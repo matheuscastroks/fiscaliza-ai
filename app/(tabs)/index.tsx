@@ -16,15 +16,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-let MapView: any;
-let Marker: any;
-
-if (Platform.OS !== "web") {
-  const ReactNativeMaps = require("react-native-maps");
-  MapView = ReactNativeMaps.default;
-  Marker = ReactNativeMaps.Marker;
-}
 import Animated, {
   BounceIn,
   FadeIn,
@@ -34,6 +25,21 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+
+let MapView: any = null;
+let Marker: any = null;
+
+if (Platform.OS !== "web") {
+  try {
+    const ReactNativeMaps = require("react-native-maps");
+    MapView = ReactNativeMaps?.default ?? null;
+    Marker = ReactNativeMaps?.Marker ?? null;
+  } catch (error) {
+    console.warn("Mapa não disponível nesta plataforma:", error);
+  }
+}
+
+const shouldRenderMap = Platform.OS !== "web" && !!MapView && !!Marker;
 
 interface LocationCoords {
   latitude: number;
@@ -629,88 +635,95 @@ export default function Index() {
       )}
 
       {/* Mapa */}
-      <Animated.View entering={FadeIn.delay(300)} style={styles.mapContainer}>
-        <MapView
-          style={styles.map}
-          region={region}
-          onRegionChangeComplete={onRegionChangeComplete}
-          showsUserLocation={true}
-          showsMyLocationButton={false}
-          mapType="standard"
-          userLocationPriority="high"
-        >
-          {!loading &&
-            filteredProblems.map((problem, index) => (
-              <Marker
-                key={problem.id}
-                coordinate={{
-                  latitude: problem.location.latitude,
-                  longitude: problem.location.longitude,
-                }}
-                onPress={() => {
-                  setSelectedProblem(problem);
-                }}
-              >
-                <Animated.View
-                  entering={BounceIn.delay(index * 50)}
-                  style={styles.markerContainer}
+      {shouldRenderMap ? (
+        <Animated.View entering={FadeIn.delay(300)} style={styles.mapContainer}>
+          <MapView
+            style={styles.map}
+            region={region}
+            onRegionChangeComplete={onRegionChangeComplete}
+            showsUserLocation={true}
+            showsMyLocationButton={false}
+            mapType="standard"
+            userLocationPriority="high"
+          >
+            {!loading &&
+              filteredProblems.map((problem, index) => (
+                <Marker
+                  key={problem.id}
+                  coordinate={{
+                    latitude: problem.location.latitude,
+                    longitude: problem.location.longitude,
+                  }}
+                  onPress={() => {
+                    setSelectedProblem(problem);
+                  }}
                 >
-                  {/* Pin simples estilo Google Maps */}
-                  <View
-                    style={[
-                      styles.markerPin,
-                      { backgroundColor: getStatusColor(problem.status) },
-                    ]}
+                  <Animated.View
+                    entering={BounceIn.delay(index * 50)}
+                    style={styles.markerContainer}
                   >
-                    <MaterialIcons
-                      name={getIconName(problem.category)}
-                      size={16}
-                      color="white"
-                    />
-                  </View>
-
-                  {/* Pequeno indicador de prioridade alta */}
-                  {problem.priority === "high" && (
-                    <View style={styles.priorityIndicator} />
-                  )}
-
-                  {/* Indicador de problema próprio */}
-                  {user && problem.reportedBy === user.id && (
-                    <View style={styles.userIndicator}>
-                      <MaterialIcons name="star" size={8} color="#FFD700" />
+                    <View
+                      style={[
+                        styles.markerPin,
+                        { backgroundColor: getStatusColor(problem.status) },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name={getIconName(problem.category)}
+                        size={16}
+                        color="white"
+                      />
                     </View>
-                  )}
-                </Animated.View>
-              </Marker>
-            ))}
-        </MapView>
 
-        {/* Overlay de loading */}
-        {loading && (
-          <Animated.View entering={FadeIn} style={styles.loadingOverlay}>
-            <MaterialIcons name="hourglass-empty" size={32} color="#2E7D32" />
-            <Text style={styles.loadingText}>Carregando problemas...</Text>
+                    {problem.priority === "high" && (
+                      <View style={styles.priorityIndicator} />
+                    )}
+
+                    {user && problem.reportedBy === user.id && (
+                      <View style={styles.userIndicator}>
+                        <MaterialIcons name="star" size={8} color="#FFD700" />
+                      </View>
+                    )}
+                  </Animated.View>
+                </Marker>
+              ))}
+          </MapView>
+
+          {loading && (
+            <Animated.View entering={FadeIn} style={styles.loadingOverlay}>
+              <MaterialIcons name="hourglass-empty" size={32} color="#2E7D32" />
+              <Text style={styles.loadingText}>Carregando problemas...</Text>
+            </Animated.View>
+          )}
+
+          <Animated.View entering={FadeIn.delay(500)} style={styles.mapStatusIndicator}>
+            <View style={styles.statusDots}>
+              <View style={styles.statusDotContainer}>
+                <View style={[styles.statusDot, { backgroundColor: '#F44336' }]} />
+                <Text style={styles.statusDotLabel}>Pendente</Text>
+              </View>
+              <View style={styles.statusDotContainer}>
+                <View style={[styles.statusDot, { backgroundColor: '#FF9800' }]} />
+                <Text style={styles.statusDotLabel}>Em andamento</Text>
+              </View>
+              <View style={styles.statusDotContainer}>
+                <View style={[styles.statusDot, { backgroundColor: '#4CAF50' }]} />
+                <Text style={styles.statusDotLabel}>Resolvido</Text>
+              </View>
+            </View>
           </Animated.View>
-        )}
-
-        {/* Indicador de status no canto do mapa */}
-        <Animated.View entering={FadeIn.delay(500)} style={styles.mapStatusIndicator}>
-          <View style={styles.statusDots}>
-            <View style={styles.statusDotContainer}>
-              <View style={[styles.statusDot, { backgroundColor: '#F44336' }]} />
-              <Text style={styles.statusDotLabel}>Pendente</Text>
-            </View>
-            <View style={styles.statusDotContainer}>
-              <View style={[styles.statusDot, { backgroundColor: '#FF9800' }]} />
-              <Text style={styles.statusDotLabel}>Em andamento</Text>
-            </View>
-            <View style={styles.statusDotContainer}>
-              <View style={[styles.statusDot, { backgroundColor: '#4CAF50' }]} />
-              <Text style={styles.statusDotLabel}>Resolvido</Text>
-            </View>
+        </Animated.View>
+      ) : (
+        <Animated.View entering={FadeIn.delay(300)} style={styles.mapContainer}>
+          <View style={styles.webMapFallback}>
+            <MaterialIcons name="map" size={36} color="#2E7D32" />
+            <Text style={styles.webMapFallbackTitle}>Mapa indisponível na web</Text>
+            <Text style={styles.webMapFallbackText}>
+              Este recurso requer a plataforma nativa para exibir o mapa interativo.
+            </Text>
           </View>
         </Animated.View>
-      </Animated.View>
+      )}
 
       {/* Callout melhorado no mapa */}
       {selectedProblem && (
@@ -982,6 +995,26 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  webMapFallback: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F3F8F4",
+    padding: 24,
+  },
+  webMapFallbackTitle: {
+    marginTop: 12,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#2E7D32",
+  },
+  webMapFallbackText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    lineHeight: 20,
   },
   markerContainer: {
     alignItems: "center",

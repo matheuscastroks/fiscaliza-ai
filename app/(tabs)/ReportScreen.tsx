@@ -1,13 +1,13 @@
-import { analyzeWithRealAI } from '@/services/aiService';
-import { problemsApi } from '@/services/mockApi';
-import { useAuthStore } from '@/stores/authStore';
-import { useProblemsStore } from '@/stores/problemsStore';
-import { useStatsStore } from '@/stores/statsStore';
-import { MaterialIcons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { analyzeWithRealAI } from "@/services/aiService";
+import { problemsApi } from "@/services/mockApi";
+import { useAuthStore } from "@/stores/authStore";
+import { useProblemsStore } from "@/stores/problemsStore";
+import { useStatsStore } from "@/stores/statsStore";
+import { MaterialIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -20,23 +20,20 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
-} from 'react-native';
+  View,
+} from "react-native";
+import NativeMapView, { Marker as NativeMarker } from "react-native-maps";
+import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 
-let MapView: any;
-let Marker: any;
+let MapView: any = null;
+let Marker: any = null;
 
-if (Platform.OS !== 'web') {
-  const ReactNativeMaps = require('react-native-maps');
-  MapView = ReactNativeMaps.default;
-  Marker = ReactNativeMaps.Marker;
+if (Platform.OS !== "web") {
+  MapView = NativeMapView;
+  Marker = NativeMarker;
 }
-import Animated, {
-  useSharedValue,
-  withTiming
-} from 'react-native-reanimated';
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 interface LocationCoords {
   latitude: number;
@@ -45,56 +42,81 @@ interface LocationCoords {
 }
 
 const categories = [
-  { id: 'lighting', name: 'Iluminação', icon: 'lightbulb-outline', color: '#FF9800' },
-  { id: 'pothole', name: 'Buracos', icon: 'construction', color: '#F44336' },
-  { id: 'trash', name: 'Lixo', icon: 'delete', color: '#9C27B0' },
-  { id: 'traffic', name: 'Trânsito', icon: 'traffic', color: '#2196F3' },
-  { id: 'water', name: 'Água/Esgoto', icon: 'water-drop', color: '#00BCD4' },
-  { id: 'others', name: 'Outros', icon: 'report-problem', color: '#607D8B' },
+  {
+    id: "lighting",
+    name: "Iluminação",
+    icon: "lightbulb-outline",
+    color: "#FF9800",
+  },
+  { id: "pothole", name: "Buracos", icon: "construction", color: "#F44336" },
+  { id: "trash", name: "Lixo", icon: "delete", color: "#9C27B0" },
+  { id: "traffic", name: "Trânsito", icon: "traffic", color: "#2196F3" },
+  { id: "water", name: "Água/Esgoto", icon: "water-drop", color: "#00BCD4" },
+  { id: "others", name: "Outros", icon: "report-problem", color: "#607D8B" },
 ];
 
 const urgencyLevels = [
-  { id: 'low', name: 'Baixa', color: '#4CAF50', description: 'Não há risco imediato' },
-  { id: 'medium', name: 'Média', color: '#FF9800', description: 'Requer atenção em breve' },
-  { id: 'high', name: 'Alta', color: '#F44336', description: 'Situação de risco' },
+  {
+    id: "low",
+    name: "Baixa",
+    color: "#4CAF50",
+    description: "Não há risco imediato",
+  },
+  {
+    id: "medium",
+    name: "Média",
+    color: "#FF9800",
+    description: "Requer atenção em breve",
+  },
+  {
+    id: "high",
+    name: "Alta",
+    color: "#F44336",
+    description: "Situação de risco",
+  },
 ];
 
 // Mapeamento das categorias do ReportScreen para o mockData
-const categoryMapping: { [key: string]: 'road' | 'lighting' | 'cleaning' | 'others' } = {
-  'lighting': 'lighting',
-  'pothole': 'road',
-  'trash': 'cleaning',
-  'traffic': 'others',
-  'water': 'others',
-  'others': 'others',
+const categoryMapping: {
+  [key: string]: "road" | "lighting" | "cleaning" | "others";
+} = {
+  lighting: "lighting",
+  pothole: "road",
+  trash: "cleaning",
+  traffic: "others",
+  water: "others",
+  others: "others",
 };
 
 export default function ReportScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { user } = useAuthStore();
-  
+
   // Stores para notificar atualizações
   const problemsStore = useProblemsStore();
   const statsStore = useStatsStore();
-  
+
   // Form states - REORGANIZADO PARA FLUXO COM IA
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedUrgency, setSelectedUrgency] = useState('medium');
+  const [selectedUrgency, setSelectedUrgency] = useState("medium");
   const [photos, setPhotos] = useState<ImagePicker.ImagePickerAsset[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<LocationCoords | null>(
-    params.userLocation ? JSON.parse(params.userLocation as string) : null
-  );
+  const [selectedLocation, setSelectedLocation] =
+    useState<LocationCoords | null>(
+      params.userLocation ? JSON.parse(params.userLocation as string) : null,
+    );
   const [mapRegion, setMapRegion] = useState(
-    params.initialRegion ? JSON.parse(params.initialRegion as string) : {
-      latitude: -23.550520,
-      longitude: -46.633308,
-      latitudeDelta: 0.0922,
-      longitudeDelta: 0.0421,
-    }
+    params.initialRegion
+      ? JSON.parse(params.initialRegion as string)
+      : {
+          latitude: -23.55052,
+          longitude: -46.633308,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        },
   );
-  
+
   // AI states - EXPANDIDO PARA NOVO FLUXO
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<{
@@ -106,9 +128,9 @@ export default function ReportScreen() {
     imageAnalysis?: string;
   } | null>(null);
   const [hasUsedAI, setHasUsedAI] = useState(false);
-  const [editableTitle, setEditableTitle] = useState('');
-  const [editableDescription, setEditableDescription] = useState('');
-  
+  const [editableTitle, setEditableTitle] = useState("");
+  const [editableDescription, setEditableDescription] = useState("");
+
   // Stepper states
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -120,46 +142,57 @@ export default function ReportScreen() {
   const progressValue = useSharedValue(0);
 
   // NOVO FLUXO DE STEPS - REORGANIZADO PARA IA
-  const steps = React.useMemo(() => [
-    { 
-      id: 'location',
-      title: 'Localização', 
-      subtitle: 'Onde está o problema?',
-      icon: 'location-on', 
-      completed: !!selectedLocation,
-      required: true
-    },
-    { 
-      id: 'ai-analysis',
-      title: 'Descrição & IA', 
-      subtitle: 'Descreva e deixe a IA analisar',
-      icon: 'auto-awesome', 
-      completed: !!hasUsedAI && !!description.trim(),
-      required: true
-    },
-    { 
-      id: 'review',
-      title: 'Revisar & Editar', 
-      subtitle: 'Confirmar informações',
-      icon: 'edit', 
-      completed: hasUsedAI && !!editableTitle && !!editableDescription,
-      required: true
-    },
-    { 
-      id: 'send',
-      title: 'Enviar', 
-      subtitle: 'Finalizar reporte',
-      icon: 'send', 
-      completed: true,
-      required: false
-    }
-  ], [selectedLocation, description, hasUsedAI, editableTitle, editableDescription]);
+  const steps = React.useMemo(
+    () => [
+      {
+        id: "location",
+        title: "Localização",
+        subtitle: "Onde está o problema?",
+        icon: "location-on",
+        completed: !!selectedLocation,
+        required: true,
+      },
+      {
+        id: "ai-analysis",
+        title: "Descrição & IA",
+        subtitle: "Descreva e deixe a IA analisar",
+        icon: "auto-awesome",
+        completed: !!hasUsedAI && !!description.trim(),
+        required: true,
+      },
+      {
+        id: "review",
+        title: "Revisar & Editar",
+        subtitle: "Confirmar informações",
+        icon: "edit",
+        completed: hasUsedAI && !!editableTitle && !!editableDescription,
+        required: true,
+      },
+      {
+        id: "send",
+        title: "Enviar",
+        subtitle: "Finalizar reporte",
+        icon: "send",
+        completed: true,
+        required: false,
+      },
+    ],
+    [
+      selectedLocation,
+      description,
+      hasUsedAI,
+      editableTitle,
+      editableDescription,
+    ],
+  );
 
   const currentStepData = steps[currentStep];
-  const isCurrentStepValid = currentStepData?.completed || !currentStepData?.required;
+  const isCurrentStepValid =
+    currentStepData?.completed || !currentStepData?.required;
   const canGoNext = currentStep < steps.length - 1 && isCurrentStepValid;
   const canGoPrevious = currentStep > 0;
-  const isFormValid = description.trim() && selectedCategory && selectedLocation;
+  const isFormValid =
+    description.trim() && selectedCategory && selectedLocation;
 
   useEffect(() => {
     // Update progress based on current step
@@ -170,13 +203,13 @@ export default function ReportScreen() {
   // Navigation functions
   const goToNextStep = () => {
     if (canGoNext) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     }
   };
 
   const goToPreviousStep = () => {
     if (canGoPrevious) {
-      setCurrentStep(prev => prev - 1);
+      setCurrentStep((prev) => prev - 1);
     }
   };
 
@@ -187,7 +220,7 @@ export default function ReportScreen() {
   const requestLocationPermission = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      return status === 'granted';
+      return status === "granted";
     } catch (err) {
       console.warn(err);
       return false;
@@ -197,7 +230,10 @@ export default function ReportScreen() {
   const getCurrentLocation = async () => {
     const hasPermission = await requestLocationPermission();
     if (!hasPermission) {
-      Alert.alert('Permissão negada', 'Precisamos da sua localização para reportar o problema.');
+      Alert.alert(
+        "Permissão negada",
+        "Precisamos da sua localização para reportar o problema.",
+      );
       return;
     }
 
@@ -209,7 +245,7 @@ export default function ReportScreen() {
         distanceInterval: 10,
       });
       const { latitude, longitude } = location.coords;
-      
+
       // Fazer geocoding reverso para obter o endereço
       try {
         const reverseGeocode = await Location.reverseGeocodeAsync({
@@ -217,28 +253,29 @@ export default function ReportScreen() {
           longitude,
         });
 
-        let address = 'Endereço não encontrado';
+        let address = "Endereço não encontrado";
         if (reverseGeocode.length > 0) {
           const result = reverseGeocode[0];
           const parts = [];
-          
+
           if (result.name) parts.push(result.name);
           if (result.street) parts.push(result.street);
           if (result.streetNumber) parts.push(result.streetNumber);
           if (result.district) parts.push(result.district);
           if (result.city) parts.push(result.city);
-          
-          address = parts.length > 0 ? parts.join(', ') : 'Endereço não encontrado';
+
+          address =
+            parts.length > 0 ? parts.join(", ") : "Endereço não encontrado";
         }
 
         const newLocation = { latitude, longitude, address };
         setSelectedLocation(newLocation);
       } catch (geocodeError) {
-        console.warn('Erro no geocoding reverso:', geocodeError);
-        const newLocation = { 
-          latitude, 
-          longitude, 
-          address: `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)}` 
+        console.warn("Erro no geocoding reverso:", geocodeError);
+        const newLocation = {
+          latitude,
+          longitude,
+          address: `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)}`,
         };
         setSelectedLocation(newLocation);
       }
@@ -250,7 +287,7 @@ export default function ReportScreen() {
         longitudeDelta: 0.0421,
       });
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível obter sua localização atual.');
+      Alert.alert("Erro", "Não foi possível obter sua localização atual.");
       console.log(error);
     } finally {
       setIsLoadingAddress(false);
@@ -259,13 +296,16 @@ export default function ReportScreen() {
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permissão negada', 'Precisamos de acesso à galeria para adicionar fotos.');
+    if (status !== "granted") {
+      Alert.alert(
+        "Permissão negada",
+        "Precisamos de acesso à galeria para adicionar fotos.",
+      );
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -279,13 +319,16 @@ export default function ReportScreen() {
 
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permissão negada', 'Precisamos de acesso à câmera para tirar fotos.');
+    if (status !== "granted") {
+      Alert.alert(
+        "Permissão negada",
+        "Precisamos de acesso à câmera para tirar fotos.",
+      );
       return;
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: 'images',
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -305,7 +348,7 @@ export default function ReportScreen() {
   const onMapPress = async (event: any) => {
     const { coordinate } = event.nativeEvent;
     setIsLoadingAddress(true);
-    
+
     try {
       // Fazer geocoding reverso para obter o endereço
       const reverseGeocode = await Location.reverseGeocodeAsync({
@@ -313,31 +356,32 @@ export default function ReportScreen() {
         longitude: coordinate.longitude,
       });
 
-      let address = 'Endereço não encontrado';
+      let address = "Endereço não encontrado";
       if (reverseGeocode.length > 0) {
         const result = reverseGeocode[0];
         const parts = [];
-        
+
         if (result.name) parts.push(result.name);
         if (result.street) parts.push(result.street);
         if (result.streetNumber) parts.push(result.streetNumber);
         if (result.district) parts.push(result.district);
         if (result.city) parts.push(result.city);
-        
-        address = parts.length > 0 ? parts.join(', ') : 'Endereço não encontrado';
+
+        address =
+          parts.length > 0 ? parts.join(", ") : "Endereço não encontrado";
       }
 
       setSelectedLocation({
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
-        address
+        address,
       });
     } catch (error) {
-      console.warn('Erro no geocoding reverso:', error);
+      console.warn("Erro no geocoding reverso:", error);
       setSelectedLocation({
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
-        address: `Lat: ${coordinate.latitude.toFixed(6)}, Lng: ${coordinate.longitude.toFixed(6)}`
+        address: `Lat: ${coordinate.latitude.toFixed(6)}, Lng: ${coordinate.longitude.toFixed(6)}`,
       });
     } finally {
       setIsLoadingAddress(false);
@@ -350,7 +394,10 @@ export default function ReportScreen() {
 
   const handleAIAnalysis = async () => {
     if (!description.trim() || description.trim().length < 10) {
-      Alert.alert('Aviso', 'Por favor, digite uma descrição com pelo menos 10 caracteres antes de usar a IA.');
+      Alert.alert(
+        "Aviso",
+        "Por favor, digite uma descrição com pelo menos 10 caracteres antes de usar a IA.",
+      );
       return;
     }
 
@@ -364,23 +411,23 @@ export default function ReportScreen() {
 
       // Mapear categoria da IA para as categorias do formulário
       const categoryMap: { [key: string]: string } = {
-        'road': 'pothole',
-        'lighting': 'lighting', 
-        'cleaning': 'trash',
-        'others': 'others'
+        road: "pothole",
+        lighting: "lighting",
+        cleaning: "trash",
+        others: "others",
       };
 
       setAiSuggestions({
         title: result.suggestedTitle,
         description: result.suggestedDescription,
-        category: categoryMap[result.suggestedCategory] || 'others',
+        category: categoryMap[result.suggestedCategory] || "others",
         priority: result.suggestedPriority,
         confidence: result.confidence,
-        imageAnalysis: result.imageAnalysis
+        imageAnalysis: result.imageAnalysis,
       });
 
       // Aplicar automaticamente as sugestões
-      setSelectedCategory(categoryMap[result.suggestedCategory] || 'others');
+      setSelectedCategory(categoryMap[result.suggestedCategory] || "others");
       setSelectedUrgency(result.suggestedPriority);
       setEditableTitle(result.suggestedTitle);
       setEditableDescription(result.suggestedDescription);
@@ -390,10 +437,12 @@ export default function ReportScreen() {
       setTimeout(() => {
         goToNextStep();
       }, 500);
-
     } catch (error) {
-      console.error('Erro na análise de IA:', error);
-      Alert.alert('Erro', 'Não foi possível analisar o problema. Tente novamente.');
+      console.error("Erro na análise de IA:", error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível analisar o problema. Tente novamente.",
+      );
     } finally {
       setIsAnalyzing(false);
     }
@@ -402,22 +451,25 @@ export default function ReportScreen() {
   const handleSubmit = async () => {
     // Validação final antes do envio
     if (!editableDescription.trim()) {
-      Alert.alert('Atenção', 'Por favor, confirme a descrição do problema.');
+      Alert.alert("Atenção", "Por favor, confirme a descrição do problema.");
       return;
     }
 
     if (!selectedCategory) {
-      Alert.alert('Atenção', 'Por favor, selecione uma categoria para o problema.');
+      Alert.alert(
+        "Atenção",
+        "Por favor, selecione uma categoria para o problema.",
+      );
       return;
     }
 
     if (!selectedLocation) {
-      Alert.alert('Atenção', 'Por favor, selecione a localização do problema.');
+      Alert.alert("Atenção", "Por favor, selecione a localização do problema.");
       return;
     }
 
     if (!user) {
-      Alert.alert('Erro', 'Usuário não encontrado. Faça login novamente.');
+      Alert.alert("Erro", "Usuário não encontrado. Faça login novamente.");
       return;
     }
 
@@ -425,28 +477,32 @@ export default function ReportScreen() {
 
     try {
       // Mapear categoria do ReportScreen para categoria do mockData
-      const mappedCategory = categoryMapping[selectedCategory] || 'others';
+      const mappedCategory = categoryMapping[selectedCategory] || "others";
 
       // Usar título e descrição editáveis da IA
-      const finalTitle = editableTitle || `${categories.find(c => c.id === selectedCategory)?.name || 'Problema'} reportado`;
+      const finalTitle =
+        editableTitle ||
+        `${categories.find((c) => c.id === selectedCategory)?.name || "Problema"} reportado`;
 
       // Preparar dados do problema para criar
       const problemData = {
         title: finalTitle,
         description: editableDescription.trim(),
         category: mappedCategory,
-        status: 'pending' as const,
-        priority: selectedUrgency as 'low' | 'medium' | 'high',
+        status: "pending" as const,
+        priority: selectedUrgency as "low" | "medium" | "high",
         location: {
           latitude: selectedLocation.latitude,
           longitude: selectedLocation.longitude,
-          address: selectedLocation.address || `Lat: ${selectedLocation.latitude.toFixed(6)}, Lng: ${selectedLocation.longitude.toFixed(6)}`,
+          address:
+            selectedLocation.address ||
+            `Lat: ${selectedLocation.latitude.toFixed(6)}, Lng: ${selectedLocation.longitude.toFixed(6)}`,
         },
-        images: photos.map(photo => photo.uri),
+        images: photos.map((photo) => photo.uri),
         reportedBy: user.id,
       };
 
-      console.log('Enviando reporte:', problemData);
+      console.log("Enviando reporte:", problemData);
 
       // Chamar a API para criar o problema
       const response = await problemsApi.createProblem(problemData);
@@ -454,16 +510,16 @@ export default function ReportScreen() {
       if (response.success && response.data) {
         // Calcular pontos baseado na categoria e urgência
         let points = 15; // Base aumentada por usar IA
-        if (selectedUrgency === 'high') points += 15;
-        else if (selectedUrgency === 'medium') points += 10;
+        if (selectedUrgency === "high") points += 15;
+        else if (selectedUrgency === "medium") points += 10;
         else points += 5;
-        
+
         if (photos.length > 0) points += 5;
         if (hasUsedAI) points += 10; // Bônus por usar IA
 
         // Atualizar pontos do usuário
-        await useAuthStore.getState().updateUser({ 
-          points: user.points + points 
+        await useAuthStore.getState().updateUser({
+          points: user.points + points,
         });
 
         // Notificar stores sobre o novo report
@@ -473,62 +529,68 @@ export default function ReportScreen() {
         setIsSubmitting(false);
 
         Alert.alert(
-          'Reporte Enviado! 🎉',
+          "Reporte Enviado! 🎉",
           `Obrigado por usar o Fiscaliza AI!\n\n+${points} pontos ganhos\n\nSeu reporte foi registrado com ID: ${response.data.id} e será analisado pela equipe responsável.`,
           [
             {
-              text: 'Ver no Mapa',
+              text: "Ver no Mapa",
               onPress: () => {
                 resetForm();
                 router.back();
-              }
+              },
             },
             {
-              text: 'Novo Reporte',
+              text: "Novo Reporte",
               onPress: () => resetForm(),
-              style: 'cancel'
-            }
-          ]
+              style: "cancel",
+            },
+          ],
         );
       } else {
         setIsSubmitting(false);
         Alert.alert(
-          'Erro ao Enviar',
-          response.error || 'Ocorreu um erro ao enviar o reporte. Tente novamente.',
-          [{ text: 'OK' }]
+          "Erro ao Enviar",
+          response.error ||
+            "Ocorreu um erro ao enviar o reporte. Tente novamente.",
+          [{ text: "OK" }],
         );
       }
     } catch (error) {
       setIsSubmitting(false);
-      console.error('Erro ao enviar reporte:', error);
+      console.error("Erro ao enviar reporte:", error);
       Alert.alert(
-        'Erro de Conexão',
-        'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
-        [{ text: 'OK' }]
+        "Erro de Conexão",
+        "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.",
+        [{ text: "OK" }],
       );
     }
   };
 
   const resetForm = () => {
-    setDescription('');
+    setDescription("");
     setSelectedCategory(null);
-    setSelectedUrgency('medium');
+    setSelectedUrgency("medium");
     setPhotos([]);
-    setSelectedLocation(params.userLocation ? JSON.parse(params.userLocation as string) : null);
+    setSelectedLocation(
+      params.userLocation ? JSON.parse(params.userLocation as string) : null,
+    );
     setCurrentStep(0);
     setHasUsedAI(false);
     setAiSuggestions(null);
-    setEditableTitle('');
-    setEditableDescription('');
+    setEditableTitle("");
+    setEditableDescription("");
   };
 
   const getLocationText = () => {
-    if (!selectedLocation) return 'Selecione a localização do problema';
-    
-    if (selectedLocation.address && selectedLocation.address !== 'Endereço não encontrado') {
+    if (!selectedLocation) return "Selecione a localização do problema";
+
+    if (
+      selectedLocation.address &&
+      selectedLocation.address !== "Endereço não encontrado"
+    ) {
       return selectedLocation.address;
     }
-    
+
     return `Lat: ${selectedLocation.latitude.toFixed(6)}, Lng: ${selectedLocation.longitude.toFixed(6)}`;
   };
 
@@ -543,23 +605,37 @@ export default function ReportScreen() {
         </Text>
       </View>
 
-      <TouchableOpacity 
-        style={[styles.locationCard, !selectedLocation && styles.locationCardEmpty]}
+      <TouchableOpacity
+        style={[
+          styles.locationCard,
+          !selectedLocation && styles.locationCardEmpty,
+        ]}
         onPress={() => setShowMapModal(true)}
         disabled={isLoadingAddress}
       >
-        <MaterialIcons name="location-on" size={24} color={selectedLocation ? "#2E7D32" : "#999"} />
+        <MaterialIcons
+          name="location-on"
+          size={24}
+          color={selectedLocation ? "#2E7D32" : "#999"}
+        />
         <View style={styles.locationInfo}>
           <Text style={styles.locationTitle}>
-            {selectedLocation ? 'Local Selecionado' : 'Selecionar Local'}
+            {selectedLocation ? "Local Selecionado" : "Selecionar Local"}
           </Text>
           {isLoadingAddress ? (
             <View style={styles.loadingAddressContainer}>
               <MaterialIcons name="hourglass-empty" size={16} color="#666" />
-              <Text style={styles.loadingAddressText}>Buscando endereço...</Text>
+              <Text style={styles.loadingAddressText}>
+                Buscando endereço...
+              </Text>
             </View>
           ) : (
-            <Text style={[styles.locationAddress, !selectedLocation && styles.locationAddressEmpty]}>
+            <Text
+              style={[
+                styles.locationAddress,
+                !selectedLocation && styles.locationAddressEmpty,
+              ]}
+            >
               {getLocationText()}
             </Text>
           )}
@@ -567,20 +643,27 @@ export default function ReportScreen() {
         <MaterialIcons name="edit" size={20} color="#2E7D32" />
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        onPress={getCurrentLocation} 
-        style={[styles.myLocationButton, isLoadingAddress && styles.myLocationButtonDisabled]}
+      <TouchableOpacity
+        onPress={getCurrentLocation}
+        style={[
+          styles.myLocationButton,
+          isLoadingAddress && styles.myLocationButtonDisabled,
+        ]}
         disabled={isLoadingAddress}
       >
         {isLoadingAddress ? (
           <>
             <MaterialIcons name="hourglass-empty" size={20} color="#999" />
-            <Text style={styles.myLocationTextDisabled}>Obtendo localização...</Text>
+            <Text style={styles.myLocationTextDisabled}>
+              Obtendo localização...
+            </Text>
           </>
         ) : (
           <>
             <MaterialIcons name="my-location" size={20} color="#2E7D32" />
-            <Text style={styles.myLocationText}>Usar Minha Localização Atual</Text>
+            <Text style={styles.myLocationText}>
+              Usar Minha Localização Atual
+            </Text>
           </>
         )}
       </TouchableOpacity>
@@ -594,7 +677,8 @@ export default function ReportScreen() {
         <MaterialIcons name="auto-awesome" size={32} color="#2E7D32" />
         <Text style={styles.stepTitle}>Descrição & Análise IA</Text>
         <Text style={styles.stepDescription}>
-          Descreva o problema e adicione fotos. Nossa IA analisará e preencherá as informações automaticamente.
+          Descreva o problema e adicione fotos. Nossa IA analisará e preencherá
+          as informações automaticamente.
         </Text>
       </View>
 
@@ -602,7 +686,10 @@ export default function ReportScreen() {
       <View style={styles.inputSection}>
         <Text style={styles.inputLabel}>Descrição do Problema</Text>
         <TextInput
-          style={[styles.textInput, description.trim() && styles.textInputFilled]}
+          style={[
+            styles.textInput,
+            description.trim() && styles.textInputFilled,
+          ]}
           placeholder="Ex: Buraco grande na pista, causando risco para veículos..."
           value={description}
           onChangeText={setDescription}
@@ -617,14 +704,23 @@ export default function ReportScreen() {
 
       {/* Seção de Fotos */}
       <View style={styles.inputSection}>
-        <Text style={styles.inputLabel}>Fotos (Recomendado para melhor análise)</Text>
-        
+        <Text style={styles.inputLabel}>
+          Fotos (Recomendado para melhor análise)
+        </Text>
+
         {photos.length > 0 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photosContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.photosContainer}
+          >
             {photos.map((photo, index) => (
               <View key={index} style={styles.photoItem}>
-                <Image source={{ uri: photo.uri }} style={styles.photoThumbnail} />
-                <TouchableOpacity 
+                <Image
+                  source={{ uri: photo.uri }}
+                  style={styles.photoThumbnail}
+                />
+                <TouchableOpacity
                   style={styles.removePhotoButton}
                   onPress={() => removePhoto(index)}
                 >
@@ -635,13 +731,13 @@ export default function ReportScreen() {
           </ScrollView>
         )}
 
-        <TouchableOpacity 
-          style={styles.addPhotoButton} 
+        <TouchableOpacity
+          style={styles.addPhotoButton}
           onPress={() => setShowPhotoModal(true)}
         >
           <MaterialIcons name="add-a-photo" size={24} color="#2E7D32" />
           <Text style={styles.addPhotoText}>
-            {photos.length === 0 ? 'Adicionar Fotos' : 'Adicionar Mais Fotos'}
+            {photos.length === 0 ? "Adicionar Fotos" : "Adicionar Mais Fotos"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -649,7 +745,10 @@ export default function ReportScreen() {
       {/* Botão de Análise IA */}
       {description.trim().length >= 10 && (
         <TouchableOpacity
-          style={[styles.aiAnalysisButton, isAnalyzing && styles.aiButtonLoading]}
+          style={[
+            styles.aiAnalysisButton,
+            isAnalyzing && styles.aiButtonLoading,
+          ]}
           onPress={handleAIAnalysis}
           disabled={isAnalyzing}
         >
@@ -676,17 +775,17 @@ export default function ReportScreen() {
             <MaterialIcons name="check-circle" size={24} color="#4CAF50" />
             <Text style={styles.aiResultsTitle}>Análise Concluída!</Text>
           </View>
-          
+
           <View style={styles.aiConfidenceContainer}>
             <Text style={styles.aiConfidenceText}>
               Confiança: {Math.round(aiSuggestions.confidence * 100)}%
             </Text>
             <View style={styles.aiConfidenceBar}>
-              <View 
+              <View
                 style={[
-                  styles.aiConfidenceFill, 
-                  { width: `${aiSuggestions.confidence * 100}%` }
-                ]} 
+                  styles.aiConfidenceFill,
+                  { width: `${aiSuggestions.confidence * 100}%` },
+                ]}
               />
             </View>
           </View>
@@ -694,12 +793,15 @@ export default function ReportScreen() {
           {aiSuggestions.imageAnalysis && (
             <View style={styles.imageAnalysisContainer}>
               <Text style={styles.imageAnalysisLabel}>Análise da Imagem:</Text>
-              <Text style={styles.imageAnalysisText}>{aiSuggestions.imageAnalysis}</Text>
+              <Text style={styles.imageAnalysisText}>
+                {aiSuggestions.imageAnalysis}
+              </Text>
             </View>
           )}
 
           <Text style={styles.nextStepHint}>
-            ✅ Informações aplicadas automaticamente! Avance para revisar e editar.
+            ✅ Informações aplicadas automaticamente! Avance para revisar e
+            editar.
           </Text>
         </View>
       )}
@@ -755,22 +857,38 @@ export default function ReportScreen() {
               key={category.id}
               style={[
                 styles.categoryCardSmall,
-                selectedCategory === category.id && styles.categoryCardSelected
+                selectedCategory === category.id && styles.categoryCardSelected,
               ]}
               onPress={() => setSelectedCategory(category.id)}
             >
-              <View style={[styles.categoryIconSmall, { backgroundColor: category.color + '20' }]}>
-                <MaterialIcons name={category.icon as any} size={20} color={category.color} />
+              <View
+                style={[
+                  styles.categoryIconSmall,
+                  { backgroundColor: category.color + "20" },
+                ]}
+              >
+                <MaterialIcons
+                  name={category.icon as any}
+                  size={20}
+                  color={category.color}
+                />
               </View>
-              <Text style={[
-                styles.categoryNameSmall,
-                selectedCategory === category.id && styles.categoryNameSelected
-              ]}>
+              <Text
+                style={[
+                  styles.categoryNameSmall,
+                  selectedCategory === category.id &&
+                    styles.categoryNameSelected,
+                ]}
+              >
                 {category.name}
               </Text>
               {selectedCategory === category.id && (
                 <View style={styles.selectedIndicatorSmall}>
-                  <MaterialIcons name="check-circle" size={16} color="#2E7D32" />
+                  <MaterialIcons
+                    name="check-circle"
+                    size={16}
+                    color="#2E7D32"
+                  />
                 </View>
               )}
             </TouchableOpacity>
@@ -787,19 +905,30 @@ export default function ReportScreen() {
               key={level.id}
               style={[
                 styles.urgencyButtonSmall,
-                selectedUrgency === level.id && [styles.urgencyButtonSelected, { borderColor: level.color }]
+                selectedUrgency === level.id && [
+                  styles.urgencyButtonSelected,
+                  { borderColor: level.color },
+                ],
               ]}
               onPress={() => setSelectedUrgency(level.id)}
             >
-              <View style={[styles.urgencyDot, { backgroundColor: level.color }]} />
-              <Text style={[
-                styles.urgencyNameSmall,
-                selectedUrgency === level.id && styles.urgencyNameSelected
-              ]}>
+              <View
+                style={[styles.urgencyDot, { backgroundColor: level.color }]}
+              />
+              <Text
+                style={[
+                  styles.urgencyNameSmall,
+                  selectedUrgency === level.id && styles.urgencyNameSelected,
+                ]}
+              >
                 {level.name}
               </Text>
               {selectedUrgency === level.id && (
-                <MaterialIcons name="radio-button-checked" size={20} color={level.color} />
+                <MaterialIcons
+                  name="radio-button-checked"
+                  size={20}
+                  color={level.color}
+                />
               )}
             </TouchableOpacity>
           ))}
@@ -821,7 +950,8 @@ export default function ReportScreen() {
           <View style={styles.summaryItem}>
             <MaterialIcons name="auto-awesome" size={16} color="#666" />
             <Text style={styles.summaryText}>
-              Analisado pela IA ({Math.round((aiSuggestions?.confidence || 0) * 100)}% confiança)
+              Analisado pela IA (
+              {Math.round((aiSuggestions?.confidence || 0) * 100)}% confiança)
             </Text>
           </View>
         </View>
@@ -831,43 +961,53 @@ export default function ReportScreen() {
 
   const renderStepContent = () => {
     switch (currentStep) {
-      case 0: return renderLocationStep();
-      case 1: return renderAIAnalysisStep();
-      case 2: return renderReviewEditStep();
-      case 3: return (
-        <View style={styles.stepContainer}>
-          <View style={styles.stepHeader}>
-            <MaterialIcons name="send" size={32} color="#2E7D32" />
-            <Text style={styles.stepTitle}>Enviar Reporte</Text>
-            <Text style={styles.stepDescription}>
-              Tudo pronto! Pressione o botão para enviar seu reporte.
-            </Text>
+      case 0:
+        return renderLocationStep();
+      case 1:
+        return renderAIAnalysisStep();
+      case 2:
+        return renderReviewEditStep();
+      case 3:
+        return (
+          <View style={styles.stepContainer}>
+            <View style={styles.stepHeader}>
+              <MaterialIcons name="send" size={32} color="#2E7D32" />
+              <Text style={styles.stepTitle}>Enviar Reporte</Text>
+              <Text style={styles.stepDescription}>
+                Tudo pronto! Pressione o botão para enviar seu reporte.
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={[
+                styles.finalSubmitButton,
+                (!editableTitle || !editableDescription || isSubmitting) &&
+                  styles.primaryButtonDisabled,
+              ]}
+              onPress={handleSubmit}
+              disabled={!editableTitle || !editableDescription || isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Animated.View style={styles.loadingSpinner}>
+                    <MaterialIcons
+                      name="hourglass-empty"
+                      size={24}
+                      color="white"
+                    />
+                  </Animated.View>
+                  <Text style={styles.primaryButtonText}>Enviando...</Text>
+                </>
+              ) : (
+                <>
+                  <MaterialIcons name="send" size={24} color="white" />
+                  <Text style={styles.primaryButtonText}>Enviar Reporte</Text>
+                </>
+              )}
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity 
-            style={[
-              styles.finalSubmitButton,
-              (!editableTitle || !editableDescription || isSubmitting) && styles.primaryButtonDisabled
-            ]}
-            onPress={handleSubmit}
-            disabled={!editableTitle || !editableDescription || isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <Animated.View style={styles.loadingSpinner}>
-                  <MaterialIcons name="hourglass-empty" size={24} color="white" />
-                </Animated.View>
-                <Text style={styles.primaryButtonText}>Enviando...</Text>
-              </>
-            ) : (
-              <>
-                <MaterialIcons name="send" size={24} color="white" />
-                <Text style={styles.primaryButtonText}>Enviar Reporte</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
-      );
-      default: return null;
+        );
+      default:
+        return null;
     }
   };
 
@@ -875,16 +1015,24 @@ export default function ReportScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <MaterialIcons name="arrow-back" size={24} color="#2E7D32" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.title}>Reportar Problema</Text>
           <Text style={styles.subtitle}>{currentStepData.subtitle}</Text>
         </View>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.headerAction}
-          onPress={() => Alert.alert('Ajuda', 'Siga os passos para reportar o problema de forma completa.')}
+          onPress={() =>
+            Alert.alert(
+              "Ajuda",
+              "Siga os passos para reportar o problema de forma completa.",
+            )
+          }
         >
           <MaterialIcons name="help-outline" size={24} color="#2E7D32" />
         </TouchableOpacity>
@@ -893,17 +1041,19 @@ export default function ReportScreen() {
       {/* Stepper Indicator */}
       <View style={styles.stepperContainer}>
         <View style={styles.stepperHeader}>
-          <Text style={styles.stepCounter}>{currentStep + 1} de {steps.length}</Text>
+          <Text style={styles.stepCounter}>
+            {currentStep + 1} de {steps.length}
+          </Text>
           <Text style={styles.stepTitle}>{currentStepData.title}</Text>
         </View>
-        
+
         <View style={styles.stepperProgress}>
           <View style={styles.progressTrack}>
-            <Animated.View 
+            <Animated.View
               style={[
-                styles.progressFill, 
-                { width: `${((currentStep + 1) / steps.length) * 100}%` }
-              ]} 
+                styles.progressFill,
+                { width: `${((currentStep + 1) / steps.length) * 100}%` },
+              ]}
             />
           </View>
         </View>
@@ -915,14 +1065,14 @@ export default function ReportScreen() {
               style={[
                 styles.stepDot,
                 index <= currentStep && styles.stepDotActive,
-                index === currentStep && styles.stepDotCurrent
+                index === currentStep && styles.stepDotCurrent,
               ]}
               onPress={() => goToStep(index)}
             >
-              <MaterialIcons 
-                name={step.icon as any} 
-                size={16} 
-                color={index <= currentStep ? 'white' : '#999'} 
+              <MaterialIcons
+                name={step.icon as any}
+                size={16}
+                color={index <= currentStep ? "white" : "#999"}
               />
             </TouchableOpacity>
           ))}
@@ -931,7 +1081,10 @@ export default function ReportScreen() {
 
       {/* Step Content */}
       <View style={styles.content}>
-        <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollContent}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={styles.scrollContent}
+        >
           {renderStepContent()}
           <View style={{ height: 120 }} />
         </ScrollView>
@@ -941,7 +1094,7 @@ export default function ReportScreen() {
       <View style={styles.footer}>
         <View style={styles.navigationContainer}>
           {canGoPrevious && (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.navigationButton}
               onPress={goToPreviousStep}
             >
@@ -949,14 +1102,14 @@ export default function ReportScreen() {
               <Text style={styles.navigationButtonText}>Anterior</Text>
             </TouchableOpacity>
           )}
-          
+
           <View style={styles.navigationSpacer} />
-          
+
           {currentStep < steps.length - 1 ? (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
                 styles.primaryButton,
-                !isCurrentStepValid && styles.primaryButtonDisabled
+                !isCurrentStepValid && styles.primaryButtonDisabled,
               ]}
               onPress={goToNextStep}
               disabled={!isCurrentStepValid}
@@ -965,10 +1118,10 @@ export default function ReportScreen() {
               <MaterialIcons name="arrow-forward" size={20} color="white" />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
                 styles.primaryButton,
-                (!isFormValid || isSubmitting) && styles.primaryButtonDisabled
+                (!isFormValid || isSubmitting) && styles.primaryButtonDisabled,
               ]}
               onPress={handleSubmit}
               disabled={!isFormValid || isSubmitting}
@@ -976,7 +1129,11 @@ export default function ReportScreen() {
               {isSubmitting ? (
                 <>
                   <Animated.View style={styles.loadingSpinner}>
-                    <MaterialIcons name="hourglass-empty" size={20} color="white" />
+                    <MaterialIcons
+                      name="hourglass-empty"
+                      size={20}
+                      color="white"
+                    />
                   </Animated.View>
                   <Text style={styles.primaryButtonText}>Enviando...</Text>
                 </>
@@ -1003,16 +1160,21 @@ export default function ReportScreen() {
               <MaterialIcons name="close" size={24} color="#2E7D32" />
             </TouchableOpacity>
             <Text style={styles.mapModalTitle}>Selecionar Localização</Text>
-            <TouchableOpacity onPress={confirmLocation} disabled={!selectedLocation}>
-              <Text style={[
-                styles.mapModalConfirm, 
-                !selectedLocation && styles.mapModalConfirmDisabled
-              ]}>
+            <TouchableOpacity
+              onPress={confirmLocation}
+              disabled={!selectedLocation}
+            >
+              <Text
+                style={[
+                  styles.mapModalConfirm,
+                  !selectedLocation && styles.mapModalConfirmDisabled,
+                ]}
+              >
                 Confirmar
               </Text>
             </TouchableOpacity>
           </View>
-          
+
           <MapView
             style={styles.modalMap}
             region={mapRegion}
@@ -1023,7 +1185,10 @@ export default function ReportScreen() {
               <Marker
                 coordinate={selectedLocation}
                 title="Localização do Problema"
-                description={selectedLocation.address || "Toque no mapa para alterar a localização"}
+                description={
+                  selectedLocation.address ||
+                  "Toque no mapa para alterar a localização"
+                }
               >
                 <View style={styles.mapMarker}>
                   <MaterialIcons name="location-on" size={30} color="#F44336" />
@@ -1031,7 +1196,7 @@ export default function ReportScreen() {
               </Marker>
             )}
           </MapView>
-          
+
           <View style={styles.mapModalInstructions}>
             {isLoadingAddress ? (
               <View style={styles.mapLoadingContainer}>
@@ -1044,7 +1209,8 @@ export default function ReportScreen() {
                 <View style={styles.mapAddressInfo}>
                   <Text style={styles.mapAddressTitle}>Local Selecionado:</Text>
                   <Text style={styles.mapAddressText}>
-                    {selectedLocation.address || `${selectedLocation.latitude.toFixed(6)}, ${selectedLocation.longitude.toFixed(6)}`}
+                    {selectedLocation.address ||
+                      `${selectedLocation.latitude.toFixed(6)}, ${selectedLocation.longitude.toFixed(6)}`}
                   </Text>
                 </View>
               </View>
@@ -1067,19 +1233,19 @@ export default function ReportScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Adicionar Foto</Text>
-            
+
             <TouchableOpacity style={styles.modalOption} onPress={takePhoto}>
               <MaterialIcons name="camera-alt" size={24} color="#2E7D32" />
               <Text style={styles.modalOptionText}>Tirar Foto</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.modalOption} onPress={pickImage}>
               <MaterialIcons name="photo-library" size={24} color="#2E7D32" />
               <Text style={styles.modalOptionText}>Escolher da Galeria</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.modalCancel} 
+
+            <TouchableOpacity
+              style={styles.modalCancel}
               onPress={() => setShowPhotoModal(false)}
             >
               <Text style={styles.modalCancelText}>Cancelar</Text>
@@ -1094,17 +1260,17 @@ export default function ReportScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -1113,7 +1279,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 12,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
     borderRadius: 12,
     marginRight: 16,
   },
@@ -1122,17 +1288,17 @@ const styles = StyleSheet.create({
   },
   headerAction: {
     padding: 12,
-    backgroundColor: '#E8F5E8',
+    backgroundColor: "#E8F5E8",
     borderRadius: 12,
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2E7D32',
+    fontWeight: "bold",
+    color: "#2E7D32",
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginTop: 2,
   },
   stepperContainer: {
@@ -1140,52 +1306,52 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   stepperHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   stepCounter: {
     fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
+    color: "#666",
+    fontWeight: "500",
   },
   stepTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   stepperProgress: {
     marginBottom: 16,
   },
   progressTrack: {
     height: 4,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: "#E0E0E0",
     borderRadius: 2,
   },
   progressFill: {
-    height: '100%',
-    backgroundColor: '#2E7D32',
+    height: "100%",
+    backgroundColor: "#2E7D32",
     borderRadius: 2,
   },
   stepperDots: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   stepDot: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#E0E0E0',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#E0E0E0",
+    justifyContent: "center",
+    alignItems: "center",
   },
   stepDotActive: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: "#2E7D32",
   },
   stepDotCurrent: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
     transform: [{ scale: 1.1 }],
   },
   content: {
@@ -1198,110 +1364,110 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   stepHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 24,
   },
   stepDescription: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     marginTop: 8,
     lineHeight: 24,
   },
   locationCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
     padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 16,
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: "transparent",
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     marginBottom: 16,
   },
   locationCardEmpty: {
-    borderColor: '#E0E0E0',
-    borderStyle: 'dashed',
+    borderColor: "#E0E0E0",
+    borderStyle: "dashed",
   },
   locationInfo: {
     flex: 1,
   },
   locationTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   locationAddress: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginTop: 4,
   },
   locationAddressEmpty: {
-    color: '#999',
-    fontStyle: 'italic',
+    color: "#999",
+    fontStyle: "italic",
   },
   myLocationButton: {
-    backgroundColor: '#E8F5E8',
+    backgroundColor: "#E8F5E8",
     borderRadius: 12,
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
   },
   myLocationText: {
     fontSize: 16,
-    color: '#2E7D32',
-    fontWeight: '500',
+    color: "#2E7D32",
+    fontWeight: "500",
   },
   textInput: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
     padding: 20,
     fontSize: 16,
     borderWidth: 2,
-    borderColor: '#E0E0E0',
+    borderColor: "#E0E0E0",
     minHeight: 120,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     marginBottom: 8,
   },
   textInputFilled: {
-    borderColor: '#2E7D32',
+    borderColor: "#2E7D32",
   },
   charCount: {
     fontSize: 12,
-    color: '#999',
-    textAlign: 'right',
+    color: "#999",
+    textAlign: "right",
     marginTop: 4,
   },
   categoryCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     width: (width - 60) / 2,
     borderWidth: 2,
-    borderColor: 'transparent',
-    position: 'relative',
+    borderColor: "transparent",
+    position: "relative",
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   categoryCardSelected: {
-    borderColor: '#2E7D32',
-    backgroundColor: '#E8F5E8',
+    borderColor: "#2E7D32",
+    backgroundColor: "#E8F5E8",
   },
   categoryIcon: {
     borderRadius: 30,
@@ -1310,16 +1476,16 @@ const styles = StyleSheet.create({
   },
   categoryName: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    textAlign: 'center',
+    fontWeight: "500",
+    color: "#333",
+    textAlign: "center",
   },
   categoryNameSelected: {
-    color: '#2E7D32',
-    fontWeight: '600',
+    color: "#2E7D32",
+    fontWeight: "600",
   },
   selectedIndicator: {
-    position: 'absolute',
+    position: "absolute",
     top: 12,
     right: 12,
   },
@@ -1327,21 +1493,21 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   urgencyButton: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
     padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: "transparent",
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   urgencyButtonSelected: {
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
     borderWidth: 2,
   },
   urgencyDot: {
@@ -1355,22 +1521,22 @@ const styles = StyleSheet.create({
   },
   urgencyName: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+    fontWeight: "500",
+    color: "#333",
   },
   urgencyNameSelected: {
-    fontWeight: '600',
+    fontWeight: "600",
   },
   urgencyDescription: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginTop: 4,
   },
   photosContainer: {
     marginBottom: 16,
   },
   photoItem: {
-    position: 'relative',
+    position: "relative",
     marginRight: 12,
   },
   photoThumbnail: {
@@ -1379,222 +1545,222 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   removePhotoButton: {
-    position: 'absolute',
+    position: "absolute",
     top: -8,
     right: -8,
-    backgroundColor: '#F44336',
+    backgroundColor: "#F44336",
     borderRadius: 16,
     width: 32,
     height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   addPhotoButton: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 2,
-    borderColor: '#E0E0E0',
-    borderStyle: 'dashed',
+    borderColor: "#E0E0E0",
+    borderStyle: "dashed",
   },
   addPhotoText: {
     fontSize: 16,
-    color: '#2E7D32',
+    color: "#2E7D32",
     marginTop: 8,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   reviewContainer: {
     gap: 16,
   },
   reviewItem: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 12,
     padding: 16,
     elevation: 1,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
   },
   reviewLabel: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
+    fontWeight: "600",
+    color: "#666",
     marginBottom: 4,
   },
   reviewValue: {
     fontSize: 16,
-    color: '#333',
+    color: "#333",
     lineHeight: 22,
   },
   footer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     paddingHorizontal: 20,
     paddingVertical: 16,
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
   },
   navigationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 16,
   },
   navigationButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
     borderRadius: 12,
   },
   navigationButtonText: {
     fontSize: 16,
-    color: '#2E7D32',
-    fontWeight: '500',
+    color: "#2E7D32",
+    fontWeight: "500",
   },
   navigationSpacer: {
     flex: 1,
   },
   primaryButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: "#2E7D32",
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     minWidth: 120,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   primaryButtonDisabled: {
-    backgroundColor: '#BDBDBD',
+    backgroundColor: "#BDBDBD",
   },
   primaryButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   loadingSpinner: {
-    transform: [{ rotate: '45deg' }],
+    transform: [{ rotate: "45deg" }],
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   modalOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
     borderRadius: 12,
     marginBottom: 12,
     gap: 12,
   },
   modalOptionText: {
     fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
+    color: "#333",
+    fontWeight: "500",
   },
   modalCancel: {
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   modalCancelText: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   mapModalContainer: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
   },
   mapModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   mapModalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2E7D32',
+    fontWeight: "bold",
+    color: "#2E7D32",
   },
   mapModalConfirm: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#2E7D32',
+    fontWeight: "600",
+    color: "#2E7D32",
   },
   mapModalConfirmDisabled: {
-    color: '#999',
+    color: "#999",
   },
   modalMap: {
     flex: 1,
   },
   mapMarker: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   mapModalInstructions: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 16,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   mapInstructionText: {
     fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
   },
   aiButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: "#2E7D32",
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   aiButtonLoading: {
-    backgroundColor: '#BDBDBD',
+    backgroundColor: "#BDBDBD",
   },
   aiButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   inputSection: {
     marginBottom: 24,
   },
   inputLabel: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 8,
   },
   singleLineInput: {
@@ -1606,102 +1772,102 @@ const styles = StyleSheet.create({
     minHeight: 100,
   },
   aiAnalysisButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: "#2E7D32",
     borderRadius: 16,
     padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 12,
     marginVertical: 16,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
   },
   aiResultsContainer: {
-    backgroundColor: '#E8F5E8',
+    backgroundColor: "#E8F5E8",
     borderRadius: 16,
     padding: 20,
     marginTop: 16,
     borderWidth: 2,
-    borderColor: '#4CAF50',
+    borderColor: "#4CAF50",
   },
   aiResultsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
     marginBottom: 16,
   },
   aiResultsTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2E7D32',
+    fontWeight: "bold",
+    color: "#2E7D32",
   },
   aiConfidenceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   aiConfidenceBar: {
     height: 4,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: "#E0E0E0",
     borderRadius: 2,
     flex: 1,
   },
   aiConfidenceFill: {
-    height: '100%',
-    backgroundColor: '#2E7D32',
+    height: "100%",
+    backgroundColor: "#2E7D32",
     borderRadius: 2,
   },
   aiConfidenceText: {
     fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
+    color: "#666",
+    fontWeight: "500",
   },
   imageAnalysisContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 12,
     padding: 16,
     marginVertical: 12,
   },
   imageAnalysisLabel: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
+    fontWeight: "600",
+    color: "#666",
     marginBottom: 6,
   },
   imageAnalysisText: {
     fontSize: 14,
-    color: '#333',
+    color: "#333",
     lineHeight: 20,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   nextStepHint: {
     fontSize: 14,
-    color: '#2E7D32',
-    textAlign: 'center',
-    fontWeight: '500',
+    color: "#2E7D32",
+    textAlign: "center",
+    fontWeight: "500",
     marginTop: 8,
   },
   categoriesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   categoryCardSmall: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 12,
     padding: 12,
-    alignItems: 'center',
+    alignItems: "center",
     width: (width - 80) / 3,
     borderWidth: 2,
-    borderColor: 'transparent',
-    position: 'relative',
+    borderColor: "transparent",
+    position: "relative",
     elevation: 1,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -1713,25 +1879,25 @@ const styles = StyleSheet.create({
   },
   categoryNameSmall: {
     fontSize: 12,
-    fontWeight: '500',
-    color: '#333',
-    textAlign: 'center',
+    fontWeight: "500",
+    color: "#333",
+    textAlign: "center",
   },
   selectedIndicatorSmall: {
-    position: 'absolute',
+    position: "absolute",
     top: 6,
     right: 6,
   },
   urgencyButtonSmall: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 12,
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: "transparent",
     elevation: 1,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -1739,85 +1905,85 @@ const styles = StyleSheet.create({
   },
   urgencyNameSmall: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
+    fontWeight: "500",
+    color: "#333",
     flex: 1,
     marginLeft: 12,
   },
   summaryContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 16,
     padding: 20,
     marginTop: 16,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   summaryTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 12,
   },
   summaryContent: {
     gap: 8,
   },
   summaryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   summaryText: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     flex: 1,
   },
   finalSubmitButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: "#2E7D32",
     borderRadius: 16,
     padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 12,
     marginVertical: 20,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
   },
   loadingAddressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   loadingAddressText: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   myLocationButtonDisabled: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
   },
   myLocationTextDisabled: {
     fontSize: 16,
-    color: '#999',
-    fontWeight: '500',
+    color: "#999",
+    fontWeight: "500",
   },
   mapLoadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   mapLoadingText: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   mapAddressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   mapAddressInfo: {
@@ -1825,11 +1991,11 @@ const styles = StyleSheet.create({
   },
   mapAddressTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   mapAddressText: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
-}); 
+});
