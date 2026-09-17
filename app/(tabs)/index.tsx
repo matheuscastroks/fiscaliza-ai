@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Image,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -15,7 +16,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+
+let MapView: any;
+let Marker: any;
+
+if (Platform.OS !== "web") {
+  const ReactNativeMaps = require("react-native-maps");
+  MapView = ReactNativeMaps.default;
+  Marker = ReactNativeMaps.Marker;
+}
 import Animated, {
   BounceIn,
   FadeIn,
