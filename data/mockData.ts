@@ -46,6 +46,7 @@ export interface Problem {
   resolvedAt?: string;
   votes: number;
   comments: Comment[];
+  statusHistory?: { status: Problem['status']; at: string; justification: string }[];
 }
 
 export interface Comment {
@@ -57,7 +58,14 @@ export interface Comment {
 }
 
 // Dados mockados
-export const mockUsers: User[] = [
+export const demoUser: User = {
+  id: 'demo-citizen', name: 'Pessoa de demonstração', email: 'demo@vilaesperanca.exemplo',
+  password: 'demo', level: 1, points: 0, ranking: 0, badges: [],
+  createdAt: '2026-09-10', streak: 0, lastActivity: '2026-09-10T09:00:00.000Z',
+  totalComments: 0, joinedDaysAgo: 0, nextLevelPoints: 100,
+};
+
+export const mockUsers: User[] = [demoUser,
   {
     id: '1',
     name: 'João Silva',
@@ -1154,4 +1162,4 @@ export const mockStats = {
   inProgressProblems: mockProblems.filter(p => p.status === 'in_progress').length,
   totalUsers: mockUsers.length,
   activeUsers: mockUsers.filter(u => u.points > 0).length,
-}; 
+};

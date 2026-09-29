@@ -1,320 +1,124 @@
-import { mockProblems, mockStats, mockUsers, Problem, User } from '@/data/mockData';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Simula delay de rede
-const delay = (ms: number = 800) => new Promise(resolve => setTimeout(resolve, ms));
+import { mockUsers, type Problem, type User } from '@/data/mockData';
+import { createDemoRepository } from '@/demo/repository';
+import type { DemoScenario } from '@/demo/types';
 
-// Simulação de resposta da API
-interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
+export interface ApiResponse<T> { success: boolean; data?: T; error?: string }
+const responseError = (error: unknown): ApiResponse<never> => ({
+  success: false,
+  error: error instanceof Error ? error.message : 'Não foi possível acessar os dados locais.',
+});
+const copy = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
+const withoutPassword = (user: User): User => {
+  const { password: _, ...safe } = copy(user);
+  return safe as User;
+};
 
-// Funções de autenticação
+/** Armazenamento independente do painel municipal. */
+export const citizenDemoRepository = createDemoRepository(AsyncStorage, 'fiscaliza:citizen:v1');
+
+export const demoApi = {
+  getScenario: (): Promise<DemoScenario> => citizenDemoRepository.getScenario(),
+  reset: (scenario: DemoScenario): Promise<void> => citizenDemoRepository.reset(scenario),
+  getWarning: (): string | null => citizenDemoRepository.getWarning(),
+};
+
 export const authApi = {
   async login(email: string, password: string): Promise<ApiResponse<User>> {
-    await delay();
-    
     const user = mockUsers.find(u => u.email === email && u.password === password);
-    
-    if (user) {
-      // Remove password do retorno por segurança
-      const { password: _, ...userWithoutPassword } = user;
-      return {
-        success: true,
-        data: userWithoutPassword as User,
-      };
-    }
-    
-    return {
-      success: false,
-      error: 'Email ou senha incorretos',
-    };
+    return user ? { success: true, data: withoutPassword(user) } : { success: false, error: 'Email ou senha incorretos' };
   },
-
   async getUserById(userId: string): Promise<ApiResponse<User>> {
-    await delay(300);
-    
     const user = mockUsers.find(u => u.id === userId);
-    
-    if (user) {
-      const { password: _, ...userWithoutPassword } = user;
-      return {
-        success: true,
-        data: userWithoutPassword as User,
-      };
-    }
-    
-    return {
-      success: false,
-      error: 'Usuário não encontrado',
-    };
+    return user ? { success: true, data: withoutPassword(user) } : { success: false, error: 'Usuário não encontrado' };
   },
-
   async updateUser(userId: string, updates: Partial<User>): Promise<ApiResponse<User>> {
-    await delay();
-    
-    const userIndex = mockUsers.findIndex(u => u.id === userId);
-    
-    if (userIndex !== -1) {
-      mockUsers[userIndex] = { ...mockUsers[userIndex], ...updates };
-      const { password: _, ...userWithoutPassword } = mockUsers[userIndex];
-      
-      return {
-        success: true,
-        data: userWithoutPassword as User,
-      };
-    }
-    
-    return {
-      success: false,
-      error: 'Usuário não encontrado',
-    };
+    const index = mockUsers.findIndex(u => u.id === userId);
+    if (index < 0) return { success: false, error: 'Usuário não encontrado' };
+    mockUsers[index] = { ...mockUsers[index], ...copy(updates), id: userId };
+    return { success: true, data: withoutPassword(mockUsers[index]) };
   },
 };
 
-// Funções de problemas
 export const problemsApi = {
-  async getProblems(filters?: {
-    status?: string;
-    category?: string;
-    userId?: string;
-  }): Promise<ApiResponse<Problem[]>> {
-    await delay();
-    
-    let filteredProblems = [...mockProblems];
-    
-    if (filters?.status && filters.status !== 'all') {
-      filteredProblems = filteredProblems.filter(p => p.status === filters.status);
-    }
-    
-    if (filters?.category && filters.category !== 'all') {
-      filteredProblems = filteredProblems.filter(p => p.category === filters.category);
-    }
-    
-    if (filters?.userId) {
-      filteredProblems = filteredProblems.filter(p => p.reportedBy === filters.userId);
-    }
-    
-    // Ordenar por data mais recente
-    filteredProblems.sort((a, b) => new Date(b.reportedAt).getTime() - new Date(a.reportedAt).getTime());
-    
-    return {
-      success: true,
-      data: filteredProblems,
-    };
+  async getProblems(filters?: { status?: string; category?: string; userId?: string }): Promise<ApiResponse<Problem[]>> {
+    try { return { success: true, data: await citizenDemoRepository.list(filters) }; }
+    catch (error) { return responseError(error); }
   },
-
   async getProblemById(problemId: string): Promise<ApiResponse<Problem>> {
-    await delay(300);
-    
-    const problem = mockProblems.find(p => p.id === problemId);
-    
-    if (problem) {
-      return {
-        success: true,
-        data: problem,
-      };
-    }
-    
-    return {
-      success: false,
-      error: 'Problema não encontrado',
-    };
+    try {
+      const problem = await citizenDemoRepository.get(problemId);
+      return problem ? { success: true, data: problem } : { success: false, error: 'Problema não encontrado' };
+    } catch (error) { return responseError(error); }
   },
-
   async createProblem(problemData: Omit<Problem, 'id' | 'reportedAt' | 'votes' | 'comments'>): Promise<ApiResponse<Problem>> {
-    await delay();
-    
-    const newProblem: Problem = {
-      ...problemData,
-      id: (mockProblems.length + 1).toString(),
-      reportedAt: new Date().toISOString(),
-      votes: 1,
-      comments: [],
-    };
-    
-    mockProblems.unshift(newProblem);
-    
-    return {
-      success: true,
-      data: newProblem,
-    };
+    try { return { success: true, data: await citizenDemoRepository.create(problemData) }; }
+    catch (error) { return responseError(error); }
   },
-
   async updateProblem(problemId: string, updates: Partial<Problem>): Promise<ApiResponse<Problem>> {
-    await delay();
-    
-    const problemIndex = mockProblems.findIndex(p => p.id === problemId);
-    
-    if (problemIndex !== -1) {
-      mockProblems[problemIndex] = { ...mockProblems[problemIndex], ...updates };
-      
-      return {
-        success: true,
-        data: mockProblems[problemIndex],
-      };
-    }
-    
-    return {
-      success: false,
-      error: 'Problema não encontrado',
-    };
+    try { return { success: true, data: await citizenDemoRepository.update(problemId, updates) }; }
+    catch (error) { return responseError(error); }
   },
-
-  async voteProblem(problemId: string, userId: string): Promise<ApiResponse<{ votes: number }>> {
-    await delay(200);
-    
-    const problemIndex = mockProblems.findIndex(p => p.id === problemId);
-    
-    if (problemIndex !== -1) {
-      mockProblems[problemIndex].votes += 1;
-      
-      return {
-        success: true,
-        data: { votes: mockProblems[problemIndex].votes },
-      };
-    }
-    
-    return {
-      success: false,
-      error: 'Problema não encontrado',
-    };
+  async voteProblem(problemId: string, _userId: string): Promise<ApiResponse<{ votes: number }>> {
+    try { return { success: true, data: { votes: await citizenDemoRepository.vote(problemId) } }; }
+    catch (error) { return responseError(error); }
   },
-
   async addComment(problemId: string, userId: string, text: string): Promise<ApiResponse<Problem>> {
-    await delay(300);
-    
-    const problemIndex = mockProblems.findIndex(p => p.id === problemId);
     const user = mockUsers.find(u => u.id === userId);
-    
-    if (problemIndex !== -1 && user) {
-      const newComment = {
-        id: Date.now().toString(),
-        text,
-        userId,
-        userName: user.name,
-        createdAt: new Date().toISOString(),
-      };
-      
-      mockProblems[problemIndex].comments.push(newComment);
-      
-      return {
-        success: true,
-        data: mockProblems[problemIndex],
-      };
-    }
-    
-    return {
-      success: false,
-      error: 'Problema ou usuário não encontrado',
-    };
+    if (!user) return { success: false, error: 'Usuário não encontrado' };
+    try { return { success: true, data: await citizenDemoRepository.comment(problemId, userId, user.name, text) }; }
+    catch (error) { return responseError(error); }
   },
 };
 
-// Funções de estatísticas
 export const statsApi = {
-  async getGlobalStats(): Promise<ApiResponse<typeof mockStats>> {
-    await delay(400);
-    
-    const currentStats = {
-      totalProblems: mockProblems.length,
-      resolvedProblems: mockProblems.filter(p => p.status === 'resolved').length,
-      pendingProblems: mockProblems.filter(p => p.status === 'pending').length,
-      inProgressProblems: mockProblems.filter(p => p.status === 'in_progress').length,
-      totalUsers: mockUsers.length,
-      activeUsers: mockUsers.filter(u => u.points > 0).length,
-    };
-    
-    return {
-      success: true,
-      data: currentStats,
-    };
-  },
-
-  async getUserStats(userId: string): Promise<ApiResponse<{
-    problemsReported: number;
-    problemsResolved: number;
-    totalVotes: number;
-    totalComments: number;
+  async getGlobalStats(): Promise<ApiResponse<{
+    totalProblems: number; resolvedProblems: number; pendingProblems: number;
+    inProgressProblems: number; totalUsers: number; activeUsers: number;
   }>> {
-    await delay(300);
-    
-    const userProblems = mockProblems.filter(p => p.reportedBy === userId);
-    const resolvedProblems = userProblems.filter(p => p.status === 'resolved');
-    const totalVotes = userProblems.reduce((sum, p) => sum + p.votes, 0);
-    const totalComments = mockProblems.reduce((sum, p) => 
-      sum + p.comments.filter(c => c.userId === userId).length, 0
-    );
-    
-    return {
-      success: true,
-      data: {
-        problemsReported: userProblems.length,
-        problemsResolved: resolvedProblems.length,
-        totalVotes,
-        totalComments,
-      },
-    };
+    try {
+      const problems = await citizenDemoRepository.list();
+      return { success: true, data: {
+        totalProblems: problems.length,
+        resolvedProblems: problems.filter(p => p.status === 'resolved').length,
+        pendingProblems: problems.filter(p => p.status === 'pending').length,
+        inProgressProblems: problems.filter(p => p.status === 'in_progress').length,
+        totalUsers: mockUsers.length,
+        activeUsers: mockUsers.filter(u => u.points > 0).length,
+      } };
+    } catch (error) { return responseError(error); }
   },
-
-
+  async getUserStats(userId: string): Promise<ApiResponse<{
+    problemsReported: number; problemsResolved: number; totalVotes: number; totalComments: number;
+  }>> {
+    try {
+      const problems = await citizenDemoRepository.list();
+      const owned = problems.filter(p => p.reportedBy === userId);
+      return { success: true, data: {
+        problemsReported: owned.length,
+        problemsResolved: owned.filter(p => p.status === 'resolved').length,
+        totalVotes: owned.reduce((sum, p) => sum + p.votes, 0),
+        totalComments: problems.reduce((sum, p) => sum + p.comments.filter(c => c.userId === userId).length, 0),
+      } };
+    } catch (error) { return responseError(error); }
+  },
   async getRanking(): Promise<ApiResponse<User[]>> {
-    await delay(500);
-    
-    // Simular ranking baseado em pontos
-    const ranking = [...mockUsers]
-      .map(user => {
-        const userProblems = mockProblems.filter(p => p.reportedBy === user.id);
-        const problemsReported = userProblems.length;
-        const problemsResolved = userProblems.filter(p => p.status === 'resolved').length;
-        const totalVotes = userProblems.reduce((sum, p) => sum + p.votes, 0);
-        
-        // Calcular eficiência (% de problemas resolvidos)
-        const efficiency = problemsReported > 0 ? Math.round((problemsResolved / problemsReported) * 100) : 0;
-        
-        return {
-          ...user,
-          problemsReported,
-          problemsResolved,
-          totalVotes,
-          efficiency,
-        };
-      })
-      .sort((a, b) => b.points - a.points)
-      .map((user, index) => ({ ...user, ranking: index + 1 }));
-    
-    return {
-      success: true,
-      data: ranking,
-    };
+    try {
+      const problems = await citizenDemoRepository.list();
+      const ranking = mockUsers.map(user => {
+        const owned = problems.filter(p => p.reportedBy === user.id);
+        return { ...withoutPassword(user), problemsReported: owned.length,
+          problemsResolved: owned.filter(p => p.status === 'resolved').length,
+          totalVotes: owned.reduce((sum, p) => sum + p.votes, 0),
+          efficiency: owned.length ? Math.round(owned.filter(p => p.status === 'resolved').length / owned.length * 100) : 0 };
+      }).sort((a, b) => b.points - a.points).map((user, index) => ({ ...user, ranking: index + 1 }));
+      return { success: true, data: ranking };
+    } catch (error) { return responseError(error); }
   },
 };
 
-// Função utilitária para simular erros de rede
-export const simulateNetworkError = (): ApiResponse<never> => {
-  return {
-    success: false,
-    error: 'Erro de conexão. Verifique sua internet.',
-  };
-};
-
-// Validação de email
-export const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-// Função para simular upload de imagem
-export const uploadImage = async (imageUri: string): Promise<ApiResponse<string>> => {
-  await delay(1000);
-  
-  // Simula upload e retorna uma URL fictícia
-  const fileName = `image_${Date.now()}.jpg`;
-  const uploadedUrl = `https://via.placeholder.com/400x300/FF5722/FFFFFF?text=${fileName}`;
-  
-  return {
-    success: true,
-    data: uploadedUrl,
-  };
-}; 
+export const simulateNetworkError = (): ApiResponse<never> => ({ success: false, error: 'Armazenamento local indisponível.' });
+export const isValidEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+export const uploadImage = async (imageUri: string): Promise<ApiResponse<string>> =>
+  imageUri.trim() ? { success: true, data: imageUri } : { success: false, error: 'Imagem inválida.' };
