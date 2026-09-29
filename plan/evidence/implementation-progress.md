@@ -7,7 +7,7 @@ Planejamento inicial: cc5e793. Usuário autorizou implementação por subagentes
 - Ruling: trabalhar no checkout atual na main — instrução explícita do usuário, substitui isolamento padrão da skill — alterações são recuperáveis por commits locais.
 - Ruling: primeira entrega é o ciclo demonstrativo essencial; ranking/pontos não receberão redesign completo — evitar atrasar o núcleo por telas secundárias — custo se inadequado: rodada posterior de UI.
 - Ruling: React/Vite em municipal/ e domínio puro em demo/ — duas interfaces sem backend e mínimo rearranjo — custo se inadequado: refatoração local, sem dependência externa.
-- Ruling: scripts auxiliares Bash indisponíveis no PATH; usar briefs do plano e ledger versionados em plan/evidence — preservar rastreabilidade em PowerShell — custo: arquivos de coordenação no histórico.
+- Ruling: auxiliar Bash da skill falhou com caminhos/permissões Windows; usar apply_patch para pacotes de diff e ledger versionado em plan/evidence — mantém rastreabilidade sem insistir no auxiliar — custo: coordenação manual equivalente.
 
 ## Preflight
 
@@ -22,7 +22,14 @@ Planejamento inicial: cc5e793. Usuário autorizou implementação por subagentes
 
 ## Estado
 
-- Auditorias técnicas e de UX em andamento, somente leitura.
-- Task 1: pendente.
-- Task 2: pendente.
+- Auditorias concluídas: npm ls limpo; baseline com 5 erros TypeScript e 9 erros/1 aviso lint. Sem adb/emulador/Xcode no PATH. Fluxo atual pode chamar Gemini, não persiste relatos e contém botões sem ação.
+- Task 1: complete (commits 5ff66fd..b85a17e, review approved). 12 testes e TypeScript passaram; lint de UI legado segue para Task 3.
+- Task 1: minor (deferred): validar datas opcionais resolvedAt/comment.createdAt na restauração; carregar para Task 3 e revisão final.
+- Task 2: implementação em andamento; base b85a17e; agente implement_dashboard.
 - Task 3: pendente.
+
+## Verificações do coordenador
+
+- Após Task 1: export Expo web concluído (16 rotas), sem falhas de bundle. Avisos de ambiente NO_COLOR/FORCE_COLOR registrados; não são aprovação de execução nativa.
+- Versão web antiga aberta em navegador local; confirmação visual de que a entrada ainda anuncia gov.br real. Correção já prevista na Task 3.
+- Branch temporária feat/tcc-demo removida; implementação segue exclusivamente na main.
