@@ -75,13 +75,13 @@ test('mutações simultâneas preservam ambos relatos e alterações', async () 
 test('reset descarta alterações apenas no escopo da chave escolhida', async () => {
   const storage = memoryStorage();
   const citizen = createDemoRepository(storage, 'citizen');
-  const municipal = createDemoRepository(storage, 'municipal');
+  const secondary = createDemoRepository(storage, 'secondary');
   const created = await citizen.create(report);
-  await municipal.reset('resolved');
+  await secondary.reset('resolved');
   assert.equal((await citizen.get(created.id))?.id, created.id);
   await citizen.reset('registered');
   assert.equal(await citizen.get(created.id), null);
-  assert.equal((await municipal.get(DEMO_PRIMARY_ID))?.status, 'resolved');
+  assert.equal((await secondary.get(DEMO_PRIMARY_ID))?.status, 'resolved');
 });
 
 test('payload corrompido é recuperado com aviso e sem expor dados inválidos', async () => {

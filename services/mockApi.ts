@@ -15,7 +15,7 @@ const withoutPassword = (user: User): User => {
   return safe as User;
 };
 
-/** Armazenamento independente do painel municipal. */
+/** Armazenamento local da aplicação do cidadão. */
 export const citizenDemoRepository = createDemoRepository(AsyncStorage, 'fiscaliza:citizen:v1');
 
 export const demoApi = {
