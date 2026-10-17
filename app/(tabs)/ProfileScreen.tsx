@@ -8,13 +8,13 @@ import {
   Alert,
   Image,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   BounceIn,
   FadeIn,
@@ -442,7 +442,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Header - Fixo no topo com medidas consistentes */}
       <View style={styles.header}>
         <View style={styles.headerCenter}>
@@ -673,7 +673,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#FFFFFF',
   },
   // Header - Consistente com ReportScreen
   header: {
@@ -739,6 +739,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    backgroundColor: '#F8F9FA',
   },
   mainProfileCard: {
     backgroundColor: 'white',

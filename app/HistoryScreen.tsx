@@ -9,12 +9,12 @@ import {
     ActivityIndicator,
     FlatList,
     Image,
-    SafeAreaView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
     BounceIn,
     FadeIn,
@@ -319,7 +319,7 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#FFFFFF',
   },
   
   // Header
@@ -433,6 +433,7 @@ const styles = StyleSheet.create({
   // Problem Cards igual ao ProblemsListScreen
   listContainer: {
     flex: 1,
+    backgroundColor: '#F8F9FA',
   },
   problemsList: {
     padding: 16,

@@ -42,7 +42,7 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { paddingTop: 30, backgroundColor: "#fff" }, // Add padding to avoid content overlapping with the status bar
+            contentStyle: { backgroundColor: "#fff" },
           }}
         >
           {/* Authentication */}
