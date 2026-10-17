@@ -14,7 +14,6 @@ import {
   Image,
   Modal,
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,15 +21,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import NativeMapView, { Marker as NativeMarker } from "react-native-maps";
+import { SafeAreaView } from "react-native-safe-area-context";
+import NativeMapView, { Marker as NativeMarker, PROVIDER_GOOGLE } from "react-native-maps";
 import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 
 let MapView: any = null;
 let Marker: any = null;
+let MapProvider: any = null;
 
 if (Platform.OS !== "web") {
   MapView = NativeMapView;
   Marker = NativeMarker;
+  MapProvider = Platform.OS === "android" ? PROVIDER_GOOGLE : undefined;
 }
 
 const { width } = Dimensions.get("window");
@@ -1012,7 +1014,7 @@ export default function ReportScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -1154,7 +1156,10 @@ export default function ReportScreen() {
         animationType="slide"
         onRequestClose={() => setShowMapModal(false)}
       >
-        <SafeAreaView style={styles.mapModalContainer}>
+        <SafeAreaView
+          style={styles.mapModalContainer}
+          edges={["top", "bottom", "left", "right"]}
+        >
           <View style={styles.mapModalHeader}>
             <TouchableOpacity onPress={() => setShowMapModal(false)}>
               <MaterialIcons name="close" size={24} color="#2E7D32" />
@@ -1176,6 +1181,7 @@ export default function ReportScreen() {
           </View>
 
           <MapView
+            provider={MapProvider}
             style={styles.modalMap}
             region={mapRegion}
             onPress={onMapPress}
@@ -1260,7 +1266,7 @@ export default function ReportScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: "#FFFFFF",
   },
   header: {
     flexDirection: "row",
@@ -1356,6 +1362,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    backgroundColor: "#F8F9FA",
   },
   scrollContent: {
     flex: 1,
@@ -1719,6 +1726,8 @@ const styles = StyleSheet.create({
     color: "#999",
   },
   modalMap: {
+    width: "100%",
+    height: "100%",
     flex: 1,
   },
   mapMarker: {

@@ -9,13 +9,13 @@ import {
   Alert,
   Image,
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   BounceIn,
   FadeIn,
@@ -28,18 +28,21 @@ import Animated, {
 
 let MapView: any = null;
 let Marker: any = null;
+let PROVIDER_GOOGLE: any = null;
 
 if (Platform.OS !== "web") {
   try {
     const ReactNativeMaps = require("react-native-maps");
     MapView = ReactNativeMaps?.default ?? null;
     Marker = ReactNativeMaps?.Marker ?? null;
+    PROVIDER_GOOGLE = ReactNativeMaps?.PROVIDER_GOOGLE ?? null;
   } catch (error) {
     console.warn("Mapa não disponível nesta plataforma:", error);
   }
 }
 
 const shouldRenderMap = Platform.OS !== "web" && !!MapView && !!Marker;
+const mapProvider = Platform.OS === "android" ? PROVIDER_GOOGLE : undefined;
 
 interface LocationCoords {
   latitude: number;
@@ -509,7 +512,7 @@ export default function Index() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       {/* Header com informações integradas */}
       <Animated.View entering={SlideInUp.delay(100)} style={styles.header}>
         <View style={styles.headerLeft}>
@@ -638,6 +641,8 @@ export default function Index() {
       {shouldRenderMap ? (
         <Animated.View entering={FadeIn.delay(300)} style={styles.mapContainer}>
           <MapView
+            provider={mapProvider}
+            initialRegion={defaultRJRegion}
             style={styles.map}
             region={region}
             onRegionChangeComplete={onRegionChangeComplete}
@@ -887,7 +892,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: "#FFFFFF",
   },
   header: {
     flexDirection: "row",
@@ -994,6 +999,8 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
   },
   map: {
+    width: "100%",
+    height: "100%",
     flex: 1,
   },
   webMapFallback: {
