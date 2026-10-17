@@ -27,6 +27,7 @@ let Marker: any = null;
 
 if (Platform.OS !== 'web') {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const ReactNativeMaps = require('react-native-maps');
     MapView = ReactNativeMaps?.default ?? null;
     Marker = ReactNativeMaps?.Marker ?? null;
@@ -46,7 +47,7 @@ const FILTER_ITEMS: { id: StatusFilterOption; label: string }[] = [
 ];
 
 export default function MapScreen() {
-  const { problems, loadProblems, isLoading } = useProblemsStore();
+  const { problems, loadProblems } = useProblemsStore();
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
 
   const {
@@ -66,16 +67,12 @@ export default function MapScreen() {
     loadProblems();
   }, [loadProblems]);
 
-  // Se houver problemas e nenhum selecionado, seleciona o primeiro para contexto
-  useEffect(() => {
-    if (filteredProblems.length > 0 && !selectedProblemId) {
-      setSelectedProblemId(filteredProblems[0].id);
-    } else if (filteredProblems.length > 0 && !filteredProblems.some(p => p.id === selectedProblemId)) {
-      setSelectedProblemId(filteredProblems[0].id);
-    }
-  }, [filteredProblems, selectedProblemId]);
+  const effectiveSelectedProblemId =
+    selectedProblemId && filteredProblems.some((p) => p.id === selectedProblemId)
+      ? selectedProblemId
+      : filteredProblems[0]?.id || null;
 
-  const selectedProblem = filteredProblems.find(p => p.id === selectedProblemId) || null;
+  const selectedProblem = filteredProblems.find((p) => p.id === effectiveSelectedProblemId) || null;
 
   const handleMarkerPress = useCallback((problem: Problem) => {
     setSelectedProblemId(problem.id);
@@ -166,7 +163,6 @@ export default function MapScreen() {
             showsMyLocationButton={false}
           >
             {filteredProblems.map((problem) => {
-              const isSelected = problem.id === selectedProblemId;
               const pinColor = getMarkerPinColor(problem.status);
 
               return (

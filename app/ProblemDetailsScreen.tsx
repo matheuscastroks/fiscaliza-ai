@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -6,7 +6,6 @@ import {
   Image,
   ActivityIndicator,
   TextInput,
-  TouchableOpacity,
   Alert,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -32,32 +31,38 @@ export default function ProblemDetailsScreen() {
   const userId = user?.id || 'demo-citizen';
 
   const [problem, setProblem] = useState<Problem | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => Boolean(id));
   const [isVoting, setIsVoting] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
-  const loadProblem = useCallback(async () => {
-    if (!id) return;
-    setIsLoading(true);
-    try {
-      const response = await problemsApi.getProblemById(id);
-      if (response.success && response.data) {
-        setProblem(response.data);
-      } else {
-        setProblem(null);
-      }
-    } catch {
-      setProblem(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [id]);
-
   useEffect(() => {
-    loadProblem();
-  }, [loadProblem]);
+    let isMounted = true;
+    if (!id) return;
+
+    problemsApi
+      .getProblemById(id)
+      .then((response) => {
+        if (!isMounted) return;
+        if (response.success && response.data) {
+          setProblem(response.data);
+        } else {
+          setProblem(null);
+        }
+        setIsLoading(false);
+      })
+      .catch(() => {
+        if (isMounted) {
+          setProblem(null);
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
 
   const handleVote = async () => {
     if (!problem || isVoting || hasVoted) return;

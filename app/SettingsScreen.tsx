@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
 import { demoApi } from '@/services/mockApi';
 import { useAuthStore } from '@/stores/authStore';
 import { useProblemsStore } from '@/stores/problemsStore';
