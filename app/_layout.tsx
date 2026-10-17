@@ -2,16 +2,17 @@ import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
-} from "expo-router/react-navigation";
+} from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { router, Stack } from "expo-router";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useAuthStore } from "@/stores/authStore";
-import { StatusBar } from "expo-status-bar";
+import { colors } from "@/theme/colors";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -22,16 +23,12 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (loaded) {
-      // Verificar se o usuário está logado e redirecionar adequadamente
-      if (!isAuthenticated) {
-        router.replace("/LoginScreen");
-      }
+    if (loaded && !isAuthenticated) {
+      router.replace("/LoginScreen");
     }
   }, [loaded, isAuthenticated]);
 
   if (!loaded) {
-    // Async font loading only occurs in development.
     return null;
   }
 
@@ -42,7 +39,7 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: "#fff" },
+            contentStyle: { backgroundColor: colors.canvas },
           }}
         >
           {/* Authentication */}

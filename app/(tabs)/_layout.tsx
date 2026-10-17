@@ -1,8 +1,9 @@
+import React from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
@@ -10,26 +11,22 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#2E7D32',
-        tabBarInactiveTintColor: '#9E9E9E',
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.muted,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopWidth: 0,
-          paddingBottom: Math.max(insets.bottom + 5, Platform.OS === 'ios' ? 20 : 10),
-          height: Math.max(insets.bottom + 60, Platform.OS === 'ios' ? 90 : 80),
-          paddingTop: 5,
+          backgroundColor: colors.surface,
+          borderTopWidth: layout.borderWidth.hairline,
+          borderTopColor: colors.divider,
+          paddingTop: 6,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+          height: 56 + (insets.bottom > 0 ? insets.bottom : 8),
           elevation: 0,
-          shadowRadius: 10,
-          position: 'relative',
-          bottom: 0,
-          left: 0,
-          right: 0,
+          shadowOpacity: 0,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
-          marginTop: 2,
+          fontSize: 12,
+          fontWeight: '500',
         },
         tabBarIconStyle: {
           marginBottom: 2,
@@ -40,38 +37,26 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Mapa',
-          tabBarIcon: ({ focused, color }) => (
-            <MaterialIcons 
-              name="map" 
-              size={focused ? 28 : 24} 
-              color={color} 
-            />
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="map" size={size || 24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="ReportScreen"
         options={{
-          title: 'Reportar',
-          tabBarIcon: ({ focused, color }) => (
-            <MaterialIcons 
-              name="add-circle" 
-              size={focused ? 28 : 24} 
-              color={color} 
-            />
+          title: 'Registrar',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="add-circle-outline" size={size || 24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="ProblemsListScreen"
         options={{
-          title: 'Problemas',
-          tabBarIcon: ({ focused, color }) => (
-            <MaterialIcons 
-              name="report" 
-              size={focused ? 28 : 24} 
-              color={color} 
-            />
+          title: 'Ocorrências',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="format-list-bulleted" size={size || 24} color={color} />
           ),
         }}
       />
@@ -79,12 +64,8 @@ export default function TabLayout() {
         name="ProfileScreen"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ focused, color }) => (
-            <MaterialIcons 
-              name="person" 
-              size={focused ? 28 : 24} 
-              color={color} 
-            />
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="person-outline" size={size || 24} color={color} />
           ),
         }}
       />

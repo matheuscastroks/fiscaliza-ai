@@ -1,26 +1,27 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Fiscaliza-AI — Adaptador de Cores (compatibilidade com template Expo e Tema V2)
  */
-
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+import { colors } from '@/theme/colors';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    text: colors.ink,
+    background: colors.canvas,
+    tint: colors.accent,
+    icon: colors.muted,
+    tabIconDefault: colors.subtle,
+    tabIconSelected: colors.accent,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    text: colors.canvas,
+    background: colors.ink,
+    tint: colors.accentSoft,
+    icon: colors.divider,
+    tabIconDefault: colors.muted,
+    tabIconSelected: colors.accentSoft,
   },
+  // Exportação direta dos tokens semânticos V2
+  ...colors,
 };
+
+export default Colors;

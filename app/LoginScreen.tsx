@@ -1,523 +1,246 @@
-import { isValidEmail } from '@/services/mockApi';
-import { useAuthStore } from '@/stores/authStore';
-import { MaterialIcons as Icon } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
+  View,
+  StyleSheet,
+  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+  Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+import { useAuthStore } from '@/stores/authStore';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+import { layout } from '@/theme/layout';
+import { AppScreen } from '@/components/ui/AppScreen';
+import { AppText } from '@/components/ui/AppText';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppInput } from '@/components/ui/AppInput';
+import { AppDivider } from '@/components/ui/AppDivider';
+import { DemoNotice } from '@/components/demo/DemoNotice';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showSimpleLogin, setShowSimpleLogin] = useState(false);
-  
+  const [showCredentialsForm, setShowCredentialsForm] = useState(false);
+  const [email, setEmail] = useState('joao.silva@email.com');
+  const [password, setPassword] = useState('123456');
+
   const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
 
-  // Se já estiver logado, redirecionar
   useEffect(() => {
     if (isAuthenticated) {
       router.replace('/(tabs)');
     }
   }, [isAuthenticated]);
 
-  // Limpar erro quando mudar de input
   useEffect(() => {
     clearError();
   }, [email, password, clearError]);
 
-  const handleLogin = async () => {
-    // Validações
-    if (!email.trim()) {
-      Alert.alert('Erro', 'Por favor, insira seu email');
-      return;
-    }
-
-    if (!isValidEmail(email)) {
-      Alert.alert('Erro', 'Por favor, insira um email válido');
-      return;
-    }
-
-    if (!password.trim()) {
-      Alert.alert('Erro', 'Por favor, insira sua senha');
-      return;
-    }
-
-    if (password.length < 6) {
-      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
-      return;
-    }
-
-    const result = await login(email, password);
-
+  const handleOpenDemo = async () => {
+    clearError();
+    const result = await login('demo@vilaesperanca.exemplo', 'demo');
     if (result.success) {
       router.replace('/(tabs)');
     } else {
-      Alert.alert('Erro de Login', result.error || 'Não foi possível fazer login');
+      Alert.alert('Erro ao iniciar demonstração', result.error || 'Não foi possível carregar os dados locais.');
     }
   };
 
-  const handleGovBrLogin = () => {
-    // Simular login rápido com dados de teste
-    setEmail('joao.silva@email.com');
-    setPassword('123456');
-    setShowSimpleLogin(true);
+  const handleLoginWithCredentials = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Atenção', 'Informe o e-mail e a senha de teste.');
+      return;
+    }
+
+    const result = await login(email.trim(), password);
+    if (result.success) {
+      router.replace('/(tabs)');
+    } else {
+      Alert.alert('Falha na autenticação', result.error || 'Credenciais inválidas.');
+    }
   };
-
-  const fillTestCredentials = () => {
-    setEmail('joao.silva@email.com');
-    setPassword('123456');
-  };
-
-  if (!showSimpleLogin) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          {/* Logo e Título */}
-          <View style={styles.header}>
-            <View style={styles.logoContainer}>
-              <Icon name="location-city" size={80} color="#2E7D32" />
-            </View>
-            <Text style={styles.title}>Fiscaliza AI</Text>
-            <Text style={styles.subtitle}>
-              Transforme sua cidade com sua participação
-            </Text>
-          </View>
-
-          {/* Ilustração */}
-          <View style={styles.illustrationContainer}>
-            <View style={styles.cityIllustration}>
-              <Icon name="apartment" size={60} color="#4CAF50" />
-              <Icon name="business" size={50} color="#66BB6A" />
-              <Icon name="domain" size={55} color="#81C784" />
-            </View>
-            <Text style={styles.illustrationText}>
-              Reporte problemas, acompanhe soluções e ganhe pontos!
-            </Text>
-          </View>
-
-          {/* Botões de Login */}
-          <View style={styles.loginSection}>
-            <TouchableOpacity 
-              style={styles.govBrButton}
-              onPress={handleGovBrLogin}
-            >
-              <View style={styles.govBrContent}>
-                <Image 
-                  source={{ uri: 'https://www.gov.br/++theme++padrao_govbr/img/govbr-colorido.png' }}
-                  style={styles.govBrLogo}
-                  resizeMode="contain"
-                />
-                <Text style={styles.govBrText}>Entrar com Gov.br</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.simpleLoginButton}
-              onPress={() => setShowSimpleLogin(true)}
-            >
-              <Text style={styles.simpleLoginText}>Ou fazer login simples</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.loginInfo}>
-              Use sua conta Gov.br para acessar o Fiscaliza AI de forma segura
-            </Text>
-          </View>
-
-          {/* Features */}
-          <View style={styles.features}>
-            <View style={styles.feature}>
-              <Icon name="report-problem" size={24} color="#FF9800" />
-              <Text style={styles.featureText}>Reporte Problemas</Text>
-            </View>
-            <View style={styles.feature}>
-              <Icon name="track-changes" size={24} color="#2196F3" />
-              <Text style={styles.featureText}>Acompanhe Soluções</Text>
-            </View>
-            <View style={styles.feature}>
-              <Icon name="emoji-events" size={24} color="#FFD700" />
-              <Text style={styles.featureText}>Ganhe Badges</Text>
-            </View>
-          </View>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
-        style={styles.keyboardContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <AppScreen style={styles.screen}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView 
-          style={styles.scrollView}
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Header com botão voltar */}
-          <View style={styles.loginHeader}>
-            <TouchableOpacity 
-              style={styles.backButton}
-              onPress={() => setShowSimpleLogin(false)}
-            >
-              <Icon name="arrow-back" size={24} color="#2E7D32" />
-            </TouchableOpacity>
-            <Text style={styles.loginTitle}>Fazer Login</Text>
+          {/* Cabeçalho de Identidade e Contexto Territorial */}
+          <View style={styles.header}>
+            <AppText variant="protocol" color="muted">
+              FISCALIZA-AI
+            </AppText>
+            <AppText variant="screenTitle" color="ink" style={styles.mainTitle}>
+              Vila Esperança
+            </AppText>
+            <AppText variant="label" color="muted">
+              Protótipo de participação cidadã
+            </AppText>
           </View>
 
-          {/* Logo */}
-          <View style={styles.loginLogoContainer}>
-            <Icon name="location-city" size={60} color="#2E7D32" />
-            <Text style={styles.appName}>Fiscaliza AI</Text>
+          <AppDivider spacingVertical="md" />
+
+          {/* Proposição de Serviço */}
+          <View style={styles.serviceSection}>
+            <AppText variant="sectionTitle" color="ink" style={styles.sectionHeading}>
+              Registre e acompanhe ocorrências na via pública
+            </AppText>
+            <AppText variant="body" color="muted" style={styles.description}>
+              Consulte o mapa territorial, informe problemas de pavimentação, iluminação ou limpeza e acompanhe a tramitação com histórico documentado.
+            </AppText>
           </View>
 
-          {/* Formulário */}
-          <View style={styles.form}>
-            {error && (
-              <View style={styles.errorContainer}>
-                <Icon name="error" size={20} color="#F44336" />
-                <Text style={styles.errorText}>{error}</Text>
-              </View>
-            )}
+          {/* Área de Ação Principal */}
+          {!showCredentialsForm ? (
+            <View style={styles.actionsArea}>
+              <AppButton
+                title="Abrir demonstração"
+                variant="primary"
+                loading={isLoading}
+                onPress={handleOpenDemo}
+                style={styles.primaryCta}
+              />
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email</Text>
-              <View style={styles.inputWrapper}>
-                <Icon name="email" size={20} color="#666" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.textInput}
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder="seu.email@exemplo.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={!isLoading}
-                />
-              </View>
+              <TouchableOpacity
+                onPress={() => setShowCredentialsForm(true)}
+                style={styles.secondaryOptionButton}
+                accessibilityRole="button"
+                accessibilityLabel="Acessar com credenciais de teste"
+              >
+                <AppText variant="meta" color="accent">
+                  Entrar com credenciais de teste →
+                </AppText>
+              </TouchableOpacity>
             </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Senha</Text>
-              <View style={styles.inputWrapper}>
-                <Icon name="lock" size={20} color="#666" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.textInput}
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="Sua senha"
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={!isLoading}
-                />
-                <TouchableOpacity 
-                  onPress={() => setShowPassword(!showPassword)}
-                  style={styles.passwordToggle}
+          ) : (
+            <View style={styles.credentialsForm}>
+              <View style={styles.formHeaderRow}>
+                <AppText variant="label" color="ink">
+                  Conta de teste
+                </AppText>
+                <TouchableOpacity
+                  onPress={() => setShowCredentialsForm(false)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Icon 
-                    name={showPassword ? "visibility-off" : "visibility"} 
-                    size={20} 
-                    color="#666" 
-                  />
+                  <AppText variant="caption" color="accent">
+                    Voltar para acesso rápido
+                  </AppText>
                 </TouchableOpacity>
               </View>
+
+              <AppInput
+                label="E-mail"
+                value={email}
+                onChangeText={setEmail}
+                placeholder="exemplo@email.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                editable={!isLoading}
+              />
+
+              <AppInput
+                label="Senha"
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Senha"
+                secureTextEntry
+                editable={!isLoading}
+                error={error}
+              />
+
+              <AppButton
+                title="Entrar com conta de teste"
+                variant="primary"
+                loading={isLoading}
+                onPress={handleLoginWithCredentials}
+              />
             </View>
+          )}
 
-            {/* Botão de teste */}
-            <TouchableOpacity 
-              style={styles.testButton}
-              onPress={fillTestCredentials}
-            >
-              <Text style={styles.testButtonText}>
-                💡 Preencher com dados de teste
-              </Text>
-            </TouchableOpacity>
+          {/* Rodapé Informativo e Notificação de Demonstração */}
+          <View style={styles.footer}>
+            <DemoNotice
+              message="Ambiente demonstrativo com dados locais mockados. Não possui vínculo com órgãos públicos ou prefeitura real."
+            />
 
-            <TouchableOpacity 
-              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
-              onPress={handleLogin}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="white" size="small" />
-              ) : (
-                <Text style={styles.loginButtonText}>Entrar</Text>
-              )}
-            </TouchableOpacity>
-
-            {/* Credenciais de teste */}
-            <View style={styles.testCredentials}>
-              <Text style={styles.testCredentialsTitle}>Credenciais de teste:</Text>
-              <Text style={styles.testCredentialsText}>Email: joao.silva@email.com</Text>
-              <Text style={styles.testCredentialsText}>Senha: 123456</Text>
-              <Text style={styles.testCredentialsText}>
-                Ou use: maria.santos@email.com / carlos.oliveira@email.com
-              </Text>
-            </View>
+            <AppText variant="caption" color="subtle" style={styles.legalDisclaimer}>
+              Acesso gov.br: proposta de integração futura para identificação oficial.
+            </AppText>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
+  screen: {
+    backgroundColor: colors.canvas,
   },
-  keyboardContainer: {
-    flex: 1,
-  },
-  scrollView: {
+  flex: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing.contentPadding,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.xxl,
     justifyContent: 'space-between',
   },
   header: {
-    alignItems: 'center',
-    marginTop: 40,
+    marginBottom: spacing.xs,
   },
-  logoContainer: {
-    backgroundColor: '#E8F5E8',
-    borderRadius: 50,
-    padding: 20,
-    marginBottom: 16,
+  mainTitle: {
+    marginTop: spacing.xxs,
+    marginBottom: spacing.xxs,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#2E7D32',
-    marginBottom: 8,
+  serviceSection: {
+    marginVertical: spacing.md,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+  sectionHeading: {
+    marginBottom: spacing.xs,
+  },
+  description: {
     lineHeight: 22,
   },
-  illustrationContainer: {
-    alignItems: 'center',
-    marginVertical: 20,
+  actionsArea: {
+    marginVertical: spacing.xl,
   },
-  cityIllustration: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginBottom: 16,
-    gap: 8,
+  primaryCta: {
+    marginBottom: spacing.md,
   },
-  illustrationText: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    paddingHorizontal: 20,
-  },
-  loginSection: {
-    marginVertical: 20,
-  },
-  govBrButton: {
-    backgroundColor: '#1351B4',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  govBrContent: {
-    flexDirection: 'row',
+  secondaryOptionButton: {
+    paddingVertical: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: layout.touchTarget.minHeight,
   },
-  govBrLogo: {
-    width: 30,
-    height: 20,
-    marginRight: 12,
+  credentialsForm: {
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    borderRadius: layout.radius.panel,
+    borderWidth: layout.borderWidth.hairline,
+    borderColor: colors.divider,
+    marginVertical: spacing.md,
   },
-  govBrText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  simpleLoginButton: {
-    padding: 12,
+  formHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: spacing.md,
   },
-  simpleLoginText: {
-    color: '#2E7D32',
-    fontSize: 14,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
+  footer: {
+    marginTop: spacing.xl,
+    rowGap: spacing.sm,
   },
-  loginInfo: {
-    fontSize: 12,
-    color: '#666',
+  legalDisclaimer: {
     textAlign: 'center',
-    lineHeight: 16,
-    marginTop: 8,
-  },
-  features: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 40,
-  },
-  feature: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  featureText: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  // Estilos do formulário de login
-  loginHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 10,
-  },
-  backButton: {
-    padding: 8,
-  },
-  loginTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2E7D32',
-    marginLeft: 16,
-  },
-  loginLogoContainer: {
-    alignItems: 'center',
-    marginVertical: 30,
-  },
-  appName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2E7D32',
-    marginTop: 8,
-  },
-  form: {
-    paddingHorizontal: 24,
-    flex: 1,
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFEBEE',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  errorText: {
-    color: '#F44336',
-    fontSize: 14,
-    marginLeft: 8,
-    flex: 1,
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  textInput: {
-    flex: 1,
-    height: 50,
-    fontSize: 16,
-    color: '#333',
-  },
-  passwordToggle: {
-    padding: 4,
-  },
-  testButton: {
-    backgroundColor: '#FFF3E0',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  testButtonText: {
-    color: '#FF9800',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  loginButton: {
-    backgroundColor: '#2E7D32',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginBottom: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  loginButtonDisabled: {
-    backgroundColor: '#A5D6A7',
-  },
-  loginButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  testCredentials: {
-    backgroundColor: '#E8F5E8',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  testCredentialsTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#2E7D32',
-    marginBottom: 8,
-  },
-  testCredentialsText: {
-    fontSize: 12,
-    color: '#4CAF50',
-    marginBottom: 2,
+    paddingHorizontal: spacing.sm,
   },
 });
