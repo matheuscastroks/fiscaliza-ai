@@ -40,13 +40,13 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
+          "photosPermission": "O aplicativo acessa suas fotos para permitir anexar imagens como evidência da ocorrência relatada."
         }
       ],
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+          "locationAlwaysAndWhenInUsePermission": "O aplicativo utiliza sua localização para posicionar a ocorrência no mapa territorial."
         }
       ]
     ],
