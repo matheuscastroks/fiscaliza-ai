@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: fiscaliza
+      POSTGRES_USER: fiscaliza
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fiscaliza-local}
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - fiscaliza_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U fiscaliza -d fiscaliza']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgres://fiscaliza:${POSTGRES_PASSWORD:-fiscaliza-local}@postgres:5432/fiscaliza
+      NODE_ENV: ${NODE_ENV:-development}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:?Set DEMO_PASSWORD before starting compose}
+      WEB_ORIGINS: ${WEB_ORIGINS:-http://localhost:8080,http://localhost:5173,http://localhost:8081,http://localhost:8082}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
+      UPLOAD_DIR: /app/uploads
+      TRUST_PROXY: 172.30.97.0/24
+    ports:
+      - '${API_BIND:-127.0.0.1}:3001:3001'
+    volumes:
+      - fiscaliza_uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+  municipal:
+    build:
+      context: .
+      dockerfile: municipal/Dockerfile
+    ports:
+      - '${WEB_BIND:-127.0.0.1}:8080:80'
+    depends_on:
+      - api
+  edge:
+    image: caddy:2-alpine
+    profiles: ['edge']
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - fiscaliza_tls:/data
+    depends_on:
+      - municipal
+volumes:
+  fiscaliza_postgres:
+  fiscaliza_uploads:
+  fiscaliza_tls:
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.97.0/24
