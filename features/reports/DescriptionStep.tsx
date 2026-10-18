@@ -33,7 +33,12 @@ export interface DescriptionStepProps {
   error?: string | null;
 }
 
-const CATEGORY_KEYS: Problem['category'][] = ['road', 'lighting', 'cleaning', 'others'];
+const CATEGORY_KEYS: Problem['category'][] = [
+  'road',
+  'lighting',
+  'cleaning',
+  'others',
+];
 const PRIORITY_KEYS: Problem['priority'][] = ['low', 'medium', 'high'];
 
 const PRIORITY_LABELS: Record<Problem['priority'], string> = {
@@ -70,6 +75,7 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
 
       <AppInput
         label="Descrição do Problema"
+        maxLength={5000}
         placeholder="Ex: Buraco profundo na pista próximo à travessia de pedestres..."
         value={description}
         onChangeText={onDescriptionChange}
@@ -91,21 +97,37 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
           {isAnalyzing ? (
             <ActivityIndicator size="small" color={colors.accent} />
           ) : (
-            <MaterialIcons name="auto-fix-high" size={18} color={colors.accent} />
+            <MaterialIcons
+              name="auto-fix-high"
+              size={18}
+              color={colors.accent}
+            />
           )}
-          <AppText variant="label" color="accent" style={styles.suggestionButtonText}>
-            {analysisSuggested ? 'Atualizar sugestão automática' : 'Sugerir título e categoria'}
+          <AppText
+            variant="label"
+            color="accent"
+            style={styles.suggestionButtonText}
+          >
+            {analysisSuggested
+              ? 'Atualizar sugestão automática'
+              : 'Sugerir título e categoria'}
           </AppText>
         </TouchableOpacity>
 
-        <AppText variant="caption" color="muted" style={styles.suggestionNotice}>
-          Classificação local baseada no texto. Não realiza envio de imagem ou chamadas de IA externa.
+        <AppText
+          variant="caption"
+          color="muted"
+          style={styles.suggestionNotice}
+        >
+          Ao solicitar, o texto pode ser enviado ao Gemini. Revise a sugestão
+          antes de registrar; as fotos não são enviadas ao Google.
         </AppText>
       </View>
 
       {/* Título Ajustável */}
       <AppInput
         label="Título Resumido da Ocorrência"
+        maxLength={120}
         placeholder="Ex: Buraco na via pública"
         value={title}
         onChangeText={onTitleChange}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { router } from 'expo-router';
 import {
   View,
   StyleSheet,
@@ -22,18 +23,26 @@ import { ReviewStep } from '@/features/reports/ReviewStep';
 import { ReportSuccess } from '@/features/reports/ReportSuccess';
 
 export default function ReportScreen() {
+  const user = useAuthStore((state) => state.user);
+  return <ReportContent key={user?.id + ':' + user?.municipality?.id} />;
+}
+function ReportContent() {
   const { user } = useAuthStore();
-  const userId = user?.id || 'demo-citizen';
+  const userId = user?.id || '';
 
   const {
     step,
     data,
     updateField,
+    updateLocation,
+    duplicates,
+    ready,
     nextStep,
     prevStep,
     runLocalSuggestion,
     isAnalyzing,
     analysisSuggested,
+    analysisSource,
     pickImage,
     removeImage,
     submitReport,
@@ -47,10 +56,7 @@ export default function ReportScreen() {
     return (
       <AppScreen edges={['top']} style={styles.screen}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <ReportSuccess
-            problem={createdProblem}
-            onNewReport={resetForm}
-          />
+          <ReportSuccess problem={createdProblem} onNewReport={resetForm} />
         </ScrollView>
       </AppScreen>
     );
@@ -60,7 +66,7 @@ export default function ReportScreen() {
     <AppScreen edges={['top']} style={styles.screen}>
       <AppHeader
         title="Registrar ocorrência"
-        context={`Etapa ${step} de 3 · Vila Esperança`}
+        context={`Etapa ${step} de 3 · ${user?.municipality?.name || 'Seu município'}`}
         onBack={step > 1 ? prevStep : undefined}
       />
 
@@ -76,6 +82,14 @@ export default function ReportScreen() {
           {step === 1 && (
             <LocationStep
               address={data.address}
+              neighborhood={data.neighborhood}
+              onNeighborhoodChange={(value) =>
+                updateField('neighborhood', value)
+              }
+              latitude={data.latitude}
+              longitude={data.longitude}
+              selected={data.locationSelected}
+              onLocationChange={updateLocation}
               onAddressChange={(address) => updateField('address', address)}
               error={error}
             />
@@ -101,6 +115,12 @@ export default function ReportScreen() {
             />
           )}
 
+          {step === 2 && analysisSource !== '' && (
+            <AppText color="muted" accessibilityLiveRegion="polite">
+              {analysisSource}
+            </AppText>
+          )}
+
           {step === 3 && (
             <ReviewStep
               title={data.title}
@@ -110,6 +130,31 @@ export default function ReportScreen() {
               description={data.description}
               images={data.images}
             />
+          )}
+
+          {step === 3 && duplicates.length > 0 && (
+            <View style={{ gap: 12, marginVertical: 16 }}>
+              <AppText variant="sectionTitle">
+                Já existe um relato parecido?
+              </AppText>
+              <AppText color="muted">
+                Você pode complementar o registro existente ou continuar se for
+                outro problema.
+              </AppText>
+              {duplicates.map((item) => (
+                <AppButton
+                  key={item.id}
+                  title={item.title}
+                  variant="secondary"
+                  onPress={() =>
+                    router.push({
+                      pathname: '/ProblemDetailsScreen',
+                      params: { id: item.id },
+                    })
+                  }
+                />
+              ))}
+            </View>
           )}
 
           {error && step === 3 ? (
@@ -138,6 +183,7 @@ export default function ReportScreen() {
             {step < 3 ? (
               <AppButton
                 title="Continuar"
+                disabled={!ready}
                 variant="primary"
                 onPress={nextStep}
                 style={styles.continueButton}

@@ -47,6 +47,8 @@ export const AppInput: React.FC<AppInputProps> = ({
         {label}
       </AppText>
       <TextInput
+        accessibilityLabel={label}
+        accessibilityHint={error || helper}
         style={[
           styles.input,
           isFocused && styles.inputFocused,
@@ -61,7 +63,12 @@ export const AppInput: React.FC<AppInputProps> = ({
         {...rest}
       />
       {error ? (
-        <AppText variant="caption" color="risk" style={styles.feedback}>
+        <AppText
+          variant="caption"
+          color="risk"
+          style={styles.feedback}
+          accessibilityLiveRegion="polite"
+        >
           {error}
         </AppText>
       ) : helper ? (

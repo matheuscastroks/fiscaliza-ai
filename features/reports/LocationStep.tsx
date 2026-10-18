@@ -1,81 +1,198 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
-import { layout } from '@/theme/layout';
+import React, { useState } from 'react';
+import { Platform, View } from 'react-native';
+import * as Location from 'expo-location';
 import { AppText } from '@/components/ui/AppText';
 import { AppInput } from '@/components/ui/AppInput';
-
-export interface LocationStepProps {
+import { AppButton } from '@/components/ui/AppButton';
+import { useAuthStore } from '@/stores/authStore';
+import {
+  municipalityRegion,
+  withinMunicipalBounds,
+} from '@/features/city/municipalContext';
+let NativeMap: any = null;
+let Marker: any = null;
+if (Platform.OS !== 'web') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const maps = require('react-native-maps');
+  NativeMap = maps.default;
+  Marker = maps.Marker;
+}
+interface Props {
   address: string;
-  onAddressChange: (address: string) => void;
+  neighborhood: string;
+  onNeighborhoodChange: (value: string) => void;
+  latitude: number;
+  longitude: number;
+  selected: boolean;
+  onAddressChange: (value: string) => void;
+  onLocationChange: (point: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    neighborhood?: string;
+  }) => void;
   error?: string | null;
 }
-
-export const LocationStep: React.FC<LocationStepProps> = ({
+export function LocationStep({
   address,
+  neighborhood,
+  onNeighborhoodChange,
+  latitude,
+  longitude,
+  selected,
   onAddressChange,
+  onLocationChange,
   error,
-}) => {
+}: Props) {
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [manual, setManual] = useState(false);
+  const [manualLatitude, setManualLatitude] = useState('');
+  const [manualLongitude, setManualLongitude] = useState('');
+  const municipality = useAuthStore((state) => state.user?.municipality);
+  const selectPoint = (point: { latitude: number; longitude: number }) => {
+    if (!withinMunicipalBounds(point, municipality)) {
+      setMessage(
+        `O local precisa estar dentro de ${municipality?.name || 'seu município'}.`,
+      );
+      return;
+    }
+    onLocationChange(point);
+    setMessage('');
+  };
+  const locate = async () => {
+    setBusy(true);
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (!permission.granted) {
+        setMessage(
+          Platform.OS === 'web'
+            ? 'Use as coordenadas do local ou autorize a localização.'
+            : 'Você pode marcar o ponto no mapa sem usar sua posição atual.',
+        );
+        return;
+      }
+      const result = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      selectPoint({
+        latitude: result.coords.latitude,
+        longitude: result.coords.longitude,
+      });
+    } catch {
+      setMessage('Localização indisponível. Marque o ponto manualmente.');
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
-    <View style={styles.container}>
-      <AppText variant="sectionTitle" color="ink" style={styles.heading}>
-        Onde fica o problema?
+    <View style={{ gap: 16, paddingVertical: 16 }}>
+      <AppText variant="sectionTitle">Onde fica o problema?</AppText>
+      <AppText color="muted">
+        {municipality?.name} · {municipality?.state}
       </AppText>
-      <AppText variant="body" color="muted" style={styles.subheading}>
-        Informe a rua, praça ou ponto de referência no município de Vila Esperança.
-      </AppText>
-
       <AppInput
-        label="Endereço ou Local"
-        placeholder="Ex: Rua das Palmeiras, próximo ao nº 120"
+        label="Rua, número ou ponto de referência"
         value={address}
         onChangeText={onAddressChange}
         error={error}
-        containerStyle={styles.inputContainer}
       />
-
-      <View style={styles.infoCard}>
-        <MaterialIcons name="info-outline" size={18} color={colors.accent} style={styles.infoIcon} />
-        <AppText variant="caption" color="muted" style={styles.infoText}>
-          No ambiente demonstrativo, as coordenadas geográficas são fixadas no perímetro de Vila Esperança para visualização consistente no mapa.
+      <AppInput
+        label="Bairro"
+        value={neighborhood}
+        onChangeText={onNeighborhoodChange}
+        maxLength={120}
+      />
+      {NativeMap && (
+        <NativeMap
+          style={{ height: 240, width: '100%' }}
+          region={
+            selected
+              ? {
+                  latitude,
+                  longitude,
+                  latitudeDelta: 0.012,
+                  longitudeDelta: 0.012,
+                }
+              : municipalityRegion(municipality)
+          }
+          onPress={(event: {
+            nativeEvent: {
+              coordinate: { latitude: number; longitude: number };
+            };
+          }) => selectPoint(event.nativeEvent.coordinate)}
+        >
+          {selected && (
+            <Marker
+              coordinate={{ latitude, longitude }}
+              draggable
+              onDragEnd={(event: {
+                nativeEvent: {
+                  coordinate: { latitude: number; longitude: number };
+                };
+              }) => selectPoint(event.nativeEvent.coordinate)}
+            />
+          )}
+        </NativeMap>
+      )}
+      <AppButton
+        title="Usar minha posição"
+        variant="secondary"
+        loading={busy}
+        onPress={() => {
+          void locate();
+        }}
+      />
+      {message !== '' && (
+        <AppText color="muted" accessibilityLiveRegion="polite">
+          {message}
         </AppText>
-      </View>
+      )}
+      {Platform.OS === 'web' && (
+        <>
+          <AppButton
+            title={
+              manual ? 'Ocultar coordenadas' : 'Informar coordenadas do local'
+            }
+            variant="quiet"
+            onPress={() => setManual(!manual)}
+          />
+          {manual && (
+            <>
+              <AppInput
+                label="Latitude"
+                value={manualLatitude}
+                onChangeText={setManualLatitude}
+                placeholder="Ex.: -22,903"
+                keyboardType="decimal-pad"
+              />
+              <AppInput
+                label="Longitude"
+                value={manualLongitude}
+                onChangeText={setManualLongitude}
+                placeholder="Ex.: -43,185"
+                keyboardType="decimal-pad"
+              />
+              <AppButton
+                title="Confirmar ponto"
+                variant="secondary"
+                disabled={!manualLatitude.trim() || !manualLongitude.trim()}
+                onPress={() =>
+                  selectPoint({
+                    latitude: Number(manualLatitude.replace(',', '.')),
+                    longitude: Number(manualLongitude.replace(',', '.')),
+                  })
+                }
+              />
+            </>
+          )}
+        </>
+      )}
+      {selected && (
+        <AppText color="completed">
+          Ponto selecionado: {latitude.toFixed(5)}, {longitude.toFixed(5)}
+        </AppText>
+      )}
     </View>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: spacing.md,
-  },
-  heading: {
-    marginBottom: spacing.xxs,
-  },
-  subheading: {
-    marginBottom: spacing.lg,
-    lineHeight: 22,
-  },
-  inputContainer: {
-    marginBottom: spacing.md,
-  },
-  infoCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: colors.surfaceSubdued,
-    borderWidth: layout.borderWidth.hairline,
-    borderColor: colors.divider,
-    borderRadius: layout.radius.button,
-    padding: spacing.md,
-    marginTop: spacing.sm,
-  },
-  infoIcon: {
-    marginRight: spacing.xs,
-    marginTop: 2,
-  },
-  infoText: {
-    flex: 1,
-    lineHeight: 18,
-  },
-});
+}

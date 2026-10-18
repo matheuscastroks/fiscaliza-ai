@@ -13,7 +13,7 @@ export const colors = {
   // Tipografia e Conteúdo Factual
   ink: '#18232A',
   muted: '#4E5A61',
-  subtle: '#7E8B92',
+  subtle: '#56656D',
 
   // Estrutura e Separação
   divider: '#DCE1E2',

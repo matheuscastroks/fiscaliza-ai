@@ -11,6 +11,7 @@ import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Problem } from '@/data/mockData';
 import { useProblemsStore } from '@/stores/problemsStore';
+import { useAuthStore } from '@/stores/authStore';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
@@ -18,7 +19,10 @@ import { AppScreen } from '@/components/ui/AppScreen';
 import { AppText } from '@/components/ui/AppText';
 import { AppDivider } from '@/components/ui/AppDivider';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
-import { useOccurrenceFilters, StatusFilterOption } from '@/features/map/useOccurrenceFilters';
+import {
+  useOccurrenceFilters,
+  StatusFilterOption,
+} from '@/features/map/useOccurrenceFilters';
 
 const STATUS_FILTERS: { id: StatusFilterOption; label: string }[] = [
   { id: 'all', label: 'Todos' },
@@ -28,6 +32,7 @@ const STATUS_FILTERS: { id: StatusFilterOption; label: string }[] = [
 ];
 
 export default function ProblemsListScreen() {
+  const municipality = useAuthStore((state) => state.user?.municipality);
   const { problems, loadProblems, isLoading } = useProblemsStore();
   const [sortOrder, setSortOrder] = useState<'recent' | 'votes'>('recent');
 
@@ -41,8 +46,8 @@ export default function ProblemsListScreen() {
   } = useOccurrenceFilters(problems);
 
   useEffect(() => {
-    loadProblems();
-  }, [loadProblems]);
+    if (municipality) void loadProblems();
+  }, [loadProblems, municipality]);
 
   const sortedProblems = [...filteredProblems].sort((a, b) => {
     if (sortOrder === 'votes') {
@@ -69,7 +74,7 @@ export default function ProblemsListScreen() {
       {/* Cabeçalho da Lista */}
       <View style={styles.header}>
         <AppText variant="caption" color="muted">
-          Vila Esperança · registros municipais
+          {municipality?.name} · registros municipais
         </AppText>
         <AppText variant="screenTitle" color="ink">
           Ocorrências
@@ -79,7 +84,12 @@ export default function ProblemsListScreen() {
       {/* Campo de Busca Funcional */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBox}>
-          <MaterialIcons name="search" size={20} color={colors.subtle} style={styles.searchIcon} />
+          <MaterialIcons
+            name="search"
+            size={20}
+            color={colors.subtle}
+            style={styles.searchIcon}
+          />
           <TextInput
             style={styles.searchInput}
             placeholder="Buscar por local ou tipo de problema"
@@ -90,7 +100,10 @@ export default function ProblemsListScreen() {
             clearButtonMode="while-editing"
           />
           {searchQuery ? (
-            <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <TouchableOpacity
+              onPress={() => setSearchQuery('')}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
               <MaterialIcons name="close" size={18} color={colors.muted} />
             </TouchableOpacity>
           ) : null}
@@ -156,18 +169,28 @@ export default function ProblemsListScreen() {
           renderItem={renderItem}
           refreshing={isLoading}
           onRefresh={loadProblems}
-          contentContainerStyle={sortedProblems.length === 0 ? styles.emptyContainer : undefined}
+          contentContainerStyle={
+            sortedProblems.length === 0 ? styles.emptyContainer : undefined
+          }
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <MaterialIcons name="inbox" size={36} color={colors.subtle} />
               <AppText variant="label" color="ink" style={styles.emptyTitle}>
                 Nenhuma ocorrência encontrada
               </AppText>
-              <AppText variant="body" color="muted" style={styles.emptyDescription}>
-                Não há registros com os critérios informados. Tente remover filtros ou ajustar o termo de busca.
+              <AppText
+                variant="body"
+                color="muted"
+                style={styles.emptyDescription}
+              >
+                Não há registros com os critérios informados. Tente remover
+                filtros ou ajustar o termo de busca.
               </AppText>
-              {(statusFilter !== 'all' || searchQuery) ? (
-                <TouchableOpacity onPress={clearFilters} style={styles.clearFiltersButton}>
+              {statusFilter !== 'all' || searchQuery ? (
+                <TouchableOpacity
+                  onPress={clearFilters}
+                  style={styles.clearFiltersButton}
+                >
                   <AppText variant="label" color="accent">
                     Limpar filtros
                   </AppText>

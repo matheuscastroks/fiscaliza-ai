@@ -31,7 +31,7 @@ export const ReportSuccess: React.FC<ReportSuccessProps> = ({
 
       <View style={styles.protocolBadge}>
         <AppText variant="caption" color="muted">
-          PROTOCOLO LOCAL
+          Protocolo
         </AppText>
         <AppText variant="protocol" color="ink" style={styles.protocolText}>
           {problem.id}
@@ -39,23 +39,26 @@ export const ReportSuccess: React.FC<ReportSuccessProps> = ({
       </View>
 
       <AppText variant="body" color="muted" style={styles.description}>
-        O relato foi salvo no repositório demonstrativo de Vila Esperança. A ocorrência já está disponível no mapa e na listagem para acompanhamento de status.
+        Seu relato foi recebido. Você pode acompanhar as respostas e
+        complementar as informações a qualquer momento.
       </AppText>
 
       <AppDivider spacingVertical="lg" />
 
       <View style={styles.actions}>
         <AppButton
-          title="Ver no mapa territorial"
+          title="Explorar o território"
           variant="primary"
-          onPress={() => router.replace('/(tabs)')}
+          onPress={() => router.replace('/(tabs)/TerritoryScreen')}
           style={styles.actionButton}
         />
 
         <AppButton
           title="Acompanhar tramitação"
           variant="secondary"
-          onPress={() => router.replace(`/ProblemDetailsScreen?id=${problem.id}`)}
+          onPress={() =>
+            router.replace(`/ProblemDetailsScreen?id=${problem.id}`)
+          }
           style={styles.actionButton}
         />
 

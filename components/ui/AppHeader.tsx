@@ -5,6 +5,7 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { AppText } from './AppText';
+import { useMenu } from './SideMenu';
 
 export interface AppHeaderProps {
   title: string;
@@ -22,6 +23,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.topRow}>
+        {!onBack && (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => useMenu.getState().setOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir menu"
+          >
+            <MaterialIcons name="menu" size={24} color={colors.ink} />
+          </TouchableOpacity>
+        )}
         {onBack && (
           <TouchableOpacity
             style={styles.backButton}
@@ -43,7 +54,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             {title}
           </AppText>
         </View>
-        {rightElement ? <View style={styles.rightArea}>{rightElement}</View> : null}
+        {rightElement ? (
+          <View style={styles.rightArea}>{rightElement}</View>
+        ) : null}
       </View>
     </View>
   );
@@ -67,8 +80,8 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
     justifyContent: 'center',
     alignItems: 'center',
-    width: 32,
-    height: 32,
+    width: 48,
+    height: 48,
   },
   titleArea: {
     flex: 1,

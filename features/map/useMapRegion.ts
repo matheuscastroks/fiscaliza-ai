@@ -9,7 +9,7 @@ export interface MapRegion {
   longitudeDelta: number;
 }
 
-// Centro de Vila Esperança baseado nas fixtures do projeto
+// Referência legada das fixtures. As telas ativas usam o município da sessão.
 export const DEFAULT_VILA_ESPERANCA_REGION: MapRegion = {
   latitude: -22.903,
   longitude: -43.185,
@@ -30,8 +30,13 @@ export function useMapRegion(problems: Problem[] = []) {
     return DEFAULT_VILA_ESPERANCA_REGION;
   });
 
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [permissionStatus, setPermissionStatus] = useState<'undetermined' | 'granted' | 'denied'>('undetermined');
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [permissionStatus, setPermissionStatus] = useState<
+    'undetermined' | 'granted' | 'denied'
+  >('undetermined');
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   const requestPermissionAndLocate = useCallback(async () => {

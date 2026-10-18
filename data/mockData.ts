@@ -1,9 +1,15 @@
 // Tipos de dados
+import type { Municipality } from '@/shared/contracts';
 export interface User {
   id: string;
   name: string;
   email: string;
-  password: string;
+  password?: string;
+  role?: 'citizen' | 'staff' | 'admin';
+  sector?: string;
+  municipality?: Municipality | null;
+  postalCode?: string;
+  neighborhood?: string;
   avatar?: string;
   level: number;
   points: number;
@@ -30,6 +36,7 @@ export interface Badge {
 
 export interface Problem {
   id: string;
+  municipalityId?: string;
   title: string;
   description: string;
   category: 'road' | 'lighting' | 'cleaning' | 'others';
@@ -39,6 +46,7 @@ export interface Problem {
     latitude: number;
     longitude: number;
     address: string;
+    neighborhood?: string;
   };
   images: string[];
   reportedBy: string; // userId
@@ -46,7 +54,11 @@ export interface Problem {
   resolvedAt?: string;
   votes: number;
   comments: Comment[];
-  statusHistory?: { status: Problem['status']; at: string; justification: string }[];
+  statusHistory?: {
+    status: Problem['status'];
+    at: string;
+    justification: string;
+  }[];
 }
 
 export interface Comment {
@@ -59,19 +71,31 @@ export interface Comment {
 
 // Dados mockados
 export const demoUser: User = {
-  id: 'demo-citizen', name: 'Pessoa de demonstração', email: 'demo@vilaesperanca.exemplo',
-  password: 'demo', level: 1, points: 0, ranking: 0, badges: [],
-  createdAt: '2026-09-10', streak: 0, lastActivity: '2026-09-10T09:00:00.000Z',
-  totalComments: 0, joinedDaysAgo: 0, nextLevelPoints: 100,
+  id: 'demo-citizen',
+  name: 'Pessoa de demonstração',
+  email: 'demo@vilaesperanca.exemplo',
+  password: 'demo',
+  level: 1,
+  points: 0,
+  ranking: 0,
+  badges: [],
+  createdAt: '2026-09-10',
+  streak: 0,
+  lastActivity: '2026-09-10T09:00:00.000Z',
+  totalComments: 0,
+  joinedDaysAgo: 0,
+  nextLevelPoints: 100,
 };
 
-export const mockUsers: User[] = [demoUser,
+export const mockUsers: User[] = [
+  demoUser,
   {
     id: '1',
     name: 'João Silva',
     email: 'joao.silva@email.com',
     password: '123456',
-    avatar: 'https://videos.openai.com/vg-assets/assets%2Ftask_01jwwzbzctetdtyv1dhtwvmhx7%2F1749024148_img_1.webp?st=2025-06-05T02%3A40%3A00Z&se=2025-06-11T03%3A40%3A00Z&sks=b&skt=2025-06-05T02%3A40%3A00Z&ske=2025-06-11T03%3A40%3A00Z&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skoid=aa5ddad1-c91a-4f0a-9aca-e20682cc8969&skv=2019-02-02&sv=2018-11-09&sr=b&sp=r&spr=https%2Chttp&sig=EkuDElonD7iO2%2B1Cw2odkWoThdQo6Ucb%2B2LFBeF%2B7tE%3D&az=oaivgprodscus',
+    avatar:
+      'https://videos.openai.com/vg-assets/assets%2Ftask_01jwwzbzctetdtyv1dhtwvmhx7%2F1749024148_img_1.webp?st=2025-06-05T02%3A40%3A00Z&se=2025-06-11T03%3A40%3A00Z&sks=b&skt=2025-06-05T02%3A40%3A00Z&ske=2025-06-11T03%3A40%3A00Z&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skoid=aa5ddad1-c91a-4f0a-9aca-e20682cc8969&skv=2019-02-02&sv=2018-11-09&sr=b&sp=r&spr=https%2Chttp&sig=EkuDElonD7iO2%2B1Cw2odkWoThdQo6Ucb%2B2LFBeF%2B7tE%3D&az=oaivgprodscus',
     level: 5,
     points: 1250,
     ranking: 47,
@@ -133,13 +157,13 @@ export const mockUsers: User[] = [demoUser,
         earned: false,
         progress: 0,
       },
-          ],
-      createdAt: '2023-12-01',
-      streak: 7,
-      lastActivity: '2024-01-15T14:30:00.000Z',
-      totalComments: 12,
-      joinedDaysAgo: 45,
-      nextLevelPoints: 1500,
+    ],
+    createdAt: '2023-12-01',
+    streak: 7,
+    lastActivity: '2024-01-15T14:30:00.000Z',
+    totalComments: 12,
+    joinedDaysAgo: 45,
+    nextLevelPoints: 1500,
   },
   {
     id: '2',
@@ -170,13 +194,13 @@ export const mockUsers: User[] = [demoUser,
         earned: false,
         progress: 60,
       },
-          ],
-      createdAt: '2024-01-05',
-      streak: 3,
-      lastActivity: '2024-01-14T19:15:00.000Z',
-      totalComments: 5,
-      joinedDaysAgo: 10,
-      nextLevelPoints: 1000,
+    ],
+    createdAt: '2024-01-05',
+    streak: 3,
+    lastActivity: '2024-01-14T19:15:00.000Z',
+    totalComments: 5,
+    joinedDaysAgo: 10,
+    nextLevelPoints: 1000,
   },
   {
     id: '3',
@@ -197,13 +221,13 @@ export const mockUsers: User[] = [demoUser,
         earned: false,
         progress: 30,
       },
-          ],
-      createdAt: '2024-01-18',
-      streak: 1,
-      lastActivity: '2024-01-12T16:20:00.000Z',
-      totalComments: 2,
-      joinedDaysAgo: 2,
-      nextLevelPoints: 500,
+    ],
+    createdAt: '2024-01-18',
+    streak: 1,
+    lastActivity: '2024-01-12T16:20:00.000Z',
+    totalComments: 2,
+    joinedDaysAgo: 2,
+    nextLevelPoints: 500,
   },
   {
     id: '4',
@@ -599,7 +623,8 @@ export const mockProblems: Problem[] = [
   {
     id: '1',
     title: 'Buraco na Estrada do Galeão',
-    description: 'Buraco grande na pista causando problemas para veículos. O buraco tem aproximadamente 1 metro de diâmetro e está localizado próximo ao acesso ao Aeroporto Internacional Tom Jobim.',
+    description:
+      'Buraco grande na pista causando problemas para veículos. O buraco tem aproximadamente 1 metro de diâmetro e está localizado próximo ao acesso ao Aeroporto Internacional Tom Jobim.',
     category: 'road',
     status: 'pending',
     priority: 'high',
@@ -635,12 +660,13 @@ export const mockProblems: Problem[] = [
   {
     id: '2',
     title: 'Lâmpada Queimada - Rua Barata Ribeiro',
-    description: 'Poste de iluminação não está funcionando na Rua Barata Ribeiro, em Copacabana, deixando a área escura durante a noite e comprometendo a segurança dos pedestres.',
+    description:
+      'Poste de iluminação não está funcionando na Rua Barata Ribeiro, em Copacabana, deixando a área escura durante a noite e comprometendo a segurança dos pedestres.',
     category: 'lighting',
     status: 'in_progress',
     priority: 'medium',
     location: {
-      latitude: -22.9711, 
+      latitude: -22.9711,
       longitude: -43.1822,
       address: 'Rua Barata Ribeiro, 203 - Copacabana, Rio de Janeiro - RJ',
     },
@@ -663,12 +689,13 @@ export const mockProblems: Problem[] = [
   {
     id: '3',
     title: 'Lixo Acumulado - Rua Visconde de Pirajá',
-    description: 'Acúmulo de lixo na calçada da Rua Visconde de Pirajá, em Ipanema. O lixo não foi coletado há vários dias e está atraindo insetos.',
+    description:
+      'Acúmulo de lixo na calçada da Rua Visconde de Pirajá, em Ipanema. O lixo não foi coletado há vários dias e está atraindo insetos.',
     category: 'cleaning',
     status: 'resolved',
     priority: 'medium',
     location: {
-      latitude: -22.9838, 
+      latitude: -22.9838,
       longitude: -43.2096,
       address: 'Rua Visconde de Pirajá, 456 - Ipanema, Rio de Janeiro - RJ',
     },
@@ -692,7 +719,8 @@ export const mockProblems: Problem[] = [
   {
     id: '4',
     title: 'Semáforo com Defeito - Rua Voluntários da Pátria',
-    description: 'Semáforo do cruzamento da Rua Voluntários da Pátria com Rua General Urquiza não está funcionando corretamente, criando risco de acidentes no trânsito intenso da região.',
+    description:
+      'Semáforo do cruzamento da Rua Voluntários da Pátria com Rua General Urquiza não está funcionando corretamente, criando risco de acidentes no trânsito intenso da região.',
     category: 'others',
     status: 'pending',
     priority: 'high',
@@ -727,12 +755,13 @@ export const mockProblems: Problem[] = [
   {
     id: '5',
     title: 'Calçada Danificada - Rua das Laranjeiras',
-    description: 'Calçada com buracos e rachaduras na Rua das Laranjeiras, em Laranjeiras, dificultando a passagem de pedestres, especialmente idosos e pessoas com mobilidade reduzida.',
+    description:
+      'Calçada com buracos e rachaduras na Rua das Laranjeiras, em Laranjeiras, dificultando a passagem de pedestres, especialmente idosos e pessoas com mobilidade reduzida.',
     category: 'road',
     status: 'in_progress',
     priority: 'medium',
     location: {
-      latitude: -22.9278, 
+      latitude: -22.9278,
       longitude: -43.1759,
       address: 'Rua das Laranjeiras, 170 - Laranjeiras, Rio de Janeiro - RJ',
     },
@@ -747,14 +776,16 @@ export const mockProblems: Problem[] = [
   {
     id: '6',
     title: 'Lixo Acumulado - Rua Almirante Alexandrino',
-    description: 'Grande acúmulo de lixo na esquina da Rua Almirante Alexandrino com Rua Paschoal Carlos Magno. O lixo está espalhado pela calçada há mais de uma semana, atraindo ratos e insetos.',
+    description:
+      'Grande acúmulo de lixo na esquina da Rua Almirante Alexandrino com Rua Paschoal Carlos Magno. O lixo está espalhado pela calçada há mais de uma semana, atraindo ratos e insetos.',
     category: 'cleaning',
     status: 'pending',
     priority: 'high',
     location: {
-      latitude: -22.9130,
+      latitude: -22.913,
       longitude: -43.1887,
-      address: 'Rua Almirante Alexandrino, 245 - Santa Teresa, Rio de Janeiro - RJ',
+      address:
+        'Rua Almirante Alexandrino, 245 - Santa Teresa, Rio de Janeiro - RJ',
     },
     images: [
       'https://www.correiodopovo.com.br/image/contentid/policy:1.835863:1677755916/lixoALS.jpeg.jpeg?a=2%3A1&$p$a=72124cc',
@@ -782,7 +813,8 @@ export const mockProblems: Problem[] = [
   {
     id: '7',
     title: 'Poste de Luz Quebrado - Rua Conde de Bonfim',
-    description: 'Poste de iluminação pública danificado após temporal. O poste está inclinado e representa risco de queda, além de deixar a rua completamente escura.',
+    description:
+      'Poste de iluminação pública danificado após temporal. O poste está inclinado e representa risco de queda, além de deixar a rua completamente escura.',
     category: 'lighting',
     status: 'pending',
     priority: 'high',
@@ -810,7 +842,8 @@ export const mockProblems: Problem[] = [
   {
     id: '8',
     title: 'Buraco na Av. das Américas',
-    description: 'Buraco profundo na via principal da Barra da Tijuca, próximo ao Shopping Barra. O buraco está causando danos aos veículos e é um risco constante para os motoristas.',
+    description:
+      'Buraco profundo na via principal da Barra da Tijuca, próximo ao Shopping Barra. O buraco está causando danos aos veículos e é um risco constante para os motoristas.',
     category: 'road',
     status: 'in_progress',
     priority: 'high',
@@ -845,14 +878,16 @@ export const mockProblems: Problem[] = [
   {
     id: '9',
     title: 'Entulho Abandonado - Estrada dos Bandeirantes',
-    description: 'Entulho de construção abandonado na calçada há mais de 15 dias. O material está obstruindo a passagem de pedestres e acumulando água parada.',
+    description:
+      'Entulho de construção abandonado na calçada há mais de 15 dias. O material está obstruindo a passagem de pedestres e acumulando água parada.',
     category: 'cleaning',
     status: 'pending',
     priority: 'medium',
     location: {
       latitude: -23.0212,
-      longitude: -43.4370,
-      address: 'Estrada dos Bandeirantes, 567 - Recreio dos Bandeirantes, Rio de Janeiro - RJ',
+      longitude: -43.437,
+      address:
+        'Estrada dos Bandeirantes, 567 - Recreio dos Bandeirantes, Rio de Janeiro - RJ',
     },
     images: [
       'https://www.correiodopovo.com.br/image/contentid/policy:1.835863:1677755916/lixoALS.jpeg.jpeg?a=2%3A1&$p$a=72124cc',
@@ -865,7 +900,8 @@ export const mockProblems: Problem[] = [
   {
     id: '10',
     title: 'Sinalização Apagada - Rua da Carioca',
-    description: 'Placa de sinalização de trânsito completamente desbotada e ilegível no Centro da cidade. Motoristas estão confusos sobre as direções.',
+    description:
+      'Placa de sinalização de trânsito completamente desbotada e ilegível no Centro da cidade. Motoristas estão confusos sobre as direções.',
     category: 'others',
     status: 'pending',
     priority: 'medium',
@@ -891,14 +927,16 @@ export const mockProblems: Problem[] = [
   {
     id: '11',
     title: 'Esgoto Vazando - Boulevard Vinte e Oito de Setembro',
-    description: 'Vazamento de esgoto na rede subterrânea está causando mau cheiro e poças de água suja na rua. Situação insalubre para os moradores.',
+    description:
+      'Vazamento de esgoto na rede subterrânea está causando mau cheiro e poças de água suja na rua. Situação insalubre para os moradores.',
     category: 'others',
     status: 'in_progress',
     priority: 'high',
     location: {
       latitude: -22.9154,
       longitude: -43.2402,
-      address: 'Boulevard Vinte e Oito de Setembro, 123 - Vila Isabel, Rio de Janeiro - RJ',
+      address:
+        'Boulevard Vinte e Oito de Setembro, 123 - Vila Isabel, Rio de Janeiro - RJ',
     },
     images: [],
     reportedBy: '6',
@@ -917,7 +955,8 @@ export const mockProblems: Problem[] = [
   {
     id: '12',
     title: 'Árvore Caída - Rua Barão de Mesquita',
-    description: 'Árvore de grande porte caiu durante o temporal e está bloqueando totalmente a passagem na rua. Risco de acidentes e impedimento do trânsito local.',
+    description:
+      'Árvore de grande porte caiu durante o temporal e está bloqueando totalmente a passagem na rua. Risco de acidentes e impedimento do trânsito local.',
     category: 'others',
     status: 'resolved',
     priority: 'high',
@@ -944,7 +983,8 @@ export const mockProblems: Problem[] = [
   {
     id: '13',
     title: 'Calçada Irregular - Rua Souza Franco',
-    description: 'Calçada com desnível perigoso e pedras soltas próximo à escola municipal. Crianças e idosos estão em risco de quedas.',
+    description:
+      'Calçada com desnível perigoso e pedras soltas próximo à escola municipal. Crianças e idosos estão em risco de quedas.',
     category: 'road',
     status: 'pending',
     priority: 'medium',
@@ -972,7 +1012,8 @@ export const mockProblems: Problem[] = [
   {
     id: '14',
     title: 'Lâmpadas Queimadas - Rua Thomás Coelho',
-    description: 'Sequência de 5 lâmpadas de poste queimadas deixando todo o quarteirão no escuro. Área se tornou insegura durante a noite.',
+    description:
+      'Sequência de 5 lâmpadas de poste queimadas deixando todo o quarteirão no escuro. Área se tornou insegura durante a noite.',
     category: 'lighting',
     status: 'pending',
     priority: 'high',
@@ -1007,14 +1048,16 @@ export const mockProblems: Problem[] = [
   {
     id: '15',
     title: 'Ponto de Ônibus Destruído - Estrada de Jacarepaguá',
-    description: 'Abrigo do ponto de ônibus foi vandalizado e está completamente destruído. Passageiros ficam expostos ao sol e chuva.',
+    description:
+      'Abrigo do ponto de ônibus foi vandalizado e está completamente destruído. Passageiros ficam expostos ao sol e chuva.',
     category: 'others',
     status: 'pending',
     priority: 'medium',
     location: {
       latitude: -22.9388,
       longitude: -43.3677,
-      address: 'Estrada de Jacarepaguá, 1890 - Jacarepaguá, Rio de Janeiro - RJ',
+      address:
+        'Estrada de Jacarepaguá, 1890 - Jacarepaguá, Rio de Janeiro - RJ',
     },
     images: [],
     reportedBy: '6',
@@ -1025,7 +1068,8 @@ export const mockProblems: Problem[] = [
   {
     id: '16',
     title: 'Buraco na Rua Quintino Bocaiúva',
-    description: 'Buraco grande na pista da Rua Quintino Bocaiúva, próximo ao número 500. O buraco está causando problemas para veículos e pedestres.',
+    description:
+      'Buraco grande na pista da Rua Quintino Bocaiúva, próximo ao número 500. O buraco está causando problemas para veículos e pedestres.',
     category: 'road',
     status: 'pending',
     priority: 'high',
@@ -1047,13 +1091,14 @@ export const mockProblems: Problem[] = [
         userId: '2',
         userName: 'Maria Santos',
         createdAt: '2024-01-22T15:45:00.000Z',
-      }
+      },
     ],
-},
-{
+  },
+  {
     id: '17',
     title: 'Lâmpadas Queimadas - Rua Madureira',
-    description: 'Sequência de 3 postes de iluminação não estão funcionando na Rua Madureira, deixando a área escura e insegura durante a noite.',
+    description:
+      'Sequência de 3 postes de iluminação não estão funcionando na Rua Madureira, deixando a área escura e insegura durante a noite.',
     category: 'lighting',
     status: 'in_progress',
     priority: 'medium',
@@ -1075,13 +1120,14 @@ export const mockProblems: Problem[] = [
         userId: '4',
         userName: 'Ana Paula Costa',
         createdAt: '2024-01-22T10:30:00.000Z',
-      }
+      },
     ],
-},
-{
+  },
+  {
     id: '18',
     title: 'Lixo Acumulado - Rua Senador Camará',
-    description: 'Acúmulo de lixo na Rua Senador Camará, em Campo Grande. O lixo não foi coletado há vários dias e está atraindo insetos e roedores.',
+    description:
+      'Acúmulo de lixo na Rua Senador Camará, em Campo Grande. O lixo não foi coletado há vários dias e está atraindo insetos e roedores.',
     category: 'cleaning',
     status: 'pending',
     priority: 'high',
@@ -1103,13 +1149,14 @@ export const mockProblems: Problem[] = [
         userId: '6',
         userName: 'Fernanda Lima',
         createdAt: '2024-01-20T12:30:00.000Z',
-      }
+      },
     ],
-},
-{
+  },
+  {
     id: '19',
     title: 'Calçada Danificada - Rua Fonseca Teles',
-    description: 'Calçada com buracos e desníveis na Rua Fonseca Teles, em Bangu. Dificultando a passagem de pedestres, especialmente idosos.',
+    description:
+      'Calçada com buracos e desníveis na Rua Fonseca Teles, em Bangu. Dificultando a passagem de pedestres, especialmente idosos.',
     category: 'road',
     status: 'pending',
     priority: 'medium',
@@ -1125,11 +1172,12 @@ export const mockProblems: Problem[] = [
     reportedAt: '2024-01-19T11:20:00.000Z',
     votes: 9,
     comments: [],
-},
-{
+  },
+  {
     id: '20',
     title: 'Semáforo com Defeito - Rua Braz de Pina',
-    description: 'Semáforo do cruzamento da Rua Braz de Pina com Av. Brasil não está funcionando corretamente, criando risco de acidentes.',
+    description:
+      'Semáforo do cruzamento da Rua Braz de Pina com Av. Brasil não está funcionando corretamente, criando risco de acidentes.',
     category: 'others',
     status: 'in_progress',
     priority: 'high',
@@ -1149,17 +1197,18 @@ export const mockProblems: Problem[] = [
         userId: '9',
         userName: 'Pedro Santos',
         createdAt: '2024-01-19T09:15:00.000Z',
-      }
+      },
     ],
-}
+  },
 ];
 
 // Estatísticas globais
 export const mockStats = {
   totalProblems: mockProblems.length,
-  resolvedProblems: mockProblems.filter(p => p.status === 'resolved').length,
-  pendingProblems: mockProblems.filter(p => p.status === 'pending').length,
-  inProgressProblems: mockProblems.filter(p => p.status === 'in_progress').length,
+  resolvedProblems: mockProblems.filter((p) => p.status === 'resolved').length,
+  pendingProblems: mockProblems.filter((p) => p.status === 'pending').length,
+  inProgressProblems: mockProblems.filter((p) => p.status === 'in_progress')
+    .length,
   totalUsers: mockUsers.length,
-  activeUsers: mockUsers.filter(u => u.points > 0).length,
+  activeUsers: mockUsers.filter((u) => u.points > 0).length,
 };

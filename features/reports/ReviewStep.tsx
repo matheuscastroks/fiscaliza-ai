@@ -61,7 +61,11 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
               GRAVIDADE
             </AppText>
             <AppText variant="body" color="ink" style={styles.fieldValue}>
-              {priority === 'high' ? 'Alta' : priority === 'medium' ? 'Média' : 'Baixa'}
+              {priority === 'high'
+                ? 'Alta'
+                : priority === 'medium'
+                  ? 'Média'
+                  : 'Baixa'}
             </AppText>
           </View>
         </View>
@@ -92,7 +96,11 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           <>
             <AppDivider spacingVertical="xs" />
             <View style={styles.fieldGroup}>
-              <AppText variant="caption" color="muted" style={styles.photoLabel}>
+              <AppText
+                variant="caption"
+                color="muted"
+                style={styles.photoLabel}
+              >
                 FOTO ANEXADA
               </AppText>
               <Image source={{ uri: images[0] }} style={styles.reviewImage} />

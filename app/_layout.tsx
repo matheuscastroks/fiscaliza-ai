@@ -1,75 +1,50 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "expo-router/react-navigation";
-import { useFonts } from "expo-font";
-import { router, Stack } from "expo-router";
-import { useEffect } from "react";
-import "react-native-reanimated";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
-
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { useAuthStore } from "@/stores/authStore";
-import { colors } from "@/theme/colors";
-
+import React, { useEffect } from 'react';
+import { router, Stack, useSegments } from 'expo-router';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { StatusBar } from 'expo-status-bar';
+import 'react-native-reanimated';
+import { useAuthStore } from '@/stores/authStore';
+import { queryClient } from '@/services/http';
+import { SideMenu } from '@/components/ui/SideMenu';
+import { colors } from '@/theme/colors';
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const { isAuthenticated } = useAuthStore();
-
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
-
+  const { isReady, isAuthenticated, initialize, user } = useAuthStore();
+  const segments = useSegments();
   useEffect(() => {
-    if (loaded && !isAuthenticated) {
-      router.replace("/LoginScreen");
-    }
-  }, [loaded, isAuthenticated]);
-
-  if (!loaded) {
-    return null;
-  }
-
+    void initialize();
+  }, [initialize]);
+  useEffect(() => {
+    const publicRoute = ['LoginScreen', 'AboutScreen', 'HelpScreen'].includes(
+      segments[0] || '',
+    );
+    if (isReady && !isAuthenticated && !publicRoute)
+      router.replace('/LoginScreen');
+    else if (
+      isReady &&
+      isAuthenticated &&
+      !user?.municipality &&
+      !publicRoute &&
+      segments[0] !== 'MunicipalityScreen'
+    )
+      router.replace('/MunicipalityScreen');
+  }, [isReady, isAuthenticated, segments, user?.municipality]);
+  if (!isReady) return null;
   return (
-    <SafeAreaProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <StatusBar style="dark" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.canvas },
-          }}
-        >
-          {/* Authentication */}
-          <Stack.Screen name="LoginScreen" options={{ headerShown: false }} />
-
-          {/* Main App */}
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-
-          {/* Problem Related Screens */}
-          <Stack.Screen
-            name="ProblemDetailsScreen"
-            options={{ headerShown: false }}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <StatusBar style="dark" />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.canvas },
+            }}
           />
-
-          {/* Profile Action Screens */}
-          <Stack.Screen name="HistoryScreen" options={{ headerShown: false }} />
-          <Stack.Screen name="RankingScreen" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="PointsGuideScreen"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="SettingsScreen"
-            options={{ headerShown: false }}
-          />
-
-          {/* Error Handling */}
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </ThemeProvider>
-    </SafeAreaProvider>
+          <SideMenu />
+        </QueryClientProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

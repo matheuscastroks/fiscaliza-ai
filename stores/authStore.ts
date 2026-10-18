@@ -1,157 +1,142 @@
-import { User } from '@/data/mockData';
-import { authApi } from '@/services/mockApi';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
-
+import type { User } from '@/data/mockData';
+import type { SessionUser } from '@/shared/contracts';
+import { authApi, legacyUser } from '@/services/mockApi';
+import { useProblemsStore } from './problemsStore';
+import { applyCurrentProfile } from '@/shared/profile-session';
+import {
+  onSessionExpired,
+  queryClient,
+  request,
+  restoreToken,
+  saveToken,
+} from '@/services/http';
 interface AuthState {
-  // Estado
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isReady: boolean;
+  sessionVersion: number;
   error: string | null;
-  
-  // Ações
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
-  updateUser: (updates: Partial<User>) => Promise<void>;
-  refreshUser: () => Promise<void>;
+  initialize: () => Promise<void>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
   clearError: () => void;
+  refreshUser: () => Promise<void>;
+  updateUser: (updates: Partial<User>) => Promise<void>;
+  acceptProfile: (
+    user: SessionUser,
+    expectedVersion: number,
+  ) => Promise<boolean>;
   setLoading: (loading: boolean) => void;
 }
-
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      // Estado inicial
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
+export const useAuthStore = create<AuthState>((set, get) => ({
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+  isReady: false,
+  sessionVersion: 0,
+  error: null,
+  initialize: async () => {
+    try {
+      await restoreToken();
+      const user = await request<SessionUser>('/auth/me');
+      set({ user: legacyUser(user), isAuthenticated: true });
+    } catch {
+      set({ user: null, isAuthenticated: false });
+    } finally {
+      set({ isReady: true });
+    }
+  },
+  login: async (email, password) => {
+    set({
+      isLoading: true,
       error: null,
-
-      // Ação de login
-      login: async (email: string, password: string) => {
-        set({ isLoading: true, error: null });
-        
-        try {
-          const response = await authApi.login(email, password);
-          
-          if (response.success && response.data) {
-            set({ 
-              user: response.data, 
-              isAuthenticated: true, 
-              isLoading: false,
-              error: null 
-            });
-            return { success: true };
-          } else {
-            set({ 
-              error: response.error || 'Erro no login', 
-              isLoading: false 
-            });
-            return { 
-              success: false, 
-              error: response.error || 'Erro no login' 
-            };
+      sessionVersion: get().sessionVersion + 1,
+    });
+    const result = await authApi.login(email, password);
+    if (result.success) {
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      useProblemsStore.getState().reset();
+    }
+    set({
+      isLoading: false,
+      error: result.error || null,
+      ...(result.data ? { user: result.data, isAuthenticated: true } : {}),
+    });
+    return { success: result.success, error: result.error };
+  },
+  logout: async () => {
+    set({ sessionVersion: get().sessionVersion + 1 });
+    try {
+      await request('/auth/logout', 'POST');
+    } finally {
+      await saveToken(null);
+      queryClient.clear();
+      useProblemsStore.getState().reset();
+      set({ user: null, isAuthenticated: false, error: null });
+    }
+  },
+  clearError: () => set({ error: null }),
+  setLoading: (isLoading) => set({ isLoading }),
+  refreshUser: async () => {
+    const expected = { userId: get().user?.id, version: get().sessionVersion };
+    if (!expected.userId) return;
+    const result = await authApi.getUserById(expected.userId);
+    if (result.data) {
+      await applyCurrentProfile(
+        { userId: expected.userId, version: expected.version },
+        () => ({
+          userId: get().user?.id,
+          version: get().sessionVersion,
+          authenticated: get().isAuthenticated,
+        }),
+        async () => {
+          if (result.data?.municipality?.id !== get().user?.municipality?.id)
+            await queryClient.cancelQueries();
+        },
+        () => {
+          if (result.data?.municipality?.id !== get().user?.municipality?.id) {
+            queryClient.clear();
+            useProblemsStore.getState().reset();
           }
-        } catch {
-          const errorMessage = 'Erro de conexão. Tente novamente.';
-          set({ 
-            error: errorMessage, 
-            isLoading: false 
-          });
-          return { 
-            success: false, 
-            error: errorMessage 
-          };
-        }
-      },
-
-      // Ação de logout
-      logout: () => {
-        set({ 
-          user: null, 
-          isAuthenticated: false, 
-          error: null 
+          set({ user: result.data, sessionVersion: get().sessionVersion + 1 });
+        },
+      );
+    }
+  },
+  acceptProfile: async (user, expectedVersion) => {
+    return applyCurrentProfile(
+      { userId: user.id, version: expectedVersion },
+      () => ({
+        userId: get().user?.id,
+        version: get().sessionVersion,
+        authenticated: get().isAuthenticated,
+      }),
+      () => queryClient.cancelQueries(),
+      () => {
+        queryClient.clear();
+        useProblemsStore.getState().reset();
+        set({
+          user: legacyUser(user),
+          sessionVersion: get().sessionVersion + 1,
         });
       },
-
-      // Atualizar dados do usuário
-      updateUser: async (updates: Partial<User>) => {
-        const { user } = get();
-        if (!user) return;
-
-        set({ isLoading: true });
-        
-        try {
-          const response = await authApi.updateUser(user.id, updates);
-          
-          if (response.success && response.data) {
-            set({ 
-              user: response.data, 
-              isLoading: false 
-            });
-          } else {
-            set({ 
-              error: response.error || 'Erro ao atualizar usuário', 
-              isLoading: false 
-            });
-          }
-        } catch {
-          set({ 
-            error: 'Erro de conexão ao atualizar usuário', 
-            isLoading: false 
-          });
-        }
-      },
-
-      // Recarregar dados do usuário
-      refreshUser: async () => {
-        const { user } = get();
-        if (!user) return;
-
-        set({ isLoading: true });
-        
-        try {
-          const response = await authApi.getUserById(user.id);
-          
-          if (response.success && response.data) {
-            set({ 
-              user: response.data, 
-              isLoading: false 
-            });
-          } else {
-            set({ 
-              error: response.error || 'Erro ao recarregar usuário', 
-              isLoading: false 
-            });
-          }
-        } catch {
-          set({ 
-            error: 'Erro de conexão ao recarregar usuário', 
-            isLoading: false 
-          });
-        }
-      },
-
-      // Limpar erro
-      clearError: () => {
-        set({ error: null });
-      },
-
-      // Definir loading
-      setLoading: (loading: boolean) => {
-        set({ isLoading: loading });
-      },
-    }),
-    {
-      name: 'auth-storage', // Nome da chave no AsyncStorage
-      storage: createJSONStorage(() => AsyncStorage),
-      // Apenas persistir os dados essenciais
-      partialize: (state) => ({ 
-        user: state.user, 
-        isAuthenticated: state.isAuthenticated 
-      }),
-    }
-  )
-); 
+    );
+  },
+  updateUser: async () =>
+    set({ error: 'A edição de conta não está disponível.' }),
+}));
+onSessionExpired(() => {
+  queryClient.clear();
+  useProblemsStore.getState().reset();
+  useAuthStore.setState((state) => ({
+    user: null,
+    isAuthenticated: false,
+    sessionVersion: state.sessionVersion + 1,
+  }));
+});
