@@ -1347,7 +1347,11 @@ export async function buildApp(
           'road.jpg',
           'waste.jpg',
           'crossing.jpg',
-          'gloria-dark.jpg', 'legacy-light-1.jpg', 'legacy-light-2.jpg', 'legacy-light-3.jpg', 'legacy-light-4.jpg',
+          'gloria-dark.jpg',
+          'legacy-light-1.jpg',
+          'legacy-light-2.jpg',
+          'legacy-light-3.jpg',
+          'legacy-light-4.jpg',
           'gloria-light.jpg',
           'recycling.jpg',
           'park-path.jpg',
@@ -1389,13 +1393,38 @@ export async function buildApp(
       }
     },
   );
-  app.post<{ Body: { description: string } }>(
+  app.post<{ Body: { description: string; imageUrl?: string } }>(
     '/api/analysis',
     {
       config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
-      schema: { body: object({ description: string() }, ['description']) },
+      schema: {
+        body: object({ description: string(5000, 0), imageUrl: images.items }, [
+          'description',
+        ]),
+      },
     },
-    async (req) => ok(await analyze(req.body, process.env.GEMINI_API_KEY)),
+    async (req) => {
+      if (!req.body.description.trim() && !req.body.imageUrl)
+        throw fail(400, 'Adicione uma foto ou descreva o problema.');
+      let image: { data: string; mimeType: string } | undefined;
+      if (req.body.imageUrl) {
+        await validateImages(req, [req.body.imageUrl]);
+        const id = req.body.imageUrl.split('/').at(-1)!;
+        let bytes: Buffer;
+        try {
+          bytes = await readFile(resolve(uploadDir, id));
+        } catch {
+          throw fail(410, 'A foto não está disponível. Anexe novamente.');
+        }
+        image = { data: bytes.toString('base64'), mimeType: 'image/webp' };
+      }
+      return ok(
+        await analyze(
+          { description: req.body.description, image },
+          process.env.GEMINI_API_KEY,
+        ),
+      );
+    },
   );
   app.post<{ Body: { scenario: 'registered' | 'in_progress' | 'resolved' } }>(
     '/api/presentation/reset',

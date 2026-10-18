@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { goBack } from '@/utils/navigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import React, { useEffect, useRef } from 'react';
@@ -9,6 +10,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import { useAuthStore } from '@/stores/authStore';
 import { colors } from '@/theme/colors';
@@ -46,9 +49,9 @@ function ReportContent() {
     ready,
     nextStep,
     prevStep,
-    runLocalSuggestion,
+    runImageAnalysis,
     isAnalyzing,
-    analysisSuggested,
+    showAiButton,
     analysisSource,
     pickImage,
     removeImage,
@@ -159,9 +162,6 @@ function ReportContent() {
                 void pickImage();
               }}
               onRemoveImage={removeImage}
-              onRunSuggestion={runLocalSuggestion}
-              isAnalyzing={isAnalyzing}
-              analysisSuggested={analysisSuggested}
               error={error}
             />
           )}
@@ -236,10 +236,40 @@ function ReportContent() {
               />
             ) : null}
 
+            {step === 1 && showAiButton && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Gerar relato com IA a partir da foto"
+                accessibilityHint="Envia a foto ao serviço de análise e sugere título e descrição para você revisar."
+                accessibilityState={{ disabled: isAnalyzing }}
+                disabled={isAnalyzing}
+                onPress={() => {
+                  void runImageAnalysis();
+                }}
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
+                  backgroundColor: colors.ink,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {isAnalyzing ? (
+                  <ActivityIndicator color={colors.white} />
+                ) : (
+                  <Ionicons
+                    name="sparkles-outline"
+                    size={24}
+                    color={colors.white}
+                  />
+                )}
+              </Pressable>
+            )}
             {step < 3 ? (
               <AppButton
                 title={step === 1 ? 'Escolher local' : 'Revisar ocorrência'}
-                disabled={!ready}
+                disabled={!ready || isAnalyzing}
                 variant="primary"
                 onPress={nextStep}
                 style={styles.continueButton}

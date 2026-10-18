@@ -55,6 +55,16 @@ test('AI without key returns deterministic heuristic suggestion', async () => {
   assert.equal(value.analysisSource, 'heuristic');
   assert.equal(value.suggestedCategory, 'lighting');
 });
+
+test('AI without a key never claims to have analyzed a photo', async () => {
+  const value = await analyze(
+    { description: '', image: { data: 'fixture', mimeType: 'image/webp' } },
+    undefined,
+  );
+  assert.equal(value.analysisSource, 'heuristic');
+  assert.equal(value.imageAnalyzed, false);
+  assert.equal(value.suggestedDescription, '');
+});
 test('browser preflight permits participation mutations and client headers', async (t) => {
   const app = await buildApp();
   t.after(() => app.close());

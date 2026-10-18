@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Problem } from '@/data/mockData';
 import { colors } from '@/theme/colors';
@@ -27,9 +21,6 @@ export interface DescriptionStepProps {
   images: string[];
   onPickImage: () => void;
   onRemoveImage: (index: number) => void;
-  onRunSuggestion: () => void;
-  isAnalyzing: boolean;
-  analysisSuggested: boolean;
   error?: string | null;
 }
 
@@ -59,9 +50,6 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
   images,
   onPickImage,
   onRemoveImage,
-  onRunSuggestion,
-  isAnalyzing,
-  analysisSuggested,
   error,
 }) => {
   return (
@@ -84,41 +72,6 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
         error={error}
         style={styles.multilineInput}
       />
-
-      {/* Assistência Heurística Local Opcional */}
-      <View style={styles.suggestionBox}>
-        <TouchableOpacity
-          style={styles.suggestionButton}
-          onPress={onRunSuggestion}
-          disabled={isAnalyzing}
-          accessibilityRole="button"
-          accessibilityLabel="Sugerir título e categoria automaticamente"
-        >
-          {isAnalyzing ? (
-            <ActivityIndicator size="small" color={colors.accent} />
-          ) : (
-            <Ionicons name="sparkles-outline" size={18} color={colors.accent} />
-          )}
-          <AppText
-            variant="label"
-            color="accent"
-            style={styles.suggestionButtonText}
-          >
-            {analysisSuggested
-              ? 'Atualizar sugestão automática'
-              : 'Sugerir título e categoria'}
-          </AppText>
-        </TouchableOpacity>
-
-        <AppText
-          variant="caption"
-          color="muted"
-          style={styles.suggestionNotice}
-        >
-          Ao solicitar, o texto pode ser enviado ao Gemini. Revise a sugestão
-          antes de registrar; as fotos não são enviadas ao Google.
-        </AppText>
-      </View>
 
       {/* Título Ajustável */}
       <AppInput
@@ -252,25 +205,6 @@ const styles = StyleSheet.create({
     minHeight: 80,
     textAlignVertical: 'top',
     paddingTop: spacing.sm,
-  },
-  suggestionBox: {
-    backgroundColor: colors.surfaceSubdued,
-    borderWidth: layout.borderWidth.hairline,
-    borderColor: colors.divider,
-    borderRadius: layout.radius.button,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  suggestionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.xxs,
-  },
-  suggestionButtonText: {
-    marginLeft: spacing.xs,
-  },
-  suggestionNotice: {
-    lineHeight: 16,
   },
   selectorSection: {
     marginBottom: spacing.lg,

@@ -167,4 +167,5 @@ export interface Analysis {
   confidence: number;
   analysisSource: 'gemini' | 'heuristic';
   imageAnalysis?: string;
+  imageAnalyzed?: boolean;
 }

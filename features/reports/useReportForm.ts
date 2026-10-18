@@ -7,7 +7,6 @@ import type { Problem } from '@/data/mockData';
 import type { Analysis } from '@/shared/contracts';
 import { problemsApi } from '@/services/mockApi';
 import { request, uploadImage } from '@/services/http';
-import { analyzeLocally } from '@/demo/localAnalysis';
 import { useProblemsStore } from '@/stores/problemsStore';
 import { useAuthStore } from '@/stores/authStore';
 import { withinMunicipalBounds } from '@/features/city/municipalContext';
@@ -61,7 +60,10 @@ export function useReportForm() {
     };
   }, []);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisSuggested, setAnalysisSuggested] = useState(false);
+  const [manualPhotoAi, setManualPhotoAi] = useState(false);
+  const analyzing = useRef(false);
+  const latest = useRef(data);
+  latest.current = data;
   const [analysisSource, setAnalysisSource] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdProblem, setCreatedProblem] = useState<Problem | null>(null);
@@ -87,8 +89,13 @@ export function useReportForm() {
               typeof value.description === 'string' &&
               Array.isArray(value.images) &&
               typeof value.locationSelected === 'boolean'
-            )
+            ) {
               setData({ ...initialData(), ...value });
+              setManualPhotoAi(
+                value.images.length > 0 &&
+                  Boolean(value.title?.trim() || value.description?.trim()),
+              );
+            }
           } catch {
             /* invalid draft is discarded */
           }
@@ -191,41 +198,72 @@ export function useReportForm() {
     }
     setError(null);
   };
-  const runLocalSuggestion = async () => {
-    if (!data.description.trim()) {
-      setError('Descreva o problema antes de pedir uma sugestão.');
-      return;
-    }
+  const analyzePhoto = async (uri: string, automatic = false) => {
+    if (analyzing.current || !uri) return;
+    const snapshot = {
+      title: latest.current.title,
+      description: latest.current.description,
+      category: latest.current.category,
+    };
+    const version = useAuthStore.getState().sessionVersion;
+    const current = () =>
+      mounted.current &&
+      useAuthStore.getState().sessionVersion === version &&
+      useAuthStore.getState().user?.id === user?.id;
+    analyzing.current = true;
     setIsAnalyzing(true);
+    setAnalysisSource('Analisando a foto…');
     try {
-      let result: Analysis;
-      try {
-        result = await request<Analysis>('/analysis', 'POST', {
-          description: data.description,
-        });
-      } catch {
-        result = {
-          ...analyzeLocally({ description: data.description }),
-          analysisSource: 'heuristic',
-        };
+      let url = uploaded.current.get(uri);
+      if (!url) {
+        url = await uploadImage(uri);
+        uploaded.current.set(uri, url);
+      }
+      if (!current()) return;
+      const result = await request<Analysis>('/analysis', 'POST', {
+        description: snapshot.description,
+        imageUrl: url,
+      });
+      if (!current() || !latest.current.images.includes(uri)) return;
+      if (result.analysisSource !== 'gemini' || !result.imageAnalyzed) {
+        setAnalysisSource(
+          'Análise da foto indisponível. Preencha o relato manualmente.',
+        );
+        return;
+      }
+      if (
+        latest.current.title !== snapshot.title ||
+        latest.current.description !== snapshot.description ||
+        latest.current.category !== snapshot.category
+      ) {
+        setAnalysisSource(
+          'Seu texto foi preservado porque mudou durante a análise.',
+        );
+        return;
       }
       setData((p) => ({
         ...p,
         title: result.suggestedTitle,
+        description: result.suggestedDescription,
         category: result.suggestedCategory,
       }));
       setAnalysisSource(
-        result.analysisSource === 'gemini'
-          ? 'Sugestão do Gemini. Revise antes de registrar.'
-          : 'Sugestão baseada no texto; a imagem não foi analisada.',
+        'Relato sugerido a partir da foto. Revise antes de continuar.',
       );
-      setAnalysisSuggested(true);
-      setError(null);
+      if (automatic) setManualPhotoAi(false);
+    } catch {
+      if (current())
+        setAnalysisSource(
+          'Não foi possível analisar a foto. Seu relato foi preservado.',
+        );
     } finally {
-      setIsAnalyzing(false);
+      analyzing.current = false;
+      if (mounted.current) setIsAnalyzing(false);
     }
   };
+  const runImageAnalysis = () => analyzePhoto(data.images[0]);
   const pickImage = async (camera = false) => {
+    if (analyzing.current) return;
     if (data.images.length >= 3) {
       setError('Adicione até três fotos.');
       return;
@@ -270,7 +308,12 @@ export function useReportForm() {
         uri = folder + Date.now() + '-' + (asset.fileName || 'foto.jpg');
         await FileSystem.copyAsync({ from: asset.uri, to: uri });
       }
+      const hadText = Boolean(
+        latest.current.title.trim() || latest.current.description.trim(),
+      );
+      setManualPhotoAi(hadText);
       setData((p) => ({ ...p, images: [...p.images, uri] }));
+      if (!hadText) void analyzePhoto(uri, true);
     } catch {
       setError('Não foi possível adicionar a foto. Tente outra imagem.');
     }
@@ -352,7 +395,7 @@ export function useReportForm() {
     setData(initialData());
     setStep(1);
     setCreatedProblem(null);
-    setAnalysisSuggested(false);
+    setManualPhotoAi(false);
     setAnalysisSource('');
     setError(null);
     setDuplicates([]);
@@ -367,9 +410,9 @@ export function useReportForm() {
       setError(null);
       setStep((p) => (p > 1 ? ((p - 1) as 1 | 2) : p));
     },
-    runLocalSuggestion,
+    runImageAnalysis,
     isAnalyzing,
-    analysisSuggested,
+    showAiButton: manualPhotoAi && data.images.length > 0,
     analysisSource,
     pickImage,
     removeImage: (index: number) =>

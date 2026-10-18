@@ -293,6 +293,45 @@
       ]
     },
     {
+      "name": "Analisar foto autorizada",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/analysis",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"\",\n  \"imageUrl\": \"{{proposalPhotoUrl}}\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(200));",
+              "const data=pm.response.json().data;",
+              "pm.test('Origem coerente com processamento visual',()=>pm.expect(data.imageAnalyzed).to.eql(data.analysisSource === 'gemini'));",
+              "pm.test('Sugestões estruturadas',()=>{pm.expect(data.suggestedTitle).to.be.a('string');pm.expect(data.suggestedDescription).to.be.a('string');});"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "Propor melhoria com foto",
       "request": {
         "method": "POST",

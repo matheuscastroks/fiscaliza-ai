@@ -21,6 +21,12 @@ test(
   { skip: !process.env.DATABASE_URL },
   async (t) => {
     const { db, pool } = database();
+    const savedKey = process.env.GEMINI_API_KEY;
+    process.env.GEMINI_API_KEY = '';
+    t.after(() => {
+      if (savedKey === undefined) delete process.env.GEMINI_API_KEY;
+      else process.env.GEMINI_API_KEY = savedKey;
+    });
     const app = await buildApp();
     const ids = [0, 1, 2].map(() => 'viewer-' + randomUUID());
     const other = '9999994';
@@ -180,7 +186,39 @@ test(
       ).statusCode,
       400,
     );
+    const deniedAnalysis = await app.inject({
+      method: 'POST',
+      url: '/api/analysis',
+      headers: headers[0],
+      payload: { description: '', imageUrl: strangerPhoto },
+    });
+    assert.equal(deniedAnalysis.statusCode, 400, deniedAnalysis.body);
     const ownPhoto = await uploadExamplePhoto(app, headers[0]);
+    const acceptedAnalysis = await app.inject({
+      method: 'POST',
+      url: '/api/analysis',
+      headers: headers[0],
+      payload: { description: '', imageUrl: ownPhoto },
+    });
+    assert.equal(acceptedAnalysis.statusCode, 200, acceptedAnalysis.body);
+    assert.equal(acceptedAnalysis.json().data.imageAnalyzed, false);
+    for (const imageUrl of [
+      'https://example.org/photo.jpg',
+      '/api/demo-media/lighting.jpg',
+      '../../private',
+    ]) {
+      assert.equal(
+        (
+          await app.inject({
+            method: 'POST',
+            url: '/api/analysis',
+            headers: headers[0],
+            payload: { description: '', imageUrl },
+          })
+        ).statusCode,
+        400,
+      );
+    }
     const saved = await app.inject({
       method: 'POST',
       url: '/api/occurrences',

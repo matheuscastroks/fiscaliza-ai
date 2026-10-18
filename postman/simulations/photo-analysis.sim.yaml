@@ -1,0 +1,5 @@
+simulation: photo-analysis
+routing: path
+mocks:
+  - routeKey: gemini
+    path: ../mocks/gemini/default.js
