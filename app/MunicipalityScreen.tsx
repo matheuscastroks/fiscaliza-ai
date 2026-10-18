@@ -1,7 +1,8 @@
+import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { goBack } from '@/utils/navigation';
 import { cityStyles } from '@/features/city/CityUI';
 import React, { useRef, useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -79,7 +80,7 @@ export default function MunicipalityScreen() {
         title={linked ? 'Meu município' : 'Sua cidade'}
         onBack={linked ? () => goBack() : undefined}
       />
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={cityStyles.content}
         keyboardShouldPersistTaps="handled"
       >
@@ -190,7 +191,7 @@ export default function MunicipalityScreen() {
             />
           )}
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </AppScreen>
   );
 }

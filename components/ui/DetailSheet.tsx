@@ -1,3 +1,4 @@
+import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -5,11 +6,11 @@ import {
   Animated,
   PanResponder,
   Pressable,
-  ScrollView,
   StyleSheet,
   View,
   useWindowDimensions,
   AccessibilityInfo,
+  RefreshControl,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,6 +32,7 @@ export function DetailSheet({
   children,
   footer,
   headerAction,
+  onRefresh,
 }: {
   title: string;
   image?: string;
@@ -38,8 +40,10 @@ export function DetailSheet({
   children: React.ReactNode;
   footer?: React.ReactNode;
   headerAction?: React.ReactNode;
+  onRefresh?: () => Promise<unknown>;
 }) {
   const { height } = useWindowDimensions();
+  const [refreshing, setRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
   const [failedImage, setFailedImage] = useState<string>();
   const photo = Boolean(image && failedImage !== image);
@@ -121,7 +125,21 @@ export function DetailSheet({
           ) : (
             <View style={{ height: spacing.lg }} />
           )}
-          <ScrollView
+          <KeyboardAwareScrollView
+            alwaysBounceVertical
+            refreshControl={
+              onRefresh ? (
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={() => {
+                    setRefreshing(true);
+                    void onRefresh().finally(() => setRefreshing(false));
+                  }}
+                  tintColor={colors.ink}
+                  colors={[colors.ink]}
+                />
+              ) : undefined
+            }
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={[
               styles.content,
@@ -134,7 +152,7 @@ export function DetailSheet({
             showsVerticalScrollIndicator={false}
           >
             {children}
-          </ScrollView>
+          </KeyboardAwareScrollView>
           {footer && (
             <View
               style={[

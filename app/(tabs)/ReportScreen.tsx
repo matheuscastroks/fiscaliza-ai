@@ -1,3 +1,4 @@
+import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { Ionicons } from '@expo/vector-icons';
 import { goBack } from '@/utils/navigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,7 +31,17 @@ import { ReportSuccess } from '@/features/reports/ReportSuccess';
 
 export default function ReportScreen() {
   const user = useAuthStore((state) => state.user);
-  return <ReportContent key={user?.id + ':' + user?.municipality?.id} />;
+  return (
+    <ReportContent
+      key={[
+        user?.id,
+        user?.municipality?.id,
+        user?.neighborhood,
+        user?.municipality?.center.latitude,
+        user?.municipality?.center.longitude,
+      ].join(':')}
+    />
+  );
 }
 function ReportContent() {
   const { user } = useAuthStore();
@@ -77,9 +88,9 @@ function ReportContent() {
   if (createdProblem) {
     return (
       <AppScreen edges={['top']} style={styles.screen}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <KeyboardAwareScrollView contentContainerStyle={styles.scrollContent}>
           <ReportSuccess problem={createdProblem} onNewReport={resetForm} />
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </AppScreen>
     );
   }
@@ -125,7 +136,7 @@ function ReportContent() {
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView
+        <KeyboardAwareScrollView
           ref={scroll}
           style={styles.flex}
           contentContainerStyle={styles.scrollContent}
@@ -215,7 +226,7 @@ function ReportContent() {
               </AppText>
             </View>
           ) : null}
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
         {/* Barra de Ações Inferior */}
         <View

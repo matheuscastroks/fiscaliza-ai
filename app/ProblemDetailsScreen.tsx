@@ -1,4 +1,6 @@
 import { CityCarousel } from '@/features/city/CityCarousel';
+import { DeleteRecord } from '@/features/city/DeleteRecord';
+import { CommunityComment } from '@/features/city/CommunityComment';
 import { nearbyOccurrences } from '@/shared/nearby-occurrences';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
 import { EngagementStats, SupportButton } from '@/components/ui/Engagement';
@@ -55,6 +57,7 @@ export default function ProblemDetailsScreen() {
   return (
     <DetailSheet
       title={'Ocorrência'}
+      onRefresh={() => Promise.all([query.refetch(), nearby.refetch()])}
       image={item?.images[0] ? assetUrl(item.images[0]) : undefined}
       onBack={() => goBack()}
       headerAction={
@@ -236,10 +239,7 @@ export default function ProblemDetailsScreen() {
           )}
           <DetailSection title="Informações da comunidade">
             {item.comments.map((c) => (
-              <View key={c.id} style={cityStyles.row}>
-                <AppText variant="label">{c.userName}</AppText>
-                <AppText>{c.text}</AppText>
-              </View>
+              <CommunityComment key={c.id} comment={c} path={path} />
             ))}
             <AppInput
               label="Complementar o registro"
@@ -258,6 +258,7 @@ export default function ProblemDetailsScreen() {
               }
             />
           </DetailSection>
+          <DeleteRecord item={item} path={path} />
           <View style={cityStyles.section}>
             <AppText variant="sectionTitle">Perto deste local</AppText>
             <QueryState

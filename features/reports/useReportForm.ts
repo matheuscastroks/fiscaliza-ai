@@ -1,4 +1,10 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import {
+  useLayoutEffect,
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+} from 'react';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
@@ -41,13 +47,18 @@ export function useReportForm() {
   const initialData = useCallback(
     (): ReportFormData => ({
       ...INITIAL_DATA,
-      ...municipality?.center,
+      latitude: municipality?.center.latitude ?? INITIAL_DATA.latitude,
+      longitude: municipality?.center.longitude ?? INITIAL_DATA.longitude,
       neighborhood: user?.neighborhood || '',
     }),
-    [municipality, user?.neighborhood],
+    [
+      municipality?.center.latitude,
+      municipality?.center.longitude,
+      user?.neighborhood,
+    ],
   );
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [data, setData] = useState<ReportFormData>(INITIAL_DATA);
+  const [data, setData] = useState<ReportFormData>(initialData);
   const [ready, setReady] = useState(false);
   const readyRef = useRef(false);
   const mounted = useRef(true);
@@ -63,7 +74,9 @@ export function useReportForm() {
   const [manualPhotoAi, setManualPhotoAi] = useState(false);
   const analyzing = useRef(false);
   const latest = useRef(data);
-  latest.current = data;
+  useLayoutEffect(() => {
+    latest.current = data;
+  }, [data]);
   const [analysisSource, setAnalysisSource] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdProblem, setCreatedProblem] = useState<Problem | null>(null);
@@ -73,12 +86,6 @@ export function useReportForm() {
   useEffect(() => {
     let active = true;
     readyRef.current = false;
-    setReady(false);
-    setData(initialData());
-    setStep(1);
-    setCreatedProblem(null);
-    setDuplicates([]);
-    setError(null);
     AsyncStorage.getItem(key)
       .then((raw) => {
         if (!active) return;

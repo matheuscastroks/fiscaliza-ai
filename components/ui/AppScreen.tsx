@@ -2,13 +2,13 @@ import React from 'react';
 import {
   StyleSheet,
   ViewProps,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { SafeAreaView, Edge } from 'react-native-safe-area-context';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
+import { KeyboardAwareScrollView } from './KeyboardAwareScrollView';
 
 export interface AppScreenProps extends ViewProps {
   scroll?: boolean;
@@ -26,13 +26,13 @@ export const AppScreen: React.FC<AppScreenProps> = ({
   ...rest
 }) => {
   const content = scroll ? (
-    <ScrollView
+    <KeyboardAwareScrollView
       contentContainerStyle={styles.scrollContent}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
       {children}
-    </ScrollView>
+    </KeyboardAwareScrollView>
   ) : (
     children
   );

@@ -1,20 +1,35 @@
-import React from 'react';
-import { ScrollView, View, TouchableOpacity } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import {
+  ScrollView,
+  View,
+  TouchableOpacity,
+  RefreshControl,
+} from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
-import { AppButton } from '@/components/ui/AppButton';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
 import { CivicRow, QueryState, cityStyles } from '@/features/city/CityUI';
 import { useCityQuery } from '@/features/city/useCityQuery';
 import type { CivicItem, Occurrence } from '@/shared/contracts';
 import { useAuthStore } from '@/stores/authStore';
+import { colors } from '@/theme/colors';
 export default function FollowScreen() {
   const municipalityId = useAuthStore((state) => state.user?.municipality?.id);
   const query = useCityQuery<{ occurrences: Occurrence[]; items: CivicItem[] }>(
     '/activity',
   );
+  const [refreshing, setRefreshing] = useState(false);
+  const { refetch } = query;
+  const refresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetch]);
   const localOccurrences =
     query.data?.occurrences.filter(
       (item) => item.municipalityId === municipalityId,
@@ -30,18 +45,24 @@ export default function FollowScreen() {
   return (
     <AppScreen>
       <AppHeader title="Acompanhar" context="Minhas contribuições" />
-      <ScrollView contentContainerStyle={cityStyles.content}>
+      <ScrollView
+        contentContainerStyle={[cityStyles.content, { flexGrow: 1 }]}
+        alwaysBounceVertical
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              void refresh();
+            }}
+            tintColor={colors.ink}
+            colors={[colors.ink]}
+          />
+        }
+      >
         <QueryState
           loading={query.isPending}
           error={query.error}
           retry={query.refetch}
-        />
-        <AppButton
-          title="Atualizar acompanhamentos"
-          variant="quiet"
-          onPress={() => {
-            void query.refetch();
-          }}
         />
         <View style={cityStyles.section}>
           <AppText variant="sectionTitle">

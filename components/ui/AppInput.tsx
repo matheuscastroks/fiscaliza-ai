@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   TextInput,
@@ -10,6 +10,7 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { AppText } from './AppText';
+import { useKeyboardAwareInput } from './KeyboardAwareScrollView';
 import { fontFamilies } from '@/theme/typography';
 
 export interface AppInputProps extends TextInputProps {
@@ -31,14 +32,18 @@ export const AppInput: React.FC<AppInputProps> = ({
   ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const input = useRef<TextInput>(null);
+  const keyboardScroll = useKeyboardAwareInput();
 
-  const handleFocus = (e: any) => {
+  const handleFocus: NonNullable<TextInputProps['onFocus']> = (e) => {
     setIsFocused(true);
+    if (input.current) keyboardScroll?.focus(input.current);
     onFocus?.(e);
   };
 
-  const handleBlur = (e: any) => {
+  const handleBlur: NonNullable<TextInputProps['onBlur']> = (e) => {
     setIsFocused(false);
+    if (input.current) keyboardScroll?.blur(input.current);
     onBlur?.(e);
   };
 
@@ -48,6 +53,7 @@ export const AppInput: React.FC<AppInputProps> = ({
         {label}
       </AppText>
       <TextInput
+        ref={input}
         accessibilityLabel={label}
         accessibilityHint={error || helper}
         style={[
