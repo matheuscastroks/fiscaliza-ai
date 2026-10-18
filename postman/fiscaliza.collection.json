@@ -12,6 +12,10 @@
     {
       "key": "password",
       "value": ""
+    },
+    {
+      "key": "webOrigin",
+      "value": "http://localhost:5173"
     }
   ],
   "item": [
@@ -26,7 +30,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/auth/login",
@@ -237,7 +241,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/occurrences",
@@ -278,7 +282,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/support"
@@ -308,7 +312,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/support"
@@ -338,7 +342,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/occurrences/{{occurrenceId}}"
@@ -369,7 +373,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/auth/login",
@@ -413,7 +417,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/transitions",
@@ -456,7 +460,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/transitions",
@@ -495,7 +499,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/occurrences/{{occurrenceId}}"
@@ -530,7 +534,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/evaluation",
@@ -573,7 +577,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/civic-items",
@@ -617,7 +621,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/civic-items/{{consultationId}}/answer",
@@ -660,7 +664,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/civic-items/{{consultationId}}/answer",
@@ -699,7 +703,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/civic-items/{{consultationId}}"
@@ -734,7 +738,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/civic-items/{{consultationId}}",
@@ -777,7 +781,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/civic-items/{{consultationId}}/answer",
@@ -820,7 +824,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/transitions",
@@ -859,7 +863,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/overview"
@@ -894,7 +898,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/analysis",
@@ -934,7 +938,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/auth/logout"
@@ -964,7 +968,7 @@
           },
           {
             "key": "Origin",
-            "value": "http://localhost:5173"
+            "value": "{{webOrigin}}"
           }
         ],
         "url": "{{baseUrl}}/auth/me"

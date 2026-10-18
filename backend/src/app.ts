@@ -25,11 +25,12 @@ import pg from 'pg';
 import { municipalities } from './schema.js';
 import { municipalityService } from './municipality.js';
 import { applyCivicUpdate } from './civic.js';
+import { summarizeOverview } from './overview.js';
 import type {
   SessionUser,
   Occurrence,
   CivicItem,
-  CityOverview,
+  CivicTerritory,
 } from '../../shared/contracts.js';
 
 declare module 'fastify' {
@@ -60,6 +61,21 @@ const location = object(
   },
   ['latitude', 'longitude', 'address'],
 );
+const civicTerritory = {
+  oneOf: [
+    object({ scope: { const: 'municipality' } }, ['scope']),
+    object({ scope: { const: 'neighborhood' }, neighborhood: string(120) }, ['scope', 'neighborhood']),
+    object({
+      scope: { const: 'location' },
+      neighborhood: string(120),
+      location: object({
+        latitude: { type: 'number', minimum: -90, maximum: 90 },
+        longitude: { type: 'number', minimum: -180, maximum: 180 },
+        address: string(300),
+      }, ['latitude', 'longitude']),
+    }, ['scope', 'neighborhood', 'location']),
+  ],
+};
 const images = {
   type: 'array',
   maxItems: 8,
@@ -263,6 +279,7 @@ export async function buildApp(
       !path.startsWith('/api/auth/') &&
       !path.startsWith('/api/profile/') &&
       path !== '/api/health' &&
+      !(req.method === 'GET' && (path === '/api/activity' || path.startsWith('/api/activity/'))) &&
       !(req.method === 'GET' && path.startsWith('/api/attachments/'))
     )
       municipalityId(req);
@@ -431,6 +448,22 @@ export async function buildApp(
     const [row] = await (lock ? query.for('update') : query);
     if (!row) throw fail(404, 'Registro não encontrado.');
     return row;
+  }
+  async function normalizeCivicTerritory(req: FastifyRequest, value?: CivicTerritory) {
+    if (!value) return undefined;
+    if (value.scope === 'municipality') return { scope: 'municipality' } as const;
+    const neighborhood = value.neighborhood.trim();
+    if (!neighborhood) throw fail(400, 'Informe o bairro.');
+    if (value.scope === 'neighborhood') return { scope: 'neighborhood', neighborhood } as const;
+    await territory.validatePoint(municipalityId(req), value.location);
+    return {
+      scope: 'location', neighborhood,
+      location: {
+        latitude: value.location.latitude,
+        longitude: value.location.longitude,
+        ...(value.location.address ? { address: value.location.address.trim() } : {}),
+      },
+    } as const;
   }
   async function validateImages(
     req: FastifyRequest,
@@ -617,6 +650,7 @@ export async function buildApp(
           {
             status: 'pending',
             at,
+            source: 'citizen',
             justification: 'Registro recebido.',
             actor: req.user!.name,
           },
@@ -695,6 +729,7 @@ export async function buildApp(
           value.statusHistory.push({
             status: value.status,
             at: now(),
+            source: 'management',
             justification: req.body.justification,
             actor: actor.name,
             sector: value.sector,
@@ -749,6 +784,7 @@ export async function buildApp(
           if (!req.body.satisfied)
             value.statusHistory.push({
               status: 'resolved',
+              source: 'citizen',
               at: now(),
               justification: `Revisão solicitada pelo autor: ${req.body.reason}`,
               actor: req.user!.name,
@@ -768,6 +804,7 @@ export async function buildApp(
     summary: string(500),
     body: string(),
     neighborhood: string(120),
+    territory: civicTerritory,
     responsible: string(120),
     linkedIds: { type: 'array', maxItems: 20, items: string(100) },
     closesAt: { type: 'string', format: 'date-time' },
@@ -786,7 +823,8 @@ export async function buildApp(
       title: string;
       summary: string;
       body: string;
-      neighborhood: string;
+      neighborhood?: string;
+      territory?: CivicTerritory;
       responsible?: string;
       linkedIds?: string[];
       closesAt?: string;
@@ -797,18 +835,16 @@ export async function buildApp(
     '/api/civic-items',
     {
       schema: {
-        body: object(civicProperties, [
-          'kind',
-          'title',
-          'summary',
-          'body',
-          'neighborhood',
-        ]),
+        body: {
+          ...object(civicProperties, ['kind', 'title', 'summary', 'body']),
+          anyOf: [{ required: ['neighborhood'] }, { required: ['territory'] }],
+        },
       },
     },
     async (req) => {
       const b = req.body;
       if (b.kind !== 'proposal') staff(req);
+      const scope = await normalizeCivicTerritory(req, b.territory);
       for (const id of b.linkedIds ?? []) {
         const [linked] = await db
           .select({ id: records.id })
@@ -827,7 +863,8 @@ export async function buildApp(
         title: b.title,
         summary: b.summary,
         body: b.body,
-        neighborhood: b.neighborhood,
+        neighborhood: scope ? (scope.scope === 'municipality' ? 'Todo o município' : scope.neighborhood) : b.neighborhood!.trim(),
+        ...(scope ? { territory: scope } : {}),
         createdBy: req.user!.id,
         createdAt: now(),
         responsible: b.responsible || 'Gestão municipal',
@@ -886,6 +923,7 @@ export async function buildApp(
       update?: string;
       dueAt?: string;
       justification?: string;
+      territory?: CivicTerritory;
     };
   }>(
     '/api/civic-items/:id',
@@ -910,6 +948,7 @@ export async function buildApp(
           evidence: images,
           update: string(3000),
           justification: string(3000),
+          territory: civicTerritory,
           dueAt: { type: 'string', format: 'date-time' },
         }),
       },
@@ -917,6 +956,9 @@ export async function buildApp(
     async (req) => {
       const actor = staff(req);
       await validateImages(req, req.body.evidence);
+      // Validate before taking a record transaction connection; the user mutation
+      // lock already pins the session municipality throughout this request.
+      const scope = await normalizeCivicTerritory(req, req.body.territory);
       return ok(
         await db.transaction(async (tx) => {
           const row = await find(
@@ -928,7 +970,7 @@ export async function buildApp(
           );
           const value = row.data as CivicItem;
           const b = req.body;
-          applyCivicUpdate(value, b, actor.name);
+          applyCivicUpdate(value, { ...b, ...(scope ? { territory: scope } : {}) }, actor.name);
           await tx
             .update(records)
             .set({ data: value })
@@ -983,6 +1025,25 @@ export async function buildApp(
       );
     },
   );
+  for (const [path, kind] of [['occurrences', 'occurrence'], ['civic-items', 'civic']] as const) {
+    app.get<{ Params: { id: string } }>(`/api/activity/${path}/:id`, async (req) => {
+      if (!req.user) throw fail(401, 'Entre para acompanhar.');
+      const uid = req.user.id;
+      const [row] = await db.select().from(records).where(and(
+        eq(records.id, req.params.id),
+        kind === 'occurrence' ? eq(records.kind, 'occurrence') : ne(records.kind, 'occurrence'),
+      ));
+      if (!row) throw fail(404, 'Registro não encontrado.');
+      if (row.authorId !== uid) {
+        const [relation] = await db.select({ id: relations.recordId }).from(relations)
+          .where(and(eq(relations.recordId, row.id), eq(relations.userId, uid), sql`${relations.kind} IN ('support', 'follow')`)).limit(1);
+        const [answer] = await db.select({ id: answers.recordId }).from(answers)
+          .where(and(eq(answers.recordId, row.id), eq(answers.userId, uid))).limit(1);
+        if (!relation && !answer) throw fail(404, 'Registro não encontrado.');
+      }
+      return ok(await present(row, uid));
+    });
+  }
   app.get('/api/activity', async (req) => {
     if (!req.user) throw fail(401, 'Entre para acompanhar.');
     const relevant = await db
@@ -1014,49 +1075,7 @@ export async function buildApp(
       .select()
       .from(records)
       .where(eq(records.municipalityId, municipalityId(req)));
-    const result: CityOverview = {
-      occurrences: 0,
-      resolved: 0,
-      proposals: 0,
-      consultations: 0,
-      actions: 0,
-      neighborhoods: [],
-    };
-    const neighborhoods = new Map<
-      string,
-      CityOverview['neighborhoods'][number]
-    >();
-    for (const row of rows) {
-      const value = row.data;
-      const name =
-        'location' in value
-          ? value.location.neighborhood || 'Sem bairro'
-          : value.neighborhood;
-      const n = neighborhoods.get(name) || {
-        name,
-        occurrences: 0,
-        resolved: 0,
-        actions: 0,
-      };
-      neighborhoods.set(name, n);
-      if ('location' in value) {
-        result.occurrences++;
-        n.occurrences++;
-        if (value.status === 'resolved') {
-          result.resolved++;
-          n.resolved++;
-        }
-      } else if (value.kind === 'proposal') result.proposals++;
-      else if (value.kind === 'consultation') result.consultations++;
-      else {
-        result.actions++;
-        n.actions++;
-      }
-    }
-    result.neighborhoods = [...neighborhoods.values()].sort((a, b) =>
-      a.name.localeCompare(b.name),
-    );
-    return ok(result);
+    return ok(summarizeOverview(rows.map((row) => row.data)));
   });
   app.get<{
     Querystring: {

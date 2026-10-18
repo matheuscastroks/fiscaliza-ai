@@ -90,6 +90,7 @@ export async function seed(
       statusHistory: [
         {
           status: 'pending',
+          source: 'citizen',
           at,
           justification: 'Relato recebido.',
           actor: 'Ana Souza',
@@ -101,6 +102,7 @@ export async function seed(
       occurrence.sector = 'Iluminação pública';
       occurrence.statusHistory.push({
         status: 'in_progress',
+        source: 'management',
         at,
         justification: 'Equipe de iluminação designada para inspeção.',
         actor: 'Equipe de Gestão',
@@ -111,6 +113,7 @@ export async function seed(
       occurrence.resolvedAt = at;
       occurrence.statusHistory.push({
         status: 'resolved',
+        source: 'management',
         at,
         justification: 'Iluminação restabelecida e vistoriada.',
         actor: 'Equipe de Gestão',
@@ -121,6 +124,7 @@ export async function seed(
       summary: 'Participação dos moradores sobre o território.',
       body: 'Registro público para acompanhamento e participação dos moradores do Rio de Janeiro.',
       neighborhood: 'Centro',
+      territory: { scope: 'neighborhood' as const, neighborhood: 'Centro' },
       createdBy: 'staff-gestao',
       createdAt: at,
       responsible: 'Secretaria de Serviços Urbanos',
@@ -128,9 +132,16 @@ export async function seed(
       supports: 0,
       linkedIds: [occurrence.id],
     };
+    // The two plaza records explicitly link to this occurrence at the same plaza.
+    const plazaLocation = {
+      latitude: occurrence.location.latitude,
+      longitude: occurrence.location.longitude,
+      address: occurrence.location.address,
+    };
     const civic: CivicItem[] = [
       {
         ...base,
+        territory: { scope: 'location', neighborhood: 'Centro', location: plazaLocation },
         id: 'proposal-praca',
         kind: 'proposal',
         title: 'Mais bancos na praça central',
@@ -151,6 +162,7 @@ export async function seed(
       },
       {
         ...base,
+        territory: { scope: 'location', neighborhood: 'Centro', location: plazaLocation },
         id: 'consultation-praca',
         kind: 'consultation',
         title: 'Qual melhoria deve começar na praça?',

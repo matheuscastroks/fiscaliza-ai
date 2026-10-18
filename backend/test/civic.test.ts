@@ -105,3 +105,37 @@ test('responsável, prazo e evidências exigem justificativa auditável', () => 
   assert.equal(action.history?.[0].actor, 'Gestão');
   assert.equal(action.responsible, 'Iluminação');
 });
+
+test('territory changes require one attributable explanation even with a lifecycle change', () => {
+  const proposal: Proposal = { ...base, kind: 'proposal', status: 'submitted' };
+  assert.throws(() => applyCivicUpdate(proposal, { territory: { scope: 'municipality' } }, 'Gestao'), /justificativa/);
+  assert.equal(Object.hasOwn(proposal, 'territory'), false);
+  applyCivicUpdate(proposal, { territory: { scope: 'municipality' }, status: 'under_review',
+    justification: 'A demanda se aplica a todo o territorio.' }, 'Gestao');
+  assert.equal(proposal.territory?.scope, 'municipality');
+  assert.equal(proposal.neighborhood, 'Todo o município');
+  assert.deepEqual(proposal.history?.map(({ actor, from, to, text }) => ({ actor, from, to, text })), [{
+    actor: 'Gestao', from: 'submitted', to: 'under_review', text: 'A demanda se aplica a todo o territorio.',
+  }]);
+});
+
+test('equivalent territory formatting and old clients preserve audit and legacy compatibility', () => {
+  const proposal: Proposal = { ...base, neighborhood: '  Centro  ', kind: 'proposal', status: 'submitted' };
+  applyCivicUpdate(proposal, { territory: { scope: 'neighborhood', neighborhood: 'centro' } }, 'Gestao');
+  assert.equal(proposal.history, undefined);
+  applyCivicUpdate(proposal, {}, 'Gestao');
+  assert.equal(proposal.territory?.scope, 'neighborhood');
+  for (const neighborhood of ['Todo o município', 'MUNICIPIO', 'Todos   os bairros']) {
+    const legacy: Proposal = { ...base, neighborhood, kind: 'proposal', status: 'submitted' };
+    applyCivicUpdate(legacy, { territory: { scope: 'municipality' } }, 'Gestao');
+    assert.equal(legacy.history, undefined);
+  }
+  const located: Proposal = { ...base, kind: 'proposal', status: 'submitted', territory: {
+    scope: 'location', neighborhood: 'Centro', location: { latitude: -22.904, longitude: -43.186, address: 'Praca Central' },
+  } };
+  applyCivicUpdate(located, { territory: { scope: 'location', neighborhood: ' CENTRO ',
+    location: { latitude: -22.904, longitude: -43.186, address: ' Praca   Central ' } } }, 'Gestao');
+  assert.equal(located.history, undefined);
+  assert.throws(() => applyCivicUpdate(located, { territory: { scope: 'location', neighborhood: 'Centro',
+    location: { latitude: -22.905, longitude: -43.186 } } }, 'Gestao'), /justificativa/);
+});

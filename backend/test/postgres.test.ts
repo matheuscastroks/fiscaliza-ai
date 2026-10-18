@@ -181,6 +181,8 @@ test(
     });
     assert.equal(evaluation.statusCode, 200);
     assert.equal(evaluation.json().data.status, 'resolved');
+    assert.deepEqual(evaluation.json().data.statusHistory.map((event: { source?: string }) => event.source),
+      ['citizen', 'management', 'management', 'citizen']);
     assert.match(
       evaluation.json().data.statusHistory.at(-1).justification,
       /Revisão/,

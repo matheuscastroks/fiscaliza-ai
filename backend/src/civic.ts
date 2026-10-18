@@ -1,4 +1,4 @@
-import type { CivicItem } from '../../shared/contracts.js';
+import type { CivicTerritory, CivicItem } from '../../shared/contracts.js';
 export interface CivicUpdate {
   status?: string;
   decision?: string;
@@ -9,9 +9,30 @@ export interface CivicUpdate {
   update?: string;
   dueAt?: string;
   justification?: string;
+  territory?: CivicTerritory;
 }
 const invalid = (message: string) =>
   Object.assign(new Error(message), { statusCode: 400 });
+// Keep legacy sentinel interpretation aligned with shared/civic-territory.ts.
+// This backend package emits ESM, while Expo's shared runtime emits CommonJS.
+export function normalizeNeighborhood(value: string): string {
+  return value.trim().replace(/\s+/g, ' ').normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('pt-BR');
+}
+export function effectiveTerritory(value: CivicItem): CivicTerritory {
+  if (value.territory) return value.territory;
+  const label = normalizeNeighborhood(value.neighborhood || '');
+  return !label || ['todo o municipio', 'municipio', 'todos os bairros'].includes(label)
+    ? { scope: 'municipality' }
+    : { scope: 'neighborhood', neighborhood: value.neighborhood };
+}
+function territoryKey(value: CivicTerritory): string {
+  if (value.scope === 'municipality') return 'municipality';
+  const neighborhood = normalizeNeighborhood(value.neighborhood);
+  if (value.scope === 'neighborhood') return JSON.stringify([value.scope, neighborhood]);
+  return JSON.stringify([value.scope, neighborhood, value.location.latitude,
+    value.location.longitude, normalizeNeighborhood(value.location.address || '')]);
+}
 /** Called under the record row lock; every decision remains attributable. */
 export function applyCivicUpdate(
   value: CivicItem,
@@ -20,6 +41,7 @@ export function applyCivicUpdate(
 ) {
   const from = value.status;
   const changing =
+    (b.territory !== undefined && territoryKey(b.territory) !== territoryKey(effectiveTerritory(value))) ||
     (b.status !== undefined && b.status !== from) ||
     (b.responsible !== undefined && b.responsible !== value.responsible) ||
     (value.kind === 'action' &&
@@ -78,6 +100,11 @@ export function applyCivicUpdate(
     if (b.dueAt) value.dueAt = b.dueAt;
   }
   if (b.responsible) value.responsible = b.responsible;
+  if (b.territory) {
+    value.territory = b.territory;
+    value.neighborhood = b.territory.scope === 'municipality'
+      ? 'Todo o município' : b.territory.neighborhood;
+  }
   if (explanation) {
     value.history ??= [];
     value.history.push({

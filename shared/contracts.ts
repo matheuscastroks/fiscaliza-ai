@@ -31,6 +31,7 @@ export interface ApiResult<T> {
 }
 export type Status = 'pending' | 'in_progress' | 'resolved';
 export interface CityEvent {
+  source?: 'citizen' | 'management';
   id?: string;
   status: Status;
   at: string;
@@ -73,6 +74,10 @@ export interface Occurrence {
   relatedIds?: string[];
   evaluation?: { satisfied: boolean; reason: string; at: string };
 }
+export type CivicTerritory =
+  | { scope: 'municipality' }
+  | { scope: 'neighborhood'; neighborhood: string }
+  | { scope: 'location'; neighborhood: string; location: { latitude: number; longitude: number; address?: string } };
 export interface CivicBase {
   id: string;
   municipalityId?: string;
@@ -80,6 +85,7 @@ export interface CivicBase {
   summary: string;
   body: string;
   neighborhood: string;
+  territory?: CivicTerritory;
   createdBy: string;
   createdAt: string;
   responsible: string;
@@ -120,6 +126,7 @@ export interface PublicAction extends CivicBase {
 }
 export type CivicItem = Proposal | Consultation | PublicAction;
 export interface CityOverview {
+  municipalScope?: { proposals: number; consultations: number; actions: number };
   occurrences: number;
   resolved: number;
   proposals: number;
@@ -127,6 +134,8 @@ export interface CityOverview {
   actions: number;
   neighborhoods: {
     name: string;
+    proposals?: number;
+    consultations?: number;
     occurrences: number;
     resolved: number;
     actions: number;
