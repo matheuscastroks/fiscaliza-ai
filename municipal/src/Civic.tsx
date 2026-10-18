@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import type { CivicItem, PublicAction } from '../../shared/contracts';
 import { api } from './api';
-import { date, isoDate, labels } from './domain';
+import {
+  civicTerritoryDraft, civicTerritoryLabel, serializeCivicTerritory,
+  date, isoDate, labels, type CivicTerritoryDraft,
+} from './domain';
 import { AsyncForm, Badge, Comments, EvidenceInput, Field, Images } from './ui';
 type Kind = CivicItem['kind'];
 const headings: Record<Kind, string> = {
@@ -84,7 +87,7 @@ export function Civic({
                 <th scope="col">
                   {kind === 'consultation' ? 'Pergunta' : 'Registro'}
                 </th>
-                <th scope="col">Bairro</th>
+                <th scope="col">Abrangência</th>
                 <th scope="col">Situação</th>
                 <th scope="col">
                   {kind === 'action'
@@ -107,7 +110,7 @@ export function Civic({
                     </button>
                     <small>{i.summary}</small>
                   </td>
-                  <td>{i.neighborhood}</td>
+                  <td>{civicTerritoryLabel(i)}</td>
                   <td>
                     <Badge value={i.status} />
                   </td>
@@ -140,6 +143,7 @@ function CivicCreate({
   onBack: () => void;
   onSave: () => Promise<void>;
 }) {
+  const [territory, setTerritory] = useState(() => civicTerritoryDraft(source));
   return (
     <>
       <button className="text-button back" onClick={onBack}>
@@ -166,7 +170,7 @@ function CivicCreate({
               title: value('title'),
               summary: value('summary'),
               body: value('body'),
-              neighborhood: value('neighborhood'),
+              ...serializeCivicTerritory(territory),
               responsible: value('responsible'),
               linkedIds: source
                 ? [source.id]
@@ -230,19 +234,10 @@ function CivicCreate({
               defaultValue={source?.body}
             />
           </Field>
-          <div className="form-columns">
-            <Field label="Bairro">
-              <input
-                name="neighborhood"
-                required
-                maxLength={120}
-                defaultValue={source?.neighborhood}
-              />
-            </Field>
-            <Field label="Setor ou equipe responsável">
-              <input name="responsible" required maxLength={120} />
-            </Field>
-          </div>
+          <TerritoryFields value={territory} onChange={setTerritory} />
+          <Field label="Setor ou equipe responsável">
+            <input name="responsible" required maxLength={120} />
+          </Field>
           <Field
             label={
               actualKind === 'consultation'
@@ -281,6 +276,7 @@ function CivicDetail({
   onAction: () => void;
 }) {
   const [status, setStatus] = useState(item.status),
+    [territory, setTerritory] = useState(() => civicTerritoryDraft(item)),
     [decision, setDecision] = useState(
       item.kind === 'proposal'
         ? item.decision || ''
@@ -323,7 +319,7 @@ function CivicDetail({
         <div>
           <h1>{item.title}</h1>
           <p>
-            {item.neighborhood} · {item.responsible}
+            {civicTerritoryLabel(item)} · {item.responsible}
           </p>
         </div>
         <Badge value={item.status} />
@@ -333,6 +329,12 @@ function CivicDetail({
           <section className="section">
             <h2>{item.summary}</h2>
             <p className="preserve">{item.body}</p>
+            {item.territory?.scope === 'location' && (
+              <p className="muted">
+                {item.territory.location.address && <>{item.territory.location.address} · </>}
+                Latitude {item.territory.location.latitude}, longitude {item.territory.location.longitude}
+              </p>
+            )}
             <p className="muted">
               Publicado em {date(item.createdAt)} · {item.supports} apoios
             </p>
@@ -448,6 +450,7 @@ function CivicDetail({
               const payload: Record<string, unknown> = {
                 status: effectiveStatus,
                 responsible: responsible.trim(),
+                territory: serializeCivicTerritory(territory).territory,
               };
               if (item.kind === 'proposal') {
                 if (!decision.trim())
@@ -500,6 +503,7 @@ function CivicDetail({
                 onChange={(e) => setResponsible(e.target.value)}
               />
             </Field>
+            <TerritoryFields value={territory} onChange={setTerritory} />
             {item.kind !== 'action' ? (
               <Field
                 label={
@@ -565,6 +569,49 @@ function CivicDetail({
           )}
         </aside>
       </div>
+    </>
+  );
+}
+function TerritoryFields({ value, onChange }: {
+  value: CivicTerritoryDraft;
+  onChange: (value: CivicTerritoryDraft) => void;
+}) {
+  const change = (key: keyof CivicTerritoryDraft, next: string) =>
+    onChange({ ...value, [key]: next });
+  return (
+    <>
+      <Field label="Abrangência">
+        <select value={value.scope} onChange={(e) => change('scope', e.target.value)}>
+          <option value="municipality">Todo o município</option>
+          <option value="neighborhood">Bairro</option>
+          <option value="location">Local específico</option>
+        </select>
+      </Field>
+      {value.scope !== 'municipality' && (
+        <Field label="Bairro da abrangência">
+          <input required maxLength={120} value={value.neighborhood}
+            onChange={(e) => change('neighborhood', e.target.value)} />
+        </Field>
+      )}
+      {value.scope === 'location' && (
+        <>
+          <p className="muted">Informe as coordenadas reais do local. O serviço valida se pertencem ao município da sessão.</p>
+          <div className="form-columns">
+            <Field label="Latitude">
+              <input required type="number" min={-90} max={90} step="any" value={value.latitude}
+                onChange={(e) => change('latitude', e.target.value)} />
+            </Field>
+            <Field label="Longitude">
+              <input required type="number" min={-180} max={180} step="any" value={value.longitude}
+                onChange={(e) => change('longitude', e.target.value)} />
+            </Field>
+          </div>
+          <Field label="Endereço ou referência (opcional)">
+            <input maxLength={300} value={value.address}
+              onChange={(e) => change('address', e.target.value)} />
+          </Field>
+        </>
+      )}
     </>
   );
 }

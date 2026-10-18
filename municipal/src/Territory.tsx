@@ -6,7 +6,7 @@ export function Territory({ overview }: { overview: CityOverview | null }) {
       <header className="page-heading">
         <div>
           <h1>Território</h1>
-          <p>Distribuição dos relatos e das ações por bairro.</p>
+          <p>Distribuição dos relatos, propostas, consultas e ações por bairro.</p>
         </div>
       </header>
       <p className="overview-summary">
@@ -16,16 +16,26 @@ export function Territory({ overview }: { overview: CityOverview | null }) {
         {overview.proposals} propostas e {overview.consultations} consultas
         registradas.
       </p>
+      {overview.municipalScope && (
+        <p>
+          Abrangência de todo o município: {overview.municipalScope.proposals}{' '}
+          propostas, {overview.municipalScope.consultations} consultas e{' '}
+          {overview.municipalScope.actions} ações. Esses registros fazem parte
+          dos totais acima e não são atribuídos a um bairro específico.
+        </p>
+      )}
       {overview.neighborhoods.length ? (
         <div className="table-scroll">
           <table>
-            <caption>Atendimento por bairro</caption>
+            <caption>Registros com bairro informado</caption>
             <thead>
               <tr>
                 <th scope="col">Bairro</th>
                 <th scope="col">Relatos</th>
                 <th scope="col">Concluídos</th>
                 <th scope="col">Em atendimento ou recebidos</th>
+                <th scope="col">Propostas</th>
+                <th scope="col">Consultas</th>
                 <th scope="col">Ações municipais</th>
               </tr>
             </thead>
@@ -36,6 +46,8 @@ export function Territory({ overview }: { overview: CityOverview | null }) {
                   <td>{n.occurrences}</td>
                   <td>{n.resolved}</td>
                   <td>{n.occurrences - n.resolved}</td>
+                  <td>{n.proposals ?? 0}</td>
+                  <td>{n.consultations ?? 0}</td>
                   <td>{n.actions}</td>
                 </tr>
               ))}
