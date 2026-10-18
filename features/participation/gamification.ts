@@ -1,5 +1,5 @@
 /**
- * Fiscaliza-AI — Regras de Participação Cívica (Gamificação Sóbria)
+ * Fiscaliza aí — Regras de Participação Cívica (Gamificação Sóbria)
  * Critérios transparentes para o ambiente demonstrativo.
  */
 
@@ -27,10 +27,10 @@ export function getUserCivicLevel(points: number): {
   nextLevelPoints: number;
 } {
   if (points >= 100) {
-    return { level: 3, title: 'Cidadão Ativo', nextLevelPoints: 250 };
+    return { level: 3, title: "Cidadão Ativo", nextLevelPoints: 250 };
   }
   if (points >= 30) {
-    return { level: 2, title: 'Colaborador Local', nextLevelPoints: 100 };
+    return { level: 2, title: "Colaborador Local", nextLevelPoints: 100 };
   }
-  return { level: 1, title: 'Participante', nextLevelPoints: 30 };
+  return { level: 1, title: "Participante", nextLevelPoints: 30 };
 }

@@ -3,7 +3,7 @@ import type { ThemeColors } from '@/theme/colors';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { Problem } from '@/data/mockData';
 
 import { spacing } from '@/theme/spacing';
@@ -27,7 +27,7 @@ export const ReportSuccess: React.FC<ReportSuccessProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.iconCircle}>
-        <MaterialIcons name="check" size={36} color={colors.completed} />
+        <Ionicons name="checkmark-circle" size={40} color={colors.completed} />
       </View>
 
       <AppText variant="screenTitle" color="ink" style={styles.title}>

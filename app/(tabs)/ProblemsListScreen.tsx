@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { Problem } from '@/data/mockData';
 import { useProblemsStore } from '@/stores/problemsStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -90,8 +90,8 @@ export default function ProblemsListScreen() {
       {/* Campo de Busca Funcional */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBox}>
-          <MaterialIcons
-            name="search"
+          <Ionicons
+            name="search-outline"
             size={20}
             color={colors.subtle}
             style={styles.searchIcon}
@@ -110,7 +110,7 @@ export default function ProblemsListScreen() {
               onPress={() => setSearchQuery('')}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <MaterialIcons name="close" size={18} color={colors.muted} />
+              <Ionicons name="close-circle" size={18} color={colors.muted} />
             </TouchableOpacity>
           ) : null}
         </View>
@@ -137,7 +137,11 @@ export default function ProblemsListScreen() {
           accessibilityRole="button"
           accessibilityLabel={`Ordenar por: ${sortOrder === 'recent' ? 'Mais recentes' : 'Mais apoiados'}`}
         >
-          <MaterialIcons name="sort" size={16} color={colors.accent} />
+          <Ionicons
+            name="swap-vertical-outline"
+            size={16}
+            color={colors.accent}
+          />
           <AppText variant="caption" color="accent" style={styles.sortText}>
             {sortOrder === 'recent' ? 'Recentes' : 'Apoiados'}
           </AppText>
@@ -166,7 +170,11 @@ export default function ProblemsListScreen() {
           }
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <MaterialIcons name="inbox" size={36} color={colors.subtle} />
+              <Ionicons
+                name="file-tray-outline"
+                size={36}
+                color={colors.subtle}
+              />
               <AppText variant="label" color="ink" style={styles.emptyTitle}>
                 Nenhuma ocorrência encontrada
               </AppText>

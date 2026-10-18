@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { View } from 'react-native';
-import { router } from 'expo-router';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppInput } from '@/components/ui/AppInput';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppText } from '@/components/ui/AppText';
-import { AppInput } from '@/components/ui/AppInput';
-import { AppButton } from '@/components/ui/AppButton';
 import { useAuthStore } from '@/stores/authStore';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { View } from 'react-native';
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,7 +30,7 @@ export default function LoginScreen() {
         }}
       >
         <AppText variant="sectionTitle" color="accent">
-          Fiscaliza-AI
+          Fiscaliza aí
         </AppText>
         <View style={{ gap: 8 }}>
           <AppText variant="screenTitle">Acesse sua conta</AppText>
@@ -68,7 +68,7 @@ export default function LoginScreen() {
           />
         </View>
         <AppButton
-          title="Sobre o Fiscaliza-AI"
+          title="Sobre o Fiscaliza aí"
           variant="quiet"
           onPress={() => router.push('/AboutScreen')}
         />

@@ -155,7 +155,7 @@ export function SideMenu({
                 color="ink"
                 style={styles.brandTitle}
               >
-                Fiscaliza-AI
+                Fiscaliza aí
               </AppText>
             </View>
           </View>

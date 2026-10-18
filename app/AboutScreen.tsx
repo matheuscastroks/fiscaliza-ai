@@ -1,19 +1,18 @@
 import { useThemedStyles } from '@/theme/useTheme';
 import { goBack } from '@/utils/navigation';
-import { createCityStyles } from '@/features/city/CityUI';
-import React from 'react';
-import { View, ScrollView } from 'react-native';
-import { router } from 'expo-router';
-import { AppScreen } from '@/components/ui/AppScreen';
-import { AppHeader } from '@/components/ui/AppHeader';
-import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
+import { AppHeader } from '@/components/ui/AppHeader';
+import { AppScreen } from '@/components/ui/AppScreen';
+import { AppText } from '@/components/ui/AppText';
+import { createCityStyles } from '@/features/city/CityUI';
+import { router } from 'expo-router';
+import { ScrollView, View } from 'react-native';
 export default function AboutScreen() {
   const cityStyles = useThemedStyles(createCityStyles);
 
   return (
     <AppScreen>
-      <AppHeader title="Sobre o Fiscaliza-AI" onBack={() => goBack()} />
+      <AppHeader title="Sobre o Fiscaliza aí" onBack={() => goBack()} />
       <ScrollView
         contentContainerStyle={cityStyles.content}
         keyboardShouldPersistTaps="handled"
