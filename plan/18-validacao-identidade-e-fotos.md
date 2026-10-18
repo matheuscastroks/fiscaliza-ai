@@ -52,3 +52,10 @@ Gestos, câmera/galeria nativa, fonte ampliada do sistema, leitor de tela e tecl
 Verificação atualizada: API **25/25**, zero skips; Postman CLI **30 requisições e 66 assertions**, zero falhas; TypeScript, lint e exportações web/Android passaram. Retratos das três contas foram confirmados por login e GET 200 na rede Wi-Fi do celular. Houve diferença histórica de finais de linha em uma migração local; foi aplicada a migração aditiva usando cópias temporárias com o checksum histórico correspondente, sem alterar journal nem conteúdo SQL. A fonte de migração versionada foi preservada.
 
 Validação visual dos refinamentos: foto escolhida pelo seletor persistiu após reload; as quatro abas mantiveram círculo 52 × 52 e a barra mediu 326 px no viewport 390 px; Acompanhar confirmou gap 16 px; busca sem resultado e limpeza dos filtros passaram; o gradiente foi confirmado no card renderizado; ocorrência e proposta apresentaram imagem com y=0 e expansão/recolhimento funcionando. Nenhum erro JavaScript. Os testes automatizados precisaram usar alt nas imagens do Expo Web e restringir seletores às telas visíveis mantidas pelo Router.
+
+
+## Drawer por gesto
+
+Abertura pela borda esquerda nas quatro abas principais, com DrawerLayout do Gesture Handler/Reanimated já instalados. SideMenu mantém somente conteúdo; AppDrawer controla gesto, visibilidade, fechamento e navegação. O botão de abrir foi removido do uso normal no celular e preservado na web/leitor de tela. Nenhuma dependência nova.
+
+Validação: TypeScript e lint sem erros; exportação web e integração Android concluídas. No Chrome, arrastes curtos, verticais e iniciados no centro não abriram; gesto da borda abriu e gesto à esquerda fechou. Toque fora, Escape, ciclo de foco, seleção com navegação após fechamento, abertura em Território e bloqueio em formulário passaram; zero erros JavaScript. O menu fechado é excluído da acessibilidade e seus botões ficam desabilitados. Retorno físico Android e conflito com gestos do mapa/sistema ainda precisam de teste em aparelho; não houve medição de desempenho.

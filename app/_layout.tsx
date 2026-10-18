@@ -7,7 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { useAuthStore } from '@/stores/authStore';
 import { queryClient } from '@/services/http';
-import { SideMenu } from '@/components/ui/SideMenu';
+import { AppDrawer } from '@/components/ui/AppDrawer';
 import { colors } from '@/theme/colors';
 import {
   useFonts,
@@ -51,23 +51,24 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <StatusBar style="dark" />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.canvas },
-            }}
-          >
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen
-              name="ProblemDetailsScreen"
-              options={{ animation: 'slide_from_bottom' }}
-            />
-            <Stack.Screen
-              name="CivicDetailsScreen"
-              options={{ animation: 'slide_from_bottom' }}
-            />
-          </Stack>
-          <SideMenu />
+          <AppDrawer>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: colors.canvas },
+              }}
+            >
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen
+                name="ProblemDetailsScreen"
+                options={{ animation: 'slide_from_bottom' }}
+              />
+              <Stack.Screen
+                name="CivicDetailsScreen"
+                options={{ animation: 'slide_from_bottom' }}
+              />
+            </Stack>
+          </AppDrawer>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

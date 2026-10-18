@@ -269,3 +269,9 @@ O perfil apresenta avatar circular de 104 unidades, nome e e-mail centralizados;
 ### Território e detalhes com foto
 
 Busca e categorias ficam à vista. Bairro e situação aparecem no controle Filtros, com contagem ativa e limpeza completa. No nativo, Mapa e Lista são modos separados; a seleção de um marcador apresenta o registro correspondente. Itens sem ponto permanecem acessíveis, sem inventar coordenadas. O mapa é recortado por um contêiner de raio 28 com `overflow: hidden`. A foto de `DetailSheet` se estende até atrás da status bar; somente os controles e o painel expandido respeitam o inset superior. A barra inferior mede `min(largura - 64, 440)` e mantém o círculo ativo de 52 unidades em uma camada persistente.
+
+### Menu por gesto
+
+No celular, o menu abre por arraste horizontal iniciado nos 24 pontos da borda esquerda, com ativação após 12 pontos de movimento. Use AppDrawer (ReanimatedDrawerLayout da dependência existente) como contêiner da navegação; SideMenu contém somente os destinos e o visual. O painel acompanha o gesto e fecha por arraste para a esquerda, toque fora, controle Fechar ou retorno do Android. A seleção navega após o fechamento.
+
+Habilite o gesto apenas nas quatro abas principais, com sessão autenticada e município confirmado. Telas de detalhes e formulários preservam sua navegação de retorno. O botão de abrir permanece na web e quando há leitor de tela ativo. O menu fechado não recebe foco; no navegador, o foco fica no painel aberto, Escape fecha e o foco retorna ao controle anterior. Não adicione detectores sobre o mapa nem novas animações a Marker.

@@ -277,7 +277,8 @@
       "territory": "Filtros progressivos; mapa/lista separados no nativo; mapa recortado em raio 28; seleção de marcador e acesso a itens sem ponto.",
       "detailPhoto": "Imagem até a status bar, controles e painel expandido protegidos pelo safe area inset.",
       "tabBar": "Largura min(window - 64, 440); círculo de 52 persistente em todas as abas.",
-      "followSpacing": "Gap 16 entre cards, sem margem vertical interna ao RecordCard."
+      "followSpacing": "Gap 16 entre cards, sem margem vertical interna ao RecordCard.",
+      "drawer": "AppDrawer com ReanimatedDrawerLayout existente: gesto da borda esquerda (24), ativação horizontal (12), somente abas principais autenticadas; fecha por gesto, backdrop, controle ou retorno Android. Web/leitor de tela preservam botão de abrir; foco e Escape no navegador."
     }
   },
   "components": [

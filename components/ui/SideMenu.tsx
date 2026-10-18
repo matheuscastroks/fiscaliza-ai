@@ -3,20 +3,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { colors, layout, spacing, typography } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Easing,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
-} from 'react-native';
-import { useReducedMotion } from 'react-native-reanimated';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { create } from 'zustand';
 import { AppText } from './AppText';
@@ -38,74 +25,14 @@ interface MenuSection {
   items: MenuItem[];
 }
 
-export function SideMenu() {
-  const { open, setOpen } = useMenu();
+export function SideMenu({
+  onClose,
+  visible,
+}: {
+  onClose: (afterClose?: () => void) => void;
+  visible: boolean;
+}) {
   const { user, logout } = useAuthStore();
-  const { width: screenWidth } = useWindowDimensions();
-
-  // Ocupa praticamente 90% da tela horizontalmente (com teto em 480 para telas muito largas)
-  const panelWidth =
-    screenWidth >= 600
-      ? Math.min(Math.round(screenWidth * 0.9), 480)
-      : Math.round(screenWidth * 0.9);
-
-  const reducedMotion = useReducedMotion();
-  const slideAnim = useState(() => new Animated.Value(-panelWidth))[0];
-  const fadeAnim = useState(() => new Animated.Value(0))[0];
-  const isClosingRef = useRef(false);
-
-  const handleClose = useCallback(
-    (callback?: () => void) => {
-      if (isClosingRef.current) return;
-      isClosingRef.current = true;
-
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: -panelWidth,
-          duration: reducedMotion ? 0 : 240,
-          easing: Easing.in(Easing.cubic),
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: reducedMotion ? 0 : 240,
-          easing: Easing.in(Easing.cubic),
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-      ]).start(() => {
-        setOpen(false);
-        isClosingRef.current = false;
-        if (callback) {
-          callback();
-        }
-      });
-    },
-    [fadeAnim, panelWidth, setOpen, slideAnim, reducedMotion],
-  );
-
-  useEffect(() => {
-    if (open) {
-      isClosingRef.current = false;
-      slideAnim.setValue(-panelWidth);
-      fadeAnim.setValue(0);
-
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: reducedMotion ? 0 : 280,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: reducedMotion ? 0 : 280,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-      ]).start();
-    }
-  }, [open, panelWidth, slideAnim, fadeAnim, reducedMotion]);
-
   const sections: MenuSection[] = [
     {
       title: 'Participar da cidade',
@@ -176,19 +103,19 @@ export function SideMenu() {
   ];
 
   const handleNavigate = (path: Href) => {
-    handleClose(() => {
+    onClose(() => {
       router.push(path);
     });
   };
 
   const handleOpenProfile = () => {
-    handleClose(() => {
+    onClose(() => {
       router.push('/(tabs)/ProfileScreen');
     });
   };
 
   const handleLogout = () => {
-    handleClose(async () => {
+    onClose(async () => {
       try {
         await logout();
       } catch {
@@ -197,214 +124,172 @@ export function SideMenu() {
     });
   };
 
-  if (!open) {
-    return null;
-  }
-
   return (
-    <Modal
-      transparent
-      visible={open}
-      animationType="none"
-      onRequestClose={() => handleClose()}
+    <View
+      style={styles.panel}
+      pointerEvents={visible ? 'auto' : 'none'}
+      role="dialog"
+      accessibilityLabel="Menu de navegação"
+      aria-hidden={!visible}
+      aria-modal={visible}
+      accessibilityElementsHidden={!visible}
+      importantForAccessibility={visible ? 'yes' : 'no-hide-descendants'}
     >
-      <View style={styles.overlay}>
-        <Animated.View style={[styles.backdropAnimated, { opacity: fadeAnim }]}>
-          <Pressable
-            style={StyleSheet.absoluteFill}
-            accessibilityLabel="Fechar menu ao tocar fora"
-            accessibilityRole="button"
-            onPress={() => handleClose()}
-          />
-        </Animated.View>
-
-        <Animated.View
-          style={[
-            styles.panel,
-            {
-              width: panelWidth,
-              transform: [{ translateX: slideAnim }],
-            },
-          ]}
-        >
-          <SafeAreaView
-            style={styles.safeArea}
-            edges={['top', 'bottom']}
-            accessibilityViewIsModal
-          >
-            <View style={styles.headerBar}>
-              <View style={styles.brandRow}>
-                <View style={styles.brandIconWrapper}>
-                  <Ionicons
-                    name="shield-checkmark"
-                    size={18}
-                    color={colors.white}
-                  />
-                </View>
-                <View>
-                  <AppText
-                    variant="sectionTitle"
-                    color="ink"
-                    style={styles.brandTitle}
-                  >
-                    Fiscaliza aí
-                  </AppText>
-                </View>
-              </View>
-              <TouchableOpacity
-                onPress={() => handleClose()}
-                accessibilityRole="button"
-                accessibilityLabel="Fechar menu"
-                style={styles.closeCircleButton}
+      <SafeAreaView
+        style={styles.safeArea}
+        edges={['top', 'bottom']}
+        accessibilityViewIsModal={visible}
+      >
+        <View style={styles.headerBar}>
+          <View style={styles.brandRow}>
+            <View style={styles.brandIconWrapper}>
+              <Ionicons
+                name="shield-checkmark"
+                size={18}
+                color={colors.white}
+              />
+            </View>
+            <View>
+              <AppText
+                variant="sectionTitle"
+                color="ink"
+                style={styles.brandTitle}
               >
-                <Ionicons name="close" size={22} color={colors.ink} />
-              </TouchableOpacity>
+                Fiscaliza aí
+              </AppText>
+            </View>
+          </View>
+          <TouchableOpacity
+            disabled={!visible}
+            onPress={() => onClose()}
+            accessibilityRole="button"
+            accessibilityLabel="Fechar menu"
+            style={styles.closeCircleButton}
+          >
+            <Ionicons name="close" size={22} color={colors.ink} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <TouchableOpacity
+            disabled={!visible}
+            activeOpacity={0.8}
+            onPress={handleOpenProfile}
+            accessibilityRole="button"
+            accessibilityLabel={`Perfil de ${user?.name || 'usuário'}. Abrir meu perfil.`}
+            style={styles.profileCard}
+          >
+            <View style={styles.avatarContainer}>
+              <UserAvatar size={64} />
             </View>
 
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollContent}
-            >
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={handleOpenProfile}
-                accessibilityRole="button"
-                accessibilityLabel={`Perfil de ${user?.name || 'usuário'}. Abrir meu perfil.`}
-                style={styles.profileCard}
+            <View style={styles.profileInfo}>
+              <AppText
+                variant="label"
+                color="ink"
+                numberOfLines={1}
+                style={styles.userName}
               >
-                <View style={styles.avatarContainer}>
-                  <UserAvatar size={64} />
-                </View>
+                {user?.name || 'Cidadão Participativo'}
+              </AppText>
 
-                <View style={styles.profileInfo}>
+              {user?.municipality && (
+                <View style={styles.municipalityRow}>
+                  <Ionicons
+                    name="location-outline"
+                    size={12}
+                    color={colors.muted}
+                  />
                   <AppText
-                    variant="label"
-                    color="ink"
+                    variant="caption"
+                    color="muted"
                     numberOfLines={1}
-                    style={styles.userName}
+                    style={styles.municipalityText}
                   >
-                    {user?.name || 'Cidadão Participativo'}
+                    {user.municipality.name} · {user.municipality.state}
                   </AppText>
+                </View>
+              )}
+            </View>
 
-                  {user?.municipality && (
-                    <View style={styles.municipalityRow}>
-                      <Ionicons
-                        name="location-outline"
-                        size={12}
-                        color={colors.muted}
-                      />
+            <View style={styles.profileArrowCircle}>
+              <Ionicons name="chevron-forward" size={18} color={colors.ink} />
+            </View>
+          </TouchableOpacity>
+
+          {sections.map((section) => (
+            <View key={section.title} style={styles.sectionContainer}>
+              <AppText variant="caption" style={styles.sectionHeader}>
+                {section.title}
+              </AppText>
+
+              <View style={styles.itemsGroup}>
+                {section.items.map((item, idx) => (
+                  <TouchableOpacity
+                    disabled={!visible}
+                    key={item.label}
+                    activeOpacity={0.7}
+                    onPress={() => handleNavigate(item.path)}
+                    accessibilityRole="button"
+                    accessibilityLabel={item.label}
+                    style={[
+                      styles.menuRow,
+                      idx === section.items.length - 1 && styles.menuRowLast,
+                    ]}
+                  >
+                    <View style={styles.iconWrapper}>
+                      <Ionicons name={item.icon} size={20} color={colors.ink} />
+                    </View>
+
+                    <View style={styles.rowTextContainer}>
                       <AppText
-                        variant="caption"
-                        color="muted"
+                        variant="body"
+                        color="ink"
                         numberOfLines={1}
-                        style={styles.municipalityText}
+                        style={styles.rowLabel}
                       >
-                        {user.municipality.name} · {user.municipality.state}
+                        {item.label}
                       </AppText>
                     </View>
-                  )}
-                </View>
 
-                <View style={styles.profileArrowCircle}>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={18}
-                    color={colors.ink}
-                  />
-                </View>
-              </TouchableOpacity>
-
-              {sections.map((section) => (
-                <View key={section.title} style={styles.sectionContainer}>
-                  <AppText variant="caption" style={styles.sectionHeader}>
-                    {section.title}
-                  </AppText>
-
-                  <View style={styles.itemsGroup}>
-                    {section.items.map((item, idx) => (
-                      <TouchableOpacity
-                        key={item.label}
-                        activeOpacity={0.7}
-                        onPress={() => handleNavigate(item.path)}
-                        accessibilityRole="button"
-                        accessibilityLabel={item.label}
-                        style={[
-                          styles.menuRow,
-                          idx === section.items.length - 1 &&
-                            styles.menuRowLast,
-                        ]}
-                      >
-                        <View style={styles.iconWrapper}>
-                          <Ionicons
-                            name={item.icon}
-                            size={20}
-                            color={colors.ink}
-                          />
-                        </View>
-
-                        <View style={styles.rowTextContainer}>
-                          <AppText
-                            variant="body"
-                            color="ink"
-                            numberOfLines={1}
-                            style={styles.rowLabel}
-                          >
-                            {item.label}
-                          </AppText>
-                        </View>
-
-                        <Ionicons
-                          name="chevron-forward"
-                          size={16}
-                          color={colors.subtle}
-                        />
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-              ))}
-
-              <View style={styles.footerSection}>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={handleLogout}
-                  accessibilityRole="button"
-                  accessibilityLabel="Sair da conta"
-                  style={styles.darkLogoutPill}
-                >
-                  <Ionicons
-                    name="log-out-outline"
-                    size={18}
-                    color={colors.white}
-                  />
-                  <AppText variant="label" style={styles.logoutPillText}>
-                    Sair da conta
-                  </AppText>
-                </TouchableOpacity>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color={colors.subtle}
+                    />
+                  </TouchableOpacity>
+                ))}
               </View>
-            </ScrollView>
-          </SafeAreaView>
-        </Animated.View>
-      </View>
-    </Modal>
+            </View>
+          ))}
+
+          <View style={styles.footerSection}>
+            <TouchableOpacity
+              disabled={!visible}
+              activeOpacity={0.8}
+              onPress={handleLogout}
+              accessibilityRole="button"
+              accessibilityLabel="Sair da conta"
+              style={styles.darkLogoutPill}
+            >
+              <Ionicons name="log-out-outline" size={18} color={colors.white} />
+              <AppText variant="label" style={styles.logoutPillText}>
+                Sair da conta
+              </AppText>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: { flex: 1, position: 'relative' },
-  backdropAnimated: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
   panel: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
+    flex: 1,
     backgroundColor: colors.canvas,
     borderTopRightRadius: layout.radius.sheet,
     borderBottomRightRadius: layout.radius.sheet,
