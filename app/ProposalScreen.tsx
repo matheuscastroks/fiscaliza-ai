@@ -1,12 +1,14 @@
+import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { LocationStep } from '@/features/reports/LocationStep';
+import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, layout } from '@/theme';
 import { goBack } from '@/utils/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '@/stores/authStore';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { router } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -23,6 +25,7 @@ export default function ProposalScreen() {
   return <ProposalForm key={user?.id + ':' + user?.municipality?.id} />;
 }
 function ProposalForm() {
+  const { camera } = useLocalSearchParams<{ camera?: string }>();
   const user = useAuthStore((state) => state.user);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -209,7 +212,7 @@ function ProposalForm() {
   return (
     <AppScreen keyboardAvoiding>
       <AppHeader title="Propor uma melhoria" onBack={goBack} />
-      <ScrollView
+      <KeyboardAwareScrollView
         contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.content}
@@ -236,6 +239,7 @@ function ProposalForm() {
           />
           <PhotoAttachments
             images={images}
+            cameraRequest={ready ? camera : undefined}
             onChange={setImages}
             disabled={save.isPending}
             onPreparingChange={setPreparingPhotos}
@@ -246,28 +250,19 @@ function ProposalForm() {
           pointerEvents={save.isPending ? 'none' : 'auto'}
         >
           <AppText variant="sectionTitle">Onde faz diferença?</AppText>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: spacing.xs }}
-          >
-            {(
-              [
-                ['municipality', 'Todo o município'],
-                ['neighborhood', 'Um bairro'],
-                ['location', 'Um local'],
-              ] as const
-            ).map(([value, label]) => (
-              <AppButton
-                key={value}
-                title={label}
-                variant={scope === value ? 'primary' : 'secondary'}
-                accessibilityState={{ selected: scope === value }}
-                onPress={() => setScope(value)}
-                disabled={save.isPending}
-              />
-            ))}
-          </ScrollView>
+          <SlidingTabs
+            edgeToEdge={false}
+            label="Abrangência da melhoria"
+            options={[
+              { value: 'municipality', label: 'Todo o município' },
+              { value: 'neighborhood', label: 'Um bairro' },
+              { value: 'location', label: 'Um local' },
+            ]}
+            value={scope}
+            onChange={(value) => {
+              if (!save.isPending) setScope(value as typeof scope);
+            }}
+          />
           {scope === 'neighborhood' && (
             <AppInput
               label="Bairro"
@@ -300,7 +295,7 @@ function ProposalForm() {
             />
           )}
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
       <View
         style={[
           styles.footer,

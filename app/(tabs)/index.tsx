@@ -1,4 +1,8 @@
+import { CitySearch } from '@/components/ui/CitySearch';
 import { CityCarousel } from '@/features/city/CityCarousel';
+import { ContributionActions } from '@/features/city/ContributionActions';
+import { BottomSheet, RNHostView } from '@expo/ui';
+import { spacing } from '@/theme/spacing';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -26,9 +30,19 @@ import { colors } from '@/theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  ScrollView,
+  TouchableOpacity,
+  View,
+  Platform,
+  useWindowDimensions,
+  RefreshControl,
+} from 'react-native';
 
 export default function HomeScreen() {
+  const [captureOpen, setCaptureOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const { width } = useWindowDimensions();
   const user = useAuthStore((s) => s.user);
   const { neighborhood, setNeighborhood } = useTerritorySelection();
   const [clock, setClock] = useState(() => Date.now());
@@ -89,6 +103,19 @@ export default function HomeScreen() {
     void occurrences.refetch();
     void activity.refetch();
   };
+  const pullRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        civic.refetch(),
+        occurrences.refetch(),
+        activity.refetch(),
+      ]);
+      setClock(Date.now());
+    } finally {
+      setRefreshing(false);
+    }
+  };
   return (
     <AppScreen>
       <AppHeader
@@ -96,13 +123,8 @@ export default function HomeScreen() {
         rightElement={
           <TouchableOpacity
             accessibilityRole="button"
-            accessibilityLabel="Fotografar ocorrência"
-            onPress={() =>
-              router.push({
-                pathname: '/(tabs)/ReportScreen',
-                params: { camera: String(Date.now()) },
-              })
-            }
+            accessibilityLabel="Participar com uma foto"
+            onPress={() => setCaptureOpen(true)}
             style={{
               width: 48,
               height: 48,
@@ -121,21 +143,29 @@ export default function HomeScreen() {
             : 'Bem-vindo ao Fiscaliza aí'
         }
       />
-      <ScrollView contentContainerStyle={cityStyles.content}>
-        <TouchableOpacity
-          style={styles.search}
+      <ScrollView
+        contentContainerStyle={[cityStyles.content, { flexGrow: 1 }]}
+        alwaysBounceVertical
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              void pullRefresh();
+            }}
+            tintColor={colors.ink}
+            colors={[colors.ink]}
+          />
+        }
+      >
+        <CitySearch
           onPress={() => router.push('/(tabs)/TerritoryScreen')}
-          accessibilityRole="button"
-          accessibilityLabel="Pesquisar no território"
-        >
-          <Ionicons name="search-outline" size={24} color={colors.ink} />
-          <AppText color="muted" style={{ flex: 1 }}>
-            Pesquisar no território
-          </AppText>
-          <View style={styles.searchArrow}>
-            <Ionicons name="options-outline" size={22} color={colors.white} />
-          </View>
-        </TouchableOpacity>
+          onFilters={() =>
+            router.push({
+              pathname: '/(tabs)/TerritoryScreen',
+              params: { filters: String(Date.now()) },
+            })
+          }
+        />
         <View style={cityStyles.section}>
           <AppText variant="screenTitle">
             Agora em {neighborhood || user?.municipality?.name || 'sua cidade'}
@@ -275,16 +305,7 @@ export default function HomeScreen() {
         </View>
         <View style={cityStyles.section}>
           <AppText variant="sectionTitle">Contribuir com a cidade</AppText>
-          <AppButton
-            title="Registrar uma ocorrência"
-            variant="secondary"
-            onPress={() => router.push('/(tabs)/ReportScreen')}
-          />
-          <AppButton
-            title="Propor uma melhoria"
-            variant="quiet"
-            onPress={() => router.push('/ProposalScreen')}
-          />
+          <ContributionActions />
         </View>
         <AppButton
           title="Ver resultados deste território"
@@ -292,51 +313,36 @@ export default function HomeScreen() {
           onPress={() => router.push('/ResultsScreen')}
         />
       </ScrollView>
+      <BottomSheet
+        isPresented={captureOpen}
+        onDismiss={() => setCaptureOpen(false)}
+        containerColor={colors.canvas}
+        contentPadding={{
+          left: spacing.contentPadding,
+          right: spacing.contentPadding,
+          bottom: spacing.xl,
+        }}
+      >
+        <RNHostView matchContents={{ vertical: true }}>
+          <View
+            style={{
+              gap: spacing.md,
+              paddingTop: spacing.sm,
+              width:
+                Platform.OS === 'web'
+                  ? '100%'
+                  : Math.min(width, 640) - 2 * spacing.contentPadding,
+              alignSelf: 'stretch',
+            }}
+          >
+            <AppText variant="sectionTitle">O que você quer registrar?</AppText>
+            <ContributionActions
+              camera
+              onChoose={() => setCaptureOpen(false)}
+            />
+          </View>
+        </RNHostView>
+      </BottomSheet>
     </AppScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  search: {
-    minHeight: 64,
-    backgroundColor: colors.surface,
-    borderRadius: 32,
-    paddingLeft: 20,
-    paddingRight: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  searchArrow: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    overflow: 'hidden',
-    backgroundColor: colors.surface,
-    borderWidth: 1.5,
-    borderColor: colors.divider,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarImage: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-  },
-  avatarFallback: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.accentSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -16,55 +16,79 @@ export function PhotoAttachments({
   onChange,
   disabled = false,
   onPreparingChange,
+  cameraRequest,
 }: {
   images: string[];
   onChange: (images: string[]) => void;
   disabled?: boolean;
   onPreparingChange?: (preparing: boolean) => void;
+  cameraRequest?: string;
 }) {
   const [picking, setPicking] = useState(false);
   const [error, setError] = useState('');
-  const pick = async () => {
-    if (picking || disabled || images.length >= 3) return;
-    setPicking(true);
-    onPreparingChange?.(true);
-    setError('');
-    try {
-      if (
-        Platform.OS !== 'web' &&
-        !(await ImagePicker.requestMediaLibraryPermissionsAsync()).granted
-      ) {
-        setError('Autorize o acesso às fotos ou continue sem anexos.');
-        return;
+  const captured = useRef<string | undefined>(undefined);
+  const pick = useCallback(
+    async (camera = false) => {
+      if (picking || disabled || images.length >= 3) return;
+      setPicking(true);
+      onPreparingChange?.(true);
+      setError('');
+      try {
+        if (
+          Platform.OS !== 'web' &&
+          !(
+            await (camera
+              ? ImagePicker.requestCameraPermissionsAsync()
+              : ImagePicker.requestMediaLibraryPermissionsAsync())
+          ).granted
+        ) {
+          setError(
+            camera
+              ? 'Autorize a câmera para fotografar a melhoria.'
+              : 'Autorize o acesso às fotos ou continue sem anexos.',
+          );
+          return;
+        }
+        const result = await (
+          camera
+            ? ImagePicker.launchCameraAsync
+            : ImagePicker.launchImageLibraryAsync
+        )({
+          mediaTypes: ['images'],
+          quality: 0.75,
+          base64: Platform.OS === 'web',
+        });
+        if (result.canceled || !result.assets[0]) return;
+        const asset = result.assets[0];
+        if ((asset.fileSize || 0) > 5 * 1024 * 1024) {
+          setError('Escolha uma imagem com até 5 MB.');
+          return;
+        }
+        let uri = asset.uri;
+        if (Platform.OS === 'web' && asset.base64)
+          uri = `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`;
+        else if (FileSystem.documentDirectory) {
+          const folder = FileSystem.documentDirectory + 'drafts/';
+          await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
+          uri = folder + Date.now() + '-' + (asset.fileName || 'foto.jpg');
+          await FileSystem.copyAsync({ from: asset.uri, to: uri });
+        }
+        onChange([...images, uri]);
+      } catch {
+        setError('Não foi possível adicionar a foto. Tente novamente.');
+      } finally {
+        setPicking(false);
+        onPreparingChange?.(false);
       }
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        quality: 0.75,
-        base64: Platform.OS === 'web',
-      });
-      if (result.canceled || !result.assets[0]) return;
-      const asset = result.assets[0];
-      if ((asset.fileSize || 0) > 5 * 1024 * 1024) {
-        setError('Escolha uma imagem com até 5 MB.');
-        return;
-      }
-      let uri = asset.uri;
-      if (Platform.OS === 'web' && asset.base64)
-        uri = `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`;
-      else if (FileSystem.documentDirectory) {
-        const folder = FileSystem.documentDirectory + 'drafts/';
-        await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
-        uri = folder + Date.now() + '-' + (asset.fileName || 'foto.jpg');
-        await FileSystem.copyAsync({ from: asset.uri, to: uri });
-      }
-      onChange([...images, uri]);
-    } catch {
-      setError('Não foi possível adicionar a foto. Tente novamente.');
-    } finally {
-      setPicking(false);
-      onPreparingChange?.(false);
+    },
+    [picking, disabled, images, onChange, onPreparingChange],
+  );
+  useEffect(() => {
+    if (cameraRequest && captured.current !== cameraRequest && !disabled) {
+      captured.current = cameraRequest;
+      void pick(true);
     }
-  };
+  }, [cameraRequest, disabled, pick]);
   return (
     <View style={styles.section}>
       <AppText variant="label">Fotos da melhoria</AppText>

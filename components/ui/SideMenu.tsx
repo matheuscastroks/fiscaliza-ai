@@ -1,4 +1,5 @@
 import { UserAvatar } from '@/components/ui/UserAvatar';
+import { useSignOutSheet } from './SignOutSheet';
 import { useAuthStore } from '@/stores/authStore';
 import { colors, layout, spacing, typography } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,7 +33,7 @@ export function SideMenu({
   onClose: (afterClose?: () => void) => void;
   visible: boolean;
 }) {
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const sections: MenuSection[] = [
     {
       title: 'Participar da cidade',
@@ -115,13 +116,7 @@ export function SideMenu({
   };
 
   const handleLogout = () => {
-    onClose(async () => {
-      try {
-        await logout();
-      } catch {
-        // Ignora falhas de rede no logout local
-      }
-    });
+    onClose(() => useSignOutSheet.getState().setOpen(true));
   };
 
   return (

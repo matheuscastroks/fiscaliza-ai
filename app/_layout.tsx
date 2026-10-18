@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 import { useAuthStore } from '@/stores/authStore';
 import { queryClient } from '@/services/http';
 import { AppDrawer } from '@/components/ui/AppDrawer';
+import { SignOutSheet } from '@/components/ui/SignOutSheet';
 import { colors } from '@/theme/colors';
 import {
   useFonts,
@@ -69,6 +70,7 @@ export default function RootLayout() {
               />
             </Stack>
           </AppDrawer>
+          <SignOutSheet />
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

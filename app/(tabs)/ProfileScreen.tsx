@@ -16,6 +16,7 @@ import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { UserAvatar } from '@/components/ui/UserAvatar';
+import { useSignOutSheet } from '@/components/ui/SignOutSheet';
 import { useAuthStore } from '@/stores/authStore';
 import { useAvatarStore } from '@/stores/avatarStore';
 import { useCityQuery } from '@/features/city/useCityQuery';
@@ -52,7 +53,7 @@ function ProfileLink({
 }
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const [picking, setPicking] = useState(false);
   const [photoError, setPhotoError] = useState('');
   const activity = useCityQuery<{
@@ -159,40 +160,25 @@ export default function ProfileScreen() {
             accessibilityState={{ busy: picking, disabled: picking }}
             style={styles.photoButton}
           >
-            <UserAvatar size={104} />
+            <UserAvatar size={80} />
             <View style={styles.camera}>
               <Ionicons name="camera-outline" size={20} color={colors.white} />
             </View>
           </Pressable>
           <View style={styles.name}>
-            <AppText variant="screenTitle" style={styles.center}>
+            <AppText variant="screenTitle">
               {user?.name || 'Meu perfil'}
             </AppText>
-            <AppText color="muted" style={styles.center} selectable>
+            <AppText color="muted" selectable>
               {user?.email}
             </AppText>
           </View>
-          <AppButton
-            title="Alterar foto"
-            variant="quiet"
-            loading={picking}
-            onPress={() => {
-              void selectPhoto();
-            }}
-          />
-          <AppText variant="caption" color="muted" style={styles.center}>
-            Sua foto fica salva neste aparelho.
-          </AppText>
-          {photoError !== '' && (
-            <AppText
-              color="risk"
-              accessibilityRole="alert"
-              style={styles.center}
-            >
-              {photoError}
-            </AppText>
-          )}
         </View>
+        {photoError !== '' && (
+          <AppText color="risk" accessibilityRole="alert">
+            {photoError}
+          </AppText>
+        )}
         <View style={styles.section}>
           <AppText variant="sectionTitle">Meu município</AppText>
           <View style={styles.municipality}>
@@ -281,7 +267,7 @@ export default function ProfileScreen() {
           title="Sair da conta"
           variant="quiet"
           onPress={() => {
-            void logout().catch(() => {});
+            useSignOutSheet.getState().setOpen(true);
           }}
         />
       </ScrollView>
@@ -290,8 +276,9 @@ export default function ProfileScreen() {
 }
 const styles = StyleSheet.create({
   identity: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
     paddingVertical: spacing.sm,
   },
   photoButton: { position: 'relative', padding: spacing.xxs },
@@ -309,12 +296,10 @@ const styles = StyleSheet.create({
     borderColor: colors.canvas,
   },
   name: {
-    alignItems: 'center',
+    flex: 1,
+    minWidth: 0,
     gap: spacing.xxs,
-    alignSelf: 'stretch',
-    marginTop: spacing.xs,
   },
-  center: { textAlign: 'center' },
   section: { gap: spacing.sm },
   municipality: {
     padding: spacing.lg,
