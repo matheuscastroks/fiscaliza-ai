@@ -216,7 +216,7 @@ Raios normativos vêm de `theme/layout.ts`. Controles circulares de cabeçalho e
 
 `RecordCard` reúne tipo/situação, título, local/data e ação explícita. Com imagem válida, a fotografia absoluta preenche o fundo em `cover`; um espaçador de 148 antecede o conteúdo em fluxo, cuja altura cresce com o texto e a fonte. A faixa legível e o avanço circular branco permanecem no fluxo, sem altura fixa para o cartão. Sem imagem, ou em falha de carregamento, usa cartão editorial branco com resumo. Não preencha automaticamente um registro do cidadão com imagem de catálogo. Os exemplos acadêmicos têm origem e uso ilustrativo definidos abaixo. Padding `lg`, intervalo `xs`; pressionado reduz opacidade (0,82).
 
-`CivicRow` aplica o padrão a proposta, consulta e ação. Propostas podem exibir a primeira foto de `images`; ações podem mostrar a primeira evidência. Consultas permanecem editoriais. Fotografias enviadas pelo cidadão não são substituídas por imagens de catálogo. Progresso usa faixa de quatro unidades, valor acessível e conclusão semântica. Popularidade não substitui resposta, prazo ou resultado.
+`CivicRow` seleciona a composição de `CivicCard` conforme a jornada. Melhoria usa foto horizontal de 170 sobre superfície branca e engajamento; consulta apresenta prazo e prévia de alternativas; ação destaca percentual, barra de execução de 6 e evidência de 84. Os detalhes usam cédula, percurso de decisão ou histórico de execução conforme a tarefa. Fotografias enviadas pelo cidadão não são substituídas por imagens de catálogo. Popularidade não substitui resposta, prazo ou resultado.
 
 ### Photo attachments and illustrative examples
 
@@ -236,7 +236,7 @@ As imagens de exemplo do cenário acadêmico são ilustrativas: não representam
 
 Para novos filtros, use cápsulas claras em repouso, escuras na seleção, texto legível e estado selecionado acessível.
 
-`FloatingGlassTabBar` conserva o nome histórico, mas implementa cápsula sólida em tinta: altura 72, raio 36, largura `min(largura da janela − 40, 520)`, centralizada, com margem inferior `max(área segura, 16)`. São quatro abas (Início, Território, Participar e Acompanhar), círculos de 52 e ícones de 24; o ativo usa círculo branco e ícone escuro. Cada aba tem altura mínima de 56, nome acessível e estado selecionado. A barra some nas rotas internas e quando o teclado abre. Pressionado reduz opacidade (0,65).
+`FloatingGlassTabBar` conserva o nome histórico, mas implementa cápsula sólida em tinta: altura 60, raio 30 e largura 228, limitada à janela menos 32. São quatro alvos/círculos de 52, com gap de 4 e folga interna de 4; o ativo usa círculo branco e ícone escuro de 24. A barra é centralizada, com margem inferior `max(área segura, 16)`, some nas rotas internas e quando o teclado abre. Cada aba tem nome acessível e estado selecionado; pressionado reduz opacidade (0,65).
 
 `SideMenu` preserva seu layout lateral de 90% da janela, com teto de 480 a partir de 600. A abertura leva 280 ms e o fechamento 240 ms, com duração zero em movimento reduzido. Os destinos refletem tarefas reais, incluindo Propor melhoria; não use pontuação fictícia, selo institucional sem fundamento ou indicadores inventados. Valores animados permanecem estáveis entre renderizações. A integração de código não substitui revisão final renderizada.
 
@@ -245,6 +245,25 @@ Para novos filtros, use cápsulas claras em repouso, escuras na seleção, texto
 Leituras remotas precisam de carregamento, erro com recuperação, vazio e conteúdo. `QueryState` fornece indicador e ação de tentar novamente. Falhas de atualização preservam conteúdo existente. Use situação textual, foco visível na web e suporte a teclado e leitor de tela. Exija contraste normal de pelo menos 4,5:1 e teste fonte ampliada. Evidência web permanece separada de dispositivo nativo; desempenho exige medição em release.
 
 ## Do's and Don'ts
+
+### Composição conforme a participação
+
+Compartilhe tipografia, superfícies, raios e espaçamentos, mas não uma ficha universal. A diferença precisa aparecer na tarefa e na hierarquia:
+
+| Conteúdo | Card | Detalhe e ação central |
+| --- | --- | --- |
+| Ocorrência | Foto em fundo, contraste em gradiente, situação, endereço e engajamento | Evidência, linha de atendimento, apoio no topo e avaliação de 1–5 estrelas após conclusão |
+| Melhoria | Foto horizontal sobre superfície branca, ideia legível e apoio comunitário | Foto de fundo com painel, percurso Recebida → Em análise → Decisão, justificativa e acompanhamento da decisão |
+| Consulta | Prazo, alternativas com círculos de seleção e acesso à escolha | Cédula com seleção exclusiva; envio fixo no rodapé, confirmação e resultado com distribuição das respostas |
+| Ação pública | Percentual e barra de execução, prazo e evidência compacta | Progresso no topo, atualizações de execução e evidências; acompanhar execução |
+
+Não diferenciar apenas por cor ou prefixos. As alternativas no card são prévias; só a cédula do detalhe registra a resposta. Percentuais vêm do andamento informado ou das respostas registradas, sem progresso inventado.
+
+Carrosséis e faixas de filtro ultrapassam o padding lateral até as bordas da tela; o primeiro e último elementos mantêm respiro interno. Preserve controles acessíveis e indicação de posição. O avatar de 48 fica à esquerda da saudação, separado por 12; a câmera à direita inicia o relato com foto.
+
+Cadastro de ocorrência: **Relato → Local → Revisão**. Foto obrigatória, rascunho preservado em falhas e mapa recortado por contêiner com raio 28 e `overflow: hidden`. A avaliação concluída sai dos destaques pessoais e permanece no histórico do perfil e na exploração pública do território.
+
+Indicadores fictícios são permitidos nos cenários de apresentação por solicitação do responsável pelo projeto. Persistem separados das interações atribuíveis; não fabricar apoio da conta ativa nem substituir evidências enviadas. Fontes de fotos ilustrativas e a natureza dos números ficam documentadas em Sobre e nos créditos do banco.
 
 ### Do:
 
@@ -275,3 +294,8 @@ Busca e categorias ficam à vista. Bairro e situação aparecem no controle Filt
 No celular, o menu abre por arraste horizontal iniciado nos 24 pontos da borda esquerda, com ativação após 12 pontos de movimento. Use AppDrawer (ReanimatedDrawerLayout da dependência existente) como contêiner da navegação; SideMenu contém somente os destinos e o visual. O painel acompanha o gesto e fecha por arraste para a esquerda, toque fora, controle Fechar ou retorno do Android. A seleção navega após o fechamento.
 
 Habilite o gesto apenas nas quatro abas principais, com sessão autenticada e município confirmado. Telas de detalhes e formulários preservam sua navegação de retorno. O botão de abrir permanece na web e quando há leitor de tela ativo. O menu fechado não recebe foco; no navegador, o foco fica no painel aberto, Escape fecha e o foco retorna ao controle anterior. Não adicione detectores sobre o mapa nem novas animações a Marker.
+
+
+### Assistência por foto no relato
+
+Não usar card de sugestão automática. Foto antes de título/descrição inicia análise e sugere ambos os campos; o botão de IA não aparece. Foto inserida depois de texto revela ação circular de 56 ao lado de Escolher local. A análise só ocorre por esse botão neste segundo caso. Não sobrescrever edição feita durante a requisição; não chamar fallback textual de análise visual. O cidadão revisa o relato e segue para Local e Revisão.

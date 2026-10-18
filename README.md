@@ -37,7 +37,7 @@ Copie `.env.example` para `.env`, configure EXPO_PUBLIC_API_URL e execute `npm s
 
 ## Contas de apresentação
 
-O seed mantém `ana@vilaesperanca.exemplo` (cidadão), `gestao@vilaesperanca.exemplo` (gestão) e `admin@vilaesperanca.exemplo` (admin). Os endereços são identificadores fictícios já existentes. A gestão pertence ao Rio; a cidadã confirma seu município no onboarding.
+O seed mantém `beatrizarante@gmail.com` (cidadão), `gestao@vilaesperanca.exemplo` (gestão) e `admin@vilaesperanca.exemplo` (admin). A gestão pertence ao Rio; a cidadã confirma seu município no onboarding.
 
 A senha é DEMO_PASSWORD. O padrão Fiscaliza123! existe apenas no desenvolvimento sem configuração; produção exige valor explícito. O seed não troca senhas ou vínculo de cidadão existente. Reset de cenários é exclusivo de admin e limitado ao cenário Rio; não apaga outras cidades ou seus anexos.
 
@@ -53,7 +53,7 @@ Evidências e limitações: `plan/11-validacao-integrada.md` e `plan/13-validaca
 
 O deploy web para VPS inclui cidadão, gestão, API e HTTPS, usando `compose.production.yaml` e `.github/workflows/release.yml`. Consulte [deploy/README.md](deploy/README.md) para preparar DNS, ambiente, registry e SSH. A publicação automática depende de `VPS_DEPLOY_ENABLED=true`; o Compose local continua disponível para desenvolvimento.
 
-A sugestão textual usa Gemini no servidor quando configurado, com heurística em falhas. Fotos permanecem na aplicação; os arquivos de evidência são públicos por URL UUID opaca. Persistência requer volumes e backup. ViaCEP e IBGE podem ficar indisponíveis: a interface conserva o trabalho e permite tentar novamente, sem inventar um município.
+A assistência usa Gemini no servidor quando configurado. Pode analisar uma foto autorizada para sugerir título e descrição; sem chave ou em falhas, mantém o preenchimento manual e não afirma ter analisado a imagem. Os arquivos de evidência são públicos por URL UUID opaca. Persistência requer volumes e backup. ViaCEP e IBGE podem ficar indisponíveis: a interface conserva o trabalho e permite tentar novamente, sem inventar um município.
 
 ## Demonstração e consolidação territorial
 Home, Território e Resultados compartilham o bairro escolhido. Ocorrências e iniciativas participam da exploração; o mapa exige coordenadas explícitas, enquanto a lista inclui conteúdos de bairro ou município sem ponto. Indicadores separam abrangência municipal de bairros. Acompanhamentos de cidades anteriores possuem detalhe autorizado somente leitura.

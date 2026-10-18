@@ -8,7 +8,7 @@ Na raiz, defina `DEMO_PASSWORD` no ambiente e execute `docker compose up --build
 
 Sem Docker, aponte `DATABASE_URL` a PostgreSQL e, dentro de `backend`, execute `npm install`, `npm run migrate`, `npm run seed`, `npm start`. As variáveis são lidas do ambiente do processo; `.env.example` é um modelo e não é carregado automaticamente. `npm run typecheck`, `npm test` e `npm run openapi` validam tipos, executam testes e geram a especificação OpenAPI, respectivamente.
 
-Contas iniciais: `ana@vilaesperanca.exemplo` (cidadã), `gestao@vilaesperanca.exemplo` (gestão) e `admin@vilaesperanca.exemplo` (admin). Fora de produção, a senha inicial padrão é `Fiscaliza123!`. Em produção, `DEMO_PASSWORD` é obrigatória. Seed é idempotente: não troca senhas existentes nem apaga dados. O reset pela API exige sessão de administrador e repõe o cenário inicial; ele mantém usuários, remove os anexos e restaura os registros do cenário escolhido.
+Contas iniciais: `beatrizarante@gmail.com` (cidadã), `gestao@vilaesperanca.exemplo` (gestão) e `admin@vilaesperanca.exemplo` (admin). Fora de produção, a senha inicial padrão é `Fiscaliza123!`. Em produção, `DEMO_PASSWORD` é obrigatória. Seed é idempotente: não troca senhas existentes nem apaga dados. O reset pela API exige sessão de administrador e repõe o cenário inicial; ele mantém usuários, remove os anexos e restaura os registros do cenário escolhido.
 
 ## Contrato e persistência
 
@@ -20,7 +20,7 @@ Listagens aceitam `limit` (até 100) e `offset`; `/activity` devolve no máximo 
 
 Anexos aceitam um arquivo multipart JPEG/PNG/WebP de até 5 MB, com validação de assinatura e MIME, UUID gerado e gravação em volume local. A API somente aceita URLs relativas emitidas pelo upload, verificando a existência dos anexos antes de vinculá-los. Não recebe URIs locais ou URLs arbitrárias para buscar imagens.
 
-Gemini recebe apenas texto, com chave exclusiva do servidor, limite por endpoint e prazo de 10 segundos. Imagens permanecem no armazenamento local e não são enviadas ao provedor externo. O endpoint aceita apenas a descrição textual. A revisão automática rejeitou o envio externo de conteúdo das imagens; a análise multimodal depende de autorização explícita para esse envio ao Google Gemini. Modelo configurável por `GEMINI_MODEL`, padrão `gemini-3.8-flash`. Ausência de chave, falha, timeout ou resposta inválida retornam sugestão heurística determinística. A sugestão não é aplicada automaticamente a um registro. Referência REST: https://ai.google.dev/api/generate-content.
+Gemini usa chave exclusiva do servidor, limite por endpoint e timeout de 10 segundos. A assistência aceita texto e, conforme o fluxo solicitado, uma foto previamente enviada, normalizada e autorizada por proprietário e município. O backend envia a imagem ao Google apenas para essa análise; sem chave, falha ou resposta inválida retorna heurística textual com imageAnalyzed=false. O cidadão revisa título e descrição antes do envio, e edições durante a requisição são preservadas. Modelo configurável por GEMINI_MODEL, padrão gemini-3.8-flash. Referência REST: https://ai.google.dev/gemini-api/docs/generate-content/image-understanding.
 
 ## Verificação
 

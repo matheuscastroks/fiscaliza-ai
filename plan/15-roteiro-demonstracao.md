@@ -12,7 +12,7 @@ npm start --prefix backend
 
 Em terminais separados, execute `npm run municipal:dev` e `npm start`. Configure `.env` a partir de `.env.example`. No celular com Expo Go, `EXPO_PUBLIC_API_URL` deve apontar para `http://<IP-LAN-do-computador>:3001/api`; mantenha os dispositivos na mesma rede e permita a porta no firewall. `localhost` no celular aponta para o próprio celular. No emulador Android padrão, use `http://10.0.2.2:3001/api`. Após mudar a URL, reinicie Metro com `npx expo start --clear`. Para web, inclua a origem efetiva em `WEB_ORIGINS`.
 
-As contas são `ana@vilaesperanca.exemplo` (cidadã), `gestao@vilaesperanca.exemplo` (gestão) e `admin@vilaesperanca.exemplo` (admin). A senha vem de `DEMO_PASSWORD`; o padrão local sem configuração é `Fiscaliza123!`. O seed preserva senhas de contas existentes.
+As contas são `beatrizarante@gmail.com` (cidadã), `gestao@vilaesperanca.exemplo` (gestão) e `admin@vilaesperanca.exemplo` (admin). A senha vem de `DEMO_PASSWORD`; o padrão local sem configuração é `Fiscaliza123!`. O seed preserva senhas de contas existentes.
 
 ## Percurso cidadão–gestão
 
