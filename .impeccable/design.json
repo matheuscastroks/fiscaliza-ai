@@ -1,0 +1,395 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-18T03:59:04.201787+00:00",
+  "title": "Design System: Fiscaliza aí — aplicativo cidadão",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "displayName": "ink",
+        "tonalRamp": [
+          "oklch(15% 0.0095 248.19)",
+          "oklch(26% 0.0095 248.19)",
+          "oklch(38% 0.0095 248.19)",
+          "oklch(49% 0.0095 248.19)",
+          "oklch(61% 0.0095 248.19)",
+          "oklch(72% 0.0095 248.19)",
+          "oklch(84% 0.0095 248.19)",
+          "oklch(95% 0.0095 248.19)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "canvas",
+        "tonalRamp": [
+          "oklch(15% 0.0017 247.84)",
+          "oklch(26% 0.0017 247.84)",
+          "oklch(38% 0.0017 247.84)",
+          "oklch(49% 0.0017 247.84)",
+          "oklch(61% 0.0017 247.84)",
+          "oklch(72% 0.0017 247.84)",
+          "oklch(84% 0.0017 247.84)",
+          "oklch(95% 0.0017 247.84)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "surface",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(38% 0.0000 89.88)",
+          "oklch(49% 0.0000 89.88)",
+          "oklch(61% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(84% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "surfaceSubdued": {
+        "role": "neutral",
+        "displayName": "surfaceSubdued",
+        "tonalRamp": [
+          "oklch(15% 0.0034 247.86)",
+          "oklch(26% 0.0034 247.86)",
+          "oklch(38% 0.0034 247.86)",
+          "oklch(49% 0.0034 247.86)",
+          "oklch(61% 0.0034 247.86)",
+          "oklch(72% 0.0034 247.86)",
+          "oklch(84% 0.0034 247.86)",
+          "oklch(95% 0.0034 247.86)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "muted",
+        "tonalRamp": [
+          "oklch(15% 0.0121 248.07)",
+          "oklch(26% 0.0121 248.07)",
+          "oklch(38% 0.0121 248.07)",
+          "oklch(49% 0.0121 248.07)",
+          "oklch(61% 0.0121 248.07)",
+          "oklch(72% 0.0121 248.07)",
+          "oklch(84% 0.0121 248.07)",
+          "oklch(95% 0.0121 248.07)"
+        ]
+      },
+      "subtle": {
+        "role": "neutral",
+        "displayName": "subtle",
+        "tonalRamp": [
+          "oklch(15% 0.0119 248.05)",
+          "oklch(26% 0.0119 248.05)",
+          "oklch(38% 0.0119 248.05)",
+          "oklch(49% 0.0119 248.05)",
+          "oklch(61% 0.0119 248.05)",
+          "oklch(72% 0.0119 248.05)",
+          "oklch(84% 0.0119 248.05)",
+          "oklch(95% 0.0119 248.05)"
+        ]
+      },
+      "divider": {
+        "role": "neutral",
+        "displayName": "divider",
+        "tonalRamp": [
+          "oklch(15% 0.0052 247.88)",
+          "oklch(26% 0.0052 247.88)",
+          "oklch(38% 0.0052 247.88)",
+          "oklch(49% 0.0052 247.88)",
+          "oklch(61% 0.0052 247.88)",
+          "oklch(72% 0.0052 247.88)",
+          "oklch(84% 0.0052 247.88)",
+          "oklch(95% 0.0052 247.88)"
+        ]
+      },
+      "accentPressed": {
+        "role": "neutral",
+        "displayName": "accentPressed",
+        "tonalRamp": [
+          "oklch(15% 0.0110 248.14)",
+          "oklch(26% 0.0110 248.14)",
+          "oklch(38% 0.0110 248.14)",
+          "oklch(49% 0.0110 248.14)",
+          "oklch(61% 0.0110 248.14)",
+          "oklch(72% 0.0110 248.14)",
+          "oklch(84% 0.0110 248.14)",
+          "oklch(95% 0.0110 248.14)"
+        ]
+      },
+      "risk": {
+        "role": "semantic",
+        "displayName": "risk",
+        "tonalRamp": [
+          "oklch(15% 0.1415 25.61)",
+          "oklch(26% 0.1415 25.61)",
+          "oklch(38% 0.1415 25.61)",
+          "oklch(49% 0.1415 25.61)",
+          "oklch(61% 0.1415 25.61)",
+          "oklch(72% 0.1415 25.61)",
+          "oklch(84% 0.1415 25.61)",
+          "oklch(95% 0.1415 25.61)"
+        ]
+      },
+      "riskSurface": {
+        "role": "semantic",
+        "displayName": "riskSurface",
+        "tonalRamp": [
+          "oklch(15% 0.0164 22.08)",
+          "oklch(26% 0.0164 22.08)",
+          "oklch(38% 0.0164 22.08)",
+          "oklch(49% 0.0164 22.08)",
+          "oklch(61% 0.0164 22.08)",
+          "oklch(72% 0.0164 22.08)",
+          "oklch(84% 0.0164 22.08)",
+          "oklch(95% 0.0164 22.08)"
+        ]
+      },
+      "attention": {
+        "role": "semantic",
+        "displayName": "attention",
+        "tonalRamp": [
+          "oklch(15% 0.0962 73.66)",
+          "oklch(26% 0.0962 73.66)",
+          "oklch(38% 0.0962 73.66)",
+          "oklch(49% 0.0962 73.66)",
+          "oklch(61% 0.0962 73.66)",
+          "oklch(72% 0.0962 73.66)",
+          "oklch(84% 0.0962 73.66)",
+          "oklch(95% 0.0962 73.66)"
+        ]
+      },
+      "attentionSurface": {
+        "role": "semantic",
+        "displayName": "attentionSurface",
+        "tonalRamp": [
+          "oklch(15% 0.0249 89.21)",
+          "oklch(26% 0.0249 89.21)",
+          "oklch(38% 0.0249 89.21)",
+          "oklch(49% 0.0249 89.21)",
+          "oklch(61% 0.0249 89.21)",
+          "oklch(72% 0.0249 89.21)",
+          "oklch(84% 0.0249 89.21)",
+          "oklch(95% 0.0249 89.21)"
+        ]
+      },
+      "completed": {
+        "role": "semantic",
+        "displayName": "completed",
+        "tonalRamp": [
+          "oklch(15% 0.0840 164.63)",
+          "oklch(26% 0.0840 164.63)",
+          "oklch(38% 0.0840 164.63)",
+          "oklch(49% 0.0840 164.63)",
+          "oklch(61% 0.0840 164.63)",
+          "oklch(72% 0.0840 164.63)",
+          "oklch(84% 0.0840 164.63)",
+          "oklch(95% 0.0840 164.63)"
+        ]
+      },
+      "completedSurface": {
+        "role": "semantic",
+        "displayName": "completedSurface",
+        "tonalRamp": [
+          "oklch(15% 0.0141 162.47)",
+          "oklch(26% 0.0141 162.47)",
+          "oklch(38% 0.0141 162.47)",
+          "oklch(49% 0.0141 162.47)",
+          "oklch(61% 0.0141 162.47)",
+          "oklch(72% 0.0141 162.47)",
+          "oklch(84% 0.0141 162.47)",
+          "oklch(95% 0.0141 162.47)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "screenTitle": {
+        "displayName": "screenTitle",
+        "purpose": "Título principal."
+      },
+      "sectionTitle": {
+        "displayName": "sectionTitle",
+        "purpose": "Seção e cartão."
+      },
+      "body": {
+        "displayName": "body",
+        "purpose": "Conteúdo e formulário."
+      },
+      "label": {
+        "displayName": "label",
+        "purpose": "Ação e rótulo."
+      },
+      "meta": {
+        "displayName": "meta",
+        "purpose": "Local, data e situação."
+      },
+      "protocol": {
+        "displayName": "protocol",
+        "purpose": "Identificador; números tabulares."
+      },
+      "caption": {
+        "displayName": "caption",
+        "purpose": "Ajuda e complemento."
+      }
+    },
+    "shadows": [
+      {
+        "name": "navigation-web",
+        "value": "0 8px 24px rgba(0,0,0,0.12)",
+        "purpose": "Sombra da barra inferior sólida na web; não aplicar a cartões."
+      },
+      {
+        "name": "navigation-ios",
+        "value": "offset(0,8), opacity 0.12, radius 12, black",
+        "purpose": "Sombra iOS da barra inferior."
+      },
+      {
+        "name": "navigation-android",
+        "value": "elevation 4",
+        "purpose": "Elevação Android da barra inferior."
+      }
+    ],
+    "motion": [
+      {
+        "name": "detail-settle",
+        "value": "220ms",
+        "purpose": "Expansão/recolhimento de DetailSheet; 0ms com movimento reduzido."
+      },
+      {
+        "name": "side-menu-open",
+        "value": "280ms cubic-out",
+        "purpose": "Abertura do menu; 0ms em movimento reduzido."
+      },
+      {
+        "name": "side-menu-close",
+        "value": "240ms cubic-in",
+        "purpose": "Fechamento do menu; 0ms em movimento reduzido."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "side-menu-width-cap",
+        "value": "600px"
+      }
+    ],
+    "productRefinements": {
+      "photoOverlay": "Gradiente funcional transparente para rgba(15,18,20,0.78) e rgba(15,18,20,0.96), via expo-linear-gradient compatível com Expo Go.",
+      "avatar": "UserAvatar compartilhado: 104 no perfil, 64 no menu, 48 no início; foto local por conta com precedência sobre a foto inicial.",
+      "territory": "Filtros progressivos; mapa/lista separados no nativo; mapa recortado em raio 28; seleção de marcador e acesso a itens sem ponto.",
+      "detailPhoto": "Imagem até a status bar, controles e painel expandido protegidos pelo safe area inset.",
+      "tabBar": "Largura min(window - 64, 440); círculo de 52 persistente em todas as abas.",
+      "followSpacing": "Gap 16 entre cards, sem margem vertical interna ao RecordCard."
+    }
+  },
+  "components": [
+    {
+      "name": "AppButton primary",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Tradução HTML de AppButton; mínimo de 54 e estados de interação.",
+      "html": "<button class=\"ds-button-primary\">Continuar</button>",
+      "css": ".ds-button-primary{font-family:\"Instrument Sans\",sans-serif;min-height:54px;padding:12px 20px;border-radius:28px;border:1px solid transparent;background:#212529;color:#FFFFFF;font-size:15px;font-weight:500;line-height:21px;cursor:pointer} .ds-button-primary:hover:not(:disabled){opacity:.9} .ds-button-primary:active:not(:disabled){opacity:.75} .ds-button-primary:focus-visible{outline:2px solid #212529;outline-offset:3px;} .ds-button-primary:disabled{background:#ECEEF0;color:#676D73;border-color:#E5E8EB;opacity:.6;cursor:default}"
+    },
+    {
+      "name": "AppButton secondary",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Tradução HTML de AppButton; mínimo de 54 e estados de interação.",
+      "html": "<button class=\"ds-button-secondary\">Continuar</button>",
+      "css": ".ds-button-secondary{font-family:\"Instrument Sans\",sans-serif;min-height:54px;padding:12px 20px;border-radius:28px;border:1px solid #E5E8EB;background:#FFFFFF;color:#212529;font-size:15px;font-weight:500;line-height:21px;cursor:pointer} .ds-button-secondary:hover:not(:disabled){opacity:.9} .ds-button-secondary:active:not(:disabled){opacity:.75} .ds-button-secondary:focus-visible{outline:2px solid #212529;outline-offset:3px;} .ds-button-secondary:disabled{background:#ECEEF0;color:#676D73;border-color:#E5E8EB;opacity:.6;cursor:default}"
+    },
+    {
+      "name": "AppButton quiet",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Tradução HTML de AppButton; mínimo de 54 e estados de interação.",
+      "html": "<button class=\"ds-button-quiet\">Continuar</button>",
+      "css": ".ds-button-quiet{font-family:\"Instrument Sans\",sans-serif;min-height:54px;padding:12px 20px;border-radius:28px;border:1px solid transparent;background:transparent;color:#212529;font-size:15px;font-weight:500;line-height:21px;cursor:pointer} .ds-button-quiet:hover:not(:disabled){opacity:.9} .ds-button-quiet:active:not(:disabled){opacity:.75} .ds-button-quiet:focus-visible{outline:2px solid #212529;outline-offset:3px;} .ds-button-quiet:disabled{background:#ECEEF0;color:#676D73;border-color:#E5E8EB;opacity:.6;cursor:default}"
+    },
+    {
+      "name": "AppButton destructive",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Tradução HTML de AppButton; mínimo de 54 e estados de interação.",
+      "html": "<button class=\"ds-button-destructive\">Continuar</button>",
+      "css": ".ds-button-destructive{font-family:\"Instrument Sans\",sans-serif;min-height:54px;padding:12px 20px;border-radius:28px;border:1px solid transparent;background:#9E3431;color:#FFFFFF;font-size:15px;font-weight:500;line-height:21px;cursor:pointer} .ds-button-destructive:hover:not(:disabled){opacity:.9} .ds-button-destructive:active:not(:disabled){opacity:.75} .ds-button-destructive:focus-visible{outline:2px solid #212529;outline-offset:3px;} .ds-button-destructive:disabled{background:#ECEEF0;color:#676D73;border-color:#E5E8EB;opacity:.6;cursor:default}"
+    },
+    {
+      "name": "AppInput",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo rotulado; foco, erro textual e estado indisponível. Em formulários com PhotoAttachments, preserve texto/fotos em falhas e bloqueie envio durante preparação; anexos ausentes são válidos.",
+      "html": "<label class=\"ds-field\">Descrição<input class=\"ds-input\" placeholder=\"Descreva a necessidade\"><span class=\"ds-help\">Informe o local e o contexto.</span></label>",
+      "css": ".ds-field{font-family:\"Instrument Sans\",sans-serif;display:grid;gap:8px;color:#212529;font-size:15px;font-weight:500}.ds-input{font-family:\"Instrument Sans\",sans-serif;min-height:56px;padding:12px 16px;border:1px solid #E5E8EB;border-radius:28px;background:#FFFFFF;color:#212529;font-size:16px}.ds-input::placeholder{color:#676D73}.ds-input:hover{border-color:#60666C}.ds-input:focus-visible{outline:none;border-color:#212529}.ds-input[aria-invalid=\"true\"]{border-color:#9E3431}.ds-input:disabled{background:#ECEEF0;color:#60666C}.ds-help{font-size:12px;font-weight:400;line-height:16px;color:#60666C}"
+    },
+    {
+      "name": "Controle circular do cabeçalho",
+      "kind": "button",
+      "refersTo": "header-circle",
+      "description": "Botão branco de 48, com ícone inline e nome acessível.",
+      "html": "<button class=\"ds-circle\" aria-label=\"Avançar\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" aria-hidden=\"true\"><path d=\"M5 12h14m-6-6 6 6-6 6\"/></svg></button>",
+      "css": ".ds-circle{display:grid;place-items:center;width:48px;height:48px;border:0;border-radius:24px;background:#FFFFFF;color:#212529;cursor:pointer}.ds-circle:hover{background:#ECEEF0}.ds-circle:active{opacity:.75}.ds-circle:focus-visible{outline:2px solid #212529;outline-offset:3px;}"
+    },
+    {
+      "name": "RecordCard editorial",
+      "kind": "card",
+      "refersTo": "record-card",
+      "description": "Alternativa editorial implementada para ocorrências e propostas sem foto ou quando a imagem falha. Fotos enviadas e exemplos acadêmicos ilustrativos têm origem distinta; não usar catálogo como evidência cidadã.",
+      "html": "<button class=\"ds-record\"><span class=\"ds-meta\">Proposta à Recebida</span><strong class=\"ds-title\">Melhoria no acesso à praça</strong><span class=\"ds-summary\">Ampliar a acessibilidade do caminho.</span><span class=\"ds-meta\">Bairro à Data</span><span class=\"ds-action\">Ver proposta<span class=\"ds-arrow\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" aria-hidden=\"true\"><path d=\"M5 12h14m-6-6 6 6-6 6\"/></svg></span></span></button>",
+      "css": ".ds-record{font-family:\"Instrument Sans\",sans-serif;display:grid;gap:8px;width:100%;padding:20px;border:0;border-radius:28px;background:#FFFFFF;color:#212529;text-align:left;cursor:pointer}.ds-meta{font-size:13px;line-height:18px;color:#60666C}.ds-title{font-size:21px;line-height:27px;letter-spacing:-.2px;font-weight:600}.ds-summary{font-size:16px;line-height:24px;color:#60666C}.ds-action{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;min-height:48px;font-size:15px;font-weight:500}.ds-arrow{display:grid;place-items:center;width:48px;height:48px;border-radius:24px;background:#212529;color:#FFFFFF}.ds-record:hover{background:#F5F6F7}.ds-record:active{opacity:.82}.ds-record:focus-visible{outline:2px solid #212529;outline-offset:3px;}"
+    },
+    {
+      "name": "DetailSheet acoplado",
+      "kind": "custom",
+      "refersTo": "detail-sheet",
+      "description": "Preview estático da ficha sem foto. Ocorrências e propostas com foto usam imagem superior e painel acoplado expansível; gesto e transição de rota pertencem ao app.",
+      "html": "<section class=\"ds-sheet\"><button class=\"ds-section\" aria-expanded=\"true\">Detalhes<span aria-hidden=\"true\">⌃</span></button><p class=\"ds-copy\">Descrição e retorno da contribuição.</p></section>",
+      "css": ".ds-sheet{font-family:\"Instrument Sans\",sans-serif;background:#F5F6F7;color:#212529;border-radius:32px 32px 0 0;padding:20px}.ds-section{font-family:\"Instrument Sans\",sans-serif;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:48px;padding:0;border:0;background:transparent;color:#212529;font-size:21px;font-weight:600;text-align:left;cursor:pointer}.ds-section:hover{color:#60666C}.ds-section:active{opacity:.75}.ds-section:focus-visible{outline:2px solid #212529;outline-offset:3px;}.ds-copy{font-size:16px;line-height:24px}"
+    },
+    {
+      "name": "Filtro em cápsula à padrão futuro",
+      "kind": "chip",
+      "description": "Padrão desejado das referências para novos filtros; não atesta todos os filtros atuais.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"true\">Todas</button>",
+      "css": ".ds-chip{font-family:\"Instrument Sans\",sans-serif;min-height:48px;padding:12px 20px;border:0;border-radius:9999px;background:#FFFFFF;color:#212529;font-size:15px;cursor:pointer}.ds-chip[aria-pressed=\"true\"]{background:#212529;color:#FFFFFF}.ds-chip:hover{opacity:.9}.ds-chip:active{opacity:.75}.ds-chip:focus-visible{outline:2px solid #212529;outline-offset:3px;}"
+    },
+    {
+      "name": "Navegação inferior sólida",
+      "kind": "nav",
+      "description": "Tradução estática da barra implementada: quatro abas, altura 72, círculo ativo 52. Ocultação por rota/teclado pertence ao app.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Principal\"><button class=\"ds-tab\" aria-label=\"Início\" aria-current=\"page\"><span class=\"ds-tab-icon\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" aria-hidden=\"true\"><path d=\"M3 10 12 3l9 7v11h-6v-7H9v7H3Z\"/></svg></span></button><button class=\"ds-tab\" aria-label=\"Território\"><span class=\"ds-tab-icon\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" aria-hidden=\"true\"><path d=\"M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3ZM9 3v15M15 6v15\"/></svg></span></button><button class=\"ds-tab\" aria-label=\"Participar\"><span class=\"ds-tab-icon\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" aria-hidden=\"true\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3a4 4 0 0 1 0 8M22 21v-2a4 4 0 0 0-3-3.87M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z\"/></svg></span></button><button class=\"ds-tab\" aria-label=\"Acompanhar\"><span class=\"ds-tab-icon\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" aria-hidden=\"true\"><path d=\"M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4\"/></svg></span></button></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;width:min(calc(100vw - 40px),520px);height:72px;padding:0 8px;border-radius:36px;background:#212529;box-shadow:0 8px 24px rgba(0,0,0,.12)}.ds-tab{display:grid;place-items:center;flex:1;min-height:56px;padding:0;border:0;background:transparent;color:#FFFFFF;cursor:pointer}.ds-tab-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:26px}.ds-tab[aria-current=\"page\"] .ds-tab-icon{background:#FFFFFF;color:#212529}.ds-tab:hover{opacity:.9}.ds-tab:active{opacity:.65}.ds-tab:focus-visible{outline:2px solid #FFFFFF;outline-offset:2px;border-radius:28px}",
+      "refersTo": "navigation-bar"
+    }
+  ],
+  "narrative": {
+    "northStar": "A cidade em primeiro plano",
+    "overview": "Reproduza a linguagem das três referências fornecidas pelo usuário: Instrument Sans, base clara, tinta escura, cápsulas, controles circulares, fotografias amplas e painéis inferiores arredondados. Aplique essa composição às contribuições e ao território, mantendo o conteúdo cívico e as jornadas de PRODUCT.md. O contrato de direção está em plan/17-identidade-referencia.md.\n\nEste documento registra tokens e componentes do aplicativo cidadão presentes no código. Não redefine a arquitetura, a autoridade da API ou o painel municipal. O menu lateral e a barra inferior estão descritos conforme o código integrado; a revisão visual final permanece pendente. Documentação de código não comprova inspeção visual, gestos ou teclado em dispositivo nativo.",
+    "keyCharacteristics": [
+      "Fotografia contextual da contribuição, com alternativa editorial quando ausente e identificação dos exemplos ilustrativos.",
+      "Uma ação principal escura por tarefa e controles de apoio circulares.",
+      "Conteúdo legível, superfícies claras e situação sempre textual.",
+      "Detalhe em painel acoplado à página, com expansão sem modal."
+    ],
+    "rules": [
+      {
+        "name": "The Estado Factual Rule",
+        "body": "Recebida, pendente ou enviada usa tratamento neutro. Recebimento não significa risco; cor acompanha o texto e nunca substitui a situação fornecida pelo servidor.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "**Do** usar Instrument Sans local, tokens de theme/ e componentes compartilhados antes de criar variações.",
+      "**Do** mostrar foto enviada da contribuição, exemplo acadêmico explicitamente ilustrativo ou ficha editorial sem imagem, conforme a origem do registro.",
+      "**Do** manter situação textual, ação concreta e retorno da gestão acima de contagens.",
+      "**Do** preservar estados remotos, rascunhos, contexto territorial e alvos acessíveis.",
+      "**Do** validar conteúdo longo, foto ausente, erro, expansão e fonte ampliada nas plataformas declaradas."
+    ],
+    "donts": [
+      "**Don't** retornar ao azul de ação, à fonte nativa ou à paleta anterior deste documento.",
+      "**Don't** converter recebimento ou pendência em risco, nem sucesso visual em gravação não confirmada.",
+      "**Don't** usar fotografia turística como evidência, ranking competitivo, slogans ou vínculo institucional fictício.",
+      "**Don't** acrescentar gradientes cosméticos, cards aninhados ou animação entering em Marker.",
+      "**Don't** afirmar revisão visual concluída, teste nativo ou desempenho sem evidência específica."
+    ]
+  }
+}
