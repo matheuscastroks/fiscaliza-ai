@@ -43,11 +43,7 @@ export function HomeHighlights({ items }: { items: CityHighlight[] }) {
         return (
           <View
             key={(occurrence?.id || civic?.id) + highlight.kind}
-            style={[
-              styles.event,
-              { borderTopColor: colors[tone] },
-              index === 0 && styles.lead,
-            ]}
+            style={[styles.event, index === 0 && styles.lead]}
           >
             <AppText variant="caption" color={tone}>
               {label}
@@ -119,8 +115,7 @@ const styles = StyleSheet.create({
   event: {
     backgroundColor: colors.surface,
     borderRadius: 24,
-    borderWidth: 1,
-    borderColor: colors.divider,
+
     padding: spacing.md,
     gap: spacing.xs,
   },

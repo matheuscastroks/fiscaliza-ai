@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  ActivityIndicator,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
@@ -12,15 +7,20 @@ import type { CivicItem } from '@/shared/contracts';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { civicTerritory } from '@/shared/civic-territory';
+import { RecordCard } from '@/components/ui/RecordCard';
+import { assetUrl } from '@/services/http';
+import { layout } from '@/theme/layout';
 export const cityStyles = StyleSheet.create({
-  content: { padding: 20, paddingBottom: 110, gap: 20 },
-  section: { gap: spacing.sm },
+  content: {
+    padding: spacing.contentPadding,
+    paddingBottom: 120,
+    gap: spacing.xl,
+  },
+  section: { gap: spacing.md },
   row: {
     padding: spacing.md,
     backgroundColor: colors.surface,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.divider,
+    borderRadius: layout.radius.panel,
     gap: spacing.xs,
   },
   controls: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
@@ -45,32 +45,39 @@ export const statusLabel: Record<string, string> = {
 export function CivicRow({ item }: { item: CivicItem }) {
   const territory = civicTerritory(item);
   return (
-    <TouchableOpacity
-      style={cityStyles.row}
+    <RecordCard
+      title={item.title}
+      label={kindLabel[item.kind] + ' · ' + statusLabel[item.status]}
+      summary={item.summary}
+      meta={
+        (territory.scope === 'municipality'
+          ? 'Todo o município'
+          : territory.neighborhood) +
+        (item.kind === 'consultation'
+          ? ' · Até ' + new Date(item.closesAt).toLocaleDateString('pt-BR')
+          : '')
+      }
+      image={
+        item.kind === 'proposal' && item.images?.[0]
+          ? assetUrl(item.images[0])
+          : item.kind === 'action' && item.evidence[0]
+            ? assetUrl(item.evidence[0])
+            : undefined
+      }
       onPress={() =>
         router.push({
           pathname: '/CivicDetailsScreen',
           params: { id: item.id },
         })
       }
-      accessibilityRole="button"
-      accessibilityLabel={
-        item.title + ', ' + statusLabel[item.status] + ', ' + item.neighborhood
+      action={
+        item.kind === 'consultation'
+          ? 'Ver consulta'
+          : item.kind === 'proposal'
+            ? 'Ver proposta'
+            : 'Ver ação'
       }
     >
-      <AppText variant="caption" color="accent">
-        {kindLabel[item.kind]} · {statusLabel[item.status]}
-      </AppText>
-      <AppText variant="sectionTitle">{item.title}</AppText>
-      <AppText color="muted">{item.summary}</AppText>
-      <AppText variant="caption" color="muted">
-        {territory.scope === 'municipality'
-          ? 'Todo o município'
-          : territory.neighborhood}
-        {item.kind === 'consultation'
-          ? ' · Até ' + new Date(item.closesAt).toLocaleDateString('pt-BR')
-          : ''}
-      </AppText>
       {item.kind === 'action' && (
         <View style={{ gap: spacing.xxs }}>
           <AppText variant="caption" color="muted">
@@ -95,7 +102,7 @@ export function CivicRow({ item }: { item: CivicItem }) {
           </View>
         </View>
       )}
-    </TouchableOpacity>
+    </RecordCard>
   );
 }
 export function QueryState({

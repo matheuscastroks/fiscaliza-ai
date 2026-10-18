@@ -10,7 +10,8 @@ import { AppHeader } from '@/components/ui/AppHeader';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
-import { mutation } from '@/services/http';
+import { mutation, uploadImage } from '@/services/http';
+import { PhotoAttachments } from '@/components/ui/PhotoAttachments';
 import type { CivicItem } from '@/shared/contracts';
 import { civicTerritory } from '@/shared/civic-territory';
 import { spacing } from '@/theme/spacing';
@@ -22,9 +23,21 @@ function ProposalForm() {
   const user = useAuthStore((state) => state.user);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [preparingPhotos, setPreparingPhotos] = useState(false);
+  const uploadedImages = useRef(new Map<string, string>());
   const [neighborhood, setNeighborhood] = useState(user?.neighborhood || '');
-  const [scope, setScope] = useState<'municipality' | 'neighborhood'>(user?.neighborhood ? 'neighborhood' : 'municipality');
+  const [scope, setScope] = useState<'municipality' | 'neighborhood'>(
+    user?.neighborhood ? 'neighborhood' : 'municipality',
+  );
   const completed = useRef(false);
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
   const draftWrites = useRef(Promise.resolve());
   const draftKey =
     'fiscaliza:proposal-draft:' + user?.id + ':' + user?.municipality?.id;
@@ -43,10 +56,22 @@ function ProposalForm() {
           ) {
             setTitle(draft.title);
             setBody(draft.body);
+            setImages(
+              Array.isArray(draft.images)
+                ? draft.images
+                    .filter((uri: unknown) => typeof uri === 'string')
+                    .slice(0, 3)
+                : [],
+            );
             setNeighborhood(draft.neighborhood);
-            setScope(draft.scope === 'municipality' || draft.scope === 'neighborhood'
-              ? draft.scope
-              : civicTerritory({ neighborhood: draft.neighborhood }).scope === 'municipality' ? 'municipality' : 'neighborhood');
+            setScope(
+              draft.scope === 'municipality' || draft.scope === 'neighborhood'
+                ? draft.scope
+                : civicTerritory({ neighborhood: draft.neighborhood }).scope ===
+                    'municipality'
+                  ? 'municipality'
+                  : 'neighborhood',
+            );
           }
         } catch {
           /* ignore corrupt draft */
@@ -63,28 +88,66 @@ function ProposalForm() {
   useEffect(() => {
     if (!ready) return;
     const timer = setTimeout(() => {
-      draftWrites.current = draftWrites.current.then(async () => {
-        if (!completed.current) await AsyncStorage.setItem(draftKey, JSON.stringify({ title, body, neighborhood, scope }));
-      }).catch(() => {});
+      draftWrites.current = draftWrites.current
+        .then(async () => {
+          if (!completed.current)
+            await AsyncStorage.setItem(
+              draftKey,
+              JSON.stringify({ title, body, neighborhood, scope, images }),
+            );
+        })
+        .catch(() => {});
     }, 250);
     return () => clearTimeout(timer);
-  }, [title, body, neighborhood, scope, draftKey, ready]);
+  }, [title, body, neighborhood, scope, images, draftKey, ready]);
   const save = useMutation({
-    mutationFn: () =>
-      mutation<CivicItem>('/civic-items', 'POST', {
+    mutationFn: async () => {
+      const assertSession = () => {
+        if (!active.current)
+          throw new Error('Envio interrompido ao sair da proposta.');
+        const current = useAuthStore.getState().user;
+        if (
+          current?.id !== user?.id ||
+          current?.municipality?.id !== user?.municipality?.id
+        )
+          throw new Error(
+            'Sua sessão mudou. Reabra a proposta antes de enviar.',
+          );
+      };
+      assertSession();
+      const urls: string[] = [];
+      for (const uri of images) {
+        assertSession();
+        const url = uploadedImages.current.get(uri) || (await uploadImage(uri));
+        uploadedImages.current.set(uri, url);
+        urls.push(url);
+      }
+      assertSession();
+      return mutation<CivicItem>('/civic-items', 'POST', {
         kind: 'proposal',
+        images: urls,
         title,
         summary: body.slice(0, 180),
         body,
-        neighborhood: scope === 'municipality' ? 'Todo o município' : neighborhood.trim(),
-        territory: scope === 'municipality' ? { scope } : { scope, neighborhood: neighborhood.trim() },
-      }),
+        neighborhood:
+          scope === 'municipality' ? 'Todo o município' : neighborhood.trim(),
+        territory:
+          scope === 'municipality'
+            ? { scope }
+            : { scope, neighborhood: neighborhood.trim() },
+      });
+    },
     onSuccess: async (item) => {
       completed.current = true;
       await draftWrites.current;
       await AsyncStorage.removeItem(draftKey).catch(() => {});
       const current = useAuthStore.getState().user;
-      if (current?.id !== user?.id || current?.municipality?.id !== user?.municipality?.id) return;
+      if (
+        !active.current ||
+        current?.id !== user?.id ||
+        current?.municipality?.id !== user?.municipality?.id
+      )
+        return;
       router.replace({
         pathname: '/CivicDetailsScreen',
         params: { id: item.id },
@@ -94,7 +157,15 @@ function ProposalForm() {
   return (
     <AppScreen keyboardAvoiding>
       <AppHeader title="Propor uma melhoria" onBack={() => goBack()} />
-      <ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, paddingHorizontal: spacing.contentPadding, paddingVertical: spacing.md }}>
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: spacing.contentPadding,
+          paddingVertical: spacing.md,
+        }}
+      >
         <View style={{ gap: spacing.md }}>
           <AppText color="muted">
             Descreva uma melhoria e escolha a área que ela abrange.
@@ -106,16 +177,35 @@ function ProposalForm() {
             maxLength={120}
           />
           <AppText variant="label">Abrangência da proposta</AppText>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-            <AppButton title="Todo o município" variant={scope === 'municipality' ? 'primary' : 'secondary'} accessibilityState={{ selected: scope === 'municipality' }} onPress={() => setScope('municipality')} />
-            <AppButton title="Um bairro" variant={scope === 'neighborhood' ? 'primary' : 'secondary'} accessibilityState={{ selected: scope === 'neighborhood' }} onPress={() => setScope('neighborhood')} />
+          <View
+            style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}
+          >
+            <AppButton
+              title="Todo o município"
+              variant={scope === 'municipality' ? 'primary' : 'secondary'}
+              accessibilityState={{ selected: scope === 'municipality' }}
+              onPress={() => setScope('municipality')}
+            />
+            <AppButton
+              title="Um bairro"
+              variant={scope === 'neighborhood' ? 'primary' : 'secondary'}
+              accessibilityState={{ selected: scope === 'neighborhood' }}
+              onPress={() => setScope('neighborhood')}
+            />
           </View>
-          {scope === 'neighborhood' ? <AppInput
-            label="Bairro"
-            value={neighborhood}
-            onChangeText={setNeighborhood}
-            maxLength={100}
-          /> : <AppText color="muted">A proposta será exibida nos recortes de todos os bairros do seu município.</AppText>}
+          {scope === 'neighborhood' ? (
+            <AppInput
+              label="Bairro"
+              value={neighborhood}
+              onChangeText={setNeighborhood}
+              maxLength={100}
+            />
+          ) : (
+            <AppText color="muted">
+              A proposta será exibida nos recortes de todos os bairros do seu
+              município.
+            </AppText>
+          )}
           <AppInput
             label="O que mudar e por quê"
             value={body}
@@ -123,6 +213,12 @@ function ProposalForm() {
             multiline
             style={{ minHeight: 140 }}
             maxLength={5000}
+          />
+          <PhotoAttachments
+            images={images}
+            onChange={setImages}
+            disabled={save.isPending}
+            onPreparingChange={setPreparingPhotos}
           />
           {save.error && (
             <AppText color="risk" accessibilityLiveRegion="polite">
@@ -134,6 +230,7 @@ function ProposalForm() {
             loading={save.isPending}
             disabled={
               !ready ||
+              preparingPhotos ||
               title.trim().length < 5 ||
               body.trim().length < 10 ||
               (scope === 'neighborhood' && !neighborhood.trim())

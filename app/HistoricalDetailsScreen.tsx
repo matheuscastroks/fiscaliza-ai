@@ -33,13 +33,15 @@ export default function HistoricalDetailsScreen() {
   const civic = item && 'kind' in item ? item : undefined;
   const occurrence = item && !('kind' in item) ? item : undefined;
   const images =
-    occurrence?.images || (civic?.kind === 'action' ? civic.evidence : []);
+    occurrence?.images ||
+    (civic?.kind === 'action'
+      ? civic.evidence
+      : civic?.kind === 'proposal'
+        ? civic.images || []
+        : []);
   return (
     <AppScreen>
-      <AppHeader
-        title="Histórico de participação"
-        onBack={() => goBack()}
-      />
+      <AppHeader title="Histórico de participação" onBack={() => goBack()} />
       <ScrollView contentContainerStyle={cityStyles.content}>
         <AppText variant="label" color="muted">
           Somente leitura

@@ -1,25 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
-import { AppScreen } from '@/components/ui/AppScreen';
-import { AppHeader } from '@/components/ui/AppHeader';
-import { AppText } from '@/components/ui/AppText';
-import { AppButton } from '@/components/ui/AppButton';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppHeader } from '@/components/ui/AppHeader';
+import { AppScreen } from '@/components/ui/AppScreen';
+import { AppText } from '@/components/ui/AppText';
 import { CivicRow, QueryState, cityStyles } from '@/features/city/CityUI';
 import { HomeHighlights } from '@/features/city/HomeHighlights';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useCityQuery } from '@/features/city/useCityQuery';
-import { useTerritorySelection } from '@/stores/territoryStore';
+import { cityHighlights, consultationIsOpen } from '@/shared/city-highlights';
 import {
   civicTerritory,
   matchesNeighborhood,
   neighborhoodOptions,
   occurrenceMatchesNeighborhood,
 } from '@/shared/civic-territory';
-import { cityHighlights, consultationIsOpen } from '@/shared/city-highlights';
 import type { CivicItem, Occurrence } from '@/shared/contracts';
 import { useAuthStore } from '@/stores/authStore';
+import { useTerritorySelection } from '@/stores/territoryStore';
+import { colors } from '@/theme/colors';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
@@ -60,6 +63,15 @@ export default function HomeScreen() {
     user?.id || '',
     clock,
   );
+  const urgentHighlights = highlights.filter(
+    (item) => item.kind === 'evaluation' || item.kind === 'consultation',
+  );
+  const responses = highlights.filter(
+    (item) => item.kind !== 'evaluation' && item.kind !== 'consultation',
+  );
+  const featuredOccurrences = [...localOccurrences]
+    .sort((a, b) => Number(Boolean(b.images[0])) - Number(Boolean(a.images[0])))
+    .slice(0, 2);
   const municipalCount = neighborhood
     ? localItems.filter((item) => civicTerritory(item).scope === 'municipality')
         .length
@@ -73,21 +85,39 @@ export default function HomeScreen() {
   return (
     <AppScreen>
       <AppHeader
-        title="Minha cidade"
+        title={`Olá, ${user?.name ? user.name.split(' ')[0] : 'Vizinho'}`}
         context={
           user?.municipality
             ? `${user.municipality.name} · ${user.municipality.state}`
-            : 'Seu município'
+            : 'Bem-vindo ao Fiscaliza aí'
+        }
+        rightElement={
+          <TouchableOpacity
+            onPress={() => router.push('/(tabs)/ProfileScreen')}
+            accessibilityRole="button"
+            accessibilityLabel="Ir para meu perfil"
+            style={styles.avatarButton}
+          >
+            <UserAvatar size={48} />
+          </TouchableOpacity>
         }
       />
       <ScrollView contentContainerStyle={cityStyles.content}>
-        <View style={cityStyles.section}>
-          <AppText variant="caption" color="muted">
-            {new Date(clock).toLocaleDateString('pt-BR', {
-              day: 'numeric',
-              month: 'long',
-            })}
+        <TouchableOpacity
+          style={styles.search}
+          onPress={() => router.push('/(tabs)/TerritoryScreen')}
+          accessibilityRole="button"
+          accessibilityLabel="Pesquisar no território"
+        >
+          <Ionicons name="search-outline" size={24} color={colors.ink} />
+          <AppText color="muted" style={{ flex: 1 }}>
+            Pesquisar no território
           </AppText>
+          <View style={styles.searchArrow}>
+            <Ionicons name="options-outline" size={22} color={colors.white} />
+          </View>
+        </TouchableOpacity>
+        <View style={cityStyles.section}>
           <AppText variant="screenTitle">
             Agora em {neighborhood || user?.municipality?.name || 'sua cidade'}
           </AppText>
@@ -100,16 +130,6 @@ export default function HomeScreen() {
             value={neighborhood}
             onChange={setNeighborhood}
           />
-          {civic.data && occurrences.data && (
-            <AppText color="muted">
-              {
-                localOccurrences.filter((item) => item.status === 'in_progress')
-                  .length
-              }{' '}
-              atendimentos em andamento · {consultations.length} consultas
-              abertas
-            </AppText>
-          )}
           {municipalCount > 0 && (
             <AppText variant="caption" color="muted">
               Inclui {municipalCount}{' '}
@@ -127,8 +147,10 @@ export default function HomeScreen() {
           error={civic.error || activity.error || occurrences.error}
           retry={refresh}
         />
-        {highlights.length > 0 && <HomeHighlights items={highlights} />}
-        {ready && !highlights.length && (
+        {urgentHighlights.length > 0 && (
+          <HomeHighlights items={urgentHighlights.slice(0, 1)} />
+        )}
+        {ready && !highlights.length && localOccurrences.length === 0 && (
           <View style={cityStyles.section}>
             <AppText variant="sectionTitle">Acompanhe este território</AppText>
             <AppText color="muted">
@@ -141,6 +163,26 @@ export default function HomeScreen() {
               onPress={() => router.push('/(tabs)/TerritoryScreen')}
             />
           </View>
+        )}
+        {localOccurrences.length > 0 && (
+          <View style={cityStyles.section}>
+            <AppText variant="sectionTitle">Ocorrências no território</AppText>
+            {featuredOccurrences.map((problem) => (
+              <OccurrenceRow
+                key={problem.id}
+                problem={problem}
+                onPress={() =>
+                  router.push({
+                    pathname: '/ProblemDetailsScreen',
+                    params: { id: problem.id },
+                  })
+                }
+              />
+            ))}
+          </View>
+        )}
+        {responses.length > 0 && (
+          <HomeHighlights items={responses.slice(0, 1)} />
         )}
         <View style={cityStyles.section}>
           <AppText variant="sectionTitle">
@@ -213,3 +255,48 @@ export default function HomeScreen() {
     </AppScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  search: {
+    minHeight: 64,
+    backgroundColor: colors.surface,
+    borderRadius: 32,
+    paddingLeft: 20,
+    paddingRight: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  searchArrow: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: colors.surface,
+    borderWidth: 1.5,
+    borderColor: colors.divider,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  avatarFallback: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
@@ -12,6 +12,7 @@ export interface AppHeaderProps {
   context?: string;
   onBack?: () => void;
   rightElement?: React.ReactNode;
+  overlay?: boolean;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -19,43 +20,57 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   context,
   onBack,
   rightElement,
+  overlay = false,
 }) => {
   return (
-    <View style={styles.container}>
-      <View style={styles.topRow}>
+    <View
+      style={[styles.container, overlay && styles.overlay]}
+      pointerEvents={overlay ? 'box-none' : 'auto'}
+    >
+      <View style={styles.topRow} pointerEvents={overlay ? 'box-none' : 'auto'}>
         {!onBack && (
           <TouchableOpacity
-            style={styles.backButton}
+            style={styles.circleButton}
             onPress={() => useMenu.getState().setOpen(true)}
             accessibilityRole="button"
             accessibilityLabel="Abrir menu"
           >
-            <MaterialIcons name="menu" size={24} color={colors.ink} />
+            <Ionicons name="menu-outline" size={22} color={colors.ink} />
           </TouchableOpacity>
         )}
         {onBack && (
           <TouchableOpacity
-            style={styles.backButton}
+            style={styles.circleButton}
             onPress={onBack}
             accessibilityRole="button"
             accessibilityLabel="Voltar"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <MaterialIcons name="arrow-back" size={24} color={colors.ink} />
+            <Ionicons name="chevron-back" size={20} color={colors.ink} />
           </TouchableOpacity>
         )}
-        <View style={styles.titleArea}>
+        <View
+          style={styles.titleArea}
+          pointerEvents={overlay ? 'none' : 'auto'}
+        >
+          <AppText
+            variant="sectionTitle"
+            color="ink"
+            numberOfLines={1}
+            style={onBack ? { textAlign: 'center' } : undefined}
+          >
+            {title}
+          </AppText>
           {context ? (
             <AppText variant="caption" color="muted" numberOfLines={1}>
               {context}
             </AppText>
           ) : null}
-          <AppText variant="sectionTitle" color="ink" numberOfLines={1}>
-            {title}
-          </AppText>
         </View>
         {rightElement ? (
           <View style={styles.rightArea}>{rightElement}</View>
+        ) : onBack ? (
+          <View style={{ width: 48 }} />
         ) : null}
       </View>
     </View>
@@ -63,25 +78,35 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 };
 
 const styles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 8,
+    zIndex: 2,
+    backgroundColor: colors.transparent,
+  },
   container: {
     paddingHorizontal: spacing.contentPadding,
     paddingTop: spacing.xs,
     paddingBottom: spacing.sm,
     backgroundColor: colors.canvas,
-    borderBottomWidth: layout.borderWidth.hairline,
-    borderBottomColor: colors.divider,
+    borderBottomWidth: 0,
   },
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: layout.touchTarget.minHeight,
   },
-  backButton: {
+  // Botões circulares brancos com sombra sutil da referência
+  circleButton: {
     marginRight: spacing.sm,
-    justifyContent: 'center',
-    alignItems: 'center',
     width: 48,
     height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   titleArea: {
     flex: 1,

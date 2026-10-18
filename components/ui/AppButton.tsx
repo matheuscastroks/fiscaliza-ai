@@ -11,9 +11,14 @@ import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { AppText } from './AppText';
 
-export type AppButtonVariant = 'primary' | 'secondary' | 'quiet' | 'destructive';
+export type AppButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'quiet'
+  | 'destructive';
 
-export interface AppButtonProps extends Omit<TouchableOpacityProps, 'children'> {
+export interface AppButtonProps
+  extends Omit<TouchableOpacityProps, 'children'> {
   title: string;
   variant?: AppButtonVariant;
   loading?: boolean;
@@ -82,7 +87,11 @@ export const AppButton: React.FC<AppButtonProps> = ({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'primary' || variant === 'destructive' ? colors.white : colors.ink}
+          color={
+            variant === 'primary' || variant === 'destructive'
+              ? colors.white
+              : colors.ink
+          }
         />
       ) : (
         <View style={styles.contentRow}>
@@ -98,7 +107,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
 
 const styles = StyleSheet.create({
   baseContainer: {
-    minHeight: layout.touchTarget.minHeight,
+    minHeight: 54,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     borderRadius: layout.radius.button,

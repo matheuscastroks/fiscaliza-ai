@@ -29,6 +29,14 @@ export default function AboutScreen() {
             apresentação. Não possui vínculo com uma prefeitura real e não
             encaminha demandas a órgãos públicos.
           </AppText>
+          <AppText>
+            As fotografias dos registros iniciais são exemplos ilustrativos de
+            iluminação, bancos e calçadas, obtidos no Wikimedia Commons sob
+            licença CC0. Não representam os endereços desses registros. Fotos
+            anexadas por você permanecem associadas à sua contribuição. Os
+            retratos das contas de apresentação são ilustrativos, obtidos no
+            Pexels sob sua licença de uso, e não representam usuários reais.
+          </AppText>
           <AppText variant="sectionTitle">Seus dados</AppText>
           <AppText>
             O CEP é consultado no ViaCEP para identificar seu município. Os

@@ -10,6 +10,7 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { AppText } from './AppText';
+import { fontFamilies } from '@/theme/typography';
 
 export interface AppInputProps extends TextInputProps {
   label: string;
@@ -51,6 +52,7 @@ export const AppInput: React.FC<AppInputProps> = ({
         accessibilityHint={error || helper}
         style={[
           styles.input,
+          rest.multiline && styles.multiline,
           isFocused && styles.inputFocused,
           Boolean(error) && styles.inputError,
           !editable && styles.inputDisabled,
@@ -88,7 +90,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   input: {
-    minHeight: layout.touchTarget.minHeight,
+    minHeight: 56,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     backgroundColor: colors.surface,
@@ -97,6 +99,13 @@ const styles = StyleSheet.create({
     borderRadius: layout.radius.button,
     color: colors.ink,
     fontSize: 16,
+    fontFamily: fontFamilies.regular,
+  },
+  multiline: {
+    minHeight: 120,
+    borderRadius: layout.radius.panel,
+    textAlignVertical: 'top',
+    paddingTop: spacing.md,
   },
   inputFocused: {
     borderColor: colors.borderActive,

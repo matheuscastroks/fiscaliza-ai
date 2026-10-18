@@ -1,15 +1,15 @@
-import { Platform } from 'react-native';
-
 /**
- * Fiscaliza-AI — Regras de Layout e Superfície (V2)
+ * Fiscaliza aí — Regras de Layout e Superfície (V2)
  */
 
 export const layout = {
   radius: {
-    xs: 4,
-    button: 8,
-    panel: 8,
-    sheet: 16,
+    xs: 6,
+    sm: 10,
+    button: 28,
+    card: 28,
+    panel: 20,
+    sheet: 32,
     pill: 9999,
   },
   borderWidth: {
@@ -17,8 +17,8 @@ export const layout = {
     focus: 2,
   },
   touchTarget: {
-    minHeight: Platform.OS === 'ios' ? 44 : 48,
-    minWidth: Platform.OS === 'ios' ? 44 : 48,
+    minHeight: 48,
+    minWidth: 48,
   },
 } as const;
 

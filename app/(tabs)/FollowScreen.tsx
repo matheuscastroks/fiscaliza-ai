@@ -43,7 +43,7 @@ export default function FollowScreen() {
             void query.refetch();
           }}
         />
-        <View>
+        <View style={cityStyles.section}>
           <AppText variant="sectionTitle">
             Ocorrências que registrei ou acompanho
           </AppText>
@@ -65,7 +65,7 @@ export default function FollowScreen() {
             </AppText>
           )}
         </View>
-        <View>
+        <View style={cityStyles.section}>
           <AppText variant="sectionTitle">Propostas, consultas e ações</AppText>
           {localItems.map((i) => (
             <CivicRow key={i.id} item={i} />
@@ -78,7 +78,7 @@ export default function FollowScreen() {
           )}
         </View>
         {previous.length > 0 && (
-          <View style={{ gap: 12 }}>
+          <View style={cityStyles.section}>
             <AppText variant="sectionTitle">
               Histórico de outros municípios
             </AppText>

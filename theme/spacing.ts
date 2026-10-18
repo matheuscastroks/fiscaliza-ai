@@ -1,5 +1,5 @@
 /**
- * Fiscaliza-AI — Escala de Espaçamento (V2)
+ * Fiscaliza aí — Escala de Espaçamento (V2)
  * Espaçamentos funcionais baseados na grade de 4pt.
  */
 
@@ -14,7 +14,7 @@ export const spacing = {
   xxxl: 40,
 
   // Alias semânticos
-  contentPadding: 16,
+  contentPadding: 20,
   gutter: 16,
   rowGap: 12,
   sectionGap: 24,

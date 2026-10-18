@@ -9,7 +9,22 @@ import { useAuthStore } from '@/stores/authStore';
 import { queryClient } from '@/services/http';
 import { SideMenu } from '@/components/ui/SideMenu';
 import { colors } from '@/theme/colors';
+import {
+  useFonts,
+  InstrumentSans_400Regular,
+  InstrumentSans_500Medium,
+  InstrumentSans_600SemiBold,
+  InstrumentSans_700Bold,
+} from '@expo-google-fonts/instrument-sans';
+export const unstable_settings = { initialRouteName: '(tabs)' };
+
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    InstrumentSans_400Regular,
+    InstrumentSans_500Medium,
+    InstrumentSans_600SemiBold,
+    InstrumentSans_700Bold,
+  });
   const { isReady, isAuthenticated, initialize, user } = useAuthStore();
   const segments = useSegments();
   useEffect(() => {
@@ -30,7 +45,7 @@ export default function RootLayout() {
     )
       router.replace('/MunicipalityScreen');
   }, [isReady, isAuthenticated, segments, user?.municipality]);
-  if (!isReady) return null;
+  if (!isReady || (!fontsLoaded && !fontError)) return null;
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
@@ -41,7 +56,17 @@ export default function RootLayout() {
               headerShown: false,
               contentStyle: { backgroundColor: colors.canvas },
             }}
-          />
+          >
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen
+              name="ProblemDetailsScreen"
+              options={{ animation: 'slide_from_bottom' }}
+            />
+            <Stack.Screen
+              name="CivicDetailsScreen"
+              options={{ animation: 'slide_from_bottom' }}
+            />
+          </Stack>
           <SideMenu />
         </QueryClientProvider>
       </SafeAreaProvider>

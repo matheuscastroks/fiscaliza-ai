@@ -2,7 +2,6 @@ import { goBack } from '@/utils/navigation';
 import { cityStyles } from '@/features/city/CityUI';
 import React, { useState } from 'react';
 import { View, ScrollView } from 'react-native';
-
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
@@ -29,10 +28,7 @@ export default function PresentationScreen() {
   };
   return (
     <AppScreen>
-      <AppHeader
-        title="Controles de apresentação"
-        onBack={() => goBack()}
-      />
+      <AppHeader title="Controles de apresentação" onBack={() => goBack()} />
       <ScrollView
         contentContainerStyle={cityStyles.content}
         keyboardShouldPersistTaps="handled"

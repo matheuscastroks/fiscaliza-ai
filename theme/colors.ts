@@ -1,29 +1,30 @@
 /**
- * Fiscaliza-AI — Tokens de Cores Semânticas (V2)
- * Sinalização & Registro Urbano. Base mineral com azul utilitário.
- * Verificado com contrastes WCAG AA/AAA.
+ * Paleta da referência fornecida pelo usuário: Instrument Sans, ônix e branco.
  */
 
 export const colors = {
-  // Superfícies e Fundos
-  canvas: '#FAFAF8',
+  // Superfícies e Fundos (Paleta #F5F6F7 da referência)
+  canvas: '#F5F6F7',
   surface: '#FFFFFF',
-  surfaceSubdued: '#F4F5F5',
+  surfaceSubdued: '#ECEEF0',
 
-  // Tipografia e Conteúdo Factual
-  ink: '#18232A',
-  muted: '#4E5A61',
-  subtle: '#56656D',
+  // Tipografia e Conteúdo Factual (Ônix #212529 da referência)
+  ink: '#212529',
+  muted: '#60666C',
+  subtle: '#676D73',
 
   // Estrutura e Separação
-  divider: '#DCE1E2',
-  border: '#DCE1E2',
-  borderActive: '#176287',
+  divider: '#E5E8EB',
+  border: '#E5E8EB',
+  borderActive: '#212529',
+
+  // Elementos de Destaque da Referência
+  darkPill: '#212529',
 
   // Ação e Navegação Territorial
-  accent: '#176287',
-  accentPressed: '#104864',
-  accentSoft: '#E8F2F7',
+  accent: '#212529',
+  accentPressed: '#383D42',
+  accentSoft: '#ECEEF0',
 
   // Estados Semânticos de Ocorrência e Sistema
   risk: '#9E3431',

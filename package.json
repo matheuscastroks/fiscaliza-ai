@@ -16,6 +16,7 @@
     "municipal:build": "npm run build --prefix municipal"
   },
   "dependencies": {
+    "@expo-google-fonts/instrument-sans": "^0.4.2",
     "@expo/vector-icons": "^15.0.2",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
@@ -30,6 +31,7 @@
     "expo-haptics": "~57.0.3",
     "expo-image": "~57.0.5",
     "expo-image-picker": "~57.0.20",
+    "expo-linear-gradient": "~57.0.2",
     "expo-linking": "~57.0.10",
     "expo-location": "~57.0.21",
     "expo-router": "~57.0.21",

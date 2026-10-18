@@ -32,9 +32,9 @@ export const StatusText: React.FC<StatusTextProps> = ({ status, style }) => {
       case 'pending':
       default:
         return {
-          bg: colors.riskSurface,
-          text: colors.risk,
-          border: colors.risk,
+          bg: colors.surfaceSubdued,
+          text: colors.ink,
+          border: colors.border,
         };
     }
   };
@@ -52,18 +52,16 @@ export const StatusText: React.FC<StatusTextProps> = ({ status, style }) => {
 
 const styles = StyleSheet.create({
   badge: {
-    paddingHorizontal: spacing.xs,
-    paddingVertical: spacing.xxs,
-    borderRadius: layout.radius.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: layout.radius.pill,
     alignSelf: 'flex-start',
     alignItems: 'center',
     justifyContent: 'center',
   },
   text: {
     fontWeight: '600',
-    fontSize: 11,
-    lineHeight: 14,
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
+    fontSize: 12,
+    lineHeight: 16,
   },
 });

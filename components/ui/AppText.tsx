@@ -1,7 +1,11 @@
 import React from 'react';
-import { Text, TextProps } from 'react-native';
+import { Text, TextProps, StyleSheet } from 'react-native';
 import { colors } from '@/theme/colors';
-import { typography, TypographyVariant } from '@/theme/typography';
+import {
+  typography,
+  TypographyVariant,
+  fontForWeight,
+} from '@/theme/typography';
 
 export interface AppTextProps extends TextProps {
   variant?: TypographyVariant;
@@ -19,10 +23,19 @@ export const AppText: React.FC<AppTextProps> = ({
 }) => {
   const textColor = (colors as Record<string, string>)[color] || color;
   const typographyStyle = typography[variant] || typography.body;
+  const flattened = StyleSheet.flatten([typographyStyle, style]);
 
   return (
     <Text
-      style={[typographyStyle, { color: textColor }, style]}
+      style={[
+        typographyStyle,
+        { color: textColor },
+        style,
+        {
+          fontFamily: fontForWeight(flattened.fontWeight),
+          fontWeight: 'normal',
+        },
+      ]}
       allowFontScaling={allowFontScaling}
       {...rest}
     >

@@ -1,27 +1,26 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
-import { colors } from '@/theme/colors';
+import { Ionicons } from '@expo/vector-icons';
+import { FloatingGlassTabBar } from '@/components/ui/FloatingGlassTabBar';
+
 export default function TabLayout() {
   return (
     <Tabs
+      tabBar={(props) => <FloatingGlassTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.muted,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.divider,
-        },
-        tabBarLabelStyle: { fontSize: 12 },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Início',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="home" color={color} size={size} />
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons
+              name={focused ? 'home' : 'home-outline'}
+              color={color}
+              size={size}
+            />
           ),
         }}
       />
@@ -29,8 +28,12 @@ export default function TabLayout() {
         name="TerritoryScreen"
         options={{
           title: 'Território',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="map" color={color} size={size} />
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons
+              name={focused ? 'map' : 'map-outline'}
+              color={color}
+              size={size}
+            />
           ),
         }}
       />
@@ -38,8 +41,12 @@ export default function TabLayout() {
         name="ParticipateScreen"
         options={{
           title: 'Participar',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="people-outline" color={color} size={size} />
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons
+              name={focused ? 'people' : 'people-outline'}
+              color={color}
+              size={size}
+            />
           ),
         }}
       />
@@ -47,9 +54,9 @@ export default function TabLayout() {
         name="FollowScreen"
         options={{
           title: 'Acompanhar',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons
-              name="notifications-none"
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons
+              name={focused ? 'notifications' : 'notifications-outline'}
               color={color}
               size={size}
             />

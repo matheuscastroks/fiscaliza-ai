@@ -6,7 +6,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { Problem } from '@/data/mockData';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -97,11 +97,7 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
           {isAnalyzing ? (
             <ActivityIndicator size="small" color={colors.accent} />
           ) : (
-            <MaterialIcons
-              name="auto-fix-high"
-              size={18}
-              color={colors.accent}
-            />
+            <Ionicons name="sparkles-outline" size={18} color={colors.accent} />
           )}
           <AppText
             variant="label"
@@ -214,7 +210,11 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
                   accessibilityRole="button"
                   accessibilityLabel="Remover foto"
                 >
-                  <MaterialIcons name="close" size={16} color={colors.white} />
+                  <Ionicons
+                    name="close-circle"
+                    size={18}
+                    color={colors.white}
+                  />
                 </TouchableOpacity>
               </View>
             ))}
@@ -226,7 +226,7 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
             accessibilityRole="button"
             accessibilityLabel="Adicionar foto da galeria"
           >
-            <MaterialIcons name="add-a-photo" size={22} color={colors.accent} />
+            <Ionicons name="camera-outline" size={22} color={colors.accent} />
             <AppText variant="label" color="accent" style={styles.addPhotoText}>
               Adicionar foto
             </AppText>
@@ -284,6 +284,8 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   selectorChip: {
+    minHeight: 48,
+    justifyContent: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: layout.radius.button,
@@ -306,7 +308,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: layout.borderWidth.hairline,
-    borderStyle: 'dashed',
+    borderStyle: 'solid',
     borderColor: colors.accent,
     borderRadius: layout.radius.button,
     paddingVertical: spacing.lg,
@@ -336,8 +338,8 @@ const styles = StyleSheet.create({
     right: 4,
     backgroundColor: colors.ink,
     borderRadius: layout.radius.pill,
-    width: 24,
-    height: 24,
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
   },

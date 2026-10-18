@@ -59,6 +59,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.canvas,
+    width: '100%',
+    maxWidth: 760,
+    alignSelf: 'center',
   },
   flex: {
     flex: 1,
