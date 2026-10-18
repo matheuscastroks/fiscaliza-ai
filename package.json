@@ -8,7 +8,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "test": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test demo/*.test.ts",
+    "test": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test demo/*.test.ts && node --test scripts/native-upload-compatibility.test.cjs",
     "lint": "expo lint",
     "api:start": "npm start --prefix backend",
     "api:test": "npm test --prefix backend",

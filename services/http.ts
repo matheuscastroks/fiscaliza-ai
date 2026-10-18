@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { fetch } from 'expo/fetch';
 import * as SecureStore from 'expo-secure-store';
 import { QueryClient } from '@tanstack/react-query';
 import type { ApiResult } from '@/shared/contracts';
@@ -10,6 +11,21 @@ export const queryClient = new QueryClient({
 });
 let sessionToken: string | null = null;
 let onExpired: (() => void) | undefined;
+async function readResult<T>(
+  path: string,
+  status: number,
+  result: ApiResult<T>,
+): Promise<T> {
+  if (status === 401 && path !== '/auth/login') {
+    await saveToken(null);
+    onExpired?.();
+  }
+  if (status < 200 || status >= 300 || !result.success)
+    throw new Error(
+      result.error || 'Não foi possível concluir. Tente novamente.',
+    );
+  return result.data as T;
+}
 export function onSessionExpired(callback: () => void) {
   onExpired = callback;
 }
@@ -51,16 +67,8 @@ export async function request<T>(
             ? body
             : JSON.stringify(body),
     });
-    if (response.status === 401 && path !== '/auth/login') {
-      await saveToken(null);
-      onExpired?.();
-    }
     const result = (await response.json()) as ApiResult<T>;
-    if (!response.ok || !result.success)
-      throw new Error(
-        result.error || 'Não foi possível concluir. Tente novamente.',
-      );
-    return result.data as T;
+    return await readResult(path, response.status, result);
   } catch (error) {
     if (
       error instanceof TypeError ||
@@ -99,21 +107,44 @@ export function assetUrl(url: string) {
 }
 export async function uploadImage(uri: string): Promise<string> {
   if (uri.startsWith('/api/attachments/') || /^https?:/.test(uri)) return uri;
-  const form = new FormData();
-  if (Platform.OS === 'web') {
-    const blob = await (await fetch(uri)).blob();
-    form.append('file', blob, 'evidencia.jpg');
-  } else {
-    const type = /\.png(?:\?|$)/i.test(uri)
-      ? 'image/png'
-      : /\.webp(?:\?|$)/i.test(uri)
-        ? 'image/webp'
-        : 'image/jpeg';
-    form.append('file', {
-      uri,
-      name: 'evidencia.' + type.split('/')[1],
-      type,
-    } as unknown as Blob);
+  if (Platform.OS !== 'web') {
+    // This API uses the existing native uploader, without constructing File or
+    // passing React Native URI descriptors through Expo fetch's FormData encoder.
+    const fs = await import('expo-file-system/legacy');
+    if (!(await fs.getInfoAsync(uri)).exists)
+      throw new Error(
+        'A foto não está mais disponível. Escolha a imagem novamente.',
+      );
+    const task = fs.createUploadTask(API_URL + '/attachments', uri, {
+      httpMethod: 'POST',
+      uploadType: fs.FileSystemUploadType.MULTIPART,
+      fieldName: 'file',
+      headers: {
+        'X-Fiscaliza-Client': 'citizen',
+        ...(sessionToken ? { Authorization: 'Bearer ' + sessionToken } : {}),
+      },
+    });
+    let expired = false;
+    const timer = setTimeout(() => {
+      expired = true;
+      void task.cancelAsync().catch(() => undefined);
+    }, 15000);
+    try {
+      const response = await task.uploadAsync();
+      if (expired || !response)
+        throw new Error('O envio da foto foi interrompido. Tente novamente.');
+      const result = await readResult<{ url: string }>(
+        '/attachments',
+        response.status,
+        JSON.parse(response.body),
+      );
+      return result.url;
+    } finally {
+      clearTimeout(timer);
+    }
   }
+  const form = new FormData();
+  const blob = await (await fetch(uri)).blob();
+  form.append('file', blob, 'evidencia.jpg');
   return (await request<{ url: string }>('/attachments', 'POST', form)).url;
 }
