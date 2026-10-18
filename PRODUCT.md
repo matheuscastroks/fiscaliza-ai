@@ -39,3 +39,8 @@ Auditoria inicial de código e testes registrada em plan/09-participacao-integra
 
 ## Limites
 Sem GOV.BR, orçamento participativo, chat, push, estatística representativa de toda a população ou publicação automática. Leituras remotas exigem serviço disponível; o formulário conserva rascunhos locais em falhas. Dados pessoais e fotos de terceiros não são necessários à apresentação.
+
+## Recorte territorial e retorno
+Home, Território e Resultados compartilham a seleção de bairro, isolada por cidadão e município. Iniciativas podem abranger o município, um bairro ou um local explícito. As municipais continuam disponíveis no recorte local com sua abrangência identificada; somente pontos informados recebem marcadores. Indicadores municipais ficam separados dos bairros.
+
+A Home destaca avaliações pendentes do autor, respostas, consultas próximas do encerramento e entregas recentes, quando existem. Respostas da gestão têm origem registrada; atualizações antigas sem origem recebem rótulo neutro. O histórico de municípios anteriores abre somente leitura para autoria ou participação persistida.

@@ -31,3 +31,6 @@ Gestão: navegação lateral → busca/filtros/fila → detalhe/histórico → a
 
 ## Verificação
 Inspecionar todas as telas em dispositivos suportados, fonte ampliada e teclado aberto. Inspeção web cobre apenas web. Medir desempenho em release antes de declarar otimização.
+
+## Consolidação territorial
+O seletor de bairro é comum às jornadas. Marcadores distinguem tipos de conteúdo e exigem localização explícita; iniciativas sem ponto permanecem na lista. Abrangência municipal nunca é apresentada como bairro. Destaques da Home usam situação, resposta, prazo e resultado reais, com ação específica e hierarquia proporcional à tarefa. Ausência de novidade não gera urgência artificial.

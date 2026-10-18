@@ -54,3 +54,8 @@ Evidências e limitações: `plan/11-validacao-integrada.md` e `plan/13-validaca
 O deploy web para VPS inclui cidadão, gestão, API e HTTPS, usando `compose.production.yaml` e `.github/workflows/release.yml`. Consulte [deploy/README.md](deploy/README.md) para preparar DNS, ambiente, registry e SSH. A publicação automática depende de `VPS_DEPLOY_ENABLED=true`; o Compose local continua disponível para desenvolvimento.
 
 A sugestão textual usa Gemini no servidor quando configurado, com heurística em falhas. Fotos permanecem na aplicação; os arquivos de evidência são públicos por URL UUID opaca. Persistência requer volumes e backup. ViaCEP e IBGE podem ficar indisponíveis: a interface conserva o trabalho e permite tentar novamente, sem inventar um município.
+
+## Demonstração e consolidação territorial
+Home, Território e Resultados compartilham o bairro escolhido. Ocorrências e iniciativas participam da exploração; o mapa exige coordenadas explícitas, enquanto a lista inclui conteúdos de bairro ou município sem ponto. Indicadores separam abrangência municipal de bairros. Acompanhamentos de cidades anteriores possuem detalhe autorizado somente leitura.
+
+Consulte [o roteiro reproduzível](plan/15-roteiro-demonstracao.md) e [a validação desta consolidação](plan/16-validacao-consolidacao.md).
