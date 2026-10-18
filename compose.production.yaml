@@ -1,0 +1,86 @@
+name: fiscaliza-ai
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fiscaliza
+      POSTGRES_USER: fiscaliza
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U fiscaliza -d fiscaliza']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  api:
+    image: ${IMAGE_PREFIX:?Configure IMAGE_PREFIX}-api:${IMAGE_TAG:?Configure IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://fiscaliza:${POSTGRES_PASSWORD}@postgres:5432/fiscaliza
+      NODE_ENV: production
+      DEMO_PASSWORD: ${DEMO_PASSWORD:?Configure DEMO_PASSWORD}
+      WEB_ORIGINS: https://${PUBLIC_DOMAIN:?Configure PUBLIC_DOMAIN},https://${MUNICIPAL_DOMAIN:?Configure MUNICIPAL_DOMAIN}
+      UPLOAD_DIR: /app/uploads
+      TRUST_PROXY: 172.30.97.0/24
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3001/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      start_period: 40s
+      retries: 18
+  citizen:
+    image: ${IMAGE_PREFIX}-citizen:${IMAGE_TAG}
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1/LoginScreen']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  municipal:
+    image: ${IMAGE_PREFIX}-municipal:${IMAGE_TAG}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1/']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  edge:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN}
+      MUNICIPAL_DOMAIN: ${MUNICIPAL_DOMAIN}
+    volumes:
+      - ${RELEASE_DIR:?Use deploy/deploy.sh}/deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - tls:/data
+      - caddy_config:/config
+    depends_on:
+      citizen:
+        condition: service_healthy
+      municipal:
+        condition: service_healthy
+volumes:
+  postgres:
+  uploads:
+  tls:
+  caddy_config:
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.97.0/24

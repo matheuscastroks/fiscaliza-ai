@@ -50,3 +50,6 @@ backend/uploads/
 backend/openapi.json
 municipal/dist/
 postman/reports/
+
+# Production runtime credentials
+.env.production

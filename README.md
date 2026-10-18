@@ -51,6 +51,6 @@ Evidências e limitações: `plan/11-validacao-integrada.md` e `plan/13-validaca
 
 ## Hospedagem e serviços
 
-Para HTTPS, configure PUBLIC_DOMAIN, NODE_ENV=production, senhas fortes e WEB_ORIGINS com a origem pública. Execute `docker compose --env-file .env.compose --profile edge up --build`; domínio e portas 80/443 precisam apontar para o servidor. Não existe publicação automática.
+O deploy web para VPS inclui cidadão, gestão, API e HTTPS, usando `compose.production.yaml` e `.github/workflows/release.yml`. Consulte [deploy/README.md](deploy/README.md) para preparar DNS, ambiente, registry e SSH. A publicação automática depende de `VPS_DEPLOY_ENABLED=true`; o Compose local continua disponível para desenvolvimento.
 
 A sugestão textual usa Gemini no servidor quando configurado, com heurística em falhas. Fotos permanecem na aplicação; os arquivos de evidência são públicos por URL UUID opaca. Persistência requer volumes e backup. ViaCEP e IBGE podem ficar indisponíveis: a interface conserva o trabalho e permite tentar novamente, sem inventar um município.

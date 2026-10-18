@@ -130,7 +130,7 @@ test(
       const r = await app.inject({
         method: 'POST',
         url: '/api/auth/login',
-        payload: { email, password: 'Fiscaliza123!' },
+        payload: { email, password: process.env.DEMO_PASSWORD || 'Fiscaliza123!' },
       });
       assert.equal(r.statusCode, 200, r.body);
       return { authorization: `Bearer ${r.json().data.token}` };

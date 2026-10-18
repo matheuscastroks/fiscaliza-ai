@@ -1,8 +1,15 @@
 name: Validate participation platform
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+  workflow_call:
+permissions:
+  contents: read
 jobs:
   checks:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     services:
       postgres:
         image: postgres:17-alpine
@@ -18,6 +25,8 @@ jobs:
       DATABASE_URL: postgres://fiscaliza:validation-ci-only@localhost:5432/fiscaliza_test
       DEMO_PASSWORD: validation-ci-only
       CI: true
+      EXPO_PUBLIC_API_URL: /api
+      EXPO_NO_TELEMETRY: 1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -40,3 +49,25 @@ jobs:
       - run: npm test --prefix municipal
       - run: npm run build --prefix municipal
       - run: npx expo export --platform web --output-dir .validation/web-export --max-workers 2
+      - name: Validate deployment configuration
+        env:
+          IMAGE_PREFIX: ghcr.io/example/fiscaliza-ai
+          IMAGE_TAG: ${{ github.sha }}
+          RELEASE_DIR: ${{ github.workspace }}
+          PUBLIC_DOMAIN: app.example.com
+          MUNICIPAL_DOMAIN: gestao.example.com
+          POSTGRES_PASSWORD: validation-only
+        run: |
+          bash -n deploy/deploy.sh
+          docker compose -f compose.production.yaml config --quiet
+          docker run --rm -e PUBLIC_DOMAIN -e MUNICIPAL_DOMAIN \
+            -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            caddy:2-alpine caddy adapt --config /etc/caddy/Caddyfile --adapter caddyfile > /dev/null
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-and-api-contract
+          path: |
+            .validation/web-export
+            backend/openapi.json
+          include-hidden-files: true
+          retention-days: 7

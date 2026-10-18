@@ -33,7 +33,7 @@ test(
       url: '/api/auth/login',
       payload: {
         email: 'ana@vilaesperanca.exemplo',
-        password: 'Fiscaliza123!',
+        password: process.env.DEMO_PASSWORD || 'Fiscaliza123!',
       },
     });
     const token = login.json().data.token as string;
