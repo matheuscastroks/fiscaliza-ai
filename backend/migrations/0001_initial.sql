@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS users(id text PRIMARY KEY, name text NOT NULL, email text NOT NULL UNIQUE, role text NOT NULL CHECK(role IN ('citizen','staff','admin')), sector text, password_hash text NOT NULL);
+CREATE TABLE IF NOT EXISTS sessions(token_hash text PRIMARY KEY, user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE, expires_at timestamptz NOT NULL);
+CREATE INDEX IF NOT EXISTS sessions_expiry ON sessions(expires_at);
+CREATE TABLE IF NOT EXISTS records(id text PRIMARY KEY, kind text NOT NULL CHECK(kind IN ('occurrence','proposal','consultation','action')), author_id text NOT NULL REFERENCES users(id), data jsonb NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS records_kind_date ON records(kind,created_at DESC);
+CREATE INDEX IF NOT EXISTS records_links ON records USING GIN ((data->'linkedIds'));
+CREATE TABLE IF NOT EXISTS relations(record_id text NOT NULL REFERENCES records(id) ON DELETE CASCADE,user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,kind text NOT NULL CHECK(kind IN ('support','follow')),PRIMARY KEY(record_id,user_id,kind));
+CREATE INDEX IF NOT EXISTS relations_user ON relations(user_id);
+CREATE TABLE IF NOT EXISTS answers(record_id text NOT NULL REFERENCES records(id) ON DELETE CASCADE,user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,option integer NOT NULL CHECK(option>=0),PRIMARY KEY(record_id,user_id));
+CREATE TABLE IF NOT EXISTS attachments(id text PRIMARY KEY,mime text NOT NULL,owner_id text NOT NULL REFERENCES users(id),created_at timestamptz NOT NULL DEFAULT now());

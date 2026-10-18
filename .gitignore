@@ -35,9 +35,18 @@ yarn-error.*
 
 # local env files
 .env
+.env.compose
 .env*.local
 
 # typescript
 *.tsbuildinfo
 
 app-example
+
+# Local verification and service outputs
+.validation/
+backend/dist/
+backend/uploads/
+backend/openapi.json
+municipal/dist/
+postman/reports/

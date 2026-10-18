@@ -1,0 +1,32 @@
+{
+  "name": "fiscaliza-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "npm run build \u0026\u0026 node dist/backend/src/server.js",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build \u0026\u0026 node --test --test-concurrency=1 dist/backend/test/*.test.js",
+    "migrate": "npm run build \u0026\u0026 node dist/backend/src/migrate.js",
+    "seed": "npm run build \u0026\u0026 node dist/backend/src/seed.js",
+    "openapi": "npm run build \u0026\u0026 node dist/backend/src/openapi.js"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^11.1.0",
+    "@fastify/multipart": "^9.2.1",
+    "@fastify/rate-limit": "^10.3.0",
+    "@fastify/swagger": "^9.5.1",
+    "drizzle-orm": "^0.45.4",
+    "fastify": "^5.6.1",
+    "pg": "^8.16.3",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "@types/pg": "^8.15.5",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,987 @@
+{
+  "info": {
+    "name": "Fiscaliza-AI — ciclo participativo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Regressão local da API real. Alvo exclusivo de validação: cria registros. Contrato de entrada: schemas Fastify e backend/openapi.json; DTOs: shared/contracts.ts. Atualizar os exemplos e assertions ao mudar contratos."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api"
+    },
+    {
+      "key": "password",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Entrar cidadão",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"ana@vilaesperanca.exemplo\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));",
+              "pm.collectionVariables.set('citizenToken', result.data.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consultar CEP do Rio",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/profile/postal-code/20010000"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Confirmar municipio do perfil",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/profile/municipality",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"postalCode\": \"20010000\",\n  \"municipalityId\": \"3304557\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir confirmacao idempotente",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/profile/municipality",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"postalCode\": \"20010000\",\n  \"municipalityId\": \"3304557\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Municipio autorizado",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/municipality"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rejeitar municipio divergente do CEP",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/profile/municipality",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"postalCode\": \"20010000\",\n  \"municipalityId\": \"3550308\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Registrar necessidade urbana",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/occurrences",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Poste sem iluminação na travessia\",\n  \"description\": \"Poste apagado junto à travessia da praça.\",\n  \"category\": \"lighting\",\n  \"reportedImpact\": \"high\",\n  \"location\": {\n    \"latitude\": -22.904,\n    \"longitude\": -43.186,\n    \"address\": \"Praça Central\",\n    \"neighborhood\": \"Centro\"\n  },\n  \"images\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));",
+              "pm.collectionVariables.set('occurrenceId', result.data.id);",
+              "pm.test('Autoria e triagem do servidor', () => { pm.expect(result.data.reportedBy).to.eql('citizen-ana'); pm.expect(result.data.priority).to.eql('medium'); pm.expect(result.data.reportedImpact).to.eql('high'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Apoiar ocorrência",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/support"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir apoio sem duplicar",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/support"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Confirmar apoio persistido",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/occurrences/{{occurrenceId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));",
+              "pm.test('Um apoio por cidadão', () => {pm.expect(result.data.votes).to.eql(1);pm.expect(result.data.supportedByMe).to.eql(true);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entrar gestão",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"gestao@vilaesperanca.exemplo\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));",
+              "pm.collectionVariables.set('staffToken', result.data.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Encaminhar atendimento",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{staffToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/transitions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"in_progress\",\n  \"justification\": \"Equipe designada para inspeção.\",\n  \"sector\": \"Iluminação pública\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Concluir com resposta pública",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{staffToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/transitions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"resolved\",\n  \"justification\": \"Luminária substituída e vistoriada.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cidadão recebe a conclusão",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/occurrences/{{occurrenceId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));",
+              "pm.test('Ciclo e histórico', () => {pm.expect(result.data.status).to.eql('resolved');pm.expect(result.data.statusHistory).to.have.lengthOf(3);pm.expect(result.data.statusHistory[2].actor).to.be.a('string');});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Avaliar solução",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/evaluation",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"satisfied\": true,\n  \"reason\": \"Iluminação restabelecida.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Abrir consulta",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{staffToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/civic-items",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"kind\": \"consultation\",\n  \"title\": \"Próxima melhoria na praça\",\n  \"summary\": \"Escolha da comunidade\",\n  \"body\": \"Qual melhoria deve começar primeiro?\",\n  \"neighborhood\": \"Centro\",\n  \"closesAt\": \"2099-01-01T00:00:00.000Z\",\n  \"options\": [\n    \"Acessibilidade\",\n    \"Convivência\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));",
+              "pm.collectionVariables.set('consultationId', result.data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Responder consulta",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/civic-items/{{consultationId}}/answer",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"option\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir sem duplicar resposta",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/civic-items/{{consultationId}}/answer",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"option\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Confirmar contagem",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/civic-items/{{consultationId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));",
+              "pm.test('Uma resposta por cidadão', () => pm.expect(result.data.answerCounts).to.eql([1,0]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Publicar devolutiva",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{staffToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/civic-items/{{consultationId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"closed\",\n  \"result\": \"Acessibilidade será incluída no planejamento.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rejeitar resposta após encerramento",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/civic-items/{{consultationId}}/answer",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"option\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(409));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(409 < 400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Impedir gestão pelo cidadão",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/transitions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"in_progress\",\n  \"justification\": \"Tentativa sem permissão.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(403));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(403 < 400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Indicadores territoriais",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/overview"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));",
+              "pm.test('Indicadores derivados', () => {pm.expect(result.data.occurrences).to.be.above(0);pm.expect(result.data.resolved).to.be.above(0);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sugestão textual resiliente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/analysis",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Poste apagado perto da escola.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));",
+              "pm.test('Origem identificada', () => pm.expect(['gemini','heuristic']).to.include(result.data.analysisSource));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Encerrar sessão",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/logout"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sessão revogada",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(401));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(401 < 400));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
