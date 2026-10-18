@@ -1,4 +1,4 @@
-# Fiscaliza-AI — Guia de leitura
+# Fiscaliza aí — Guia de leitura
 
 1. `PRODUCT.md`: proposta, públicos e jornadas de participação urbana.
 2. `DESIGN.md`: navegação, identidade, estados e acessibilidade.

@@ -1,4 +1,4 @@
-# Plano de evolução — Fiscaliza AI com Superpowers
+# Plano de evolução — Fiscaliza aí com Superpowers
 
 ## Como usar este planejamento
 
@@ -20,14 +20,14 @@ Este diretório contém planejamento, não autorização para implementar ou pub
 
 ## Sequência de trabalho
 
-| Fase | Documento | Resultado e dependência |
-| --- | --- | --- |
-| 01 | [Diagnóstico e recorte do TCC](01-diagnostico-e-escopo.md) | Base técnica verificada e pergunta de pesquisa delimitada |
-| 02 | [Estratégia e experiência](02-estrategia-e-ux.md) | Jornadas, requisitos e arquitetura da informação; depende de 01 |
-| 03 | [Mocks e disponibilização](03-infraestrutura-e-identidade.md) | Arquitetura e disponibilização definidas; depende de 01 e dos requisitos de 02 |
-| 04 | [Protótipo e sistema visual](04-prototipo-e-ui.md) | Fluxos testados e especificação visual; depende de 02, incorporando restrições de 03 |
-| 05 | [Implementação incremental](05-implementacao.md) | Jornadas interativas com mocks; depende de 03 e 04 |
-| 06 | [Validação e entrega acadêmica](06-validacao-e-entrega.md) | Evidências, demonstração reproduzível e limites documentados; depende de 05 |
+| Fase | Documento                                                     | Resultado e dependência                                                              |
+| ---- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| 01   | [Diagnóstico e recorte do TCC](01-diagnostico-e-escopo.md)    | Base técnica verificada e pergunta de pesquisa delimitada                            |
+| 02   | [Estratégia e experiência](02-estrategia-e-ux.md)             | Jornadas, requisitos e arquitetura da informação; depende de 01                      |
+| 03   | [Mocks e disponibilização](03-infraestrutura-e-identidade.md) | Arquitetura e disponibilização definidas; depende de 01 e dos requisitos de 02       |
+| 04   | [Protótipo e sistema visual](04-prototipo-e-ui.md)            | Fluxos testados e especificação visual; depende de 02, incorporando restrições de 03 |
+| 05   | [Implementação incremental](05-implementacao.md)              | Jornadas interativas com mocks; depende de 03 e 04                                   |
+| 06   | [Validação e entrega acadêmica](06-validacao-e-entrega.md)    | Evidências, demonstração reproduzível e limites documentados; depende de 05          |
 
 Cada fase deve registrar entregáveis, evidências, decisões e pendências antes de avançar. Infraestrutura e wireframes podem ser estudados em paralelo depois de definido o escopo. Não atribuir datas antes de conhecer o prazo do TCC e a disponibilidade de trabalho.
 

@@ -1,4 +1,4 @@
-# Fiscaliza-AI
+# Fiscaliza aí
 
 Plataforma de participação na gestão urbana: cidadãos registram necessidades, propõem melhorias, participam de consultas e acompanham ações e respostas da gestão.
 
@@ -33,7 +33,7 @@ Painel: http://localhost:8080. API: http://localhost:3001/api. Migrations e seed
 
 Com PostgreSQL já iniciado, defina DATABASE_URL e DEMO_PASSWORD no ambiente do processo. Execute `npm run migrate --prefix backend`, `npm run seed --prefix backend` e `npm start --prefix backend`. Em outro terminal: `npm run dev --prefix municipal`. Os arquivos backend/.env.example são modelos; não são carregados automaticamente.
 
-Copie `.env.example` para `.env`, configure EXPO_PUBLIC_API_URL e execute `npm start`. No celular, localhost é o próprio aparelho: use o IP do computador na mesma rede. No Compose, acesso LAN exige API_BIND=0.0.0.0; acrescente em WEB_ORIGINS as origens web efetivamente usadas. Gemini nunca usa EXPO_PUBLIC_.
+Copie `.env.example` para `.env`, configure `EXPO_PUBLIC_API_URL` e execute `npm start`. No celular, localhost é o próprio aparelho: use o IP do computador na mesma rede. No Compose, acesso LAN exige API_BIND=0.0.0.0; acrescente em WEB_ORIGINS as origens web efetivamente usadas. Gemini nunca usa `EXPO_PUBLIC_`.
 
 ## Contas de apresentação
 
@@ -56,6 +56,7 @@ O deploy web para VPS inclui cidadão, gestão, API e HTTPS, usando `compose.pro
 A assistência usa Gemini no servidor quando configurado. Pode analisar uma foto autorizada para sugerir título e descrição; sem chave ou em falhas, mantém o preenchimento manual e não afirma ter analisado a imagem. Os arquivos de evidência são públicos por URL UUID opaca. Persistência requer volumes e backup. ViaCEP e IBGE podem ficar indisponíveis: a interface conserva o trabalho e permite tentar novamente, sem inventar um município.
 
 ## Demonstração e consolidação territorial
+
 Home, Território e Resultados compartilham o bairro escolhido. Ocorrências e iniciativas participam da exploração; o mapa exige coordenadas explícitas, enquanto a lista inclui conteúdos de bairro ou município sem ponto. Indicadores separam abrangência municipal de bairros. Acompanhamentos de cidades anteriores possuem detalhe autorizado somente leitura.
 
 Consulte [o roteiro reproduzível](plan/15-roteiro-demonstracao.md) e [a validação desta consolidação](plan/16-validacao-consolidacao.md).

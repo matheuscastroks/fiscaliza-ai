@@ -8,7 +8,7 @@
 - [ ] Comparar direções de interface pelo esforço da tarefa, legibilidade e contexto municipal, não apenas pela aparência.
 - [ ] Apresentar protótipo navegável e registrar avaliação em `plan/evidence/04-usabilidade.md`.
 - [ ] Especificar tokens e componentes em `plan/specs/interface-design.md`, incluindo estados e comportamento Android/iOS.
-- [ ] Aplicar `frontend-design` ao conteúdo específico do Fiscaliza AI. Orientações sobre hero, CSS e hover não devem ser transplantadas para React Native; convenções móveis e acessibilidade prevalecem sobre novidade estética.
+- [ ] Aplicar `frontend-design` ao conteúdo específico do Fiscaliza aí. Orientações sobre hero, CSS e hover não devem ser transplantadas para React Native; convenções móveis e acessibilidade prevalecem sobre novidade estética.
 - [ ] Revisar com o usuário a especificação visual e os fluxos antes de gerar tarefas de implementação.
 
 **Saída:** protótipo avaliado e especificação revisada. Figma é uma ferramenta opcional; usar as skills já fornecidas pelo plugin caso seja escolhido, sem reinstalá-las.

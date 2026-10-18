@@ -6,7 +6,7 @@ Leia Task 2 e Global Constraints de plan/implementation/demo-v1.md e o contrato 
 
 Criar municipal/ com React/Vite/TypeScript, pacote e lock próprios. Scripts de raiz municipal:dev e municipal:build. Excluir municipal do tsconfig mobile, mantendo a camada demo compartilhada verificável. Não introduzir backend, SSR, auth real ou chamadas de dados externas.
 
-O painel representa a Prefeitura de Vila Esperança (fictícia), com marca Fiscaliza AI, navegação clara e identificação de demonstração. Trabalhar em português, com a paleta do spec e tipografia de sistema. Sem dependência de imagens/fontes remotas. Foco visual na fila e no caso em atendimento.
+O painel representa a Prefeitura de Vila Esperança (fictícia), com marca Fiscaliza aí, navegação clara e identificação de demonstração. Trabalhar em português, com a paleta do spec e tipografia de sistema. Sem dependência de imagens/fontes remotas. Foco visual na fila e no caso em atendimento.
 
 Layout desktop: identificação/navegação lateral, cabeçalho com contexto, indicadores derivados, busca/status/categoria e fila de ocorrências; detalhe ao lado ou abaixo com local e histórico. Em telas pequenas, empilhar sem perda de ações. Não exibir navegação para páginas inexistentes.
 

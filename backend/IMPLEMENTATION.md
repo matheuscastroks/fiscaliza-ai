@@ -1,4 +1,4 @@
-# API persistente Fiscaliza-AI
+# API persistente Fiscaliza aí
 
 Requer Node 22 e PostgreSQL 17. Nenhum banco em memória é usado pelo servidor.
 
@@ -29,7 +29,6 @@ Gemini usa chave exclusiva do servidor, limite por endpoint e timeout de 10 segu
 Limites operacionais: o armazenamento local exige volume e backup; a coleta de anexos órfãos e expiração de sessões não possui agendador. O `/health` comprova que o processo responde; `/api/health` também verifica PostgreSQL. Arquivos enviados são públicos por URL opaca para exibição das evidências urbanas; não envie dados pessoais ou anexos privados.
 
 Proxy: TRUST_PROXY aceita uma lista explícita de IPs/CIDRs confiáveis; por padrão nenhum cabeçalho encaminhado é confiável. O Compose reserva a rede 172.30.97.0/24 para seus proxies. Se alterar a sub-rede, ajuste também essa variável. Não use confiança global em proxies com a API exposta diretamente.
-
 
 ## Municipal onboarding
 
