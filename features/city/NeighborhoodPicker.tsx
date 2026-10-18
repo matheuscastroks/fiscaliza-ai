@@ -43,6 +43,7 @@ export function NeighborhoodPicker({
             accessibilityRole="button"
             accessibilityLabel={option || 'Todo o município'}
             accessibilityState={{ selected }}
+            aria-pressed={selected}
             onPress={() => onChange(option)}
             style={{
               minHeight: 48,
