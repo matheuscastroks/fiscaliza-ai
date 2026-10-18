@@ -1,14 +1,11 @@
-# Fiscaliza-AI — Revisão Anti-Slop v2
+# Fiscaliza-AI — Guia de leitura
 
-**Este pacote substitui a direção estética do anterior.** A referência visual HTML anterior, com telas fictícias e estética verde editorial, foi rejeitada e não deve orientar o Gemini.
+1. `PRODUCT.md`: proposta, públicos e jornadas de participação urbana.
+2. `DESIGN.md`: navegação, identidade, estados e acessibilidade.
+3. `AGENTS.md`: regras de contribuição e validação.
+4. `README.md`: instalação, contas de apresentação e execução.
+5. `plan/12-municipio-por-cep.md`: onboarding por CEP e isolamento municipal.
 
-Ordem de leitura:
-1. `01_AUDITORIA_ANTI_SLOP.md` — o que remover e por quê;
-2. `02_DESIGN_V2.md` — nova identidade visual e arquitetura de informação;
-3. `03_MASTERPLAN_V2.md` — plano por fase, alterações específicas por arquivo e QA;
-4. `04_GEMINI_FASE1_V2.md` — tarefa para executar **somente a Fase 1**.
+A direção vigente conecta cidadão, território e gestão com API persistente e painel municipal separado. O CEP vincula o perfil a um município real, mas não comprova residência. Os registros iniciais são fictícios e não representam serviços de uma prefeitura.
 
-Este pacote intencionalmente **não inclui um novo mockup HTML**: as decisões estruturais devem ser validadas primeiro com wireframes e screenshots do aplicativo real, evitando substituir um template genérico por outro.
-
-Repositório: https://github.com/matheuscastroks/fiscaliza-ai
-Fontes de pesquisa e links estão nos documentos. Informações sobre a aplicação vieram de inspeção estática do código, não de testes visuais executados no celular.
+Os documentos históricos Anti-Slop V2 foram substituídos pelas referências acima. Evidências da primeira integração estão em `plan/11-validacao-integrada.md`; a evolução territorial tem sua própria validação em `plan/13-validacao-municipal.md`.

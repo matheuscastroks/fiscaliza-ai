@@ -1,81 +1,32 @@
-# Fiscaliza-AI — Guia do Agente de IA (AGENTS.md)
+# Repository Guidelines
 
-Este documento é a referência canônica para qualquer agente autônomo ou assistente de IA operando no repositório **Fiscaliza-AI**. Siga estritamente os comandos, restrições e diretrizes estabelecidos aqui.
+## Produto e arquitetura
+Fiscaliza-AI demonstra participação na gestão urbana: ocorrências, propostas, consultas e ações públicas. O cidadão contribui; a gestão responde e presta contas. Consulte PRODUCT.md e DESIGN.md. O plano integrado aprovado substitui decisões antigas de execução exclusivamente mockada.
 
----
+## Organização
+- app/: rotas Expo Router; features/: jornadas; components/: UI compartilhada; theme/: tokens.
+- services/: transporte HTTP e compatibilidade; stores/: sessão, interface e adaptadores legados.
+- shared/: contratos públicos; backend/: Fastify, PostgreSQL, Drizzle, migrações e testes.
+- municipal/: painel React/Vite; demo/: fixtures, heurística e testes puros.
+- assets/: arquivos estáticos; plan/: decisões e evidências.
 
-## 1. Visão Geral do Projeto
+## Comandos
+Use npm e preserve os package-lock.json. Instale módulos Expo com npx expo install.
+- npm start: Metro; npm run web: cidadão web.
+- npm test: testes locais Node; npx tsc --noEmit: tipos; npm run lint: Expo lint.
+- npm test --prefix backend: testes API; npm run typecheck --prefix backend: tipos.
+- npm run build --prefix municipal: painel.
+- npx expo run:android: build nativo; npx expo config --type prebuild: configuração.
+Consulte README.md para Docker e configuração.
 
-O **Fiscaliza-AI** é um aplicativo mobile cívico para relato, triagem e acompanhamento de problemas urbanos (buracos na via, iluminação pública, acúmulo de lixo, esgoto a céu aberto, etc.).
-- **Plataforma:** React Native com Expo (gerenciado via CNG / Continuous Native Generation).
-- **Roteamento:** Expo Router (roteamento baseado no sistema de arquivos em `app/`).
-- **Estado:** Zustand + persistência local via `@react-native-async-storage/async-storage`.
-- **Mapas:** `react-native-maps` (Google Maps no Android e Apple Maps no iOS em ambiente de desenvolvimento).
-- **Inteligência Artificial:** Google Gemini (multimodal via REST) para triagem e categorização de fotos/relatos, com fallback para heurística local offline.
+## Convenções
+O município vem da sessão e usa código IBGE. Não aceite cidade arbitrária em mutações; registros validam o polígono no servidor. Cache e rascunhos incluem usuário e município. Gestão não escolhe território pelo onboarding cidadão.
 
----
+TypeScript estrito, indentação de dois espaços, componentes PascalCase, hooks useX e funções com responsabilidade delimitada. Preserve contratos compartilhados e valide entradas no servidor. API/banco são a autoridade; cache e rascunho nunca podem confirmar gravação inexistente. Apoios/respostas devem ter unicidade persistida. Mudanças de atendimento/decisão exigem justificativa e histórico com ator.
 
-## 2. Comandos Operacionais Críticos
+## UI e testes
+Aplique RITO: razão, informação, tarefa e originalidade funcional. Sem slogans, cards aninhados, vínculo institucional fictício, ranking competitivo ou animações entering em Marker. Teste comportamento, falhas e autorização; registre separadamente evidência de código, web e dispositivo nativo. Nenhuma alegação de desempenho sem medição.
 
-Sempre utilize os comandos abaixo para validação e execução. Nunca invente flags ou scripts inexistentes.
-
-| Tarefa | Comando | Observações |
-|---|---|---|
-| **Instalação** | `npm install` | **Não** use `yarn` ou `pnpm` (o repositório mantém `package-lock.json`). |
-| **Testes Unitários** | `npm test` | Executa o test runner nativo do Node em `demo/*.test.ts`. Deve passar com **0 falhas**. |
-| **Checagem de Tipos** | `npx tsc --noEmit` | Validação estrita do TypeScript sem emissão de arquivos. |
-| **Linter** | `npm run lint` | Executa o `expo lint`. |
-| **Iniciar Metro / Dev** | `npm start` | Inicia o bundler Metro (`expo start`). |
-| **Build Android Local** | `npx expo run:android` | Gera e compila a variante nativa de desenvolvimento com chaves embutidas. |
-| **Configuração Expo** | `npx expo config --type prebuild` | Inspeciona a configuração dinâmica gerada pelo `app.config.js`. |
-
----
-
-## 3. Variáveis de Ambiente e Configurações Nativas
-
-1. **Prefixo Obrigatório:** Variáveis de ambiente que precisam ser acessadas pelo código do aplicativo cliente **devem** começar com `EXPO_PUBLIC_` (ex: `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`, `EXPO_PUBLIC_GEMINI_API_KEY`).
-2. **Template e Segurança:** Nunca versione arquivos `.env` ou `.env*.local`. Mantenha sempre o [`.env.example`](file:///C:/Users/Matheus/Projects/fiscaliza-ai/.env.example) atualizado quando adicionar novas variáveis.
-3. **Injeção Nativa:** A configuração nativa do Expo é estendida dinamicamente no [`app.config.js`](file:///C:/Users/Matheus/Projects/fiscaliza-ai/app.config.js). Não tente gravar chaves diretamente no [`app.json`](file:///C:/Users/Matheus/Projects/fiscaliza-ai/app.json).
-4. **Pastas Nativas `/android` e `/ios`:** São efêmeras e geradas automaticamente pelo Expo Prebuild. **Nunca comite as pastas `/android` ou `/ios`** (regras garantidas no [`.gitignore`](file:///C:/Users/Matheus/Projects/fiscaliza-ai/.gitignore)).
-
----
-
-## 4. Filosofia de Design e Diretrizes Anti-AI-Slop
-
-O projeto possui regras rigorosas de identidade visual e usabilidade descritas nos documentos `01_AUDITORIA_ANTI_SLOP.md` e `02_DESIGN_V2.md`. O agente deve respeitar o princípio **R-I-T-O**:
-
-- **R — Razão:** Qual necessidade cívica/urbana este elemento resolve?
-- **I — Informação:** Que dado concreto está sendo transmitido?
-- **T — Tarefa:** Que ação do cidadão ou servidor está sendo facilitada?
-- **O — Originalidade Funcional:** Por que a solução escolhida serve a um serviço urbano e não a um template SaaS genérico?
-
-### Antipadrões Proibidos:
-- ❌ **Não** use gradientes cosméticos roxo/azul/aurora, glassmorphism ou blur de fundo desnecessário.
-- ❌ **Não** empilhe cards dentro de cards ou bento grids decorativos sem propósito hierárquico.
-- ❌ **Não** utilize textos publicitários vazios ("Transformando comunidades", "Sua cidade inteligente").
-- ❌ **Não** simule vínculos institucionais ou logins oficiais (como GOV.BR) que não existem no protótipo.
-- ❌ **Não** use animações de entrada gratuitas (`entering`) dentro de componentes de mapa nativo (`<Marker>`), pois isso trava a renderização da surface view no Android.
-
----
-
-## 5. Estrutura do Repositório e Sub-AGENTS
-
-```text
-fiscaliza-ai/
-├── app/                  # Rotas do Expo Router (telas e navegação por abas)
-├── assets/               # Imagens, ícones e fontes estáticas
-├── components/           # Componentes visuais compartilhados
-├── constants/            # Cores do tema, paletas e constantes de layout
-├── data/                 # Tipos e dados mockados iniciais (mockData.ts)
-├── demo/                 # Módulo de demonstração isolado e testes (vide demo/AGENTS.md)
-├── hooks/                # Custom React Hooks
-├── services/             # Camada de serviços: IA e API Mock (vide services/AGENTS.md)
-├── stores/               # Gerenciamento de estado global com Zustand
-├── app.config.js         # Configuração dinâmica do Expo (lê .env)
-├── app.json              # Metadados base do Expo
-└── package.json          # Dependências e scripts
-```
-
-### Sub-documentos de Direcionamento Específico:
-- [**`demo/AGENTS.md`**](file:///C:/Users/Matheus/Projects/fiscaliza-ai/demo/AGENTS.md): Regras para manipulação do repositório de dados local, cenários de teste e isolamento de estado.
-- [**`services/AGENTS.md`**](file:///C:/Users/Matheus/Projects/fiscaliza-ai/services/AGENTS.md): Regras para chamadas ao Google Gemini, Google Maps e política obrigatória de fallbacks defensivos.
+## Segurança e colaboração
+Nunca comite .env, credenciais ou android/ios gerados. Gemini somente no servidor; fotos permanecem nesta aplicação. Atualize templates de ambiente. Commits seguem feat/fix/docs e escopo quando útil; sem prefixos de ferramenta na branch ou mensagem. PRs descrevem comportamento, validação e limitações reais.
+Skills oficiais selecionadas estão em .agents/skills; instruções do projeto prevalecem.

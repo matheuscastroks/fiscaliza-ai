@@ -1,82 +1,56 @@
-# Fiscaliza-AI — Sinalização & Registro Urbano
+# Fiscaliza-AI
 
-Protótipo acadêmico em React Native e Expo para identificação, registro e acompanhamento documental de problemas na via pública (pavimentação, iluminação pública e limpeza urbana).
+Plataforma de participação na gestão urbana: cidadãos registram necessidades, propõem melhorias, participam de consultas e acompanham ações e respostas da gestão.
 
-> **Aviso de Escopo e Dados:**
-> Este projeto opera exclusivamente como um **ambiente demonstrativo local**.
-> - Não possui vínculo com órgãos públicos ou prefeituras reais.
-> - Os dados de demonstração são ancorados no município fictício de **Vila Esperança**.
-> - A persistência é realizada localmente no dispositivo via `@react-native-async-storage/async-storage`.
-> - A triagem e sugestão automática de categorias e gravidade utiliza motor heurístico local offline (`demo/localAnalysis.ts`), sem envio de fotos para serviços externos de nuvem ou custos de infraestrutura.
+Aplicativo Expo Android/iOS, painel municipal React/Vite e API TypeScript/PostgreSQL. As cidades e seus limites são reais; os registros iniciais e contas são de apresentação acadêmica. Não existe vínculo ou encaminhamento a uma prefeitura real. Esse contexto fica em Sobre nas interfaces.
 
----
+## Organização
 
-## 1. Arquitetura e Diretrizes de Design (V2)
+`app/`, `features/`, `components/` e `theme/` compõem o cidadão; `backend/` contém API, migrações, dados territoriais e testes; `municipal/` contém o painel; `shared/` define contratos. `PRODUCT.md`, `DESIGN.md` e `AGENTS.md` orientam contribuições.
 
-O aplicativo segue rigorosamente as diretrizes **Sinalização & Registro Urbano** documentadas em [DESIGN.md](DESIGN.md) e [ANTI_SLOP.md](ANTI_SLOP.md):
-- **Superfície Territorial Centrada no Mapa:** O mapa nativo é a interface primária de exploração contextual das demandas do bairro.
-- **Ficha de Ocorrência Documental:** Cada demanda contém código de protocolo, localização, situação, descrição factual e linha do tempo de tramitação com justificativas documentadas.
-- **Design de Serviço Sem Efeitos Supérfluos:** Paleta mineral com azul utilitário (`#176287`) para navegação e foco; eliminação de sombras artificiais pesadas, botões em pílula generalizados, pódios e animações elásticas desnecessárias.
-- **Transparência de Participação:** Gamificação sóbria e critérios transparentes de pontuação cívica documentados no app, sem promessas fictícias de privilégios em serviços públicos reais.
+## Município pelo CEP
 
----
+No primeiro acesso, o cidadão informa o CEP e confirma município/UF. O servidor consulta ViaCEP, usa o código IBGE como identidade municipal e valida a localização de novas ocorrências no polígono da cidade. Um ponto no retângulo de visualização do mapa não é suficiente para permitir o registro.
 
-## 2. Estrutura do Repositório
+Meu perfil → Atualizar CEP e município permite mudança de residência. Rascunhos e cache são separados por usuário/município. O histórico das cidades anteriores é preservado para consulta; novas interações ficam na cidade atual. CEP não é comprovação de residência.
 
-```text
-fiscaliza-ai/
-├── app/                     # Rotas do Expo Router (File-based routing)
-│   ├── (tabs)/              # Abas: Mapa, Registrar, Ocorrências, Perfil
-│   │   ├── index.tsx        # Mapa territorial e filtros rápidos
-│   │   ├── ReportScreen.tsx # Registro em 3 etapas documentais
-│   │   ├── ProblemsListScreen.tsx # Lista pesquisável de ocorrências
-│   │   └── ProfileScreen.tsx # Perfil e resumo de contribuições
-│   ├── LoginScreen.tsx      # Entrada de serviço para a demonstração
-│   ├── ProblemDetailsScreen.tsx # Ficha com linha do tempo de tramitação
-│   ├── HistoryScreen.tsx    # Histórico de relatos do usuário
-│   ├── RankingScreen.tsx    # Ranking comunitário demonstrativo
-│   ├── PointsGuideScreen.tsx # Guia de critérios de pontuação cívica
-│   └── SettingsScreen.tsx   # Alternância de cenários (registered, in_progress, resolved)
-├── components/
-│   ├── ui/                  # Primitivos de interface (AppText, AppButton, AppScreen, etc.)
-│   ├── occurrences/         # Componentes de ocorrência (OccurrenceRow, OccurrenceTimeline, StatusText)
-│   └── demo/                # Componentes demonstrativos (DemoNotice)
-├── features/
-│   ├── map/                 # Hooks de região e filtragem independente
-│   ├── reports/             # Formulário em etapas e confirmação
-│   └── participation/       # Regras de pontuação cívica e seletores
-├── demo/                    # Repositório local, fixtures e testes automatizados
-├── services/                # Camada de serviços e API local mockada
-├── stores/                  # Gerenciamento de estado com Zustand
-└── theme/                   # Tokens semânticos de cores, tipografia e espaçamento
+A gestão recebe município e setor pela conta autorizada, sem seleção livre no onboarding. Contas sem vínculo ficam bloqueadas. O cenário inicial usa Rio de Janeiro/RJ (3304557), coerente com o mapa. Para conhecê-lo como cidadão, use o CEP 20010-000 e confirme a cidade. A primeira consulta exige conexão; consultas válidas têm cache no servidor. A malha oficial do Rio acompanha o projeto.
+
+## Desenvolvimento
+
+Requer Node 22.18+ e npm. Preserve os três lockfiles.
+
+```powershell
+npm install
+npm install --prefix backend
+npm install --prefix municipal
+Copy-Item .env.compose.example .env.compose
+# Configure senhas e origens permitidas em .env.compose.
+docker compose --env-file .env.compose up --build
 ```
 
----
+Painel: http://localhost:8080. API: http://localhost:3001/api. Migrations e seed são executados antes da API no container. Volumes preservam banco e anexos. `docker compose down -v` remove os dados.
 
-## 3. Comandos Operacionais
+Com PostgreSQL já iniciado, defina DATABASE_URL e DEMO_PASSWORD no ambiente do processo. Execute `npm run migrate --prefix backend`, `npm run seed --prefix backend` e `npm start --prefix backend`. Em outro terminal: `npm run dev --prefix municipal`. Os arquivos backend/.env.example são modelos; não são carregados automaticamente.
 
-Conforme estabelecido no guia operacional do projeto ([AGENTS.md](AGENTS.md)), utilize sempre o gerenciador `npm`:
+Copie `.env.example` para `.env`, configure EXPO_PUBLIC_API_URL e execute `npm start`. No celular, localhost é o próprio aparelho: use o IP do computador na mesma rede. No Compose, acesso LAN exige API_BIND=0.0.0.0; acrescente em WEB_ORIGINS as origens web efetivamente usadas. Gemini nunca usa EXPO_PUBLIC_.
 
-| Tarefa | Comando | Descrição |
-|---|---|---|
-| **Instalação** | `npm install` | Instala as dependências do projeto mantendo `package-lock.json`. |
-| **Testes Unitários** | `npm test` | Executa o test runner nativo do Node em `demo/*.test.ts`. |
-| **Validação TypeScript** | `npx tsc --noEmit` | Checagem estrita de tipos sem emissão de arquivos. |
-| **Linter** | `npm run lint` | Executa o linter oficial do Expo (`expo lint`). |
-| **Iniciar Metro / Dev** | `npm start` | Inicia o bundler Metro para desenvolvimento. |
-| **Configuração Expo** | `npx expo config --type prebuild` | Inspeciona a configuração dinâmica gerada pelo `app.config.js`. |
+## Contas de apresentação
 
----
+O seed mantém `ana@vilaesperanca.exemplo` (cidadão), `gestao@vilaesperanca.exemplo` (gestão) e `admin@vilaesperanca.exemplo` (admin). Os endereços são identificadores fictícios já existentes. A gestão pertence ao Rio; a cidadã confirma seu município no onboarding.
 
-## 4. Cenários de Demonstração
+A senha é DEMO_PASSWORD. O padrão Fiscaliza123! existe apenas no desenvolvimento sem configuração; produção exige valor explícito. O seed não troca senhas ou vínculo de cidadão existente. Reset de cenários é exclusivo de admin e limitado ao cenário Rio; não apaga outras cidades ou seus anexos.
 
-Para facilitar testes acadêmicos e validações da banca, o aplicativo suporta alternância instantânea entre três cenários controlados na tela de Configurações:
-1. `registered`: Ocorrência primária recém-recebida, aguardando triagem.
-2. `in_progress`: Equipe técnica designada com histórico documentado de tramitação.
-3. `resolved`: Reparo concluído e vistoriado na via pública.
+## Jornadas e verificação
 
----
+Cidadão registra → gestão encaminha e responde → cidadão acompanha e avalia. Apoios e respostas de consulta são únicos por identidade. Decisões municipais exigem justificativa e histórico. Atualize/reabra telas para buscar mudanças; não há push.
 
-## 5. Licença
+`npm test`, `npx tsc --noEmit` e `npm run lint` verificam o cidadão. `npm test --prefix backend` inclui integração real quando DATABASE_URL aponta para banco exclusivo de teste; não use banco de apresentação em testes que restauram cenários. `npm test --prefix municipal` e `npm run build --prefix municipal` verificam o painel. `npm run openapi --prefix backend` gera o contrato. A coleção em `postman/` testa a API real sem publicar na nuvem.
 
-Este projeto é desenvolvido para fins acadêmicos e educacionais sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
+Evidências e limitações: `plan/11-validacao-integrada.md` e `plan/13-validacao-municipal.md`. Skills oficiais Expo selecionadas, com licença e revisão fixada, estão em `.agents/skills`.
+
+## Hospedagem e serviços
+
+Para HTTPS, configure PUBLIC_DOMAIN, NODE_ENV=production, senhas fortes e WEB_ORIGINS com a origem pública. Execute `docker compose --env-file .env.compose --profile edge up --build`; domínio e portas 80/443 precisam apontar para o servidor. Não existe publicação automática.
+
+A sugestão textual usa Gemini no servidor quando configurado, com heurística em falhas. Fotos permanecem na aplicação; os arquivos de evidência são públicos por URL UUID opaca. Persistência requer volumes e backup. ViaCEP e IBGE podem ficar indisponíveis: a interface conserva o trabalho e permite tentar novamente, sem inventar um município.

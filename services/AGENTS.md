@@ -1,45 +1,11 @@
-# Sub-AGENTS: Camada de Serviços e Integrações (`services/`)
+# Serviços e integrações
 
-Este documento orienta agentes que operam no diretório [`services/`](file:///C:/Users/Matheus/Projects/fiscaliza-ai/services/).
+A API compartilhada é a fonte de dados do produto. http.ts implementa transporte, sessão móvel SecureStore, cookie web e cache TanStack Query. mockApi.ts é adaptador temporário para telas antigas; não deve voltar a inventar sucesso local.
 
----
+Respostas usam ApiResult<T> de shared/contracts.ts. Identidade e permissões são verificadas no backend. Não enviar userId como autoridade nem aceitar histórico pronto do cliente.
 
-## 1. Responsabilidade do Módulo
+Gemini existe exclusivamente no backend, usa descrição textual, timeout e fallback heurístico. Não ler EXPO_PUBLIC_GEMINI_API_KEY, converter fotos para envio ao Google ou dizer que fotos foram analisadas. Exports legados de aiService.ts mantêm apenas compatibilidade local.
 
-O diretório `services/` faz a ponte entre a interface do usuário e as fontes de dados / inteligência artificial:
-- [`aiService.ts`](file:///C:/Users/Matheus/Projects/fiscaliza-ai/services/aiService.ts): Serviço de análise inteligente com Google Gemini (REST) e fallback local.
-- [`mockApi.ts`](file:///C:/Users/Matheus/Projects/fiscaliza-ai/services/mockApi.ts): Interface de acesso a dados (problemas, usuários, autenticação) tipada com contratos `ApiResponse<T>`.
+Uploads devem retornar URL durável. Falhas preservam rascunhos. Após mutação, invalidar consultas afetadas; não manter contadores independentes.
 
----
-
-## 2. Regras Estritas de Implementação
-
-1. **Princípio do Fallback Obrigatório (Resiliência):**
-   - Nenhuma chamada a API externa (como Google Gemini) pode bloquear o fluxo do cidadão.
-   - Caso não haja chave no ambiente (`EXPO_PUBLIC_GEMINI_API_KEY` ou `GEMINI_KEY`), o dispositivo esteja offline ou a API retorne erro, a função **deve cair de forma transparente no fallback local** (`analyzeLocally`).
-   - A tela de denúncia [`ReportScreen.tsx`](file:///C:/Users/Matheus/Projects/fiscaliza-ai/app/%28tabs%29/ReportScreen.tsx) deve sempre receber uma sugestão válida de categoria, prioridade e título.
-
-2. **Tipagem e Contrato `ApiResponse<T>`:**
-   - Métodos em [`mockApi.ts`](file:///C:/Users/Matheus/Projects/fiscaliza-ai/services/mockApi.ts) devem retornar sempre o objeto estruturado:
-     ```typescript
-     export interface ApiResponse<T> {
-       success: boolean;
-       data?: T;
-       error?: string;
-     }
-     ```
-   - Nunca propague exceções cruas para os componentes. Capture erros com `try/catch` e converta para `{ success: false, error: ... }`.
-
-3. **Retrocompatibilidade de Assinaturas:**
-   - Mantenha os exports legados exportados por convenção (`analyzeWithAI`, `analyzeWithRealAI`, `analyzeWithGemini`, `imageToBase64`), para garantir que telas antigas não quebrem durante migrações ou refatorações graduais.
-
----
-
-## 3. Comandos de Verificação
-
-Após qualquer alteração em `services/`:
-```bash
-npx tsc --noEmit
-npm test
-```
-**Critério de Aceitação:** Zero erros de tipagem no TypeScript e todos os 12 testes do projeto passando.
+Verifique npm test, npx tsc --noEmit e npm run lint após alterações.
