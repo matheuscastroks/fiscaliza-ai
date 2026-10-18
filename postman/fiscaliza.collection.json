@@ -1276,6 +1276,181 @@
       ]
     },
     {
+      "name": "Comentar com retrato centralizado",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/civic-items/{{deletableProposalId}}/comments",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\":\"Há espaço para um novo banco junto ao ponto.\"}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(200));",
+              "const comment=pm.response.json().data.comments.at(-1);pm.collectionVariables.set('editableCommentId',comment.id);pm.test('Retrato do perfil',()=>pm.expect(comment.avatar).to.match(/^\\/api\\/(demo-media|attachments)\\//));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Impedir edição por outra conta",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/civic-items/{{deletableProposalId}}/comments/{{editableCommentId}}",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{staffToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\":\"Alteração sem autoria\"}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Editar próprio comentário",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/civic-items/{{deletableProposalId}}/comments/{{editableCommentId}}",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\":\"O espaço disponível fica junto ao abrigo do ponto.\"}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(200));",
+              "const comment=pm.response.json().data.comments.at(-1);pm.test('Edição persistida',()=>{pm.expect(comment.text).to.eql('O espaço disponível fica junto ao abrigo do ponto.');pm.expect(comment.editedAt).to.be.a('string');});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Apagar próprio comentário",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/civic-items/{{deletableProposalId}}/comments/{{editableCommentId}}",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(200));",
+              "pm.test('Comentário removido',()=>pm.expect(pm.response.json().data.comments).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comentário removido não pode ser editado",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/civic-items/{{deletableProposalId}}/comments/{{editableCommentId}}",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\":\"Tentativa depois da exclusão\"}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "Impedir exclusão por outra conta",
       "request": {
         "method": "DELETE",

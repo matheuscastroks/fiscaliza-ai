@@ -346,6 +346,19 @@ export async function buildApp(
     if (!req.user) throw fail(401, 'Sessão expirada.');
     return ok(req.user);
   });
+  app.put<{ Body: { avatar: string } }>(
+    '/api/profile/avatar',
+    { schema: { body: object({ avatar: images.items }, ['avatar']) } },
+    async (req) => {
+      await validateImages(req, [req.body.avatar]);
+      const [updated] = await db
+        .update(users)
+        .set({ avatar: req.body.avatar })
+        .where(eq(users.id, req.user!.id))
+        .returning();
+      return ok(await hydrate(updated));
+    },
+  );
   app.post('/api/auth/logout', async (req, reply) => {
     if (req.sessionToken)
       await db
@@ -739,6 +752,8 @@ export async function buildApp(
               userName: req.user!.name,
               createdAt: now(),
             });
+            if (req.user!.role !== 'citizen')
+              row.data.municipalInterventionAt ??= now();
             await tx
               .update(records)
               .set({ data: row.data })
@@ -748,6 +763,48 @@ export async function buildApp(
         );
       },
     );
+    for (const method of ['PATCH', 'DELETE'] as const) {
+      app.route<{
+        Params: { id: string; commentId: string };
+        Body: { text: string };
+      }>({
+        method,
+        url: `/api/${path}/:id/comments/:commentId`,
+        ...(method === 'PATCH'
+          ? { schema: { body: object({ text: string(2000) }, ['text']) } }
+          : {}),
+        handler: async (req) => {
+          const value = await db.transaction(async (tx) => {
+            const row = await find(
+              municipalityId(req),
+              req.params.id,
+              kind,
+              tx,
+              true,
+            );
+            const index = row.data.comments.findIndex(
+              (comment) => comment.id === req.params.commentId,
+            );
+            if (index < 0) throw fail(404, 'Comentário não encontrado.');
+            if (row.data.comments[index].userId !== req.user!.id)
+              throw fail(403, 'Somente o autor pode alterar este comentário.');
+            if (req.user!.role !== 'citizen')
+              row.data.municipalInterventionAt ??= now();
+            if (method === 'DELETE') row.data.comments.splice(index, 1);
+            else {
+              row.data.comments[index].text = req.body.text.trim();
+              row.data.comments[index].editedAt = now();
+            }
+            await tx
+              .update(records)
+              .set({ data: row.data })
+              .where(eq(records.id, row.id));
+            return present(row, req.user!.id, tx);
+          });
+          return ok(value);
+        },
+      });
+    }
   }
   app.post<{
     Body: {

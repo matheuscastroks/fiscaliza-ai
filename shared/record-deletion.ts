@@ -2,6 +2,7 @@ import type { CivicItem, Occurrence } from './contracts.js';
 
 /** Municipal activity remains public even if a record later returns to pending. */
 export function canDeleteRecord(value: Occurrence | CivicItem): boolean {
+  if (value.municipalInterventionAt) return false;
   if ('kind' in value)
     return (
       value.kind === 'proposal' &&

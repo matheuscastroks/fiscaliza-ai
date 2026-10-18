@@ -208,6 +208,14 @@ test(
     );
     const withReply = await app.inject({ url: replied.path, headers: owner });
     assert.equal(withReply.json().data.canDelete, false);
+    const replyId = withReply.json().data.comments[0].id;
+    const removedReply = await app.inject({
+      method: 'DELETE',
+      url: replied.path + '/comments/' + replyId,
+      headers: staff,
+    });
+    assert.equal(removedReply.statusCode, 200, removedReply.body);
+    assert.equal(removedReply.json().data.canDelete, false);
     assert.equal(
       (
         await app.inject({

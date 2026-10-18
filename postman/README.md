@@ -25,6 +25,10 @@ Números dos cenários vêm de `demo_engagement` somados às relações reais. N
 
 O campo derivado `canDelete` orienta a interface; a autorização é revalidada no servidor. Comentários retornam `avatar` opcional e nome atual do autor, sem dados privados da conta. A coleção verifica exclusão de proposta, tentativa por outra conta e preservação de ocorrência atendida.
 
+`PATCH /{occurrences|civic-items}/:id/comments/:commentId` recebe `text` e registra `editedAt`. `DELETE` no mesmo endereço remove o comentário. Apenas seu autor pode alterar ou apagar; uma intervenção municipal continua registrada mesmo após remoção de sua mensagem.
+
+`PUT /profile/avatar` recebe `{avatar:"/api/attachments/<uuid>"}` de um upload pertencente à conta e ao município. A foto é persistida no perfil e reapresentada em sessão e comentários existentes. URLs externas e anexos de outras contas são rejeitados. O aplicativo migra a foto anteriormente local e usa o mesmo componente de avatar em todos os contextos.
+
 ## Análise de foto
 
 `POST /analysis` recebe `description` (pode ser vazia quando há foto) e `imageUrl` de `/api/attachments/<uuid>`. O anexo precisa pertencer à conta e ao município. Sem chave ou em falha do modelo, `imageAnalyzed=false`; somente retorno visual válido do Gemini usa `true`.

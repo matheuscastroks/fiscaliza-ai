@@ -41,6 +41,7 @@ export interface CityEvent {
   sector?: string;
 }
 export interface CityComment {
+  editedAt?: string;
   avatar?: string;
   id: string;
   text: string;
@@ -49,6 +50,7 @@ export interface CityComment {
   createdAt: string;
 }
 export interface Occurrence {
+  municipalInterventionAt?: string;
   canDelete?: boolean;
   /** Distinct authenticated accounts that opened this record. */
   views?: number;
@@ -93,6 +95,7 @@ export type CivicTerritory =
       location: { latitude: number; longitude: number; address?: string };
     };
 export interface CivicBase {
+  municipalInterventionAt?: string;
   canDelete?: boolean;
   id: string;
   municipalityId?: string;
