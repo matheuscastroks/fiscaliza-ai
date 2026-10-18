@@ -6,6 +6,9 @@ import {
   Platform,
   useWindowDimensions,
   Keyboard,
+  Animated,
+  Easing,
+  AccessibilityInfo,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,6 +33,45 @@ export function FloatingGlassTabBar({
 }: FloatingGlassTabBarProps) {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
+  const barWidth = Math.min(4 * 52 + 3 * 4 + 2 * 4, width - 32);
+  const visibleRoutes = state.routes.filter((route) => VISIBLE.has(route.name));
+  const selectedIndex = Math.max(
+    0,
+    visibleRoutes.findIndex(
+      (route) => route.key === state.routes[state.index]?.key,
+    ),
+  );
+  const target = (selectedIndex * (barWidth - 8 - 52)) / 3;
+  const [selection] = useState(() => new Animated.Value(target));
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void AccessibilityInfo.isReduceMotionEnabled().then((value) => {
+      if (active) setReduced(value);
+    });
+    const sub = AccessibilityInfo.addEventListener(
+      'reduceMotionChanged',
+      setReduced,
+    );
+    return () => {
+      active = false;
+      sub.remove();
+    };
+  }, []);
+  useEffect(() => {
+    if (reduced) {
+      selection.setValue(target);
+      return;
+    }
+    const motion = Animated.timing(selection, {
+      toValue: target,
+      duration: 200,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    });
+    motion.start();
+    return () => motion.stop();
+  }, [target, reduced, selection]);
   const [keyboard, setKeyboard] = useState(false);
   useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', () =>
@@ -44,7 +86,6 @@ export function FloatingGlassTabBar({
     };
   }, []);
   if (keyboard || !VISIBLE.has(state.routes[state.index]?.name)) return null;
-  const barWidth = Math.min(4 * 52 + 3 * 4 + 2 * 4, width - 32);
   return (
     <View
       style={[
@@ -56,6 +97,15 @@ export function FloatingGlassTabBar({
         },
       ]}
     >
+      <Animated.View
+        pointerEvents="none"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={[
+          styles.selected,
+          { top: 4, left: 4, transform: [{ translateX: selection }] },
+        ]}
+      />
       {state.routes
         .filter((route) => VISIBLE.has(route.name))
         .map((route) => {
@@ -91,11 +141,6 @@ export function FloatingGlassTabBar({
               ]}
             >
               <View collapsable={false} style={styles.icon}>
-                <View
-                  pointerEvents="none"
-                  collapsable={false}
-                  style={[styles.selected, { opacity: focused ? 1 : 0 }]}
-                />
                 {options.tabBarIcon?.({
                   focused,
                   color: focused ? colors.ink : colors.white,

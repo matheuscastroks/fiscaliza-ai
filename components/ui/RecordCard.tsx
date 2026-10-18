@@ -40,7 +40,11 @@ export function RecordCard({
       accessibilityRole="button"
       accessibilityLabel={`${title}, ${label}, ${meta}`}
       onPress={onPress}
-      style={({ pressed }) => [styles.card, pressed && { opacity: 0.82 }]}
+      style={({ pressed }) => [
+        styles.card,
+        photo && { minHeight: featured ? 440 : 400 },
+        pressed && { opacity: 0.82 },
+      ]}
     >
       {photo && (
         <Image
@@ -51,9 +55,7 @@ export function RecordCard({
           accessibilityLabel={`Foto de ${title}`}
         />
       )}
-      {photo && (
-        <View style={[styles.photoSpace, featured && { height: 170 }]} />
-      )}
+      {photo && <View style={styles.photoSpace} />}
       <View style={styles.content}>
         {photo && (
           <LinearGradient
@@ -70,11 +72,7 @@ export function RecordCard({
         <AppText variant="meta" color={photo ? 'white' : 'muted'}>
           {label}
         </AppText>
-        <AppText
-          variant="sectionTitle"
-          color={photo ? 'white' : 'ink'}
-          numberOfLines={3}
-        >
+        <AppText variant="sectionTitle" color={photo ? 'white' : 'ink'}>
           {title}
         </AppText>
         {summary && !photo && (
@@ -129,7 +127,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  photoSpace: { height: 148 },
+  photoSpace: { flexGrow: 1, minHeight: 96 },
   content: { padding: spacing.lg, gap: spacing.xs },
   scrim: { position: 'absolute', left: 0, right: 0, top: -100, bottom: 0 },
   action: {

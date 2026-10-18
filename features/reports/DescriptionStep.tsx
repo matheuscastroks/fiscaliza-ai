@@ -1,3 +1,4 @@
+import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -87,31 +88,16 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
         <AppText variant="label" color="ink" style={styles.selectorLabel}>
           Categoria
         </AppText>
-        <View style={styles.chipsRow}>
-          {CATEGORY_KEYS.map((catKey) => {
-            const isSelected = category === catKey;
-            return (
-              <TouchableOpacity
-                key={catKey}
-                style={[
-                  styles.selectorChip,
-                  isSelected && styles.selectorChipSelected,
-                ]}
-                onPress={() => onCategoryChange(catKey)}
-                accessibilityRole="button"
-                accessibilityState={{ selected: isSelected }}
-              >
-                <AppText
-                  variant="caption"
-                  color={isSelected ? 'white' : 'muted'}
-                  style={styles.chipText}
-                >
-                  {CATEGORY_LABELS[catKey]}
-                </AppText>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+        <SlidingTabs
+          edgeToEdge={false}
+          label="Categoria da ocorrência"
+          options={CATEGORY_KEYS.map((value) => ({
+            value,
+            label: CATEGORY_LABELS[value],
+          }))}
+          value={category}
+          onChange={(value) => onCategoryChange(value as typeof category)}
+        />
       </View>
 
       {/* Seletor de Gravidade/Prioridade */}
@@ -119,31 +105,16 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
         <AppText variant="label" color="ink" style={styles.selectorLabel}>
           Gravidade Estimada
         </AppText>
-        <View style={styles.chipsRow}>
-          {PRIORITY_KEYS.map((pKey) => {
-            const isSelected = priority === pKey;
-            return (
-              <TouchableOpacity
-                key={pKey}
-                style={[
-                  styles.selectorChip,
-                  isSelected && styles.selectorChipSelected,
-                ]}
-                onPress={() => onPriorityChange(pKey)}
-                accessibilityRole="button"
-                accessibilityState={{ selected: isSelected }}
-              >
-                <AppText
-                  variant="caption"
-                  color={isSelected ? 'white' : 'muted'}
-                  style={styles.chipText}
-                >
-                  {PRIORITY_LABELS[pKey]}
-                </AppText>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+        <SlidingTabs
+          edgeToEdge={false}
+          label="Gravidade estimada"
+          options={PRIORITY_KEYS.map((value) => ({
+            value,
+            label: PRIORITY_LABELS[value],
+          }))}
+          value={priority}
+          onChange={(value) => onPriorityChange(value as typeof priority)}
+        />
       </View>
 
       {/* Foto / Evidência */}

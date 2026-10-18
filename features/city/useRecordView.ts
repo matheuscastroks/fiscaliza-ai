@@ -13,6 +13,7 @@ export function useRecordView(path: string, enabled: boolean) {
   useFocusEffect(
     useCallback(() => {
       if (!enabled || !userId || !municipality) return;
+      if (attempt > 0) setError('');
       let active = true;
       void request(path + '/view', 'PUT')
         .then(async () => {

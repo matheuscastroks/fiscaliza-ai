@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -38,6 +38,12 @@ export function CivicCard({
   onPress: () => void;
 }) {
   const [failedPhoto, setFailedPhoto] = useState<string>();
+  const [clock, setClock] = useState(() => Date.now());
+  useEffect(() => {
+    if (item.kind !== 'consultation' || item.status !== 'open') return;
+    const timer = setInterval(() => setClock(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, [item.kind, item.status]);
   const photo =
     item.kind === 'proposal'
       ? item.images?.[0]
@@ -48,7 +54,7 @@ export function CivicCard({
   const open =
     item.kind === 'consultation' &&
     item.status === 'open' &&
-    new Date(item.closesAt).getTime() > Date.now();
+    new Date(item.closesAt).getTime() > clock;
   const action =
     item.kind === 'proposal'
       ? 'Conhecer a ideia'

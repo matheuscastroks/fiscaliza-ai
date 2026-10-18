@@ -1,6 +1,7 @@
 // Local GenerateContent contract fixture; not an image classifier.
 // Based on https://ai.google.dev/gemini-api/docs/generate-content/image-understanding
 const http = require('node:http');
+const { Buffer } = require('node:buffer');
 http
   .createServer(async (req, res) => {
     res.setHeader('content-type', 'application/json');
