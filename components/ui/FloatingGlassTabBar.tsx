@@ -44,7 +44,7 @@ export function FloatingGlassTabBar({
     };
   }, []);
   if (keyboard || !VISIBLE.has(state.routes[state.index]?.name)) return null;
-  const barWidth = Math.min(width - 64, 440);
+  const barWidth = Math.min(4 * 52 + 3 * 4 + 2 * 4, width - 32);
   return (
     <View
       style={[
@@ -111,11 +111,12 @@ export function FloatingGlassTabBar({
 const styles = StyleSheet.create({
   bar: {
     position: 'absolute',
-    height: 72,
-    borderRadius: 36,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: colors.ink,
     flexDirection: 'row',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
+    justifyContent: 'space-between',
     alignItems: 'center',
     ...Platform.select({
       ios: {
@@ -129,8 +130,8 @@ const styles = StyleSheet.create({
     }),
   },
   tab: {
-    flex: 1,
-    minHeight: 56,
+    width: 52,
+    minHeight: 52,
     alignItems: 'center',
     justifyContent: 'center',
   },
