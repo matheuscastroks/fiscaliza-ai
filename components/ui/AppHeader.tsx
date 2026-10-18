@@ -1,11 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import {
-  AccessibilityInfo,
-  Platform,
-  View,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import { UserAvatar } from './UserAvatar';
+import { useAuthStore } from '@/stores/authStore';
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
@@ -28,35 +24,21 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   rightElement,
   overlay = false,
 }) => {
-  const [screenReader, setScreenReader] = useState(false);
-  useEffect(() => {
-    let active = true;
-    void AccessibilityInfo.isScreenReaderEnabled().then((enabled) => {
-      if (active) setScreenReader(enabled);
-    });
-    const subscription = AccessibilityInfo.addEventListener(
-      'screenReaderChanged',
-      setScreenReader,
-    );
-    return () => {
-      active = false;
-      subscription.remove();
-    };
-  }, []);
+  const user = useAuthStore((state) => state.user);
   return (
     <View
       style={[styles.container, overlay && styles.overlay]}
       pointerEvents={overlay ? 'box-none' : 'auto'}
     >
       <View style={styles.topRow} pointerEvents={overlay ? 'box-none' : 'auto'}>
-        {!onBack && (Platform.OS === 'web' || screenReader) && (
+        {!onBack && user && (
           <TouchableOpacity
             style={styles.circleButton}
             onPress={() => useMenu.getState().setOpen(true)}
             accessibilityRole="button"
             accessibilityLabel="Abrir menu"
           >
-            <Ionicons name="menu-outline" size={22} color={colors.ink} />
+            <UserAvatar size={48} />
           </TouchableOpacity>
         )}
         {onBack && (
@@ -118,10 +100,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: layout.touchTarget.minHeight,
+    gap: spacing.sm,
   },
   // Botões circulares brancos com sombra sutil da referência
   circleButton: {
-    marginRight: spacing.sm,
     width: 48,
     height: 48,
     borderRadius: 24,

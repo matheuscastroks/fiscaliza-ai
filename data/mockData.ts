@@ -35,6 +35,7 @@ export interface Badge {
 }
 
 export interface Problem {
+  views?: number;
   id: string;
   municipalityId?: string;
   title: string;

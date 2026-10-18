@@ -260,6 +260,11 @@ export default function ProfileScreen() {
           <AppText variant="sectionTitle">Minha conta</AppText>
           <View style={styles.links}>
             <ProfileLink
+              title="Histórico de atendimentos"
+              icon="time-outline"
+              href="/HistoryScreen"
+            />
+            <ProfileLink
               title="Preferências"
               icon="options-outline"
               href="/SettingsScreen"

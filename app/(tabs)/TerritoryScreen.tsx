@@ -273,7 +273,11 @@ function TerritoryContent() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: spacing.xs }}
+          style={{ marginHorizontal: -spacing.contentPadding }}
+          contentContainerStyle={{
+            gap: spacing.xs,
+            paddingHorizontal: spacing.contentPadding,
+          }}
         >
           {(
             [
@@ -351,7 +355,11 @@ function TerritoryContent() {
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: spacing.xs }}
+                  style={{ marginHorizontal: -spacing.contentPadding }}
+                  contentContainerStyle={{
+                    gap: spacing.xs,
+                    paddingHorizontal: spacing.contentPadding,
+                  }}
                 >
                   {[['all', 'Todas'], ...statuses].map(([value, label]) => (
                     <AppButton

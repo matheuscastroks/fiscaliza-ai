@@ -7,8 +7,7 @@ import type { CivicItem } from '@/shared/contracts';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 import { civicTerritory } from '@/shared/civic-territory';
-import { RecordCard } from '@/components/ui/RecordCard';
-import { assetUrl } from '@/services/http';
+import { CivicCard } from './CivicCard';
 import { layout } from '@/theme/layout';
 export const cityStyles = StyleSheet.create({
   content: {
@@ -45,24 +44,13 @@ export const statusLabel: Record<string, string> = {
 export function CivicRow({ item }: { item: CivicItem }) {
   const territory = civicTerritory(item);
   return (
-    <RecordCard
-      title={item.title}
-      label={kindLabel[item.kind] + ' · ' + statusLabel[item.status]}
-      summary={item.summary}
-      meta={
-        (territory.scope === 'municipality'
+    <CivicCard
+      item={item}
+      status={statusLabel[item.status]}
+      territory={
+        territory.scope === 'municipality'
           ? 'Todo o município'
-          : territory.neighborhood) +
-        (item.kind === 'consultation'
-          ? ' · Até ' + new Date(item.closesAt).toLocaleDateString('pt-BR')
-          : '')
-      }
-      image={
-        item.kind === 'proposal' && item.images?.[0]
-          ? assetUrl(item.images[0])
-          : item.kind === 'action' && item.evidence[0]
-            ? assetUrl(item.evidence[0])
-            : undefined
+          : territory.neighborhood || 'Local indicado'
       }
       onPress={() =>
         router.push({
@@ -70,41 +58,10 @@ export function CivicRow({ item }: { item: CivicItem }) {
           params: { id: item.id },
         })
       }
-      action={
-        item.kind === 'consultation'
-          ? 'Ver consulta'
-          : item.kind === 'proposal'
-            ? 'Ver proposta'
-            : 'Ver ação'
-      }
-    >
-      {item.kind === 'action' && (
-        <View style={{ gap: spacing.xxs }}>
-          <AppText variant="caption" color="muted">
-            Execução: {item.progress}%
-          </AppText>
-          <View
-            accessibilityRole="progressbar"
-            accessibilityLabel="Execução da ação pública"
-            accessibilityValue={{ min: 0, max: 100, now: item.progress }}
-            style={{ height: spacing.xxs, backgroundColor: colors.divider }}
-          >
-            <View
-              style={{
-                height: spacing.xxs,
-                width: `${Math.max(0, Math.min(100, item.progress))}%`,
-                backgroundColor:
-                  item.status === 'completed'
-                    ? colors.completed
-                    : colors.accent,
-              }}
-            />
-          </View>
-        </View>
-      )}
-    </RecordCard>
+    />
   );
 }
+
 export function QueryState({
   loading,
   error,

@@ -1,3 +1,4 @@
+import { EngagementStats } from './Engagement';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import { StyleSheet, Pressable, View } from 'react-native';
@@ -18,6 +19,8 @@ export function RecordCard({
   onPress,
   children,
   action = 'Ver detalhes',
+  metrics,
+  featured = false,
 }: {
   title: string;
   label: string;
@@ -27,6 +30,8 @@ export function RecordCard({
   onPress: () => void;
   children?: React.ReactNode;
   action?: string;
+  metrics?: { views: number; supports: number };
+  featured?: boolean;
 }) {
   const [failedImage, setFailedImage] = useState<string>();
   const photo = Boolean(image && failedImage !== image);
@@ -46,7 +51,9 @@ export function RecordCard({
           accessibilityLabel={`Foto de ${title}`}
         />
       )}
-      {photo && <View style={styles.photoSpace} />}
+      {photo && (
+        <View style={[styles.photoSpace, featured && { height: 170 }]} />
+      )}
       <View style={styles.content}>
         {photo && (
           <LinearGradient
@@ -82,6 +89,13 @@ export function RecordCard({
         >
           {meta}
         </AppText>
+        {metrics && (
+          <EngagementStats
+            views={metrics.views}
+            supports={metrics.supports}
+            light={photo}
+          />
+        )}
         {!photo && children}
         <View style={[styles.action, photo && styles.photoAction]}>
           <AppText variant="label" color={photo ? 'white' : 'ink'}>

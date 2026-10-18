@@ -28,6 +28,14 @@ export function consultationIsOpen(
   );
 }
 
+export function isHomeOccurrence(item: Occurrence, userId: string) {
+  return !(
+    item.reportedBy === userId &&
+    item.status === 'resolved' &&
+    (item.evaluation?.rating || item.evaluation?.satisfied)
+  );
+}
+
 export function cityHighlights(
   occurrences: Occurrence[],
   items: CivicItem[],
@@ -82,6 +90,7 @@ export function cityHighlights(
     )
     .sort((a, b) => b.at - a.at);
   const responses: CityHighlight[] = occurrences
+    .filter((item) => isHomeOccurrence(item, userId))
     .flatMap((occurrence) => {
       const latest = occurrence.statusHistory
         .filter(

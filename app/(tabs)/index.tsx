@@ -1,4 +1,4 @@
-import { UserAvatar } from '@/components/ui/UserAvatar';
+import { CityCarousel } from '@/features/city/CityCarousel';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -8,7 +8,11 @@ import { CivicRow, QueryState, cityStyles } from '@/features/city/CityUI';
 import { HomeHighlights } from '@/features/city/HomeHighlights';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useCityQuery } from '@/features/city/useCityQuery';
-import { cityHighlights, consultationIsOpen } from '@/shared/city-highlights';
+import {
+  cityHighlights,
+  consultationIsOpen,
+  isHomeOccurrence,
+} from '@/shared/city-highlights';
 import {
   civicTerritory,
   matchesNeighborhood,
@@ -41,12 +45,15 @@ export default function HomeScreen() {
   const localItems = (civic.data || []).filter((item) =>
     matchesNeighborhood(item, neighborhood),
   );
-  const localOccurrences = (occurrences.data || []).filter((item) =>
-    occurrenceMatchesNeighborhood(item, neighborhood),
+  const localOccurrences = (occurrences.data || []).filter(
+    (item) =>
+      occurrenceMatchesNeighborhood(item, neighborhood) &&
+      isHomeOccurrence(item, user?.id || ''),
   );
   const localActivity = (activity.data?.occurrences || []).filter(
     (item) =>
       item.municipalityId === user?.municipality?.id &&
+      isHomeOccurrence(item, user?.id || '') &&
       occurrenceMatchesNeighborhood(item, neighborhood),
   );
   const consultations = localItems
@@ -71,7 +78,7 @@ export default function HomeScreen() {
   );
   const featuredOccurrences = [...localOccurrences]
     .sort((a, b) => Number(Boolean(b.images[0])) - Number(Boolean(a.images[0])))
-    .slice(0, 2);
+    .slice(0, 8);
   const municipalCount = neighborhood
     ? localItems.filter((item) => civicTerritory(item).scope === 'municipality')
         .length
@@ -86,20 +93,32 @@ export default function HomeScreen() {
     <AppScreen>
       <AppHeader
         title={`Olá, ${user?.name ? user.name.split(' ')[0] : 'Vizinho'}`}
+        rightElement={
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Fotografar ocorrência"
+            onPress={() =>
+              router.push({
+                pathname: '/(tabs)/ReportScreen',
+                params: { camera: String(Date.now()) },
+              })
+            }
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: colors.surface,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Ionicons name="camera-outline" size={24} color={colors.ink} />
+          </TouchableOpacity>
+        }
         context={
           user?.municipality
             ? `${user.municipality.name} · ${user.municipality.state}`
             : 'Bem-vindo ao Fiscaliza aí'
-        }
-        rightElement={
-          <TouchableOpacity
-            onPress={() => router.push('/(tabs)/ProfileScreen')}
-            accessibilityRole="button"
-            accessibilityLabel="Ir para meu perfil"
-            style={styles.avatarButton}
-          >
-            <UserAvatar size={48} />
-          </TouchableOpacity>
         }
       />
       <ScrollView contentContainerStyle={cityStyles.content}>
@@ -147,9 +166,6 @@ export default function HomeScreen() {
           error={civic.error || activity.error || occurrences.error}
           retry={refresh}
         />
-        {urgentHighlights.length > 0 && (
-          <HomeHighlights items={urgentHighlights.slice(0, 1)} />
-        )}
         {ready && !highlights.length && localOccurrences.length === 0 && (
           <View style={cityStyles.section}>
             <AppText variant="sectionTitle">Acompanhe este território</AppText>
@@ -167,22 +183,46 @@ export default function HomeScreen() {
         {localOccurrences.length > 0 && (
           <View style={cityStyles.section}>
             <AppText variant="sectionTitle">Ocorrências no território</AppText>
-            {featuredOccurrences.map((problem) => (
-              <OccurrenceRow
-                key={problem.id}
-                problem={problem}
-                onPress={() =>
-                  router.push({
-                    pathname: '/ProblemDetailsScreen',
-                    params: { id: problem.id },
-                  })
-                }
-              />
-            ))}
+            <CityCarousel
+              key={
+                neighborhood +
+                featuredOccurrences.map((item) => item.id).join(',')
+              }
+              items={featuredOccurrences}
+              label="Ocorrências no território"
+              renderItem={(problem) => (
+                <OccurrenceRow
+                  problem={problem}
+                  featured
+                  onPress={() =>
+                    router.push({
+                      pathname: '/ProblemDetailsScreen',
+                      params: { id: problem.id },
+                    })
+                  }
+                />
+              )}
+            ></CityCarousel>
           </View>
+        )}
+        {urgentHighlights.length > 0 && (
+          <HomeHighlights items={urgentHighlights.slice(0, 1)} />
         )}
         {responses.length > 0 && (
           <HomeHighlights items={responses.slice(0, 1)} />
+        )}
+        {localItems.some((item) => item.kind === 'proposal') && (
+          <View style={cityStyles.section}>
+            <AppText variant="sectionTitle">Propostas da comunidade</AppText>
+            <CityCarousel
+              key={neighborhood + '-proposals'}
+              label="Propostas da comunidade"
+              items={localItems
+                .filter((item) => item.kind === 'proposal')
+                .slice(0, 6)}
+              renderItem={(item) => <CivicRow item={item} />}
+            />
+          </View>
         )}
         <View style={cityStyles.section}>
           <AppText variant="sectionTitle">

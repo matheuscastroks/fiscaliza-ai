@@ -30,12 +30,14 @@ export function DetailSheet({
   onBack,
   children,
   footer,
+  headerAction,
 }: {
   title: string;
   image?: string;
   onBack: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  headerAction?: React.ReactNode;
 }) {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -74,14 +76,21 @@ export function DetailSheet({
       keyboardAvoiding
       edges={photo ? ['left', 'right'] : ['top', 'left', 'right']}
     >
-      {!photo && <AppHeader title={title} onBack={onBack} />}
+      {!photo && (
+        <AppHeader title={title} onBack={onBack} rightElement={headerAction} />
+      )}
       <View style={styles.stage}>
         {photo && (
           <View
             pointerEvents="box-none"
             style={[styles.backArea, { top: insets.top }]}
           >
-            <AppHeader title="" onBack={onBack} overlay />
+            <AppHeader
+              title=""
+              onBack={onBack}
+              rightElement={headerAction}
+              overlay
+            />
           </View>
         )}
         {photo && (

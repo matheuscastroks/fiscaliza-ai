@@ -1,3 +1,10 @@
+import { ExecutionProgress } from '@/features/city/CivicCard';
+import {
+  BallotOption,
+  ProposalStages,
+} from '@/features/city/ParticipationDetails';
+import { EngagementStats, SupportButton } from '@/components/ui/Engagement';
+import { useRecordView } from '@/features/city/useRecordView';
 import { goBack } from '@/utils/navigation';
 import React, { useState, useEffect } from 'react';
 import { Image, View } from 'react-native';
@@ -21,6 +28,7 @@ export default function CivicDetailsScreen() {
   const path = '/civic-items/' + encodeURIComponent(id || '');
   const query = useCityQuery<CivicItem>(path);
   const item = query.data;
+  const view = useRecordView(path, Boolean(item?.kind === 'proposal'));
   const [comment, setComment] = useState('');
   const [selected, setSelected] = useState<number>();
   const [clock, setClock] = useState(() => Date.now());
@@ -40,6 +48,7 @@ export default function CivicDetailsScreen() {
     }) => mutation(path + suffix, method, body),
     onSuccess: (_result, variables) => {
       if (variables.suffix === '/comments') setComment('');
+      if (variables.suffix === '/answer') setSelected(undefined);
       void query.refetch();
     },
   });
@@ -51,11 +60,20 @@ export default function CivicDetailsScreen() {
       image={
         item?.kind === 'proposal' && item.images?.[0]
           ? assetUrl(item.images[0])
-          : item?.kind === 'action' && item.evidence[0]
-            ? assetUrl(item.evidence[0])
-            : undefined
+          : undefined
       }
       onBack={() => goBack()}
+      headerAction={
+        item?.kind === 'proposal' ? (
+          <SupportButton
+            supported={Boolean(item.supportedByMe)}
+            disabled={change.isPending}
+            onPress={() =>
+              send('/support', item.supportedByMe ? 'DELETE' : 'PUT')
+            }
+          />
+        ) : undefined
+      }
       footer={
         item ? (
           <View style={{ gap: 8 }}>
@@ -64,18 +82,36 @@ export default function CivicDetailsScreen() {
                 {change.error.message}
               </AppText>
             )}
-            <AppButton
-              title={
-                item.followedByMe
-                  ? 'Deixar de acompanhar'
-                  : 'Acompanhar atualizações'
-              }
-              variant="primary"
-              disabled={change.isPending}
-              onPress={() =>
-                send('/follow', item.followedByMe ? 'DELETE' : 'PUT')
-              }
-            />
+            {item.kind === 'consultation' &&
+            item.status === 'open' &&
+            new Date(item.closesAt).getTime() > clock ? (
+              <AppButton
+                title={
+                  item.myAnswer === undefined
+                    ? 'Registrar resposta'
+                    : 'Atualizar resposta'
+                }
+                loading={change.isPending}
+                disabled={selected === undefined || selected === item.myAnswer}
+                onPress={() => send('/answer', 'PUT', { option: selected })}
+              />
+            ) : (
+              <AppButton
+                title={
+                  item.followedByMe
+                    ? 'Deixar de acompanhar'
+                    : item.kind === 'proposal'
+                      ? 'Acompanhar decisão'
+                      : item.kind === 'action'
+                        ? 'Acompanhar execução'
+                        : 'Acompanhar devolutiva'
+                }
+                disabled={change.isPending}
+                onPress={() =>
+                  send('/follow', item.followedByMe ? 'DELETE' : 'PUT')
+                }
+              />
+            )}
           </View>
         ) : undefined
       }
@@ -91,6 +127,30 @@ export default function CivicDetailsScreen() {
             {statusLabel[item.status]} · {item.neighborhood}
           </AppText>
           <AppText variant="screenTitle">{item.title}</AppText>
+          {item.kind === 'proposal' && (
+            <EngagementStats views={item.views ?? 0} supports={item.supports} />
+          )}
+          {change.error && change.variables?.suffix === '/support' && (
+            <AppText color="risk" accessibilityRole="alert">
+              {change.error.message}
+            </AppText>
+          )}
+          {view.error && (
+            <View style={{ gap: 8 }}>
+              <AppText variant="meta" color="muted">
+                {view.error}
+              </AppText>
+              <AppButton
+                title="Registrar visualização novamente"
+                variant="quiet"
+                onPress={view.retry}
+              />
+            </View>
+          )}
+          {item.kind === 'proposal' && <ProposalStages status={item.status} />}
+          {item.kind === 'action' && (
+            <ExecutionProgress progress={item.progress} />
+          )}
           <AppText>{item.body}</AppText>
           {item.kind === 'proposal' &&
             item.images?.slice(1).map((url, index) => (
@@ -109,18 +169,6 @@ export default function CivicDetailsScreen() {
           <AppText color="muted">
             Responsável: {item.responsible || 'Gestão municipal'}
           </AppText>
-          {(item.history?.length || 0) > 0 && (
-            <DetailSection title="Histórico de decisões">
-              {item.history?.map((event, index) => (
-                <View key={index} style={cityStyles.row}>
-                  <AppText color="muted">
-                    {new Date(event.at).toLocaleString('pt-BR')} · {event.actor}
-                  </AppText>
-                  <AppText>{event.text}</AppText>
-                </View>
-              ))}
-            </DetailSection>
-          )}
           {item.kind === 'proposal' && item.decision && (
             <DetailSection title="Resposta da gestão">
               <AppText>{item.decision}</AppText>
@@ -137,44 +185,24 @@ export default function CivicDetailsScreen() {
                 Encerramento:{' '}
                 {new Date(item.closesAt).toLocaleDateString('pt-BR')}
               </AppText>
-              {item.options.map((option, index) => (
-                <AppButton
+              {item.options.map((_, index) => (
+                <BallotOption
                   key={index}
-                  title={
-                    option +
-                    (item.status === 'closed'
-                      ? ' — ' + (item.answerCounts[index] || 0) + ' respostas'
-                      : '')
+                  item={item}
+                  index={index}
+                  selected={selected ?? item.myAnswer}
+                  closed={
+                    item.status === 'closed' ||
+                    new Date(item.closesAt).getTime() <= clock
                   }
-                  variant={
-                    (selected ?? item.myAnswer) === index
-                      ? 'primary'
-                      : 'secondary'
-                  }
-                  accessibilityState={{
-                    selected: (selected ?? item.myAnswer) === index,
-                  }}
                   disabled={
                     item.status === 'closed' ||
                     new Date(item.closesAt).getTime() <= clock ||
                     change.isPending
                   }
-                  onPress={() => setSelected(index)}
+                  onSelect={() => setSelected(index)}
                 />
               ))}
-              {item.status === 'open' &&
-                new Date(item.closesAt).getTime() > clock && (
-                  <AppButton
-                    title={
-                      item.myAnswer === undefined
-                        ? 'Registrar resposta'
-                        : 'Atualizar resposta'
-                    }
-                    loading={change.isPending}
-                    disabled={selected === undefined}
-                    onPress={() => send('/answer', 'PUT', { option: selected })}
-                  />
-                )}
               {item.myAnswer !== undefined && (
                 <AppText color="completed">
                   Sua resposta foi registrada: {item.options[item.myAnswer]}.
@@ -190,9 +218,7 @@ export default function CivicDetailsScreen() {
           )}
           {item.kind === 'action' && (
             <View style={cityStyles.section}>
-              <AppText variant="sectionTitle">
-                Execução: {item.progress}%
-              </AppText>
+              <AppText variant="sectionTitle">Etapas da execução</AppText>
               <AppText color="muted">
                 Previsão: {new Date(item.dueAt).toLocaleDateString('pt-BR')}
               </AppText>
@@ -205,15 +231,32 @@ export default function CivicDetailsScreen() {
                   <AppText>{update.text}</AppText>
                 </View>
               ))}
-              {item.evidence.slice(1).map((url, index) => (
+              {item.evidence.map((url, index) => (
                 <Image
                   key={url}
                   source={{ uri: assetUrl(url) }}
                   accessibilityLabel={'Evidência da ação ' + (index + 1)}
-                  style={{ height: 200, width: '100%', resizeMode: 'cover' }}
+                  style={{
+                    height: 220,
+                    width: '100%',
+                    borderRadius: 28,
+                    resizeMode: 'cover',
+                  }}
                 />
               ))}
             </View>
+          )}
+          {(item.history?.length || 0) > 0 && (
+            <DetailSection title="Histórico de decisões">
+              {item.history?.map((event, index) => (
+                <View key={index} style={cityStyles.row}>
+                  <AppText color="muted">
+                    {new Date(event.at).toLocaleString('pt-BR')} · {event.actor}
+                  </AppText>
+                  <AppText>{event.text}</AppText>
+                </View>
+              ))}
+            </DetailSection>
           )}
           {item.linkedIds.length > 0 && (
             <DetailSection title="Contribuições e ações relacionadas">
@@ -232,22 +275,7 @@ export default function CivicDetailsScreen() {
               ))}
             </DetailSection>
           )}
-          <View style={cityStyles.controls}>
-            {item.kind === 'proposal' && (
-              <AppButton
-                title={
-                  item.supportedByMe
-                    ? 'Retirar apoio (' + item.supports + ')'
-                    : 'Apoiar (' + item.supports + ')'
-                }
-                variant="secondary"
-                disabled={change.isPending}
-                onPress={() =>
-                  send('/support', item.supportedByMe ? 'DELETE' : 'PUT')
-                }
-              />
-            )}
-          </View>
+
           <DetailSection title="Contribuições da comunidade">
             {item.comments.map((c) => (
               <View key={c.id} style={cityStyles.row}>
@@ -274,11 +302,13 @@ export default function CivicDetailsScreen() {
           </DetailSection>
         </>
       )}
-      {change.error && change.variables?.suffix !== '/follow' && (
-        <AppText color="risk" accessibilityLiveRegion="polite">
-          {change.error.message}
-        </AppText>
-      )}
+      {change.error &&
+        change.variables?.suffix !== '/follow' &&
+        change.variables?.suffix !== '/support' && (
+          <AppText color="risk" accessibilityLiveRegion="polite">
+            {change.error.message}
+          </AppText>
+        )}
     </DetailSheet>
   );
 }

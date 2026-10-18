@@ -26,7 +26,11 @@ export function NeighborhoodPicker({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: spacing.xs }}
+      style={{ marginHorizontal: -spacing.contentPadding }}
+      contentContainerStyle={{
+        gap: spacing.xs,
+        paddingHorizontal: spacing.contentPadding,
+      }}
       keyboardShouldPersistTaps="handled"
       accessibilityLabel="Filtrar por bairro"
     >

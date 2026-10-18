@@ -1,6 +1,14 @@
+import { CityCarousel } from '@/features/city/CityCarousel';
+import { nearbyOccurrences } from '@/shared/nearby-occurrences';
+import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
+import { EngagementStats, SupportButton } from '@/components/ui/Engagement';
+import { useRecordView } from '@/features/city/useRecordView';
 import { goBack } from '@/utils/navigation';
 import React, { useState } from 'react';
-import { Image, View } from 'react-native';
+import { Image, View, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import { DetailSheet, DetailSection } from '@/components/ui/DetailSheet';
@@ -19,9 +27,13 @@ export default function ProblemDetailsScreen() {
   const path = '/occurrences/' + encodeURIComponent(id || '');
   const user = useAuthStore((s) => s.user);
   const query = useCityQuery<Occurrence>(path);
+  const nearby = useCityQuery<Occurrence[]>('/occurrences');
   const item = query.data;
+  const related = item ? nearbyOccurrences(item, nearby.data || []) : [];
+  const view = useRecordView(path, Boolean(item));
   const [comment, setComment] = useState('');
   const [reason, setReason] = useState('');
+  const [rating, setRating] = useState(0);
   const change = useMutation({
     mutationFn: ({
       suffix,
@@ -45,6 +57,17 @@ export default function ProblemDetailsScreen() {
       title={'Ocorrência'}
       image={item?.images[0] ? assetUrl(item.images[0]) : undefined}
       onBack={() => goBack()}
+      headerAction={
+        item ? (
+          <SupportButton
+            supported={Boolean(item.supportedByMe)}
+            disabled={change.isPending}
+            onPress={() =>
+              send('/support', item.supportedByMe ? 'DELETE' : 'PUT')
+            }
+          />
+        ) : undefined
+      }
       footer={
         item ? (
           <View style={{ gap: 8 }}>
@@ -78,6 +101,24 @@ export default function ProblemDetailsScreen() {
         <>
           <StatusText status={item.status} />
           <AppText variant="screenTitle">{item.title}</AppText>
+          <EngagementStats views={item.views ?? 0} supports={item.votes} />
+          {change.error && change.variables?.suffix === '/support' && (
+            <AppText color="risk" accessibilityRole="alert">
+              {change.error.message}
+            </AppText>
+          )}
+          {view.error && (
+            <View style={{ gap: 8 }}>
+              <AppText variant="meta" color="muted">
+                {view.error}
+              </AppText>
+              <AppButton
+                title="Registrar visualização novamente"
+                variant="quiet"
+                onPress={view.retry}
+              />
+            </View>
+          )}
           <AppText color="muted">{item.location.address}</AppText>
           <AppText variant="caption" color="muted">
             Protocolo {item.id} ·{' '}
@@ -129,57 +170,68 @@ export default function ProblemDetailsScreen() {
               ))}
             </DetailSection>
           )}
-          <View style={cityStyles.controls}>
-            <AppButton
-              title={
-                item.supportedByMe
-                  ? 'Retirar meu apoio (' + item.votes + ')'
-                  : 'Apoiar (' + item.votes + ')'
-              }
-              variant="secondary"
-              disabled={change.isPending}
-              onPress={() =>
-                send('/support', item.supportedByMe ? 'DELETE' : 'PUT')
-              }
-            />
-          </View>
+
           {item.status === 'resolved' && item.reportedBy === user?.id && (
-            <DetailSection title="O problema foi resolvido?">
-              {item.evaluation && (
+            <DetailSection title="Avaliação do atendimento">
+              {item.evaluation ? (
                 <AppText color="muted">
-                  {item.evaluation.satisfied
-                    ? 'Você confirmou a solução.'
-                    : 'Revisão solicitada: ' + item.evaluation.reason}
+                  {item.evaluation.rating
+                    ? 'Atendimento avaliado: ' +
+                      item.evaluation.rating +
+                      ' de 5 estrelas.'
+                    : 'Sua avaliação foi registrada.'}{' '}
+                  Você encontra este registro no histórico do perfil.
                 </AppText>
+              ) : (
+                <>
+                  <AppText color="muted">
+                    Como foi o atendimento desta ocorrência?
+                  </AppText>
+                  <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Pressable
+                        key={star}
+                        accessibilityRole="radio"
+                        accessibilityLabel={
+                          star + (star === 1 ? ' estrela' : ' estrelas')
+                        }
+                        accessibilityState={{ checked: rating === star }}
+                        onPress={() => setRating(star)}
+                        style={{
+                          width: 48,
+                          height: 48,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Ionicons
+                          name={star <= rating ? 'star' : 'star-outline'}
+                          size={30}
+                          color={colors.ink}
+                        />
+                      </Pressable>
+                    ))}
+                  </View>
+                  <AppInput
+                    label="Comentário (opcional)"
+                    value={reason}
+                    onChangeText={setReason}
+                    multiline
+                    maxLength={2000}
+                  />
+                  <AppButton
+                    title="Concluir avaliação"
+                    disabled={change.isPending || rating === 0}
+                    onPress={() =>
+                      send('/evaluation', 'POST', {
+                        rating,
+                        satisfied: rating >= 3,
+                        reason: reason.trim(),
+                      })
+                    }
+                  />
+                </>
               )}
-              <AppInput
-                label="Conte o que encontrou no local"
-                value={reason}
-                onChangeText={setReason}
-                multiline
-                maxLength={2000}
-              />
-              <AppButton
-                title="Confirmar solução"
-                disabled={change.isPending}
-                onPress={() =>
-                  send('/evaluation', 'POST', {
-                    satisfied: true,
-                    reason: reason.trim() || 'Solução confirmada no local.',
-                  })
-                }
-              />
-              <AppButton
-                title="Solicitar revisão do atendimento"
-                variant="secondary"
-                disabled={change.isPending || reason.trim().length < 5}
-                onPress={() =>
-                  send('/evaluation', 'POST', {
-                    satisfied: false,
-                    reason: reason.trim(),
-                  })
-                }
-              />
             </DetailSection>
           )}
           <DetailSection title="Informações da comunidade">
@@ -206,13 +258,58 @@ export default function ProblemDetailsScreen() {
               }
             />
           </DetailSection>
+          <View style={cityStyles.section}>
+            <AppText variant="sectionTitle">Perto deste local</AppText>
+            <QueryState
+              loading={nearby.isLoading}
+              error={nearby.error}
+              retry={nearby.refetch}
+            />
+            {related.length > 0 && (
+              <CityCarousel
+                key={item.id}
+                label="Ocorrências próximas"
+                items={related.map((result) => ({
+                  ...result,
+                  id: result.item.id,
+                }))}
+                renderItem={({ item: other, distance }) => (
+                  <View style={{ gap: 8 }}>
+                    <AppText variant="meta" color="muted">
+                      {distance < 1000
+                        ? Math.round(distance) + ' m'
+                        : (distance / 1000).toFixed(1).replace('.', ',') +
+                          ' km'}{' '}
+                      deste registro
+                    </AppText>
+                    <OccurrenceRow
+                      problem={other}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/ProblemDetailsScreen',
+                          params: { id: other.id },
+                        })
+                      }
+                    />
+                  </View>
+                )}
+              />
+            )}
+            {nearby.data && related.length === 0 && (
+              <AppText color="muted">
+                Nenhuma outra ocorrência a até 1,5 km deste local.
+              </AppText>
+            )}
+          </View>
         </>
       )}
-      {change.error && change.variables?.suffix !== '/follow' && (
-        <AppText color="risk" accessibilityLiveRegion="polite">
-          {change.error.message}
-        </AppText>
-      )}
+      {change.error &&
+        change.variables?.suffix !== '/follow' &&
+        change.variables?.suffix !== '/support' && (
+          <AppText color="risk" accessibilityLiveRegion="polite">
+            {change.error.message}
+          </AppText>
+        )}
     </DetailSheet>
   );
 }

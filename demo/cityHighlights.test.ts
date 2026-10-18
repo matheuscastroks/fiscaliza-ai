@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   cityHighlights,
+  isHomeOccurrence,
   consultationIsOpen,
 } from '../shared/city-highlights.ts';
 import type {
@@ -188,4 +189,24 @@ test('legacy updates without origin remain neutral instead of claiming managemen
   assert.equal(highlight.kind, 'response');
   if (highlight.kind === 'response')
     assert.equal(highlight.institutional, false);
+});
+
+test('a rated resolved occurrence leaves the author home but remains visible to the territory', () => {
+  for (const rating of [1, 2, 3, 4, 5]) {
+    const item = occurrence({
+      evaluation: {
+        rating,
+        satisfied: rating >= 3,
+        reason: '',
+        at: '2026-10-18T10:00:00Z',
+      },
+    });
+    assert.equal(isHomeOccurrence(item, 'ana'), false);
+    assert.equal(isHomeOccurrence(item, 'outro'), true);
+    assert.deepEqual(cityHighlights([item], [], 'ana', now), []);
+  }
+  assert.equal(
+    isHomeOccurrence(occurrence({ evaluation: undefined }), 'ana'),
+    true,
+  );
 });
