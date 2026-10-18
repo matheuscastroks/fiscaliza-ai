@@ -1,6 +1,7 @@
+import { goBack } from '@/utils/navigation';
 import React from 'react';
 import { Image, ScrollView, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
@@ -37,7 +38,7 @@ export default function HistoricalDetailsScreen() {
     <AppScreen>
       <AppHeader
         title="Histórico de participação"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <ScrollView contentContainerStyle={cityStyles.content}>
         <AppText variant="label" color="muted">

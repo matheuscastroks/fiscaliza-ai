@@ -1,7 +1,8 @@
+import { goBack } from '@/utils/navigation';
 import { cityStyles } from '@/features/city/CityUI';
 import React, { useState } from 'react';
 import { View, ScrollView } from 'react-native';
-import { router } from 'expo-router';
+
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
@@ -30,7 +31,7 @@ export default function PresentationScreen() {
     <AppScreen>
       <AppHeader
         title="Controles de apresentação"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <ScrollView
         contentContainerStyle={cityStyles.content}

@@ -1,3 +1,4 @@
+import { goBack } from '@/utils/navigation';
 import React, { useState } from 'react';
 import { Image, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -42,7 +43,7 @@ export default function ProblemDetailsScreen() {
     change.mutate({ suffix, method, body });
   return (
     <AppScreen keyboardAvoiding>
-      <AppHeader title="Ocorrência" onBack={() => router.back()} />
+      <AppHeader title="Ocorrência" onBack={() => goBack()} />
       <ScrollView
         contentContainerStyle={cityStyles.content}
         keyboardShouldPersistTaps="handled"

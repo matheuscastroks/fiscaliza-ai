@@ -1,3 +1,4 @@
+import { goBack } from '@/utils/navigation';
 import React from 'react';
 import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
@@ -17,7 +18,7 @@ export default function CityScreen() {
   const municipal = query.data?.municipalScope;
   return (
     <AppScreen>
-      <AppHeader title="Município e bairros" onBack={() => router.back()} />
+      <AppHeader title="Município e bairros" onBack={() => goBack()} />
       <ScrollView contentContainerStyle={cityStyles.content}>
         <AppText variant="screenTitle">{municipality?.name}</AppText>
         <AppText color="muted">{municipality?.state}</AppText>

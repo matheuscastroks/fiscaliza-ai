@@ -1,3 +1,4 @@
+import { goBack } from '@/utils/navigation';
 import { cityStyles } from '@/features/city/CityUI';
 import React, { useRef, useState } from 'react';
 import { View, ScrollView } from 'react-native';
@@ -76,7 +77,7 @@ export default function MunicipalityScreen() {
     <AppScreen keyboardAvoiding>
       <AppHeader
         title={linked ? 'Meu município' : 'Sua cidade'}
-        onBack={linked ? () => router.back() : undefined}
+        onBack={linked ? () => goBack() : undefined}
       />
       <ScrollView
         contentContainerStyle={cityStyles.content}

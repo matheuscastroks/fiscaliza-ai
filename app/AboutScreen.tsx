@@ -1,3 +1,4 @@
+import { goBack } from '@/utils/navigation';
 import { cityStyles } from '@/features/city/CityUI';
 import React from 'react';
 import { View, ScrollView } from 'react-native';
@@ -9,7 +10,7 @@ import { AppButton } from '@/components/ui/AppButton';
 export default function AboutScreen() {
   return (
     <AppScreen>
-      <AppHeader title="Sobre o Fiscaliza-AI" onBack={() => router.back()} />
+      <AppHeader title="Sobre o Fiscaliza-AI" onBack={() => goBack()} />
       <ScrollView
         contentContainerStyle={cityStyles.content}
         keyboardShouldPersistTaps="handled"

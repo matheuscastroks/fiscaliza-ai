@@ -1,3 +1,4 @@
+import { goBack } from '@/utils/navigation';
 import { cityStyles } from '@/features/city/CityUI';
 import React from 'react';
 import { View, ScrollView } from 'react-native';
@@ -11,7 +12,7 @@ export default function SettingsScreen() {
   const user = useAuthStore((s) => s.user);
   return (
     <AppScreen>
-      <AppHeader title="Preferências" onBack={() => router.back()} />
+      <AppHeader title="Preferências" onBack={() => goBack()} />
       <ScrollView
         contentContainerStyle={cityStyles.content}
         keyboardShouldPersistTaps="handled"

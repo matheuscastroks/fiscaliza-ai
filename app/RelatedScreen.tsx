@@ -1,3 +1,4 @@
+import { goBack } from '@/utils/navigation';
 import React, { useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
@@ -39,7 +40,7 @@ export default function RelatedScreen() {
   }, [id]);
   return (
     <AppScreen>
-      <AppHeader title="Registro relacionado" onBack={() => router.back()} />
+      <AppHeader title="Registro relacionado" onBack={() => goBack()} />
       <QueryState loading={!error} error={error} />
     </AppScreen>
   );

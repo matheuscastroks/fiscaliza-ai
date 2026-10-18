@@ -1,3 +1,4 @@
+import { goBack } from '@/utils/navigation';
 import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
@@ -17,7 +18,7 @@ export default function ProfileScreen() {
   }>('/activity');
   return (
     <AppScreen>
-      <AppHeader title="Meu perfil" onBack={() => router.back()} />
+      <AppHeader title="Meu perfil" onBack={() => goBack()} />
       <ScrollView
         contentContainerStyle={cityStyles.content}
         keyboardShouldPersistTaps="handled"

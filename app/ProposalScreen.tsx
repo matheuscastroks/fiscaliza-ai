@@ -1,3 +1,4 @@
+import { goBack } from '@/utils/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '@/stores/authStore';
@@ -92,7 +93,7 @@ function ProposalForm() {
   });
   return (
     <AppScreen keyboardAvoiding>
-      <AppHeader title="Propor uma melhoria" onBack={() => router.back()} />
+      <AppHeader title="Propor uma melhoria" onBack={() => goBack()} />
       <ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, paddingHorizontal: spacing.contentPadding, paddingVertical: spacing.md }}>
         <View style={{ gap: spacing.md }}>
           <AppText color="muted">

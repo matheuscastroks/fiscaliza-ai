@@ -1,3 +1,4 @@
+import { goBack } from '@/utils/navigation';
 import React, { useState, useEffect } from 'react';
 import { Image, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -49,7 +50,7 @@ export default function CivicDetailsScreen() {
     <AppScreen>
       <AppHeader
         title={item ? kindLabel[item.kind] : 'Participação'}
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <ScrollView
         contentContainerStyle={cityStyles.content}

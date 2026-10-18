@@ -1,3 +1,4 @@
+import { goBack } from '@/utils/navigation';
 import React from 'react';
 import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
@@ -38,7 +39,7 @@ export default function ResultsScreen() {
     ) || [];
   return (
     <AppScreen>
-      <AppHeader title="Resultados da cidade" onBack={() => router.back()} />
+      <AppHeader title="Resultados da cidade" onBack={() => goBack()} />
       <ScrollView contentContainerStyle={cityStyles.content}>
         <AppText variant="screenTitle">
           {neighborhood || 'Todo o município'}
