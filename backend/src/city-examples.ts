@@ -1,3 +1,4 @@
+import { withExampleContent } from './example-content.js';
 import type { Occurrence, Proposal } from '../../shared/contracts.js';
 
 /** Presentation content only; real contributions are never replaced by these examples. */
@@ -223,5 +224,8 @@ export function cityExamples(at: string) {
           ]
         : [],
   }));
-  return { occurrences, proposals };
+  return {
+    occurrences: occurrences.map(withExampleContent),
+    proposals: proposals.map(withExampleContent),
+  };
 }

@@ -1,3 +1,4 @@
+import { exampleContent } from './example-content.js';
 import { cityExamples } from './city-examples.js';
 import { eq, sql } from 'drizzle-orm';
 import { officialRio } from './municipality.js';
@@ -65,7 +66,9 @@ export async function seed(
           municipalityId: u.role === 'citizen' ? null : '3304557',
         })
         .onConflictDoNothing();
-    await tx.execute(sql`UPDATE users SET name='Beatriz Arantes', email='beatrizarante@gmail.com' WHERE id='citizen-ana' AND email='ana@vilaesperanca.exemplo'`);
+    await tx.execute(
+      sql`UPDATE users SET name='Beatriz Arantes', email='beatrizarante@gmail.com' WHERE id='citizen-ana' AND email='ana@vilaesperanca.exemplo'`,
+    );
     await tx.execute(
       (await import('drizzle-orm'))
         .sql`UPDATE users SET municipality_id='3304557' WHERE id IN ('staff-gestao','admin-local') AND role IN ('staff','admin') AND municipality_id IS NULL`,
@@ -270,6 +273,8 @@ export async function seed(
         ],
       },
     ];
+    for (const item of [occurrence, ...civic])
+      Object.assign(item, exampleContent[item.id] || {});
     const more = cityExamples(at);
     for (const example of [...more.occurrences, ...more.proposals]) {
       await tx
