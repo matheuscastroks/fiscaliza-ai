@@ -15,6 +15,7 @@ export interface PostalCodeLookup {
   street: string;
 }
 export interface SessionUser {
+  avatar?: string;
   id: string;
   name: string;
   email: string;
@@ -77,7 +78,11 @@ export interface Occurrence {
 export type CivicTerritory =
   | { scope: 'municipality' }
   | { scope: 'neighborhood'; neighborhood: string }
-  | { scope: 'location'; neighborhood: string; location: { latitude: number; longitude: number; address?: string } };
+  | {
+      scope: 'location';
+      neighborhood: string;
+      location: { latitude: number; longitude: number; address?: string };
+    };
 export interface CivicBase {
   id: string;
   municipalityId?: string;
@@ -104,6 +109,7 @@ export interface CivicBase {
 }
 export interface Proposal extends CivicBase {
   kind: 'proposal';
+  images?: string[];
   status: 'submitted' | 'under_review' | 'accepted' | 'declined';
   decision?: string;
 }
@@ -126,7 +132,11 @@ export interface PublicAction extends CivicBase {
 }
 export type CivicItem = Proposal | Consultation | PublicAction;
 export interface CityOverview {
-  municipalScope?: { proposals: number; consultations: number; actions: number };
+  municipalScope?: {
+    proposals: number;
+    consultations: number;
+    actions: number;
+  };
   occurrences: number;
   resolved: number;
   proposals: number;

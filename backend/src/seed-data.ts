@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { officialRio } from './municipality.js';
 import { hashPassword } from './auth.js';
 import { users, records, attachments, municipalities } from './schema.js';
@@ -31,18 +31,21 @@ export async function seed(
       {
         id: 'citizen-ana',
         name: 'Ana Souza',
+        avatar: '/api/demo-media/avatar-ana.jpg',
         email: 'ana@vilaesperanca.exemplo',
         role: 'citizen' as const,
       },
       {
         id: 'staff-gestao',
         name: 'Equipe de Gestão',
+        avatar: '/api/demo-media/avatar-gestao.jpg',
         email: 'gestao@vilaesperanca.exemplo',
         role: 'staff' as const,
       },
       {
         id: 'admin-local',
         name: 'Administração',
+        avatar: '/api/demo-media/avatar-admin.jpg',
         email: 'admin@vilaesperanca.exemplo',
         role: 'admin' as const,
       },
@@ -59,6 +62,12 @@ export async function seed(
       (await import('drizzle-orm'))
         .sql`UPDATE users SET municipality_id='3304557' WHERE id IN ('staff-gestao','admin-local') AND role IN ('staff','admin') AND municipality_id IS NULL`,
     );
+    // Enrich only the three presentation accounts without replacing existing portraits.
+    await tx.execute(sql`UPDATE users SET avatar = CASE id
+      WHEN 'citizen-ana' THEN '/api/demo-media/avatar-ana.jpg'
+      WHEN 'staff-gestao' THEN '/api/demo-media/avatar-gestao.jpg'
+      WHEN 'admin-local' THEN '/api/demo-media/avatar-admin.jpg'
+      END WHERE id IN ('citizen-ana', 'staff-gestao', 'admin-local') AND (avatar IS NULL OR avatar = '')`);
     if (reset) {
       await tx
         .delete(records)
@@ -82,7 +91,7 @@ export async function seed(
         address: 'Praça Central',
         neighborhood: 'Centro',
       },
-      images: [],
+      images: ['/api/demo-media/lighting.jpg'],
       reportedBy: 'citizen-ana',
       reportedAt: at,
       votes: 0,
@@ -141,9 +150,14 @@ export async function seed(
     const civic: CivicItem[] = [
       {
         ...base,
-        territory: { scope: 'location', neighborhood: 'Centro', location: plazaLocation },
+        territory: {
+          scope: 'location',
+          neighborhood: 'Centro',
+          location: plazaLocation,
+        },
         id: 'proposal-praca',
         kind: 'proposal',
+        images: ['/api/demo-media/benches.jpg'],
         title: 'Mais bancos na praça central',
         summary:
           'Moradores pedem assentos próximos à sombra e à parada de ônibus.',
@@ -162,7 +176,11 @@ export async function seed(
       },
       {
         ...base,
-        territory: { scope: 'location', neighborhood: 'Centro', location: plazaLocation },
+        territory: {
+          scope: 'location',
+          neighborhood: 'Centro',
+          location: plazaLocation,
+        },
         id: 'consultation-praca',
         kind: 'consultation',
         title: 'Qual melhoria deve começar na praça?',
@@ -185,7 +203,7 @@ export async function seed(
         status: 'in_progress',
         progress: 35,
         dueAt: new Date(Date.now() + 45 * 86400000).toISOString(),
-        evidence: [],
+        evidence: ['/api/demo-media/sidewalk.jpg'],
         updates: [
           {
             at,
@@ -198,6 +216,7 @@ export async function seed(
         ...base,
         id: 'proposal-travessia',
         kind: 'proposal',
+        images: ['/api/demo-media/sidewalk.jpg'],
         title: 'Travessia acessível até a unidade de saúde',
         summary:
           'Conectar a praça à unidade de saúde com calçada regular e rampas.',
@@ -264,5 +283,25 @@ export async function seed(
           data: item,
         })
         .onConflictDoNothing();
+    // Enrich existing demo records atomically, preserving their state and any
+    // resident uploads. Only a missing, null or empty media field is eligible.
+    for (const item of [occurrence, ...civic]) {
+      const field =
+        'kind' in item && item.kind === 'action' ? 'evidence' : 'images';
+      const media =
+        'images' in item
+          ? item.images
+          : 'evidence' in item
+            ? item.evidence
+            : undefined;
+      if (!media?.length) continue;
+      await tx.execute(sql`
+        UPDATE records
+        SET data = jsonb_set(data, ARRAY[${field}]::text[], ${JSON.stringify(media)}::jsonb)
+        WHERE id = ${item.id} AND municipality_id = ${municipalityId}
+          AND kind = ${'kind' in item ? item.kind : 'occurrence'}
+          AND (data -> ${field} IS NULL OR data -> ${field} = 'null'::jsonb OR data -> ${field} = '[]'::jsonb)
+      `);
+    }
   });
 }

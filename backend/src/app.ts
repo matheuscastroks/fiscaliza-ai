@@ -1,37 +1,37 @@
-import Fastify, { type FastifyRequest } from 'fastify';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
-import { and, eq, gt, ne, desc, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, ne, sql } from 'drizzle-orm';
+import Fastify, { type FastifyRequest } from 'fastify';
 import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, writeFile, unlink } from 'node:fs/promises';
+import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { database, type Database } from './db.js';
-import {
-  users,
-  sessions,
-  records,
-  relations,
-  answers,
-  attachments,
-} from './schema.js';
-import { newToken, tokenHash, verifyPassword } from './auth.js';
-import { analyze } from './analysis.js';
-import { seed } from './seed-data.js';
-import sharp from 'sharp';
 import pg from 'pg';
-import { municipalities } from './schema.js';
-import { municipalityService } from './municipality.js';
-import { applyCivicUpdate } from './civic.js';
-import { summarizeOverview } from './overview.js';
+import sharp from 'sharp';
 import type {
-  SessionUser,
-  Occurrence,
   CivicItem,
   CivicTerritory,
+  Occurrence,
+  SessionUser,
 } from '../../shared/contracts.js';
+import { analyze } from './analysis.js';
+import { newToken, tokenHash, verifyPassword } from './auth.js';
+import { applyCivicUpdate } from './civic.js';
+import { database, type Database } from './db.js';
+import { municipalityService } from './municipality.js';
+import { summarizeOverview } from './overview.js';
+import {
+  answers,
+  attachments,
+  municipalities,
+  records,
+  relations,
+  sessions,
+  users,
+} from './schema.js';
+import { seed } from './seed-data.js';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -64,16 +64,25 @@ const location = object(
 const civicTerritory = {
   oneOf: [
     object({ scope: { const: 'municipality' } }, ['scope']),
-    object({ scope: { const: 'neighborhood' }, neighborhood: string(120) }, ['scope', 'neighborhood']),
-    object({
-      scope: { const: 'location' },
-      neighborhood: string(120),
-      location: object({
-        latitude: { type: 'number', minimum: -90, maximum: 90 },
-        longitude: { type: 'number', minimum: -180, maximum: 180 },
-        address: string(300),
-      }, ['latitude', 'longitude']),
-    }, ['scope', 'neighborhood', 'location']),
+    object({ scope: { const: 'neighborhood' }, neighborhood: string(120) }, [
+      'scope',
+      'neighborhood',
+    ]),
+    object(
+      {
+        scope: { const: 'location' },
+        neighborhood: string(120),
+        location: object(
+          {
+            latitude: { type: 'number', minimum: -90, maximum: 90 },
+            longitude: { type: 'number', minimum: -180, maximum: 180 },
+            address: string(300),
+          },
+          ['latitude', 'longitude'],
+        ),
+      },
+      ['scope', 'neighborhood', 'location'],
+    ),
   ],
 };
 const images = {
@@ -92,6 +101,7 @@ const sessionCookie = (req: FastifyRequest) =>
 const publicUser = (u: typeof users.$inferSelect): SessionUser => ({
   id: u.id,
   name: u.name,
+  avatar: u.avatar ?? undefined,
   email: u.email,
   role: u.role,
   postalCode: u.postalCode ?? undefined,
@@ -161,7 +171,7 @@ export async function buildApp(
   });
   await app.register(swagger, {
     openapi: {
-      info: { title: 'Fiscaliza-AI API', version: '1.0.0' },
+      info: { title: 'Fiscaliza aí API', version: '1.0.0' },
       components: {
         securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer' } },
       },
@@ -279,8 +289,15 @@ export async function buildApp(
       !path.startsWith('/api/auth/') &&
       !path.startsWith('/api/profile/') &&
       path !== '/api/health' &&
-      !(req.method === 'GET' && (path === '/api/activity' || path.startsWith('/api/activity/'))) &&
-      !(req.method === 'GET' && path.startsWith('/api/attachments/'))
+      !(
+        req.method === 'GET' &&
+        (path === '/api/activity' || path.startsWith('/api/activity/'))
+      ) &&
+      !(
+        req.method === 'GET' &&
+        (path.startsWith('/api/attachments/') ||
+          path.startsWith('/api/demo-media/'))
+      )
     )
       municipalityId(req);
   });
@@ -449,19 +466,27 @@ export async function buildApp(
     if (!row) throw fail(404, 'Registro não encontrado.');
     return row;
   }
-  async function normalizeCivicTerritory(req: FastifyRequest, value?: CivicTerritory) {
+  async function normalizeCivicTerritory(
+    req: FastifyRequest,
+    value?: CivicTerritory,
+  ) {
     if (!value) return undefined;
-    if (value.scope === 'municipality') return { scope: 'municipality' } as const;
+    if (value.scope === 'municipality')
+      return { scope: 'municipality' } as const;
     const neighborhood = value.neighborhood.trim();
     if (!neighborhood) throw fail(400, 'Informe o bairro.');
-    if (value.scope === 'neighborhood') return { scope: 'neighborhood', neighborhood } as const;
+    if (value.scope === 'neighborhood')
+      return { scope: 'neighborhood', neighborhood } as const;
     await territory.validatePoint(municipalityId(req), value.location);
     return {
-      scope: 'location', neighborhood,
+      scope: 'location',
+      neighborhood,
       location: {
         latitude: value.location.latitude,
         longitude: value.location.longitude,
-        ...(value.location.address ? { address: value.location.address.trim() } : {}),
+        ...(value.location.address
+          ? { address: value.location.address.trim() }
+          : {}),
       },
     } as const;
   }
@@ -803,6 +828,7 @@ export async function buildApp(
     title: string(120),
     summary: string(500),
     body: string(),
+    images: { ...images, maxItems: 5 },
     neighborhood: string(120),
     territory: civicTerritory,
     responsible: string(120),
@@ -823,6 +849,7 @@ export async function buildApp(
       title: string;
       summary: string;
       body: string;
+      images?: string[];
       neighborhood?: string;
       territory?: CivicTerritory;
       responsible?: string;
@@ -844,6 +871,9 @@ export async function buildApp(
     async (req) => {
       const b = req.body;
       if (b.kind !== 'proposal') staff(req);
+      if (b.images !== undefined && b.kind !== 'proposal')
+        throw fail(400, 'Fotos neste campo pertencem apenas a propostas.');
+      await validateImages(req, b.images);
       const scope = await normalizeCivicTerritory(req, b.territory);
       for (const id of b.linkedIds ?? []) {
         const [linked] = await db
@@ -863,7 +893,11 @@ export async function buildApp(
         title: b.title,
         summary: b.summary,
         body: b.body,
-        neighborhood: scope ? (scope.scope === 'municipality' ? 'Todo o município' : scope.neighborhood) : b.neighborhood!.trim(),
+        neighborhood: scope
+          ? scope.scope === 'municipality'
+            ? 'Todo o município'
+            : scope.neighborhood
+          : b.neighborhood!.trim(),
         ...(scope ? { territory: scope } : {}),
         createdBy: req.user!.id,
         createdAt: now(),
@@ -874,7 +908,12 @@ export async function buildApp(
       };
       let value: CivicItem;
       if (b.kind === 'proposal')
-        value = { ...base, kind: 'proposal', status: 'submitted' };
+        value = {
+          ...base,
+          kind: 'proposal',
+          status: 'submitted',
+          images: b.images ?? [],
+        };
       else if (b.kind === 'consultation') {
         if (!b.options || !b.closesAt || Date.parse(b.closesAt) <= Date.now())
           throw fail(400, 'Consulta exige opções e prazo futuro.');
@@ -970,7 +1009,11 @@ export async function buildApp(
           );
           const value = row.data as CivicItem;
           const b = req.body;
-          applyCivicUpdate(value, { ...b, ...(scope ? { territory: scope } : {}) }, actor.name);
+          applyCivicUpdate(
+            value,
+            { ...b, ...(scope ? { territory: scope } : {}) },
+            actor.name,
+          );
           await tx
             .update(records)
             .set({ data: value })
@@ -1025,24 +1068,49 @@ export async function buildApp(
       );
     },
   );
-  for (const [path, kind] of [['occurrences', 'occurrence'], ['civic-items', 'civic']] as const) {
-    app.get<{ Params: { id: string } }>(`/api/activity/${path}/:id`, async (req) => {
-      if (!req.user) throw fail(401, 'Entre para acompanhar.');
-      const uid = req.user.id;
-      const [row] = await db.select().from(records).where(and(
-        eq(records.id, req.params.id),
-        kind === 'occurrence' ? eq(records.kind, 'occurrence') : ne(records.kind, 'occurrence'),
-      ));
-      if (!row) throw fail(404, 'Registro não encontrado.');
-      if (row.authorId !== uid) {
-        const [relation] = await db.select({ id: relations.recordId }).from(relations)
-          .where(and(eq(relations.recordId, row.id), eq(relations.userId, uid), sql`${relations.kind} IN ('support', 'follow')`)).limit(1);
-        const [answer] = await db.select({ id: answers.recordId }).from(answers)
-          .where(and(eq(answers.recordId, row.id), eq(answers.userId, uid))).limit(1);
-        if (!relation && !answer) throw fail(404, 'Registro não encontrado.');
-      }
-      return ok(await present(row, uid));
-    });
+  for (const [path, kind] of [
+    ['occurrences', 'occurrence'],
+    ['civic-items', 'civic'],
+  ] as const) {
+    app.get<{ Params: { id: string } }>(
+      `/api/activity/${path}/:id`,
+      async (req) => {
+        if (!req.user) throw fail(401, 'Entre para acompanhar.');
+        const uid = req.user.id;
+        const [row] = await db
+          .select()
+          .from(records)
+          .where(
+            and(
+              eq(records.id, req.params.id),
+              kind === 'occurrence'
+                ? eq(records.kind, 'occurrence')
+                : ne(records.kind, 'occurrence'),
+            ),
+          );
+        if (!row) throw fail(404, 'Registro não encontrado.');
+        if (row.authorId !== uid) {
+          const [relation] = await db
+            .select({ id: relations.recordId })
+            .from(relations)
+            .where(
+              and(
+                eq(relations.recordId, row.id),
+                eq(relations.userId, uid),
+                sql`${relations.kind} IN ('support', 'follow')`,
+              ),
+            )
+            .limit(1);
+          const [answer] = await db
+            .select({ id: answers.recordId })
+            .from(answers)
+            .where(and(eq(answers.recordId, row.id), eq(answers.userId, uid)))
+            .limit(1);
+          if (!relation && !answer) throw fail(404, 'Registro não encontrado.');
+        }
+        return ok(await present(row, uid));
+      },
+    );
   }
   app.get('/api/activity', async (req) => {
     if (!req.user) throw fail(401, 'Entre para acompanhar.');
@@ -1202,19 +1270,42 @@ export async function buildApp(
       await mkdir(uploadDir, { recursive: true });
       await writeFile(resolve(uploadDir, id), sanitized, { flag: 'wx' });
       try {
-        await db
-          .insert(attachments)
-          .values({
-            id,
-            municipalityId: municipalityId(req),
-            mime: 'image/webp',
-            ownerId: req.user!.id,
-          });
+        await db.insert(attachments).values({
+          id,
+          municipalityId: municipalityId(req),
+          mime: 'image/webp',
+          ownerId: req.user!.id,
+        });
       } catch (error) {
         await unlink(resolve(uploadDir, id));
         throw error;
       }
       return ok({ url: `/api/attachments/${id}` });
+    },
+  );
+  app.get<{ Params: { name: string } }>(
+    '/api/demo-media/:name',
+    async (req, reply) => {
+      if (
+        ![
+          'lighting.jpg',
+          'benches.jpg',
+          'sidewalk.jpg',
+          'avatar-ana.jpg',
+          'avatar-gestao.jpg',
+          'avatar-admin.jpg',
+        ].includes(req.params.name)
+      )
+        throw fail(404, 'Imagem de exemplo não encontrada.');
+      try {
+        return reply
+          .type('image/jpeg')
+          .header('X-Content-Type-Options', 'nosniff')
+          .header('Cache-Control', 'public, max-age=86400')
+          .send(await readFile(resolve('data/demo-media', req.params.name)));
+      } catch {
+        throw fail(404, 'Imagem de exemplo não encontrada.');
+      }
     },
   );
   app.get<{ Params: { id: string } }>(

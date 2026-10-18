@@ -32,6 +32,7 @@ export const postalCodes = pgTable('postal_codes', {
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
+  avatar: text('avatar'),
   email: text('email').notNull().unique(),
   role: text('role').$type<SessionUser['role']>().notNull(),
   sector: text('sector'),

@@ -329,6 +329,7 @@ function CivicDetail({
           <section className="section">
             <h2>{item.summary}</h2>
             <p className="preserve">{item.body}</p>
+            {item.kind === 'proposal' && <Images urls={item.images || []} />}
             {item.territory?.scope === 'location' && (
               <p className="muted">
                 {item.territory.location.address && <>{item.territory.location.address} · </>}
