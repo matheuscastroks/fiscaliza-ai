@@ -19,6 +19,12 @@ Ocorrências novas exigem pelo menos uma foto enviada pelo próprio cidadão no 
 
 Números dos cenários vêm de `demo_engagement` somados às relações reais. Não representam usuários reais, não marcam a conta ativa como apoiadora e não são usados para priorização técnica.
 
+## Exclusão e comentários
+
+`DELETE /occurrences/:id` e `DELETE /civic-items/:id` retornam `{success:true,data:{deleted:true}}` somente para o autor de ocorrência pendente ou proposta recebida, sem intervenção municipal. Respostas, encaminhamentos, análise, decisão e vínculos com ações/consultas bloqueiam a exclusão com 409; outra conta recebe 403 e outro município recebe 404. A checagem e a exclusão usam o mesmo bloqueio transacional da atualização de atendimento. Relações são removidas por cascade. As fotos permanecem disponíveis na camada de anexos, pois podem ter sido reutilizadas em outro registro.
+
+O campo derivado `canDelete` orienta a interface; a autorização é revalidada no servidor. Comentários retornam `avatar` opcional e nome atual do autor, sem dados privados da conta. A coleção verifica exclusão de proposta, tentativa por outra conta e preservação de ocorrência atendida.
+
 ## Análise de foto
 
 `POST /analysis` recebe `description` (pode ser vazia quando há foto) e `imageUrl` de `/api/attachments/<uuid>`. O anexo precisa pertencer à conta e ao município. Sem chave ou em falha do modelo, `imageAnalyzed=false`; somente retorno visual válido do Gemini usa `true`.

@@ -3,7 +3,7 @@ import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
-import { and, desc, eq, gt, ne, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, inArray, ne, sql } from 'drizzle-orm';
 import Fastify, { type FastifyRequest } from 'fastify';
 import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
@@ -19,6 +19,7 @@ import type {
 import { analyze } from './analysis.js';
 import { newToken, tokenHash, verifyPassword } from './auth.js';
 import { applyCivicUpdate } from './civic.js';
+import { canDeleteRecord } from '../../shared/record-deletion.js';
 import { database, type Database } from './db.js';
 import { municipalityService } from './municipality.js';
 import { summarizeOverview } from './overview.js';
@@ -407,8 +408,34 @@ export async function buildApp(
   ): Promise<Occurrence | CivicItem> {
     const value = structuredClone(row.data);
     value.municipalityId = row.municipalityId;
+    let managementComment = false;
+    if (value.comments.length) {
+      const authors = await tx
+        .select({
+          id: users.id,
+          name: users.name,
+          avatar: users.avatar,
+          role: users.role,
+        })
+        .from(users)
+        .where(
+          inArray(users.id, [
+            ...new Set(value.comments.map((comment) => comment.userId)),
+          ]),
+        );
+      const profiles = new Map(authors.map((author) => [author.id, author]));
+      managementComment = authors.some((author) => author.role !== 'citizen');
+      value.comments = value.comments.map((comment) => {
+        const author = profiles.get(comment.userId);
+        return {
+          ...comment,
+          userName: author?.name || comment.userName,
+          ...(author?.avatar ? { avatar: author.avatar } : {}),
+        };
+      });
+    }
     const reverse = await tx
-      .select({ id: records.id })
+      .select({ id: records.id, kind: records.kind })
       .from(records)
       .where(
         and(
@@ -421,6 +448,13 @@ export async function buildApp(
         ...new Set([...value.linkedIds, ...reverse.map((r) => r.id)]),
       ];
     else value.relatedIds = reverse.map((r) => r.id);
+    value.canDelete =
+      row.authorId === uid &&
+      canDeleteRecord(value) &&
+      !managementComment &&
+      !reverse.some(
+        (record) => record.kind === 'action' || record.kind === 'consultation',
+      );
     const rs = await tx
       .select()
       .from(relations)
@@ -569,6 +603,61 @@ export async function buildApp(
         ),
       ),
     );
+    app.delete<{ Params: { id: string } }>(`/api/${path}/:id`, async (req) => {
+      await db.transaction(async (tx) => {
+        const row = await find(
+          municipalityId(req),
+          req.params.id,
+          kind,
+          tx,
+          true,
+        );
+        if (row.authorId !== req.user!.id)
+          throw fail(403, 'Somente o autor pode excluir este registro.');
+        if (!canDeleteRecord(row.data))
+          throw fail(
+            409,
+            'Este registro já recebeu atendimento da prefeitura e não pode ser excluído.',
+          );
+        if (row.data.comments.length) {
+          const responders = await tx
+            .select({ id: users.id })
+            .from(users)
+            .where(
+              and(
+                inArray(
+                  users.id,
+                  row.data.comments.map((comment) => comment.userId),
+                ),
+                ne(users.role, 'citizen'),
+              ),
+            );
+          if (responders.length)
+            throw fail(
+              409,
+              'Este registro já recebeu uma resposta da prefeitura e não pode ser excluído.',
+            );
+        }
+        const linked = await tx
+          .select({ id: records.id })
+          .from(records)
+          .where(
+            and(
+              eq(records.municipalityId, row.municipalityId),
+              ne(records.kind, 'occurrence'),
+              ne(records.kind, 'proposal'),
+              sql`${records.data}->'linkedIds' @> ${JSON.stringify([row.id])}::jsonb`,
+            ),
+          );
+        if (linked.length)
+          throw fail(
+            409,
+            'Este registro está vinculado a uma ação da prefeitura e não pode ser excluído.',
+          );
+        await tx.delete(records).where(eq(records.id, row.id));
+      });
+      return ok({ deleted: true });
+    });
     app.put<{ Params: { id: string } }>(
       `/api/${path}/:id/view`,
       async (req) => {

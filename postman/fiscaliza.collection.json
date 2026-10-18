@@ -1231,6 +1231,164 @@
       ]
     },
     {
+      "name": "Criar proposta para excluir",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/civic-items",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"kind\": \"proposal\",\n  \"title\": \"Mais bancos no trajeto até a praça\",\n  \"summary\": \"Assentos à sombra para quem aguarda o ônibus.\",\n  \"body\": \"Instalar bancos preservando a passagem acessível junto à praça.\",\n  \"territory\": {\n    \"scope\": \"neighborhood\",\n    \"neighborhood\": \"Centro\"\n  },\n  \"images\": [\n    \"{{proposalPhotoUrl}}\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(true));",
+              "pm.test('Foto associada à proposta', () => pm.expect(result.data.images).to.eql([pm.collectionVariables.get('proposalPhotoUrl')]));",
+              "pm.collectionVariables.set('deletableProposalId', result.data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Impedir exclusão por outra conta",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/civic-items/{{deletableProposalId}}",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{staffToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Excluir proposta sem atendimento",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/civic-items/{{deletableProposalId}}",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(200));",
+              "pm.test('Exclusão confirmada',()=>pm.expect(pm.response.json().data.deleted).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Registro excluído não pode ser reaberto",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/civic-items/{{deletableProposalId}}",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Preservar ocorrência já atendida",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/occurrences/{{occurrenceId}}",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "Encerrar sessão",
       "request": {
         "method": "POST",
