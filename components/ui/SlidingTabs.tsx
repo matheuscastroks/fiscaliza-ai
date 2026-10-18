@@ -1,0 +1,188 @@
+import { useEffect, useRef, useState } from 'react';
+import {
+  AccessibilityInfo,
+  Animated,
+  Easing,
+  Pressable,
+  ScrollView,
+  View,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { AppText } from './AppText';
+import { colors, spacing } from '@/theme';
+
+export interface SlidingOption {
+  value: string;
+  label: string;
+  icon?: keyof typeof Ionicons.glyphMap;
+}
+
+/** One moving selection surface; labels keep their natural width. */
+export function SlidingTabs({
+  options,
+  value,
+  onChange,
+  label,
+  scroll = true,
+  edgeToEdge = true,
+  tabs = false,
+}: {
+  options: readonly SlidingOption[];
+  value: string;
+  onChange: (value: string) => void;
+  label: string;
+  scroll?: boolean;
+  edgeToEdge?: boolean;
+  tabs?: boolean;
+}) {
+  const [positions, setPositions] = useState<
+    Record<string, { x: number; width: number }>
+  >({});
+  const [reduced, setReduced] = useState(false);
+  const [left] = useState(() => new Animated.Value(0));
+  const [width] = useState(() => new Animated.Value(0));
+  const positioned = useRef(false);
+  const selected = positions[value];
+  useEffect(() => {
+    let active = true;
+    void AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
+      if (active) setReduced(enabled);
+    });
+    const sub = AccessibilityInfo.addEventListener(
+      'reduceMotionChanged',
+      setReduced,
+    );
+    return () => {
+      active = false;
+      sub.remove();
+    };
+  }, []);
+  useEffect(() => {
+    if (!selected) return;
+    if (!positioned.current || reduced) {
+      left.setValue(selected.x);
+      width.setValue(selected.width);
+      positioned.current = true;
+      return;
+    }
+    const motion = Animated.parallel([
+      Animated.timing(left, {
+        toValue: selected.x,
+        duration: 200,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
+      }),
+      Animated.timing(width, {
+        toValue: selected.width,
+        duration: 200,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
+      }),
+    ]);
+    motion.start();
+    return () => motion.stop();
+  }, [selected, reduced, left, width]);
+  const row = (
+    <View
+      accessibilityRole={tabs ? 'tablist' : undefined}
+      style={{
+        flexDirection: 'row',
+        gap: spacing.xs,
+        alignItems: 'center',
+        ...(scroll
+          ? {}
+          : {
+              backgroundColor: colors.surface,
+              padding: spacing.xxs,
+              borderRadius: 32,
+            }),
+      }}
+    >
+      {selected && (
+        <Animated.View
+          pointerEvents="none"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={{
+            position: 'absolute',
+            top: scroll ? 0 : spacing.xxs,
+            bottom: scroll ? 0 : spacing.xxs,
+            left,
+            width,
+            borderRadius: 28,
+            backgroundColor: colors.darkPill,
+          }}
+        />
+      )}
+      {options.map((option) => {
+        const active = value === option.value;
+        return (
+          <Pressable
+            key={option.value}
+            accessibilityRole={tabs ? 'tab' : 'button'}
+            accessibilityLabel={option.label}
+            accessibilityState={{ selected: active }}
+            aria-pressed={tabs ? undefined : active}
+            onPress={() => onChange(option.value)}
+            onLayout={(event) => {
+              const { x, width } = event.nativeEvent.layout;
+              setPositions((previous) =>
+                previous[option.value]?.x === x &&
+                previous[option.value]?.width === width
+                  ? previous
+                  : { ...previous, [option.value]: { x, width } },
+              );
+            }}
+            style={{
+              minHeight: 48,
+              paddingHorizontal: spacing.md,
+              paddingVertical: spacing.xs,
+              borderRadius: 28,
+              flexDirection: 'row',
+              gap: spacing.xs,
+              alignItems: 'center',
+              justifyContent: 'center',
+              ...(scroll ? {} : { flex: 1 }),
+              backgroundColor: active
+                ? selected
+                  ? 'transparent'
+                  : colors.darkPill
+                : 'transparent',
+              borderWidth: scroll ? 1 : 0,
+              borderColor: active ? 'transparent' : colors.divider,
+            }}
+          >
+            {option.icon && (
+              <Ionicons
+                name={option.icon}
+                size={20}
+                color={active ? colors.white : colors.ink}
+              />
+            )}
+            <AppText variant="label" color={active ? 'white' : 'ink'}>
+              {option.label}
+            </AppText>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+  return scroll ? (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      accessibilityLabel={label}
+      style={
+        edgeToEdge ? { marginHorizontal: -spacing.contentPadding } : undefined
+      }
+      contentContainerStyle={
+        edgeToEdge ? { paddingHorizontal: spacing.contentPadding } : undefined
+      }
+    >
+      {row}
+    </ScrollView>
+  ) : (
+    row
+  );
+}

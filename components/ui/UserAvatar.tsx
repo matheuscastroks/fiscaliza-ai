@@ -6,9 +6,17 @@ import { useAuthStore } from '@/stores/authStore';
 import { useAvatarStore } from '@/stores/avatarStore';
 import { colors, layout } from '@/theme';
 import { assetUrl } from '@/services/http';
+import type { SessionUser } from '@/shared/contracts';
 
-export function UserAvatar({ size = 48 }: { size?: number }) {
-  const user = useAuthStore((state) => state.user);
+export function UserAvatar({
+  size = 48,
+  profile,
+}: {
+  size?: number;
+  profile?: Pick<SessionUser, 'id' | 'name' | 'avatar'>;
+}) {
+  const sessionUser = useAuthStore((state) => state.user);
+  const user = profile || sessionUser;
   const localPhoto = useAvatarStore((state) =>
     user ? state.photos[user.id] : null,
   );
@@ -20,7 +28,9 @@ export function UserAvatar({ size = 48 }: { size?: number }) {
         .load(user.id)
         .catch(() => {});
   }, [user?.id]);
-  const uri = localPhoto || user?.avatar;
+  const uri = user?.avatar?.startsWith('/api/attachments/')
+    ? user.avatar
+    : localPhoto || user?.avatar;
   const initials = (user?.name || 'Meu perfil')
     .trim()
     .split(/\s+/)
