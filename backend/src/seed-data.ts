@@ -37,9 +37,9 @@ export async function seed(
     for (const u of [
       {
         id: 'citizen-ana',
-        name: 'Ana Souza',
+        name: 'Beatriz Arantes',
         avatar: '/api/demo-media/avatar-ana.jpg',
-        email: 'ana@vilaesperanca.exemplo',
+        email: 'beatrizarante@gmail.com',
         role: 'citizen' as const,
       },
       {
@@ -65,6 +65,7 @@ export async function seed(
           municipalityId: u.role === 'citizen' ? null : '3304557',
         })
         .onConflictDoNothing();
+    await tx.execute(sql`UPDATE users SET name='Beatriz Arantes', email='beatrizarante@gmail.com' WHERE id='citizen-ana' AND email='ana@vilaesperanca.exemplo'`);
     await tx.execute(
       (await import('drizzle-orm'))
         .sql`UPDATE users SET municipality_id='3304557' WHERE id IN ('staff-gestao','admin-local') AND role IN ('staff','admin') AND municipality_id IS NULL`,
@@ -109,7 +110,7 @@ export async function seed(
           source: 'citizen',
           at,
           justification: 'Relato recebido.',
-          actor: 'Ana Souza',
+          actor: 'Beatriz Arantes',
         },
       ],
     };

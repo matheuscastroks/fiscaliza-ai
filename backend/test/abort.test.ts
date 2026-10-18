@@ -32,7 +32,7 @@ test(
       method: 'POST',
       url: '/api/auth/login',
       payload: {
-        email: 'ana@vilaesperanca.exemplo',
+        email: 'beatrizarante@gmail.com',
         password: process.env.DEMO_PASSWORD || 'Fiscaliza123!',
       },
     });

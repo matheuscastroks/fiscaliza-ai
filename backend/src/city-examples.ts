@@ -120,7 +120,7 @@ export function cityExamples(at: string) {
         source: 'citizen',
         at: ago(index + 1),
         justification: 'Registro recebido.',
-        actor: 'Ana Souza',
+        actor: 'Beatriz Arantes',
       },
       ...(entry.status !== 'pending'
         ? [

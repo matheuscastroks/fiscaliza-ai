@@ -289,7 +289,7 @@ test(
     });
     await seed(db);
     for (const [id, email, file] of [
-      ['citizen-ana', 'ana@vilaesperanca.exemplo', 'avatar-ana.jpg'],
+      ['citizen-ana', 'beatrizarante@gmail.com', 'avatar-ana.jpg'],
       ['staff-gestao', 'gestao@vilaesperanca.exemplo', 'avatar-gestao.jpg'],
       ['admin-local', 'admin@vilaesperanca.exemplo', 'avatar-admin.jpg'],
     ]) {

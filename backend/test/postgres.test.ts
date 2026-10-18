@@ -41,7 +41,7 @@ test(
       assert.equal(response.statusCode, 200);
       return { authorization: `Bearer ${response.json().data.token}` };
     }
-    const citizen = await login('ana@vilaesperanca.exemplo');
+    const citizen = await login('beatrizarante@gmail.com');
     const confirm = await app.inject({
       method: 'PUT',
       url: '/api/profile/municipality',
@@ -61,7 +61,7 @@ test(
         },
       });
     const citizenLogin = await browserLogin(
-      'ana@vilaesperanca.exemplo',
+      'beatrizarante@gmail.com',
       'citizen',
     );
     const managementLogin = await browserLogin('gestao@vilaesperanca.exemplo');
@@ -331,7 +331,7 @@ test(
       method: 'POST',
       url: '/api/auth/login',
       payload: {
-        email: 'ana@vilaesperanca.exemplo',
+        email: 'beatrizarante@gmail.com',
         password: process.env.DEMO_PASSWORD || 'Fiscaliza123!',
       },
     });

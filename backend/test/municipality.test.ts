@@ -139,7 +139,7 @@ test(
       assert.equal(r.statusCode, 200, r.body);
       return { authorization: `Bearer ${r.json().data.token}` };
     };
-    const citizen = await login('ana@vilaesperanca.exemplo'),
+    const citizen = await login('beatrizarante@gmail.com'),
       staff = await login('gestao@vilaesperanca.exemplo'),
       admin = await login('admin@vilaesperanca.exemplo');
     const request = (

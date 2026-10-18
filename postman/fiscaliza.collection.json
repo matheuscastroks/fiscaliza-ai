@@ -40,7 +40,7 @@
         "url": "{{baseUrl}}/auth/login",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"ana@vilaesperanca.exemplo\",\n  \"password\": \"{{password}}\"\n}",
+          "raw": "{\n  \"email\": \"beatrizarante@gmail.com\",\n  \"password\": \"{{password}}\"\n}",
           "options": {
             "raw": {
               "language": "json"
