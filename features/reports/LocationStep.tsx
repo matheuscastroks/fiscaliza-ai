@@ -1,5 +1,6 @@
+import { colors, layout, spacing } from '@/theme';
 import React, { useState } from 'react';
-import { Platform, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import * as Location from 'expo-location';
 import { AppText } from '@/components/ui/AppText';
 import { AppInput } from '@/components/ui/AppInput';
@@ -32,6 +33,7 @@ interface Props {
     neighborhood?: string;
   }) => void;
   error?: string | null;
+  heading?: string;
 }
 export function LocationStep({
   address,
@@ -43,6 +45,7 @@ export function LocationStep({
   onAddressChange,
   onLocationChange,
   error,
+  heading = 'Onde fica o problema?',
 }: Props) {
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
@@ -86,11 +89,50 @@ export function LocationStep({
     }
   };
   return (
-    <View style={{ gap: 16, paddingVertical: 16 }}>
-      <AppText variant="sectionTitle">Onde fica o problema?</AppText>
+    <View style={{ gap: spacing.md }}>
+      <AppText variant="sectionTitle">{heading}</AppText>
       <AppText color="muted">
         {municipality?.name} · {municipality?.state}
       </AppText>
+      {NativeMap && (
+        <View collapsable={false} style={styles.mapFrame}>
+          <NativeMap
+            style={styles.map}
+            region={
+              selected
+                ? {
+                    latitude,
+                    longitude,
+                    latitudeDelta: 0.012,
+                    longitudeDelta: 0.012,
+                  }
+                : municipalityRegion(municipality)
+            }
+            onPress={(event: {
+              nativeEvent: {
+                coordinate: { latitude: number; longitude: number };
+              };
+            }) => selectPoint(event.nativeEvent.coordinate)}
+          >
+            {selected && (
+              <Marker
+                coordinate={{ latitude, longitude }}
+                draggable
+                onDragEnd={(event: {
+                  nativeEvent: {
+                    coordinate: { latitude: number; longitude: number };
+                  };
+                }) => selectPoint(event.nativeEvent.coordinate)}
+              />
+            )}
+          </NativeMap>
+        </View>
+      )}
+      {NativeMap && (
+        <AppText variant="meta" color="muted">
+          Toque no mapa para marcar o local.
+        </AppText>
+      )}
       <AppInput
         label="Rua, número ou ponto de referência"
         value={address}
@@ -103,38 +145,6 @@ export function LocationStep({
         onChangeText={onNeighborhoodChange}
         maxLength={120}
       />
-      {NativeMap && (
-        <NativeMap
-          style={{ height: 240, width: '100%' }}
-          region={
-            selected
-              ? {
-                  latitude,
-                  longitude,
-                  latitudeDelta: 0.012,
-                  longitudeDelta: 0.012,
-                }
-              : municipalityRegion(municipality)
-          }
-          onPress={(event: {
-            nativeEvent: {
-              coordinate: { latitude: number; longitude: number };
-            };
-          }) => selectPoint(event.nativeEvent.coordinate)}
-        >
-          {selected && (
-            <Marker
-              coordinate={{ latitude, longitude }}
-              draggable
-              onDragEnd={(event: {
-                nativeEvent: {
-                  coordinate: { latitude: number; longitude: number };
-                };
-              }) => selectPoint(event.nativeEvent.coordinate)}
-            />
-          )}
-        </NativeMap>
-      )}
       <AppButton
         title="Usar minha posição"
         variant="secondary"
@@ -190,9 +200,23 @@ export function LocationStep({
       )}
       {selected && (
         <AppText color="completed">
-          Ponto selecionado: {latitude.toFixed(5)}, {longitude.toFixed(5)}
+          {Platform.OS === 'web'
+            ? 'Ponto selecionado: ' +
+              latitude.toFixed(5) +
+              ', ' +
+              longitude.toFixed(5)
+            : 'Local marcado no mapa'}
         </AppText>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  mapFrame: {
+    borderRadius: layout.radius.card,
+    overflow: 'hidden',
+    backgroundColor: colors.surfaceSubdued,
+  },
+  map: { height: 260, width: '100%', borderRadius: layout.radius.card },
+});

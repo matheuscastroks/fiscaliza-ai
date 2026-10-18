@@ -1,11 +1,14 @@
-import React from 'react';
-import { router } from 'expo-router';
+import { goBack } from '@/utils/navigation';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useEffect, useRef } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
   View,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from 'react-native';
 import { useAuthStore } from '@/stores/authStore';
 import { colors } from '@/theme/colors';
@@ -28,7 +31,11 @@ export default function ReportScreen() {
 }
 function ReportContent() {
   const { user } = useAuthStore();
+  const insets = useSafeAreaInsets();
+  const scroll = useRef<ScrollView>(null);
   const userId = user?.id || '';
+  const { camera } = useLocalSearchParams<{ camera?: string }>();
+  const captured = useRef<string | undefined>(undefined);
 
   const {
     step,
@@ -52,6 +59,18 @@ function ReportContent() {
     error,
   } = useReportForm();
 
+  useEffect(() => {
+    if (ready && camera && captured.current !== camera) {
+      captured.current = camera;
+      void pickImage(true);
+    }
+  }, [ready, camera, pickImage]);
+
+  useEffect(() => {
+    scroll.current?.scrollTo({ y: 0, animated: false });
+    Keyboard.dismiss();
+  }, [step]);
+
   if (createdProblem) {
     return (
       <AppScreen edges={['top']} style={styles.screen}>
@@ -67,19 +86,49 @@ function ReportContent() {
       <AppHeader
         title="Registrar ocorrência"
         context={`Etapa ${step} de 3 · ${user?.municipality?.name || 'Seu município'}`}
-        onBack={step > 1 ? prevStep : undefined}
+        onBack={step > 1 ? prevStep : goBack}
       />
 
+      <View
+        style={{
+          flexDirection: 'row',
+          gap: spacing.xs,
+          paddingHorizontal: spacing.contentPadding,
+          paddingVertical: spacing.sm,
+        }}
+        accessibilityRole="progressbar"
+        accessibilityLabel="Etapas do registro"
+        accessibilityValue={{ min: 1, max: 3, now: step }}
+      >
+        {['Relato', 'Local', 'Revisão'].map((label, index) => (
+          <View key={label} style={{ flex: 1, gap: spacing.xs }}>
+            <View
+              style={{
+                height: 4,
+                borderRadius: layout.radius.pill,
+                backgroundColor: step > index ? colors.ink : colors.divider,
+              }}
+            />
+            <AppText
+              variant="caption"
+              color={step === index + 1 ? 'ink' : 'muted'}
+            >
+              {index + 1}. {label}
+            </AppText>
+          </View>
+        ))}
+      </View>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
+          ref={scroll}
           style={styles.flex}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          {step === 1 && (
+          {step === 2 && (
             <LocationStep
               address={data.address}
               neighborhood={data.neighborhood}
@@ -95,7 +144,7 @@ function ReportContent() {
             />
           )}
 
-          {step === 2 && (
+          {step === 1 && (
             <DescriptionStep
               title={data.title}
               onTitleChange={(title) => updateField('title', title)}
@@ -106,7 +155,9 @@ function ReportContent() {
               priority={data.priority}
               onPriorityChange={(prio) => updateField('priority', prio)}
               images={data.images}
-              onPickImage={pickImage}
+              onPickImage={() => {
+                void pickImage();
+              }}
               onRemoveImage={removeImage}
               onRunSuggestion={runLocalSuggestion}
               isAnalyzing={isAnalyzing}
@@ -115,7 +166,7 @@ function ReportContent() {
             />
           )}
 
-          {step === 2 && analysisSource !== '' && (
+          {step === 1 && analysisSource !== '' && (
             <AppText color="muted" accessibilityLiveRegion="polite">
               {analysisSource}
             </AppText>
@@ -167,7 +218,12 @@ function ReportContent() {
         </ScrollView>
 
         {/* Barra de Ações Inferior */}
-        <View style={styles.bottomBar}>
+        <View
+          style={[
+            styles.bottomBar,
+            { paddingBottom: Math.max(insets.bottom, spacing.xs) },
+          ]}
+        >
           <AppDivider />
           <View style={styles.buttonRow}>
             {step > 1 ? (
@@ -182,7 +238,7 @@ function ReportContent() {
 
             {step < 3 ? (
               <AppButton
-                title="Continuar"
+                title={step === 1 ? 'Escolher local' : 'Revisar ocorrência'}
                 disabled={!ready}
                 variant="primary"
                 onPress={nextStep}
@@ -193,6 +249,7 @@ function ReportContent() {
                 title="Confirmar e registrar"
                 variant="primary"
                 loading={isSubmitting}
+                disabled={!data.images.length}
                 onPress={() => submitReport(userId)}
                 style={styles.continueButton}
               />

@@ -1,8 +1,11 @@
+import { LocationStep } from '@/features/reports/LocationStep';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors, layout } from '@/theme';
 import { goBack } from '@/utils/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '@/stores/authStore';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import { AppScreen } from '@/components/ui/AppScreen';
@@ -27,9 +30,15 @@ function ProposalForm() {
   const [preparingPhotos, setPreparingPhotos] = useState(false);
   const uploadedImages = useRef(new Map<string, string>());
   const [neighborhood, setNeighborhood] = useState(user?.neighborhood || '');
-  const [scope, setScope] = useState<'municipality' | 'neighborhood'>(
-    user?.neighborhood ? 'neighborhood' : 'municipality',
-  );
+  const [scope, setScope] = useState<
+    'municipality' | 'neighborhood' | 'location'
+  >(user?.neighborhood ? 'neighborhood' : 'municipality');
+  const insets = useSafeAreaInsets();
+  const [point, setPoint] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [address, setAddress] = useState('');
   const completed = useRef(false);
   const active = useRef(true);
   useEffect(() => {
@@ -64,8 +73,16 @@ function ProposalForm() {
                 : [],
             );
             setNeighborhood(draft.neighborhood);
+            if (
+              Number.isFinite(draft.point?.latitude) &&
+              Number.isFinite(draft.point?.longitude)
+            )
+              setPoint(draft.point);
+            if (typeof draft.address === 'string') setAddress(draft.address);
             setScope(
-              draft.scope === 'municipality' || draft.scope === 'neighborhood'
+              draft.scope === 'municipality' ||
+                draft.scope === 'neighborhood' ||
+                draft.scope === 'location'
                 ? draft.scope
                 : civicTerritory({ neighborhood: draft.neighborhood }).scope ===
                     'municipality'
@@ -93,13 +110,31 @@ function ProposalForm() {
           if (!completed.current)
             await AsyncStorage.setItem(
               draftKey,
-              JSON.stringify({ title, body, neighborhood, scope, images }),
+              JSON.stringify({
+                title,
+                body,
+                neighborhood,
+                scope,
+                images,
+                point,
+                address,
+              }),
             );
         })
         .catch(() => {});
     }, 250);
     return () => clearTimeout(timer);
-  }, [title, body, neighborhood, scope, images, draftKey, ready]);
+  }, [
+    title,
+    body,
+    neighborhood,
+    scope,
+    images,
+    point,
+    address,
+    draftKey,
+    ready,
+  ]);
   const save = useMutation({
     mutationFn: async () => {
       const assertSession = () => {
@@ -126,15 +161,21 @@ function ProposalForm() {
       return mutation<CivicItem>('/civic-items', 'POST', {
         kind: 'proposal',
         images: urls,
-        title,
-        summary: body.slice(0, 180),
-        body,
+        title: title.trim(),
+        summary: body.trim().slice(0, 180),
+        body: body.trim(),
         neighborhood:
           scope === 'municipality' ? 'Todo o município' : neighborhood.trim(),
         territory:
           scope === 'municipality'
             ? { scope }
-            : { scope, neighborhood: neighborhood.trim() },
+            : scope === 'location'
+              ? {
+                  scope,
+                  neighborhood: neighborhood.trim(),
+                  location: { ...point, address: address.trim() },
+                }
+              : { scope, neighborhood: neighborhood.trim() },
       });
     },
     onSuccess: async (item) => {
@@ -154,65 +195,44 @@ function ProposalForm() {
       });
     },
   });
+  const hint = !ready
+    ? 'Carregando seu rascunho…'
+    : title.trim().length < 5
+      ? 'Dê um título à sua proposta (mínimo de 5 caracteres).'
+      : body.trim().length < 10
+        ? 'Descreva a melhoria com pelo menos 10 caracteres.'
+        : scope !== 'municipality' && !neighborhood.trim()
+          ? 'Informe o bairro da melhoria.'
+          : scope === 'location' && (!point || !address.trim())
+            ? 'Marque o ponto e informe o endereço.'
+            : '';
   return (
     <AppScreen keyboardAvoiding>
-      <AppHeader title="Propor uma melhoria" onBack={() => goBack()} />
+      <AppHeader title="Propor uma melhoria" onBack={goBack} />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingHorizontal: spacing.contentPadding,
-          paddingVertical: spacing.md,
-        }}
+        contentContainerStyle={styles.content}
       >
-        <View style={{ gap: spacing.md }}>
-          <AppText color="muted">
-            Descreva uma melhoria e escolha a área que ela abrange.
-          </AppText>
+        <View style={styles.section}>
+          <AppText variant="sectionTitle">Sua ideia para a cidade</AppText>
           <AppInput
             label="Título da proposta"
+            placeholder="Ex.: Mais sombra e bancos na praça"
             value={title}
             onChangeText={setTitle}
             maxLength={120}
+            editable={!save.isPending}
           />
-          <AppText variant="label">Abrangência da proposta</AppText>
-          <View
-            style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}
-          >
-            <AppButton
-              title="Todo o município"
-              variant={scope === 'municipality' ? 'primary' : 'secondary'}
-              accessibilityState={{ selected: scope === 'municipality' }}
-              onPress={() => setScope('municipality')}
-            />
-            <AppButton
-              title="Um bairro"
-              variant={scope === 'neighborhood' ? 'primary' : 'secondary'}
-              accessibilityState={{ selected: scope === 'neighborhood' }}
-              onPress={() => setScope('neighborhood')}
-            />
-          </View>
-          {scope === 'neighborhood' ? (
-            <AppInput
-              label="Bairro"
-              value={neighborhood}
-              onChangeText={setNeighborhood}
-              maxLength={100}
-            />
-          ) : (
-            <AppText color="muted">
-              A proposta será exibida nos recortes de todos os bairros do seu
-              município.
-            </AppText>
-          )}
           <AppInput
             label="O que mudar e por quê"
+            placeholder="Conte como a melhoria ajudaria quem usa esse espaço."
             value={body}
             onChangeText={setBody}
             multiline
             style={{ minHeight: 140 }}
             maxLength={5000}
+            editable={!save.isPending}
           />
           <PhotoAttachments
             images={images}
@@ -220,25 +240,108 @@ function ProposalForm() {
             disabled={save.isPending}
             onPreparingChange={setPreparingPhotos}
           />
-          {save.error && (
-            <AppText color="risk" accessibilityLiveRegion="polite">
-              {save.error.message}
+        </View>
+        <View
+          style={styles.section}
+          pointerEvents={save.isPending ? 'none' : 'auto'}
+        >
+          <AppText variant="sectionTitle">Onde faz diferença?</AppText>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: spacing.xs }}
+          >
+            {(
+              [
+                ['municipality', 'Todo o município'],
+                ['neighborhood', 'Um bairro'],
+                ['location', 'Um local'],
+              ] as const
+            ).map(([value, label]) => (
+              <AppButton
+                key={value}
+                title={label}
+                variant={scope === value ? 'primary' : 'secondary'}
+                accessibilityState={{ selected: scope === value }}
+                onPress={() => setScope(value)}
+                disabled={save.isPending}
+              />
+            ))}
+          </ScrollView>
+          {scope === 'neighborhood' && (
+            <AppInput
+              label="Bairro"
+              value={neighborhood}
+              onChangeText={setNeighborhood}
+              maxLength={100}
+              editable={!save.isPending}
+            />
+          )}
+          {scope === 'municipality' && (
+            <AppText variant="meta" color="muted">
+              {user?.municipality?.name} · disponível em todos os bairros
             </AppText>
           )}
-          <AppButton
-            title="Enviar proposta"
-            loading={save.isPending}
-            disabled={
-              !ready ||
-              preparingPhotos ||
-              title.trim().length < 5 ||
-              body.trim().length < 10 ||
-              (scope === 'neighborhood' && !neighborhood.trim())
-            }
-            onPress={() => save.mutate()}
-          />
+          {scope === 'location' && (
+            <LocationStep
+              heading="Marque o local da melhoria"
+              address={address}
+              neighborhood={neighborhood}
+              onNeighborhoodChange={setNeighborhood}
+              latitude={
+                point?.latitude ?? user?.municipality?.center.latitude ?? 0
+              }
+              longitude={
+                point?.longitude ?? user?.municipality?.center.longitude ?? 0
+              }
+              selected={Boolean(point)}
+              onAddressChange={setAddress}
+              onLocationChange={setPoint}
+            />
+          )}
         </View>
       </ScrollView>
+      <View
+        style={[
+          styles.footer,
+          { paddingBottom: Math.max(insets.bottom, spacing.sm) },
+        ]}
+      >
+        {save.error && (
+          <AppText color="risk" accessibilityRole="alert">
+            {save.error.message}
+          </AppText>
+        )}
+        {hint !== '' && (
+          <AppText variant="caption" color="muted">
+            {hint}
+          </AppText>
+        )}
+        <AppButton
+          title="Enviar proposta"
+          loading={save.isPending}
+          disabled={Boolean(hint) || preparingPhotos}
+          onPress={() => save.mutate()}
+        />
+      </View>
     </AppScreen>
   );
 }
+const styles = StyleSheet.create({
+  content: {
+    padding: spacing.contentPadding,
+    paddingBottom: spacing.xxl,
+    gap: spacing.xxl,
+  },
+  section: { gap: spacing.md },
+  footer: {
+    gap: spacing.xs,
+    paddingTop: spacing.sm,
+    paddingHorizontal: spacing.contentPadding,
+    backgroundColor: colors.canvas,
+    borderTopWidth: 1,
+    borderTopColor: colors.divider,
+    borderTopLeftRadius: layout.radius.panel,
+    borderTopRightRadius: layout.radius.panel,
+  },
+});

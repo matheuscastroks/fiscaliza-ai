@@ -51,6 +51,15 @@ export function useReportForm() {
   const [data, setData] = useState<ReportFormData>(INITIAL_DATA);
   const [ready, setReady] = useState(false);
   const readyRef = useRef(false);
+  const mounted = useRef(true);
+  const sending = useRef(false);
+  const uploaded = useRef(new Map<string, string>());
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisSuggested, setAnalysisSuggested] = useState(false);
   const [analysisSource, setAnalysisSource] = useState('');
@@ -147,7 +156,7 @@ export function useReportForm() {
     [],
   );
   const nextStep = () => {
-    if (step === 1) {
+    if (step === 2) {
       if (!data.address.trim() || !data.locationSelected) {
         setError('Informe o endereço e marque o ponto da ocorrência.');
         return;
@@ -158,8 +167,12 @@ export function useReportForm() {
         );
         return;
       }
-      setStep(2);
-    } else if (step === 2) {
+      setStep(3);
+    } else if (step === 1) {
+      if (!data.images.length) {
+        setError('Adicione pelo menos uma foto da ocorrência para continuar.');
+        return;
+      }
       if (data.description.trim().length < 10) {
         setError('Descreva o que encontrou com pelo menos 10 caracteres.');
         return;
@@ -174,7 +187,7 @@ export function useReportForm() {
             .join(' ')
             .slice(0, 120),
         }));
-      setStep(3);
+      setStep(2);
     }
     setError(null);
   };
@@ -212,19 +225,28 @@ export function useReportForm() {
       setIsAnalyzing(false);
     }
   };
-  const pickImage = async () => {
+  const pickImage = async (camera = false) => {
     if (data.images.length >= 3) {
       setError('Adicione até três fotos.');
       return;
     }
     try {
-      const permission =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const permission = await (camera
+        ? ImagePicker.requestCameraPermissionsAsync()
+        : ImagePicker.requestMediaLibraryPermissionsAsync());
       if (!permission.granted) {
-        setError('Autorize o acesso às fotos ou continue sem anexos.');
+        setError(
+          camera
+            ? 'Permita o acesso à câmera para fotografar o local.'
+            : 'Permita o acesso à galeria para anexar a foto obrigatória.',
+        );
         return;
       }
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const result = await (
+        camera
+          ? ImagePicker.launchCameraAsync
+          : ImagePicker.launchImageLibraryAsync
+      )({
         mediaTypes: ['images'],
         quality: 0.7,
         base64: Platform.OS === 'web',
@@ -254,19 +276,43 @@ export function useReportForm() {
     }
   };
   const submitReport = async (userId = user?.id || '') => {
-    if (isSubmitting || !readyRef.current) return null;
+    if (sending.current || isSubmitting || !readyRef.current) return null;
+    if (!data.images.length) {
+      setError('Adicione pelo menos uma foto da ocorrência.');
+      return null;
+    }
     if (!data.locationSelected || !withinMunicipalBounds(data, municipality)) {
       setError(
         `Escolha um local dentro de ${municipality?.name || 'seu município'}.`,
       );
       return null;
     }
+    sending.current = true;
+    const version = useAuthStore.getState().sessionVersion;
+    const currentSession = () => {
+      const current = useAuthStore.getState();
+      return (
+        mounted.current &&
+        current.user?.id === user?.id &&
+        current.user?.municipality?.id === municipality?.id &&
+        current.sessionVersion === version
+      );
+    };
+    const assertSession = () => {
+      if (!currentSession())
+        throw new Error('Sua sessão mudou. Reabra o registro antes de enviar.');
+    };
     setIsSubmitting(true);
     setError(null);
     try {
       const images: string[] = [];
-      for (const uri of data.images) images.push(await uploadImage(uri));
-      setData((p) => ({ ...p, images }));
+      for (const uri of data.images) {
+        assertSession();
+        const url = uploaded.current.get(uri) || (await uploadImage(uri));
+        uploaded.current.set(uri, url);
+        images.push(url);
+      }
+      assertSession();
       const response = await problemsApi.createProblem({
         title: data.title.trim(),
         description: data.description.trim(),
@@ -284,9 +330,11 @@ export function useReportForm() {
       });
       if (!response.success || !response.data)
         throw new Error(response.error || 'Não foi possível registrar.');
-      setCreatedProblem(response.data);
       await AsyncStorage.removeItem(key).catch(() => {});
-      await loadProblems();
+      if (currentSession()) {
+        setCreatedProblem(response.data);
+        await loadProblems();
+      }
       return response.data;
     } catch (e) {
       setError(
@@ -296,7 +344,8 @@ export function useReportForm() {
       );
       return null;
     } finally {
-      setIsSubmitting(false);
+      sending.current = false;
+      if (mounted.current) setIsSubmitting(false);
     }
   };
   const resetForm = () => {

@@ -70,11 +70,11 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
         O que aconteceu?
       </AppText>
       <AppText variant="body" color="muted" style={styles.subheading}>
-        Descreva a ocorrência em detalhes com suas palavras.
+        Descreva o problema e adicione uma foto do local.
       </AppText>
 
       <AppInput
-        label="Descrição do Problema"
+        label="O que você encontrou?"
         maxLength={5000}
         placeholder="Ex: Buraco profundo na pista próximo à travessia de pedestres..."
         value={description}
@@ -122,7 +122,7 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
 
       {/* Título Ajustável */}
       <AppInput
-        label="Título Resumido da Ocorrência"
+        label="Título da ocorrência"
         maxLength={120}
         placeholder="Ex: Buraco na via pública"
         value={title}
@@ -132,7 +132,7 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
       {/* Seletor de Categoria */}
       <View style={styles.selectorSection}>
         <AppText variant="label" color="ink" style={styles.selectorLabel}>
-          Categoria do Serviço
+          Categoria
         </AppText>
         <View style={styles.chipsRow}>
           {CATEGORY_KEYS.map((catKey) => {
@@ -196,7 +196,7 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
       {/* Foto / Evidência */}
       <View style={styles.photoSection}>
         <AppText variant="label" color="ink" style={styles.selectorLabel}>
-          Foto da Ocorrência (Opcional)
+          Foto da ocorrência · obrigatória
         </AppText>
 
         {images.length > 0 ? (
