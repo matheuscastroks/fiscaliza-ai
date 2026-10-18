@@ -1,5 +1,6 @@
+import { cityStyles } from '@/features/city/CityUI';
 import React from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -11,7 +12,10 @@ export default function SettingsScreen() {
   return (
     <AppScreen>
       <AppHeader title="Preferências" onBack={() => router.back()} />
-      <AppScreen scroll>
+      <ScrollView
+        contentContainerStyle={cityStyles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={{ gap: 20 }}>
           <AppText variant="sectionTitle">Leitura e acessibilidade</AppText>
           <AppText>
@@ -37,7 +41,7 @@ export default function SettingsScreen() {
             />
           )}
         </View>
-      </AppScreen>
+      </ScrollView>
     </AppScreen>
   );
 }

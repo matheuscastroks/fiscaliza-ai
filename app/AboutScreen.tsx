@@ -1,5 +1,6 @@
+import { cityStyles } from '@/features/city/CityUI';
 import React from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -9,7 +10,10 @@ export default function AboutScreen() {
   return (
     <AppScreen>
       <AppHeader title="Sobre o Fiscaliza-AI" onBack={() => router.back()} />
-      <AppScreen scroll>
+      <ScrollView
+        contentContainerStyle={cityStyles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={{ gap: 20 }}>
           <AppText variant="sectionTitle">
             Participação na gestão da cidade
@@ -53,7 +57,7 @@ export default function AboutScreen() {
             onPress={() => router.push('/HelpScreen')}
           />
         </View>
-      </AppScreen>
+      </ScrollView>
     </AppScreen>
   );
 }

@@ -1,5 +1,6 @@
+import { cityStyles } from '@/features/city/CityUI';
 import React, { useRef, useState } from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -72,12 +73,15 @@ export default function MunicipalityScreen() {
     }
   };
   return (
-    <AppScreen>
+    <AppScreen keyboardAvoiding>
       <AppHeader
         title={linked ? 'Meu município' : 'Sua cidade'}
         onBack={linked ? () => router.back() : undefined}
       />
-      <AppScreen scroll keyboardAvoiding>
+      <ScrollView
+        contentContainerStyle={cityStyles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={{ gap: 20 }}>
           {!editing ? (
             <>
@@ -185,7 +189,7 @@ export default function MunicipalityScreen() {
             />
           )}
         </View>
-      </AppScreen>
+      </ScrollView>
     </AppScreen>
   );
 }

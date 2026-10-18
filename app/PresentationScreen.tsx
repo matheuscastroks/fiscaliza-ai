@@ -1,5 +1,6 @@
+import { cityStyles } from '@/features/city/CityUI';
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -31,7 +32,10 @@ export default function PresentationScreen() {
         title="Controles de apresentação"
         onBack={() => router.back()}
       />
-      <AppScreen scroll>
+      <ScrollView
+        contentContainerStyle={cityStyles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={{ gap: 16 }}>
           {user?.role !== 'admin' ? (
             <AppText>Acesso restrito ao administrador.</AppText>
@@ -90,7 +94,7 @@ export default function PresentationScreen() {
             <AppText accessibilityLiveRegion="polite">{message}</AppText>
           )}
         </View>
-      </AppScreen>
+      </ScrollView>
     </AppScreen>
   );
 }

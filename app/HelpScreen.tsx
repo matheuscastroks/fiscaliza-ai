@@ -1,5 +1,6 @@
+import { cityStyles } from '@/features/city/CityUI';
 import React from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -8,7 +9,10 @@ export default function HelpScreen() {
   return (
     <AppScreen>
       <AppHeader title="Ajuda e acessibilidade" onBack={() => router.back()} />
-      <AppScreen scroll>
+      <ScrollView
+        contentContainerStyle={cityStyles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={{ gap: 20 }}>
           <AppText variant="sectionTitle">Meu município</AppText>
           <AppText>
@@ -47,7 +51,7 @@ export default function HelpScreen() {
             disponível e tente enviar novamente.
           </AppText>
         </View>
-      </AppScreen>
+      </ScrollView>
     </AppScreen>
   );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -7,7 +7,7 @@ import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { useAuthStore } from '@/stores/authStore';
 import { useCityQuery } from '@/features/city/useCityQuery';
-import { QueryState } from '@/features/city/CityUI';
+import { QueryState, cityStyles } from '@/features/city/CityUI';
 import type { Occurrence, CivicItem } from '@/shared/contracts';
 export default function ProfileScreen() {
   const { user, logout } = useAuthStore();
@@ -18,7 +18,10 @@ export default function ProfileScreen() {
   return (
     <AppScreen>
       <AppHeader title="Meu perfil" onBack={() => router.back()} />
-      <AppScreen scroll>
+      <ScrollView
+        contentContainerStyle={cityStyles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={{ gap: 20 }}>
           <AppText variant="screenTitle">{user?.name}</AppText>
           <AppText color="muted">{user?.email}</AppText>
@@ -93,7 +96,7 @@ export default function ProfileScreen() {
             }}
           />
         </View>
-      </AppScreen>
+      </ScrollView>
     </AppScreen>
   );
 }

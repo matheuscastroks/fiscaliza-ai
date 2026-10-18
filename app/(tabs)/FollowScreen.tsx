@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, View, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -87,12 +87,26 @@ export default function FollowScreen() {
               interações ficam no município atual.
             </AppText>
             {previous.map((item) => (
-              <View key={item.id} style={cityStyles.row}>
+              <TouchableOpacity
+                key={item.id}
+                style={cityStyles.row}
+                accessibilityRole="button"
+                accessibilityLabel={'Abrir histórico: ' + item.title}
+                onPress={() =>
+                  router.push({
+                    pathname: '/HistoricalDetailsScreen',
+                    params: {
+                      id: item.id,
+                      kind: 'kind' in item ? 'civic-items' : 'occurrences',
+                    },
+                  })
+                }
+              >
                 <AppText variant="label">{item.title}</AppText>
                 <AppText color="muted">
                   Participação anterior à mudança de município
                 </AppText>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         )}
