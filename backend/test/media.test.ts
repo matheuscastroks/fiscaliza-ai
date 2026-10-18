@@ -23,6 +23,20 @@ test('demo media: public JPEG allowlist rejects other files and encoded traversa
   t.after(() => app.close());
   for (const name of [
     'lighting.jpg',
+    'road.jpg',
+    'waste.jpg',
+    'crossing.jpg',
+    'gloria-dark.jpg',
+    'gloria-light.jpg',
+    'park-shade.jpg',
+    'park-path.jpg',
+    'recycling.jpg',
+    'accessible-path.jpg',
+    'crossing-day.jpg',
+    'legacy-light-1.jpg',
+    'legacy-light-2.jpg',
+    'legacy-light-3.jpg',
+    'legacy-light-4.jpg',
     'benches.jpg',
     'sidewalk.jpg',
     'avatar-ana.jpg',
@@ -227,7 +241,7 @@ test(
       .where(eq(records.id, plaza.id));
     assert.deepEqual(filled.data, {
       ...changed,
-      images: ['/api/demo-media/benches.jpg'],
+      images: ['/api/demo-media/park-shade.jpg'],
     });
     const [preserved] = await db
       .select()

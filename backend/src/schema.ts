@@ -101,3 +101,12 @@ export const attachments = pgTable('attachments', {
     .notNull()
     .defaultNow(),
 });
+
+// Scenario baseline is separate from attributable citizen interactions.
+export const demoEngagement = pgTable('demo_engagement', {
+  recordId: text('record_id')
+    .primaryKey()
+    .references(() => records.id, { onDelete: 'cascade' }),
+  views: integer('views').notNull(),
+  supports: integer('supports').notNull(),
+});

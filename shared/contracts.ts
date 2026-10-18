@@ -48,6 +48,8 @@ export interface CityComment {
   createdAt: string;
 }
 export interface Occurrence {
+  /** Distinct authenticated accounts that opened this record. */
+  views?: number;
   id: string;
   municipalityId?: string;
   title: string;
@@ -73,7 +75,12 @@ export interface Occurrence {
   followedByMe?: boolean;
   sector?: string;
   relatedIds?: string[];
-  evaluation?: { satisfied: boolean; reason: string; at: string };
+  evaluation?: {
+    satisfied: boolean;
+    reason: string;
+    rating?: number;
+    at: string;
+  };
 }
 export type CivicTerritory =
   | { scope: 'municipality' }
@@ -95,6 +102,7 @@ export interface CivicBase {
   createdAt: string;
   responsible: string;
   comments: CityComment[];
+  views?: number;
   supports: number;
   supportedByMe?: boolean;
   followedByMe?: boolean;

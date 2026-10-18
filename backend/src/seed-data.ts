@@ -1,7 +1,14 @@
+import { cityExamples } from './city-examples.js';
 import { eq, sql } from 'drizzle-orm';
 import { officialRio } from './municipality.js';
 import { hashPassword } from './auth.js';
-import { users, records, attachments, municipalities } from './schema.js';
+import {
+  users,
+  records,
+  attachments,
+  municipalities,
+  demoEngagement,
+} from './schema.js';
 import type { Database } from './db.js';
 import type { Occurrence, CivicItem } from '../../shared/contracts.js';
 export async function seed(
@@ -157,7 +164,7 @@ export async function seed(
         },
         id: 'proposal-praca',
         kind: 'proposal',
-        images: ['/api/demo-media/benches.jpg'],
+        images: ['/api/demo-media/park-shade.jpg'],
         title: 'Mais bancos na praça central',
         summary:
           'Moradores pedem assentos próximos à sombra e à parada de ônibus.',
@@ -216,7 +223,7 @@ export async function seed(
         ...base,
         id: 'proposal-travessia',
         kind: 'proposal',
-        images: ['/api/demo-media/sidewalk.jpg'],
+        images: ['/api/demo-media/accessible-path.jpg'],
         title: 'Travessia acessível até a unidade de saúde',
         summary:
           'Conectar a praça à unidade de saúde com calçada regular e rampas.',
@@ -262,6 +269,19 @@ export async function seed(
         ],
       },
     ];
+    const more = cityExamples(at);
+    for (const example of [...more.occurrences, ...more.proposals]) {
+      await tx
+        .insert(records)
+        .values({
+          id: example.id,
+          municipalityId,
+          kind: 'kind' in example ? example.kind : 'occurrence',
+          authorId: 'kind' in example ? example.createdBy : example.reportedBy,
+          data: example,
+        })
+        .onConflictDoNothing();
+    }
     await tx
       .insert(records)
       .values({
@@ -283,9 +303,30 @@ export async function seed(
           data: item,
         })
         .onConflictDoNothing();
+    const scenarioRecords = [
+      occurrence,
+      ...civic.filter((item) => item.kind === 'proposal'),
+      ...more.occurrences,
+      ...more.proposals,
+    ];
+    for (const [index, item] of scenarioRecords.entries()) {
+      await tx
+        .insert(demoEngagement)
+        .values({
+          recordId: item.id,
+          views: 128 + ((index * 173) % 1700),
+          supports: 9 + ((index * 19) % 117),
+        })
+        .onConflictDoNothing();
+    }
     // Enrich existing demo records atomically, preserving their state and any
     // resident uploads. Only a missing, null or empty media field is eligible.
-    for (const item of [occurrence, ...civic]) {
+    for (const item of [
+      occurrence,
+      ...civic,
+      ...more.occurrences,
+      ...more.proposals,
+    ]) {
       const field =
         'kind' in item && item.kind === 'action' ? 'evidence' : 'images';
       const media =
@@ -300,7 +341,7 @@ export async function seed(
         SET data = jsonb_set(data, ARRAY[${field}]::text[], ${JSON.stringify(media)}::jsonb)
         WHERE id = ${item.id} AND municipality_id = ${municipalityId}
           AND kind = ${'kind' in item ? item.kind : 'occurrence'}
-          AND (data -> ${field} IS NULL OR data -> ${field} = 'null'::jsonb OR data -> ${field} = '[]'::jsonb)
+          AND (data -> ${field} IS NULL OR data -> ${field} = 'null'::jsonb OR data -> ${field} = '[]'::jsonb OR (jsonb_array_length(data -> ${field}) = 1 AND data -> ${field} ->> 0 LIKE '/api/demo-media/%'))
       `);
     }
   });

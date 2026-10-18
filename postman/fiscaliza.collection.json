@@ -369,6 +369,66 @@
       ]
     },
     {
+      "name": "Registrar visualização proposta",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/civic-items/{{proposalWithPhotoId}}/view",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(200));",
+              "const count=pm.response.json().data.views;",
+              "pm.test('Contagem persistida',()=>pm.expect(count).to.be.above(0));",
+              "pm.collectionVariables.set('proposalViews',count);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir visualização proposta",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/civic-items/{{proposalWithPhotoId}}/view",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(200));",
+              "pm.test('Uma visualização por conta',()=>pm.expect(pm.response.json().data.views).to.eql(Number(pm.collectionVariables.get('proposalViews'))));"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "Registrar necessidade urbana",
       "request": {
         "method": "POST",
@@ -389,7 +449,7 @@
         "url": "{{baseUrl}}/occurrences",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"title\": \"Poste sem iluminação na travessia\",\n  \"description\": \"Poste apagado junto à travessia da praça.\",\n  \"category\": \"lighting\",\n  \"reportedImpact\": \"high\",\n  \"location\": {\n    \"latitude\": -22.904,\n    \"longitude\": -43.186,\n    \"address\": \"Praça Central\",\n    \"neighborhood\": \"Centro\"\n  },\n  \"images\": []\n}",
+          "raw": "{\n  \"title\": \"Poste sem iluminação na travessia\",\n  \"description\": \"Poste apagado junto à travessia da praça.\",\n  \"category\": \"lighting\",\n  \"reportedImpact\": \"high\",\n  \"location\": {\n    \"latitude\": -22.904,\n    \"longitude\": -43.186,\n    \"address\": \"Praça Central\",\n    \"neighborhood\": \"Centro\"\n  },\n  \"images\": [\n    \"{{proposalPhotoUrl}}\"\n  ]\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -408,6 +468,66 @@
               "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));",
               "pm.collectionVariables.set('occurrenceId', result.data.id);",
               "pm.test('Autoria e triagem do servidor', () => { pm.expect(result.data.reportedBy).to.eql('citizen-ana'); pm.expect(result.data.priority).to.eql('medium'); pm.expect(result.data.reportedImpact).to.eql('high'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Registrar visualização ocorrência",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/view",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(200));",
+              "const count=pm.response.json().data.views;",
+              "pm.test('Contagem persistida',()=>pm.expect(count).to.be.above(0));",
+              "pm.collectionVariables.set('occurrenceViews',count);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir visualização ocorrência",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/view",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Origin",
+            "value": "{{webOrigin}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP esperado',()=>pm.response.to.have.status(200));",
+              "pm.test('Uma visualização por conta',()=>pm.expect(pm.response.json().data.views).to.eql(Number(pm.collectionVariables.get('occurrenceViews'))));"
             ]
           }
         }
@@ -683,7 +803,7 @@
         "url": "{{baseUrl}}/occurrences/{{occurrenceId}}/evaluation",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"satisfied\": true,\n  \"reason\": \"Iluminação restabelecida.\"\n}",
+          "raw": "{\n  \"satisfied\": true,\n  \"reason\": \"Iluminação restabelecida.\",\n  \"rating\": 5\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -699,7 +819,8 @@
             "exec": [
               "pm.test('HTTP esperado', () => pm.response.to.have.status(200));",
               "const result = pm.response.json();",
-              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));"
+              "pm.test('Envelope coerente', () => pm.expect(result.success).to.eql(200 < 400));",
+              "pm.test('Nota persistida',()=>pm.expect(pm.response.json().data.evaluation.rating).to.eql(5));"
             ]
           }
         }

@@ -1,3 +1,4 @@
+import { uploadExamplePhoto } from './upload-photo.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildApp } from '../src/app.js';
@@ -112,11 +113,13 @@ test(
       ).statusCode,
       200,
     );
+    const requiredPhoto = await uploadExamplePhoto(app, citizen);
     const create = await app.inject({
       method: 'POST',
       url: '/api/occurrences',
       headers: citizen,
       payload: {
+        images: [requiredPhoto],
         title: 'Buraco na Rua do teste',
         description: 'Buraco prejudica passagem de pedestres.',
         category: 'road',
@@ -181,8 +184,12 @@ test(
     });
     assert.equal(evaluation.statusCode, 200);
     assert.equal(evaluation.json().data.status, 'resolved');
-    assert.deepEqual(evaluation.json().data.statusHistory.map((event: { source?: string }) => event.source),
-      ['citizen', 'management', 'management', 'citizen']);
+    assert.deepEqual(
+      evaluation
+        .json()
+        .data.statusHistory.map((event: { source?: string }) => event.source),
+      ['citizen', 'management', 'management', 'citizen'],
+    );
     assert.match(
       evaluation.json().data.statusHistory.at(-1).justification,
       /Revisão/,

@@ -29,3 +29,24 @@ Retratos ilustrativos para as três contas fictícias, sem relação com cidadã
 | avatar-admin.jpg | Simon Robben | https://www.pexels.com/photo/man-in-brown-polo-shirt-614810/ |
 
 O seed só preenche avatares vazios dessas contas. Fotos escolhidas no app são locais ao aparelho e têm precedência sobre o retrato inicial; não são sincronizadas pela API.
+
+## Fotografias adicionais por contexto
+
+Imagens ilustrativas sob a [licença Pexels](https://www.pexels.com/license/), pesquisadas em 18/10/2026. Não representam os endereços dos cenários. Uma fotografia diferente por ocorrência/proposta controlada; anexos dos usuários são preservados. JPEG até 1200 × 1200, qualidade 82, sem metadados.
+
+| Arquivo | Fonte |
+| --- | --- |
+| road.jpg | [Fotografia original e autor](https://www.pexels.com/photo/crack-in-road-17706118/) |
+| waste.jpg | [Fotografia original e autor](https://www.pexels.com/photo/a-pile-of-garbage-bags-4651148/) |
+| crossing.jpg | [Fotografia original e autor](https://www.pexels.com/photo/traffic-light-at-a-pedestrian-crossing-23319093/) |
+| gloria-dark.jpg | [Fotografia original e autor](https://www.pexels.com/photo/man-walking-on-a-street-at-night-18657046/) |
+| gloria-light.jpg | [Fotografia original e autor](https://www.pexels.com/photo/sidewalk-illuminated-at-night-18918901/) |
+| recycling.jpg | [Fotografia original e autor](https://www.pexels.com/photo/recycling-bins-on-urban-street-sidewalk-33791470/) |
+| park-path.jpg | [Fotografia original e autor](https://www.pexels.com/photo/scenic-park-path-with-benches-and-trash-bins-36170414/) |
+| park-shade.jpg | [Fotografia original e autor](https://www.pexels.com/photo/empty-walkway-in-the-park-17498442/) |
+| crossing-day.jpg | [Fotografia original e autor](https://www.pexels.com/photo/people-walking-on-the-sidewalk-with-traffic-lights-7661653/) |
+| accessible-path.jpg | [Fotografia original e autor](https://www.pexels.com/photo/modern-urban-sidewalk-with-safety-railings-36738295/) |
+| legacy-light-1.jpg | [Iluminação — fotografia original e autor](https://www.pexels.com/photo/person-walking-on-a-street-at-night-11891089/) |
+| legacy-light-2.jpg | [Iluminação — fotografia original e autor](https://www.pexels.com/photo/a-streetlight-at-night-14119199/) |
+| legacy-light-3.jpg | [Iluminação — fotografia original e autor](https://www.pexels.com/photo/lighted-street-lights-during-night-time-13642043/) |
+| legacy-light-4.jpg | [Iluminação — fotografia original e autor](https://www.pexels.com/photo/lanterns-along-a-walkway-in-city-19032683/) |

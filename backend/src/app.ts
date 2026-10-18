@@ -24,6 +24,7 @@ import { municipalityService } from './municipality.js';
 import { summarizeOverview } from './overview.js';
 import {
   answers,
+  demoEngagement,
   attachments,
   municipalities,
   records,
@@ -424,9 +425,16 @@ export async function buildApp(
       .select()
       .from(relations)
       .where(eq(relations.recordId, row.id));
+    const [baseline] = await tx
+      .select()
+      .from(demoEngagement)
+      .where(eq(demoEngagement.recordId, row.id));
+    value.views =
+      (baseline?.views || 0) + rs.filter((x) => x.kind === 'view').length;
     const support = rs.filter((x) => x.kind === 'support');
-    if ('votes' in value) value.votes = support.length;
-    else value.supports = support.length;
+    if ('votes' in value)
+      value.votes = (baseline?.supports || 0) + support.length;
+    else value.supports = (baseline?.supports || 0) + support.length;
     value.supportedByMe = support.some((x) => x.userId === uid);
     value.followedByMe = rs.some(
       (x) => x.kind === 'follow' && x.userId === uid,
@@ -561,6 +569,31 @@ export async function buildApp(
         ),
       ),
     );
+    app.put<{ Params: { id: string } }>(
+      `/api/${path}/:id/view`,
+      async (req) => {
+        const value = await db.transaction(async (tx) => {
+          const row = await find(
+            municipalityId(req),
+            req.params.id,
+            kind,
+            tx,
+            true,
+          );
+          if (row.kind !== 'occurrence' && row.kind !== 'proposal')
+            throw fail(
+              400,
+              'Visualizações disponíveis para ocorrências e propostas.',
+            );
+          await tx
+            .insert(relations)
+            .values({ recordId: row.id, userId: req.user!.id, kind: 'view' })
+            .onConflictDoNothing();
+          return present(row, req.user!.id, tx);
+        });
+        return ok(value);
+      },
+    );
     for (const relation of ['support', 'follow'] as const) {
       for (const method of ['PUT', 'DELETE'] as const) {
         app.route<{ Params: { id: string } }>({
@@ -646,10 +679,10 @@ export async function buildApp(
             description: string(),
             category,
             location,
-            images,
+            images: { ...images, minItems: 1 },
             reportedImpact: enumeration(['low', 'medium', 'high']),
           },
-          ['title', 'description', 'category', 'location'],
+          ['title', 'description', 'category', 'location', 'images'],
         ),
       },
     },
@@ -776,13 +809,17 @@ export async function buildApp(
   );
   app.post<{
     Params: { id: string };
-    Body: { satisfied: boolean; reason: string };
+    Body: { satisfied: boolean; reason: string; rating?: number };
   }>(
     '/api/occurrences/:id/evaluation',
     {
       schema: {
         body: object(
-          { satisfied: { type: 'boolean' }, reason: string(2000, 0) },
+          {
+            satisfied: { type: 'boolean' },
+            reason: string(2000, 0),
+            rating: { type: 'integer', minimum: 1, maximum: 5 },
+          },
           ['satisfied', 'reason'],
         ),
       },
@@ -803,10 +840,18 @@ export async function buildApp(
           if (value.status !== 'resolved')
             throw fail(409, 'A ocorrência ainda não foi concluída.');
           if (value.evaluation) throw fail(409, 'Avaliação já registrada.');
-          if (!req.body.satisfied && !req.body.reason.trim())
+          if (
+            !req.body.satisfied &&
+            !req.body.rating &&
+            !req.body.reason.trim()
+          )
             throw fail(400, 'Informe o motivo da revisão.');
-          value.evaluation = { ...req.body, at: now() };
-          if (!req.body.satisfied)
+          value.evaluation = {
+            ...req.body,
+            ...(req.body.rating ? { satisfied: req.body.rating >= 3 } : {}),
+            at: now(),
+          };
+          if (!req.body.satisfied && !req.body.rating)
             value.statusHistory.push({
               status: 'resolved',
               source: 'citizen',
@@ -1117,7 +1162,12 @@ export async function buildApp(
     const relevant = await db
       .select({ id: relations.recordId })
       .from(relations)
-      .where(eq(relations.userId, req.user.id));
+      .where(
+        and(
+          eq(relations.userId, req.user.id),
+          sql`${relations.kind} IN ('support', 'follow')`,
+        ),
+      );
     const responded = await db
       .select({ id: answers.recordId })
       .from(answers)
@@ -1294,6 +1344,16 @@ export async function buildApp(
           'avatar-ana.jpg',
           'avatar-gestao.jpg',
           'avatar-admin.jpg',
+          'road.jpg',
+          'waste.jpg',
+          'crossing.jpg',
+          'gloria-dark.jpg', 'legacy-light-1.jpg', 'legacy-light-2.jpg', 'legacy-light-3.jpg', 'legacy-light-4.jpg',
+          'gloria-light.jpg',
+          'recycling.jpg',
+          'park-path.jpg',
+          'park-shade.jpg',
+          'crossing-day.jpg',
+          'accessible-path.jpg',
         ].includes(req.params.name)
       )
         throw fail(404, 'Imagem de exemplo não encontrada.');

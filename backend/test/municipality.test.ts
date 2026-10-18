@@ -1,3 +1,4 @@
+import { uploadExamplePhoto } from './upload-photo.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { eq } from 'drizzle-orm';
@@ -130,7 +131,10 @@ test(
       const r = await app.inject({
         method: 'POST',
         url: '/api/auth/login',
-        payload: { email, password: process.env.DEMO_PASSWORD || 'Fiscaliza123!' },
+        payload: {
+          email,
+          password: process.env.DEMO_PASSWORD || 'Fiscaliza123!',
+        },
       });
       assert.equal(r.statusCode, 200, r.body);
       return { authorization: `Bearer ${r.json().data.token}` };
@@ -201,7 +205,9 @@ test(
       (await request('GET', '/api/municipality')).json().data.id,
       '3304557',
     );
+    const requiredPhoto = await uploadExamplePhoto(app, citizen);
     const payload = {
+      images: [requiredPhoto],
       title: 'Territorial test',
       description: 'Local teste',
       category: 'road',
