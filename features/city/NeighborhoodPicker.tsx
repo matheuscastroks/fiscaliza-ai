@@ -1,9 +1,6 @@
 import React from 'react';
-import { Pressable, ScrollView } from 'react-native';
-import { AppText } from '@/components/ui/AppText';
+import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import { normalizeNeighborhood } from '@/shared/civic-territory';
-import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
 
 export function NeighborhoodPicker({
   options,
@@ -23,48 +20,19 @@ export function NeighborhoodPicker({
       ? [value, ...options]
       : options;
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={{ marginHorizontal: -spacing.contentPadding }}
-      contentContainerStyle={{
-        gap: spacing.xs,
-        paddingHorizontal: spacing.contentPadding,
-      }}
-      keyboardShouldPersistTaps="handled"
-      accessibilityLabel="Filtrar por bairro"
-    >
-      {['', ...labels].map((option) => {
-        const selected =
-          normalizeNeighborhood(option) === normalizeNeighborhood(value);
-        return (
-          <Pressable
-            key={option}
-            accessibilityRole="button"
-            accessibilityLabel={option || 'Todo o município'}
-            accessibilityState={{ selected }}
-            aria-pressed={selected}
-            onPress={() => onChange(option)}
-            style={{
-              minHeight: 48,
-              justifyContent: 'center',
-              paddingHorizontal: spacing.md,
-              paddingVertical: spacing.xs,
-              borderRadius: spacing.xl,
-              backgroundColor: selected ? colors.darkPill : colors.surface,
-              borderColor: selected ? colors.darkPill : colors.divider,
-              borderWidth: 1,
-            }}
-          >
-            <AppText
-              variant="label"
-              style={{ color: selected ? colors.white : colors.ink }}
-            >
-              {option || 'Todo o município'}
-            </AppText>
-          </Pressable>
-        );
-      })}
-    </ScrollView>
+    <SlidingTabs
+      label="Filtrar por bairro"
+      options={['', ...labels].map((option) => ({
+        value: option,
+        label: option || 'Todo o município',
+      }))}
+      value={
+        labels.find(
+          (option) =>
+            normalizeNeighborhood(option) === normalizeNeighborhood(value),
+        ) || ''
+      }
+      onChange={onChange}
+    />
   );
 }

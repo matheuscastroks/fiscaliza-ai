@@ -8,13 +8,13 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
-import { AppInput } from '@/components/ui/AppInput';
+import { CitySearch } from '@/components/ui/CitySearch';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
 import {
   CivicRow,
@@ -24,6 +24,12 @@ import {
   statusLabel,
 } from '@/features/city/CityUI';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
+import { SlidingTabs } from '@/components/ui/SlidingTabs';
+import {
+  compareTerritoryRecords,
+  withinPeriod,
+  type TerritoryOrder,
+} from '@/shared/territory-order';
 import { useCityQuery } from '@/features/city/useCityQuery';
 import { inMapRegion } from '@/shared/territory';
 import {
@@ -83,6 +89,8 @@ export default function TerritoryScreen() {
 }
 
 function TerritoryContent() {
+  const [order, setOrder] = useState<TerritoryOrder>('date');
+  const [period, setPeriod] = useState(0);
   const user = useAuthStore((state) => state.user);
   const municipality = user?.municipality;
   const initial = useMemo(
@@ -103,7 +111,17 @@ function TerritoryContent() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [map, setMap] = useState(Platform.OS !== 'web');
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const { filters } = useLocalSearchParams<{ filters?: string }>();
+  const [filterVisibility, setFilterVisibility] = useState<{
+    param?: string;
+    open: boolean;
+  }>({ open: false });
+  const filtersOpen =
+    filterVisibility.param === filters
+      ? filterVisibility.open
+      : Boolean(filters);
+  const setFiltersOpen = (open: boolean) =>
+    setFilterVisibility({ param: filters, open });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showUnlocated, setShowUnlocated] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
@@ -151,14 +169,19 @@ function TerritoryContent() {
           result.push({ type: 'civic', item });
       }
     }
-    return result.sort((a, b) => {
-      const aDate =
-        a.type === 'occurrence' ? a.item.reportedAt : a.item.createdAt;
-      const bDate =
-        b.type === 'occurrence' ? b.item.reportedAt : b.item.createdAt;
-      return bDate.localeCompare(aDate);
-    });
-  }, [occurrences.data, civic.data, kind, status, search, neighborhood]);
+    return result
+      .filter((entry) => withinPeriod(entry.item, period))
+      .sort((a, b) => compareTerritoryRecords(a.item, b.item, order));
+  }, [
+    occurrences.data,
+    civic.data,
+    kind,
+    status,
+    search,
+    neighborhood,
+    period,
+    order,
+  ]);
   const unlocated = entries.filter((entry) => !entryLocation(entry));
   const located = entries.filter((entry) => {
     const point = entryLocation(entry);
@@ -167,7 +190,11 @@ function TerritoryContent() {
   const listed = areaOnly ? located : entries;
   const selectedEntry = located.find((entry) => entry.item.id === selectedId);
   const filterCount =
-    Number(Boolean(neighborhood)) + Number(status !== 'all') + Number(areaOnly);
+    Number(Boolean(neighborhood)) +
+    Number(status !== 'all') +
+    Number(areaOnly) +
+    Number(period !== 0) +
+    Number(order !== 'date');
   const statuses: [string, string][] =
     kind === 'occurrences'
       ? Object.entries(occurrenceStatus)
@@ -214,6 +241,8 @@ function TerritoryContent() {
     </View>
   );
   const resetFilters = () => {
+    setOrder('date');
+    setPeriod(0);
     setSearch('');
     setKind('all');
     setSelectedId(null);
@@ -264,44 +293,32 @@ function TerritoryContent() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={cityStyles.content}
       >
-        <AppInput
-          label="Buscar no território"
-          placeholder="Rua, bairro ou assunto"
-          value={search}
-          onChangeText={setSearch}
-        />
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ marginHorizontal: -spacing.contentPadding }}
-          contentContainerStyle={{
-            gap: spacing.xs,
-            paddingHorizontal: spacing.contentPadding,
-          }}
-        >
-          {(
-            [
-              ['all', 'Tudo'],
-              ['occurrences', 'Ocorrências'],
-              ['proposal', 'Propostas'],
-              ['consultation', 'Consultas'],
-              ['action', 'Ações'],
-            ] as const
-          ).map(([value, label]) => (
-            <AppButton
-              key={value}
-              title={label}
-              variant={kind === value ? 'primary' : 'quiet'}
-              accessibilityState={{ selected: kind === value }}
-              onPress={() => {
-                setKind(value);
-                setStatus('all');
-                setSelectedId(null);
-                setAreaOnly(false);
-              }}
-            />
-          ))}
-        </ScrollView>
+        <View style={{ gap: spacing.sm }}>
+          <CitySearch
+            value={search}
+            onChangeText={setSearch}
+            onFilters={() => setFiltersOpen(!filtersOpen)}
+            expanded={filtersOpen}
+            filterCount={filterCount}
+          />
+          <SlidingTabs
+            label="Tipos de participação no território"
+            options={[
+              { value: 'all', label: 'Tudo' },
+              { value: 'occurrences', label: 'Ocorrências' },
+              { value: 'proposal', label: 'Propostas' },
+              { value: 'consultation', label: 'Consultas' },
+              { value: 'action', label: 'Ações' },
+            ]}
+            value={kind}
+            onChange={(value) => {
+              setKind(value as Kind);
+              setStatus('all');
+              setSelectedId(null);
+              setAreaOnly(false);
+            }}
+          />
+        </View>
         <View style={styles.toolbar}>
           <View style={styles.flex}>
             <AppText variant="label">
@@ -319,23 +336,6 @@ function TerritoryContent() {
               </AppText>
             )}
           </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Filtros do território"
-            accessibilityState={{ expanded: filtersOpen }}
-            aria-expanded={filtersOpen}
-            onPress={() => setFiltersOpen(!filtersOpen)}
-            style={[styles.filterButton, filtersOpen && styles.filterSelected]}
-          >
-            <Ionicons
-              name="options-outline"
-              size={20}
-              color={filtersOpen ? colors.white : colors.ink}
-            />
-            <AppText variant="label" color={filtersOpen ? 'white' : 'ink'}>
-              Filtros{filterCount ? ' · ' + filterCount : ''}
-            </AppText>
-          </Pressable>
         </View>
         {filtersOpen && (
           <View style={styles.filters}>
@@ -352,27 +352,44 @@ function TerritoryContent() {
             {statuses.length > 0 && (
               <>
                 <AppText variant="label">Situação</AppText>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  style={{ marginHorizontal: -spacing.contentPadding }}
-                  contentContainerStyle={{
-                    gap: spacing.xs,
-                    paddingHorizontal: spacing.contentPadding,
-                  }}
-                >
-                  {[['all', 'Todas'], ...statuses].map(([value, label]) => (
-                    <AppButton
-                      key={value}
-                      title={label}
-                      variant={status === value ? 'primary' : 'quiet'}
-                      accessibilityState={{ selected: status === value }}
-                      onPress={() => setStatus(value)}
-                    />
-                  ))}
-                </ScrollView>
+                <SlidingTabs
+                  label="Filtrar por situação"
+                  options={[['all', 'Todas'], ...statuses].map(
+                    ([value, label]) => ({ value, label }),
+                  )}
+                  value={status}
+                  onChange={setStatus}
+                />
               </>
             )}
+            <AppText variant="label">Período</AppText>
+            <SlidingTabs
+              label="Filtrar por período"
+              edgeToEdge={false}
+              options={[
+                { value: '0', label: 'Todo o período' },
+                { value: '1', label: 'Últimas 24h' },
+                { value: '7', label: 'Últimos 7 dias' },
+                { value: '30', label: 'Últimos 30 dias' },
+              ]}
+              value={String(period)}
+              onChange={(value) => {
+                setPeriod(Number(value));
+                setSelectedId(null);
+              }}
+            />
+            <AppText variant="label">Ordenar por</AppText>
+            <SlidingTabs
+              label="Ordenar território"
+              edgeToEdge={false}
+              options={[
+                { value: 'date', label: 'Mais recentes' },
+                { value: 'supports', label: 'Mais apoiados' },
+                { value: 'views', label: 'Mais vistos' },
+              ]}
+              value={order}
+              onChange={(value) => setOrder(value as TerritoryOrder)}
+            />
             <AppButton
               title="Limpar filtros"
               variant="quiet"
@@ -381,40 +398,20 @@ function TerritoryContent() {
           </View>
         )}
         {Platform.OS !== 'web' && (
-          <View style={styles.viewToggle} accessibilityRole="tablist">
-            {(
-              [
-                ['map', 'Mapa', 'map-outline'],
-                ['list', 'Lista', 'list-outline'],
-              ] as const
-            ).map(([value, label, icon]) => (
-              <Pressable
-                key={value}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: (value === 'map') === map }}
-                onPress={() => {
-                  setMap(value === 'map');
-                  setAreaOnly(false);
-                }}
-                style={[
-                  styles.viewTab,
-                  (value === 'map') === map && styles.viewSelected,
-                ]}
-              >
-                <Ionicons
-                  name={icon}
-                  size={20}
-                  color={(value === 'map') === map ? colors.white : colors.ink}
-                />
-                <AppText
-                  variant="label"
-                  color={(value === 'map') === map ? 'white' : 'ink'}
-                >
-                  {label}
-                </AppText>
-              </Pressable>
-            ))}
-          </View>
+          <SlidingTabs
+            tabs
+            scroll={false}
+            label="Visualização do território"
+            options={[
+              { value: 'map', label: 'Mapa', icon: 'map-outline' },
+              { value: 'list', label: 'Lista', icon: 'list-outline' },
+            ]}
+            value={map ? 'map' : 'list'}
+            onChange={(value) => {
+              setMap(value === 'map');
+              setAreaOnly(false);
+            }}
+          />
         )}
         {!municipality && (
           <AppText color="muted">
