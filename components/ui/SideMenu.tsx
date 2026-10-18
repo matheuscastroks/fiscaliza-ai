@@ -149,7 +149,7 @@ export function SideMenu({
                 color={colors.white}
               />
             </View>
-            <View>
+            <View style={{ flex: 1, minWidth: 0 }}>
               <AppText
                 variant="sectionTitle"
                 color="ink"
@@ -304,7 +304,14 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.lg,
   },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  brandRow: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginRight: spacing.sm,
+  },
   brandIconWrapper: {
     width: 40,
     height: 40,
@@ -315,6 +322,7 @@ const styles = StyleSheet.create({
   },
   brandTitle: { ...typography.sectionTitle },
   closeCircleButton: {
+    flexShrink: 0,
     width: layout.touchTarget.minWidth,
     height: layout.touchTarget.minHeight,
     borderRadius: layout.radius.pill,
