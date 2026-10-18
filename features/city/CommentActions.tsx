@@ -1,3 +1,4 @@
+import { useTheme } from '@/theme/useTheme';
 import { useState } from 'react';
 import { Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +10,6 @@ import { AppInput } from '@/components/ui/AppInput';
 import { useAuthStore } from '@/stores/authStore';
 import { mutation } from '@/services/http';
 import type { CityComment } from '@/shared/contracts';
-import { colors } from '@/theme';
 
 export function CommentActions({
   comment,
@@ -18,6 +18,8 @@ export function CommentActions({
   comment: CityComment;
   path: string;
 }) {
+  const { colors } = useTheme();
+
   const user = useAuthStore((state) => state.user);
   const [mode, setMode] = useState<'closed' | 'menu' | 'edit' | 'delete'>(
     'closed',

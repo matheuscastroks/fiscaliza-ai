@@ -1,8 +1,10 @@
+import { useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { LocationStep } from '@/features/reports/LocationStep';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, layout } from '@/theme';
+import { layout } from '@/theme';
 import { goBack } from '@/utils/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -25,6 +27,8 @@ export default function ProposalScreen() {
   return <ProposalForm key={user?.id + ':' + user?.municipality?.id} />;
 }
 function ProposalForm() {
+  const styles = useThemedStyles(createStyles);
+
   const { camera } = useLocalSearchParams<{ camera?: string }>();
   const user = useAuthStore((state) => state.user);
   const [title, setTitle] = useState('');
@@ -322,21 +326,22 @@ function ProposalForm() {
     </AppScreen>
   );
 }
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.contentPadding,
-    paddingBottom: spacing.xxl,
-    gap: spacing.xxl,
-  },
-  section: { gap: spacing.md },
-  footer: {
-    gap: spacing.xs,
-    paddingTop: spacing.sm,
-    paddingHorizontal: spacing.contentPadding,
-    backgroundColor: colors.canvas,
-    borderTopWidth: 1,
-    borderTopColor: colors.divider,
-    borderTopLeftRadius: layout.radius.panel,
-    borderTopRightRadius: layout.radius.panel,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    content: {
+      padding: spacing.contentPadding,
+      paddingBottom: spacing.xxl,
+      gap: spacing.xxl,
+    },
+    section: { gap: spacing.md },
+    footer: {
+      gap: spacing.xs,
+      paddingTop: spacing.sm,
+      paddingHorizontal: spacing.contentPadding,
+      backgroundColor: colors.canvas,
+      borderTopWidth: 1,
+      borderTopColor: colors.divider,
+      borderTopLeftRadius: layout.radius.panel,
+      borderTopRightRadius: layout.radius.panel,
+    },
+  });

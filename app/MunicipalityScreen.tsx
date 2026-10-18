@@ -1,6 +1,8 @@
+import { useThemedStyles } from '@/theme/useTheme';
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { goBack } from '@/utils/navigation';
-import { cityStyles } from '@/features/city/CityUI';
+import { useSignOutSheet } from '@/components/ui/SignOutSheet';
+import { createCityStyles } from '@/features/city/CityUI';
 import React, { useRef, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
@@ -15,9 +17,10 @@ import type { PostalCodeLookup, SessionUser } from '@/shared/contracts';
 
 /** First access and changes of residence share the same server-confirmed flow. */
 export default function MunicipalityScreen() {
+  const cityStyles = useThemedStyles(createCityStyles);
+
   const user = useAuthStore((state) => state.user);
   const acceptProfile = useAuthStore((state) => state.acceptProfile);
-  const logout = useAuthStore((state) => state.logout);
   const [postalCode, setPostalCode] = useState(user?.postalCode || '');
   const [lookup, setLookup] = useState<PostalCodeLookup | null>(null);
   const [busy, setBusy] = useState(false);
@@ -187,7 +190,7 @@ export default function MunicipalityScreen() {
               title="Sair da conta"
               variant="quiet"
               disabled={busy || saving}
-              onPress={() => void logout().catch(() => {})}
+              onPress={() => useSignOutSheet.getState().setOpen(true)}
             />
           )}
         </View>

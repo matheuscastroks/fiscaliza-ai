@@ -1,3 +1,5 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React, { useRef, useState } from 'react';
 import {
   View,
@@ -6,7 +8,7 @@ import {
   StyleSheet,
   ViewStyle,
 } from 'react-native';
-import { colors } from '@/theme/colors';
+
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { AppText } from './AppText';
@@ -31,6 +33,9 @@ export const AppInput: React.FC<AppInputProps> = ({
   onBlur,
   ...rest
 }) => {
+  const { colors, mode } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const [isFocused, setIsFocused] = useState(false);
   const input = useRef<TextInput>(null);
   const keyboardScroll = useKeyboardAwareInput();
@@ -54,6 +59,7 @@ export const AppInput: React.FC<AppInputProps> = ({
       </AppText>
       <TextInput
         ref={input}
+        keyboardAppearance={mode}
         accessibilityLabel={label}
         accessibilityHint={error || helper}
         style={[
@@ -65,6 +71,7 @@ export const AppInput: React.FC<AppInputProps> = ({
           style,
         ]}
         placeholderTextColor={colors.subtle}
+        scrollEnabled={rest.multiline ? true : undefined}
         editable={editable}
         onFocus={handleFocus}
         onBlur={handleBlur}
@@ -88,42 +95,44 @@ export const AppInput: React.FC<AppInputProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.md,
-  },
-  label: {
-    marginBottom: spacing.xs,
-  },
-  input: {
-    minHeight: 56,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.surface,
-    borderWidth: layout.borderWidth.hairline,
-    borderColor: colors.border,
-    borderRadius: layout.radius.button,
-    color: colors.ink,
-    fontSize: 16,
-    fontFamily: fontFamilies.regular,
-  },
-  multiline: {
-    minHeight: 120,
-    borderRadius: layout.radius.panel,
-    textAlignVertical: 'top',
-    paddingTop: spacing.md,
-  },
-  inputFocused: {
-    borderColor: colors.borderActive,
-  },
-  inputError: {
-    borderColor: colors.risk,
-  },
-  inputDisabled: {
-    backgroundColor: colors.surfaceSubdued,
-    color: colors.muted,
-  },
-  feedback: {
-    marginTop: spacing.xxs,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      marginBottom: spacing.md,
+    },
+    label: {
+      marginBottom: spacing.xs,
+    },
+    input: {
+      minHeight: 56,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      backgroundColor: colors.surface,
+      borderWidth: layout.borderWidth.hairline,
+      borderColor: colors.border,
+      borderRadius: layout.radius.button,
+      color: colors.ink,
+      fontSize: 16,
+      fontFamily: fontFamilies.regular,
+    },
+    multiline: {
+      minHeight: 120,
+      maxHeight: 192,
+      borderRadius: layout.radius.panel,
+      textAlignVertical: 'top',
+      paddingTop: spacing.md,
+    },
+    inputFocused: {
+      borderColor: colors.borderActive,
+    },
+    inputError: {
+      borderColor: colors.risk,
+    },
+    inputDisabled: {
+      backgroundColor: colors.surfaceSubdued,
+      color: colors.muted,
+    },
+    feedback: {
+      marginTop: spacing.xxs,
+    },
+  });

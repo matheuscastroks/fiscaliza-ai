@@ -1,5 +1,15 @@
+import { useTheme, useThemeInitialization } from '@/theme/useTheme';
+import * as SystemUI from 'expo-system-ui';
+import { Platform } from 'react-native';
 import React, { useEffect } from 'react';
-import { router, Stack, useSegments } from 'expo-router';
+import {
+  router,
+  Stack,
+  useSegments,
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from 'expo-router';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -9,7 +19,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { queryClient } from '@/services/http';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { SignOutSheet } from '@/components/ui/SignOutSheet';
-import { colors } from '@/theme/colors';
+
 import {
   useFonts,
   InstrumentSans_400Regular,
@@ -20,6 +30,14 @@ import {
 export const unstable_settings = { initialRouteName: '(tabs)' };
 
 export default function RootLayout() {
+  const { colors, isDark, mode } = useTheme();
+  const themeReady = useThemeInitialization();
+  useEffect(() => {
+    void SystemUI.setBackgroundColorAsync(colors.canvas).catch(() => undefined);
+    if (Platform.OS === 'web')
+      document.documentElement.style.colorScheme = mode;
+  }, [colors.canvas, mode]);
+
   const [fontsLoaded, fontError] = useFonts({
     InstrumentSans_400Regular,
     InstrumentSans_500Medium,
@@ -46,32 +64,46 @@ export default function RootLayout() {
     )
       router.replace('/MunicipalityScreen');
   }, [isReady, isAuthenticated, segments, user?.municipality]);
-  if (!isReady || (!fontsLoaded && !fontError)) return null;
+  if (!themeReady || !isReady || (!fontsLoaded && !fontError)) return null;
+  const base = isDark ? DarkTheme : DefaultTheme;
+  const navigationTheme = {
+    ...base,
+    colors: {
+      ...base.colors,
+      background: colors.canvas,
+      card: colors.surface,
+      text: colors.ink,
+      border: colors.border,
+      primary: colors.accent,
+    },
+  };
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
-          <StatusBar style="dark" />
-          <AppDrawer>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: colors.canvas },
-              }}
-            >
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen
-                name="ProblemDetailsScreen"
-                options={{ animation: 'slide_from_bottom' }}
-              />
-              <Stack.Screen
-                name="CivicDetailsScreen"
-                options={{ animation: 'slide_from_bottom' }}
-              />
-            </Stack>
-          </AppDrawer>
-          <SignOutSheet />
-        </QueryClientProvider>
+        <ThemeProvider value={navigationTheme}>
+          <QueryClientProvider client={queryClient}>
+            <StatusBar style={isDark ? 'light' : 'dark'} />
+            <AppDrawer>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: colors.canvas },
+                }}
+              >
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen
+                  name="ProblemDetailsScreen"
+                  options={{ animation: 'slide_from_bottom' }}
+                />
+                <Stack.Screen
+                  name="CivicDetailsScreen"
+                  options={{ animation: 'slide_from_bottom' }}
+                />
+              </Stack>
+            </AppDrawer>
+            <SignOutSheet />
+          </QueryClientProvider>
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

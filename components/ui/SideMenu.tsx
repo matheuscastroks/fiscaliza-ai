@@ -1,7 +1,9 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useSignOutSheet } from './SignOutSheet';
 import { useAuthStore } from '@/stores/authStore';
-import { colors, layout, spacing, typography } from '@/theme';
+import { layout, spacing, typography } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -33,6 +35,9 @@ export function SideMenu({
   onClose: (afterClose?: () => void) => void;
   visible: boolean;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const { user } = useAuthStore();
   const sections: MenuSection[] = [
     {
@@ -141,7 +146,7 @@ export function SideMenu({
               <Ionicons
                 name="shield-checkmark"
                 size={18}
-                color={colors.white}
+                color={colors.onAccent}
               />
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
@@ -270,7 +275,11 @@ export function SideMenu({
               accessibilityLabel="Sair da conta"
               style={styles.darkLogoutPill}
             >
-              <Ionicons name="log-out-outline" size={18} color={colors.white} />
+              <Ionicons
+                name="log-out-outline"
+                size={18}
+                color={colors.onAccent}
+              />
               <AppText variant="label" style={styles.logoutPillText}>
                 Sair da conta
               </AppText>
@@ -282,118 +291,119 @@ export function SideMenu({
   );
 }
 
-const styles = StyleSheet.create({
-  panel: {
-    flex: 1,
-    backgroundColor: colors.canvas,
-    borderTopRightRadius: layout.radius.sheet,
-    borderBottomRightRadius: layout.radius.sheet,
-    overflow: 'hidden',
-  },
-  safeArea: { flex: 1 },
-  headerBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.lg,
-  },
-  brandRow: {
-    flex: 1,
-    minWidth: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginRight: spacing.sm,
-  },
-  brandIconWrapper: {
-    width: 40,
-    height: 40,
-    borderRadius: layout.radius.pill,
-    backgroundColor: colors.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  brandTitle: { ...typography.sectionTitle },
-  closeCircleButton: {
-    flexShrink: 0,
-    width: layout.touchTarget.minWidth,
-    height: layout.touchTarget.minHeight,
-    borderRadius: layout.radius.pill,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-    gap: spacing.xl,
-  },
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: layout.radius.card,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  avatarContainer: {},
-  profileInfo: { flex: 1, gap: spacing.xxs },
-  userName: { ...typography.label },
-  municipalityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xxs,
-  },
-  municipalityText: { ...typography.meta, flexShrink: 1 },
-  profileArrowCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: layout.radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sectionContainer: { gap: spacing.sm },
-  sectionHeader: {
-    ...typography.label,
-    color: colors.muted,
-    paddingHorizontal: spacing.xxs,
-  },
-  itemsGroup: {
-    backgroundColor: colors.surface,
-    borderRadius: layout.radius.card,
-    overflow: 'hidden',
-  },
-  menuRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: 64,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.divider,
-    gap: spacing.sm,
-  },
-  menuRowLast: { borderBottomWidth: 0 },
-  iconWrapper: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rowTextContainer: { flex: 1, gap: spacing.xxs },
-  rowLabel: { ...typography.body },
-  rowSubtitle: { ...typography.meta },
-  footerSection: { gap: spacing.md },
-  darkLogoutPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 54,
-    borderRadius: layout.radius.pill,
-    backgroundColor: colors.ink,
-    gap: spacing.xs,
-  },
-  logoutPillText: { ...typography.label, color: colors.white },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    panel: {
+      flex: 1,
+      backgroundColor: colors.canvas,
+      borderTopRightRadius: layout.radius.sheet,
+      borderBottomRightRadius: layout.radius.sheet,
+      overflow: 'hidden',
+    },
+    safeArea: { flex: 1 },
+    headerBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.lg,
+    },
+    brandRow: {
+      flex: 1,
+      minWidth: 0,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginRight: spacing.sm,
+    },
+    brandIconWrapper: {
+      width: 40,
+      height: 40,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.ink,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    brandTitle: { ...typography.sectionTitle },
+    closeCircleButton: {
+      flexShrink: 0,
+      width: layout.touchTarget.minWidth,
+      height: layout.touchTarget.minHeight,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    scrollContent: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.xxl,
+      gap: spacing.xl,
+    },
+    profileCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: layout.radius.card,
+      padding: spacing.md,
+      gap: spacing.sm,
+    },
+    avatarContainer: {},
+    profileInfo: { flex: 1, gap: spacing.xxs },
+    userName: { ...typography.label },
+    municipalityRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xxs,
+    },
+    municipalityText: { ...typography.meta, flexShrink: 1 },
+    profileArrowCircle: {
+      width: 32,
+      height: 32,
+      borderRadius: layout.radius.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sectionContainer: { gap: spacing.sm },
+    sectionHeader: {
+      ...typography.label,
+      color: colors.muted,
+      paddingHorizontal: spacing.xxs,
+    },
+    itemsGroup: {
+      backgroundColor: colors.surface,
+      borderRadius: layout.radius.card,
+      overflow: 'hidden',
+    },
+    menuRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      minHeight: 64,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.divider,
+      gap: spacing.sm,
+    },
+    menuRowLast: { borderBottomWidth: 0 },
+    iconWrapper: {
+      width: 32,
+      height: 32,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    rowTextContainer: { flex: 1, gap: spacing.xxs },
+    rowLabel: { ...typography.body },
+    rowSubtitle: { ...typography.meta },
+    footerSection: { gap: spacing.md },
+    darkLogoutPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 54,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.ink,
+      gap: spacing.xs,
+    },
+    logoutPillText: { ...typography.label, color: colors.onAccent },
+  });

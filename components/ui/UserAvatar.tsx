@@ -1,10 +1,12 @@
+import { useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { AppText } from './AppText';
 import { useAuthStore } from '@/stores/authStore';
 import { useAvatarStore } from '@/stores/avatarStore';
-import { colors, layout } from '@/theme';
+import { layout } from '@/theme';
 import { assetUrl } from '@/services/http';
 import type { SessionUser } from '@/shared/contracts';
 
@@ -15,6 +17,8 @@ export function UserAvatar({
   size?: number;
   profile?: Pick<SessionUser, 'id' | 'name' | 'avatar'>;
 }) {
+  const styles = useThemedStyles(createStyles);
+
   const sessionUser = useAuthStore((state) => state.user);
   const user = profile || sessionUser;
   const localPhoto = useAvatarStore((state) =>
@@ -60,13 +64,14 @@ export function UserAvatar({
     </View>
   );
 }
-const styles = StyleSheet.create({
-  frame: {
-    borderRadius: layout.radius.pill,
-    overflow: 'hidden',
-    backgroundColor: colors.surfaceSubdued,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image: { width: '100%', height: '100%' },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    frame: {
+      borderRadius: layout.radius.pill,
+      overflow: 'hidden',
+      backgroundColor: colors.surfaceSubdued,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    image: { width: '100%', height: '100%' },
+  });

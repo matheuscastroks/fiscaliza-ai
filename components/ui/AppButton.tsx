@@ -1,3 +1,5 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React from 'react';
 import {
   TouchableOpacity,
@@ -6,7 +8,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { colors } from '@/theme/colors';
+
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { AppText } from './AppText';
@@ -37,6 +39,9 @@ export const AppButton: React.FC<AppButtonProps> = ({
   accessibilityLabel,
   ...rest
 }) => {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const isInteractive = !loading && !disabled;
 
   const getContainerStyle = () => {
@@ -53,15 +58,15 @@ export const AppButton: React.FC<AppButtonProps> = ({
     }
   };
 
-  const getTextColor = (): keyof typeof colors => {
+  const getTextColor = (): keyof ThemeColors => {
     if (disabled) return 'subtle';
     switch (variant) {
       case 'primary':
-        return 'white';
+        return 'onAccent';
       case 'secondary':
         return 'ink';
       case 'destructive':
-        return 'white';
+        return 'onDestructive';
       case 'quiet':
       default:
         return 'accent';
@@ -89,7 +94,9 @@ export const AppButton: React.FC<AppButtonProps> = ({
           size="small"
           color={
             variant === 'primary' || variant === 'destructive'
-              ? colors.white
+              ? variant === 'primary'
+                ? colors.onAccent
+                : colors.onDestructive
               : colors.ink
           }
         />
@@ -105,42 +112,43 @@ export const AppButton: React.FC<AppButtonProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  baseContainer: {
-    minHeight: 54,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: layout.radius.button,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  primaryContainer: {
-    backgroundColor: colors.accent,
-  },
-  secondaryContainer: {
-    backgroundColor: colors.surface,
-    borderWidth: layout.borderWidth.hairline,
-    borderColor: colors.border,
-  },
-  destructiveContainer: {
-    backgroundColor: colors.risk,
-  },
-  quietContainer: {
-    backgroundColor: 'transparent',
-  },
-  disabledContainer: {
-    backgroundColor: colors.surfaceSubdued,
-    borderColor: colors.border,
-    borderWidth: layout.borderWidth.hairline,
-    opacity: 0.6,
-  },
-  contentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconMargin: {
-    marginRight: spacing.xs,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    baseContainer: {
+      minHeight: 54,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderRadius: layout.radius.button,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row',
+    },
+    primaryContainer: {
+      backgroundColor: colors.accent,
+    },
+    secondaryContainer: {
+      backgroundColor: colors.surface,
+      borderWidth: layout.borderWidth.hairline,
+      borderColor: colors.border,
+    },
+    destructiveContainer: {
+      backgroundColor: colors.destructive,
+    },
+    quietContainer: {
+      backgroundColor: 'transparent',
+    },
+    disabledContainer: {
+      backgroundColor: colors.surfaceSubdued,
+      borderColor: colors.border,
+      borderWidth: layout.borderWidth.hairline,
+      opacity: 0.6,
+    },
+    contentRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    iconMargin: {
+      marginRight: spacing.xs,
+    },
+  });

@@ -1,9 +1,10 @@
+import { useTheme } from '@/theme/useTheme';
 import React from 'react';
 import { Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
-import { colors, spacing } from '@/theme';
+import { spacing } from '@/theme';
 
 export function ContributionActions({
   camera = false,
@@ -12,6 +13,8 @@ export function ContributionActions({
   camera?: boolean;
   onChoose?: () => void;
 }) {
+  const { colors } = useTheme();
+
   return (
     <View style={{ gap: spacing.sm, width: '100%', alignSelf: 'stretch' }}>
       {(
@@ -68,7 +71,7 @@ export function ContributionActions({
               name={action.icon}
               size={24}
               color={
-                action.icon === 'camera-outline' ? colors.white : colors.ink
+                action.icon === 'camera-outline' ? colors.onAccent : colors.ink
               }
             />
           </View>

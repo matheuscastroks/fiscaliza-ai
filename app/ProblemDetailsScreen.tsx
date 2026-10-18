@@ -1,3 +1,4 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import { CityCarousel } from '@/features/city/CityCarousel';
 import { DeleteRecord } from '@/features/city/DeleteRecord';
 import { CommunityComment } from '@/features/city/CommunityComment';
@@ -9,7 +10,7 @@ import { goBack } from '@/utils/navigation';
 import React, { useState } from 'react';
 import { Image, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '@/theme/colors';
+
 import { spacing } from '@/theme/spacing';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
@@ -18,13 +19,16 @@ import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
 import { StatusText } from '@/components/occurrences/StatusText';
-import { QueryState, cityStyles } from '@/features/city/CityUI';
+import { QueryState, createCityStyles } from '@/features/city/CityUI';
 import { useCityQuery } from '@/features/city/useCityQuery';
 import { assetUrl, mutation } from '@/services/http';
 import { useAuthStore } from '@/stores/authStore';
 import { useProblemsStore } from '@/stores/problemsStore';
 import type { Occurrence } from '@/shared/contracts';
 export default function ProblemDetailsScreen() {
+  const { colors } = useTheme();
+  const cityStyles = useThemedStyles(createCityStyles);
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const path = '/occurrences/' + encodeURIComponent(id || '');
   const user = useAuthStore((s) => s.user);

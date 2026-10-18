@@ -1,7 +1,8 @@
+import { useTheme } from '@/theme/useTheme';
 import type { ReactNode } from 'react';
 import { Platform, View, useWindowDimensions } from 'react-native';
 import { BottomSheet, RNHostView } from '@expo/ui';
-import { colors, spacing } from '@/theme';
+import { spacing } from '@/theme';
 import { KeyboardAwareScrollView } from './KeyboardAwareScrollView';
 
 export function AppBottomSheet({
@@ -17,6 +18,8 @@ export function AppBottomSheet({
   busy?: boolean;
   scroll?: boolean;
 }) {
+  const { colors } = useTheme();
+
   const { width, height } = useWindowDimensions();
   return (
     <BottomSheet
@@ -26,6 +29,7 @@ export function AppBottomSheet({
       }}
       shouldDismissOnBackPress={!busy}
       shouldDismissOnClickOutside={!busy}
+      snapPoints={scroll && Platform.OS !== 'web' ? ['full'] : undefined}
       containerColor={colors.surface}
       contentPadding={{
         left: spacing.contentPadding,
@@ -33,11 +37,17 @@ export function AppBottomSheet({
         bottom: spacing.xl,
       }}
     >
-      <RNHostView matchContents={{ vertical: true }}>
+      <RNHostView
+        matchContents={
+          scroll && Platform.OS !== 'web' ? false : { vertical: true }
+        }
+      >
         {scroll ? (
           <KeyboardAwareScrollView
             style={{
-              maxHeight: height * 0.75,
+              ...(Platform.OS === 'web'
+                ? { maxHeight: height * 0.75 }
+                : { flex: 1 }),
               width:
                 Platform.OS === 'web'
                   ? '100%'

@@ -1,3 +1,5 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { EngagementStats } from './Engagement';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
@@ -5,7 +7,7 @@ import { StyleSheet, Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
-import { colors } from '@/theme/colors';
+
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -33,6 +35,9 @@ export function RecordCard({
   metrics?: { views: number; supports: number };
   featured?: boolean;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const [failedImage, setFailedImage] = useState<string>();
   const photo = Boolean(image && failedImage !== image);
   return (
@@ -103,7 +108,7 @@ export function RecordCard({
             <Ionicons
               name="arrow-forward"
               size={22}
-              color={photo ? colors.ink : colors.white}
+              color={photo ? colors.navigationOnSelection : colors.onAccent}
             />
           </View>
         </View>
@@ -112,46 +117,47 @@ export function RecordCard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    borderRadius: layout.radius.card,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
-  },
-  photo: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
-  },
-  photoSpace: { flexGrow: 1, minHeight: 96 },
-  content: { padding: spacing.lg, gap: spacing.xs },
-  scrim: { position: 'absolute', left: 0, right: 0, top: -100, bottom: 0 },
-  action: {
-    minHeight: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-  },
-  photoAction: {
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderRadius: layout.radius.pill,
-    paddingLeft: spacing.lg,
-    paddingRight: spacing.xxs,
-    paddingVertical: spacing.xxs,
-  },
-  arrow: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  photoArrow: { backgroundColor: colors.white },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      borderRadius: layout.radius.card,
+      backgroundColor: colors.surface,
+      overflow: 'hidden',
+    },
+    photo: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0,
+      width: '100%',
+      height: '100%',
+    },
+    photoSpace: { flexGrow: 1, minHeight: 96 },
+    content: { padding: spacing.lg, gap: spacing.xs },
+    scrim: { position: 'absolute', left: 0, right: 0, top: -100, bottom: 0 },
+    action: {
+      minHeight: 48,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+      marginTop: spacing.xs,
+    },
+    photoAction: {
+      backgroundColor: 'rgba(255,255,255,0.12)',
+      borderRadius: layout.radius.pill,
+      paddingLeft: spacing.lg,
+      paddingRight: spacing.xxs,
+      paddingVertical: spacing.xxs,
+    },
+    arrow: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: colors.ink,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    photoArrow: { backgroundColor: colors.white },
+  });

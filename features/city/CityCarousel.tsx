@@ -1,3 +1,5 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { useRef, useState, type ReactNode } from 'react';
 import {
   Animated,
@@ -10,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
-import { colors, layout, spacing } from '@/theme';
+import { layout, spacing } from '@/theme';
 
 /** Native horizontal scrolling with the next cards set back, like the approved reference. */
 export function CityCarousel<T extends { id: string }>({
@@ -24,6 +26,9 @@ export function CityCarousel<T extends { id: string }>({
   label: string;
   edgeToEdge?: boolean;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const { width } = useWindowDimensions();
   const [viewport, setViewport] = useState(
     Math.min(width, 760) - spacing.contentPadding * 2,
@@ -156,21 +161,22 @@ export function CityCarousel<T extends { id: string }>({
     </View>
   );
 }
-const styles = StyleSheet.create({
-  container: { gap: spacing.xxs },
-  controls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  arrows: { flexDirection: 'row', gap: spacing.xs },
-  arrow: {
-    width: layout.touchTarget.minWidth,
-    height: layout.touchTarget.minHeight,
-    borderRadius: layout.radius.pill,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  disabled: { opacity: 0.3 },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: { gap: spacing.xxs },
+    controls: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    arrows: { flexDirection: 'row', gap: spacing.xs },
+    arrow: {
+      width: layout.touchTarget.minWidth,
+      height: layout.touchTarget.minHeight,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    disabled: { opacity: 0.3 },
+  });

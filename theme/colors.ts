@@ -1,43 +1,82 @@
-/**
- * Paleta da referência fornecida pelo usuário: Instrument Sans, ônix e branco.
- */
-
-export const colors = {
-  // Superfícies e Fundos (Paleta #F5F6F7 da referência)
+/** Fiscaliza aí: semantic light/dark palettes. Photos and brand assets are never inverted. */
+export const lightColors = {
   canvas: '#F5F6F7',
   surface: '#FFFFFF',
   surfaceSubdued: '#ECEEF0',
-
-  // Tipografia e Conteúdo Factual (Ônix #212529 da referência)
   ink: '#212529',
   muted: '#60666C',
   subtle: '#676D73',
-
-  // Estrutura e Separação
   divider: '#E5E8EB',
   border: '#E5E8EB',
   borderActive: '#212529',
-
-  // Elementos de Destaque da Referência
   darkPill: '#212529',
-
-  // Ação e Navegação Territorial
   accent: '#212529',
   accentPressed: '#383D42',
   accentSoft: '#ECEEF0',
-
-  // Estados Semânticos de Ocorrência e Sistema
+  onAccent: '#FFFFFF',
+  onSelection: '#FFFFFF',
+  destructive: '#9E3431',
+  onDestructive: '#FFFFFF',
+  navigationSurface: '#212529',
+  navigationSelection: '#FFFFFF',
+  navigationOnSelection: '#212529',
+  navigationIcon: '#FFFFFF',
   risk: '#9E3431',
   riskSurface: '#FCEDEC',
   attention: '#835916',
   attentionSurface: '#F9F2E0',
   completed: '#236B50',
   completedSurface: '#E7F2EC',
-
-  // Neutro Operacional
+  // Fixed colors for photos, map pins, and assets. Use onAccent for action text.
   white: '#FFFFFF',
   black: '#000000',
   transparent: 'transparent',
+  scrim: 'rgba(0, 0, 0, 0.44)',
+  glass: 'rgba(255, 255, 255, 0.94)',
+  glassBorder: 'rgba(255, 255, 255, 0.72)',
+  shadow: '#000000',
 } as const;
 
-export type ThemeColors = typeof colors;
+export type ThemeColors = {
+  readonly [Key in keyof typeof lightColors]: string;
+};
+
+export const darkColors: ThemeColors = {
+  canvas: '#111315',
+  surface: '#1B1E21',
+  surfaceSubdued: '#282C30',
+  ink: '#F3F4F5',
+  muted: '#B7BDC3',
+  subtle: '#A8AFB6',
+  divider: '#343A40',
+  border: '#343A40',
+  borderActive: '#F3F4F5',
+  darkPill: '#F3F4F5',
+  accent: '#F3F4F5',
+  accentPressed: '#D3D8DD',
+  accentSoft: '#282C30',
+  onAccent: '#171A1D',
+  onSelection: '#171A1D',
+  destructive: '#9E3431',
+  onDestructive: '#FFFFFF',
+  navigationSurface: '#212529',
+  navigationSelection: '#FFFFFF',
+  navigationOnSelection: '#212529',
+  navigationIcon: '#FFFFFF',
+  risk: '#FFAAA5',
+  riskSurface: '#3C2325',
+  attention: '#EAC57E',
+  attentionSurface: '#352D1E',
+  completed: '#8ED5B1',
+  completedSurface: '#1E342A',
+  white: '#FFFFFF',
+  black: '#000000',
+  transparent: 'transparent',
+  scrim: 'rgba(0, 0, 0, 0.68)',
+  glass: 'rgba(27, 30, 33, 0.96)',
+  glassBorder: 'rgba(255, 255, 255, 0.12)',
+  shadow: '#000000',
+};
+
+/** @deprecated Use useTheme().colors in components and a colors factory argument in styles. */
+export const colors: ThemeColors = lightColors;

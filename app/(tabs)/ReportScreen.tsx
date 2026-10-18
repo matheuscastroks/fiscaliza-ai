@@ -1,3 +1,5 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { Ionicons } from '@expo/vector-icons';
 import { goBack } from '@/utils/navigation';
@@ -15,7 +17,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAuthStore } from '@/stores/authStore';
-import { colors } from '@/theme/colors';
+
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { AppScreen } from '@/components/ui/AppScreen';
@@ -44,6 +46,9 @@ export default function ReportScreen() {
   );
 }
 function ReportContent() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const { user } = useAuthStore();
   const insets = useSafeAreaInsets();
   const scroll = useRef<ScrollView>(null);
@@ -267,12 +272,12 @@ function ReportContent() {
                 }}
               >
                 {isAnalyzing ? (
-                  <ActivityIndicator color={colors.white} />
+                  <ActivityIndicator color={colors.onAccent} />
                 ) : (
                   <Ionicons
                     name="sparkles-outline"
                     size={24}
-                    color={colors.white}
+                    color={colors.onAccent}
                   />
                 )}
               </Pressable>
@@ -302,37 +307,38 @@ function ReportContent() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    backgroundColor: colors.canvas,
-  },
-  flex: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.contentPadding,
-    paddingBottom: spacing.xxl,
-  },
-  bottomBar: {
-    backgroundColor: colors.surface,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.contentPadding,
-    paddingVertical: spacing.md,
-    columnGap: spacing.sm,
-  },
-  backButton: {
-    flex: 1,
-  },
-  continueButton: {
-    flex: 2,
-  },
-  errorBox: {
-    padding: spacing.md,
-    backgroundColor: colors.riskSurface,
-    borderRadius: layout.radius.button,
-    marginVertical: spacing.sm,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    screen: {
+      backgroundColor: colors.canvas,
+    },
+    flex: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: spacing.contentPadding,
+      paddingBottom: spacing.xxl,
+    },
+    bottomBar: {
+      backgroundColor: colors.surface,
+    },
+    buttonRow: {
+      flexDirection: 'row',
+      paddingHorizontal: spacing.contentPadding,
+      paddingVertical: spacing.md,
+      columnGap: spacing.sm,
+    },
+    backButton: {
+      flex: 1,
+    },
+    continueButton: {
+      flex: 2,
+    },
+    errorBox: {
+      padding: spacing.md,
+      backgroundColor: colors.riskSurface,
+      borderRadius: layout.radius.button,
+      marginVertical: spacing.sm,
+    },
+  });

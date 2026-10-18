@@ -1,15 +1,18 @@
+import { useThemedStyles } from '@/theme/useTheme';
 import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
-import { QueryState, cityStyles } from '@/features/city/CityUI';
+import { QueryState, createCityStyles } from '@/features/city/CityUI';
 import { useCityQuery } from '@/features/city/useCityQuery';
 import { useAuthStore } from '@/stores/authStore';
 import type { Occurrence } from '@/shared/contracts';
 import { goBack } from '@/utils/navigation';
 export default function HistoryScreen() {
+  const cityStyles = useThemedStyles(createCityStyles);
+
   const user = useAuthStore((state) => state.user);
   const query = useCityQuery<Occurrence[]>('/occurrences');
   const items = (query.data || [])

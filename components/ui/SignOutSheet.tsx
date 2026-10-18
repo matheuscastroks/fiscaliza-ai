@@ -1,9 +1,10 @@
+import { useTheme } from '@/theme/useTheme';
 import { useState } from 'react';
 import { Platform, View, useWindowDimensions } from 'react-native';
 import { BottomSheet, RNHostView } from '@expo/ui';
 import { create } from 'zustand';
 import { useAuthStore } from '@/stores/authStore';
-import { colors, spacing } from '@/theme';
+import { spacing } from '@/theme';
 import { AppText } from './AppText';
 import { AppButton } from './AppButton';
 
@@ -13,6 +14,8 @@ export const useSignOutSheet = create<{
 }>((set) => ({ open: false, setOpen: (open) => set({ open }) }));
 
 export function SignOutSheet() {
+  const { colors } = useTheme();
+
   const { open, setOpen } = useSignOutSheet();
   const [busy, setBusy] = useState(false);
   const { width } = useWindowDimensions();

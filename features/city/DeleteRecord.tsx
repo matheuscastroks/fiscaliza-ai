@@ -1,3 +1,4 @@
+import { useTheme } from '@/theme/useTheme';
 import React, { useState } from 'react';
 import { View, Platform, useWindowDimensions } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -10,7 +11,7 @@ import { canDeleteRecord } from '@/shared/record-deletion';
 import type { CivicItem, Occurrence } from '@/shared/contracts';
 import { goBack } from '@/utils/navigation';
 import { spacing } from '@/theme/spacing';
-import { colors } from '@/theme/colors';
+
 import { BottomSheet, RNHostView } from '@expo/ui';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -21,6 +22,8 @@ export function DeleteRecord({
   item: Occurrence | CivicItem;
   path: string;
 }) {
+  const { colors } = useTheme();
+
   const user = useAuthStore((state) => state.user);
   const { width } = useWindowDimensions();
   const [confirming, setConfirming] = useState(false);

@@ -1,9 +1,11 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { UserAvatar } from './UserAvatar';
 import { useAuthStore } from '@/stores/authStore';
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '@/theme/colors';
+
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { AppText } from './AppText';
@@ -24,6 +26,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   rightElement,
   overlay = false,
 }) => {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const user = useAuthStore((state) => state.user);
   return (
     <View
@@ -80,44 +85,45 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 8,
-    zIndex: 2,
-    backgroundColor: colors.transparent,
-  },
-  container: {
-    paddingHorizontal: spacing.contentPadding,
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.sm,
-    backgroundColor: colors.canvas,
-    borderBottomWidth: 0,
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: layout.touchTarget.minHeight,
-    gap: spacing.sm,
-  },
-  // Botões circulares brancos com sombra sutil da referência
-  circleButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  titleArea: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  rightArea: {
-    marginLeft: spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    overlay: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 8,
+      zIndex: 2,
+      backgroundColor: colors.transparent,
+    },
+    container: {
+      paddingHorizontal: spacing.contentPadding,
+      paddingTop: spacing.xs,
+      paddingBottom: spacing.sm,
+      backgroundColor: colors.canvas,
+      borderBottomWidth: 0,
+    },
+    topRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      minHeight: layout.touchTarget.minHeight,
+      gap: spacing.sm,
+    },
+    // Botões circulares brancos com sombra sutil da referência
+    circleButton: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    titleArea: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    rightArea: {
+      marginLeft: spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+  });

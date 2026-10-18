@@ -1,4 +1,6 @@
-import { colors, layout, spacing } from '@/theme';
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
+import { layout, spacing } from '@/theme';
 import React, { useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import * as Location from 'expo-location';
@@ -47,6 +49,9 @@ export function LocationStep({
   error,
   heading = 'Onde fica o problema?',
 }: Props) {
+  const { mode } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [manual, setManual] = useState(false);
@@ -97,6 +102,7 @@ export function LocationStep({
       {NativeMap && (
         <View collapsable={false} style={styles.mapFrame}>
           <NativeMap
+            userInterfaceStyle={mode}
             style={styles.map}
             region={
               selected
@@ -212,11 +218,12 @@ export function LocationStep({
   );
 }
 
-const styles = StyleSheet.create({
-  mapFrame: {
-    borderRadius: layout.radius.card,
-    overflow: 'hidden',
-    backgroundColor: colors.surfaceSubdued,
-  },
-  map: { height: 260, width: '100%', borderRadius: layout.radius.card },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    mapFrame: {
+      borderRadius: layout.radius.card,
+      overflow: 'hidden',
+      backgroundColor: colors.surfaceSubdued,
+    },
+    map: { height: 260, width: '100%', borderRadius: layout.radius.card },
+  });

@@ -1,3 +1,4 @@
+import { useThemedStyles } from '@/theme/useTheme';
 import { ExecutionProgress } from '@/features/city/CivicCard';
 import { DeleteRecord } from '@/features/city/DeleteRecord';
 import { CommunityComment } from '@/features/city/CommunityComment';
@@ -18,7 +19,7 @@ import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
 import {
   QueryState,
-  cityStyles,
+  createCityStyles,
   kindLabel,
   statusLabel,
 } from '@/features/city/CityUI';
@@ -26,6 +27,8 @@ import { useCityQuery } from '@/features/city/useCityQuery';
 import { assetUrl, mutation } from '@/services/http';
 import type { CivicItem } from '@/shared/contracts';
 export default function CivicDetailsScreen() {
+  const cityStyles = useThemedStyles(createCityStyles);
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const path = '/civic-items/' + encodeURIComponent(id || '');
   const query = useCityQuery<CivicItem>(path);

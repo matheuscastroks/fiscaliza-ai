@@ -1,10 +1,13 @@
+import { useTheme } from '@/theme/useTheme';
 import { Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import type { Consultation, Proposal } from '@/shared/contracts';
-import { colors, spacing } from '@/theme';
+import { spacing } from '@/theme';
 
 export function ProposalStages({ status }: { status: Proposal['status'] }) {
+  const { colors } = useTheme();
+
   const current =
     status === 'submitted' ? 0 : status === 'under_review' ? 1 : 2;
   return (
@@ -42,6 +45,8 @@ export function BallotOption({
   closed: boolean;
   onSelect: () => void;
 }) {
+  const { colors } = useTheme();
+
   const checked = selected === index;
   const total = item.answerCounts.reduce((sum, count) => sum + count, 0);
   const count = item.answerCounts[index] || 0;

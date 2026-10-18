@@ -1,3 +1,6 @@
+import { SlidingTabs } from '@/components/ui/SlidingTabs';
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -12,7 +15,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Problem } from '@/data/mockData';
 import { useProblemsStore } from '@/stores/problemsStore';
 import { useAuthStore } from '@/stores/authStore';
-import { colors } from '@/theme/colors';
+
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { AppScreen } from '@/components/ui/AppScreen';
@@ -32,6 +35,9 @@ const STATUS_FILTERS: { id: StatusFilterOption; label: string }[] = [
 ];
 
 export default function ProblemsListScreen() {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const municipality = useAuthStore((state) => state.user?.municipality);
   const { problems, loadProblems, isLoading } = useProblemsStore();
   const [sortOrder, setSortOrder] = useState<'recent' | 'votes'>('recent');
@@ -112,31 +118,17 @@ export default function ProblemsListScreen() {
 
       {/* Linha de Filtros e Ordenação */}
       <View style={styles.filterRow}>
-        <View style={styles.chipsGroup}>
-          {STATUS_FILTERS.map((item) => {
-            const isSelected = statusFilter === item.id;
-            return (
-              <TouchableOpacity
-                key={item.id}
-                style={[
-                  styles.filterChip,
-                  isSelected && styles.filterChipSelected,
-                ]}
-                onPress={() => setStatusFilter(item.id)}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityState={{ selected: isSelected }}
-              >
-                <AppText
-                  variant="caption"
-                  color={isSelected ? 'white' : 'muted'}
-                  style={styles.chipText}
-                >
-                  {item.label}
-                </AppText>
-              </TouchableOpacity>
-            );
-          })}
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <SlidingTabs
+            edgeToEdge={false}
+            label="Filtrar ocorrências"
+            options={STATUS_FILTERS.map((option) => ({
+              value: option.id,
+              label: option.label,
+            }))}
+            value={statusFilter}
+            onChange={(value) => setStatusFilter(value as StatusFilterOption)}
+          />
         </View>
 
         <TouchableOpacity
@@ -204,108 +196,109 @@ export default function ProblemsListScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    backgroundColor: colors.canvas,
-  },
-  header: {
-    paddingHorizontal: spacing.contentPadding,
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.xs,
-    backgroundColor: colors.surface,
-  },
-  searchContainer: {
-    paddingHorizontal: spacing.contentPadding,
-    paddingVertical: spacing.xs,
-    backgroundColor: colors.surface,
-  },
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceSubdued,
-    borderWidth: layout.borderWidth.hairline,
-    borderColor: colors.divider,
-    borderRadius: layout.radius.button,
-    paddingHorizontal: spacing.sm,
-    minHeight: layout.touchTarget.minHeight,
-  },
-  searchIcon: {
-    marginRight: spacing.xs,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    color: colors.ink,
-    paddingVertical: spacing.xs,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.contentPadding,
-    paddingVertical: spacing.xs,
-    backgroundColor: colors.surface,
-  },
-  chipsGroup: {
-    flexDirection: 'row',
-    columnGap: spacing.xs,
-    flex: 1,
-  },
-  filterChip: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xxs,
-    borderRadius: layout.radius.pill,
-    backgroundColor: colors.surfaceSubdued,
-    borderWidth: layout.borderWidth.hairline,
-    borderColor: colors.divider,
-  },
-  filterChipSelected: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
-  },
-  chipText: {
-    fontWeight: '500',
-  },
-  sortButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.xxs,
-    paddingHorizontal: spacing.xs,
-    marginLeft: spacing.xs,
-  },
-  sortText: {
-    marginLeft: spacing.xxs,
-    fontWeight: '500',
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingText: {
-    marginTop: spacing.xs,
-  },
-  emptyContainer: {
-    flexGrow: 1,
-  },
-  emptyState: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xxl,
-    minHeight: 280,
-  },
-  emptyTitle: {
-    marginTop: spacing.sm,
-    marginBottom: spacing.xxs,
-  },
-  emptyDescription: {
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  clearFiltersButton: {
-    marginTop: spacing.md,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    screen: {
+      backgroundColor: colors.canvas,
+    },
+    header: {
+      paddingHorizontal: spacing.contentPadding,
+      paddingTop: spacing.xs,
+      paddingBottom: spacing.xs,
+      backgroundColor: colors.surface,
+    },
+    searchContainer: {
+      paddingHorizontal: spacing.contentPadding,
+      paddingVertical: spacing.xs,
+      backgroundColor: colors.surface,
+    },
+    searchBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surfaceSubdued,
+      borderWidth: layout.borderWidth.hairline,
+      borderColor: colors.divider,
+      borderRadius: layout.radius.button,
+      paddingHorizontal: spacing.sm,
+      minHeight: layout.touchTarget.minHeight,
+    },
+    searchIcon: {
+      marginRight: spacing.xs,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 15,
+      color: colors.ink,
+      paddingVertical: spacing.xs,
+    },
+    filterRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: spacing.contentPadding,
+      paddingVertical: spacing.xs,
+      backgroundColor: colors.surface,
+    },
+    chipsGroup: {
+      flexDirection: 'row',
+      columnGap: spacing.xs,
+      flex: 1,
+    },
+    filterChip: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xxs,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surfaceSubdued,
+      borderWidth: layout.borderWidth.hairline,
+      borderColor: colors.divider,
+    },
+    filterChipSelected: {
+      backgroundColor: colors.ink,
+      borderColor: colors.ink,
+    },
+    chipText: {
+      fontWeight: '500',
+    },
+    sortButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.xxs,
+      paddingHorizontal: spacing.xs,
+      marginLeft: spacing.xs,
+    },
+    sortText: {
+      marginLeft: spacing.xxs,
+      fontWeight: '500',
+    },
+    loadingContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    loadingText: {
+      marginTop: spacing.xs,
+    },
+    emptyContainer: {
+      flexGrow: 1,
+    },
+    emptyState: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing.xxl,
+      minHeight: 280,
+    },
+    emptyTitle: {
+      marginTop: spacing.sm,
+      marginBottom: spacing.xxs,
+    },
+    emptyDescription: {
+      textAlign: 'center',
+      lineHeight: 20,
+    },
+    clearFiltersButton: {
+      marginTop: spacing.md,
+      paddingVertical: spacing.xs,
+      paddingHorizontal: spacing.md,
+    },
+  });

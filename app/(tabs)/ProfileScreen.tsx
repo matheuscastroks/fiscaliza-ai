@@ -1,3 +1,5 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { goBack } from '@/utils/navigation';
 import { useState } from 'react';
 import {
@@ -20,8 +22,8 @@ import { useSignOutSheet } from '@/components/ui/SignOutSheet';
 import { useAuthStore } from '@/stores/authStore';
 import { useAvatarStore } from '@/stores/avatarStore';
 import { useCityQuery } from '@/features/city/useCityQuery';
-import { QueryState, cityStyles } from '@/features/city/CityUI';
-import { colors, layout, spacing } from '@/theme';
+import { QueryState, createCityStyles } from '@/features/city/CityUI';
+import { layout, spacing } from '@/theme';
 import type { Occurrence, CivicItem } from '@/shared/contracts';
 
 function ProfileLink({
@@ -35,6 +37,9 @@ function ProfileLink({
   href: Href;
   last?: boolean;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -53,6 +58,10 @@ function ProfileLink({
 }
 
 export default function ProfileScreen() {
+  const { colors } = useTheme();
+  const cityStyles = useThemedStyles(createCityStyles);
+  const styles = useThemedStyles(createStyles);
+
   const { user } = useAuthStore();
   const [picking, setPicking] = useState(false);
   const [photoError, setPhotoError] = useState('');
@@ -162,7 +171,11 @@ export default function ProfileScreen() {
           >
             <UserAvatar size={80} />
             <View style={styles.camera}>
-              <Ionicons name="camera-outline" size={20} color={colors.white} />
+              <Ionicons
+                name="camera-outline"
+                size={20}
+                color={colors.onAccent}
+              />
             </View>
           </Pressable>
           <View style={styles.name}>
@@ -274,77 +287,78 @@ export default function ProfileScreen() {
     </AppScreen>
   );
 }
-const styles = StyleSheet.create({
-  identity: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.sm,
-  },
-  photoButton: { position: 'relative', padding: spacing.xxs },
-  camera: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    width: 36,
-    height: 36,
-    borderRadius: layout.radius.pill,
-    backgroundColor: colors.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: colors.canvas,
-  },
-  name: {
-    flex: 1,
-    minWidth: 0,
-    gap: spacing.xxs,
-  },
-  section: { gap: spacing.sm },
-  municipality: {
-    padding: spacing.lg,
-    gap: spacing.lg,
-    backgroundColor: colors.surface,
-    borderRadius: layout.radius.card,
-  },
-  municipalityHeading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  locationIcon: {
-    width: layout.touchTarget.minWidth,
-    height: layout.touchTarget.minHeight,
-    borderRadius: layout.radius.pill,
-    backgroundColor: colors.canvas,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  flex: { flex: 1, gap: spacing.xxs },
-  stats: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  stat: {
-    flex: 1,
-    minWidth: 90,
-    padding: spacing.sm,
-    gap: spacing.xs,
-    backgroundColor: colors.surface,
-    borderRadius: layout.radius.panel,
-  },
-  links: {
-    backgroundColor: colors.surface,
-    borderRadius: layout.radius.card,
-    overflow: 'hidden',
-  },
-  link: {
-    minHeight: 64,
-    padding: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  divider: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.divider,
-  },
-  pressed: { backgroundColor: colors.surfaceSubdued },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    identity: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingVertical: spacing.sm,
+    },
+    photoButton: { position: 'relative', padding: spacing.xxs },
+    camera: {
+      position: 'absolute',
+      right: 0,
+      bottom: 0,
+      width: 36,
+      height: 36,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.ink,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 3,
+      borderColor: colors.canvas,
+    },
+    name: {
+      flex: 1,
+      minWidth: 0,
+      gap: spacing.xxs,
+    },
+    section: { gap: spacing.sm },
+    municipality: {
+      padding: spacing.lg,
+      gap: spacing.lg,
+      backgroundColor: colors.surface,
+      borderRadius: layout.radius.card,
+    },
+    municipalityHeading: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    locationIcon: {
+      width: layout.touchTarget.minWidth,
+      height: layout.touchTarget.minHeight,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.canvas,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    flex: { flex: 1, gap: spacing.xxs },
+    stats: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+    stat: {
+      flex: 1,
+      minWidth: 90,
+      padding: spacing.sm,
+      gap: spacing.xs,
+      backgroundColor: colors.surface,
+      borderRadius: layout.radius.panel,
+    },
+    links: {
+      backgroundColor: colors.surface,
+      borderRadius: layout.radius.card,
+      overflow: 'hidden',
+    },
+    link: {
+      minHeight: 64,
+      padding: spacing.md,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    divider: {
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.divider,
+    },
+    pressed: { backgroundColor: colors.surfaceSubdued },
+  });

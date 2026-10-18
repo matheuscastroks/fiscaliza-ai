@@ -1,3 +1,5 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
@@ -18,7 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppScreen } from './AppScreen';
 import { AppHeader } from './AppHeader';
 import { AppText } from './AppText';
-import { colors } from '@/theme/colors';
+
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -42,6 +44,9 @@ export function DetailSheet({
   headerAction?: React.ReactNode;
   onRefresh?: () => Promise<unknown>;
 }) {
+  const { colors, isDark } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const { height } = useWindowDimensions();
   const [refreshing, setRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
@@ -50,7 +55,7 @@ export function DetailSheet({
   const resting = photo ? Math.min(320, Math.max(180, height * 0.32)) : 8;
   const minimum = photo ? insets.top : 0;
   const [expansion, setExpansion] = useState({ resting, expanded: false });
-  const expanded = expansion.resting === resting && expansion.expanded;
+  const expanded = expansion.expanded;
   const [motion] = useState(
     () => new SheetMotion(resting, minimum, setExpansion),
   );
@@ -71,9 +76,9 @@ export function DetailSheet({
   }, [motion]);
   useFocusEffect(
     useCallback(() => {
-      setStatusBarStyle(photo && !expanded ? 'light' : 'dark');
-      return () => setStatusBarStyle('dark');
-    }, [photo, expanded]),
+      setStatusBarStyle((photo && !expanded) || isDark ? 'light' : 'dark');
+      return () => setStatusBarStyle(isDark ? 'light' : 'dark');
+    }, [photo, expanded, isDark]),
   );
   return (
     <AppScreen
@@ -176,6 +181,9 @@ export function DetailSection({
   title: string;
   children: React.ReactNode;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const [open, setOpen] = useState(true);
   return (
     <View style={styles.section}>
@@ -244,9 +252,11 @@ class SheetMotion {
     });
   }
   configure(resting: number, minimum: number) {
+    const expanded = this.current < (this.resting + this.minimum) / 2;
     this.resting = resting;
-    this.current = resting;
-    this.top.setValue(resting);
+    this.minimum = minimum;
+    this.current = expanded ? minimum : resting;
+    this.top.setValue(this.current);
   }
   setReduced(value: boolean) {
     this.reduced = value;
@@ -268,47 +278,58 @@ class SheetMotion {
   }
 }
 
-const styles = StyleSheet.create({
-  stage: { flex: 1, overflow: 'hidden' },
-  hero: { width: '100%' },
-  backArea: { position: 'absolute', left: 0, right: 0, height: 72, zIndex: 3 },
-  sheet: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.canvas,
-    borderTopLeftRadius: layout.radius.sheet,
-    borderTopRightRadius: layout.radius.sheet,
-    overflow: 'hidden',
-  },
-  handleTarget: { height: 48, alignItems: 'center', justifyContent: 'center' },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: colors.divider,
-    borderRadius: 2,
-  },
-  content: {
-    paddingHorizontal: spacing.contentPadding,
-    gap: spacing.lg,
-    flexGrow: 1,
-  },
-  footer: {
-    backgroundColor: colors.canvas,
-    paddingHorizontal: spacing.contentPadding,
-    paddingTop: spacing.sm,
-  },
-  section: {
-    backgroundColor: colors.surface,
-    borderRadius: layout.radius.card,
-    padding: spacing.lg,
-    gap: spacing.sm,
-  },
-  sectionHeader: {
-    minHeight: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    stage: { flex: 1, overflow: 'hidden' },
+    hero: { width: '100%' },
+    backArea: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      height: 72,
+      zIndex: 3,
+    },
+    sheet: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: colors.canvas,
+      borderTopLeftRadius: layout.radius.sheet,
+      borderTopRightRadius: layout.radius.sheet,
+      overflow: 'hidden',
+    },
+    handleTarget: {
+      height: 48,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    handle: {
+      width: 40,
+      height: 4,
+      backgroundColor: colors.divider,
+      borderRadius: 2,
+    },
+    content: {
+      paddingHorizontal: spacing.contentPadding,
+      gap: spacing.lg,
+      flexGrow: 1,
+    },
+    footer: {
+      backgroundColor: colors.canvas,
+      paddingHorizontal: spacing.contentPadding,
+      paddingTop: spacing.sm,
+    },
+    section: {
+      backgroundColor: colors.surface,
+      borderRadius: layout.radius.card,
+      padding: spacing.lg,
+      gap: spacing.sm,
+    },
+    sectionHeader: {
+      minHeight: 48,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+  });

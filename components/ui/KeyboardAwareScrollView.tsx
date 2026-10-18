@@ -66,50 +66,66 @@ export const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
         const container = scroll.current;
         if (!input || !container || !input.isFocused()) return;
 
-        container.getNativeScrollRef()?.measureInWindow((_x, viewportY, _width, viewportHeight) => {
-          if (scroll.current !== container || focusedInput.current !== input) return;
-          let visibleBottom = viewportY + viewportHeight;
-          if (Platform.OS === 'web') {
-            // Mobile browsers resize the visual viewport independently of layout.
-            const viewport = window.visualViewport;
-            visibleBottom = Math.min(
-              visibleBottom,
-              viewport ? viewport.offsetTop + viewport.height : window.innerHeight,
-            );
-          } else if (keyboardTop.current !== null) {
-            visibleBottom = Math.min(visibleBottom, keyboardTop.current);
-          }
-          const overlap = Math.max(0, viewportY + viewportHeight - visibleBottom);
-          setKeyboardOverlap((previous) =>
-            Math.abs(previous - overlap) < 1 ? previous : overlap,
-          );
-
-          input.measureInWindow((_inputX, inputY, _inputWidth, inputHeight) => {
-            if (focusedInput.current !== input || !input.isFocused()) return;
-            const availableHeight = visibleBottom - viewportY - FIELD_CLEARANCE * 2;
-            if (availableHeight <= 0) return;
-            // For very tall multiline fields, keep their top accessible.
-            const bottom = inputY + Math.min(inputHeight, availableHeight);
-            const delta = bottom > visibleBottom - FIELD_CLEARANCE
-              ? bottom - visibleBottom + FIELD_CLEARANCE
-              : inputY < viewportY + FIELD_CLEARANCE
-                ? inputY - viewportY - FIELD_CLEARANCE
-                : 0;
-            if (Math.abs(delta) > 1) {
-              container.scrollTo({
-                y: Math.max(0, scrollOffset.current + delta),
-                animated: false,
-              });
+        container
+          .getNativeScrollRef()
+          ?.measureInWindow((_x, viewportY, _width, viewportHeight) => {
+            if (scroll.current !== container || focusedInput.current !== input)
+              return;
+            let visibleBottom = viewportY + viewportHeight;
+            if (Platform.OS === 'web') {
+              // Mobile browsers resize the visual viewport independently of layout.
+              const viewport = window.visualViewport;
+              visibleBottom = Math.min(
+                visibleBottom,
+                viewport
+                  ? viewport.offsetTop + viewport.height
+                  : window.innerHeight,
+              );
+            } else if (keyboardTop.current !== null) {
+              visibleBottom = Math.min(visibleBottom, keyboardTop.current);
             }
+            const overlap = Math.max(
+              0,
+              viewportY + viewportHeight - visibleBottom,
+            );
+            setKeyboardOverlap((previous) =>
+              Math.abs(previous - overlap) < 1 ? previous : overlap,
+            );
+
+            input.measureInWindow(
+              (_inputX, inputY, _inputWidth, inputHeight) => {
+                if (focusedInput.current !== input || !input.isFocused())
+                  return;
+                const availableHeight =
+                  visibleBottom - viewportY - FIELD_CLEARANCE * 2;
+                if (availableHeight <= 0) return;
+                // For very tall multiline fields, keep their top accessible.
+                const bottom = inputY + Math.min(inputHeight, availableHeight);
+                const delta =
+                  bottom > visibleBottom - FIELD_CLEARANCE
+                    ? bottom - visibleBottom + FIELD_CLEARANCE
+                    : inputY < viewportY + FIELD_CLEARANCE
+                      ? inputY - viewportY - FIELD_CLEARANCE
+                      : 0;
+                if (Math.abs(delta) > 1) {
+                  container.scrollTo({
+                    y: Math.max(0, scrollOffset.current + delta),
+                    animated: false,
+                  });
+                }
+              },
+            );
           });
-        });
       });
     }, []);
 
-    const focus = useCallback((input: TextInput) => {
-      focusedInput.current = input;
-      revealFocusedInput();
-    }, [revealFocusedInput]);
+    const focus = useCallback(
+      (input: TextInput) => {
+        focusedInput.current = input;
+        revealFocusedInput();
+      },
+      [revealFocusedInput],
+    );
 
     const blur = useCallback((input: TextInput) => {
       if (focusedInput.current === input) focusedInput.current = null;
@@ -123,9 +139,11 @@ export const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
           else setKeyboardOverlap(0);
         };
         viewport?.addEventListener('resize', update);
+        viewport?.addEventListener('scroll', update);
         window.addEventListener('resize', update);
         return () => {
           viewport?.removeEventListener('resize', update);
+          viewport?.removeEventListener('scroll', update);
           window.removeEventListener('resize', update);
           if (frame.current !== null) cancelAnimationFrame(frame.current);
         };
@@ -152,10 +170,11 @@ export const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
       };
     }, [revealFocusedInput]);
 
-    const basePadding = StyleSheet.flatten(contentContainerStyle)?.paddingBottom
-      ?? StyleSheet.flatten(contentContainerStyle)?.paddingVertical
-      ?? StyleSheet.flatten(contentContainerStyle)?.padding
-      ?? 0;
+    const basePadding =
+      StyleSheet.flatten(contentContainerStyle)?.paddingBottom ??
+      StyleSheet.flatten(contentContainerStyle)?.paddingVertical ??
+      StyleSheet.flatten(contentContainerStyle)?.padding ??
+      0;
 
     return (
       <KeyboardScrollContext.Provider value={{ focus, blur }}>
@@ -167,8 +186,10 @@ export const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
           contentContainerStyle={[
             contentContainerStyle,
             keyboardOverlap > 0 && {
-              paddingBottom: (typeof basePadding === 'number' ? basePadding : 0)
-                + keyboardOverlap + FIELD_CLEARANCE,
+              paddingBottom:
+                (typeof basePadding === 'number' ? basePadding : 0) +
+                keyboardOverlap +
+                FIELD_CLEARANCE,
             },
           ]}
           onLayout={(event) => {

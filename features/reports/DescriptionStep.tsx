@@ -1,9 +1,11 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Problem } from '@/data/mockData';
-import { colors } from '@/theme/colors';
+
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { AppText } from '@/components/ui/AppText';
@@ -53,6 +55,9 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
   onRemoveImage,
   error,
 }) => {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={styles.container}>
       <AppText variant="sectionTitle" color="ink" style={styles.heading}>
@@ -137,7 +142,7 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
                   <Ionicons
                     name="close-circle"
                     size={18}
-                    color={colors.white}
+                    color={colors.onAccent}
                   />
                 </TouchableOpacity>
               </View>
@@ -161,91 +166,92 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: spacing.md,
-  },
-  heading: {
-    marginBottom: spacing.xxs,
-  },
-  subheading: {
-    marginBottom: spacing.lg,
-    lineHeight: 22,
-  },
-  multilineInput: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-    paddingTop: spacing.sm,
-  },
-  selectorSection: {
-    marginBottom: spacing.lg,
-  },
-  selectorLabel: {
-    marginBottom: spacing.xs,
-  },
-  chipsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-  },
-  selectorChip: {
-    minHeight: 48,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: layout.radius.button,
-    backgroundColor: colors.surface,
-    borderWidth: layout.borderWidth.hairline,
-    borderColor: colors.divider,
-  },
-  selectorChipSelected: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
-  },
-  chipText: {
-    fontWeight: '500',
-  },
-  photoSection: {
-    marginBottom: spacing.xl,
-  },
-  addPhotoButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: layout.borderWidth.hairline,
-    borderStyle: 'solid',
-    borderColor: colors.accent,
-    borderRadius: layout.radius.button,
-    paddingVertical: spacing.lg,
-    backgroundColor: colors.surfaceSubdued,
-  },
-  addPhotoText: {
-    marginLeft: spacing.xs,
-  },
-  imagePreviewContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  imageWrapper: {
-    position: 'relative',
-    borderRadius: layout.radius.button,
-    overflow: 'hidden',
-  },
-  previewImage: {
-    width: 100,
-    height: 100,
-    borderRadius: layout.radius.button,
-  },
-  removeImageButton: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    backgroundColor: colors.ink,
-    borderRadius: layout.radius.pill,
-    width: 48,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      paddingVertical: spacing.md,
+    },
+    heading: {
+      marginBottom: spacing.xxs,
+    },
+    subheading: {
+      marginBottom: spacing.lg,
+      lineHeight: 22,
+    },
+    multilineInput: {
+      minHeight: 80,
+      textAlignVertical: 'top',
+      paddingTop: spacing.sm,
+    },
+    selectorSection: {
+      marginBottom: spacing.lg,
+    },
+    selectorLabel: {
+      marginBottom: spacing.xs,
+    },
+    chipsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.xs,
+    },
+    selectorChip: {
+      minHeight: 48,
+      justifyContent: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs,
+      borderRadius: layout.radius.button,
+      backgroundColor: colors.surface,
+      borderWidth: layout.borderWidth.hairline,
+      borderColor: colors.divider,
+    },
+    selectorChipSelected: {
+      backgroundColor: colors.ink,
+      borderColor: colors.ink,
+    },
+    chipText: {
+      fontWeight: '500',
+    },
+    photoSection: {
+      marginBottom: spacing.xl,
+    },
+    addPhotoButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: layout.borderWidth.hairline,
+      borderStyle: 'solid',
+      borderColor: colors.accent,
+      borderRadius: layout.radius.button,
+      paddingVertical: spacing.lg,
+      backgroundColor: colors.surfaceSubdued,
+    },
+    addPhotoText: {
+      marginLeft: spacing.xs,
+    },
+    imagePreviewContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    imageWrapper: {
+      position: 'relative',
+      borderRadius: layout.radius.button,
+      overflow: 'hidden',
+    },
+    previewImage: {
+      width: 100,
+      height: 100,
+      borderRadius: layout.radius.button,
+    },
+    removeImageButton: {
+      position: 'absolute',
+      top: 4,
+      right: 4,
+      backgroundColor: colors.ink,
+      borderRadius: layout.radius.pill,
+      width: 48,
+      height: 48,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });

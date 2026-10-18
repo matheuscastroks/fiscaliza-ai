@@ -1,3 +1,4 @@
+import { useThemedStyles } from '@/theme/useTheme';
 import { goBack } from '@/utils/navigation';
 import React from 'react';
 import { Image, ScrollView, View } from 'react-native';
@@ -8,7 +9,7 @@ import { AppText } from '@/components/ui/AppText';
 import { StatusText } from '@/components/occurrences/StatusText';
 import {
   QueryState,
-  cityStyles,
+  createCityStyles,
   kindLabel,
   statusLabel,
 } from '@/features/city/CityUI';
@@ -18,6 +19,8 @@ import type { CivicItem, Occurrence } from '@/shared/contracts';
 
 /** Historical reads have their own identity-authorized API; no mutation controls. */
 export default function HistoricalDetailsScreen() {
+  const cityStyles = useThemedStyles(createCityStyles);
+
   const { id, kind } = useLocalSearchParams<{ id?: string; kind?: string }>();
   const valid = Boolean(
     id && (kind === 'occurrences' || kind === 'civic-items'),

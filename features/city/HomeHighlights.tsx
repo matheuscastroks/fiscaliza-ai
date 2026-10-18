@@ -1,3 +1,5 @@
+import { useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
@@ -5,10 +7,12 @@ import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import type { CityHighlight } from '@/shared/city-highlights';
 import { civicTerritory } from '@/shared/civic-territory';
-import { colors } from '@/theme/colors';
+
 import { spacing } from '@/theme/spacing';
 
 export function HomeHighlights({ items }: { items: CityHighlight[] }) {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={styles.stack}>
       {items.map((highlight, index) => {
@@ -110,17 +114,18 @@ export function HomeHighlights({ items }: { items: CityHighlight[] }) {
     </View>
   );
 }
-const styles = StyleSheet.create({
-  stack: { gap: spacing.lg },
-  event: {
-    backgroundColor: colors.surface,
-    borderRadius: 24,
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    stack: { gap: spacing.lg },
+    event: {
+      backgroundColor: colors.surface,
+      borderRadius: 24,
 
-    padding: spacing.md,
-    gap: spacing.xs,
-  },
-  lead: {
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-  },
-});
+      padding: spacing.md,
+      gap: spacing.xs,
+    },
+    lead: {
+      backgroundColor: colors.surface,
+      padding: spacing.lg,
+    },
+  });

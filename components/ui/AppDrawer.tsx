@@ -1,3 +1,5 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import {
   useCallback,
   useEffect,
@@ -23,7 +25,6 @@ import ReanimatedDrawerLayout, {
 } from 'react-native-gesture-handler/ReanimatedDrawerLayout';
 import { SideMenu, useMenu } from './SideMenu';
 import { useAuthStore } from '@/stores/authStore';
-import { colors } from '@/theme';
 
 const MAIN_TABS = new Set([
   'index',
@@ -34,6 +35,9 @@ const MAIN_TABS = new Set([
 
 /** Edge-only gestures on main tabs leave nested screens' back gestures intact. */
 export function AppDrawer({ children }: { children: ReactNode }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const drawer = useRef<DrawerLayoutMethods>(null);
   const menuView = useRef<View>(null);
   const actualOpen = useRef(false);
@@ -126,7 +130,7 @@ export function AppDrawer({ children }: { children: ReactNode }) {
       minSwipeDistance={12}
       keyboardDismissMode={DrawerKeyboardDismissMode.ON_DRAG}
       enableTrackpadTwoFingerGesture
-      overlayColor="rgba(0,0,0,0.4)"
+      overlayColor={colors.scrim}
       drawerBackgroundColor={colors.transparent}
       onDrawerStateChanged={(state) => {
         if (state !== DrawerState.IDLE) setVisible(true);
@@ -161,4 +165,5 @@ export function AppDrawer({ children }: { children: ReactNode }) {
   );
 }
 
-const styles = StyleSheet.create({ fill: { flex: 1 } });
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({ fill: { flex: 1 } });

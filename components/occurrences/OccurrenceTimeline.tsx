@@ -1,7 +1,9 @@
+import { useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Problem } from '@/data/mockData';
-import { colors } from '@/theme/colors';
+
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { AppText } from '@/components/ui/AppText';
@@ -19,14 +21,19 @@ export const OccurrenceTimeline: React.FC<OccurrenceTimelineProps> = ({
   currentStatus,
   reportedAt,
 }) => {
+  const styles = useThemedStyles(createStyles);
+
   // Se não houver histórico gravado, monta ao menos o registro inicial
-  const events = history && history.length > 0 ? history : [
-    {
-      status: currentStatus,
-      at: reportedAt,
-      justification: 'Relato registrado no sistema de atendimento.',
-    },
-  ];
+  const events =
+    history && history.length > 0
+      ? history
+      : [
+          {
+            status: currentStatus,
+            at: reportedAt,
+            justification: 'Relato registrado no sistema de atendimento.',
+          },
+        ];
 
   // Ordena os eventos do mais recente para o mais antigo para leitura de tramitação
   const sortedEvents = [...events].reverse();
@@ -47,10 +54,7 @@ export const OccurrenceTimeline: React.FC<OccurrenceTimelineProps> = ({
               {/* Linha vertical conectora e bullet */}
               <View style={styles.bulletCol}>
                 <View
-                  style={[
-                    styles.bullet,
-                    isLatest && styles.bulletLatest,
-                  ]}
+                  style={[styles.bullet, isLatest && styles.bulletLatest]}
                 />
                 {index < sortedEvents.length - 1 ? (
                   <View style={styles.connectingLine} />
@@ -67,7 +71,11 @@ export const OccurrenceTimeline: React.FC<OccurrenceTimelineProps> = ({
                 </View>
 
                 {event.justification ? (
-                  <AppText variant="body" color="ink" style={styles.justification}>
+                  <AppText
+                    variant="body"
+                    color="ink"
+                    style={styles.justification}
+                  >
                     {event.justification}
                   </AppText>
                 ) : null}
@@ -80,57 +88,58 @@ export const OccurrenceTimeline: React.FC<OccurrenceTimelineProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: spacing.md,
-  },
-  heading: {
-    marginBottom: spacing.md,
-  },
-  timelineList: {
-    paddingLeft: spacing.xs,
-  },
-  timelineItem: {
-    flexDirection: 'row',
-    marginBottom: spacing.md,
-  },
-  bulletCol: {
-    alignItems: 'center',
-    width: 20,
-    marginRight: spacing.sm,
-  },
-  bullet: {
-    width: 10,
-    height: 10,
-    borderRadius: layout.radius.pill,
-    backgroundColor: colors.divider,
-    marginTop: 4,
-  },
-  bulletLatest: {
-    backgroundColor: colors.accent,
-    width: 12,
-    height: 12,
-    borderWidth: 2,
-    borderColor: colors.accentSoft,
-  },
-  connectingLine: {
-    flex: 1,
-    width: layout.borderWidth.hairline,
-    backgroundColor: colors.divider,
-    marginVertical: 4,
-  },
-  eventContent: {
-    flex: 1,
-    paddingBottom: spacing.xs,
-  },
-  eventHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.xxs,
-  },
-  justification: {
-    marginTop: spacing.xxs,
-    lineHeight: 20,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      marginVertical: spacing.md,
+    },
+    heading: {
+      marginBottom: spacing.md,
+    },
+    timelineList: {
+      paddingLeft: spacing.xs,
+    },
+    timelineItem: {
+      flexDirection: 'row',
+      marginBottom: spacing.md,
+    },
+    bulletCol: {
+      alignItems: 'center',
+      width: 20,
+      marginRight: spacing.sm,
+    },
+    bullet: {
+      width: 10,
+      height: 10,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.divider,
+      marginTop: 4,
+    },
+    bulletLatest: {
+      backgroundColor: colors.accent,
+      width: 12,
+      height: 12,
+      borderWidth: 2,
+      borderColor: colors.accentSoft,
+    },
+    connectingLine: {
+      flex: 1,
+      width: layout.borderWidth.hairline,
+      backgroundColor: colors.divider,
+      marginVertical: 4,
+    },
+    eventContent: {
+      flex: 1,
+      paddingBottom: spacing.xs,
+    },
+    eventHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.xxs,
+    },
+    justification: {
+      marginTop: spacing.xxs,
+      lineHeight: 20,
+    },
+  });

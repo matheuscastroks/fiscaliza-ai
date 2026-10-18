@@ -1,6 +1,8 @@
+import { useTheme } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React from 'react';
 import { Text, TextProps, StyleSheet } from 'react-native';
-import { colors } from '@/theme/colors';
+
 import {
   typography,
   TypographyVariant,
@@ -9,7 +11,7 @@ import {
 
 export interface AppTextProps extends TextProps {
   variant?: TypographyVariant;
-  color?: keyof typeof colors | string;
+  color?: keyof ThemeColors | string;
   children?: React.ReactNode;
 }
 
@@ -21,6 +23,8 @@ export const AppText: React.FC<AppTextProps> = ({
   allowFontScaling = true,
   ...rest
 }) => {
+  const { colors } = useTheme();
+
   const textColor = (colors as Record<string, string>)[color] || color;
   const typographyStyle = typography[variant] || typography.body;
   const flattened = StyleSheet.flatten([typographyStyle, style]);

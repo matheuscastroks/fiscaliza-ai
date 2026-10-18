@@ -1,3 +1,5 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { layout } from '@/theme/layout';
 import React, { useMemo, useState } from 'react';
@@ -19,7 +21,7 @@ import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
 import {
   CivicRow,
   QueryState,
-  cityStyles,
+  createCityStyles,
   kindLabel,
   statusLabel,
 } from '@/features/city/CityUI';
@@ -41,7 +43,7 @@ import {
   occurrenceMatchesNeighborhood,
 } from '@/shared/civic-territory';
 import type { CivicItem, Occurrence } from '@/shared/contracts';
-import { colors } from '@/theme/colors';
+
 import { spacing } from '@/theme/spacing';
 import { useAuthStore } from '@/stores/authStore';
 import { useTerritorySelection } from '@/stores/territoryStore';
@@ -66,11 +68,6 @@ const occurrenceStatus: Record<string, string> = {
   in_progress: 'Em atendimento',
   resolved: 'Concluída',
 };
-const pinColors = {
-  proposal: colors.attention,
-  consultation: colors.muted,
-  action: colors.completed,
-};
 const locatedOccurrence = (item: Occurrence) =>
   Number.isFinite(item.location.latitude) &&
   Number.isFinite(item.location.longitude) &&
@@ -89,6 +86,15 @@ export default function TerritoryScreen() {
 }
 
 function TerritoryContent() {
+  const { colors, mode } = useTheme();
+  const pinColors = {
+    proposal: colors.attention,
+    consultation: colors.muted,
+    action: colors.completed,
+  };
+  const cityStyles = useThemedStyles(createCityStyles);
+  const styles = useThemedStyles(createStyles);
+
   const [order, setOrder] = useState<TerritoryOrder>('date');
   const [period, setPeriod] = useState(0);
   const user = useAuthStore((state) => state.user);
@@ -469,6 +475,7 @@ function TerritoryContent() {
           <View style={cityStyles.section}>
             <View style={styles.mapFrame}>
               <NativeMap
+                userInterfaceStyle={mode}
                 style={styles.map}
                 region={region}
                 onRegionChangeComplete={setRegion}
@@ -594,60 +601,61 @@ function TerritoryContent() {
   );
 }
 
-const styles = StyleSheet.create({
-  toolbar: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  flex: { flex: 1, gap: spacing.xxs },
-  filterButton: {
-    minHeight: layout.touchTarget.minHeight,
-    paddingHorizontal: spacing.md,
-    borderRadius: layout.radius.pill,
-    backgroundColor: colors.surface,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  filterSelected: { backgroundColor: colors.ink },
-  filters: {
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: layout.radius.card,
-    backgroundColor: colors.surface,
-  },
-  viewToggle: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderRadius: layout.radius.pill,
-    padding: spacing.xxs,
-  },
-  viewTab: {
-    flex: 1,
-    minHeight: layout.touchTarget.minHeight,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    borderRadius: layout.radius.pill,
-  },
-  viewSelected: { backgroundColor: colors.ink },
-  mapFrame: {
-    borderRadius: layout.radius.card,
-    overflow: 'hidden',
-    position: 'relative',
-    backgroundColor: colors.surfaceSubdued,
-  },
-  map: { height: 360, width: '100%' },
-  mapActions: {
-    position: 'absolute',
-    right: spacing.sm,
-    top: spacing.sm,
-    gap: spacing.xs,
-  },
-  mapCircle: {
-    width: layout.touchTarget.minWidth,
-    height: layout.touchTarget.minHeight,
-    borderRadius: layout.radius.pill,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    toolbar: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    flex: { flex: 1, gap: spacing.xxs },
+    filterButton: {
+      minHeight: layout.touchTarget.minHeight,
+      paddingHorizontal: spacing.md,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surface,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    filterSelected: { backgroundColor: colors.ink },
+    filters: {
+      gap: spacing.sm,
+      padding: spacing.md,
+      borderRadius: layout.radius.card,
+      backgroundColor: colors.surface,
+    },
+    viewToggle: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface,
+      borderRadius: layout.radius.pill,
+      padding: spacing.xxs,
+    },
+    viewTab: {
+      flex: 1,
+      minHeight: layout.touchTarget.minHeight,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.xs,
+      borderRadius: layout.radius.pill,
+    },
+    viewSelected: { backgroundColor: colors.ink },
+    mapFrame: {
+      borderRadius: layout.radius.card,
+      overflow: 'hidden',
+      position: 'relative',
+      backgroundColor: colors.surfaceSubdued,
+    },
+    map: { height: 360, width: '100%' },
+    mapActions: {
+      position: 'absolute',
+      right: spacing.sm,
+      top: spacing.sm,
+      gap: spacing.xs,
+    },
+    mapCircle: {
+      width: layout.touchTarget.minWidth,
+      height: layout.touchTarget.minHeight,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });

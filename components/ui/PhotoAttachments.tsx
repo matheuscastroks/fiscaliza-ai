@@ -1,3 +1,5 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
@@ -7,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
 import { AppButton } from './AppButton';
 import { assetUrl } from '@/services/http';
-import { colors } from '@/theme/colors';
+
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -24,6 +26,9 @@ export function PhotoAttachments({
   onPreparingChange?: (preparing: boolean) => void;
   cameraRequest?: string;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const [picking, setPicking] = useState(false);
   const [error, setError] = useState('');
   const captured = useRef<string | undefined>(undefined);
@@ -111,7 +116,7 @@ export function PhotoAttachments({
               onPress={() => onChange(images.filter((_, i) => i !== index))}
               style={styles.remove}
             >
-              <Ionicons name="close" size={22} color={colors.white} />
+              <Ionicons name="close" size={22} color={colors.onAccent} />
             </Pressable>
           </View>
         ))}
@@ -136,25 +141,26 @@ export function PhotoAttachments({
     </View>
   );
 }
-const styles = StyleSheet.create({
-  section: { gap: spacing.sm },
-  photos: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  photo: {
-    width: 144,
-    height: 160,
-    borderRadius: layout.radius.panel,
-    overflow: 'hidden',
-  },
-  image: { width: '100%', height: '100%' },
-  remove: {
-    position: 'absolute',
-    right: 4,
-    top: 4,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    section: { gap: spacing.sm },
+    photos: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+    photo: {
+      width: 144,
+      height: 160,
+      borderRadius: layout.radius.panel,
+      overflow: 'hidden',
+    },
+    image: { width: '100%', height: '100%' },
+    remove: {
+      position: 'absolute',
+      right: 4,
+      top: 4,
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: colors.ink,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });

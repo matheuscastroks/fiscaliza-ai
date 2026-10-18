@@ -1,3 +1,5 @@
+import { useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React from 'react';
 import {
   StyleSheet,
@@ -6,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView, Edge } from 'react-native-safe-area-context';
-import { colors } from '@/theme/colors';
+
 import { spacing } from '@/theme/spacing';
 import { KeyboardAwareScrollView } from './KeyboardAwareScrollView';
 
@@ -25,6 +27,8 @@ export const AppScreen: React.FC<AppScreenProps> = ({
   children,
   ...rest
 }) => {
+  const styles = useThemedStyles(createStyles);
+
   const content = scroll ? (
     <KeyboardAwareScrollView
       contentContainerStyle={styles.scrollContent}
@@ -55,20 +59,21 @@ export const AppScreen: React.FC<AppScreenProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.canvas,
-    width: '100%',
-    maxWidth: 760,
-    alignSelf: 'center',
-  },
-  flex: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.contentPadding,
-    paddingVertical: spacing.md,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.canvas,
+      width: '100%',
+      maxWidth: 760,
+      alignSelf: 'center',
+    },
+    flex: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: spacing.contentPadding,
+      paddingVertical: spacing.md,
+    },
+  });

@@ -1,5 +1,6 @@
+import { useThemedStyles } from '@/theme/useTheme';
 import { goBack } from '@/utils/navigation';
-import { cityStyles } from '@/features/city/CityUI';
+import { createCityStyles } from '@/features/city/CityUI';
 import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
@@ -8,6 +9,8 @@ import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 export default function AboutScreen() {
+  const cityStyles = useThemedStyles(createCityStyles);
+
   return (
     <AppScreen>
       <AppHeader title="Sobre o Fiscaliza-AI" onBack={() => goBack()} />
@@ -31,10 +34,16 @@ export default function AboutScreen() {
           </AppText>
           <AppText>
             As fotografias dos registros iniciais são exemplos ilustrativos de
-            iluminação, bancos, calçadas e outros contextos urbanos, obtidos no Wikimedia Commons (CC0) e Pexels (licença Pexels). Não representam os endereços desses registros. Fotos
-            anexadas por você permanecem associadas à sua contribuição. Os
-            retratos das contas de apresentação são ilustrativos, obtidos no
-            Pexels sob sua licença de uso, e não representam usuários reais. Os cenários iniciais incluem números simulados de visualizações e apoios; novas interações são contabilizadas separadamente. A assistência de IA pode enviar a foto e o relato ao Gemini para sugerir o preenchimento; você revisa as informações antes de registrar.
+            iluminação, bancos, calçadas e outros contextos urbanos, obtidos no
+            Wikimedia Commons (CC0) e Pexels (licença Pexels). Não representam
+            os endereços desses registros. Fotos anexadas por você permanecem
+            associadas à sua contribuição. Os retratos das contas de
+            apresentação são ilustrativos, obtidos no Pexels sob sua licença de
+            uso, e não representam usuários reais. Os cenários iniciais incluem
+            números simulados de visualizações e apoios; novas interações são
+            contabilizadas separadamente. A assistência de IA pode enviar a foto
+            e o relato ao Gemini para sugerir o preenchimento; você revisa as
+            informações antes de registrar.
           </AppText>
           <AppText variant="sectionTitle">Seus dados</AppText>
           <AppText>

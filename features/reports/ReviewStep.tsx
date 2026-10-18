@@ -1,7 +1,9 @@
+import { useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 import { Problem } from '@/data/mockData';
-import { colors } from '@/theme/colors';
+
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { AppText } from '@/components/ui/AppText';
@@ -25,6 +27,8 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   description,
   images,
 }) => {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={styles.container}>
       <AppText variant="sectionTitle" color="ink" style={styles.heading}>
@@ -112,44 +116,45 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: spacing.md,
-  },
-  heading: {
-    marginBottom: spacing.xxs,
-  },
-  subheading: {
-    marginBottom: spacing.lg,
-    lineHeight: 22,
-  },
-  reviewCard: {
-    backgroundColor: colors.surface,
-    borderWidth: layout.borderWidth.hairline,
-    borderColor: colors.divider,
-    borderRadius: layout.radius.panel,
-    padding: spacing.md,
-  },
-  fieldGroup: {
-    marginVertical: spacing.xs,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: spacing.xs,
-  },
-  halfField: {
-    flex: 1,
-  },
-  fieldValue: {
-    marginTop: spacing.xxs,
-  },
-  photoLabel: {
-    marginBottom: spacing.xs,
-  },
-  reviewImage: {
-    width: 120,
-    height: 90,
-    borderRadius: layout.radius.button,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      paddingVertical: spacing.md,
+    },
+    heading: {
+      marginBottom: spacing.xxs,
+    },
+    subheading: {
+      marginBottom: spacing.lg,
+      lineHeight: 22,
+    },
+    reviewCard: {
+      backgroundColor: colors.surface,
+      borderWidth: layout.borderWidth.hairline,
+      borderColor: colors.divider,
+      borderRadius: layout.radius.panel,
+      padding: spacing.md,
+    },
+    fieldGroup: {
+      marginVertical: spacing.xs,
+    },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginVertical: spacing.xs,
+    },
+    halfField: {
+      flex: 1,
+    },
+    fieldValue: {
+      marginTop: spacing.xxs,
+    },
+    photoLabel: {
+      marginBottom: spacing.xs,
+    },
+    reviewImage: {
+      width: 120,
+      height: 90,
+      borderRadius: layout.radius.button,
+    },
+  });

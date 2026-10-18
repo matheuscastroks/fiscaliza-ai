@@ -1,3 +1,4 @@
+import { useThemedStyles } from '@/theme/useTheme';
 import { goBack } from '@/utils/navigation';
 import React from 'react';
 import { ScrollView, View } from 'react-native';
@@ -7,7 +8,7 @@ import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
 import { useCityQuery } from '@/features/city/useCityQuery';
-import { CivicRow, QueryState, cityStyles } from '@/features/city/CityUI';
+import { CivicRow, QueryState, createCityStyles } from '@/features/city/CityUI';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useTerritorySelection } from '@/stores/territoryStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -18,6 +19,8 @@ import {
 } from '@/shared/civic-territory';
 import type { CivicItem, Occurrence } from '@/shared/contracts';
 export default function ResultsScreen() {
+  const cityStyles = useThemedStyles(createCityStyles);
+
   const civic = useCityQuery<CivicItem[]>('/civic-items');
   const occurrences = useCityQuery<Occurrence[]>('/occurrences');
   const profileNeighborhood = useAuthStore((state) => state.user?.neighborhood);

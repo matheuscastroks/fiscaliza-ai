@@ -1,3 +1,4 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import React, { useState, useCallback } from 'react';
 import {
   ScrollView,
@@ -10,12 +11,15 @@ import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
-import { CivicRow, QueryState, cityStyles } from '@/features/city/CityUI';
+import { CivicRow, QueryState, createCityStyles } from '@/features/city/CityUI';
 import { useCityQuery } from '@/features/city/useCityQuery';
 import type { CivicItem, Occurrence } from '@/shared/contracts';
 import { useAuthStore } from '@/stores/authStore';
-import { colors } from '@/theme/colors';
+
 export default function FollowScreen() {
+  const { colors } = useTheme();
+  const cityStyles = useThemedStyles(createCityStyles);
+
   const municipalityId = useAuthStore((state) => state.user?.municipality?.id);
   const query = useCityQuery<{ occurrences: Occurrence[]; items: CivicItem[] }>(
     '/activity',

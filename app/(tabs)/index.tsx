@@ -1,3 +1,4 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import { CitySearch } from '@/components/ui/CitySearch';
 import { CityCarousel } from '@/features/city/CityCarousel';
 import { ContributionActions } from '@/features/city/ContributionActions';
@@ -8,7 +9,7 @@ import { AppButton } from '@/components/ui/AppButton';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppText } from '@/components/ui/AppText';
-import { CivicRow, QueryState, cityStyles } from '@/features/city/CityUI';
+import { CivicRow, QueryState, createCityStyles } from '@/features/city/CityUI';
 import { HomeHighlights } from '@/features/city/HomeHighlights';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useCityQuery } from '@/features/city/useCityQuery';
@@ -26,7 +27,7 @@ import {
 import type { CivicItem, Occurrence } from '@/shared/contracts';
 import { useAuthStore } from '@/stores/authStore';
 import { useTerritorySelection } from '@/stores/territoryStore';
-import { colors } from '@/theme/colors';
+
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -40,6 +41,9 @@ import {
 } from 'react-native';
 
 export default function HomeScreen() {
+  const { colors } = useTheme();
+  const cityStyles = useThemedStyles(createCityStyles);
+
   const [captureOpen, setCaptureOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { width } = useWindowDimensions();

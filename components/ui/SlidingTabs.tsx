@@ -1,3 +1,4 @@
+import { useTheme } from '@/theme/useTheme';
 import { useEffect, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
@@ -9,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
-import { colors, spacing } from '@/theme';
+import { spacing } from '@/theme';
 
 export interface SlidingOption {
   value: string;
@@ -35,6 +36,8 @@ export function SlidingTabs({
   edgeToEdge?: boolean;
   tabs?: boolean;
 }) {
+  const { colors } = useTheme();
+
   const [positions, setPositions] = useState<
     Record<string, { x: number; width: number }>
   >({});
@@ -156,10 +159,10 @@ export function SlidingTabs({
               <Ionicons
                 name={option.icon}
                 size={20}
-                color={active ? colors.white : colors.ink}
+                color={active ? colors.onSelection : colors.ink}
               />
             )}
-            <AppText variant="label" color={active ? 'white' : 'ink'}>
+            <AppText variant="label" color={active ? 'onSelection' : 'ink'}>
               {option.label}
             </AppText>
           </Pressable>

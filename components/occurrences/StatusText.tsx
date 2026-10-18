@@ -1,7 +1,9 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Problem } from '@/data/mockData';
-import { colors } from '@/theme/colors';
+
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { AppText } from '@/components/ui/AppText';
@@ -13,6 +15,9 @@ export interface StatusTextProps {
 }
 
 export const StatusText: React.FC<StatusTextProps> = ({ status, style }) => {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const label = getStatusLabel(status);
 
   const getTheme = () => {
@@ -50,18 +55,19 @@ export const StatusText: React.FC<StatusTextProps> = ({ status, style }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  badge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: layout.radius.pill,
-    alignSelf: 'flex-start',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    fontWeight: '600',
-    fontSize: 12,
-    lineHeight: 16,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    badge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: layout.radius.pill,
+      alignSelf: 'flex-start',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    text: {
+      fontWeight: '600',
+      fontSize: 12,
+      lineHeight: 16,
+    },
+  });

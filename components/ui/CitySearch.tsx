@@ -1,7 +1,8 @@
+import { useTheme } from '@/theme/useTheme';
 import { Pressable, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
-import { colors, spacing } from '@/theme';
+import { spacing } from '@/theme';
 import { fontFamilies } from '@/theme/typography';
 
 export function CitySearch({
@@ -19,6 +20,8 @@ export function CitySearch({
   expanded?: boolean;
   filterCount?: number;
 }) {
+  const { colors, mode } = useTheme();
+
   return (
     <View
       style={{
@@ -36,6 +39,7 @@ export function CitySearch({
       {onChangeText ? (
         <TextInput
           accessibilityLabel="Buscar no território"
+          keyboardAppearance={mode}
           placeholder="Rua, bairro ou assunto"
           value={value}
           onChangeText={onChangeText}
@@ -74,7 +78,7 @@ export function CitySearch({
           justifyContent: 'center',
         }}
       >
-        <Ionicons name="options-outline" size={22} color={colors.white} />
+        <Ionicons name="options-outline" size={22} color={colors.onAccent} />
         {filterCount > 0 && (
           <View
             style={{

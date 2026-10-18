@@ -1,5 +1,6 @@
+import { useThemedStyles } from '@/theme/useTheme';
 import { goBack } from '@/utils/navigation';
-import { cityStyles } from '@/features/city/CityUI';
+import { createCityStyles } from '@/features/city/CityUI';
 import React, { useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import { AppScreen } from '@/components/ui/AppScreen';
@@ -9,6 +10,8 @@ import { AppButton } from '@/components/ui/AppButton';
 import { mutation } from '@/services/http';
 import { useAuthStore } from '@/stores/authStore';
 export default function PresentationScreen() {
+  const cityStyles = useThemedStyles(createCityStyles);
+
   const user = useAuthStore((s) => s.user);
   const [scenario, setScenario] = useState('registered');
   const [confirm, setConfirm] = useState(false);

@@ -1,30 +1,33 @@
+import { useTheme } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import type { CivicItem } from '@/shared/contracts';
-import { colors } from '@/theme/colors';
+
 import { spacing } from '@/theme/spacing';
 import { civicTerritory } from '@/shared/civic-territory';
 import { CivicCard } from './CivicCard';
 import { layout } from '@/theme/layout';
-export const cityStyles = StyleSheet.create({
-  content: {
-    padding: spacing.contentPadding,
-    paddingBottom: 120,
-    gap: spacing.xl,
-  },
-  section: { gap: spacing.md },
-  row: {
-    padding: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: layout.radius.panel,
-    gap: spacing.xs,
-  },
-  controls: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  description: { lineHeight: 24 },
-});
+export const createCityStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    content: {
+      padding: spacing.contentPadding,
+      paddingBottom: 120,
+      gap: spacing.xl,
+    },
+    section: { gap: spacing.md },
+    row: {
+      padding: spacing.md,
+      backgroundColor: colors.surface,
+      borderRadius: layout.radius.panel,
+      gap: spacing.xs,
+    },
+    controls: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+    description: { lineHeight: 24 },
+  });
 export const kindLabel = {
   proposal: 'Proposta',
   consultation: 'Consulta pública',
@@ -71,6 +74,8 @@ export function QueryState({
   error?: Error | null;
   retry?: () => unknown;
 }) {
+  const { colors } = useTheme();
+
   return (
     <View accessibilityLiveRegion="polite" style={{ gap: 12 }}>
       {loading && (

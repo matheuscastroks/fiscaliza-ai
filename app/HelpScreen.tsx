@@ -1,11 +1,14 @@
+import { useThemedStyles } from '@/theme/useTheme';
 import { goBack } from '@/utils/navigation';
-import { cityStyles } from '@/features/city/CityUI';
+import { createCityStyles } from '@/features/city/CityUI';
 import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 export default function HelpScreen() {
+  const cityStyles = useThemedStyles(createCityStyles);
+
   return (
     <AppScreen>
       <AppHeader title="Ajuda e acessibilidade" onBack={() => goBack()} />

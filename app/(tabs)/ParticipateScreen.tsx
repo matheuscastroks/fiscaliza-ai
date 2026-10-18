@@ -1,15 +1,18 @@
+import { useThemedStyles } from '@/theme/useTheme';
 import React, { useState } from 'react';
 import { ScrollView } from 'react-native';
 import { ContributionActions } from '@/features/city/ContributionActions';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
-import { CivicRow, QueryState, cityStyles } from '@/features/city/CityUI';
+import { CivicRow, QueryState, createCityStyles } from '@/features/city/CityUI';
 import { useCityQuery } from '@/features/city/useCityQuery';
 import type { CivicItem } from '@/shared/contracts';
 import { useAuthStore } from '@/stores/authStore';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
 export default function ParticipateScreen() {
+  const cityStyles = useThemedStyles(createCityStyles);
+
   const municipality = useAuthStore((state) => state.user?.municipality);
   const query = useCityQuery<CivicItem[]>('/civic-items');
   const [kind, setKind] = useState<

@@ -1,6 +1,8 @@
+import { useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
-import { colors } from '@/theme/colors';
+
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
@@ -13,6 +15,8 @@ export const AppDivider: React.FC<AppDividerProps> = ({
   spacingVertical,
   style,
 }) => {
+  const styles = useThemedStyles(createStyles);
+
   const marginV = spacingVertical ? spacing[spacingVertical] : 0;
 
   return (
@@ -26,10 +30,11 @@ export const AppDivider: React.FC<AppDividerProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  divider: {
-    height: layout.borderWidth.hairline,
-    backgroundColor: colors.divider,
-    width: '100%',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    divider: {
+      height: layout.borderWidth.hairline,
+      backgroundColor: colors.divider,
+      width: '100%',
+    },
+  });

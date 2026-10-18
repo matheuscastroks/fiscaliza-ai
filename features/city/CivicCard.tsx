@@ -1,3 +1,5 @@
+import { useThemedStyles, useTheme } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { useState, useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
@@ -6,9 +8,11 @@ import { AppText } from '@/components/ui/AppText';
 import { EngagementStats } from '@/components/ui/Engagement';
 import { assetUrl } from '@/services/http';
 import type { CivicItem } from '@/shared/contracts';
-import { colors, layout, spacing } from '@/theme';
+import { layout, spacing } from '@/theme';
 
 export function ExecutionProgress({ progress }: { progress: number }) {
+  const styles = useThemedStyles(createStyles);
+
   const value = Math.max(0, Math.min(100, progress));
   return (
     <View style={styles.progressGroup}>
@@ -37,6 +41,9 @@ export function CivicCard({
   territory: string;
   onPress: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const [failedPhoto, setFailedPhoto] = useState<string>();
   const [clock, setClock] = useState(() => Date.now());
   useEffect(() => {
@@ -171,58 +178,59 @@ export function CivicCard({
             {action}
           </AppText>
           <View style={styles.arrow}>
-            <Ionicons name="arrow-forward" size={22} color={colors.white} />
+            <Ionicons name="arrow-forward" size={22} color={colors.onAccent} />
           </View>
         </View>
       </View>
     </Pressable>
   );
 }
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: layout.radius.card,
-    overflow: 'hidden',
-  },
-  content: { padding: spacing.lg, gap: spacing.sm },
-  proposalPhoto: { width: '100%', height: 170 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  ballot: { gap: spacing.xs, marginTop: spacing.xs },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.divider,
-  },
-  progressGroup: { gap: spacing.sm, paddingVertical: spacing.sm },
-  track: {
-    height: 6,
-    borderRadius: 3,
-    overflow: 'hidden',
-    backgroundColor: colors.divider,
-  },
-  fill: { height: '100%', borderRadius: 3, backgroundColor: colors.ink },
-  evidence: { width: 84, height: 84, borderRadius: layout.radius.panel },
-  action: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    minHeight: 48,
-  },
-  arrow: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: layout.radius.card,
+      overflow: 'hidden',
+    },
+    content: { padding: spacing.lg, gap: spacing.sm },
+    proposalPhoto: { width: '100%', height: 170 },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.md,
+    },
+    ballot: { gap: spacing.xs, marginTop: spacing.xs },
+    option: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingVertical: spacing.sm,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.divider,
+    },
+    progressGroup: { gap: spacing.sm, paddingVertical: spacing.sm },
+    track: {
+      height: 6,
+      borderRadius: 3,
+      overflow: 'hidden',
+      backgroundColor: colors.divider,
+    },
+    fill: { height: '100%', borderRadius: 3, backgroundColor: colors.ink },
+    evidence: { width: 84, height: 84, borderRadius: layout.radius.panel },
+    action: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+      minHeight: 48,
+    },
+    arrow: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: colors.ink,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });

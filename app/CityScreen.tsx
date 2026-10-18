@@ -1,3 +1,4 @@
+import { useThemedStyles } from '@/theme/useTheme';
 import { goBack } from '@/utils/navigation';
 import React from 'react';
 import { ScrollView, View } from 'react-native';
@@ -7,11 +8,13 @@ import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { useCityQuery } from '@/features/city/useCityQuery';
-import { QueryState, cityStyles } from '@/features/city/CityUI';
+import { QueryState, createCityStyles } from '@/features/city/CityUI';
 import { useTerritorySelection } from '@/stores/territoryStore';
 import type { CityOverview } from '@/shared/contracts';
 import { useAuthStore } from '@/stores/authStore';
 export default function CityScreen() {
+  const cityStyles = useThemedStyles(createCityStyles);
+
   const query = useCityQuery<CityOverview>('/overview');
   const municipality = useAuthStore((state) => state.user?.municipality);
   const { setNeighborhood } = useTerritorySelection();

@@ -1,7 +1,9 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
-import { colors, layout, spacing } from '@/theme';
+import { layout, spacing } from '@/theme';
 
 export function SupportButton({
   supported,
@@ -12,6 +14,9 @@ export function SupportButton({
   disabled?: boolean;
   onPress: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -42,39 +47,43 @@ export function EngagementStats({
   supports: number;
   light?: boolean;
 }) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+
   const color = light ? colors.white : colors.muted;
   return (
     <View style={styles.row}>
       <View
         style={styles.metric}
-        accessibilityLabel={`${views} {views === 1 ? 'visualização' : 'visualizações'} únicas`}
+        accessibilityLabel={`${views} ${views === 1 ? 'visualização única' : 'visualizações únicas'}`}
       >
         <Ionicons name="eye-outline" size={18} color={color} />
         <AppText variant="meta" style={{ color }}>
-          {views} visualizações
+          {views} {views === 1 ? 'visualização' : 'visualizações'}
         </AppText>
       </View>
       <View
         style={styles.metric}
-        accessibilityLabel={`${supports} {supports === 1 ? 'apoio' : 'apoios'}`}
+        accessibilityLabel={`${supports} ${supports === 1 ? 'apoio' : 'apoios'}`}
       >
         <Ionicons name="heart-outline" size={18} color={color} />
         <AppText variant="meta" style={{ color }}>
-          {supports} apoios
+          {supports} {supports === 1 ? 'apoio' : 'apoios'}
         </AppText>
       </View>
     </View>
   );
 }
-const styles = StyleSheet.create({
-  support: {
-    width: layout.touchTarget.minWidth,
-    height: layout.touchTarget.minHeight,
-    borderRadius: layout.radius.pill,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
-  metric: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    support: {
+      width: layout.touchTarget.minWidth,
+      height: layout.touchTarget.minHeight,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+    metric: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs },
+  });
