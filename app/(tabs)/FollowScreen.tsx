@@ -1,3 +1,4 @@
+import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import React, { useState, useCallback } from 'react';
 import {
@@ -68,40 +69,59 @@ export default function FollowScreen() {
           error={query.error}
           retry={query.refetch}
         />
-        <View style={cityStyles.section}>
-          <AppText variant="sectionTitle">
-            Ocorrências que registrei ou acompanho
-          </AppText>
-          {localOccurrences.map((i) => (
-            <OccurrenceRow
-              key={i.id}
-              problem={i}
-              onPress={() =>
-                router.push({
-                  pathname: '/ProblemDetailsScreen',
-                  params: { id: i.id },
-                })
-              }
+        {query.data &&
+          !query.error &&
+          !localOccurrences.length &&
+          !localItems.length && (
+            <IllustratedEmptyState
+              title="Seus acompanhamentos ficam aqui"
+              description="Registre uma ocorrência ou acompanhe uma participação para ver as respostas da gestão."
+              action={{
+                title: 'Explorar território',
+                onPress: () => router.push('/(tabs)/TerritoryScreen'),
+              }}
             />
-          ))}
-          {query.data && !localOccurrences.length && (
-            <AppText color="muted">
-              Você ainda não registrou nem acompanhou uma ocorrência.
-            </AppText>
           )}
-        </View>
-        <View style={cityStyles.section}>
-          <AppText variant="sectionTitle">Propostas, consultas e ações</AppText>
-          {localItems.map((i) => (
-            <CivicRow key={i.id} item={i} />
-          ))}
-          {query.data && !localItems.length && (
-            <AppText color="muted">
-              Participe de uma consulta ou acompanhe uma ação para encontrá-la
-              aqui.
-            </AppText>
-          )}
-        </View>
+        {(localOccurrences.length > 0 || localItems.length > 0) && (
+          <>
+            <View style={cityStyles.section}>
+              <AppText variant="sectionTitle">
+                Ocorrências que registrei ou acompanho
+              </AppText>
+              {localOccurrences.map((i) => (
+                <OccurrenceRow
+                  key={i.id}
+                  problem={i}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/ProblemDetailsScreen',
+                      params: { id: i.id },
+                    })
+                  }
+                />
+              ))}
+              {query.data && !localOccurrences.length && (
+                <AppText color="muted">
+                  Você ainda não registrou nem acompanhou uma ocorrência.
+                </AppText>
+              )}
+            </View>
+            <View style={cityStyles.section}>
+              <AppText variant="sectionTitle">
+                Propostas, consultas e ações
+              </AppText>
+              {localItems.map((i) => (
+                <CivicRow key={i.id} item={i} />
+              ))}
+              {query.data && !localItems.length && (
+                <AppText color="muted">
+                  Participe de uma consulta ou acompanhe uma ação para
+                  encontrá-la aqui.
+                </AppText>
+              )}
+            </View>
+          </>
+        )}
         {previous.length > 0 && (
           <View style={cityStyles.section}>
             <AppText variant="sectionTitle">

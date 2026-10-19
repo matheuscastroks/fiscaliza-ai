@@ -67,6 +67,16 @@ export default function AboutScreen() {
             As atualizações aparecem ao abrir ou atualizar a tela. Esta versão
             não envia notificações push nem mensagens por e-mail.
           </AppText>
+          <AppText variant="sectionTitle">Ilustrações</AppText>
+          <AppText>
+            As ilustrações de apresentação e estados vazios vêm do pacote Notion
+            Resources Freebie fornecido para este projeto.
+          </AppText>
+          <AppButton
+            title="Como funciona"
+            variant="secondary"
+            onPress={() => router.push('/OnboardingScreen')}
+          />
           <AppButton
             title="Ajuda e acessibilidade"
             variant="secondary"

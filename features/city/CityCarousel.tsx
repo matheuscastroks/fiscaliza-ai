@@ -37,7 +37,12 @@ export function CityCarousel<T extends { id: string }>({
   const [scrollX] = useState(() => new Animated.Value(0));
   const list = useRef<ScrollView>(null);
   const available = viewport - (edgeToEdge ? spacing.contentPadding * 2 : 0);
-  const cardWidth = items.length > 1 ? available - 24 : available;
+  const cardWidth =
+    Platform.OS === 'web' && width >= 1100
+      ? Math.min(360, available)
+      : items.length > 1
+        ? available - 24
+        : available;
   const step = cardWidth + spacing.sm;
   const current = Math.min(index, items.length - 1);
   const go = (next: number) => {

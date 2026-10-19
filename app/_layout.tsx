@@ -1,3 +1,8 @@
+import { useOnboardingStore } from '@/stores/onboardingStore';
+import {
+  OnboardingGate,
+  useOnboardingInitialization,
+} from '@/features/onboarding/OnboardingGate';
 import { useTheme, useThemeInitialization } from '@/theme/useTheme';
 import * as SystemUI from 'expo-system-ui';
 import { Platform } from 'react-native';
@@ -32,6 +37,8 @@ export const unstable_settings = { initialRouteName: '(tabs)' };
 export default function RootLayout() {
   const { colors, isDark, mode } = useTheme();
   const themeReady = useThemeInitialization();
+  const onboardingReady = useOnboardingInitialization();
+  const onboardingCompleted = useOnboardingStore((state) => state.completed);
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(colors.canvas).catch(() => undefined);
     if (Platform.OS === 'web')
@@ -50,9 +57,12 @@ export default function RootLayout() {
     void initialize();
   }, [initialize]);
   useEffect(() => {
-    const publicRoute = ['LoginScreen', 'AboutScreen', 'HelpScreen'].includes(
-      segments[0] || '',
-    );
+    const publicRoute = [
+      'LoginScreen',
+      'AboutScreen',
+      'HelpScreen',
+      'OnboardingScreen',
+    ].includes(segments[0] || '');
     if (isReady && !isAuthenticated && !publicRoute)
       router.replace('/LoginScreen');
     else if (
@@ -64,7 +74,13 @@ export default function RootLayout() {
     )
       router.replace('/MunicipalityScreen');
   }, [isReady, isAuthenticated, segments, user?.municipality]);
-  if (!themeReady || !isReady || (!fontsLoaded && !fontError)) return null;
+  if (
+    !themeReady ||
+    !onboardingReady ||
+    (!isReady && onboardingCompleted) ||
+    (!fontsLoaded && !fontError)
+  )
+    return null;
   const base = isDark ? DarkTheme : DefaultTheme;
   const navigationTheme = {
     ...base,
@@ -102,6 +118,7 @@ export default function RootLayout() {
               </Stack>
             </AppDrawer>
             <SignOutSheet />
+            <OnboardingGate enabled={segments[0] !== 'OnboardingScreen'} />
           </QueryClientProvider>
         </ThemeProvider>
       </SafeAreaProvider>

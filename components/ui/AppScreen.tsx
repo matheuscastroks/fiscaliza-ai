@@ -6,6 +6,7 @@ import {
   ViewProps,
   KeyboardAvoidingView,
   Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView, Edge } from 'react-native-safe-area-context';
 
@@ -28,6 +29,8 @@ export const AppScreen: React.FC<AppScreenProps> = ({
   ...rest
 }) => {
   const styles = useThemedStyles(createStyles);
+  const { width } = useWindowDimensions();
+  const desktop = Platform.OS === 'web' && width >= 1100;
 
   const content = scroll ? (
     <KeyboardAwareScrollView
@@ -53,7 +56,11 @@ export const AppScreen: React.FC<AppScreenProps> = ({
   );
 
   return (
-    <SafeAreaView edges={edges} style={[styles.container, style]} {...rest}>
+    <SafeAreaView
+      edges={edges}
+      style={[styles.container, desktop && { maxWidth: 1200 }, style]}
+      {...rest}
+    >
       {wrappedContent}
     </SafeAreaView>
   );

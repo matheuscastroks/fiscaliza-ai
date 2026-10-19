@@ -1,9 +1,16 @@
+import { router } from 'expo-router';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { UserAvatar } from './UserAvatar';
 import { useAuthStore } from '@/stores/authStore';
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  useWindowDimensions,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { spacing } from '@/theme/spacing';
@@ -30,6 +37,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const styles = useThemedStyles(createStyles);
 
   const user = useAuthStore((state) => state.user);
+  const { width } = useWindowDimensions();
+  const desktop = Platform.OS === 'web' && width >= 1100;
   return (
     <View
       style={[styles.container, overlay && styles.overlay]}
@@ -39,9 +48,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         {!onBack && user && (
           <TouchableOpacity
             style={styles.circleButton}
-            onPress={() => useMenu.getState().setOpen(true)}
+            onPress={() =>
+              desktop
+                ? router.push('/ProfileScreen')
+                : useMenu.getState().setOpen(true)
+            }
             accessibilityRole="button"
-            accessibilityLabel="Abrir menu"
+            accessibilityLabel={desktop ? 'Abrir perfil' : 'Abrir menu'}
           >
             <UserAvatar size={48} />
           </TouchableOpacity>

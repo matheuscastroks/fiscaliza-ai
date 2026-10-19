@@ -89,7 +89,12 @@ export function FloatingGlassTabBar({
       hide.remove();
     };
   }, []);
-  if (keyboard || !VISIBLE.has(state.routes[state.index]?.name)) return null;
+  if (
+    (Platform.OS === 'web' && width >= 1100) ||
+    keyboard ||
+    !VISIBLE.has(state.routes[state.index]?.name)
+  )
+    return null;
   return (
     <View
       style={[

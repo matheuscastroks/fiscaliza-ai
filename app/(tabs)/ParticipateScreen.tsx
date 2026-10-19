@@ -1,10 +1,10 @@
+import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
 import { useThemedStyles } from '@/theme/useTheme';
 import React, { useState } from 'react';
 import { ScrollView } from 'react-native';
 import { ContributionActions } from '@/features/city/ContributionActions';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
-import { AppText } from '@/components/ui/AppText';
 import { CivicRow, QueryState, createCityStyles } from '@/features/city/CityUI';
 import { useCityQuery } from '@/features/city/useCityQuery';
 import type { CivicItem } from '@/shared/contracts';
@@ -52,10 +52,13 @@ export default function ParticipateScreen() {
             <CivicRow key={i.id} item={i} />
           ))}
         {query.data &&
+          !query.error &&
           !query.data.some((i) => kind === 'all' || i.kind === kind) && (
-            <AppText color="muted">
-              Nenhuma participação disponível neste filtro.
-            </AppText>
+            <IllustratedEmptyState
+              kind="participation"
+              title="Nenhuma participação neste filtro"
+              description="Consultas, propostas e ações publicadas aparecem aqui. Você também pode escolher outro filtro."
+            />
           )}
       </ScrollView>
     </AppScreen>

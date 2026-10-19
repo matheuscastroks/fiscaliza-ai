@@ -214,7 +214,7 @@ function ProposalForm() {
             ? 'Marque o ponto e informe o endereço.'
             : '';
   return (
-    <AppScreen keyboardAvoiding>
+    <AppScreen keyboardAvoiding style={{ maxWidth: 760 }}>
       <AppHeader title="Propor uma melhoria" onBack={goBack} />
       <KeyboardAwareScrollView
         contentInsetAdjustmentBehavior="automatic"

@@ -1,3 +1,4 @@
+import { DesktopNavigation } from './DesktopNavigation';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import {
@@ -48,8 +49,15 @@ export function AppDrawer({ children }: { children: ReactNode }) {
   const authenticated = useAuthStore((state) => state.isAuthenticated);
   const segments = useSegments();
   const { width } = useWindowDimensions();
-  const enabled = Boolean(
+  const desktop = Platform.OS === 'web' && width >= 1100;
+  const showNavigation =
+    desktop &&
     authenticated &&
+    Boolean(user?.municipality) &&
+    segments[0] !== 'OnboardingScreen';
+  const enabled = Boolean(
+    !desktop &&
+      authenticated &&
       user?.municipality &&
       segments[0] === '(tabs)' &&
       MAIN_TABS.has(segments[1] || 'index'),
@@ -118,50 +126,57 @@ export function AppDrawer({ children }: { children: ReactNode }) {
   }, [open, close]);
 
   return (
-    <ReanimatedDrawerLayout
-      ref={drawer}
-      drawerPosition={DrawerPosition.LEFT}
-      drawerType={DrawerType.FRONT}
-      drawerWidth={Math.min(Math.round(width * 0.9), 480)}
-      drawerLockMode={
-        enabled ? DrawerLockMode.UNLOCKED : DrawerLockMode.LOCKED_CLOSED
-      }
-      edgeWidth={24}
-      minSwipeDistance={12}
-      keyboardDismissMode={DrawerKeyboardDismissMode.ON_DRAG}
-      enableTrackpadTwoFingerGesture
-      overlayColor={colors.scrim}
-      drawerBackgroundColor={colors.transparent}
-      onDrawerStateChanged={(state) => {
-        if (state !== DrawerState.IDLE) setVisible(true);
-      }}
-      onDrawerOpen={() => {
-        setVisible(true);
-        actualOpen.current = true;
-        useMenu.getState().setOpen(true);
-      }}
-      onDrawerClose={() => {
-        setVisible(false);
-        actualOpen.current = false;
-        useMenu.getState().setOpen(false);
-        const action = afterClose.current;
-        afterClose.current = undefined;
-        action?.();
-      }}
-      renderNavigationView={() => (
-        <View ref={menuView} style={styles.fill}>
-          <SideMenu onClose={close} visible={visible} />
-        </View>
-      )}
+    <View
+      style={{ flex: 1, flexDirection: 'row', backgroundColor: colors.canvas }}
     >
-      <View
-        style={styles.fill}
-        aria-hidden={open}
-        accessibilityElementsHidden={open}
-      >
-        {children}
+      {showNavigation && <DesktopNavigation />}
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <ReanimatedDrawerLayout
+          ref={drawer}
+          drawerPosition={DrawerPosition.LEFT}
+          drawerType={DrawerType.FRONT}
+          drawerWidth={Math.min(Math.round(width * 0.9), 480)}
+          drawerLockMode={
+            enabled ? DrawerLockMode.UNLOCKED : DrawerLockMode.LOCKED_CLOSED
+          }
+          edgeWidth={24}
+          minSwipeDistance={12}
+          keyboardDismissMode={DrawerKeyboardDismissMode.ON_DRAG}
+          enableTrackpadTwoFingerGesture
+          overlayColor={colors.scrim}
+          drawerBackgroundColor={colors.transparent}
+          onDrawerStateChanged={(state) => {
+            if (state !== DrawerState.IDLE) setVisible(true);
+          }}
+          onDrawerOpen={() => {
+            setVisible(true);
+            actualOpen.current = true;
+            useMenu.getState().setOpen(true);
+          }}
+          onDrawerClose={() => {
+            setVisible(false);
+            actualOpen.current = false;
+            useMenu.getState().setOpen(false);
+            const action = afterClose.current;
+            afterClose.current = undefined;
+            action?.();
+          }}
+          renderNavigationView={() => (
+            <View ref={menuView} style={styles.fill}>
+              <SideMenu onClose={close} visible={visible} />
+            </View>
+          )}
+        >
+          <View
+            style={styles.fill}
+            aria-hidden={open}
+            accessibilityElementsHidden={open}
+          >
+            {children}
+          </View>
+        </ReanimatedDrawerLayout>
       </View>
-    </ReanimatedDrawerLayout>
+    </View>
   );
 }
 

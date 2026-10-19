@@ -81,6 +81,12 @@ export function SideMenu({
       title: 'Sua conta',
       items: [
         {
+          label: 'Como funciona',
+          subtitle: 'Conheça as formas de participar',
+          path: '/OnboardingScreen',
+          icon: 'book-outline',
+        },
+        {
           label: 'Preferências',
           subtitle: 'Preferências da conta',
           path: '/SettingsScreen',

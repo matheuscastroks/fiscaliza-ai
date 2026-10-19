@@ -92,7 +92,7 @@ function ReportContent() {
 
   if (createdProblem) {
     return (
-      <AppScreen edges={['top']} style={styles.screen}>
+      <AppScreen edges={['top']} style={[styles.screen, { maxWidth: 760 }]}>
         <KeyboardAwareScrollView contentContainerStyle={styles.scrollContent}>
           <ReportSuccess problem={createdProblem} onNewReport={resetForm} />
         </KeyboardAwareScrollView>
@@ -101,7 +101,7 @@ function ReportContent() {
   }
 
   return (
-    <AppScreen edges={['top']} style={styles.screen}>
+    <AppScreen edges={['top']} style={[styles.screen, { maxWidth: 760 }]}>
       <AppHeader
         title="Registrar ocorrência"
         context={`Etapa ${step} de 3 · ${user?.municipality?.name || 'Seu município'}`}
