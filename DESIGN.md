@@ -299,3 +299,15 @@ Habilite o gesto apenas nas quatro abas principais, com sessão autenticada e mu
 ### Assistência por foto no relato
 
 Não usar card de sugestão automática. Foto antes de título/descrição inicia análise e sugere ambos os campos; o botão de IA não aparece. Foto inserida depois de texto revela ação circular de 56 ao lado de Escolher local. A análise só ocorre por esse botão neste segundo caso. Não sobrescrever edição feita durante a requisição; não chamar fallback textual de análise visual. O cidadão revisa o relato e segue para Local e Revisão.
+
+## Desktop e painel municipal
+
+A partir de 1100 px, o aplicativo cidadão usa navegação lateral persistente, área de conteúdo de até 1200 px e carrosséis com cards de até 360 px. Formulários de registro preservam o limite de 760 px. Abaixo desse ponto, mantém barra inferior, menu por gesto e composição móvel. Redimensionar a janela não remonta a árvore de rotas.
+
+O painel municipal importa as paletas diretamente de theme/colors.ts. Instrument Sans é servida localmente com sua licença em municipal/src/assets/. Campos, botões, estados, fotografias e comentários seguem a mesma identidade; tabelas e área de encaminhamento preservam a densidade necessária à gestão. O seletor Aparência oferece Sistema, Claro e Escuro com persistência local.
+
+## Apresentação inicial e estados vazios
+
+Quatro etapas apresentam território, registro com foto e local, propostas/consultas e acompanhamento/avaliação. O primeiro acesso oferece Pular e Começar; ambos concluem a apresentação neste aparelho, sem alterar conta ou município. O menu Como funciona reabre o mesmo conteúdo e permite voltar ao ponto anterior. A apresentação inicial não espera a autenticação remota.
+
+Usar somente os cinco SVGs originais selecionados do pacote Notion Resources Freebie fornecido pelo usuário (procedência em assets/illustrations/README.md). Renderizar com expo-image, sem rasterizar ou buscar imagens externas. O fundo claro das ilustrações preserva os traços pretos também no tema escuro. Estados vazios ilustrados se limitam a Acompanhar e Participar; erros de rede continuam com recuperação própria.

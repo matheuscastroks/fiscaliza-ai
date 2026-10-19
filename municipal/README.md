@@ -19,3 +19,7 @@ Consultas e ações podem abranger todo o município, um bairro ou um local espe
 A sessão é hidratada por `/api/auth/me`, mantida por cookie HTTP-only e enviada com `credentials: include`. O token de login não é armazenado. O painel bloqueia contas de cidadão e contas de gestão sem município autorizado. O nome e a UF vêm da sessão; não há seletor de município ou consulta de CEP para conceder acesso. A API continua sendo a autoridade nas operações e no isolamento territorial dos dados. Os dados são relidos após gravação, ao voltar à janela e pelo botão Atualizar. Os campos ficam preservados se a gravação falhar.
 
 Sobre concentra a identificação acadêmica. Controles de apresentação aparecem somente para administrador, com confirmação textual antes da restauração.
+
+## Identidade e aparência
+
+O painel reutiliza as paletas de theme/colors.ts do aplicativo cidadão e a fonte Instrument Sans local (licença incluída em src/assets/). O controle Aparência na navegação permite Sistema, Claro ou Escuro. A preferência fica salva no navegador; em Sistema, acompanha alterações do aparelho. O build Docker copia o arquivo compartilhado de cores.
