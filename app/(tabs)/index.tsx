@@ -27,6 +27,7 @@ import {
 import type { CivicItem, Occurrence } from '@/shared/contracts';
 import { useAuthStore } from '@/stores/authStore';
 import { useTerritorySelection } from '@/stores/territoryStore';
+import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
 
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -202,15 +203,14 @@ export default function HomeScreen() {
         />
         {ready && !highlights.length && localOccurrences.length === 0 && (
           <View style={cityStyles.section}>
-            <AppText variant="sectionTitle">Acompanhe este território</AppText>
-            <AppText color="muted">
-              Não há novas respostas, consultas próximas do encerramento ou
-              entregas recentes neste recorte.
-            </AppText>
-            <AppButton
-              title="Explorar o território"
-              variant="secondary"
-              onPress={() => router.push('/(tabs)/TerritoryScreen')}
+            <IllustratedEmptyState
+              kind="territory"
+              title="Acompanhe este território"
+              description="Não há novas respostas, consultas próximas do encerramento ou entregas recentes neste recorte."
+              action={{
+                title: 'Explorar o território',
+                onPress: () => router.push('/(tabs)/TerritoryScreen'),
+              }}
             />
           </View>
         )}
@@ -266,9 +266,11 @@ export default function HomeScreen() {
             <CivicRow key={item.id} item={item} />
           ))}
           {civic.data && consultations.length === 0 && (
-            <AppText color="muted">
-              Nenhuma consulta com prazo aberto neste recorte.
-            </AppText>
+            <IllustratedEmptyState
+              kind="consultation"
+              description="Nenhuma consulta com prazo aberto neste recorte. Quando a gestão abrir consultas ou audiências com a população, elas aparecerão aqui."
+              height={140}
+            />
           )}
         </View>
         <View style={cityStyles.section}>
@@ -277,9 +279,11 @@ export default function HomeScreen() {
             <CivicRow key={item.id} item={item} />
           ))}
           {civic.data && actions.length === 0 && (
-            <AppText color="muted">
-              Nenhuma ação programada ou em andamento neste recorte.
-            </AppText>
+            <IllustratedEmptyState
+              kind="action"
+              description="Nenhuma ação pública programada ou em andamento neste recorte."
+              height={140}
+            />
           )}
         </View>
         <View style={cityStyles.section}>
@@ -297,9 +301,11 @@ export default function HomeScreen() {
             />
           ))}
           {activity.data && localActivity.length === 0 && (
-            <AppText color="muted">
-              Seus registros e acompanhamentos deste território aparecerão aqui.
-            </AppText>
+            <IllustratedEmptyState
+              kind="empty"
+              description="Seus registros e acompanhamentos deste território aparecerão aqui."
+              height={140}
+            />
           )}
           <AppButton
             title="Ver todos os acompanhamentos"

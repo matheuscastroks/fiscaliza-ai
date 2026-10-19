@@ -9,6 +9,9 @@ const illustrations = {
   participation: require('@/assets/illustrations/nc-design-proposal.svg'),
   results: require('@/assets/illustrations/nc-reviewing.svg'),
   empty: require('@/assets/illustrations/nc-no-answer.svg'),
+  target: require('@/assets/illustrations/oc-target.svg'),
+  consultation: require('@/assets/illustrations/nc-research-panel.svg'),
+  action: require('@/assets/illustrations/oc-puzzle.svg'),
 };
 export type IllustrationKind = keyof typeof illustrations;
 

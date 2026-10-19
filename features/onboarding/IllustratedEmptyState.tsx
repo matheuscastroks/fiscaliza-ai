@@ -9,11 +9,13 @@ export function IllustratedEmptyState({
   description,
   kind = 'empty',
   action,
+  height = 170,
 }: {
-  title: string;
+  title?: string;
   description: string;
   kind?: IllustrationKind;
   action?: { title: string; onPress: () => void };
+  height?: number;
 }) {
   return (
     <View
@@ -25,9 +27,9 @@ export function IllustratedEmptyState({
         alignSelf: 'center',
       }}
     >
-      <Illustration kind={kind} height={170} label={title} />
+      <Illustration kind={kind} height={height} label={title || description} />
       <View style={{ gap: spacing.xs }}>
-        <AppText variant="sectionTitle">{title}</AppText>
+        {Boolean(title) && <AppText variant="sectionTitle">{title}</AppText>}
         <AppText color="muted">{description}</AppText>
       </View>
       {action && (

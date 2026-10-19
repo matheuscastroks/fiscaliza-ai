@@ -25,6 +25,7 @@ import {
   kindLabel,
   statusLabel,
 } from '@/features/city/CityUI';
+import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import {
@@ -569,14 +570,15 @@ function TerritoryContent() {
             </AppText>
             {listed.map(renderEntry)}
             {dataReady && listed.length === 0 && (
-              <>
-                <AppText color="muted">Nenhum resultado neste recorte.</AppText>
-                <AppButton
-                  title="Limpar filtros"
-                  variant="secondary"
-                  onPress={resetFilters}
-                />
-              </>
+              <IllustratedEmptyState
+                kind="territory"
+                title="Nenhum resultado neste recorte"
+                description="Nenhuma ocorrência, proposta, consulta ou ação encontrada com os filtros atuais."
+                action={{
+                  title: 'Limpar filtros',
+                  onPress: resetFilters,
+                }}
+              />
             )}
           </View>
         )}

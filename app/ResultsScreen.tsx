@@ -18,6 +18,8 @@ import {
   occurrenceMatchesNeighborhood,
 } from '@/shared/civic-territory';
 import type { CivicItem, Occurrence } from '@/shared/contracts';
+import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
+
 export default function ResultsScreen() {
   const cityStyles = useThemedStyles(createCityStyles);
 
@@ -74,39 +76,66 @@ export default function ResultsScreen() {
             void occurrences.refetch();
           }}
         />
-        <View style={cityStyles.section}>
-          <AppText variant="sectionTitle">Decisões e entregas</AppText>
-          {results.map((item) => (
-            <CivicRow key={item.id} item={item} />
-          ))}
-          {civic.data && results.length === 0 && (
-            <AppText color="muted">
-              Ainda não há decisões ou ações concluídas publicadas neste
-              recorte.
-            </AppText>
-          )}
-        </View>
-        <View style={cityStyles.section}>
-          <AppText variant="sectionTitle">Atendimentos concluídos</AppText>
-          {resolved.map((item) => (
-            <OccurrenceRow
-              key={item.id}
-              problem={item}
-              onPress={() =>
-                router.push({
-                  pathname: '/ProblemDetailsScreen',
-                  params: { id: item.id },
-                })
-              }
-            />
-          ))}
-          {occurrences.data && resolved.length === 0 && (
-            <AppText color="muted">
-              Os atendimentos aparecerão aqui quando a gestão publicar a
-              conclusão.
-            </AppText>
-          )}
-        </View>
+        {civic.data &&
+        occurrences.data &&
+        !civic.error &&
+        !occurrences.error &&
+        results.length === 0 &&
+        resolved.length === 0 ? (
+          <IllustratedEmptyState
+            kind="target"
+            title="Nenhum resultado neste recorte"
+            description={
+              neighborhood
+                ? 'Ainda não há decisões ou atendimentos concluídos para este bairro. Você pode selecionar outro bairro ou ver todo o município.'
+                : 'Decisões publicadas, ações concluídas e atendimentos com retorno à comunidade aparecerão aqui assim que a gestão prestar contas.'
+            }
+            action={
+              neighborhood
+                ? {
+                    title: 'Ver todo o município',
+                    onPress: () => setNeighborhood(''),
+                  }
+                : undefined
+            }
+          />
+        ) : (
+          <>
+            <View style={cityStyles.section}>
+              <AppText variant="sectionTitle">Decisões e entregas</AppText>
+              {results.map((item) => (
+                <CivicRow key={item.id} item={item} />
+              ))}
+              {civic.data && results.length === 0 && (
+                <AppText color="muted">
+                  Ainda não há decisões ou ações concluídas publicadas neste
+                  recorte.
+                </AppText>
+              )}
+            </View>
+            <View style={cityStyles.section}>
+              <AppText variant="sectionTitle">Atendimentos concluídos</AppText>
+              {resolved.map((item) => (
+                <OccurrenceRow
+                  key={item.id}
+                  problem={item}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/ProblemDetailsScreen',
+                      params: { id: item.id },
+                    })
+                  }
+                />
+              ))}
+              {occurrences.data && resolved.length === 0 && (
+                <AppText color="muted">
+                  Os atendimentos aparecerão aqui quando a gestão publicar a
+                  conclusão.
+                </AppText>
+              )}
+            </View>
+          </>
+        )}
       </ScrollView>
     </AppScreen>
   );
