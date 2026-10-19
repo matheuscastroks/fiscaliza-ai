@@ -4,6 +4,7 @@ import { router, usePathname, type Href } from 'expo-router';
 import { useTheme } from '@/theme/useTheme';
 import { useAuthStore } from '@/stores/authStore';
 import { AppText } from './AppText';
+import { AppBrandGlyph } from './AppBrandGlyph';
 import { UserAvatar } from './UserAvatar';
 import { useSignOutSheet } from './SignOutSheet';
 
@@ -39,7 +40,20 @@ export function DesktopNavigation() {
         onPress={() => router.push('/')}
         accessibilityRole="link"
         accessibilityLabel="Fiscaliza aí, início"
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}
       >
+        <View
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 17,
+            backgroundColor: colors.ink,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <AppBrandGlyph size={18} color={colors.onAccent} />
+        </View>
         <AppText variant="screenTitle">Fiscaliza aí</AppText>
       </Pressable>
       <View style={{ gap: 4 }}>

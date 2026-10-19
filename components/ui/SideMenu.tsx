@@ -10,6 +10,7 @@ import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { create } from 'zustand';
 import { AppText } from './AppText';
+import { AppBrandGlyph } from './AppBrandGlyph';
 
 export const useMenu = create<{
   open: boolean;
@@ -149,10 +150,10 @@ export function SideMenu({
         <View style={styles.headerBar}>
           <View style={styles.brandRow}>
             <View style={styles.brandIconWrapper}>
-              <Ionicons
-                name="shield-checkmark"
-                size={18}
+              <AppBrandGlyph
+                size={22}
                 color={colors.onAccent}
+                active={visible}
               />
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
