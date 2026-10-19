@@ -2,8 +2,13 @@ import { useState } from 'react';
 import type { CivicItem, PublicAction } from '../../shared/contracts';
 import { api } from './api';
 import {
-  civicTerritoryDraft, civicTerritoryLabel, serializeCivicTerritory,
-  date, isoDate, labels, type CivicTerritoryDraft,
+  civicTerritoryDraft,
+  civicTerritoryLabel,
+  serializeCivicTerritory,
+  date,
+  isoDate,
+  labels,
+  type CivicTerritoryDraft,
 } from './domain';
 import { AsyncForm, Badge, Comments, EvidenceInput, Field, Images } from './ui';
 type Kind = CivicItem['kind'];
@@ -102,6 +107,14 @@ export function Civic({
               {filtered.map((i) => (
                 <tr key={i.id}>
                   <td>
+                    {i.kind === 'proposal' && i.images?.[0] && (
+                      <img
+                        className="record-thumbnail"
+                        src={i.images![0]}
+                        alt=""
+                        loading="lazy"
+                      />
+                    )}
                     <button
                       className="row-link"
                       onClick={() => setSelected(i.id)}
@@ -315,7 +328,14 @@ function CivicDetail({
       <button className="text-button back" onClick={onBack}>
         ← Voltar à lista
       </button>
-      <header className="page-heading">
+      {item.kind === 'proposal' && item.images?.[0] && (
+        <div className="record-cover">
+          <img src={item.images![0]} alt="Imagem do registro" />
+        </div>
+      )}
+      <header
+        className={`page-heading ${'images' in item && item.images?.length ? 'photo-heading' : ''}`}
+      >
         <div>
           <h1>{item.title}</h1>
           <p>
@@ -332,8 +352,11 @@ function CivicDetail({
             {item.kind === 'proposal' && <Images urls={item.images || []} />}
             {item.territory?.scope === 'location' && (
               <p className="muted">
-                {item.territory.location.address && <>{item.territory.location.address} · </>}
-                Latitude {item.territory.location.latitude}, longitude {item.territory.location.longitude}
+                {item.territory.location.address && (
+                  <>{item.territory.location.address} · </>
+                )}
+                Latitude {item.territory.location.latitude}, longitude{' '}
+                {item.territory.location.longitude}
               </p>
             )}
             <p className="muted">
@@ -573,7 +596,10 @@ function CivicDetail({
     </>
   );
 }
-function TerritoryFields({ value, onChange }: {
+function TerritoryFields({
+  value,
+  onChange,
+}: {
   value: CivicTerritoryDraft;
   onChange: (value: CivicTerritoryDraft) => void;
 }) {
@@ -582,7 +608,10 @@ function TerritoryFields({ value, onChange }: {
   return (
     <>
       <Field label="Abrangência">
-        <select value={value.scope} onChange={(e) => change('scope', e.target.value)}>
+        <select
+          value={value.scope}
+          onChange={(e) => change('scope', e.target.value)}
+        >
           <option value="municipality">Todo o município</option>
           <option value="neighborhood">Bairro</option>
           <option value="location">Local específico</option>
@@ -590,26 +619,50 @@ function TerritoryFields({ value, onChange }: {
       </Field>
       {value.scope !== 'municipality' && (
         <Field label="Bairro da abrangência">
-          <input required maxLength={120} value={value.neighborhood}
-            onChange={(e) => change('neighborhood', e.target.value)} />
+          <input
+            required
+            maxLength={120}
+            value={value.neighborhood}
+            onChange={(e) => change('neighborhood', e.target.value)}
+          />
         </Field>
       )}
       {value.scope === 'location' && (
         <>
-          <p className="muted">Informe as coordenadas reais do local. O serviço valida se pertencem ao município da sessão.</p>
+          <p className="muted">
+            Informe as coordenadas reais do local. O serviço valida se pertencem
+            ao município da sessão.
+          </p>
           <div className="form-columns">
             <Field label="Latitude">
-              <input required type="number" min={-90} max={90} step="any" value={value.latitude}
-                onChange={(e) => change('latitude', e.target.value)} />
+              <input
+                required
+                type="number"
+                min={-90}
+                max={90}
+                step="any"
+                value={value.latitude}
+                onChange={(e) => change('latitude', e.target.value)}
+              />
             </Field>
             <Field label="Longitude">
-              <input required type="number" min={-180} max={180} step="any" value={value.longitude}
-                onChange={(e) => change('longitude', e.target.value)} />
+              <input
+                required
+                type="number"
+                min={-180}
+                max={180}
+                step="any"
+                value={value.longitude}
+                onChange={(e) => change('longitude', e.target.value)}
+              />
             </Field>
           </div>
           <Field label="Endereço ou referência (opcional)">
-            <input maxLength={300} value={value.address}
-              onChange={(e) => change('address', e.target.value)} />
+            <input
+              maxLength={300}
+              value={value.address}
+              onChange={(e) => change('address', e.target.value)}
+            />
           </Field>
         </>
       )}

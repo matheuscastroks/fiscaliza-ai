@@ -116,6 +116,14 @@ export function Occurrences({
               {filtered.map((i) => (
                 <tr key={i.id}>
                   <td>
+                    {i.images?.[0] && (
+                      <img
+                        className="record-thumbnail"
+                        src={i.images![0]}
+                        alt=""
+                        loading="lazy"
+                      />
+                    )}
                     <button
                       className="row-link"
                       onClick={() => setSelected(i.id)}
@@ -176,7 +184,14 @@ function OccurrenceDetail({
       <button className="text-button back" onClick={onBack}>
         ← Voltar à fila
       </button>
-      <header className="page-heading">
+      {item.images?.[0] && (
+        <div className="record-cover">
+          <img src={item.images![0]} alt="Imagem do registro" />
+        </div>
+      )}
+      <header
+        className={`page-heading ${'images' in item && item.images?.length ? 'photo-heading' : ''}`}
+      >
         <div>
           <p className="protocol">Protocolo {item.id}</p>
           <h1>{item.title}</h1>

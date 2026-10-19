@@ -156,11 +156,26 @@ export function Comments({
     <section className="section">
       <h3>Conversa com o cidadão</h3>
       {comments.length ? (
-        <ol className="timeline">
+        <ol className="timeline comment-list">
           {comments.map((c) => (
             <li key={c.id}>
-              <strong>{c.userName}</strong>
-              <time dateTime={c.createdAt}>{date(c.createdAt)}</time>
+              <div className="comment-profile">
+                {c.avatar ? (
+                  <img
+                    src={c.avatar}
+                    alt={`Foto de ${c.userName}`}
+                    loading="lazy"
+                  />
+                ) : (
+                  <span className="comment-avatar" aria-hidden="true">
+                    {c.userName.slice(0, 1)}
+                  </span>
+                )}
+                <div>
+                  <strong>{c.userName}</strong>
+                  <time dateTime={c.createdAt}>{date(c.createdAt)}</time>
+                </div>
+              </div>
               <p>{c.text}</p>
             </li>
           ))}
