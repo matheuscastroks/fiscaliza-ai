@@ -33,3 +33,21 @@ export function withinMunicipalBounds(
     point.longitude <= municipality.bounds.east,
   );
 }
+
+export function regionToCameraPosition(region: {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+}) {
+  const delta = Math.max(region.latitudeDelta, region.longitudeDelta, 0.001);
+  const zoom = Math.max(3, Math.min(18, Math.round(Math.log2(360 / delta))));
+  return {
+    coordinates: {
+      latitude: region.latitude,
+      longitude: region.longitude,
+    },
+    zoom,
+  };
+}
+

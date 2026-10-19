@@ -2,7 +2,7 @@ import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { layout } from '@/theme/layout';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Platform,
   Pressable,
@@ -10,8 +10,14 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { requireOptionalNativeModule } from 'expo';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
+import type {
+  AppleMaps as AppleMapsNamespace,
+  CameraMoveEvent,
+  GoogleMaps as GoogleMapsNamespace,
+} from 'expo-maps';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
@@ -48,17 +54,31 @@ import type { CivicItem, Occurrence } from '@/shared/contracts';
 import { spacing } from '@/theme/spacing';
 import { useAuthStore } from '@/stores/authStore';
 import { useTerritorySelection } from '@/stores/territoryStore';
-import { municipalityRegion } from '@/features/city/municipalContext';
+import {
+  municipalityRegion,
+  regionToCameraPosition,
+} from '@/features/city/municipalContext';
 
-// Native maps are excluded from the web bundle.
-let NativeMap: any = null;
-let Marker: any = null;
-if (Platform.OS !== 'web') {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const maps = require('react-native-maps');
-  NativeMap = maps.default;
-  Marker = maps.Marker;
+// Native maps are excluded from the web bundle and checked before loading so Expo Go does not crash.
+let AppleMaps: typeof AppleMapsNamespace | null = null;
+let GoogleMaps: typeof GoogleMapsNamespace | null = null;
+if (Platform.OS !== 'web' && requireOptionalNativeModule('ExpoMaps')) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const maps = require('expo-maps') as {
+      AppleMaps: typeof AppleMapsNamespace;
+      GoogleMaps: typeof GoogleMapsNamespace;
+    };
+    AppleMaps = maps.AppleMaps;
+    GoogleMaps = maps.GoogleMaps;
+  } catch {
+    AppleMaps = null;
+    GoogleMaps = null;
+  }
 }
+const hasNativeMap =
+  (Platform.OS === 'ios' && Boolean(AppleMaps)) ||
+  (Platform.OS === 'android' && Boolean(GoogleMaps));
 
 type Kind = 'all' | 'occurrences' | CivicItem['kind'];
 type Entry =
@@ -117,7 +137,7 @@ function TerritoryContent() {
   const [kind, setKind] = useState<Kind>('all');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
-  const [map, setMap] = useState(Platform.OS !== 'web');
+  const [map, setMap] = useState(hasNativeMap);
   const { filters } = useLocalSearchParams<{ filters?: string }>();
   const [filterVisibility, setFilterVisibility] = useState<{
     param?: string;
@@ -247,6 +267,65 @@ function TerritoryContent() {
       )}
     </View>
   );
+  const mapRef = useRef<
+    AppleMapsNamespace.MapView | GoogleMapsNamespace.MapView | null
+  >(null);
+  const initialCamera = useMemo(
+    () => regionToCameraPosition(initial),
+    [initial],
+  );
+  const appleMarkers: AppleMapsNamespace.Marker[] = located.flatMap((entry) => {
+    const point = entryLocation(entry);
+    if (!point) return [];
+    return [
+      {
+        id: entry.item.id,
+        coordinates: {
+          latitude: point.latitude,
+          longitude: point.longitude,
+        },
+        title: `${entry.type === 'occurrence' ? 'Ocorrência' : kindLabel[entry.item.kind]} · ${entry.item.title}`,
+        tintColor:
+          entry.type === 'occurrence'
+            ? colors.accent
+            : pinColors[entry.item.kind],
+      },
+    ];
+  });
+  const googleMarkers: GoogleMapsNamespace.Marker[] = located.flatMap(
+    (entry) => {
+      const point = entryLocation(entry);
+      if (!point) return [];
+      return [
+        {
+          id: entry.item.id,
+          coordinates: {
+            latitude: point.latitude,
+            longitude: point.longitude,
+          },
+          title: `${entry.type === 'occurrence' ? 'Ocorrência' : kindLabel[entry.item.kind]} · ${entry.item.title}`,
+          snippet:
+            entry.type === 'occurrence'
+              ? `${occurrenceStatus[entry.item.status]} · ${entry.item.location.address}`
+              : `${statusLabel[entry.item.status]} · ${entry.item.neighborhood}`,
+          showCallout: true,
+        },
+      ];
+    },
+  );
+  const handleCameraMove = (event: CameraMoveEvent) => {
+    if (
+      typeof event.coordinates.latitude === 'number' &&
+      typeof event.coordinates.longitude === 'number'
+    ) {
+      setRegion((current) => ({
+        latitude: event.coordinates.latitude!,
+        longitude: event.coordinates.longitude!,
+        latitudeDelta: event.latitudeDelta || current.latitudeDelta,
+        longitudeDelta: event.longitudeDelta || current.longitudeDelta,
+      }));
+    }
+  };
   const resetFilters = () => {
     setOrder('date');
     setPeriod(0);
@@ -270,11 +349,15 @@ function TerritoryContent() {
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
-      setRegion((current) => ({
-        ...current,
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      }));
+      setRegion((current) => {
+        const nextRegion = {
+          ...current,
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        };
+        mapRef.current?.setCameraPosition(regionToCameraPosition(nextRegion));
+        return nextRegion;
+      });
       setLocationMessage('');
     } catch {
       setLocationMessage(
@@ -472,35 +555,46 @@ function TerritoryContent() {
             {locationMessage}
           </AppText>
         )}
-        {map && NativeMap && (
+        {map && hasNativeMap && (
           <View style={cityStyles.section}>
             <View style={styles.mapFrame}>
-              <NativeMap
-                userInterfaceStyle={mode}
-                style={styles.map}
-                region={region}
-                onRegionChangeComplete={setRegion}
-              >
-                {located.map((entry) => (
-                  <Marker
-                    key={entry.type + entry.item.id}
-                    coordinate={entryLocation(entry)}
-                    title={`${entry.type === 'occurrence' ? 'Ocorrência' : kindLabel[entry.item.kind]} · ${entry.item.title}`}
-                    description={
-                      entry.type === 'occurrence'
-                        ? `${occurrenceStatus[entry.item.status]} · ${entry.item.location.address}`
-                        : `${statusLabel[entry.item.status]} · ${entry.item.neighborhood}`
-                    }
-                    pinColor={
-                      entry.type === 'occurrence'
-                        ? colors.accent
-                        : pinColors[entry.item.kind]
-                    }
-                    onPress={() => setSelectedId(entry.item.id)}
-                    onCalloutPress={() => openEntry(entry)}
-                  />
-                ))}
-              </NativeMap>
+              {Platform.OS === 'ios' && AppleMaps ? (
+                <AppleMaps.View
+                  ref={
+                    mapRef as React.RefObject<AppleMapsNamespace.MapView | null>
+                  }
+                  style={styles.map}
+                  colorScheme={
+                    mode === 'dark'
+                      ? AppleMaps.MapColorScheme.DARK
+                      : AppleMaps.MapColorScheme.LIGHT
+                  }
+                  cameraPosition={initialCamera}
+                  markers={appleMarkers}
+                  onCameraMove={handleCameraMove}
+                  onMarkerClick={(marker) => {
+                    if (marker.id) setSelectedId(marker.id);
+                  }}
+                />
+              ) : Platform.OS === 'android' && GoogleMaps ? (
+                <GoogleMaps.View
+                  ref={
+                    mapRef as React.RefObject<GoogleMapsNamespace.MapView | null>
+                  }
+                  style={styles.map}
+                  colorScheme={
+                    mode === 'dark'
+                      ? GoogleMaps.MapColorScheme.DARK
+                      : GoogleMaps.MapColorScheme.LIGHT
+                  }
+                  cameraPosition={initialCamera}
+                  markers={googleMarkers}
+                  onCameraMove={handleCameraMove}
+                  onMarkerClick={(marker) => {
+                    if (marker.id) setSelectedId(marker.id);
+                  }}
+                />
+              ) : null}
               <View style={styles.mapActions}>
                 <Pressable
                   accessibilityRole="button"
@@ -523,6 +617,9 @@ function TerritoryContent() {
                   accessibilityLabel="Voltar ao município"
                   onPress={() => {
                     setRegion(initial);
+                    mapRef.current?.setCameraPosition(
+                      regionToCameraPosition(initial),
+                    );
                     setAreaOnly(false);
                     setSelectedId(null);
                   }}
@@ -561,6 +658,23 @@ function TerritoryContent() {
                 onPress={() => setShowUnlocated(!showUnlocated)}
               />
             )}
+          </View>
+        )}
+        {map && !hasNativeMap && (
+          <View style={styles.filters}>
+            <AppText variant="label">
+              Mapa nativo requer Development Build
+            </AppText>
+            <AppText color="muted">
+              O módulo nativo expo-maps não está incluído no cliente Expo Go
+              padrão. Execute npx expo run:android ou npx expo run:ios para
+              habilitar o mapa nativo, ou explore os registros pela lista.
+            </AppText>
+            <AppButton
+              title="Ver lista do território"
+              variant="secondary"
+              onPress={() => setMap(false)}
+            />
           </View>
         )}
         {!map && (
