@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { View } from 'react-native';
 import { useTheme } from '@/theme/useTheme';
-import { layout, spacing } from '@/theme';
+import { spacing } from '@/theme';
 
 const illustrations = {
   territory: require('@/assets/illustrations/oc-project-development.svg'),
@@ -15,7 +15,7 @@ const illustrations = {
 };
 export type IllustrationKind = keyof typeof illustrations;
 
-/** Original SVGs on a light backing preserve their black outlines in both themes. */
+/** Adapts stroke and fill to current theme ink color (light/dark) with transparent background. */
 export function Illustration({
   kind,
   height = 260,
@@ -33,15 +33,14 @@ export function Illustration({
         width: '100%',
         maxWidth: 440,
         alignSelf: 'center',
-        borderRadius: layout.radius.sheet,
-        backgroundColor: colors.white,
-        padding: spacing.xl,
+        paddingVertical: spacing.xs,
         overflow: 'hidden',
       }}
     >
       <Image
         source={illustrations[kind]}
         contentFit="contain"
+        tintColor={colors.ink}
         style={{ width: '100%', height: '100%' }}
         accessibilityLabel={label}
       />
