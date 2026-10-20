@@ -62,7 +62,7 @@ export function DesktopNavigation() {
           {user?.municipality?.name || 'Rio de Janeiro · RJ'}
         </AppText>
         <AppText variant="caption" color="muted">
-          Inteligência Urbana · Central 1746
+          Inteligência urbana · Rio
         </AppText>
       </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ gap: 8 }}>

@@ -22,36 +22,36 @@ const slides: {
 }[] = [
   {
     id: 'territory',
-    title: 'Conheça o território',
+    title: 'Explore o Rio',
     description:
-      'Veja problemas, propostas, consultas e ações do seu município.',
+      'Encontre escolas, unidades de saúde, espaços públicos e demandas do 1746 no mapa.',
     imageLabel: 'Pessoas planejando e acompanhando um projeto',
-    note: 'Seu CEP conecta você ao município onde mora.',
+    note: 'Você pode explorar os dados públicos sem entrar na conta.',
   },
   {
     id: 'report',
-    title: 'Registre o que precisa mudar',
+    title: 'Conheça seu bairro',
     description:
-      'Encontrou um problema? Adicione uma foto, conte o que aconteceu e indique o local.',
+      'Escolha um bairro para consultar seus equipamentos e demandas no período que interessa.',
     imageLabel: 'Mãos registrando informações em uma prancheta',
-    note: 'Antes de registrar, confira se alguém já relatou o mesmo problema.',
+    note: 'Cada fonte informa sua publicação; dados antigos não significam situação atual.',
   },
   {
     id: 'participation',
-    title: 'Proponha e participe',
+    title: 'Contribua com a cidade',
     description:
-      'Sugira melhorias, apoie ideias e responda consultas sobre a cidade.',
+      'Compartilhe necessidades e propostas com a comunidade, nos espaços de participação.',
     imageLabel:
       'Uma proposta representada por um avião de papel chegando ao alvo',
-    note: 'Ocorrências pedem atendimento. Propostas apresentam uma melhoria.',
+    note: 'Contribuições no app não abrem chamados no 1746 nem representam decisões da prefeitura.',
   },
   {
     id: 'results',
-    title: 'Acompanhe e avalie',
+    title: 'Salve e acompanhe',
     description:
-      'Veja as respostas da gestão, acompanhe as ações e avalie os serviços concluídos.',
+      'Salve os chamados de seu interesse e consulte as atualizações publicadas na base.',
     imageLabel: 'Pessoas avaliando juntas o resultado de um trabalho',
-    note: 'Suas contribuições e os registros que você segue ficam em Acompanhar.',
+    note: 'Fiscaliza Aí é independente. O atendimento municipal continua nos canais oficiais.',
   },
 ];
 

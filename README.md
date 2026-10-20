@@ -1,8 +1,8 @@
 # Fiscaliza aí — Plataforma de Inteligência Urbana do Rio de Janeiro
 
-Plataforma inteligente de exploração e análise de dados públicos urbanos com foco no município do Rio de Janeiro (IBGE `3304557`). A aplicação agrega dados oficiais da Central 1746 (DATA.RIO via Google BigQuery), democratizando o acesso a informações públicas sobre chamados, serviços, prazos de atendimento, secretarias e distribuição territorial na cidade.
+Plataforma independente de inteligência urbana e participação cidadã no Rio de Janeiro (IBGE 3304557). Combina demandas do 1746 e cadastros oficiais de escolas, saúde, espaços públicos e bairros, com origem e cobertura explícitas. Não representa a prefeitura nem abre chamados no 1746.
 
-Aplicativo Expo Android/iOS/Web e API TypeScript/PostgreSQL. A plataforma integra os dados oficiais da Prefeitura do Rio com as camadas participativas existentes (propostas comunitárias, consultas e ações públicas).
+Aplicativo Expo Android/iOS/web e API Fastify/PostgreSQL. Consulte [PRODUCT.md](PRODUCT.md) para escopo e limites de interpretação.
 
 ## Organização
 
@@ -20,7 +20,7 @@ O Fiscaliza Aí conecta-se diretamente ao repositório público do DATA.RIO no G
 
 ### Princípios da Integração
 1. **Desacoplamento**: O cliente mobile/web nunca consulta o BigQuery diretamente. Todas as leituras passam pelo PostgreSQL sincronizado.
-2. **Controle de Custos e Particionamento**: Todas as consultas ao BigQuery são limitadas por partição diária (`data_particao`), possuem `maximumBytesBilled` restrito (500 MB) e executam dry runs prévios.
+2. **Controle de Custos e Particionamento**: Todas as consultas ao BigQuery são limitadas por partição diária (`data_particao`), compartilham um orçamento por execução (500 MB por padrão), executam dry runs e definem maximumBytesBilled pelo saldo disponível.
 3. **Privacidade e Proteção de Dados**: Número de logradouro residencial é omitido da API pública; a base não contém dados pessoais identificáveis (CPF/nome).
 4. **Resiliência Espacial**: Coordenadas geográficas fora do polígono do município do Rio de Janeiro ou inválidas (0,0) são tratadas com segurança mantendo o registro oficial acessível por bairro/região.
 
@@ -29,9 +29,8 @@ O Fiscaliza Aí conecta-se diretamente ao repositório público do DATA.RIO no G
 Para executar uma sincronização pontual de partição a partir do BigQuery para o PostgreSQL local:
 
 ```powershell
-npm run sync:rio1746 --prefix backend
-# Ou especificando data da partição e limite:
-npm run sync:rio1746 --prefix backend 2026-09-20 2000
+# Data explícita e limite de registros; confira a CLI antes de executar em produção.
+npm run sync:rio1746 --prefix backend -- 2026-09-20 2000
 ```
 
 Consulte [docs/integracoes/rio1746-diagnostico.md](docs/integracoes/rio1746-diagnostico.md) para a análise detalhada da estrutura da tabela e métricas de volume.
@@ -60,6 +59,7 @@ npm start --prefix backend
 Para autenticação com o BigQuery durante o desenvolvimento local:
 ```powershell
 gcloud auth application-default login
+$env:GCP_PROJECT_ID="seu-projeto-de-faturamento"
 ```
 
 Copie `.env.example` para `.env`, configure `EXPO_PUBLIC_API_URL` e execute `npm start`.
@@ -71,3 +71,18 @@ Copie `.env.example` para `.env`, configure `EXPO_PUBLIC_API_URL` e execute `npm
 - `npm run lint`: linter oficial Expo.
 - `npm test --prefix backend`: suite de testes do backend Fastify e integração BigQuery/1746.
 - `npm run typecheck --prefix backend`: verificação de tipos do backend.
+
+## Cadastros territoriais SIURB
+
+Use PostgreSQL UTF-8. Aplique migrações no banco escolhido antes de importar. Não use o banco pessoal para testes. O seed de instalação preserva contas existentes; limpeza é uma operação separada e explícita.
+
+```powershell
+npm run probe:siurb --prefix backend
+# Após definir DATABASE_URL explicitamente e aplicar migrações:
+npm run sync:siurb --prefix backend -- all
+# all importa limites 18 antes de escolas 1, saúde 2 e espaços 16.
+```
+
+O probe lê metadados e amostras; não equivale à extração integral. A importação é administrativa e nunca ocorre como efeito do build ou navegação. Fontes ausentes, cadastros sem nome e bairros sem vínculo são apresentados como tal. Consulte [integração SIURB](backend/src/integrations/siurb/README.md) para limites, codificação e recuperação e [evidência das fontes](plan/evidence/20-siurb-fontes.md) para licença e contagens reais.
+
+Leituras públicas: /api/data-sources, /api/public-facilities (paginado), /api/territorial-boundaries e seus detalhes, /api/neighborhoods/:id/overview?startDate=AAAA-MM-DD&endDate=AAAA-MM-DD. O OpenAPI gerado com npm run openapi --prefix backend documenta os schemas e é publicado como artefato de validação no CI.

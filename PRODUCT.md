@@ -1,39 +1,32 @@
-# Fiscaliza aí — Produto
+# Fiscaliza Aí — Produto
 
 ## Posicionamento
 
-Plataforma inteligente de exploração e análise de dados públicos urbanos com foco exclusivo no município do Rio de Janeiro (IBGE `3304557`). A aplicação agrega dados oficiais da Central 1746 (DATA.RIO via Google BigQuery), democratizando o acesso a informações públicas sobre chamados, serviços, prazos de atendimento, secretarias e distribuição territorial na cidade.
+Uma plataforma independente de inteligência urbana e participação cidadã que transforma dados públicos do Rio em informações acessíveis, territorializadas e úteis para entender, acompanhar e participar da vida da cidade.
 
-A plataforma integra os registros oficiais com as camadas participativas existentes (propostas cidadãs, consultas e ações públicas), permitindo ao cidadão compreender profundamente a infraestrutura da cidade sem a pretensão de abrir novos chamados no 1746 neste estágio inicial.
+O território organiza a experiência. O 1746 é uma camada de demandas, ao lado dos cadastros de equipamentos públicos. A aplicação não representa a prefeitura e não encaminha contribuições ao 1746.
 
-## Fonte de dados primária
+## Experiências desta entrega
 
-- **DATA.RIO / Central 1746 (BigQuery)**: tabela `datario.adm_central_atendimento_1746.chamado` e tabela mestre `datario.dados_mestres.bairro`.
-- **Arquitetura de sincronização**: Pipeline desacoplado `DATA.RIO (BigQuery) -> Sincronizador Backend -> PostgreSQL -> Fastify API -> Expo Client`. O frontend jamais acessa o BigQuery diretamente.
-- **Transparência e privacidade**: Dados públicos sem informações pessoais identificáveis (PII) de cidadãos. Número de logradouro não é exposto.
+- **Conhecer o bairro:** escolher um bairro canônico do Rio (IBGE 3304557), consultar escolas, saúde e espaços públicos, e examinar demandas em datas explícitas.
+- **Explorar:** combinar camadas no mapa com agrupamento ou em lista; buscar no território e abrir fichas de equipamentos com endereço, contato, horário e origem quando disponíveis.
+- **Entender as evidências:** distinguir período solicitado, extensão disponível, última importação e data de referência. Ausência de publicação é desconhecimento, nunca zero.
+- **Participar e acompanhar:** preservar os espaços comunitários e chamados salvos, distinguindo contribuições internas, dados oficiais e decisões municipais. Nenhuma nova integração operacional de atendimento foi entregue neste ciclo.
 
-## Plataformas
+## Fontes e responsabilidades
 
-Adaptive — aplicativo Expo (Android/iOS) e web cidadão. O mapa territorial conta com suporte a agrupamento dinâmico (clustering) e alternância integrada com visualização em lista.
+SIURB/IPP: escolas (1), saúde (2), espaços públicos (16) e limites de bairros (18). Central 1746/DATA.RIO: demandas via BigQuery. A evidência de uso e atribuição está em plan/evidence/20-siurb-fontes.md.
 
-## Contexto de uso e escopo
+O backend importa e valida; PostgreSQL conserva cadastros e proveniência; Fastify serve contratos públicos; Expo apresenta as evidências em Android/iOS/web. O cliente não consulta os provedores de importação diretamente. O mapa utiliza tiles OpenStreetMap e Leaflet.
 
-Foco exclusivo no município do Rio de Janeiro (`3304557`). Leitura, sincronização periódica, organização, visualização no mapa e interpretação de dados urbanos oficiais.
+Importações administrativas são limitadas, auditadas e protegidas por trava por fonte. Publicações cadastrais são atômicas; falhas preservam a versão anterior. Builds e abertura de telas não sincronizam dados.
 
-## Públicos e responsabilidades
+## Limites do significado
 
-- **Cidadão / Pesquisador urbano**: explora problemas oficiais registrados, visualiza no mapa e em lista com filtros de bairro, tipo de serviço, situação e período; acompanha indicadores públicos e propõe iniciativas.
-- **Gestão / Monitoramento**: visualiza a distribuição territorial de chamados por secretaria (COMLURB, CET-RIO, RIOLUZ, etc.) e taxas de resolução dentro do prazo.
+Quantidade de equipamentos não mede vagas, capacidade, funcionamento ou qualidade. Ponto derivado de polígono não indica entrada. Bairro ambíguo continua sem vínculo. Muitos chamados próximos a uma escola não estabelecem causalidade ou responsabilidade. Extração completa de um cadastro não confirma atualização na origem nem cobertura histórica contínua do 1746.
 
-## Jornadas
+Não completar campos ausentes com nomes, horários, imagens ou indicadores inventados. Nenhuma foto genérica representa uma unidade real.
 
-1. **Inteligência 1746**: visão geral de chamados → métricas da cidade → filtros por bairro e tipo de serviço → detalhamento oficial de prazo e órgão executor.
-2. **Exploração Territorial**: mapa interativo com pins oficiais e clustering inteligente → alternância fluida entre mapa e lista → consulta detalhada de despacho oficial.
-3. **Participação Cidadã**: propostas comunitárias e consultas públicas que complementam o entendimento urbano da comunidade.
+## Continuidade
 
-## Princípios
-
-- **Transparência e fidedignidade**: distinção explícita entre dados oficiais municipais (DATA.RIO/1746) e propostas da comunidade.
-- **Proteção orçamentária de dados**: consultas em BigQuery utilizam dry runs, particionamento diário/mensal e `maximumBytesBilled` estrito.
-- **API como autoridade**: o banco PostgreSQL local armazena os dados sincronizados para consultas de baixa latência e resiliência offline.
-- **RITO**: razão, informação, tarefa e originalidade funcional em todas as telas. Sem cards aninhados desnecessários ou marketing vazio.
+IPS, obras, orçamento, transporte em tempo real, meteorologia e explicações por IA dependem de contratos, uso permitido e cobertura verificáveis. Não são capacidades desta entrega. Preservar navegação, identidade visual, acessibilidade e distinção entre leitura pública e participação autenticada.

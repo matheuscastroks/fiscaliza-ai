@@ -42,7 +42,7 @@ export function SideMenu({
   const { user, isAuthenticated } = useAuthStore();
   const sections: MenuSection[] = [
     {
-      title: 'Inteligência 1746 · Rio',
+      title: 'Inteligência urbana · Rio',
       items: [
         {
           label: 'Explorar no mapa',
@@ -269,7 +269,9 @@ export function SideMenu({
               activeOpacity={0.8}
               onPress={handleLogout}
               accessibilityRole="button"
-              accessibilityLabel={isAuthenticated ? 'Sair da conta' : 'Entrar na conta'}
+              accessibilityLabel={
+                isAuthenticated ? 'Sair da conta' : 'Entrar na conta'
+              }
               style={styles.darkLogoutPill}
             >
               <Ionicons

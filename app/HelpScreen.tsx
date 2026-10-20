@@ -17,41 +17,47 @@ export default function HelpScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ gap: 20 }}>
-          <AppText variant="sectionTitle">Meu município</AppText>
+          <AppText variant="sectionTitle">Escolher meu bairro</AppText>
           <AppText>
-            O CEP do seu perfil define o município onde você participa. Ao mudar
-            de residência, use Meu perfil → Atualizar CEP e município. Seu
-            histórico anterior é preservado; novos registros precisam estar
-            dentro da cidade confirmada.
+            Na Home ou no Território, escolha um bairro. O panorama reúne
+            cadastros de escolas, saúde, espaços públicos e demandas do 1746.
+            Você não precisa entrar na conta para consultar dados públicos.
           </AppText>
-          <AppText variant="sectionTitle">Encontrei um problema</AppText>
+          <AppText variant="sectionTitle">Combinar camadas</AppText>
           <AppText>
-            Em Participar, escolha Registrar ocorrência. Informe o endereço e
-            marque o ponto. Antes de enviar, veja se existe um registro
-            parecido; você pode apoiá-lo ou acrescentar uma informação.
+            No Território, ative as categorias de seu interesse. Mapa e lista
+            mostram os mesmos registros carregados; a lista também inclui
+            cadastros sem ponto. Use a contagem de cada camada para carregar
+            mais ou tentar novamente se houver falha. Situação, serviço e
+            período filtram somente o 1746.
           </AppText>
-          <AppText variant="sectionTitle">Quero sugerir uma melhoria</AppText>
+          <AppText variant="sectionTitle">Entender datas e ausências</AppText>
           <AppText>
-            Escolha Propor uma melhoria. Conte o que deveria mudar e por que
-            isso é importante para o bairro. A resposta da gestão fica na
-            própria proposta.
+            O panorama consulta as datas escolhidas e informa a extensão
+            disponível na base. Cobertura parcial ou desconhecida não significa
+            ausência de problemas. Indisponível significa que a fonte ou o
+            vínculo não está confirmado. Zero só aparece quando há publicação
+            válida no recorte.
           </AppText>
-          <AppText variant="sectionTitle">Como acompanho o resultado?</AppText>
+          <AppText variant="sectionTitle">Preciso de atendimento</AppText>
           <AppText>
-            Use Acompanhar para retomar registros e participações. No detalhe,
-            acompanhe as respostas, o setor responsável e as evidências. Você
-            pode confirmar uma solução ou explicar por que precisa ser revista.
+            O Fiscaliza Aí não abre chamados no 1746. Use os canais oficiais da
+            Prefeitura do Rio para solicitar serviços. As contribuições da
+            comunidade no app não substituem o protocolo municipal.
           </AppText>
-          <AppText variant="sectionTitle">Leitura e navegação</AppText>
+          <AppText variant="sectionTitle">Acompanhar e atualizar</AppText>
           <AppText>
-            A lista oferece acesso às ocorrências sem depender do mapa. O texto
-            segue a escala de fonte do aparelho. Use TalkBack no Android ou
-            VoiceOver no iOS para navegar por rótulos e controles.
+            Salve os chamados de interesse no detalhe para retomá-los em
+            Acompanhar. Arraste para baixo nas telas com atualização para
+            consultar novamente a base do app. Isso não dispara uma importação
+            nem garante uma atualização na origem.
           </AppText>
-          <AppText variant="sectionTitle">Se a conexão cair</AppText>
+          <AppText variant="sectionTitle">Leitura e conexão</AppText>
           <AppText>
-            Seu registro permanece como rascunho. Volte quando a conexão estiver
-            disponível e tente enviar novamente.
+            Use a lista para explorar sem depender do mapa. Os textos respeitam
+            a escala de fonte do aparelho; os controles têm rótulos para
+            TalkBack e VoiceOver. Se uma camada falhar, tente novamente nela; as
+            demais permanecem disponíveis.
           </AppText>
         </View>
       </ScrollView>

@@ -141,7 +141,7 @@ Definir `TerritorialGeometry` como GeoJSON Point/Polygon/MultiPolygon com coorde
 - [x] Integrar queries com chaves por município, bairro, camadas, busca, bbox e página; fontes públicas não dependem de login. Cancelar ou ignorar resposta obsoleta; filtros de serviço/situação/período só afetam chamados. Manter “Todo o município” inicialmente e bairro do CEP na sequência, sem inferir código de bairro pelo CEP.
 - [x] Seletor horizontal combina camadas; padrão inicial mantém chamados para continuidade. Escolas/saúde/praças usam ícones próprios e detalhe sem ações de atendimento. Ícones/seleção legíveis em claro/escuro, hit targets >=44 e rótulos acessíveis. Reutilizar componentes Expo existentes; consultar skills expo-ui/native-ui/data-fetching na execução.
 - [x] Estender `MarkerKind` e o protocolo JSON do mapa para categoria e limites GeoJSON; renderizar shapes sem interpolar texto cadastral em HTML. Testar escape de nome com markup. Marcadores exibem ponto interno de praça; polígono preservado no detalhe. Preservar clustering, raio visual, busca na área e bordas arredondadas.
-- [ ] Cada camada tem loading/erro/retry e fonte/período próprios; mostrar contagem exibida e total ou desconhecido. “Carregar mais” pagina por camada sem reiniciar as demais. Detalhe abre drawer com dados reais, sem imagem fictícia. Rodar tipos/lint e inspeção web mobile/desktop; comitar `feat(territorio): explorar equipamentos em camadas`.
+- [x] Cada camada tem loading/erro/retry e fonte/período próprios; mostrar contagem exibida e total ou desconhecido. “Carregar mais” pagina por camada sem reiniciar as demais. Detalhe abre drawer com dados reais, sem imagem fictícia. Rodar tipos/lint e inspeção web mobile/desktop; comitar `feat(territorio): explorar equipamentos em camadas`.
 
 ## Tarefa 8 — Página de bairro com evidências
 
@@ -152,7 +152,7 @@ Definir `TerritorialGeometry` como GeoJSON Point/Polygon/MultiPolygon com coorde
 - [x] Testar seletores de apresentação: `unknown facility count is not zero`, `historical range is explicit`, `partial source never produces complete neighborhood claim` e `links preserve the evidence scope`. Bairro inexistente tem recuperação para seleção, sem crash ou fallback silencioso.
 - [x] Compor equipamentos por categoria, tipos de demandas e período visível; mostrar intervalo solicitado e disponível quando divergem, fonte e publicação. Dados antigos não viram “agora”; chamadas sem coordenadas continuam nas contagens com cobertura de mapa informada. Não criar score de qualidade de vida ou causalidade.
 - [x] Oferecer entrada na Home após escolher bairro e na exploração territorial. Enquanto “Todo o município” estiver ativo, oferecer escolher bairro; não escolher um bairro arbitrário. Detalhe e Home suportam pull-to-refresh como os fluxos atuais.
-- [ ] Inspecionar respostas atrasadas após trocar bairro/conta, duas fontes indisponíveis e nenhuma escola no snapshot. Validar UI sem overflow em 320 px e desktop, fonte ampliada e leitor de tela; rodar testes/tipos e comitar `feat(bairro): conectar servicos e demandas com evidencias`.
+- [x] Inspecionar respostas atrasadas após trocar bairro/conta, duas fontes indisponíveis e nenhuma escola no snapshot. Validar UI sem overflow em 320 px e desktop, fonte ampliada e leitor de tela; rodar testes/tipos e comitar `feat(bairro): conectar servicos e demandas com evidencias`.
 
 Validação visual integrada à tarefa 9; implementação e verificações de código concluídas nesta tarefa.
 
@@ -160,15 +160,15 @@ Validação visual integrada à tarefa 9; implementação e verificações de c�
 
 **Arquivos:** modificar `PRODUCT.md`, `README.md`, `DESIGN.md` apenas nos padrões novos, `features/onboarding/OnboardingFlow.tsx`, `app/{AboutScreen,HelpScreen}.tsx` e `.github/workflows/validate.yml` quando exigido pelos checks novos. Criar `plan/evidence/21-inteligencia-territorial-validacao.md`. Preservar `AGENTS.md`.
 
-- [ ] Atualizar posicionamento e onboarding com o escopo efetivamente entregue, creditar fontes e explicar a independência do app; sem prometer abertura de chamado 1746, integração municipal operacional ou IA ainda ausente.
-- [ ] Executar `npm test`, `npx tsc --noEmit`, `npm run lint`, `npm run typecheck --prefix backend`, migrações e `npm test --prefix backend` em banco dedicado. Registrar skips separadamente; integração com banco pulada não conta como aprovação. CI não chama SIURB/Google para funcionar.
-- [ ] Executar `npm run openapi --prefix backend` e `npx expo export --platform web --output-dir .validation/territorial-web --max-workers 2`; validar configuração Docker existente sem alterar deploy para fontes não publicadas. Não rodar publicação/importação real como efeito colateral do build.
-- [ ] Inspecionar web 390×844 e 1440×1000 em claro/escuro: fonte ausente, fonte antiga, todas as camadas, clusters, detalhe, mapa/lista e ida/volta bairro. Validar também teclado, rolagem e atualização. Dados de teste controlados são evidência de UI, não de fonte real.
+- [x] Atualizar posicionamento e onboarding com o escopo efetivamente entregue, creditar fontes e explicar a independência do app; sem prometer abertura de chamado 1746, integração municipal operacional ou IA ainda ausente.
+- [x] Executar `npm test`, `npx tsc --noEmit`, `npm run lint`, `npm run typecheck --prefix backend`, migrações e `npm test --prefix backend` em banco dedicado. Registrar skips separadamente; integração com banco pulada não conta como aprovação. CI não chama SIURB/Google para funcionar.
+- [x] Executar `npm run openapi --prefix backend` e `npx expo export --platform web --output-dir .validation/territorial-web --max-workers 2`; validar configuração Docker existente sem alterar deploy para fontes não publicadas. Não rodar publicação/importação real como efeito colateral do build.
+- [x] Inspecionar web 390×844 e 1440×1000 em claro/escuro: fonte ausente, fonte antiga, todas as camadas, clusters, detalhe, mapa/lista e ida/volta bairro. Validar também teclado, rolagem e atualização. Dados de teste controlados são evidência de UI, não de fonte real.
 - [ ] Testar no dispositivo Android/Expo Go mapa, drawer, gesto e atualização quando houver acesso ao aparelho; se não houver, registrar pendência concreta. Registrar HTTP/probe separado de extração integral, CI remoto separado de checks locais e limites de redistribuição por camada.
-- [ ] Conferir diff, segredos e arquivos gerados; comitar `docs: registrar entrega e validacao territorial`. Enviar commits autorizados sem force push; verificar CI remoto se disponível. Não declarar implantação na VPS sem evidência.
+- [x] Conferir diff, segredos e arquivos gerados; comitar `docs: registrar entrega e validacao territorial`. Enviar commits autorizados sem force push; verificar CI remoto se disponível. Não declarar implantação na VPS sem evidência.
 
 ## Revisão do plano
 
 Cobertura: tarefas 1–2 atendem fundação; 3 valida upstream/uso; 4–5 cobrem persistência e recuperação; 6 fixa contratos e equivalência de filtros; 7–8 entregam experiência; 9 registra validação e limites. As cinco condições de Review Focus têm testes ou inspeções atribuídos. Metadados conhecidos não são tratados como extração completa. Nenhuma tarefa exige substituir a aplicação ou remodelar suas abas.
 
-Plano revisado quanto a dependências, nomes públicos, migrações aditivas e distinção entre implementação, publicação de dados e validação nativa. Todas as tarefas permanecem pendentes até a execução.
+Plano revisado quanto a dependências, nomes públicos, migrações aditivas e distinção entre implementação, publicação de dados e validação nativa. Implementação concluída; evidências e limites em plan/evidence/21-inteligencia-territorial-validacao.md. Teste nativo permanece pendente por ausência de dispositivo. A inspeção visual integrada das tarefas 7–8 foi realizada no fechamento; proveniência compacta no seletor foi registrada como melhoria menor adiada.

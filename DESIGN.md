@@ -310,3 +310,11 @@ A partir de 1100 px, o aplicativo cidadão usa navegação lateral persistente, 
 Quatro etapas apresentam território, registro com foto e local, propostas/consultas e acompanhamento/avaliação. O primeiro acesso oferece Pular e Começar; ambos concluem a apresentação neste aparelho, sem alterar conta ou município. O menu Como funciona reabre o mesmo conteúdo e permite voltar ao ponto anterior. A apresentação inicial não espera a autenticação remota.
 
 Usar somente os oito SVGs originais selecionados do pacote Notion Resources Freebie fornecido pelo usuário (procedência em assets/illustrations/README.md). Renderizar com expo-image e tintColor dinâmico de acordo com o tema (colors.ink), sem fundo artificial, adaptando os traços naturalmente entre os modos claro e escuro. Estados vazios ilustrados cobrem Início (acompanhamentos, consultas e ações com ilustrações dedicadas), Território, Acompanhar, Participar e Resultados; erros de rede continuam com recuperação própria via QueryState.
+
+## Camadas territoriais e fichas cadastrais
+
+Preservar Instrument Sans, tokens e navegação. Camadas são seleções independentes com ícone, rótulo e estado de checkbox (alvo mínimo 44); não usar tabs mutuamente exclusivas. A lista horizontal alcança a borda. Filtros de atendimento e período afetam somente o 1746. Cada camada mantém carregamento, falha recuperável, contagem exibida/total e publicação próprias.
+
+Equipamentos usam ficha cadastral sem foto genérica: categoria, nome oficial ou indicação de ausência, endereço, contatos, funcionamento informado e proveniência. Reutilizar DetailSheet, mapa arredondado e atualização por arraste; não oferecer apoio, avaliação ou status de atendimento a um cadastro. Polígonos de espaços públicos permanecem no detalhe. O marcador derivado não representa entrada.
+
+A página do bairro separa equipamentos de demandas, preserva datas explícitas nos links e mostra indisponível em vez de zero quando faltar publicação ou vínculo. Contagens são cadastros com bairro confirmado; não sugerem capacidade ou qualidade. Mostrar data de importação separadamente da referência desconhecida. A apresentação inicial explica exploração pública, bairro, contribuição independente e acompanhamento de fontes, sem prometer respostas institucionais.

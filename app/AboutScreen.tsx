@@ -18,59 +18,47 @@ export default function AboutScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ gap: 20 }}>
-          <AppText variant="sectionTitle">
-            Participação na gestão da cidade
+          <AppText variant="sectionTitle">Conhecer e participar do Rio</AppText>
+          <AppText>
+            Fiscaliza Aí reúne dados públicos sobre serviços, equipamentos e
+            demandas do território. É uma plataforma independente, sem vínculo
+            institucional com a Prefeitura do Rio.
+          </AppText>
+          <AppText variant="sectionTitle">Origem das informações</AppText>
+          <AppText>
+            Escolas, unidades de saúde, espaços públicos e limites de bairros
+            vêm do SIURB / Instituto Pereira Passos / Prefeitura da Cidade do
+            Rio de Janeiro. Os cadastros são atribuídos ao IPP/PCRJ e
+            disponibilizados conforme os termos da fonte (CC BY 4.0 no serviço).
+            As demandas vêm da Central 1746 / DATA.RIO. O mapa utiliza
+            OpenStreetMap e Leaflet.
           </AppText>
           <AppText>
-            Um espaço para identificar necessidades do bairro, propor melhorias,
-            participar de consultas e acompanhar as respostas e ações da gestão.
+            Os detalhes mostram a última importação e as datas conhecidas na
+            origem. A data de importação não garante que o cadastro esteja
+            atualizado. Contagens não medem capacidade, qualidade ou área de
+            atendimento.
           </AppText>
-          <AppText variant="sectionTitle">Sobre esta versão</AppText>
+          <AppText variant="sectionTitle">Participação independente</AppText>
           <AppText>
-            Projeto acadêmico com municípios reais, dados fictícios e contas de
-            apresentação. Não possui vínculo com uma prefeitura real e não
-            encaminha demandas a órgãos públicos.
-          </AppText>
-          <AppText>
-            As fotografias dos registros iniciais são exemplos ilustrativos de
-            iluminação, bancos, calçadas e outros contextos urbanos, obtidos no
-            Wikimedia Commons (CC0) e Pexels (licença Pexels). Não representam
-            os endereços desses registros. Fotos anexadas por você permanecem
-            associadas à sua contribuição. Os retratos das contas de
-            apresentação são ilustrativos, obtidos no Pexels sob sua licença de
-            uso, e não representam usuários reais. Os cenários iniciais incluem
-            números simulados de visualizações e apoios; novas interações são
-            contabilizadas separadamente. A assistência de IA pode enviar a foto
-            e o relato ao Gemini para sugerir o preenchimento; você revisa as
-            informações antes de registrar.
+            Contribuições, propostas e discussões internas não são chamados
+            oficiais do 1746 nem decisões municipais. Para solicitar atendimento
+            público, utilize os canais oficiais. Atualizações no app dependem da
+            publicação e importação das fontes; não são monitoramento em tempo
+            real.
           </AppText>
           <AppText variant="sectionTitle">Seus dados</AppText>
           <AppText>
-            O CEP é consultado no ViaCEP para identificar seu município. Os
-            limites territoriais são obtidos do IBGE. Essa associação não
-            comprova residência.
-          </AppText>
-          <AppText>
-            Registros, contribuições e fotos são armazenados no serviço desta
-            aplicação. Evite incluir documentos, rostos e informações pessoais
-            de terceiros. As fotos não são enviadas ao Google.
-          </AppText>
-          <AppText variant="sectionTitle">Assistência de classificação</AppText>
-          <AppText>
-            Ao pedir uma sugestão, sua descrição pode ser enviada ao Google
-            Gemini pelo servidor. Se o serviço estiver indisponível, usamos
-            regras locais baseadas no texto. Toda sugestão pode ser corrigida;
-            ela não determina a prioridade do atendimento.
-          </AppText>
-          <AppText variant="sectionTitle">Acompanhamento</AppText>
-          <AppText>
-            As atualizações aparecem ao abrir ou atualizar a tela. Esta versão
-            não envia notificações push nem mensagens por e-mail.
+            A leitura territorial é pública. Ao participar com uma conta, o CEP
+            ajuda a identificar seu município; não comprova residência.
+            Contribuições e anexos ficam no serviço da aplicação. Evite
+            documentos, rostos e dados pessoais de terceiros.
           </AppText>
           <AppText variant="sectionTitle">Ilustrações</AppText>
           <AppText>
-            As ilustrações de apresentação e estados vazios vêm do pacote Notion
-            Resources Freebie fornecido para este projeto.
+            As ilustrações vêm do pacote Notion Resources Freebie fornecido para
+            este projeto. Os detalhes cadastrais não usam fotografias genéricas
+            para representar equipamentos reais.
           </AppText>
           <AppButton
             title="Como funciona"
