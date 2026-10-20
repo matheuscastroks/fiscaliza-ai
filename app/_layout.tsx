@@ -57,20 +57,33 @@ export default function RootLayout() {
     void initialize();
   }, [initialize]);
   useEffect(() => {
-    const publicRoute = [
-      'LoginScreen',
-      'AboutScreen',
-      'HelpScreen',
-      'OnboardingScreen',
-    ].includes(segments[0] || '');
-    if (isReady && !isAuthenticated && !publicRoute)
+    const topSegment = segments[0] || '';
+    const subSegment = segments[1] || 'index';
+    const isProtectedTab =
+      topSegment === '(tabs)' &&
+      ['ReportScreen', 'ProfileScreen'].includes(subSegment);
+    const isPublicRoute =
+      !isProtectedTab &&
+      [
+        '',
+        '(tabs)',
+        'OfficialCallDetailsScreen',
+        'ResultsScreen',
+        'CityScreen',
+        'LoginScreen',
+        'AboutScreen',
+        'HelpScreen',
+        'OnboardingScreen',
+      ].includes(topSegment);
+
+    if (isReady && !isAuthenticated && !isPublicRoute)
       router.replace('/LoginScreen');
     else if (
       isReady &&
       isAuthenticated &&
       !user?.municipality &&
-      !publicRoute &&
-      segments[0] !== 'MunicipalityScreen'
+      !isPublicRoute &&
+      topSegment !== 'MunicipalityScreen'
     )
       router.replace('/MunicipalityScreen');
   }, [isReady, isAuthenticated, segments, user?.municipality]);

@@ -12,6 +12,7 @@ import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { ItemLocationMap } from '@/components/ui/ItemLocationMap';
 import { useOfficialCall } from '@/features/city/useOfficialCalls';
+import { useFollowStore } from '@/stores/followStore';
 import { goBack } from '@/utils/navigation';
 
 export default function OfficialCallDetailsScreen() {
@@ -21,6 +22,9 @@ export default function OfficialCallDetailsScreen() {
   const styles = useThemedStyles(createStyles);
 
   const { data: item, isLoading, isError, refetch } = useOfficialCall(id);
+  const savedCalls = useFollowStore((s) => s.savedCalls);
+  const toggleSavedCall = useFollowStore((s) => s.toggleSavedCall);
+  const isSaved = Boolean(item && savedCalls.some((c) => c.id === item.id));
 
   if (isLoading) {
     return (
@@ -93,7 +97,7 @@ export default function OfficialCallDetailsScreen() {
           { paddingBottom: insets.bottom + spacing.xl },
         ]}
       >
-        {/* Attribution Badge */}
+        {/* Attribution Badge + Save Action */}
         <View style={styles.officialHeaderBadge}>
           <View style={styles.badgeShield}>
             <Ionicons name="shield-checkmark" size={16} color="#0072BB" />
@@ -101,9 +105,32 @@ export default function OfficialCallDetailsScreen() {
               DADO OFICIAL PÚBLICO · DATA.RIO
             </AppText>
           </View>
-          <AppText variant="caption" color="muted">
-            Protocolo #{item.externalId}
-          </AppText>
+          <Pressable
+            onPress={() => toggleSavedCall(item)}
+            accessibilityRole="button"
+            accessibilityLabel={
+              isSaved ? 'Remover dos chamados salvos' : 'Salvar chamado para acompanhar'
+            }
+            style={[
+              styles.badgeShield,
+              isSaved && { backgroundColor: colors.ink },
+            ]}
+          >
+            <Ionicons
+              name={isSaved ? 'bookmark' : 'bookmark-outline'}
+              size={14}
+              color={isSaved ? colors.onAccent : '#0072BB'}
+            />
+            <AppText
+              variant="caption"
+              style={[
+                styles.officialBadgeText,
+                isSaved && { color: colors.onAccent },
+              ]}
+            >
+              {isSaved ? 'Salvo' : 'Salvar'}
+            </AppText>
+          </Pressable>
         </View>
 
         {/* Main Service Card */}

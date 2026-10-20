@@ -230,11 +230,11 @@ export function FloatingGlassTabBar({
       {isIndex && (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Registrar nova ocorrência"
+          accessibilityLabel="Ver resultados e prazos da Central 1746"
           onPress={() => {
             if (Platform.OS !== 'web')
               void Haptics.selectionAsync().catch(() => {});
-            router.push('/(tabs)/ReportScreen');
+            router.push('/ResultsScreen');
           }}
           style={({ pressed }) => [
             styles.extraButton,
@@ -242,7 +242,7 @@ export function FloatingGlassTabBar({
           ]}
         >
           <Ionicons
-            name="add-circle"
+            name="stats-chart"
             size={20}
             color={colors.navigationIcon}
           />
@@ -256,7 +256,7 @@ export function FloatingGlassTabBar({
                 marginLeft: 5,
               }}
             >
-              Relatar
+              Resultados
             </AppText>
           )}
         </Pressable>

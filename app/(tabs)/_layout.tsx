@@ -53,10 +53,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="FollowScreen"
         options={{
-          title: 'Acompanhar',
+          title: 'Situação',
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
-              name={focused ? 'notifications' : 'notifications-outline'}
+              name={focused ? 'pulse' : 'pulse-outline'}
               color={color}
               size={size}
             />

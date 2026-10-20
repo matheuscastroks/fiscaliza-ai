@@ -329,6 +329,7 @@ function TerritoryContent() {
     if (!neighborhood || areaOnly || focusId) return;
     const hasLocated = entries.some((entry) => Boolean(entryLocation(entry)));
     if (hasLocated) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRegion(municipalOverviewRegion);
     }
   }, [neighborhood, areaOnly, focusId, entries, municipalOverviewRegion]);

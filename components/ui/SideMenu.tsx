@@ -39,75 +39,61 @@ export function SideMenu({
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const sections: MenuSection[] = [
     {
-      title: 'Participar da cidade',
+      title: 'Inteligência 1746 · Rio',
       items: [
         {
-          label: 'Registrar ocorrência',
-          subtitle: 'Relate problemas de vias, luz ou limpeza',
-          path: '/(tabs)/ReportScreen',
-          icon: 'add-circle-outline',
+          label: 'Explorar no mapa',
+          subtitle: 'Chamados oficiais por bairro, serviço e período',
+          path: '/(tabs)/TerritoryScreen',
+          icon: 'map-outline',
         },
         {
-          label: 'Ocorrências',
-          subtitle: 'Demandas e fiscalização da comunidade',
-          path: '/(tabs)/ProblemsListScreen',
-          icon: 'list-outline',
+          label: 'Situação dos chamados',
+          subtitle: 'Em atendimento, encerrados e salvos',
+          path: '/(tabs)/FollowScreen',
+          icon: 'pulse-outline',
         },
         {
-          label: 'Resultados',
-          subtitle: 'Ações da gestão e prestação de contas',
+          label: 'Resultados e prazos',
+          subtitle: 'Taxa de conclusão, SLA e desfechos 1746',
           path: '/ResultsScreen',
           icon: 'stats-chart-outline',
         },
         {
-          label: 'Meu município',
-          subtitle: user?.municipality
-            ? `${user.municipality.name} · ${user.municipality.state}`
-            : 'Explore os limites territoriais e bairros',
+          label: 'Panorama municipal',
+          subtitle: 'Rio de Janeiro · RJ · DATA.RIO',
           path: '/CityScreen',
           icon: 'business-outline',
-        },
-        {
-          label: 'Propor melhoria',
-          subtitle: 'Sugira uma mudança para a cidade',
-          path: '/ProposalScreen',
-          icon: 'bulb-outline',
         },
       ],
     },
     {
-      title: 'Sua conta',
+      title: 'Plataforma e conta',
       items: [
         {
           label: 'Como funciona',
-          subtitle: 'Conheça as formas de participar',
+          subtitle: 'Fontes públicas e funcionamento do explorador',
           path: '/OnboardingScreen',
           icon: 'book-outline',
         },
         {
           label: 'Preferências',
-          subtitle: 'Preferências da conta',
+          subtitle: 'Tema e configurações do aplicativo',
           path: '/SettingsScreen',
           icon: 'settings-outline',
         },
         {
-          label: 'Acompanhar',
-          subtitle: 'Respostas e contribuições que você segue',
-          path: '/(tabs)/FollowScreen',
-          icon: 'notifications-outline',
-        },
-        {
           label: 'Ajuda',
-          subtitle: 'Perguntas frequentes e canais de contato',
+          subtitle: 'Perguntas frequentes e canais oficiais 1746',
           path: '/HelpScreen',
           icon: 'help-circle-outline',
         },
         {
           label: 'Sobre o Fiscaliza aí',
-          subtitle: 'Propósito público, transparência e termos',
+          subtitle: 'Propósito público, transparência e dados abertos',
           path: '/AboutScreen',
           icon: 'information-circle-outline',
         },
@@ -123,11 +109,15 @@ export function SideMenu({
 
   const handleOpenProfile = () => {
     onClose(() => {
-      router.push('/(tabs)/ProfileScreen');
+      router.push(isAuthenticated ? '/(tabs)/ProfileScreen' : '/LoginScreen');
     });
   };
 
   const handleLogout = () => {
+    if (!isAuthenticated) {
+      onClose(() => router.push('/LoginScreen'));
+      return;
+    }
     onClose(() => useSignOutSheet.getState().setOpen(true));
   };
 
@@ -279,16 +269,16 @@ export function SideMenu({
               activeOpacity={0.8}
               onPress={handleLogout}
               accessibilityRole="button"
-              accessibilityLabel="Sair da conta"
+              accessibilityLabel={isAuthenticated ? 'Sair da conta' : 'Entrar na conta'}
               style={styles.darkLogoutPill}
             >
               <Ionicons
-                name="log-out-outline"
+                name={isAuthenticated ? 'log-out-outline' : 'log-in-outline'}
                 size={18}
                 color={colors.onAccent}
               />
               <AppText variant="label" style={styles.logoutPillText}>
-                Sair da conta
+                {isAuthenticated ? 'Sair da conta' : 'Entrar na conta'}
               </AppText>
             </TouchableOpacity>
           </View>

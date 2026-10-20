@@ -12,9 +12,9 @@ const destinations = [
   ['Início', '/', 'home-outline'],
   ['Território', '/TerritoryScreen', 'map-outline'],
   ['Participar', '/ParticipateScreen', 'people-outline'],
-  ['Acompanhar', '/FollowScreen', 'notifications-outline'],
-  ['Meu município', '/CityScreen', 'business-outline'],
-  ['Resultados', '/ResultsScreen', 'stats-chart-outline'],
+  ['Situação', '/FollowScreen', 'pulse-outline'],
+  ['Resultados e prazos', '/ResultsScreen', 'stats-chart-outline'],
+  ['Panorama municipal', '/CityScreen', 'business-outline'],
   ['Como funciona', '/OnboardingScreen', 'book-outline'],
   ['Preferências', '/SettingsScreen', 'settings-outline'],
   ['Ajuda', '/HelpScreen', 'help-circle-outline'],
@@ -25,6 +25,7 @@ export function DesktopNavigation() {
   const { colors } = useTheme();
   const path = usePathname();
   const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return (
     <View
       style={{
@@ -57,9 +58,11 @@ export function DesktopNavigation() {
         <AppText variant="screenTitle">Fiscaliza aí</AppText>
       </Pressable>
       <View style={{ gap: 4 }}>
-        <AppText variant="label">{user?.municipality?.name}</AppText>
+        <AppText variant="label">
+          {user?.municipality?.name || 'Rio de Janeiro · RJ'}
+        </AppText>
         <AppText variant="caption" color="muted">
-          Participação municipal
+          Inteligência Urbana · Central 1746
         </AppText>
       </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ gap: 8 }}>
@@ -101,22 +104,28 @@ export function DesktopNavigation() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Abrir perfil"
-        onPress={() => router.push('/ProfileScreen')}
+        onPress={() =>
+          router.push(isAuthenticated ? '/ProfileScreen' : '/LoginScreen')
+        }
         style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
       >
         <UserAvatar size={44} />
         <View style={{ flex: 1, minWidth: 0 }}>
           <AppText variant="label" numberOfLines={1}>
-            {user?.name}
+            {user?.name || 'Visitante'}
           </AppText>
           <AppText variant="caption" color="muted">
-            Meu perfil
+            {isAuthenticated ? 'Meu perfil' : 'Acesso público'}
           </AppText>
         </View>
       </Pressable>
       <Pressable
         accessibilityRole="button"
-        onPress={() => useSignOutSheet.getState().setOpen(true)}
+        onPress={() =>
+          isAuthenticated
+            ? useSignOutSheet.getState().setOpen(true)
+            : router.push('/LoginScreen')
+        }
         style={{
           minHeight: 48,
           justifyContent: 'center',
@@ -124,7 +133,9 @@ export function DesktopNavigation() {
           borderTopColor: colors.divider,
         }}
       >
-        <AppText variant="label">Sair da conta</AppText>
+        <AppText variant="label">
+          {isAuthenticated ? 'Sair da conta' : 'Entrar na conta'}
+        </AppText>
       </Pressable>
     </View>
   );

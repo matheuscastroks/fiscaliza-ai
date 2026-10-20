@@ -25,7 +25,6 @@ import ReanimatedDrawerLayout, {
   type DrawerLayoutMethods,
 } from 'react-native-gesture-handler/ReanimatedDrawerLayout';
 import { SideMenu, useMenu } from './SideMenu';
-import { useAuthStore } from '@/stores/authStore';
 
 const MAIN_TABS = new Set([
   'index',
@@ -47,20 +46,15 @@ export function AppDrawer({ children }: { children: ReactNode }) {
   const afterClose = useRef<(() => void) | undefined>(undefined);
   const [visible, setVisible] = useState(false);
   const open = useMenu((state) => state.open);
-  const user = useAuthStore((state) => state.user);
-  const authenticated = useAuthStore((state) => state.isAuthenticated);
   const segments: readonly string[] = useSegments();
   const { width } = useWindowDimensions();
   const desktop = Platform.OS === 'web' && width >= 1100;
   const showNavigation =
     desktop &&
-    authenticated &&
-    Boolean(user?.municipality) &&
-    segments[0] !== 'OnboardingScreen';
+    segments[0] !== 'OnboardingScreen' &&
+    segments[0] !== 'LoginScreen';
   const enabled = Boolean(
     !desktop &&
-      authenticated &&
-      user?.municipality &&
       segments[0] === '(tabs)' &&
       MAIN_TABS.has(segments[1] || 'index'),
   );

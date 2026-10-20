@@ -18,8 +18,8 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
 
   const isClosed = Boolean(
     call.closedAt ||
-    call.officialStatus === 'Encerrado' ||
-    call.officialSituation?.toLowerCase().includes('encerrad')
+    call.officialSituation === 'Encerrado' ||
+    call.officialStatus?.toLowerCase().includes('fechado')
   );
 
   const situationColor = isClosed ? colors.completed : colors.accent;
@@ -39,6 +39,11 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
     }
   };
 
+  const primaryStateLabel =
+    call.officialStatus && call.officialStatus !== call.officialSituation
+      ? `${call.officialSituation || 'Registrado'} · ${call.officialStatus}`
+      : call.officialSituation || call.officialStatus || 'Registrado';
+
   return (
     <Pressable
       style={({ pressed }) => [
@@ -46,13 +51,13 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
         pressed && { opacity: 0.8 },
       ]}
       accessibilityRole="button"
-      accessibilityLabel={`Chamado ${call.externalId}, ${call.serviceSubtype}, ${call.officialSituation || ''}`}
+      accessibilityLabel={`Chamado ${call.externalId}, ${call.serviceSubtype}, ${primaryStateLabel}`}
       onPress={onPress}
     >
-      {/* Header: Service Type + 1746 Official Tag */}
+      {/* Header: Service Type + Protocol 1746 Tag */}
       <View style={styles.topRow}>
         <View style={styles.typeBadge}>
-          <AppText variant="caption" style={styles.typeBadgeText}>
+          <AppText variant="caption" numberOfLines={1} style={styles.typeBadgeText}>
             {call.serviceType}
           </AppText>
         </View>
@@ -60,7 +65,7 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
         <View style={styles.officialPill}>
           <Ionicons name="shield-checkmark" size={12} color="#0072BB" />
           <AppText variant="caption" style={styles.officialPillText}>
-            1746
+            1746 · #{call.externalId}
           </AppText>
         </View>
       </View>
@@ -70,14 +75,15 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
         {call.serviceSubtype || call.serviceType}
       </AppText>
 
-      {/* Situation / Status */}
+      {/* Official Situation + Detailed Operational Status + SLA */}
       <View style={styles.statusRow}>
         <View style={[styles.statusDot, { backgroundColor: situationColor }]} />
         <AppText
           variant="label"
-          style={{ color: situationColor, fontWeight: '700', fontSize: 13 }}
+          numberOfLines={1}
+          style={{ color: situationColor, fontWeight: '700', fontSize: 13, flexShrink: 1 }}
         >
-          {call.officialSituation || call.officialStatus || 'Registrado'}
+          {primaryStateLabel}
         </AppText>
         {call.withinDeadline ? (
           <AppText variant="caption" color="muted">
@@ -86,12 +92,14 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
         ) : null}
       </View>
 
-      {/* Bottom Metadata: Org, Neighborhood, Date */}
+      {/* Bottom Metadata: Neighborhood + Organization + Date */}
       <View style={styles.footerRow}>
         <View style={styles.locationGroup}>
           <Ionicons name="location-outline" size={14} color={colors.muted} />
           <AppText variant="caption" color="muted" numberOfLines={1} style={{ flexShrink: 1 }}>
-            {call.neighborhoodName || 'Rio de Janeiro'}
+            {[call.neighborhoodName || 'Rio de Janeiro', call.organizationName]
+              .filter(Boolean)
+              .join(' · ')}
           </AppText>
         </View>
 
@@ -118,13 +126,14 @@ function createStyles(colors: ThemeColors) {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
+      gap: spacing.xs,
     },
     typeBadge: {
       backgroundColor: colors.surfaceSubdued,
       paddingHorizontal: spacing.sm,
       paddingVertical: 3,
       borderRadius: layout.radius.sm,
-      maxWidth: '75%',
+      flexShrink: 1,
     },
     typeBadgeText: {
       color: colors.muted,
@@ -140,6 +149,7 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: 6,
       paddingVertical: 2,
       borderRadius: layout.radius.pill,
+      flexShrink: 0,
     },
     officialPillText: {
       color: '#0072BB',
@@ -154,6 +164,7 @@ function createStyles(colors: ThemeColors) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
+      flexWrap: 'wrap',
     },
     statusDot: {
       width: 8,
