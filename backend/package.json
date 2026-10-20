@@ -12,7 +12,8 @@
     "seed": "npm run build && node dist/backend/src/seed.js",
     "clean:demo": "npm run build && node dist/backend/src/clean-demo.js",
     "openapi": "npm run build && node dist/backend/src/openapi.js",
-    "sync:rio1746": "npm run build && node dist/backend/src/sync-cli.js"
+    "sync:rio1746": "npm run build && node dist/backend/src/sync-cli.js",
+    "probe:siurb": "npm run build && node dist/backend/src/integrations/siurb/probe.js"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",

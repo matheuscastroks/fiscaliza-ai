@@ -67,10 +67,10 @@ Bloco A: tarefas 1–2, confiabilidade existente. Bloco B: tarefas 3–6, fonte 
 
 **Interfaces:** `SiurbLayerId = 1 | 2 | 16 | 18`; `SiurbLayerSpec` declara URL fixa, campos permitidos, OID, categoria, geometria e condição de publicação. `probeSiurbLayer(layerId: SiurbLayerId, fetcher: typeof fetch): Promise<LayerProbe>` faz somente leituras delimitadas de metadados, count, IDs e amostra.
 
-- [ ] Testar `catalog rejects arbitrary upstream URLs`, `health reads declared objectid_1`, `plazas retain polygon geometry` e `missing update date remains unknown`. URLs e layer IDs aceitos vêm exclusivamente do catálogo; referência espacial esperada na saída é 4326.
-- [ ] Implementar probe com timeout 15 s, no máximo uma amostra de 5 features por camada, sem importar ao banco. Validar ArcGIS error em HTTP 200. Executar testes sem upstream e registrar resultado esperado PASS.
-- [ ] Executar o probe contra a fonte oficial, se acessível, registrar data, URLs, contagens observadas, OIDs, campos/domínios, flags de paginação, IDs estáveis disponíveis, datas declaradas e evidência de uso/atribuição. Amostra pública não comprova extração integral. Se bloqueado, registrar bloqueio; não afirmar validação operacional.
-- [ ] Escolher identificador externo estável a partir da evidência: GlobalID quando presente e único, senão OID com estabilidade desconhecida registrada. Anotar a correspondência comprovada entre códigos de bairro ArcGIS e BigQuery; divergências ficam não resolvidas. Comitar `docs(siurb): registrar contratos e evidencias das camadas` com probe e testes.
+- [x] Testar `catalog rejects arbitrary upstream URLs`, `health reads declared objectid_1`, `plazas retain polygon geometry` e `missing update date remains unknown`. URLs e layer IDs aceitos vêm exclusivamente do catálogo; referência espacial esperada na saída é 4326.
+- [x] Implementar probe com timeout 15 s, no máximo uma amostra de 5 features por camada, sem importar ao banco. Validar ArcGIS error em HTTP 200. Executar testes sem upstream e registrar resultado esperado PASS.
+- [x] Executar o probe contra a fonte oficial, se acessível, registrar data, URLs, contagens observadas, OIDs, campos/domínios, flags de paginação, IDs estáveis disponíveis, datas declaradas e evidência de uso/atribuição. Amostra pública não comprova extração integral. Se bloqueado, registrar bloqueio; não afirmar validação operacional.
+- [x] Escolher identificador externo estável a partir da evidência: GlobalID quando presente e único, senão OID com estabilidade desconhecida registrada. Anotar a correspondência comprovada entre códigos de bairro ArcGIS e BigQuery; divergências ficam não resolvidas. Comitar `docs(siurb): registrar contratos e evidencias das camadas` com probe e testes.
 
 ## Tarefa 4 — Modelo territorial e contratos compartilhados
 
