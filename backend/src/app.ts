@@ -169,13 +169,15 @@ export async function buildApp(
   const isAllowedOrigin = (origin: string): boolean => {
     if (origins.includes(origin)) return true;
     if (process.env.NODE_ENV !== 'production') {
-      if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
+      if (origin === 'null') return true;
+      if (/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(origin)) return true;
       if (
         /^https?:\/\/(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/.test(
           origin,
         )
       )
         return true;
+      if (/^exp:\/\//.test(origin)) return true;
     }
     return false;
   };
@@ -277,7 +279,9 @@ export async function buildApp(
     const bearer = req.headers.authorization?.match(
       /^Bearer ([A-Za-z0-9_-]+)$/,
     )?.[1];
+    const isLogin = req.url === '/api/auth/login';
     if (
+      !isLogin &&
       mutation &&
       !bearer &&
       req.cookies[sessionCookie(req)] &&
@@ -285,6 +289,7 @@ export async function buildApp(
     )
       throw fail(403, 'Origem não autorizada.');
     if (
+      !isLogin &&
       req.headers.origin &&
       mutation &&
       !isAllowedOrigin(req.headers.origin)
