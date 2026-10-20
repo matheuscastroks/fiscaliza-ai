@@ -1,6 +1,6 @@
-# Fiscaliza aí — Plataforma de Inteligência Urbana do Rio de Janeiro
+# Fiscaliza Aí — Descobrir, fiscalizar e agir no Rio
 
-Plataforma independente de inteligência urbana e participação cidadã no Rio de Janeiro (IBGE 3304557). Combina demandas do 1746 e cadastros oficiais de escolas, saúde, espaços públicos e bairros, com origem e cobertura explícitas. Não representa a prefeitura nem abre chamados no 1746.
+Aplicativo independente que ajuda moradores do Rio de Janeiro (IBGE 3304557) a descobrir o que acontece no bairro, acompanhar a atuação da prefeitura e encontrar como agir. Utiliza demandas do 1746 e cadastros de serviços públicos como apoio à fiscalização e à participação cidadã, com origem e cobertura explícitas. Não representa a prefeitura nem abre chamados no 1746.
 
 Aplicativo Expo Android/iOS/web e API Fastify/PostgreSQL. Consulte [PRODUCT.md](PRODUCT.md) para escopo e limites de interpretação.
 

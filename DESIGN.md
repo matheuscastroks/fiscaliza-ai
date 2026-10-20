@@ -138,6 +138,18 @@ Este documento registra tokens e componentes do aplicativo cidadão presentes no
 - Conteúdo legível, superfícies claras e situação sempre textual.
 - Detalhe em painel acoplado à página, com expansão sem modal.
 
+## Hierarquia orientada à jornada cidadã
+
+Direção para o próximo redesenho, conforme PRODUCT.md; estes critérios não comprovam implementação nas telas atuais.
+
+- **Home:** explorar o entorno é a ação principal. Salvos, demandas recentes e acesso ao atendimento dão continuidade. Contagens, rankings territoriais e gráficos não ocupam o protagonismo.
+- **Território:** mapa e lista são duas formas de realizar a mesma descoberta. Camadas de serviços são opcionais, com seleção legível e recorte preservado. Nunca apresentar um equipamento como responsável por demandas próximas.
+- **Chamado:** problema e localização orientam a leitura; situação, protocolo, prazo disponível e datas permitem fiscalizar. Salvar e acessar o atendimento oficial são ações distintas. Não aplicar linguagem de resolução confirmada a um simples encerramento administrativo.
+- **Equipamento:** endereço, tipo e formas de contato dão utilidade à ficha. Não reutilizar apoio, avaliação de atendimento ou estados de chamados como se fossem propriedades do cadastro.
+- **Aprofundamento:** gráficos entram quando respondem a uma pergunta identificável; origem e período ficam junto à informação. Falta de dados tem tratamento próprio, sem contagem zero artificial.
+
+Preferir rótulos de tarefa, como “Explorar no mapa”, “Salvar chamado” e “Acessar atendimento oficial”. Evitar slogans e explicações repetidas. O conceito “seu bairro, mais perto” orienta a composição; não exige um novo bloco promocional na Home. Preservar Instrument Sans, tokens, modo escuro e componentes existentes.
+
 ## Colors
 
 A paleta neutra das referências dá protagonismo ao conteúdo; cores semânticas comunicam estados concretos.
