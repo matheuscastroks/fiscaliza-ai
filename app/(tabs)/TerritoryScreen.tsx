@@ -1,5 +1,5 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
-import type { ThemeColors } from '@/theme/colors';
+import { lightColors, type ThemeColors } from '@/theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { layout } from '@/theme/layout';
 import React, { useMemo, useState, useEffect } from 'react';
@@ -50,6 +50,7 @@ import { useTerritorySelection, useTerritoryViewMode } from '@/stores/territoryS
 import { municipalityRegion } from '@/features/city/municipalContext';
 import { OsmMapView, type MapMarker } from '@/components/ui/OsmMapView';
 import { TerritoryPreviewCard, type Entry } from '@/components/territory/TerritoryPreviewCard';
+import { TerritoryClusterCarousel } from '@/components/territory/TerritoryClusterCarousel';
 
 type TerritoryMapRegion = {
   latitude: number;
@@ -84,11 +85,12 @@ function TerritoryContent() {
   const insets = useSafeAreaInsets();
   const pinColors = useMemo(
     () => ({
-      proposal: colors.attention,
-      consultation: colors.muted,
-      action: colors.completed,
+      occurrence: lightColors.ink,
+      proposal: lightColors.attention,
+      consultation: lightColors.muted,
+      action: lightColors.completed,
     }),
-    [colors.attention, colors.muted, colors.completed],
+    [],
   );
   const cityStyles = useThemedStyles(createCityStyles);
   const styles = useThemedStyles(createStyles);
@@ -142,6 +144,11 @@ function TerritoryContent() {
   const setFiltersOpen = (open: boolean) =>
     setFilterVisibility({ param: filters, open });
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedCluster, setSelectedCluster] = useState<{
+    ids: string[];
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [showUnlocated, setShowUnlocated] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
   const [locating, setLocating] = useState(false);
@@ -150,6 +157,7 @@ function TerritoryContent() {
     if (focusId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedId(focusId);
+      setSelectedCluster(null);
       setIsListView(false);
       setAreaOnly(false);
       setStatus('all');
@@ -273,6 +281,28 @@ function TerritoryContent() {
     return null;
   }, [selectedId, entries, occurrences.data, civic.data]);
 
+  const selectedClusterEntries = useMemo(() => {
+    if (!selectedCluster || selectedCluster.ids.length === 0) return [];
+    const idSet = new Set(selectedCluster.ids);
+    const matched: Entry[] = [];
+    for (const entry of entries) {
+      if (idSet.has(entry.item.id)) {
+        matched.push(entry);
+      }
+    }
+    for (const id of selectedCluster.ids) {
+      if (!matched.some((m) => m.item.id === id)) {
+        const occ = occurrences.data?.find((i) => i.id === id);
+        if (occ) matched.push({ type: 'occurrence', item: occ });
+        else {
+          const civ = civic.data?.find((i) => i.id === id);
+          if (civ) matched.push({ type: 'civic', item: civ });
+        }
+      }
+    }
+    return matched;
+  }, [selectedCluster, entries, occurrences.data, civic.data]);
+
   const municipalOverviewRegion = useMemo(() => {
     const points = entries
       .map((entry) => entryLocation(entry))
@@ -385,7 +415,7 @@ function TerritoryContent() {
           title: `${entry.type === 'occurrence' ? 'Ocorrência' : kindLabel[entry.item.kind]} · ${entry.item.title}`,
           color:
             entry.type === 'occurrence'
-              ? colors.accent
+              ? pinColors.occurrence
               : pinColors[entry.item.kind],
           kind: markerKind,
         },
@@ -402,7 +432,7 @@ function TerritoryContent() {
           title: `${selectedEntry.type === 'occurrence' ? 'Ocorrência' : kindLabel[selectedEntry.item.kind]} · ${selectedEntry.item.title}`,
           color:
             selectedEntry.type === 'occurrence'
-              ? colors.accent
+              ? pinColors.occurrence
               : pinColors[selectedEntry.item.kind],
           kind:
             selectedEntry.type === 'occurrence'
@@ -413,7 +443,7 @@ function TerritoryContent() {
     }
 
     return list;
-  }, [located, selectedEntry, colors.accent, pinColors]);
+  }, [located, selectedEntry, pinColors]);
 
   const resetFilters = () => {
     setOrder('date');
@@ -421,6 +451,7 @@ function TerritoryContent() {
     setSearch('');
     setKind('all');
     setSelectedId(null);
+    setSelectedCluster(null);
     setStatus('all');
     setNeighborhood('');
     setAreaOnly(false);
@@ -545,6 +576,7 @@ function TerritoryContent() {
           setKind(value as Kind);
           setStatus('all');
           setSelectedId(null);
+          setSelectedCluster(null);
           setAreaOnly(false);
         }}
       />
@@ -568,9 +600,20 @@ function TerritoryContent() {
           region={region}
           markers={osmMarkers}
           selectedId={selectedId}
+          selectedClusterIds={selectedCluster?.ids || null}
           isDark={mode === 'dark'}
-          onMarkerClick={(id) => setSelectedId(id)}
-          onMapClick={() => setSelectedId(null)}
+          onMarkerClick={(id) => {
+            setSelectedId(id);
+            setSelectedCluster(null);
+          }}
+          onClusterClick={(event) => {
+            setSelectedCluster(event);
+            setSelectedId(null);
+          }}
+          onMapClick={() => {
+            setSelectedId(null);
+            setSelectedCluster(null);
+          }}
           onRegionChange={(newRegion) => {
             setRegion((curr: TerritoryMapRegion) => ({
               ...curr,
@@ -640,6 +683,7 @@ function TerritoryContent() {
               setRegion(municipalOverviewRegion);
               setAreaOnly(false);
               setSelectedId(null);
+              setSelectedCluster(null);
             }}
             style={[styles.floatingCircleButton, { backgroundColor: colors.surface }]}
           >
@@ -653,7 +697,7 @@ function TerritoryContent() {
       )}
 
       {/* 4. BOTÃO 'BUSCAR NESTA ÁREA' QUANDO MOVE O MAPA */}
-      {!isListView && !selectedEntry && (
+      {!isListView && !selectedEntry && selectedClusterEntries.length === 0 && (
         <View style={[styles.areaButtonWrapper, { bottom: insets.bottom + 95 }]}>
           <Pressable
             style={[styles.areaPillButton, { backgroundColor: colors.surface }]}
@@ -671,8 +715,39 @@ function TerritoryContent() {
         </View>
       )}
 
-      {/* 5. BOTTOM PREVIEW CARD (QUANDO UM PINO É SELECIONADO) */}
-      {!isListView && selectedEntry && (
+      {/* 5. BOTTOM PREVIEW CARDS (INDIVIDUAL OU CARROSSEL DE CLUSTER) */}
+      {!isListView && selectedClusterEntries.length > 1 && (
+        <TerritoryClusterCarousel
+          entries={selectedClusterEntries}
+          onOpen={openEntry}
+          onClose={() => setSelectedCluster(null)}
+          onZoomCluster={() => {
+            if (selectedCluster) {
+              const targetLat = selectedCluster.latitude;
+              const targetLng = selectedCluster.longitude;
+              setSelectedCluster(null);
+              setRegion((curr: TerritoryMapRegion) => ({
+                ...curr,
+                latitude: targetLat,
+                longitude: targetLng,
+                zoom: Math.max(16, Math.min(18, (curr.zoom ?? 14) + 2)),
+              }));
+            }
+          }}
+          bottomOffset={insets.bottom + 85}
+        />
+      )}
+
+      {!isListView && selectedClusterEntries.length === 1 && (
+        <TerritoryPreviewCard
+          entry={selectedClusterEntries[0]}
+          onOpen={openEntry}
+          onClose={() => setSelectedCluster(null)}
+          bottomOffset={insets.bottom + 85}
+        />
+      )}
+
+      {!isListView && selectedClusterEntries.length === 0 && selectedEntry && (
         <TerritoryPreviewCard
           entry={selectedEntry}
           onOpen={openEntry}

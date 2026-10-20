@@ -28,12 +28,17 @@ interface TerritoryPreviewCardProps {
   bottomOffset?: number;
 }
 
-export function TerritoryPreviewCard({
+export function TerritoryCardContent({
   entry,
   onOpen,
   onClose,
-  bottomOffset = 90,
-}: TerritoryPreviewCardProps) {
+  hideClose = false,
+}: {
+  entry: Entry;
+  onOpen: (entry: Entry) => void;
+  onClose?: () => void;
+  hideClose?: boolean;
+}) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const [imageError, setImageError] = useState(false);
@@ -76,87 +81,87 @@ export function TerritoryPreviewCard({
   const hasPhoto = Boolean(resolvedPhoto && !imageError);
 
   return (
-    <View style={[styles.card, { bottom: bottomOffset }]}>
-      <Pressable
-        style={styles.cardPressable}
-        accessibilityRole="button"
-        accessibilityLabel={`Ver detalhes de ${title}`}
-        onPress={() => onOpen(entry)}
-      >
-        {hasPhoto && resolvedPhoto && (
-          <>
-            <Image
-              source={{ uri: resolvedPhoto }}
-              style={StyleSheet.absoluteFill}
-              contentFit="cover"
-              transition={250}
-              onError={() => setImageError(true)}
-            />
-            <LinearGradient
-              colors={[
-                'rgba(15,18,20,0.35)',
-                'rgba(15,18,20,0.72)',
-                'rgba(15,18,20,0.96)',
+    <Pressable
+      style={styles.cardPressable}
+      accessibilityRole="button"
+      accessibilityLabel={`Ver detalhes de ${title}`}
+      onPress={() => onOpen(entry)}
+    >
+      {hasPhoto && resolvedPhoto && (
+        <>
+          <Image
+            source={{ uri: resolvedPhoto }}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            transition={250}
+            onError={() => setImageError(true)}
+          />
+          <LinearGradient
+            colors={[
+              'rgba(15,18,20,0.35)',
+              'rgba(15,18,20,0.72)',
+              'rgba(15,18,20,0.96)',
+            ]}
+            locations={[0, 0.45, 1]}
+            style={StyleSheet.absoluteFill}
+          />
+        </>
+      )}
+
+      <View style={styles.cardInner}>
+        {/* Top row: Badges + Close button */}
+        <View style={styles.topRow}>
+          <View style={styles.badgeGroup}>
+            <View
+              style={[
+                styles.badge,
+                {
+                  backgroundColor: hasPhoto
+                    ? 'rgba(255,255,255,0.22)'
+                    : badgeColor + '18',
+                },
               ]}
-              locations={[0, 0.45, 1]}
-              style={StyleSheet.absoluteFill}
-            />
-          </>
-        )}
-
-        <View style={styles.cardInner}>
-          {/* Top row: Badges + Close button */}
-          <View style={styles.topRow}>
-            <View style={styles.badgeGroup}>
+            >
               <View
                 style={[
-                  styles.badge,
-                  {
-                    backgroundColor: hasPhoto
-                      ? 'rgba(255,255,255,0.22)'
-                      : badgeColor + '18',
-                  },
+                  styles.badgeDot,
+                  { backgroundColor: hasPhoto ? colors.white : badgeColor },
                 ]}
+              />
+              <AppText
+                variant="caption"
+                style={{
+                  color: hasPhoto ? colors.white : badgeColor,
+                  fontWeight: '700',
+                }}
               >
-                <View
-                  style={[
-                    styles.badgeDot,
-                    { backgroundColor: hasPhoto ? colors.white : badgeColor },
-                  ]}
-                />
-                <AppText
-                  variant="caption"
-                  style={{
-                    color: hasPhoto ? colors.white : badgeColor,
-                    fontWeight: '700',
-                  }}
-                >
-                  {categoryLabel}
-                </AppText>
-              </View>
-
-              <View
-                style={[
-                  styles.statusBadge,
-                  {
-                    backgroundColor: hasPhoto
-                      ? 'rgba(0,0,0,0.35)'
-                      : colors.surfaceSubdued,
-                  },
-                ]}
-              >
-                <AppText
-                  variant="caption"
-                  style={{
-                    color: hasPhoto ? 'rgba(255,255,255,0.9)' : colors.muted,
-                    fontWeight: '600',
-                  }}
-                >
-                  {status}
-                </AppText>
-              </View>
+                {categoryLabel}
+              </AppText>
             </View>
 
+            <View
+              style={[
+                styles.statusBadge,
+                {
+                  backgroundColor: hasPhoto
+                    ? 'rgba(0,0,0,0.35)'
+                    : colors.surfaceSubdued,
+                },
+              ]}
+            >
+              <AppText
+                variant="caption"
+                style={{
+                  color: hasPhoto ? 'rgba(255,255,255,0.9)' : colors.muted,
+                  fontWeight: '600',
+                }}
+              >
+                {status}
+              </AppText>
+            </View>
+          </View>
+
+          {!hideClose && onClose && (
             <Pressable
               style={[
                 styles.closeCircle,
@@ -176,72 +181,91 @@ export function TerritoryPreviewCard({
                 color={hasPhoto ? colors.white : colors.ink}
               />
             </Pressable>
-          </View>
+          )}
+        </View>
 
-          {/* Bottom section: Title, Location and Action CTA */}
-          <View style={styles.bottomSection}>
+        {/* Bottom section: Title, Location and Action CTA */}
+        <View style={styles.bottomSection}>
+          <AppText
+            variant="sectionTitle"
+            numberOfLines={2}
+            style={[
+              styles.cardTitle,
+              hasPhoto ? { color: colors.white } : { color: colors.ink },
+            ]}
+          >
+            {title}
+          </AppText>
+
+          <View style={styles.locationRow}>
+            <Ionicons
+              name="location"
+              size={14}
+              color={hasPhoto ? 'rgba(255,255,255,0.85)' : colors.muted}
+            />
             <AppText
-              variant="sectionTitle"
-              numberOfLines={2}
+              variant="caption"
+              numberOfLines={1}
               style={[
-                styles.cardTitle,
-                hasPhoto ? { color: colors.white } : { color: colors.ink },
+                styles.addressText,
+                hasPhoto
+                  ? { color: 'rgba(255,255,255,0.85)' }
+                  : { color: colors.muted },
               ]}
             >
-              {title}
+              {address}
             </AppText>
+          </View>
 
-            <View style={styles.locationRow}>
-              <Ionicons
-                name="location"
-                size={14}
-                color={hasPhoto ? 'rgba(255,255,255,0.85)' : colors.muted}
-              />
+          <View style={styles.actionRow}>
+            <View
+              style={[
+                styles.actionButton,
+                {
+                  backgroundColor: hasPhoto
+                    ? 'rgba(255,255,255,0.92)'
+                    : colors.ink,
+                },
+              ]}
+            >
               <AppText
-                variant="caption"
-                numberOfLines={1}
-                style={[
-                  styles.addressText,
-                  hasPhoto
-                    ? { color: 'rgba(255,255,255,0.85)' }
-                    : { color: colors.muted },
-                ]}
+                variant="label"
+                style={{
+                  color: hasPhoto ? '#111827' : colors.surface,
+                  fontWeight: '700',
+                  fontSize: 13,
+                }}
               >
-                {address}
+                Ver detalhes
               </AppText>
-            </View>
-
-            <View style={styles.actionRow}>
-              <View
-                style={[
-                  styles.actionButton,
-                  {
-                    backgroundColor: hasPhoto
-                      ? 'rgba(255,255,255,0.92)'
-                      : colors.ink,
-                  },
-                ]}
-              >
-                <AppText
-                  variant="label"
-                  style={{
-                    color: hasPhoto ? '#111827' : colors.surface,
-                    fontWeight: '700',
-                    fontSize: 13,
-                  }}
-                >
-                  Ver detalhes
-                </AppText>
-                <Ionicons
-                  name="arrow-forward"
-                  size={14}
-                  color={hasPhoto ? '#111827' : colors.surface}
-                />
-              </View>
+              <Ionicons
+                name="arrow-forward"
+                size={14}
+                color={hasPhoto ? '#111827' : colors.surface}
+              />
             </View>
           </View>
         </View>
-      </Pressable>
+      </View>
+    </Pressable>
+  );
+}
+
+export function TerritoryPreviewCard({
+  entry,
+  onOpen,
+  onClose,
+  bottomOffset = 90,
+}: TerritoryPreviewCardProps) {
+  const styles = useThemedStyles(createStyles);
+
+  return (
+    <View style={[styles.card, { bottom: bottomOffset }]}>
+      <TerritoryCardContent
+        entry={entry}
+        onOpen={onOpen}
+        onClose={onClose}
+      />
     </View>
   );
 }

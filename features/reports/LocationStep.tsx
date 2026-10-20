@@ -1,5 +1,5 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
-import type { ThemeColors } from '@/theme/colors';
+import { lightColors, type ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
 import React, { useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
@@ -109,7 +109,7 @@ export function LocationStep({
                     longitude,
                     title: address || 'Local selecionado',
                     draggable: true,
-                    color: colors.accent,
+                    color: lightColors.ink,
                   },
                 ]
               : []
@@ -122,13 +122,13 @@ export function LocationStep({
         Toque no mapa ou arraste o pino para marcar o local.
       </AppText>
       <AppInput
-        label="Rua, número ou ponto de referência"
+        placeholder="Rua, número ou ponto de referência"
         value={address}
         onChangeText={onAddressChange}
         error={error}
       />
       <AppInput
-        label="Bairro"
+        placeholder="Bairro"
         value={neighborhood}
         onChangeText={onNeighborhoodChange}
         maxLength={120}
@@ -156,17 +156,15 @@ export function LocationStep({
       {manual && (
         <>
           <AppInput
-            label="Latitude"
+            placeholder="Latitude (Ex.: -22,903)"
             value={manualLatitude}
             onChangeText={setManualLatitude}
-            placeholder="Ex.: -22,903"
             keyboardType="decimal-pad"
           />
           <AppInput
-            label="Longitude"
+            placeholder="Longitude (Ex.: -43,185)"
             value={manualLongitude}
             onChangeText={setManualLongitude}
-            placeholder="Ex.: -43,185"
             keyboardType="decimal-pad"
           />
           <AppButton
