@@ -2,11 +2,21 @@ import type { RawBigQuery1746Row } from './types.js';
 
 function extractDateValue(val: { value: string } | string | null | undefined): string | null {
   if (!val) return null;
-  const raw = typeof val === 'object' && 'value' in val ? val.value : String(val);
+  const raw = (typeof val === 'object' && 'value' in val ? val.value : String(val)).trim();
   if (!raw) return null;
-  // If it's a date or datetime like "2026-09-20T13:07:16", ensure valid ISO
+
   try {
-    const d = new Date(raw.includes('T') ? raw : raw + 'T00:00:00Z');
+    // BigQuery DATETIME fields in DATA.RIO represent America/Sao_Paulo local time (UTC-3).
+    // Ensure deterministic parsing across UTC containers and local machines.
+    const normalized = raw.replace(' ', 'T');
+    const hasExplicitZone = /(?:Z|[+-]\d{2}:\d{2})$/i.test(normalized);
+    const isoCandidate = normalized.includes('T')
+      ? hasExplicitZone
+        ? normalized
+        : `${normalized}-03:00`
+      : `${normalized}T00:00:00-03:00`;
+
+    const d = new Date(isoCandidate);
     return isNaN(d.getTime()) ? null : d.toISOString();
   } catch {
     return null;
@@ -15,12 +25,12 @@ function extractDateValue(val: { value: string } | string | null | undefined): s
 
 function extractDateString(val: { value: string } | string | null | undefined): string | null {
   if (!val) return null;
-  const raw = typeof val === 'object' && 'value' in val ? val.value : String(val);
+  const raw = (typeof val === 'object' && 'value' in val ? val.value : String(val)).trim();
   return raw && raw.length >= 10 ? raw.slice(0, 10) : null;
 }
 
 export function mapRawRowToOfficialCall(row: RawBigQuery1746Row) {
-  // Validate coordinates: Rio de Janeiro bounding polygon is roughly lat [-23.15, -22.70], lng [-43.80, -43.10]
+  // Validate coordinates: Rio de Janeiro bounding box is lat [-23.15, -22.70], lng [-43.80, -43.10]
   let lat: number | null = null;
   let lng: number | null = null;
 

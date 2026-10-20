@@ -6,7 +6,13 @@ import {
   assertValidPartitionDate,
   buildPartitionCallsQuery,
   buildLatestPartitionsQuery,
+  expandPartitionDateRange,
+  RIO1746_EXCLUDED_SENSITIVE_COLUMNS,
 } from '../src/integrations/rio1746/queries.js';
+import {
+  deduplicateMappedCalls,
+  importPartition,
+} from '../src/integrations/rio1746/importer.js';
 import type { RawBigQuery1746Row } from '../src/integrations/rio1746/types.js';
 
 test('rio1746: mapper maps valid row within Rio coordinates correctly', () => {
@@ -122,6 +128,27 @@ test('rio1746: queries use BigQuery parameters (@partitionDate, @limit) and reje
     () => assertValidPartitionDate('2026-02-30'),
     /Invalid calendar date/,
   );
+
+  for (const sensitiveCol of RIO1746_EXCLUDED_SENSITIVE_COLUMNS) {
+    assert.ok(
+      !callQuery.query.includes(sensitiveCol),
+      `Query must not expose sensitive column ${sensitiveCol}`,
+    );
+  }
+
+  assert.deepEqual(expandPartitionDateRange('2026-09-18', '2026-09-20'), [
+    '2026-09-18',
+    '2026-09-19',
+    '2026-09-20',
+  ]);
+  assert.equal(
+    deduplicateMappedCalls([
+      { externalId: '1', v: 'a' },
+      { externalId: '1', v: 'b' },
+      { externalId: '2', v: 'c' },
+    ]).skippedDuplicates,
+    1,
+  );
 });
 
 test('rio1746: POST /api/rio1746/sync rejects unauthenticated callers', async (t) => {
@@ -194,6 +221,94 @@ test(
       payload: { partitionDate: "2026-09-20' OR 1=1" },
     });
     assert.equal(badDateSync.statusCode, 400);
+
+    // Verify multi-page pagination, auditable imported vs updated counts, and non-regressing checkpoint
+    const { sql } = await import('drizzle-orm');
+    const { officialCalls, syncCheckpoints } = await import('../src/schema.js');
+    await db.execute(sql`DELETE FROM official_calls WHERE external_id IN ('test-bq-1', 'test-bq-2', 'test-bq-3')`);
+    await db.execute(sql`DELETE FROM sync_checkpoints WHERE id = 'rio1746_calls'`);
+
+    const page1: RawBigQuery1746Row[] = Array.from({ length: 10 }, (_, idx) => ({
+      id_chamado: idx < 2 ? `test-bq-${idx + 1}` : 'test-bq-2', // includes duplicates in same page
+      data_inicio: '2026-09-20T10:00:00',
+      tipo: 'Iluminação Pública',
+      subtipo: 'Reparo de luminária',
+      status: 'Aberto',
+      situacao: 'Não Encerrado',
+      dentro_prazo: 'No Prazo',
+      latitude: -22.91,
+      longitude: -43.2,
+      nome_bairro: 'Centro',
+      data_particao: '2026-09-20',
+    }));
+    const page2: RawBigQuery1746Row[] = [
+      {
+        id_chamado: 'test-bq-3',
+        data_inicio: '2026-09-20T11:00:00',
+        data_fim: '2026-09-20T15:00:00',
+        tipo: 'Iluminação Pública',
+        subtipo: 'Reparo de luminária',
+        status: 'Fechado com solução',
+        situacao: 'Encerrado',
+        dentro_prazo: 'No Prazo',
+        latitude: -22.92,
+        longitude: -43.21,
+        nome_bairro: 'Copacabana',
+        data_particao: '2026-09-20',
+      },
+    ];
+
+    let callIndex = 0;
+    const mockBq = {
+      query: async () => {
+        callIndex += 1;
+        return [callIndex === 1 ? page1 : callIndex === 2 ? page2 : []];
+      },
+    } as unknown as import('@google-cloud/bigquery').BigQuery;
+
+    const firstImport = await importPartition(mockBq, db, '2026-09-20', {
+      pageSize: 10,
+    });
+    assert.equal(firstImport.pagesProcessed, 2);
+    assert.equal(firstImport.totalFetched, 11);
+    assert.equal(firstImport.skippedDuplicates, 8);
+    assert.equal(firstImport.imported, 3);
+    assert.equal(firstImport.updated, 0);
+
+    // Re-import an older partition with 1 updated record and ensure lastPartition does not regress
+    const mockBqUpdate = {
+      query: async () => [
+        [
+          {
+            id_chamado: 'test-bq-1',
+            data_inicio: '2026-09-19T10:00:00',
+            data_fim: '2026-09-20T12:00:00',
+            tipo: 'Iluminação Pública',
+            subtipo: 'Reparo de luminária',
+            status: 'Fechado com solução',
+            situacao: 'Encerrado',
+            dentro_prazo: 'No Prazo',
+            latitude: -22.91,
+            longitude: -43.2,
+            nome_bairro: 'Centro',
+            data_particao: '2026-09-19',
+          },
+        ],
+      ],
+    } as unknown as import('@google-cloud/bigquery').BigQuery;
+
+    const secondImport = await importPartition(mockBqUpdate, db, '2026-09-19', {
+      pageSize: 10,
+    });
+    assert.equal(secondImport.imported, 0);
+    assert.equal(secondImport.updated, 1);
+
+    const [cp] = await db.select().from(syncCheckpoints);
+    assert.equal(cp.lastPartition, '2026-09-20');
+    assert.equal(cp.recordsImported, 3);
+    assert.equal(cp.recordsUpdated, 1);
+
+    await db.execute(sql`DELETE FROM official_calls WHERE external_id IN ('test-bq-1', 'test-bq-2', 'test-bq-3')`);
   },
 );
 

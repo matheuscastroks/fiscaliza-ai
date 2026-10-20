@@ -2,7 +2,11 @@ import type { FastifyInstance } from 'fastify';
 import { and, desc, eq, gte, ilike, isNotNull, lte, or, sql } from 'drizzle-orm';
 import type { Database } from './db.js';
 import { officialCalls } from './schema.js';
-import { runRio1746Sync, getSyncStatus } from './integrations/rio1746/sync.js';
+import {
+  runRio1746RangeSync,
+  runRio1746Sync,
+  getSyncStatus,
+} from './integrations/rio1746/sync.js';
 import type {
   OfficialCall,
   OfficialCallsFilterOptions,
@@ -302,6 +306,8 @@ export function registerOfficialCallsRoutes(
   app.post<{
     Body?: {
       partitionDate?: string;
+      startDate?: string;
+      endDate?: string;
       limit?: number;
     };
   }>(
@@ -316,10 +322,18 @@ export function registerOfficialCallsRoutes(
               type: 'string',
               pattern: '^\\d{4}-\\d{2}-\\d{2}$',
             },
+            startDate: {
+              type: 'string',
+              pattern: '^\\d{4}-\\d{2}-\\d{2}$',
+            },
+            endDate: {
+              type: 'string',
+              pattern: '^\\d{4}-\\d{2}-\\d{2}$',
+            },
             limit: {
               type: 'integer',
               minimum: 10,
-              maximum: 10000,
+              maximum: 50000,
             },
           },
         },
@@ -330,10 +344,26 @@ export function registerOfficialCallsRoutes(
         throw fail(403, 'Acesso restrito à administração.');
       }
 
-      const partition = req.body?.partitionDate || '2026-09-20';
-      const limit = Math.min(10000, Math.max(10, req.body?.limit || 2000));
+      const maxRecords = req.body?.limit
+        ? Math.min(50000, Math.max(10, req.body.limit))
+        : undefined;
 
-      const result = await runRio1746Sync(db, partition, limit);
+      if (req.body?.startDate && req.body?.endDate) {
+        const rangeResult = await runRio1746RangeSync(
+          db,
+          req.body.startDate,
+          req.body.endDate,
+          maxRecords ? { maxRecords } : {},
+        );
+        return ok(rangeResult);
+      }
+
+      const partition = req.body?.partitionDate || '2026-09-20';
+      const result = await runRio1746Sync(
+        db,
+        partition,
+        maxRecords ? { maxRecords } : {},
+      );
       return ok(result);
     },
   );

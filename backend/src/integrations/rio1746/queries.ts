@@ -3,6 +3,15 @@ export interface ParameterizedBigQuery {
   params: Record<string, string | number>;
 }
 
+/**
+ * Columns explicitly excluded from BigQuery extraction to protect citizen/household privacy.
+ * - `numero_logradouro`: exact residential door number is omitted to prevent neighbor identification
+ *   in sensitive calls (e.g., noise complaints, sanitary inspection).
+ */
+export const RIO1746_EXCLUDED_SENSITIVE_COLUMNS = [
+  'numero_logradouro',
+] as const;
+
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 export function assertValidPartitionDate(partitionDate: string): string {
@@ -29,9 +38,33 @@ export function assertSafeBoundedInt(
   return value;
 }
 
+export function expandPartitionDateRange(startDate: string, endDate: string): string[] {
+  const startIso = assertValidPartitionDate(startDate);
+  const endIso = assertValidPartitionDate(endDate);
+  const startMs = new Date(`${startIso}T00:00:00Z`).getTime();
+  const endMs = new Date(`${endIso}T00:00:00Z`).getTime();
+
+  if (endMs < startMs) {
+    throw new Error(`Invalid partition range: endDate (${endIso}) is before startDate (${startIso}).`);
+  }
+
+  const maxSpanDays = 31;
+  const days = Math.round((endMs - startMs) / (24 * 60 * 60 * 1000)) + 1;
+  if (days > maxSpanDays) {
+    throw new Error(`Partition range too wide (${days} days). Maximum allowed is ${maxSpanDays} days per sync run.`);
+  }
+
+  const dates: string[] = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(startMs + i * 24 * 60 * 60 * 1000);
+    dates.push(d.toISOString().slice(0, 10));
+  }
+  return dates;
+}
+
 export function buildPartitionCallsQuery(
   partitionDate: string,
-  limit = 5000,
+  limit = 2500,
   offset = 0,
 ): ParameterizedBigQuery {
   const safePartition = assertValidPartitionDate(partitionDate);
@@ -47,7 +80,6 @@ export function buildPartitionCallsQuery(
         c.id_bairro,
         b.nome as nome_bairro,
         b.subprefeitura,
-        c.id_logradouro,
         c.nome_unidade_organizacional,
         c.categoria,
         c.tipo,
@@ -67,7 +99,7 @@ export function buildPartitionCallsQuery(
       FROM \`datario.adm_central_atendimento_1746.chamado\` c
       LEFT JOIN \`datario.dados_mestres.bairro\` b ON c.id_bairro = b.id_bairro
       WHERE c.data_particao = DATE(@partitionDate)
-      ORDER BY c.data_inicio DESC, c.id_chamado ASC
+      ORDER BY c.id_chamado ASC
       LIMIT @limit
       OFFSET @offset
     `,
