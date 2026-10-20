@@ -4,15 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { layout } from '@/theme/layout';
 import React, { useMemo, useState } from 'react';
 import {
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
-import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
@@ -50,16 +49,10 @@ import { useAuthStore } from '@/stores/authStore';
 import { useTerritorySelection } from '@/stores/territoryStore';
 import { municipalityRegion } from '@/features/city/municipalContext';
 import { OsmMapView, type MapMarker } from '@/components/ui/OsmMapView';
+import { TerritoryPreviewCard, type Entry } from '@/components/territory/TerritoryPreviewCard';
 
 type Kind = 'all' | 'occurrences' | CivicItem['kind'];
-type Entry =
-  | { type: 'occurrence'; item: Occurrence }
-  | { type: 'civic'; item: CivicItem };
-const occurrenceStatus: Record<string, string> = {
-  pending: 'Recebida',
-  in_progress: 'Em atendimento',
-  resolved: 'Concluída',
-};
+
 const locatedOccurrence = (item: Occurrence) =>
   Number.isFinite(item.location.latitude) &&
   Number.isFinite(item.location.longitude) &&
@@ -67,6 +60,7 @@ const locatedOccurrence = (item: Occurrence) =>
   Math.abs(item.location.longitude) <= 180
     ? item.location
     : undefined;
+
 const entryLocation = (entry: Entry) =>
   entry.type === 'occurrence'
     ? locatedOccurrence(entry.item)
@@ -79,6 +73,7 @@ export default function TerritoryScreen() {
 
 function TerritoryContent() {
   const { colors, mode } = useTheme();
+  const insets = useSafeAreaInsets();
   const pinColors = {
     proposal: colors.attention,
     consultation: colors.muted,
@@ -108,7 +103,7 @@ function TerritoryContent() {
   const [kind, setKind] = useState<Kind>('all');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
-  const [map, setMap] = useState(true);
+  const [isListView, setIsListView] = useState(false);
   const { filters } = useLocalSearchParams<{ filters?: string }>();
   const [filterVisibility, setFilterVisibility] = useState<{
     param?: string;
@@ -124,6 +119,7 @@ function TerritoryContent() {
   const [showUnlocated, setShowUnlocated] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
   const [locating, setLocating] = useState(false);
+
   const entries = useMemo(() => {
     const term = normalizeNeighborhood(search);
     const result: Entry[] = [];
@@ -180,22 +176,29 @@ function TerritoryContent() {
     period,
     order,
   ]);
+
   const unlocated = entries.filter((entry) => !entryLocation(entry));
   const located = entries.filter((entry) => {
     const point = entryLocation(entry);
     return point && (!areaOnly || inMapRegion(point, region));
   });
   const listed = areaOnly ? located : entries;
-  const selectedEntry = located.find((entry) => entry.item.id === selectedId);
+  const selectedEntry = entries.find((entry) => entry.item.id === selectedId);
+
   const filterCount =
     Number(Boolean(neighborhood)) +
     Number(status !== 'all') +
     Number(areaOnly) +
     Number(period !== 0) +
     Number(order !== 'date');
+
   const statuses: [string, string][] =
     kind === 'occurrences'
-      ? Object.entries(occurrenceStatus)
+      ? [
+          ['pending', 'Recebida'],
+          ['in_progress', 'Em atendimento'],
+          ['resolved', 'Concluída'],
+        ]
       : kind === 'proposal'
         ? ['submitted', 'under_review', 'accepted', 'declined'].map((key) => [
             key,
@@ -209,11 +212,13 @@ function TerritoryContent() {
                 statusLabel[key],
               ])
             : [];
+
   const showOccurrences = kind === 'all' || kind === 'occurrences';
   const showCivic = kind !== 'occurrences';
   const dataReady =
     (!showOccurrences || occurrences.data !== undefined) &&
     (!showCivic || civic.data !== undefined);
+
   const openEntry = (entry: Entry) =>
     router.push({
       pathname:
@@ -222,6 +227,7 @@ function TerritoryContent() {
           : '/CivicDetailsScreen',
       params: { id: entry.item.id },
     });
+
   const renderEntry = (entry: Entry) => (
     <View key={entry.type + entry.item.id}>
       {entry.type === 'occurrence' ? (
@@ -238,26 +244,26 @@ function TerritoryContent() {
       )}
     </View>
   );
+
   const osmMarkers: MapMarker[] = located.flatMap((entry) => {
     const point = entryLocation(entry);
     if (!point) return [];
+    const markerKind = entry.type === 'occurrence' ? 'occurrence' : entry.item.kind;
     return [
       {
         id: entry.item.id,
         latitude: point.latitude,
         longitude: point.longitude,
         title: `${entry.type === 'occurrence' ? 'Ocorrência' : kindLabel[entry.item.kind]} · ${entry.item.title}`,
-        description:
-          entry.type === 'occurrence'
-            ? `${occurrenceStatus[entry.item.status]} · ${entry.item.location.address}`
-            : `${statusLabel[entry.item.status]} · ${entry.item.neighborhood}`,
         color:
           entry.type === 'occurrence'
             ? colors.accent
             : pinColors[entry.item.kind],
+        kind: markerKind,
       },
     ];
   });
+
   const resetFilters = () => {
     setOrder('date');
     setPeriod(0);
@@ -268,6 +274,7 @@ function TerritoryContent() {
     setNeighborhood('');
     setAreaOnly(false);
   };
+
   const locate = async () => {
     setLocating(true);
     try {
@@ -285,6 +292,7 @@ function TerritoryContent() {
         ...current,
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
+        zoom: 16,
       }));
       setLocationMessage('');
     } catch {
@@ -297,21 +305,40 @@ function TerritoryContent() {
   };
 
   return (
-    <AppScreen>
-      <AppHeader
-        title="Território"
-        context={
-          municipality
-            ? `${municipality.name} · ${municipality.state}`
-            : 'Seu município'
-        }
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={cityStyles.content}
-      >
-        <View style={{ gap: spacing.sm }}>
+    <View style={styles.container}>
+      {locationMessage !== '' && (
+        <View style={[styles.messageBanner, { top: insets.top + 70, backgroundColor: colors.surface }]}>
+          <AppText variant="caption" color="muted" accessibilityLiveRegion="polite">
+            {locationMessage}
+          </AppText>
+        </View>
+      )}
+
+      {/* 1. MAPA DE FUNDO EDGE-TO-EDGE */}
+      <View style={StyleSheet.absoluteFill}>
+        <OsmMapView
+          style={StyleSheet.absoluteFill}
+          region={region}
+          markers={osmMarkers}
+          selectedId={selectedId}
+          isDark={mode === 'dark'}
+          onMarkerClick={(id) => setSelectedId(id)}
+          onMapClick={() => setSelectedId(null)}
+          onRegionChange={(newRegion) => {
+            setRegion((curr) => ({
+              ...curr,
+              latitude: newRegion.latitude,
+              longitude: newRegion.longitude,
+              latitudeDelta: newRegion.latitudeDelta,
+              longitudeDelta: newRegion.longitudeDelta,
+            }));
+          }}
+        />
+      </View>
+
+      {/* 2. TOP FLOATING HEADER (BUSCA + CHIPS DE CATEGORIA + FILTROS) */}
+      <View style={[styles.topFloatingHeader, { paddingTop: insets.top + spacing.xs }]}>
+        <View style={styles.searchContainer}>
           <CitySearch
             value={search}
             onChangeText={setSearch}
@@ -319,8 +346,16 @@ function TerritoryContent() {
             expanded={filtersOpen}
             filterCount={filterCount}
           />
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryScroll}
+        >
           <SlidingTabs
-            label="Tipos de participação no território"
+            label="Categorias"
+            edgeToEdge={false}
             options={[
               { value: 'all', label: 'Tudo' },
               { value: 'occurrences', label: 'Ocorrências' },
@@ -336,27 +371,21 @@ function TerritoryContent() {
               setAreaOnly(false);
             }}
           />
-        </View>
-        <View style={styles.toolbar}>
-          <View style={styles.flex}>
-            <AppText variant="label">
-              {neighborhood || 'Todo o município'}
+        </ScrollView>
+
+        {/* CONTADOR DE RESULTADOS RÁPIDO */}
+        <View style={styles.resultsBadgeRow}>
+          <View style={[styles.resultsBadge, { backgroundColor: colors.surface + 'EE' }]}>
+            <AppText variant="caption" style={{ fontWeight: '700' }}>
+              {listed.length} {listed.length === 1 ? 'registro' : 'registros'}
+              {areaOnly ? ' nesta área' : ''}
             </AppText>
-            {dataReady && (
-              <AppText
-                variant="meta"
-                color="muted"
-                accessibilityLiveRegion="polite"
-              >
-                {listed.length}{' '}
-                {listed.length === 1 ? 'resultado' : 'resultados'}
-                {areaOnly ? ' na área visível' : ''}
-              </AppText>
-            )}
           </View>
         </View>
+
+        {/* FILTROS AVANÇADOS EXPANSÍVEIS (MODAL / GAVETA) */}
         {filtersOpen && (
-          <View style={styles.filters}>
+          <View style={[styles.filtersDrawer, { backgroundColor: colors.surface }]}>
             <AppText variant="label">Bairro</AppText>
             <NeighborhoodPicker
               options={options}
@@ -408,257 +437,326 @@ function TerritoryContent() {
               value={order}
               onChange={(value) => setOrder(value as TerritoryOrder)}
             />
-            <AppButton
-              title="Limpar filtros"
-              variant="quiet"
-              onPress={resetFilters}
-            />
-          </View>
-        )}
-        {Platform.OS !== 'web' && (
-          <SlidingTabs
-            tabs
-            scroll={false}
-            label="Visualização do território"
-            options={[
-              { value: 'map', label: 'Mapa', icon: 'map-outline' },
-              { value: 'list', label: 'Lista', icon: 'list-outline' },
-            ]}
-            value={map ? 'map' : 'list'}
-            onChange={(value) => {
-              setMap(value === 'map');
-              setAreaOnly(false);
-            }}
-          />
-        )}
-        {!municipality && (
-          <AppText color="muted">
-            Confirme seu município no perfil para explorar o território.
-          </AppText>
-        )}
-        {showOccurrences &&
-          (occurrences.isLoading ||
-            occurrences.error ||
-            occurrences.fetchStatus === 'paused') && (
-            <View style={{ gap: spacing.xs }}>
-              {occurrences.error && (
-                <AppText variant="label">Ocorrências</AppText>
-              )}
-              <QueryState
-                loading={occurrences.isLoading}
-                error={occurrences.error}
-                retry={occurrences.refetch}
-              />
-              {occurrences.fetchStatus === 'paused' && (
-                <AppText color="muted">
-                  Ocorrências aguardando conexão. Os dados já carregados
-                  continuam disponíveis.
-                </AppText>
-              )}
-            </View>
-          )}
-        {showCivic &&
-          (civic.isLoading ||
-            civic.error ||
-            civic.fetchStatus === 'paused') && (
-            <View style={{ gap: spacing.xs }}>
-              {civic.error && (
-                <AppText variant="label">Propostas, consultas e ações</AppText>
-              )}
-              <QueryState
-                loading={civic.isLoading}
-                error={civic.error}
-                retry={civic.refetch}
-              />
-              {civic.fetchStatus === 'paused' && (
-                <AppText color="muted">
-                  Participações aguardando conexão. Os dados já carregados
-                  continuam disponíveis.
-                </AppText>
-              )}
-            </View>
-          )}
-        {locationMessage !== '' && (
-          <AppText color="muted" accessibilityLiveRegion="polite">
-            {locationMessage}
-          </AppText>
-        )}
-        {map && (
-          <View style={cityStyles.section}>
-            <View style={styles.mapFrame}>
-              <OsmMapView
-                style={styles.map}
-                region={region}
-                markers={osmMarkers}
-                isDark={mode === 'dark'}
-                onMarkerClick={(id) => setSelectedId(id)}
-                onRegionChange={(newRegion) => {
-                  setRegion((curr) => ({
-                    ...curr,
-                    latitude: newRegion.latitude,
-                    longitude: newRegion.longitude,
-                    latitudeDelta: newRegion.latitudeDelta,
-                    longitudeDelta: newRegion.longitudeDelta,
-                  }));
-                }}
-              />
-              <View style={styles.mapActions}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Minha posição"
-                  accessibilityState={{ disabled: locating, busy: locating }}
-                  disabled={locating}
-                  onPress={() => {
-                    void locate();
-                  }}
-                  style={styles.mapCircle}
-                >
-                  <Ionicons
-                    name="locate-outline"
-                    size={22}
-                    color={colors.ink}
-                  />
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Voltar ao município"
-                  onPress={() => {
-                    setRegion(initial);
-                    setAreaOnly(false);
-                    setSelectedId(null);
-                  }}
-                  style={styles.mapCircle}
-                >
-                  <Ionicons
-                    name="expand-outline"
-                    size={22}
-                    color={colors.ink}
-                  />
-                </Pressable>
-              </View>
-            </View>
-            <AppButton
-              title={
-                areaOnly ? 'Mostrar todo o território' : 'Buscar nesta área'
-              }
-              variant="secondary"
-              onPress={() => setAreaOnly(!areaOnly)}
-            />
-            {selectedEntry ? (
-              renderEntry(selectedEntry)
-            ) : (
-              <AppText variant="meta" color="muted">
-                Toque em um ponto para ver o registro.
-              </AppText>
-            )}
-            {unlocated.length > 0 && (
+            <View style={styles.filterActionsRow}>
               <AppButton
-                title={
-                  (showUnlocated ? 'Ocultar' : 'Ver') +
-                  ' participações sem ponto no mapa · ' +
-                  unlocated.length
-                }
+                title="Limpar filtros"
                 variant="quiet"
-                onPress={() => setShowUnlocated(!showUnlocated)}
+                onPress={resetFilters}
               />
-            )}
-          </View>
-        )}
-        {!map && (
-          <View style={cityStyles.section}>
-            <AppText variant="sectionTitle">
-              {areaOnly ? 'Itens na área visível' : 'Lista do território'}
-            </AppText>
-            {listed.map(renderEntry)}
-            {dataReady && listed.length === 0 && (
-              <IllustratedEmptyState
-                kind="territory"
-                title="Nenhum resultado neste recorte"
-                description="Nenhuma ocorrência, proposta, consulta ou ação encontrada com os filtros atuais."
-                action={{
-                  title: 'Limpar filtros',
-                  onPress: resetFilters,
-                }}
+              <AppButton
+                title="Fechar"
+                variant="secondary"
+                onPress={() => setFiltersOpen(false)}
               />
-            )}
+            </View>
           </View>
         )}
-        {map && showUnlocated && unlocated.length > 0 && (
-          <View style={cityStyles.section}>
-            <AppText variant="sectionTitle">
-              Sem ponto específico · {unlocated.length}
+      </View>
+
+      {/* 3. BOTÕES FLUTUANTES LATERAIS (GPS, RESET, BUSCAR NESTA ÁREA) */}
+      {!isListView && (
+        <View style={[styles.mapActionsRight, { top: insets.top + 160 }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Minha posição"
+            accessibilityState={{ disabled: locating, busy: locating }}
+            disabled={locating}
+            onPress={() => {
+              void locate();
+            }}
+            style={[styles.floatingCircleButton, { backgroundColor: colors.surface }]}
+          >
+            <Ionicons
+              name="locate"
+              size={22}
+              color={locating ? colors.accent : colors.ink}
+            />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Voltar ao município"
+            onPress={() => {
+              setRegion(initial);
+              setAreaOnly(false);
+              setSelectedId(null);
+            }}
+            style={[styles.floatingCircleButton, { backgroundColor: colors.surface }]}
+          >
+            <Ionicons
+              name="expand-outline"
+              size={22}
+              color={colors.ink}
+            />
+          </Pressable>
+        </View>
+      )}
+
+      {/* 4. BOTÃO 'BUSCAR NESTA ÁREA' QUANDO MOVE O MAPA */}
+      {!isListView && !selectedEntry && (
+        <View style={[styles.areaButtonWrapper, { bottom: insets.bottom + 95 }]}>
+          <Pressable
+            style={[styles.areaPillButton, { backgroundColor: colors.surface }]}
+            onPress={() => setAreaOnly(!areaOnly)}
+          >
+            <Ionicons
+              name={areaOnly ? 'globe-outline' : 'scan-outline'}
+              size={16}
+              color={colors.ink}
+            />
+            <AppText variant="caption" style={{ fontWeight: '700' }}>
+              {areaOnly ? 'Mostrar todo o município' : 'Buscar nesta área'}
             </AppText>
-            <AppText color="muted">
-              Abrangem o município ou um bairro, sem localização para comparar
-              com a área do mapa.
-            </AppText>
-            {unlocated.map(renderEntry)}
-          </View>
-        )}
-        <AppButton
-          title="Participar da cidade"
-          onPress={() => router.push('/(tabs)/ParticipateScreen')}
+          </Pressable>
+        </View>
+      )}
+
+      {/* 5. BOTTOM PREVIEW CARD (QUANDO UM PINO É SELECIONADO) */}
+      {!isListView && selectedEntry && (
+        <TerritoryPreviewCard
+          entry={selectedEntry}
+          onOpen={openEntry}
+          onClose={() => setSelectedId(null)}
+          bottomOffset={insets.bottom + 85}
         />
-      </ScrollView>
-    </AppScreen>
+      )}
+
+      {/* 6. VISUALIZAÇÃO EM LISTA (QUANDO ATIVADA) */}
+      {isListView && (
+        <View style={[styles.fullListOverlay, { backgroundColor: colors.canvas }]}>
+          <AppHeader
+            title="Território"
+            context={
+              municipality
+                ? `${municipality.name} · ${municipality.state}`
+                : 'Seu município'
+            }
+          />
+          <ScrollView
+            contentContainerStyle={[cityStyles.content, { paddingBottom: insets.bottom + 100 }]}
+          >
+            {showOccurrences &&
+              (occurrences.isLoading ||
+                occurrences.error ||
+                occurrences.fetchStatus === 'paused') && (
+                <View style={{ gap: spacing.xs }}>
+                  <QueryState
+                    loading={occurrences.isLoading}
+                    error={occurrences.error}
+                    retry={occurrences.refetch}
+                  />
+                </View>
+              )}
+            {showCivic &&
+              (civic.isLoading ||
+                civic.error ||
+                civic.fetchStatus === 'paused') && (
+                <View style={{ gap: spacing.xs }}>
+                  <QueryState
+                    loading={civic.isLoading}
+                    error={civic.error}
+                    retry={civic.refetch}
+                  />
+                </View>
+              )}
+            <View style={cityStyles.section}>
+              <AppText variant="sectionTitle">
+                {areaOnly ? 'Itens na área visível' : 'Lista do território'} ({listed.length})
+              </AppText>
+              {listed.map(renderEntry)}
+              {dataReady && listed.length === 0 && (
+                <IllustratedEmptyState
+                  kind="territory"
+                  title="Nenhum resultado neste recorte"
+                  description="Nenhuma ocorrência, proposta, consulta ou ação encontrada com os filtros atuais."
+                  action={{
+                    title: 'Limpar filtros',
+                    onPress: resetFilters,
+                  }}
+                />
+              )}
+            </View>
+            {unlocated.length > 0 && (
+              <View style={cityStyles.section}>
+                <AppButton
+                  title={
+                    (showUnlocated ? 'Ocultar' : 'Ver') +
+                    ' participações sem ponto no mapa · ' +
+                    unlocated.length
+                  }
+                  variant="quiet"
+                  onPress={() => setShowUnlocated(!showUnlocated)}
+                />
+                {showUnlocated && unlocated.map(renderEntry)}
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* 7. BOTÃO FLUTUANTE ESTILO QUINTOANDAR / AIRBNB (MAPA <-> LISTA) */}
+      <View
+        style={[
+          styles.switchViewPillWrapper,
+          { bottom: insets.bottom + 20 },
+        ]}
+      >
+        <Pressable
+          style={[styles.switchViewPill, { backgroundColor: colors.ink }]}
+          onPress={() => setIsListView(!isListView)}
+          accessibilityRole="button"
+          accessibilityLabel={isListView ? 'Alternar para visualização no Mapa' : 'Alternar para visualização em Lista'}
+        >
+          <Ionicons
+            name={isListView ? 'map' : 'list'}
+            size={18}
+            color={colors.surface}
+          />
+          <AppText
+            variant="label"
+            style={{ color: colors.surface, fontWeight: '700', fontSize: 13 }}
+          >
+            {isListView ? 'Ver Mapa' : 'Ver Lista'}
+          </AppText>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
-    toolbar: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-    flex: { flex: 1, gap: spacing.xxs },
-    filterButton: {
-      minHeight: layout.touchTarget.minHeight,
+    container: {
+      flex: 1,
+      backgroundColor: colors.canvas,
+    },
+    messageBanner: {
+      position: 'absolute',
+      left: spacing.md,
+      right: spacing.md,
+      zIndex: 55,
+      padding: spacing.xs,
+      borderRadius: layout.radius.button,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    topFloatingHeader: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 50,
       paddingHorizontal: spacing.md,
-      borderRadius: layout.radius.pill,
-      backgroundColor: colors.surface,
-      flexDirection: 'row',
-      alignItems: 'center',
       gap: spacing.xs,
     },
-    filterSelected: { backgroundColor: colors.ink },
-    filters: {
-      gap: spacing.sm,
+    searchContainer: {
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.12,
+      shadowRadius: 10,
+      elevation: 4,
+    },
+    categoryScroll: {
+      paddingVertical: 2,
+    },
+    resultsBadgeRow: {
+      flexDirection: 'row',
+      justifyContent: 'flex-start',
+    },
+    resultsBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 3,
+      borderRadius: layout.radius.pill,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    filtersDrawer: {
+      marginTop: spacing.xs,
       padding: spacing.md,
       borderRadius: layout.radius.card,
-      backgroundColor: colors.surface,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.15,
+      shadowRadius: 14,
+      elevation: 6,
+      gap: spacing.sm,
+      maxHeight: 400,
     },
-    viewToggle: {
+    filterActionsRow: {
       flexDirection: 'row',
-      backgroundColor: colors.surface,
-      borderRadius: layout.radius.pill,
-      padding: spacing.xxs,
-    },
-    viewTab: {
-      flex: 1,
-      minHeight: layout.touchTarget.minHeight,
-      flexDirection: 'row',
+      justifyContent: 'space-between',
       alignItems: 'center',
-      justifyContent: 'center',
-      gap: spacing.xs,
-      borderRadius: layout.radius.pill,
+      marginTop: spacing.xs,
     },
-    viewSelected: { backgroundColor: colors.ink },
-    mapFrame: {
-      borderRadius: layout.radius.card,
-      overflow: 'hidden',
-      position: 'relative',
-      backgroundColor: colors.surfaceSubdued,
-    },
-    map: { height: 360, width: '100%' },
-    mapActions: {
+    mapActionsRight: {
       position: 'absolute',
-      right: spacing.sm,
-      top: spacing.sm,
+      right: spacing.md,
+      zIndex: 40,
       gap: spacing.xs,
     },
-    mapCircle: {
-      width: layout.touchTarget.minWidth,
-      height: layout.touchTarget.minHeight,
-      borderRadius: layout.radius.pill,
-      backgroundColor: colors.surface,
+    floatingCircleButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
       alignItems: 'center',
       justifyContent: 'center',
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.15,
+      shadowRadius: 6,
+      elevation: 4,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+    },
+    areaButtonWrapper: {
+      position: 'absolute',
+      alignSelf: 'center',
+      zIndex: 40,
+    },
+    areaPillButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: spacing.md,
+      paddingVertical: 9,
+      borderRadius: layout.radius.pill,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.14,
+      shadowRadius: 8,
+      elevation: 5,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+    },
+    fullListOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 60,
+    },
+    switchViewPillWrapper: {
+      position: 'absolute',
+      alignSelf: 'center',
+      zIndex: 70,
+    },
+    switchViewPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      borderRadius: layout.radius.pill,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.25,
+      shadowRadius: 12,
+      elevation: 8,
     },
   });

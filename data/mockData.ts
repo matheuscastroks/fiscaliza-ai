@@ -1,5 +1,6 @@
 // Tipos de dados
 import type { Municipality } from '@/shared/contracts';
+import { rioDemoCitizens, rioDemoOccurrences } from '@/shared/rio-data';
 export interface User {
   id: string;
   name: string;

@@ -1,5 +1,12 @@
 import { exampleContent } from './example-content.js';
 import { cityExamples } from './city-examples.js';
+import {
+  rioDemoCitizens,
+  rioDemoStaff,
+  rioDemoOccurrences,
+  rioDemoProposals,
+  rioDemoActions,
+} from './rio-data.js';
 import { eq, sql } from 'drizzle-orm';
 import { officialRio } from './municipality.js';
 import { hashPassword } from './auth.js';
@@ -79,6 +86,35 @@ export async function seed(
       WHEN 'staff-gestao' THEN '/api/demo-media/avatar-gestao.jpg'
       WHEN 'admin-local' THEN '/api/demo-media/avatar-admin.jpg'
       END WHERE id IN ('citizen-ana', 'staff-gestao', 'admin-local') AND (avatar IS NULL OR avatar = '')`);
+    for (const c of rioDemoCitizens) {
+      await tx
+        .insert(users)
+        .values({
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          avatar: c.avatar,
+          role: 'citizen',
+          passwordHash,
+          municipalityId: null,
+        })
+        .onConflictDoNothing();
+    }
+    for (const s of rioDemoStaff) {
+      await tx
+        .insert(users)
+        .values({
+          id: s.id,
+          name: s.name,
+          email: s.email,
+          avatar: '/api/demo-media/avatar-gestao.jpg',
+          role: 'staff',
+          sector: s.sector,
+          passwordHash,
+          municipalityId: '3304557',
+        })
+        .onConflictDoNothing();
+    }
     if (reset) {
       await tx
         .delete(records)
@@ -309,11 +345,26 @@ export async function seed(
           data: item,
         })
         .onConflictDoNothing();
+    for (const item of [...rioDemoOccurrences, ...rioDemoProposals, ...rioDemoActions]) {
+      await tx
+        .insert(records)
+        .values({
+          id: item.id,
+          municipalityId,
+          kind: 'kind' in item ? item.kind : 'occurrence',
+          authorId: 'kind' in item ? item.createdBy : item.reportedBy,
+          data: item,
+        })
+        .onConflictDoNothing();
+    }
     const scenarioRecords = [
       occurrence,
       ...civic.filter((item) => item.kind === 'proposal'),
       ...more.occurrences,
       ...more.proposals,
+      ...rioDemoOccurrences,
+      ...rioDemoProposals,
+      ...rioDemoActions,
     ];
     for (const [index, item] of scenarioRecords.entries()) {
       await tx
@@ -332,6 +383,9 @@ export async function seed(
       ...civic,
       ...more.occurrences,
       ...more.proposals,
+      ...rioDemoOccurrences,
+      ...rioDemoProposals,
+      ...rioDemoActions,
     ]) {
       const field =
         'kind' in item && item.kind === 'action' ? 'evidence' : 'images';

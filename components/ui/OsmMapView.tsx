@@ -2,6 +2,8 @@ import React, { useMemo, useRef, useEffect } from 'react';
 import { StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
 import { WebView } from 'react-native-webview';
 
+export type MarkerKind = 'occurrence' | 'proposal' | 'consultation' | 'action';
+
 export interface MapMarker {
   id: string;
   latitude: number;
@@ -9,6 +11,7 @@ export interface MapMarker {
   title?: string;
   description?: string;
   color?: string;
+  kind?: MarkerKind;
   draggable?: boolean;
 }
 
@@ -24,6 +27,7 @@ interface OsmMapViewProps {
   style?: StyleProp<ViewStyle>;
   region: MapRegion;
   markers?: MapMarker[];
+  selectedId?: string | null;
   onMapClick?: (coords: { latitude: number; longitude: number }) => void;
   onMarkerClick?: (id: string) => void;
   onRegionChange?: (region: {
@@ -40,6 +44,7 @@ export function OsmMapView({
   style,
   region,
   markers = [],
+  selectedId,
   onMapClick,
   onMarkerClick,
   onRegionChange,
@@ -89,29 +94,59 @@ export function OsmMapView({
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: transform 0.2s ease;
+    }
+    .custom-marker.selected {
+      transform: scale(1.22);
+      z-index: 1000 !important;
     }
     .marker-pin {
-      width: 26px;
-      height: 26px;
+      width: 32px;
+      height: 32px;
       border-radius: 50% 50% 50% 0;
-      background: #0070f3;
       position: absolute;
       transform: rotate(-45deg);
       left: 50%;
       top: 50%;
-      margin: -13px 0 0 -13px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      margin: -16px 0 0 -16px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.35);
       border: 2px solid #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .marker-dot {
-      width: 8px;
-      height: 8px;
-      background: #ffffff;
-      border-radius: 50%;
+    .marker-icon-wrapper {
       position: absolute;
       left: 50%;
       top: 50%;
-      margin: -4px 0 0 -4px;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+    .marker-icon-wrapper svg {
+      width: 14px;
+      height: 14px;
+      fill: #ffffff;
+    }
+    .pulse-ring {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.8);
+      top: 50%;
+      left: 50%;
+      margin: -22px 0 0 -22px;
+      animation: pulse 1.8s infinite ease-out;
+      pointer-events: none;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.6); opacity: 1; }
+      100% { transform: scale(1.3); opacity: 0; }
     }
   </style>
 </head>
@@ -134,37 +169,47 @@ export function OsmMapView({
 
     var markerLayer = L.layerGroup().addTo(map);
 
-    function createMarkerIcon(color) {
-      var pinColor = color || '#2563eb';
+    var SVG_ICONS = {
+      occurrence: '<svg viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm1 14h-2v-2h2v2zm0-4h-2V8h2v4z"/></svg>',
+      proposal: '<svg viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>',
+      consultation: '<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2z"/></svg>',
+      action: '<svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>'
+    };
+
+    function createMarkerIcon(markerData, isSelected) {
+      var pinColor = markerData.color || '#2563eb';
+      var iconSvg = SVG_ICONS[markerData.kind] || '<div style="width:6px;height:6px;border-radius:50%;background:#fff"></div>';
+      var pulseHtml = isSelected ? '<div class="pulse-ring" style="border-color:' + pinColor + '"></div>' : '';
+
       return L.divIcon({
-        className: 'custom-marker',
-        iconSize: [30, 42],
-        iconAnchor: [15, 30],
-        popupAnchor: [0, -28],
-        html: '<div class="marker-pin" style="background:' + pinColor + '"></div><div class="marker-dot"></div>'
+        className: 'custom-marker' + (isSelected ? ' selected' : ''),
+        iconSize: [36, 48],
+        iconAnchor: [18, 36],
+        popupAnchor: [0, -32],
+        html: pulseHtml +
+          '<div class="marker-pin" style="background:' + pinColor + '"></div>' +
+          '<div class="marker-icon-wrapper">' + iconSvg + '</div>'
       });
     }
 
     var markersMap = {};
+    var currentSelectedId = ${JSON.stringify(selectedId || null)};
 
-    function updateMarkers(markers) {
+    function updateMarkers(markers, selectedId) {
       markerLayer.clearLayers();
       markersMap = {};
+      currentSelectedId = selectedId;
+
       markers.forEach(function(m) {
+        var isSelected = m.id === selectedId;
         var marker = L.marker([m.latitude, m.longitude], {
-          icon: createMarkerIcon(m.color),
-          draggable: !!m.draggable
+          icon: createMarkerIcon(m, isSelected),
+          draggable: !!m.draggable,
+          zIndexOffset: isSelected ? 1000 : 0
         });
 
-        if (m.title || m.description) {
-          var popupContent = '<div style="font-family:sans-serif;font-size:12px;">' +
-            (m.title ? '<strong>' + m.title + '</strong><br/>' : '') +
-            (m.description ? m.description : '') +
-            '</div>';
-          marker.bindPopup(popupContent);
-        }
-
-        marker.on('click', function() {
+        marker.on('click', function(e) {
+          L.DomEvent.stopPropagation(e);
           window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({
             type: 'onMarkerClick',
             id: m.id
@@ -187,7 +232,7 @@ export function OsmMapView({
       });
     }
 
-    updateMarkers(${JSON.stringify(markers)});
+    updateMarkers(${JSON.stringify(markers)}, currentSelectedId);
 
     map.on('click', function(e) {
       window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({
@@ -216,8 +261,8 @@ export function OsmMapView({
       map.setView([lat, lng], zoomLevel || map.getZoom());
     };
 
-    window.setMarkers = function(newMarkers) {
-      updateMarkers(newMarkers);
+    window.setMarkers = function(newMarkers, newSelectedId) {
+      updateMarkers(newMarkers, newSelectedId);
     };
   </script>
 </body>
@@ -234,9 +279,9 @@ export function OsmMapView({
 
   // Sync marker updates efficiently without reloading entire HTML
   useEffect(() => {
-    const script = `if (window.setMarkers) { window.setMarkers(${JSON.stringify(markers)}); } true;`;
+    const script = `if (window.setMarkers) { window.setMarkers(${JSON.stringify(markers)}, ${JSON.stringify(selectedId || null)}); } true;`;
     webViewRef.current?.injectJavaScript(script);
-  }, [markers]);
+  }, [markers, selectedId]);
 
   return (
     <View style={[styles.container, style]}>
