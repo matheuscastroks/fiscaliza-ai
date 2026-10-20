@@ -41,10 +41,10 @@ Bloco A: tarefas 1–2, confiabilidade existente. Bloco B: tarefas 3–6, fonte 
 
 **Interfaces:** produzir `seedBase(db: Database, municipality: Municipality, passwordHash: string): Promise<void>`; importar `Municipality` de `shared/contracts.ts`. O wrapper CLI resolve município/senha e fecha o pool, a função não abre conexão nem consulta serviços externos.
 
-- [ ] Escrever teste `base seed is idempotent and preserves edited accounts and civic records`: criar conta `citizen-ana` com nome/e-mail/município alterados e registro; executar `seedBase` duas vezes; comparar todos os campos anteriores, senha, contagens de registros e chamados; verificar criação das contas ausentes uma única vez.
-- [ ] Executar `npm run build --prefix backend` e, com diretório de trabalho `backend`, `node --test dist/backend/test/seed-base.test.js`; antes da implementação esperar falha por função ausente. Usar `DATABASE_URL` de banco de teste, nunca ambiente local herdado sem identificação. Os testes focais seguintes também rodam com cwd `backend`, pois migrações usam caminhos relativos.
-- [ ] Extrair criação não destrutiva para `seed-base.ts`, remover o UPDATE incondicional do CLI e manter a exigência de senha explícita em produção. Testar também conflito de e-mail sem sobrescrever seu proprietário.
-- [ ] Reexecutar teste e `npm run typecheck --prefix backend`; esperar aprovação sem perda de dados. Comitar `fix(seed): preservar contas e registros existentes` apenas com arquivos da tarefa.
+- [x] Escrever teste `base seed is idempotent and preserves edited accounts and civic records`: criar conta `citizen-ana` com nome/e-mail/município alterados e registro; executar `seedBase` duas vezes; comparar todos os campos anteriores, senha, contagens de registros e chamados; verificar criação das contas ausentes uma única vez.
+- [x] Executar `npm run build --prefix backend` e, com diretório de trabalho `backend`, `node --test dist/backend/test/seed-base.test.js`; antes da implementação esperar falha por função ausente. Usar `DATABASE_URL` de banco de teste, nunca ambiente local herdado sem identificação. Os testes focais seguintes também rodam com cwd `backend`, pois migrações usam caminhos relativos.
+- [x] Extrair criação não destrutiva para `seed-base.ts`, remover o UPDATE incondicional do CLI e manter a exigência de senha explícita em produção. Testar também conflito de e-mail sem sobrescrever seu proprietário.
+- [x] Reexecutar teste e `npm run typecheck --prefix backend`; esperar aprovação sem perda de dados. Comitar `fix(seed): preservar contas e registros existentes` apenas com arquivos da tarefa.
 
 ## Tarefa 2 — Sincronização 1746 delimitada e auditável
 
