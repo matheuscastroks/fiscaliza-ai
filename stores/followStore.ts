@@ -1,13 +1,18 @@
 import { create } from 'zustand';
 
+export type FollowStatusFilter = 'open' | 'resolved';
+
 interface FollowStore {
-  onlyMine: boolean;
-  toggleOnlyMine: () => void;
-  setOnlyMine: (value: boolean) => void;
+  statusFilter: FollowStatusFilter;
+  toggleStatusFilter: () => void;
+  setStatusFilter: (value: FollowStatusFilter) => void;
 }
 
 export const useFollowStore = create<FollowStore>((set) => ({
-  onlyMine: false,
-  toggleOnlyMine: () => set((state) => ({ onlyMine: !state.onlyMine })),
-  setOnlyMine: (value: boolean) => set({ onlyMine: value }),
+  statusFilter: 'open',
+  toggleStatusFilter: () =>
+    set((state) => ({
+      statusFilter: state.statusFilter === 'open' ? 'resolved' : 'open',
+    })),
+  setStatusFilter: (value: FollowStatusFilter) => set({ statusFilter: value }),
 }));

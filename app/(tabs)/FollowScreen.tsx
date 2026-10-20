@@ -40,8 +40,7 @@ export default function FollowScreen() {
     }
   }, [refetch]);
 
-  const user = useAuthStore((state) => state.user);
-  const { onlyMine, setOnlyMine } = useFollowStore();
+  const { statusFilter, toggleStatusFilter, setStatusFilter } = useFollowStore();
 
   const localOccurrences =
     query.data?.occurrences.filter(
@@ -58,16 +57,22 @@ export default function FollowScreen() {
     (item) => item.kind === 'consultation',
   );
 
-  const occurrencesToDisplay = onlyMine
-    ? localOccurrences.filter(
-        (item) => item.reportedBy === user?.id,
-      )
-    : localOccurrences;
-  const proposalsToDisplay = onlyMine
-    ? proposals.filter((item) => item.createdBy === user?.id)
-    : proposals;
-  const actionsToDisplay = onlyMine ? [] : actions;
-  const consultationsToDisplay = onlyMine ? [] : consultations;
+  const isOpen = statusFilter === 'open';
+
+  const occurrencesToDisplay = localOccurrences.filter((item) =>
+    isOpen ? item.status !== 'resolved' : item.status === 'resolved',
+  );
+  const proposalsToDisplay = proposals.filter((item) =>
+    isOpen
+      ? ['submitted', 'under_review'].includes(item.status)
+      : ['accepted', 'rejected'].includes(item.status),
+  );
+  const actionsToDisplay = actions.filter((item) =>
+    isOpen ? item.status !== 'completed' : item.status === 'completed',
+  );
+  const consultationsToDisplay = consultations.filter((item) =>
+    isOpen ? item.status === 'open' : ['closed', 'answered'].includes(item.status),
+  );
 
   const hasLocalContent =
     occurrencesToDisplay.length > 0 ||
@@ -103,57 +108,64 @@ export default function FollowScreen() {
           retry={query.refetch}
         />
 
-        {onlyMine && (
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              backgroundColor: colors.surface,
-              borderRadius: 12,
-              paddingHorizontal: 14,
-              paddingVertical: 10,
-              borderWidth: 1,
-              borderColor: colors.border,
-              marginHorizontal: 16,
-              marginBottom: 8,
-            }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Ionicons name="filter" size={16} color={colors.ink} />
-              <AppText variant="caption" style={{ fontWeight: '600' }}>
-                Mostrando apenas criadas por você
-              </AppText>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ver todas as participações"
-              onPress={() => setOnlyMine(false)}
-            >
-              <AppText
-                variant="caption"
-                style={{ color: colors.attention, fontWeight: '700' }}
-              >
-                Ver todas
-              </AppText>
-            </Pressable>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingHorizontal: 14,
+            paddingVertical: 10,
+            borderWidth: 1,
+            borderColor: colors.border,
+            marginHorizontal: 16,
+            marginBottom: 8,
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Ionicons
+              name={isOpen ? 'time-outline' : 'checkmark-circle-outline'}
+              size={16}
+              color={isOpen ? colors.attention : colors.completed}
+            />
+            <AppText variant="caption" style={{ fontWeight: '600' }}>
+              {isOpen
+                ? 'Demandas em andamento'
+                : 'Demandas resolvidas / concluídas'}
+            </AppText>
           </View>
-        )}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              isOpen ? 'Ver demandas resolvidas' : 'Ver demandas em aberto'
+            }
+            onPress={toggleStatusFilter}
+          >
+            <AppText
+              variant="caption"
+              style={{ color: colors.attention, fontWeight: '700' }}
+            >
+              {isOpen ? 'Ver resolvidas' : 'Ver em aberto'}
+            </AppText>
+          </Pressable>
+        </View>
 
         {query.data && !query.error && !hasLocalContent && (
           <IllustratedEmptyState
-            title={onlyMine ? 'Nenhum registro próprio encontrado' : 'Seus acompanhamentos ficam aqui'}
+            title={
+              isOpen
+                ? 'Nenhuma demanda em andamento'
+                : 'Nenhuma demanda resolvida ainda'
+            }
             description={
-              onlyMine
-                ? 'Você ainda não criou ocorrências ou propostas neste município.'
-                : 'Registre uma ocorrência ou acompanhe uma participação para ver as respostas da gestão.'
+              isOpen
+                ? 'Todas as suas participações já foram atendidas ou você ainda não abriu novas demandas.'
+                : 'Suas demandas concluídas pela prefeitura aparecerão aqui com a prestação de contas.'
             }
             action={{
-              title: onlyMine ? 'Ver todas as participações' : 'Explorar território',
-              onPress: () => {
-                if (onlyMine) setOnlyMine(false);
-                else router.push('/(tabs)/TerritoryScreen');
-              },
+              title: isOpen ? 'Ver resolvidas' : 'Ver em andamento',
+              onPress: toggleStatusFilter,
             }}
           />
         )}

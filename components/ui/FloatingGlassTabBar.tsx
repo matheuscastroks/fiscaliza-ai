@@ -108,7 +108,7 @@ export function FloatingGlassTabBar({
   const isFollow = activeRoute === 'FollowScreen';
 
   const { isListView, toggleViewMode } = useTerritoryViewMode();
-  const { onlyMine, toggleOnlyMine } = useFollowStore();
+  const { statusFilter, toggleStatusFilter } = useFollowStore();
 
   if (
     (Platform.OS === 'web' && width >= 1100) ||
@@ -301,14 +301,14 @@ export function FloatingGlassTabBar({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={
-            onlyMine
-              ? 'Mostrar todas as participações'
-              : 'Mostrar apenas minhas participações'
+            statusFilter === 'open'
+              ? 'Mostrando demandas em andamento. Tocar para ver resolvidas'
+              : 'Mostrando demandas resolvidas. Tocar para ver em andamento'
           }
           onPress={() => {
             if (Platform.OS !== 'web')
               void Haptics.selectionAsync().catch(() => {});
-            toggleOnlyMine();
+            toggleStatusFilter();
           }}
           style={({ pressed }) => [
             styles.extraButton,
@@ -316,9 +316,9 @@ export function FloatingGlassTabBar({
           ]}
         >
           <Ionicons
-            name={onlyMine ? 'people-outline' : 'person-outline'}
+            name={statusFilter === 'open' ? 'time-outline' : 'checkmark-circle-outline'}
             size={20}
-            color={colors.navigationIcon}
+            color={statusFilter === 'open' ? colors.attention : colors.completed}
           />
           {width >= 360 && (
             <AppText
@@ -330,7 +330,7 @@ export function FloatingGlassTabBar({
                 marginLeft: 5,
               }}
             >
-              {onlyMine ? 'Todas' : 'Minhas'}
+              {statusFilter === 'open' ? 'Abertos' : 'Resolvidos'}
             </AppText>
           )}
         </Pressable>
