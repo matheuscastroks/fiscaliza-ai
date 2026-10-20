@@ -70,11 +70,11 @@ export async function seed(
         .values({
           ...u,
           passwordHash,
-          municipalityId: u.role === 'citizen' ? null : '3304557',
+          municipalityId: '3304557',
         })
         .onConflictDoNothing();
     await tx.execute(
-      sql`UPDATE users SET name='Beatriz Arantes', email='beatrizarante@gmail.com' WHERE id='citizen-ana' AND email='ana@vilaesperanca.exemplo'`,
+      sql`UPDATE users SET name='Beatriz Arantes', email='beatrizarante@gmail.com', municipality_id='3304557' WHERE id='citizen-ana'`,
     );
     await tx.execute(
       (await import('drizzle-orm'))
@@ -96,7 +96,7 @@ export async function seed(
           avatar: c.avatar,
           role: 'citizen',
           passwordHash,
-          municipalityId: null,
+          municipalityId: '3304557',
         })
         .onConflictDoNothing();
     }

@@ -166,6 +166,19 @@ export async function buildApp(
   )
     .split(',')
     .map((x) => x.trim());
+  const isAllowedOrigin = (origin: string): boolean => {
+    if (origins.includes(origin)) return true;
+    if (process.env.NODE_ENV !== 'production') {
+      if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
+      if (
+        /^https?:\/\/(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/.test(
+          origin,
+        )
+      )
+        return true;
+    }
+    return false;
+  };
   const uploadDir = resolve(process.env.UPLOAD_DIR || 'uploads');
   app.addHook('onClose', async () => {
     await connection.pool.end();
@@ -181,7 +194,13 @@ export async function buildApp(
   });
   await app.register(cookie);
   await app.register(cors, {
-    origin: origins,
+    origin: (origin, cb) => {
+      if (!origin || isAllowedOrigin(origin)) {
+        cb(null, true);
+      } else {
+        cb(null, false);
+      }
+    },
     credentials: true,
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
@@ -262,10 +281,14 @@ export async function buildApp(
       mutation &&
       !bearer &&
       req.cookies[sessionCookie(req)] &&
-      (!req.headers.origin || !origins.includes(req.headers.origin))
+      (!req.headers.origin || !isAllowedOrigin(req.headers.origin))
     )
       throw fail(403, 'Origem não autorizada.');
-    if (req.headers.origin && mutation && !origins.includes(req.headers.origin))
+    if (
+      req.headers.origin &&
+      mutation &&
+      !isAllowedOrigin(req.headers.origin)
+    )
       throw fail(403, 'Origem não autorizada.');
     const token = bearer || req.cookies[sessionCookie(req)];
     if (token) {
