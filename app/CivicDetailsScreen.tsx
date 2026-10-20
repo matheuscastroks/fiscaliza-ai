@@ -169,6 +169,7 @@ export default function CivicDetailsScreen() {
                 : undefined;
             return (
               <ItemLocationMap
+                id={item.id}
                 latitude={point.latitude}
                 longitude={point.longitude}
                 address={address}

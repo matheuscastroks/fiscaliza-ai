@@ -98,6 +98,7 @@ export default function HistoricalDetailsScreen() {
                 : civic?.neighborhood;
               return (
                 <ItemLocationMap
+                  id={item.id}
                   latitude={coords.latitude}
                   longitude={coords.longitude}
                   address={address}

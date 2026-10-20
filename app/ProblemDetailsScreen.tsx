@@ -134,6 +134,7 @@ export default function ProblemDetailsScreen() {
           </AppText>
           <AppText>{item.description}</AppText>
           <ItemLocationMap
+            id={item.id}
             latitude={item.location.latitude}
             longitude={item.location.longitude}
             address={item.location.address}

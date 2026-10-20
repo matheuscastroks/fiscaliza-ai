@@ -2,7 +2,7 @@ import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { layout } from '@/theme/layout';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -51,6 +51,14 @@ import { municipalityRegion } from '@/features/city/municipalContext';
 import { OsmMapView, type MapMarker } from '@/components/ui/OsmMapView';
 import { TerritoryPreviewCard, type Entry } from '@/components/territory/TerritoryPreviewCard';
 
+type TerritoryMapRegion = {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+  zoom?: number;
+};
+
 type Kind = 'all' | 'occurrences' | CivicItem['kind'];
 
 const locatedOccurrence = (item: Occurrence) =>
@@ -90,7 +98,10 @@ function TerritoryContent() {
   const user = useAuthStore((state) => state.user);
   const municipality = user?.municipality;
   const initial = useMemo(
-    () => municipalityRegion(municipality),
+    () => ({
+      ...municipalityRegion(municipality),
+      zoom: 12,
+    }),
     [municipality],
   );
   const occurrences = useCityQuery<Occurrence[]>('/occurrences');
@@ -101,13 +112,25 @@ function TerritoryContent() {
     civic.data || [],
     user?.neighborhood,
   );
-  const [region, setRegion] = useState(initial);
+  const [region, setRegion] = useState<TerritoryMapRegion>(initial);
   const [areaOnly, setAreaOnly] = useState(false);
   const [kind, setKind] = useState<Kind>('all');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
-  const { isListView } = useTerritoryViewMode();
-  const { filters } = useLocalSearchParams<{ filters?: string }>();
+  const { isListView, setIsListView } = useTerritoryViewMode();
+  const {
+    filters,
+    focusId,
+    lat,
+    lng,
+    neighborhood: paramNeighborhood,
+  } = useLocalSearchParams<{
+    filters?: string;
+    focusId?: string;
+    lat?: string;
+    lng?: string;
+    neighborhood?: string;
+  }>();
   const [filterVisibility, setFilterVisibility] = useState<{
     param?: string;
     open: boolean;
@@ -122,6 +145,59 @@ function TerritoryContent() {
   const [showUnlocated, setShowUnlocated] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
   const [locating, setLocating] = useState(false);
+
+  useEffect(() => {
+    if (focusId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedId(focusId);
+      setIsListView(false);
+      setAreaOnly(false);
+      setStatus('all');
+      setKind('all');
+      setSearch('');
+
+      if (paramNeighborhood) {
+        setNeighborhood(paramNeighborhood);
+      }
+
+      let targetLat = lat ? Number(lat) : NaN;
+      let targetLng = lng ? Number(lng) : NaN;
+      if (!Number.isFinite(targetLat) || !Number.isFinite(targetLng)) {
+        const occ = occurrences.data?.find((i) => i.id === focusId);
+        if (occ) {
+          targetLat = occ.location.latitude;
+          targetLng = occ.location.longitude;
+        } else {
+          const civ = civic.data?.find((i) => i.id === focusId);
+          if (civ) {
+            const loc = civicLocation(civ);
+            if (loc) {
+              targetLat = loc.latitude;
+              targetLng = loc.longitude;
+            }
+          }
+        }
+      }
+
+      if (Number.isFinite(targetLat) && Number.isFinite(targetLng)) {
+        setRegion((prev: TerritoryMapRegion) => ({
+          ...prev,
+          latitude: targetLat,
+          longitude: targetLng,
+          zoom: 17,
+        }));
+      }
+    }
+  }, [
+    focusId,
+    lat,
+    lng,
+    paramNeighborhood,
+    occurrences.data,
+    civic.data,
+    setIsListView,
+    setNeighborhood,
+  ]);
 
   const entries = useMemo(() => {
     const term = normalizeNeighborhood(search);
@@ -186,7 +262,54 @@ function TerritoryContent() {
     return point && (!areaOnly || inMapRegion(point, region));
   });
   const listed = areaOnly ? located : entries;
-  const selectedEntry = entries.find((entry) => entry.item.id === selectedId);
+  const selectedEntry = useMemo(() => {
+    if (!selectedId) return null;
+    const fromEntries = entries.find((entry) => entry.item.id === selectedId);
+    if (fromEntries) return fromEntries;
+    const occ = occurrences.data?.find((item) => item.id === selectedId);
+    if (occ) return { type: 'occurrence' as const, item: occ };
+    const civ = civic.data?.find((item) => item.id === selectedId);
+    if (civ) return { type: 'civic' as const, item: civ };
+    return null;
+  }, [selectedId, entries, occurrences.data, civic.data]);
+
+  const municipalOverviewRegion = useMemo(() => {
+    const points = entries
+      .map((entry) => entryLocation(entry))
+      .filter((pt): pt is { latitude: number; longitude: number } => Boolean(pt));
+
+    if (points.length === 0) {
+      return initial;
+    }
+
+    let minLat = points[0].latitude;
+    let maxLat = points[0].latitude;
+    let minLng = points[0].longitude;
+    let maxLng = points[0].longitude;
+
+    for (const p of points) {
+      if (p.latitude < minLat) minLat = p.latitude;
+      if (p.latitude > maxLat) maxLat = p.latitude;
+      if (p.longitude < minLng) minLng = p.longitude;
+      if (p.longitude > maxLng) maxLng = p.longitude;
+    }
+
+    const latDelta = Math.max(0.04, (maxLat - minLat) * 1.35);
+    const lngDelta = Math.max(0.04, (maxLng - minLng) * 1.35);
+    const delta = Math.max(latDelta, lngDelta, 0.001);
+    const calculatedZoom = Math.max(
+      11,
+      Math.min(15, Math.round(Math.log2(360 / delta))),
+    );
+
+    return {
+      latitude: (minLat + maxLat) / 2,
+      longitude: (minLng + maxLng) / 2,
+      latitudeDelta: latDelta,
+      longitudeDelta: lngDelta,
+      zoom: calculatedZoom,
+    };
+  }, [entries, initial]);
 
   const filterCount =
     Number(Boolean(neighborhood)) +
@@ -249,7 +372,7 @@ function TerritoryContent() {
   );
 
   const osmMarkers: MapMarker[] = useMemo(() => {
-    return located.flatMap((entry) => {
+    const list: MapMarker[] = located.flatMap((entry) => {
       const point = entryLocation(entry);
       if (!point) return [];
       const markerKind =
@@ -268,7 +391,29 @@ function TerritoryContent() {
         },
       ];
     });
-  }, [located, colors.accent, pinColors]);
+
+    if (selectedEntry && !list.some((m) => m.id === selectedEntry.item.id)) {
+      const point = entryLocation(selectedEntry);
+      if (point) {
+        list.push({
+          id: selectedEntry.item.id,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          title: `${selectedEntry.type === 'occurrence' ? 'Ocorrência' : kindLabel[selectedEntry.item.kind]} · ${selectedEntry.item.title}`,
+          color:
+            selectedEntry.type === 'occurrence'
+              ? colors.accent
+              : pinColors[selectedEntry.item.kind],
+          kind:
+            selectedEntry.type === 'occurrence'
+              ? 'occurrence'
+              : selectedEntry.item.kind,
+        });
+      }
+    }
+
+    return list;
+  }, [located, selectedEntry, colors.accent, pinColors]);
 
   const resetFilters = () => {
     setOrder('date');
@@ -294,7 +439,7 @@ function TerritoryContent() {
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
-      setRegion((current) => ({
+      setRegion((current: TerritoryMapRegion) => ({
         ...current,
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
@@ -309,6 +454,102 @@ function TerritoryContent() {
       setLocating(false);
     }
   };
+
+  const renderFilterDrawer = () => (
+    <View style={[styles.filtersDrawer, { backgroundColor: colors.surface }]}>
+      <AppText variant="label">Bairro</AppText>
+      <NeighborhoodPicker
+        options={options}
+        value={neighborhood}
+        onChange={(value) => {
+          setNeighborhood(value);
+          setAreaOnly(false);
+          setSelectedId(null);
+        }}
+      />
+      {statuses.length > 0 && (
+        <>
+          <AppText variant="label">Situação</AppText>
+          <SlidingTabs
+            label="Filtrar por situação"
+            options={[['all', 'Todas'], ...statuses].map(([val, lab]) => ({
+              value: val,
+              label: lab,
+            }))}
+            value={status}
+            onChange={setStatus}
+          />
+        </>
+      )}
+      <AppText variant="label">Período</AppText>
+      <SlidingTabs
+        label="Filtrar por período"
+        edgeToEdge={false}
+        options={[
+          { value: '0', label: 'Todo o período' },
+          { value: '1', label: 'Últimas 24h' },
+          { value: '7', label: 'Últimos 7 dias' },
+          { value: '30', label: 'Últimos 30 dias' },
+        ]}
+        value={String(period)}
+        onChange={(value) => {
+          setPeriod(Number(value));
+          setSelectedId(null);
+        }}
+      />
+      <AppText variant="label">Ordenar por</AppText>
+      <SlidingTabs
+        label="Ordenar território"
+        edgeToEdge={false}
+        options={[
+          { value: 'date', label: 'Mais recentes' },
+          { value: 'supports', label: 'Mais apoiados' },
+          { value: 'views', label: 'Mais vistos' },
+        ]}
+        value={order}
+        onChange={(value) => setOrder(value as TerritoryOrder)}
+      />
+      <View style={styles.filterActionsRow}>
+        <AppButton
+          title="Limpar filtros"
+          variant="quiet"
+          onPress={resetFilters}
+        />
+        <AppButton
+          title="Fechar"
+          variant="secondary"
+          onPress={() => setFiltersOpen(false)}
+        />
+      </View>
+    </View>
+  );
+
+  const renderCategoryChips = () => (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.categoryScroll}
+    >
+      <SlidingTabs
+        label="Categorias"
+        edgeToEdge={false}
+        options={[
+          { value: 'all', label: 'Tudo' },
+          { value: 'occurrences', label: 'Ocorrências' },
+          { value: 'proposal', label: 'Propostas' },
+          { value: 'consultation', label: 'Consultas' },
+          { value: 'action', label: 'Ações' },
+        ]}
+        value={kind}
+        onChange={(value) => {
+          setKind(value as Kind);
+          setStatus('all');
+          setSelectedId(null);
+          setAreaOnly(false);
+        }}
+      />
+    </ScrollView>
+  );
 
   return (
     <View style={styles.container}>
@@ -331,134 +572,47 @@ function TerritoryContent() {
           onMarkerClick={(id) => setSelectedId(id)}
           onMapClick={() => setSelectedId(null)}
           onRegionChange={(newRegion) => {
-            setRegion((curr) => ({
+            setRegion((curr: TerritoryMapRegion) => ({
               ...curr,
               latitude: newRegion.latitude,
               longitude: newRegion.longitude,
               latitudeDelta: newRegion.latitudeDelta,
               longitudeDelta: newRegion.longitudeDelta,
-              zoom: newRegion.zoom,
+              zoom: newRegion.zoom ?? curr.zoom,
             }));
           }}
         />
       </View>
 
-      {/* 2. TOP FLOATING HEADER (BUSCA + CHIPS DE CATEGORIA + FILTROS) */}
-      <View style={[styles.topFloatingHeader, { paddingTop: insets.top + spacing.xs }]}>
-        <View style={styles.searchContainer}>
-          <CitySearch
-            value={search}
-            onChangeText={setSearch}
-            onFilters={() => setFiltersOpen(!filtersOpen)}
-            expanded={filtersOpen}
-            filterCount={filterCount}
-          />
-        </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryScroll}
-        >
-          <SlidingTabs
-            label="Categorias"
-            edgeToEdge={false}
-            options={[
-              { value: 'all', label: 'Tudo' },
-              { value: 'occurrences', label: 'Ocorrências' },
-              { value: 'proposal', label: 'Propostas' },
-              { value: 'consultation', label: 'Consultas' },
-              { value: 'action', label: 'Ações' },
-            ]}
-            value={kind}
-            onChange={(value) => {
-              setKind(value as Kind);
-              setStatus('all');
-              setSelectedId(null);
-              setAreaOnly(false);
-            }}
-          />
-        </ScrollView>
-
-        {/* CONTADOR DE RESULTADOS RÁPIDO */}
-        <View style={styles.resultsBadgeRow}>
-          <View style={[styles.resultsBadge, { backgroundColor: colors.surface + 'EE' }]}>
-            <AppText variant="caption" style={{ fontWeight: '700' }}>
-              {listed.length} {listed.length === 1 ? 'registro' : 'registros'}
-              {areaOnly ? ' nesta área' : ''}
-            </AppText>
+      {/* 2. TOP FLOATING HEADER (BUSCA + CHIPS DE CATEGORIA + FILTROS - NO MAPA) */}
+      {!isListView && (
+        <View style={[styles.topFloatingHeader, { paddingTop: insets.top + spacing.xs }]}>
+          <View style={styles.searchContainer}>
+            <CitySearch
+              value={search}
+              onChangeText={setSearch}
+              onFilters={() => setFiltersOpen(!filtersOpen)}
+              expanded={filtersOpen}
+              filterCount={filterCount}
+            />
           </View>
-        </View>
 
-        {/* FILTROS AVANÇADOS EXPANSÍVEIS (MODAL / GAVETA) */}
-        {filtersOpen && (
-          <View style={[styles.filtersDrawer, { backgroundColor: colors.surface }]}>
-            <AppText variant="label">Bairro</AppText>
-            <NeighborhoodPicker
-              options={options}
-              value={neighborhood}
-              onChange={(value) => {
-                setNeighborhood(value);
-                setAreaOnly(false);
-                setSelectedId(null);
-              }}
-            />
-            {statuses.length > 0 && (
-              <>
-                <AppText variant="label">Situação</AppText>
-                <SlidingTabs
-                  label="Filtrar por situação"
-                  options={[['all', 'Todas'], ...statuses].map(
-                    ([value, label]) => ({ value, label }),
-                  )}
-                  value={status}
-                  onChange={setStatus}
-                />
-              </>
-            )}
-            <AppText variant="label">Período</AppText>
-            <SlidingTabs
-              label="Filtrar por período"
-              edgeToEdge={false}
-              options={[
-                { value: '0', label: 'Todo o período' },
-                { value: '1', label: 'Últimas 24h' },
-                { value: '7', label: 'Últimos 7 dias' },
-                { value: '30', label: 'Últimos 30 dias' },
-              ]}
-              value={String(period)}
-              onChange={(value) => {
-                setPeriod(Number(value));
-                setSelectedId(null);
-              }}
-            />
-            <AppText variant="label">Ordenar por</AppText>
-            <SlidingTabs
-              label="Ordenar território"
-              edgeToEdge={false}
-              options={[
-                { value: 'date', label: 'Mais recentes' },
-                { value: 'supports', label: 'Mais apoiados' },
-                { value: 'views', label: 'Mais vistos' },
-              ]}
-              value={order}
-              onChange={(value) => setOrder(value as TerritoryOrder)}
-            />
-            <View style={styles.filterActionsRow}>
-              <AppButton
-                title="Limpar filtros"
-                variant="quiet"
-                onPress={resetFilters}
-              />
-              <AppButton
-                title="Fechar"
-                variant="secondary"
-                onPress={() => setFiltersOpen(false)}
-              />
+          {renderCategoryChips()}
+
+          {/* CONTADOR DE RESULTADOS RÁPIDO */}
+          <View style={styles.resultsBadgeRow}>
+            <View style={[styles.resultsBadge, { backgroundColor: colors.surface + 'EE' }]}>
+              <AppText variant="caption" style={{ fontWeight: '700' }}>
+                {listed.length} {listed.length === 1 ? 'registro' : 'registros'}
+                {areaOnly ? ' nesta área' : ''}
+              </AppText>
             </View>
           </View>
-        )}
-      </View>
+
+          {/* FILTROS AVANÇADOS EXPANSÍVEIS (MODAL / GAVETA) */}
+          {filtersOpen && renderFilterDrawer()}
+        </View>
+      )}
 
       {/* 3. BOTÕES FLUTUANTES LATERAIS (GPS, RESET, BUSCAR NESTA ÁREA) */}
       {!isListView && (
@@ -483,7 +637,7 @@ function TerritoryContent() {
             accessibilityRole="button"
             accessibilityLabel="Voltar ao município"
             onPress={() => {
-              setRegion(initial);
+              setRegion(municipalOverviewRegion);
               setAreaOnly(false);
               setSelectedId(null);
             }}
@@ -543,6 +697,37 @@ function TerritoryContent() {
                 : 'Seu município'
             }
           />
+
+          {/* FILTROS INTEGRADOS NA VISUALIZAÇÃO EM LISTA */}
+          <View style={styles.listFilterBar}>
+            <View style={{ paddingHorizontal: spacing.md }}>
+              <CitySearch
+                value={search}
+                onChangeText={setSearch}
+                onFilters={() => setFiltersOpen(!filtersOpen)}
+                expanded={filtersOpen}
+                filterCount={filterCount}
+              />
+            </View>
+
+            {renderCategoryChips()}
+
+            <View style={[styles.resultsBadgeRow, { paddingHorizontal: spacing.md }]}>
+              <View style={[styles.resultsBadge, { backgroundColor: colors.surface }]}>
+                <AppText variant="caption" style={{ fontWeight: '700' }}>
+                  {listed.length} {listed.length === 1 ? 'registro' : 'registros'}
+                  {areaOnly ? ' nesta área' : ''}
+                </AppText>
+              </View>
+            </View>
+
+            {filtersOpen && (
+              <View style={{ paddingHorizontal: spacing.md, marginTop: spacing.xs }}>
+                {renderFilterDrawer()}
+              </View>
+            )}
+          </View>
+
           <ScrollView
             contentContainerStyle={[cityStyles.content, { paddingBottom: insets.bottom + 100 }]}
           >
@@ -645,6 +830,13 @@ const createStyles = (colors: ThemeColors) =>
     },
     categoryScroll: {
       paddingVertical: 2,
+      gap: spacing.xs,
+    },
+    listFilterBar: {
+      paddingBottom: spacing.xs,
+      gap: spacing.xs,
+      backgroundColor: colors.canvas,
+      zIndex: 10,
     },
     resultsBadgeRow: {
       flexDirection: 'row',

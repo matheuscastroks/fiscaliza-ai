@@ -10,6 +10,7 @@ import { AppText } from './AppText';
 import { OsmMapView, type MarkerKind } from './OsmMapView';
 
 export interface ItemLocationMapProps {
+  id?: string;
   latitude?: number | null;
   longitude?: number | null;
   address?: string;
@@ -23,6 +24,7 @@ export interface ItemLocationMapProps {
 }
 
 export function ItemLocationMap({
+  id,
   latitude,
   longitude,
   address,
@@ -36,6 +38,18 @@ export function ItemLocationMap({
 }: ItemLocationMapProps) {
   const { colors, mode } = useTheme();
   const styles = useThemedStyles(createStyles);
+
+  const handleOpenMap = () => {
+    router.push({
+      pathname: '/(tabs)/TerritoryScreen',
+      params: {
+        focusId: id,
+        lat: latitude != null ? String(latitude) : undefined,
+        lng: longitude != null ? String(longitude) : undefined,
+        neighborhood: neighborhood || undefined,
+      },
+    });
+  };
 
   const isValid = useMemo(() => {
     return (
@@ -81,7 +95,7 @@ export function ItemLocationMap({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Ver no mapa territorial completo"
-            onPress={() => router.push('/(tabs)/TerritoryScreen')}
+            onPress={handleOpenMap}
             style={({ pressed }) => [
               styles.expandButton,
               pressed && { opacity: 0.7 },
@@ -95,7 +109,13 @@ export function ItemLocationMap({
         )}
       </View>
 
-      <View style={[styles.mapFrame, { height }]} collapsable={false}>
+      <Pressable
+        onPress={handleOpenMap}
+        accessibilityRole="button"
+        accessibilityLabel="Explorar no mapa completo"
+        style={[styles.mapFrame, { height }]}
+        collapsable={false}
+      >
         <OsmMapView
           style={styles.map}
           region={{
@@ -105,7 +125,7 @@ export function ItemLocationMap({
           }}
           markers={[
             {
-              id: 'item-pin',
+              id: id || 'item-pin',
               latitude,
               longitude,
               title: title || formattedAddress,
@@ -114,9 +134,11 @@ export function ItemLocationMap({
             },
           ]}
           isDark={mode === 'dark'}
-          interactive={true}
+          interactive={false}
+          onMarkerClick={handleOpenMap}
+          onMapClick={handleOpenMap}
         />
-      </View>
+      </Pressable>
 
       <View style={styles.footer}>
         <Ionicons name="navigate-outline" size={14} color={colors.muted} />

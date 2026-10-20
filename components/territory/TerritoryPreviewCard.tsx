@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
-import { AppButton } from '@/components/ui/AppButton';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
 import type { CivicItem, Occurrence } from '@/shared/contracts';
 import { kindLabel, statusLabel } from '@/features/city/CityUI';
+import { assetUrl } from '@/services/http';
 
 export type Entry =
   | { type: 'occurrence'; item: Occurrence }
@@ -35,13 +36,14 @@ export function TerritoryPreviewCard({
 }: TerritoryPreviewCardProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const [imageError, setImageError] = useState(false);
 
   const title = entry.item.title;
 
   let status = '';
   let categoryLabel = '';
   let address = '';
-  let photoUri: string | null = null;
+  let rawPhoto: string | null = null;
   let badgeColor = colors.accent;
 
   if (entry.type === 'occurrence') {
@@ -49,13 +51,19 @@ export function TerritoryPreviewCard({
     status = occurrenceStatus[occ.status] || occ.status;
     categoryLabel = 'Ocorrência';
     address = occ.location.address || occ.location.neighborhood || 'Local indicado';
-    photoUri = occ.images && occ.images.length > 0 ? occ.images[0] : null;
+    rawPhoto = occ.images && occ.images.length > 0 ? occ.images[0] : null;
     badgeColor = colors.accent;
   } else {
     const civic = entry.item;
     status = statusLabel[civic.status] || civic.status;
     categoryLabel = kindLabel[civic.kind];
     address = civic.neighborhood || 'Território municipal';
+    rawPhoto =
+      'images' in civic && Array.isArray(civic.images) && civic.images.length > 0
+        ? civic.images[0]
+        : 'evidence' in civic && Array.isArray(civic.evidence) && civic.evidence.length > 0
+          ? civic.evidence[0]
+          : null;
     badgeColor =
       civic.kind === 'proposal'
         ? colors.attention
@@ -64,73 +72,176 @@ export function TerritoryPreviewCard({
           : colors.muted;
   }
 
+  const resolvedPhoto = rawPhoto ? assetUrl(rawPhoto) : null;
+  const hasPhoto = Boolean(resolvedPhoto && !imageError);
+
   return (
     <View style={[styles.card, { bottom: bottomOffset }]}>
       <Pressable
-        style={styles.content}
+        style={styles.cardPressable}
         accessibilityRole="button"
         accessibilityLabel={`Ver detalhes de ${title}`}
         onPress={() => onOpen(entry)}
       >
-        {photoUri ? (
-          <Image
-            source={{ uri: photoUri }}
-            style={styles.thumbnail}
-            contentFit="cover"
-            transition={200}
-          />
-        ) : (
-          <View style={[styles.thumbnailPlaceholder, { backgroundColor: colors.surfaceSubdued }]}>
-            <Ionicons
-              name={entry.type === 'occurrence' ? 'alert-circle-outline' : 'bulb-outline'}
-              size={24}
-              color={colors.muted}
+        {hasPhoto && resolvedPhoto && (
+          <>
+            <Image
+              source={{ uri: resolvedPhoto }}
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+              transition={250}
+              onError={() => setImageError(true)}
             />
-          </View>
+            <LinearGradient
+              colors={[
+                'rgba(15,18,20,0.35)',
+                'rgba(15,18,20,0.72)',
+                'rgba(15,18,20,0.96)',
+              ]}
+              locations={[0, 0.45, 1]}
+              style={StyleSheet.absoluteFill}
+            />
+          </>
         )}
 
-        <View style={styles.details}>
-          <View style={styles.badgeRow}>
-            <View style={[styles.badge, { backgroundColor: badgeColor + '18' }]}>
-              <View style={[styles.badgeDot, { backgroundColor: badgeColor }]} />
-              <AppText variant="caption" style={{ color: badgeColor, fontWeight: '700' }}>
-                {categoryLabel}
+        <View style={styles.cardInner}>
+          {/* Top row: Badges + Close button */}
+          <View style={styles.topRow}>
+            <View style={styles.badgeGroup}>
+              <View
+                style={[
+                  styles.badge,
+                  {
+                    backgroundColor: hasPhoto
+                      ? 'rgba(255,255,255,0.22)'
+                      : badgeColor + '18',
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.badgeDot,
+                    { backgroundColor: hasPhoto ? colors.white : badgeColor },
+                  ]}
+                />
+                <AppText
+                  variant="caption"
+                  style={{
+                    color: hasPhoto ? colors.white : badgeColor,
+                    fontWeight: '700',
+                  }}
+                >
+                  {categoryLabel}
+                </AppText>
+              </View>
+
+              <View
+                style={[
+                  styles.statusBadge,
+                  {
+                    backgroundColor: hasPhoto
+                      ? 'rgba(0,0,0,0.35)'
+                      : colors.surfaceSubdued,
+                  },
+                ]}
+              >
+                <AppText
+                  variant="caption"
+                  style={{
+                    color: hasPhoto ? 'rgba(255,255,255,0.9)' : colors.muted,
+                    fontWeight: '600',
+                  }}
+                >
+                  {status}
+                </AppText>
+              </View>
+            </View>
+
+            <Pressable
+              style={[
+                styles.closeCircle,
+                {
+                  backgroundColor: hasPhoto
+                    ? 'rgba(0,0,0,0.45)'
+                    : colors.surfaceSubdued,
+                },
+              ]}
+              onPress={onClose}
+              hitSlop={12}
+              accessibilityLabel="Fechar visualização rápida"
+            >
+              <Ionicons
+                name="close"
+                size={16}
+                color={hasPhoto ? colors.white : colors.ink}
+              />
+            </Pressable>
+          </View>
+
+          {/* Bottom section: Title, Location and Action CTA */}
+          <View style={styles.bottomSection}>
+            <AppText
+              variant="sectionTitle"
+              numberOfLines={2}
+              style={[
+                styles.cardTitle,
+                hasPhoto ? { color: colors.white } : { color: colors.ink },
+              ]}
+            >
+              {title}
+            </AppText>
+
+            <View style={styles.locationRow}>
+              <Ionicons
+                name="location"
+                size={14}
+                color={hasPhoto ? 'rgba(255,255,255,0.85)' : colors.muted}
+              />
+              <AppText
+                variant="caption"
+                numberOfLines={1}
+                style={[
+                  styles.addressText,
+                  hasPhoto
+                    ? { color: 'rgba(255,255,255,0.85)' }
+                    : { color: colors.muted },
+                ]}
+              >
+                {address}
               </AppText>
             </View>
-            <AppText variant="caption" color="muted">
-              {status}
-            </AppText>
-          </View>
 
-          <AppText variant="label" numberOfLines={1} style={styles.title}>
-            {title}
-          </AppText>
-
-          <View style={styles.locationRow}>
-            <Ionicons name="location-outline" size={13} color={colors.muted} />
-            <AppText variant="meta" color="muted" numberOfLines={1} style={styles.address}>
-              {address}
-            </AppText>
+            <View style={styles.actionRow}>
+              <View
+                style={[
+                  styles.actionButton,
+                  {
+                    backgroundColor: hasPhoto
+                      ? 'rgba(255,255,255,0.92)'
+                      : colors.ink,
+                  },
+                ]}
+              >
+                <AppText
+                  variant="label"
+                  style={{
+                    color: hasPhoto ? '#111827' : colors.surface,
+                    fontWeight: '700',
+                    fontSize: 13,
+                  }}
+                >
+                  Ver detalhes
+                </AppText>
+                <Ionicons
+                  name="arrow-forward"
+                  size={14}
+                  color={hasPhoto ? '#111827' : colors.surface}
+                />
+              </View>
+            </View>
           </View>
         </View>
-
-        <Pressable
-          style={styles.closeButton}
-          onPress={onClose}
-          hitSlop={12}
-          accessibilityLabel="Fechar visualização rápida"
-        >
-          <Ionicons name="close" size={18} color={colors.muted} />
-        </Pressable>
       </Pressable>
-
-      <View style={styles.actions}>
-        <AppButton
-          title="Ver detalhes"
-          variant="secondary"
-          onPress={() => onOpen(entry)}
-        />
-      </View>
     </View>
   );
 }
@@ -143,48 +254,43 @@ const createStyles = (colors: ThemeColors) =>
       right: spacing.md,
       backgroundColor: colors.surface,
       borderRadius: layout.radius.card,
-      padding: spacing.sm,
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.16,
-      shadowRadius: 16,
-      elevation: 8,
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.22,
+      shadowRadius: 18,
+      elevation: 10,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
       zIndex: 100,
+      overflow: 'hidden',
     },
-    content: {
+    cardPressable: {
+      minHeight: 220,
+    },
+    cardInner: {
+      flex: 1,
+      minHeight: 220,
+      padding: spacing.md,
+      justifyContent: 'space-between',
+    },
+    topRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: spacing.sm,
+      justifyContent: 'space-between',
+      zIndex: 2,
     },
-    thumbnail: {
-      width: 58,
-      height: 58,
-      borderRadius: layout.radius.button,
-    },
-    thumbnailPlaceholder: {
-      width: 58,
-      height: 58,
-      borderRadius: layout.radius.button,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    details: {
-      flex: 1,
-      gap: 2,
-    },
-    badgeRow: {
+    badgeGroup: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xs,
+      flexWrap: 'wrap',
     },
     badge: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 4,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
+      gap: 5,
+      paddingHorizontal: 9,
+      paddingVertical: 4,
       borderRadius: layout.radius.pill,
     },
     badgeDot: {
@@ -192,26 +298,48 @@ const createStyles = (colors: ThemeColors) =>
       height: 6,
       borderRadius: 3,
     },
-    title: {
-      fontSize: 14,
-      lineHeight: 18,
+    statusBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: layout.radius.pill,
+    },
+    closeCircle: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    bottomSection: {
+      gap: 6,
+      zIndex: 2,
+      marginTop: spacing.md,
+    },
+    cardTitle: {
+      fontSize: 16,
+      lineHeight: 22,
+      fontWeight: '700',
     },
     locationRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 2,
+      gap: 4,
     },
-    address: {
+    addressText: {
       flex: 1,
+      fontSize: 12,
     },
-    closeButton: {
-      padding: spacing.xxs,
-      alignSelf: 'flex-start',
+    actionRow: {
+      marginTop: 4,
+      flexDirection: 'row',
+      alignItems: 'center',
     },
-    actions: {
-      marginTop: spacing.xs,
-      paddingTop: spacing.xs,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: colors.border,
+    actionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: layout.radius.pill,
     },
   });

@@ -71,13 +71,8 @@ export function OsmMapView({
   }, [region.zoom, region.latitudeDelta, region.longitudeDelta]);
 
   const htmlContent = useMemo(() => {
-    const tileUrl = isDark
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-    const attribution = isDark
-      ? '&copy; OpenStreetMap &copy; CARTO'
-      : '&copy; OpenStreetMap contributors';
+    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    const attribution = '&copy; OpenStreetMap contributors';
 
     return `
 <!DOCTYPE html>
@@ -97,6 +92,14 @@ export function OsmMapView({
       overflow: hidden;
       touch-action: none;
     }
+    ${isDark ? `
+    .leaflet-tile-pane {
+      filter: invert(100%) hue-rotate(180deg) brightness(92%) contrast(92%);
+    }
+    .leaflet-container {
+      background: #121212 !important;
+    }
+    ` : ''}
     .leaflet-control-attribution {
       font-size: 8px !important;
       background: rgba(255,255,255,0.7) !important;
@@ -177,7 +180,7 @@ export function OsmMapView({
     var map = L.map('map', {
       zoomControl: false,
       attributionControl: true,
-      minZoom: 3,
+      minZoom: 10,
       maxZoom: 19,
       dragging: ${interactive},
       touchZoom: ${interactive},

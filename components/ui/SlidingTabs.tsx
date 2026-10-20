@@ -150,9 +150,15 @@ export function SlidingTabs({
                 ? selected
                   ? 'transparent'
                   : colors.darkPill
-                : 'transparent',
-              borderWidth: scroll ? 1 : 0,
-              borderColor: active ? 'transparent' : colors.divider,
+                : colors.surface,
+              borderWidth: 1,
+              borderColor: active ? 'transparent' : colors.border,
+              elevation: scroll && !active ? 1 : 0,
+              shadowColor: scroll && !active ? '#000000' : undefined,
+              shadowOffset:
+                scroll && !active ? { width: 0, height: 1 } : undefined,
+              shadowOpacity: scroll && !active ? 0.08 : undefined,
+              shadowRadius: scroll && !active ? 3 : undefined,
             }}
           >
             {option.icon && (

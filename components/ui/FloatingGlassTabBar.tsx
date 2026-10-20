@@ -191,13 +191,13 @@ export function FloatingGlassTabBar({
           <Ionicons
             name={isListView ? 'map' : 'list'}
             size={20}
-            color={colors.navigationOnSelection}
+            color={colors.navigationIcon}
           />
           {width >= 360 && (
             <AppText
               variant="label"
               style={{
-                color: colors.navigationOnSelection,
+                color: colors.navigationIcon,
                 fontWeight: '700',
                 fontSize: 13,
                 marginLeft: 5,
