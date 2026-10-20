@@ -6,8 +6,15 @@ import {
 
 async function main() {
   const args = process.argv.slice(2);
-  const firstArg = args[0] || process.env.RIO1746_SYNC_PARTITION || '2026-09-20';
+  const firstArg = args[0] || process.env.RIO1746_SYNC_PARTITION;
+  if (!firstArg)
+    throw new Error('Informe a partição ou intervalo a sincronizar.');
   const secondArg = args[1];
+  if (args.length > 2) throw new Error('Use uma data e um limite, ou duas datas.');
+  if (secondArg && !/^\d{4}-\d{2}-\d{2}$/.test(secondArg) &&
+      (!/^\d+$/.test(secondArg) || Number(secondArg) < 10 || Number(secondArg) > 50000)) {
+    throw new Error('O limite deve ser um inteiro entre 10 e 50000.');
+  }
 
   const { db, pool } = database();
   const startTime = Date.now();
@@ -18,7 +25,7 @@ async function main() {
       console.log(
         `[Rio1746 Sync CLI] Syncing partition range: ${firstArg} .. ${secondArg}`,
       );
-      const result = await runRio1746RangeSync(db, firstArg, secondArg);
+      const result = await runRio1746RangeSync(db, pool, firstArg, secondArg);
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
       console.log(
         `[Rio1746 Sync CLI] Range sync finished in ${elapsed}s:`,
@@ -30,11 +37,14 @@ async function main() {
     const maxRecords = secondArg ? parseInt(secondArg, 10) : undefined;
     console.log(
       `[Rio1746 Sync CLI] Syncing partition: ${firstArg} (${
-        maxRecords ? `maxRecords: ${maxRecords}` : 'full partition with pagination'
+        maxRecords
+          ? `maxRecords: ${maxRecords}`
+          : 'full partition with pagination'
       })`,
     );
     const result = await runRio1746Sync(
       db,
+      pool,
       firstArg,
       maxRecords ? { maxRecords } : {},
     );

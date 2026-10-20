@@ -1,5 +1,22 @@
 /** Public HTTP contracts. Passwords, session secrets and database rows never belong here. */
 export type Role = 'citizen' | 'staff' | 'admin';
+export type SyncCoverage = 'complete' | 'partial' | 'unknown';
+export interface SyncRunSummary {
+  id: string;
+  sourceId: string;
+  status: 'running' | 'success' | 'partial' | 'failed';
+  coverage: SyncCoverage;
+  requestedStart: string | null;
+  requestedEnd: string | null;
+  startedAt: string;
+  finishedAt: string | null;
+  counters: {
+    received: number;
+    imported: number;
+    updated: number;
+    rejected: number;
+  };
+}
 export interface Municipality {
   /** Official seven-digit IBGE municipality code. */
   id: string;

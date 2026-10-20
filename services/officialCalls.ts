@@ -32,7 +32,9 @@ export async function fetchOfficialCalls(
   if (params.west !== undefined) query.set('west', String(params.west));
 
   const qs = query.toString();
-  return request<OfficialCallsListResponse>(`/rio1746/calls${qs ? `?${qs}` : ''}`);
+  return request<OfficialCallsListResponse>(
+    `/rio1746/calls${qs ? `?${qs}` : ''}`,
+  );
 }
 
 export async function fetchOfficialCall(id: string): Promise<OfficialCall> {
@@ -63,7 +65,9 @@ export async function fetchOfficialOverview(
     query.set('periodDays', String(normalized.periodDays));
   }
   const qs = query.toString();
-  return request<OfficialCallsOverview>(`/rio1746/overview${qs ? `?${qs}` : ''}`);
+  return request<OfficialCallsOverview>(
+    `/rio1746/overview${qs ? `?${qs}` : ''}`,
+  );
 }
 
 export interface SyncStatusResult {
@@ -72,7 +76,7 @@ export interface SyncStatusResult {
   lastSyncAt: string | null;
   recordsSynced: number | null;
   status: string;
-  errorMessage: string | null;
+  latestRun: import('@/shared/contracts').SyncRunSummary | null;
 }
 
 export async function fetchSyncStatus(): Promise<SyncStatusResult | null> {

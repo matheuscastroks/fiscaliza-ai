@@ -1,11 +1,13 @@
 import type { FastifyInstance } from 'fastify';
 import { and, desc, eq, gte, ilike, isNotNull, lte, or, sql, type SQL } from 'drizzle-orm';
 import type { Database } from './db.js';
+import type pg from 'pg';
 import { officialCalls } from './schema.js';
 import {
   runRio1746RangeSync,
   runRio1746Sync,
   getSyncStatus,
+  getPublicSyncStatus,
 } from './integrations/rio1746/sync.js';
 import type {
   OfficialCall,
@@ -54,6 +56,7 @@ function buildPeriodCondition(periodDaysRaw?: string): SQL | undefined {
 export function registerOfficialCallsRoutes(
   app: FastifyInstance,
   db: Database,
+  pool: pg.Pool,
   ok: (data: unknown) => { success: boolean; data: unknown },
   fail: (statusCode: number, message: string) => Error,
 ) {
@@ -368,7 +371,7 @@ export function registerOfficialCallsRoutes(
 
   // 5. Check sync status
   app.get('/api/rio1746/sync-status', async () => {
-    const status = await getSyncStatus(db);
+    const status = await getPublicSyncStatus(db);
     return ok(status);
   });
 
@@ -387,6 +390,18 @@ export function registerOfficialCallsRoutes(
         body: {
           type: 'object',
           additionalProperties: false,
+          oneOf: [
+            {
+              required: ['partitionDate'],
+              not: {
+                anyOf: [{ required: ['startDate'] }, { required: ['endDate'] }],
+              },
+            },
+            {
+              required: ['startDate', 'endDate'],
+              not: { required: ['partitionDate'] },
+            },
+          ],
           properties: {
             partitionDate: {
               type: 'string',
@@ -413,6 +428,8 @@ export function registerOfficialCallsRoutes(
       if (!req.user || req.user.role !== 'admin') {
         throw fail(403, 'Acesso restrito à administração.');
       }
+      if (!req.body)
+        throw fail(400, 'Informe uma data ou intervalo para sincronizar.');
 
       const maxRecords = req.body?.limit
         ? Math.min(50000, Math.max(10, req.body.limit))
@@ -421,6 +438,7 @@ export function registerOfficialCallsRoutes(
       if (req.body?.startDate && req.body?.endDate) {
         const rangeResult = await runRio1746RangeSync(
           db,
+          pool,
           req.body.startDate,
           req.body.endDate,
           maxRecords ? { maxRecords } : {},
@@ -428,9 +446,10 @@ export function registerOfficialCallsRoutes(
         return ok(rangeResult);
       }
 
-      const partition = req.body?.partitionDate || '2026-09-20';
+      const partition = req.body.partitionDate!;
       const result = await runRio1746Sync(
         db,
+        pool,
         partition,
         maxRecords ? { maxRecords } : {},
       );

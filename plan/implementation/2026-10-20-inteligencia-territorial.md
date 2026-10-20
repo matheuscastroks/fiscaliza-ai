@@ -1,6 +1,6 @@
 # Inteligência territorial — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Não iniciar implementação antes da revisão deste plano; método de execução a confirmar.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Plano aprovado; execução inline, tarefa por tarefa, autorizada pelo usuário.
 
 **Goal:** Permitir explorar equipamentos públicos e chamados do 1746 por bairro do Rio, com origem, datas e cobertura verificáveis.
 
@@ -54,12 +54,12 @@ Bloco A: tarefas 1–2, confiabilidade existente. Bloco B: tarefas 3–6, fonte 
 
 `SyncBudget` mantém `remainingBytes: bigint`; teto padrão por execução 500000000 bytes e por query no máximo 500000000 bytes, configurável no servidor por `RIO1746_MAX_RUN_BYTES`, inteiro positivo. Compartilhar o mesmo orçamento entre todas as páginas/partições, sem reset a cada dia. Adaptador BigQuery devolve linhas e bytes faturados por job; verificar tipos instalados do SDK antes de implementá-lo.
 
-- [ ] Escrever testes `sync rejects anonymous citizen and staff before upstream access`, `API and CLI contend for the same source lock`, `lock releases after failure`, `record cap cannot publish complete coverage`, `range budget is shared across pages and dates` e `failed later partition preserves earlier publication coverage`. Asserções: 401/403 sem chamada upstream; segunda execução 409; limite e falha jamais produzem cobertura completa.
-- [ ] Rodar build e teste focal como na tarefa 1; esperar falhas comportamentais nas garantias novas. Reutilizar os testes existentes de `rio1746.test.ts`.
-- [ ] Criar journal de execuções e coordenador comum; manter assinaturas públicas atuais ou atualizar API/CLI juntas. Validar corpo da sync (data única OU intervalo completo), sem cair silenciosamente na data padrão. Não expor mensagens internas no GET público de status; harmonizar seus campos hoje divergentes de `SyncStatusResult`.
-- [ ] No adaptador, realizar dry run da consulta parametrizada antes do job pago; se estimativa exceder saldo, encerrar como parcial. Fixar `maximumBytesBilled` no saldo, deduzir faturamento real e, se ele não puder ser confirmado, reservar todo o teto atribuído ao job. Execução sequencial não pode gastar além do orçamento. Testes substituem o adaptador, sem Google real.
-- [ ] Registrar término por partição; cap exato sem prova de esgotamento permanece parcial. Contadores de upsert não provam completude. Remover avanço indevido do checkpoint; persistir data solicitada, cobertura importada e último sucesso separadamente.
-- [ ] Rodar migrações e testes no PostgreSQL dedicado. No CI, exigir banco nos testes de integração, acrescentar `npm run typecheck --prefix backend` explicitamente e manter o encadeamento de release já existente. Comitar `fix(sync): delimitar execucoes e registrar cobertura real`.
+- [x] Escrever testes `sync rejects anonymous citizen and staff before upstream access`, `API and CLI contend for the same source lock`, `lock releases after failure`, `record cap cannot publish complete coverage`, `range budget is shared across pages and dates` e `failed later partition preserves earlier publication coverage`. Asserções: 401/403 sem chamada upstream; segunda execução 409; limite e falha jamais produzem cobertura completa.
+- [x] Rodar build e teste focal como na tarefa 1; esperar falhas comportamentais nas garantias novas. Reutilizar os testes existentes de `rio1746.test.ts`.
+- [x] Criar journal de execuções e coordenador comum; manter assinaturas públicas atuais ou atualizar API/CLI juntas. Validar corpo da sync (data única OU intervalo completo), sem cair silenciosamente na data padrão. Não expor mensagens internas no GET público de status; harmonizar seus campos hoje divergentes de `SyncStatusResult`.
+- [x] No adaptador, realizar dry run da consulta parametrizada antes do job pago; se estimativa exceder saldo, encerrar como parcial. Fixar `maximumBytesBilled` no saldo, deduzir faturamento real e, se ele não puder ser confirmado, reservar todo o teto atribuído ao job. Execução sequencial não pode gastar além do orçamento. Testes substituem o adaptador, sem Google real.
+- [x] Registrar término por partição; cap exato sem prova de esgotamento permanece parcial. Contadores de upsert não provam completude. Remover avanço indevido do checkpoint; persistir data solicitada, cobertura importada e último sucesso separadamente.
+- [x] Rodar migrações e testes no PostgreSQL dedicado. No CI, exigir banco nos testes de integração, acrescentar `npm run typecheck --prefix backend` explicitamente e manter o encadeamento de release já existente. Comitar `fix(sync): delimitar execucoes e registrar cobertura real`.
 
 ## Tarefa 3 — Evidências e contrato das quatro camadas
 
@@ -74,7 +74,7 @@ Bloco A: tarefas 1–2, confiabilidade existente. Bloco B: tarefas 3–6, fonte 
 
 ## Tarefa 4 — Modelo territorial e contratos compartilhados
 
-**Arquivos:** criar `backend/migrations/0008_territorial_sources.sql`, `shared/public-data.ts`, `backend/src/territorial-schema.ts`, `backend/test/territorial-schema.test.ts`; modificar `backend/src/schema.ts` (reexport), `shared/contracts.ts` (reexport). Consumir `source_sync_runs` da tarefa 2, sem criar outro journal.
+**Arquivos:** criar `backend/migrations/0009_territorial_sources.sql`, `shared/public-data.ts`, `backend/src/territorial-schema.ts`, `backend/test/territorial-schema.test.ts`; modificar `backend/src/schema.ts` (reexport), `shared/contracts.ts` (reexport). Consumir `source_sync_runs` da tarefa 2, sem criar outro journal.
 
 **Interfaces públicas em `shared/public-data.ts`:**
 

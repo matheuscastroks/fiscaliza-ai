@@ -443,7 +443,7 @@ export async function buildApp(
     },
   );
   app.get('/api/municipality', async (req) => ok(req.user!.municipality));
-  registerOfficialCallsRoutes(app, db, ok, fail);
+  registerOfficialCallsRoutes(app, db, connection.pool, ok, fail);
 
   async function present(
     row: typeof records.$inferSelect,

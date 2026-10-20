@@ -42,6 +42,7 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm run lint
       - run: npm run migrate --prefix backend
+      - run: npm run typecheck --prefix backend
       - run: npm test --prefix backend
       - run: npm run openapi --prefix backend
       - run: npx expo export --platform web --output-dir .validation/web-export --max-workers 2

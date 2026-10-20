@@ -5,8 +5,16 @@ import { officialCalls, syncCheckpoints } from '../../schema.js';
 import { buildPartitionCallsQuery } from './queries.js';
 import { mapRawRowToOfficialCall } from './mapper.js';
 import type { RawBigQuery1746Row } from './types.js';
+import type { SyncCoverage } from '../../../../shared/contracts.js';
+import {
+  createSyncBudget,
+  runBudgetedQuery,
+  SyncBudgetExceeded,
+  type SyncBudget,
+} from '../sync-budget.js';
 
 export interface ImportResult {
+  coverage: SyncCoverage;
   partition: string;
   pagesProcessed: number;
   totalFetched: number;
@@ -17,6 +25,7 @@ export interface ImportResult {
 }
 
 export interface ImportPartitionOptions {
+  budget?: SyncBudget;
   /** Maximum records to import in total across pages. Omit or set undefined to import the entire partition. */
   maxRecords?: number;
   /** Number of rows fetched per BigQuery page (default: 2500). */
@@ -47,8 +56,13 @@ export async function importPartition(
   const normalizedOptions: ImportPartitionOptions =
     typeof options === 'number' ? { maxRecords: options } : options;
 
-  const pageSize = Math.min(5000, Math.max(10, normalizedOptions.pageSize ?? 2500));
+  const pageSize = Math.min(
+    5000,
+    Math.max(10, normalizedOptions.pageSize ?? 2500),
+  );
   const maxRecords = normalizedOptions.maxRecords;
+  const budget = normalizedOptions.budget ?? createSyncBudget();
+  let coverage: SyncCoverage = 'partial';
 
   let offset = 0;
   let pagesProcessed = 0;
@@ -59,23 +73,31 @@ export async function importPartition(
 
   while (true) {
     const remainingBudget =
-      maxRecords !== undefined ? Math.max(0, maxRecords - totalFetched) : pageSize;
+      maxRecords !== undefined
+        ? Math.max(0, maxRecords - totalFetched)
+        : pageSize;
     if (maxRecords !== undefined && remainingBudget === 0) {
       break;
     }
 
     const fetchLimit = Math.min(pageSize, remainingBudget);
-    const { query, params } = buildPartitionCallsQuery(partitionDate, fetchLimit, offset);
+    const { query, params } = buildPartitionCallsQuery(
+      partitionDate,
+      fetchLimit,
+      offset,
+    );
 
-    // Conservative safety threshold: 500 MB maximum billed bytes per page query
-    const [rows] = await bq.query({
-      query,
-      params,
-      maximumBytesBilled: '500000000',
-    });
+    let rows: unknown[];
+    try {
+      rows = await runBudgetedQuery(bq, { query, params }, budget);
+    } catch (error) {
+      if (error instanceof SyncBudgetExceeded) break;
+      throw error;
+    }
 
     const rawRows = rows as RawBigQuery1746Row[];
     if (rawRows.length === 0) {
+      coverage = 'complete';
       break;
     }
 
@@ -143,6 +165,7 @@ export async function importPartition(
 
     offset += rawRows.length;
     if (rawRows.length < fetchLimit) {
+      coverage = 'complete';
       break;
     }
   }
@@ -152,26 +175,31 @@ export async function importPartition(
     .insert(syncCheckpoints)
     .values({
       id: 'rio1746_calls',
-      lastPartition: partitionDate,
+      lastPartition: coverage === 'complete' ? partitionDate : null,
       recordsImported: imported,
       recordsUpdated: updated,
-      status: 'success',
-      lastSyncedAt: new Date(),
+      status: coverage === 'complete' ? 'success' : 'partial',
+      lastSyncedAt: coverage === 'complete' ? new Date() : null,
       errorMessage: null,
     })
     .onConflictDoUpdate({
       target: syncCheckpoints.id,
       set: {
-        lastPartition: sql`GREATEST(COALESCE(${syncCheckpoints.lastPartition}, ''), ${partitionDate})`,
+        ...(coverage === 'complete'
+          ? {
+              lastPartition: sql`GREATEST(COALESCE(${syncCheckpoints.lastPartition}, ''), ${partitionDate})`,
+              lastSyncedAt: new Date(),
+            }
+          : {}),
         recordsImported: sql`COALESCE(${syncCheckpoints.recordsImported}, 0) + ${imported}`,
         recordsUpdated: sql`COALESCE(${syncCheckpoints.recordsUpdated}, 0) + ${updated}`,
-        status: 'success',
-        lastSyncedAt: new Date(),
+        status: coverage === 'complete' ? 'success' : 'partial',
         errorMessage: null,
       },
     });
 
   return {
+    coverage,
     partition: partitionDate,
     pagesProcessed,
     totalFetched,

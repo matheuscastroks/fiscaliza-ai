@@ -138,8 +138,12 @@ export const officialCalls = pgTable('official_calls', {
   latitude: doublePrecision('latitude'),
   longitude: doublePrecision('longitude'),
   sourcePartitionDate: date('source_partition_date'),
-  importedAt: timestamp('imported_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  importedAt: timestamp('imported_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const syncCheckpoints = pgTable('sync_checkpoints', {
@@ -150,4 +154,26 @@ export const syncCheckpoints = pgTable('sync_checkpoints', {
   status: text('status').notNull().default('idle'),
   lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
   errorMessage: text('error_message'),
+});
+
+export const sourceSyncRuns = pgTable('source_sync_runs', {
+  id: text('id').primaryKey(),
+  sourceId: text('source_id').notNull(),
+  status: text('status')
+    .$type<import('../../shared/contracts.js').SyncRunSummary['status']>()
+    .notNull(),
+  coverage: text('coverage')
+    .$type<import('../../shared/contracts.js').SyncCoverage>()
+    .notNull(),
+  requestedStart: date('requested_start'),
+  requestedEnd: date('requested_end'),
+  startedAt: timestamp('started_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  finishedAt: timestamp('finished_at', { withTimezone: true }),
+  receivedCount: integer('received_count').notNull().default(0),
+  importedCount: integer('imported_count').notNull().default(0),
+  updatedCount: integer('updated_count').notNull().default(0),
+  rejectedCount: integer('rejected_count').notNull().default(0),
+  details: jsonb('details').notNull().default({}),
 });
