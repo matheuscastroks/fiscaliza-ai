@@ -13,9 +13,13 @@ import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
 import { CivicRow, QueryState, createCityStyles } from '@/features/city/CityUI';
+import { CityCarousel } from '@/features/city/CityCarousel';
 import { useCityQuery } from '@/features/city/useCityQuery';
 import type { CivicItem, Occurrence } from '@/shared/contracts';
 import { useAuthStore } from '@/stores/authStore';
+import { useFollowStore } from '@/stores/followStore';
+import { Ionicons } from '@expo/vector-icons';
+import { Pressable } from 'react-native';
 
 export default function FollowScreen() {
   const { colors } = useTheme();
@@ -35,6 +39,10 @@ export default function FollowScreen() {
       setRefreshing(false);
     }
   }, [refetch]);
+
+  const user = useAuthStore((state) => state.user);
+  const { onlyMine, setOnlyMine } = useFollowStore();
+
   const localOccurrences =
     query.data?.occurrences.filter(
       (item) => item.municipalityId === municipalityId,
@@ -43,10 +51,35 @@ export default function FollowScreen() {
     query.data?.items.filter(
       (item) => item.municipalityId === municipalityId,
     ) || [];
+
+  const actions = localItems.filter((item) => item.kind === 'action');
+  const proposals = localItems.filter((item) => item.kind === 'proposal');
+  const consultations = localItems.filter(
+    (item) => item.kind === 'consultation',
+  );
+
+  const occurrencesToDisplay = onlyMine
+    ? localOccurrences.filter(
+        (item) => item.reportedBy === user?.id,
+      )
+    : localOccurrences;
+  const proposalsToDisplay = onlyMine
+    ? proposals.filter((item) => item.createdBy === user?.id)
+    : proposals;
+  const actionsToDisplay = onlyMine ? [] : actions;
+  const consultationsToDisplay = onlyMine ? [] : consultations;
+
+  const hasLocalContent =
+    occurrencesToDisplay.length > 0 ||
+    actionsToDisplay.length > 0 ||
+    proposalsToDisplay.length > 0 ||
+    consultationsToDisplay.length > 0;
+
   const previous = [
     ...(query.data?.occurrences || []),
     ...(query.data?.items || []),
   ].filter((item) => item.municipalityId !== municipalityId);
+
   return (
     <AppScreen>
       <AppHeader title="Acompanhar" context="Minhas contribuições" />
@@ -69,59 +102,122 @@ export default function FollowScreen() {
           error={query.error}
           retry={query.refetch}
         />
-        {query.data &&
-          !query.error &&
-          !localOccurrences.length &&
-          !localItems.length && (
-            <IllustratedEmptyState
-              title="Seus acompanhamentos ficam aqui"
-              description="Registre uma ocorrência ou acompanhe uma participação para ver as respostas da gestão."
-              action={{
-                title: 'Explorar território',
-                onPress: () => router.push('/(tabs)/TerritoryScreen'),
-              }}
-            />
-          )}
-        {(localOccurrences.length > 0 || localItems.length > 0) && (
-          <>
-            <View style={cityStyles.section}>
-              <AppText variant="sectionTitle">
-                Ocorrências que registrei ou acompanho
+
+        {onlyMine && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              paddingHorizontal: 14,
+              paddingVertical: 10,
+              borderWidth: 1,
+              borderColor: colors.border,
+              marginHorizontal: 16,
+              marginBottom: 8,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="filter" size={16} color={colors.ink} />
+              <AppText variant="caption" style={{ fontWeight: '600' }}>
+                Mostrando apenas criadas por você
               </AppText>
-              {localOccurrences.map((i) => (
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Ver todas as participações"
+              onPress={() => setOnlyMine(false)}
+            >
+              <AppText
+                variant="caption"
+                style={{ color: colors.attention, fontWeight: '700' }}
+              >
+                Ver todas
+              </AppText>
+            </Pressable>
+          </View>
+        )}
+
+        {query.data && !query.error && !hasLocalContent && (
+          <IllustratedEmptyState
+            title={onlyMine ? 'Nenhum registro próprio encontrado' : 'Seus acompanhamentos ficam aqui'}
+            description={
+              onlyMine
+                ? 'Você ainda não criou ocorrências ou propostas neste município.'
+                : 'Registre uma ocorrência ou acompanhe uma participação para ver as respostas da gestão.'
+            }
+            action={{
+              title: onlyMine ? 'Ver todas as participações' : 'Explorar território',
+              onPress: () => {
+                if (onlyMine) setOnlyMine(false);
+                else router.push('/(tabs)/TerritoryScreen');
+              },
+            }}
+          />
+        )}
+
+        {/* 1. Ações públicas em slide */}
+        {actionsToDisplay.length > 0 && (
+          <View style={cityStyles.section}>
+            <AppText variant="sectionTitle">Ações públicas</AppText>
+            <CityCarousel
+              items={actionsToDisplay}
+              label="Ações públicas que acompanho"
+              renderItem={(item) => <CivicRow item={item} />}
+            />
+          </View>
+        )}
+
+        {/* 2. Ocorrências em slide */}
+        {occurrencesToDisplay.length > 0 && (
+          <View style={cityStyles.section}>
+            <AppText variant="sectionTitle">Ocorrências</AppText>
+            <CityCarousel
+              items={occurrencesToDisplay}
+              label="Ocorrências que acompanho"
+              renderItem={(problem) => (
                 <OccurrenceRow
-                  key={i.id}
-                  problem={i}
+                  problem={problem}
+                  featured
                   onPress={() =>
                     router.push({
                       pathname: '/ProblemDetailsScreen',
-                      params: { id: i.id },
+                      params: { id: problem.id },
                     })
                   }
                 />
-              ))}
-              {query.data && !localOccurrences.length && (
-                <AppText color="muted">
-                  Você ainda não registrou nem acompanhou uma ocorrência.
-                </AppText>
               )}
-            </View>
-            <View style={cityStyles.section}>
-              <AppText variant="sectionTitle">
-                Propostas, consultas e ações
-              </AppText>
-              {localItems.map((i) => (
-                <CivicRow key={i.id} item={i} />
-              ))}
-              {query.data && !localItems.length && (
-                <AppText color="muted">
-                  Participe de uma consulta ou acompanhe uma ação para
-                  encontrá-la aqui.
-                </AppText>
-              )}
-            </View>
-          </>
+            />
+          </View>
         )}
+
+        {/* 3. Propostas em slide */}
+        {proposalsToDisplay.length > 0 && (
+          <View style={cityStyles.section}>
+            <AppText variant="sectionTitle">Propostas</AppText>
+            <CityCarousel
+              items={proposalsToDisplay}
+              label="Propostas que acompanho"
+              renderItem={(item) => <CivicRow item={item} />}
+            />
+          </View>
+        )}
+
+        {/* 4. Consultas públicas em slide */}
+        {consultationsToDisplay.length > 0 && (
+          <View style={cityStyles.section}>
+            <AppText variant="sectionTitle">Consultas públicas</AppText>
+            <CityCarousel
+              items={consultationsToDisplay}
+              label="Consultas públicas que participei"
+              renderItem={(item) => <CivicRow item={item} />}
+            />
+          </View>
+        )}
+
+        {/* 5. Histórico de outros municípios */}
         {previous.length > 0 && (
           <View style={cityStyles.section}>
             <AppText variant="sectionTitle">

@@ -14,10 +14,15 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import type { Tabs } from 'expo-router';
+import { router, type Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
 import { useTerritoryViewMode } from '@/stores/territoryStore';
+import { useFollowStore } from '@/stores/followStore';
+
+const TAB_SIZE = 48;
+const TAB_PADDING = 8;
+const TAB_GAP = 8;
 
 export type FloatingGlassTabBarProps = Parameters<
   NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>
@@ -40,7 +45,10 @@ export function FloatingGlassTabBar({
 
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const barWidth = Math.min(4 * 52 + 3 * 4 + 2 * 4, width - 32);
+  const barWidth = Math.min(
+    4 * TAB_SIZE + 3 * TAB_GAP + 2 * TAB_PADDING,
+    width - 32,
+  );
   const visibleRoutes = state.routes.filter((route) => VISIBLE.has(route.name));
   const selectedIndex = Math.max(
     0,
@@ -48,7 +56,8 @@ export function FloatingGlassTabBar({
       (route) => route.key === state.routes[state.index]?.key,
     ),
   );
-  const target = (selectedIndex * (barWidth - 8 - 52)) / 3;
+  const target =
+    (selectedIndex * (barWidth - 2 * TAB_PADDING - TAB_SIZE)) / 3;
   const [selection] = useState(() => new Animated.Value(target));
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
@@ -94,7 +103,12 @@ export function FloatingGlassTabBar({
   }, []);
   const activeRoute = state.routes[state.index]?.name;
   const isTerritory = activeRoute === 'TerritoryScreen';
+  const isIndex = activeRoute === 'index';
+  const isParticipate = activeRoute === 'ParticipateScreen';
+  const isFollow = activeRoute === 'FollowScreen';
+
   const { isListView, toggleViewMode } = useTerritoryViewMode();
+  const { onlyMine, toggleOnlyMine } = useFollowStore();
 
   if (
     (Platform.OS === 'web' && width >= 1100) ||
@@ -119,7 +133,11 @@ export function FloatingGlassTabBar({
           importantForAccessibility="no-hide-descendants"
           style={[
             styles.selected,
-            { top: 4, left: 4, transform: [{ translateX: selection }] },
+            {
+              top: TAB_PADDING,
+              left: TAB_PADDING,
+              transform: [{ translateX: selection }],
+            },
           ]}
         />
         {state.routes
@@ -208,6 +226,115 @@ export function FloatingGlassTabBar({
           )}
         </Pressable>
       )}
+
+      {isIndex && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Registrar nova ocorrência"
+          onPress={() => {
+            if (Platform.OS !== 'web')
+              void Haptics.selectionAsync().catch(() => {});
+            router.push('/(tabs)/ReportScreen');
+          }}
+          style={({ pressed }) => [
+            styles.extraButton,
+            pressed && { opacity: 0.75, transform: [{ scale: 0.95 }] },
+          ]}
+        >
+          <Ionicons
+            name="add-circle"
+            size={20}
+            color={colors.navigationIcon}
+          />
+          {width >= 360 && (
+            <AppText
+              variant="label"
+              style={{
+                color: colors.navigationIcon,
+                fontWeight: '700',
+                fontSize: 13,
+                marginLeft: 5,
+              }}
+            >
+              Relatar
+            </AppText>
+          )}
+        </Pressable>
+      )}
+
+      {isParticipate && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Criar nova proposta popular"
+          onPress={() => {
+            if (Platform.OS !== 'web')
+              void Haptics.selectionAsync().catch(() => {});
+            router.push('/ProposalScreen');
+          }}
+          style={({ pressed }) => [
+            styles.extraButton,
+            pressed && { opacity: 0.75, transform: [{ scale: 0.95 }] },
+          ]}
+        >
+          <Ionicons
+            name="bulb-outline"
+            size={20}
+            color={colors.navigationIcon}
+          />
+          {width >= 360 && (
+            <AppText
+              variant="label"
+              style={{
+                color: colors.navigationIcon,
+                fontWeight: '700',
+                fontSize: 13,
+                marginLeft: 5,
+              }}
+            >
+              Propor
+            </AppText>
+          )}
+        </Pressable>
+      )}
+
+      {isFollow && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            onlyMine
+              ? 'Mostrar todas as participações'
+              : 'Mostrar apenas minhas participações'
+          }
+          onPress={() => {
+            if (Platform.OS !== 'web')
+              void Haptics.selectionAsync().catch(() => {});
+            toggleOnlyMine();
+          }}
+          style={({ pressed }) => [
+            styles.extraButton,
+            pressed && { opacity: 0.75, transform: [{ scale: 0.95 }] },
+          ]}
+        >
+          <Ionicons
+            name={onlyMine ? 'people-outline' : 'person-outline'}
+            size={20}
+            color={colors.navigationIcon}
+          />
+          {width >= 360 && (
+            <AppText
+              variant="label"
+              style={{
+                color: colors.navigationIcon,
+                fontWeight: '700',
+                fontSize: 13,
+                marginLeft: 5,
+              }}
+            >
+              {onlyMine ? 'Todas' : 'Minhas'}
+            </AppText>
+          )}
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -224,11 +351,11 @@ const createStyles = (colors: ThemeColors) =>
       zIndex: 99,
     },
     bar: {
-      height: 60,
-      borderRadius: 30,
+      height: TAB_SIZE + 2 * TAB_PADDING,
+      borderRadius: (TAB_SIZE + 2 * TAB_PADDING) / 2,
       backgroundColor: colors.navigationSurface,
       flexDirection: 'row',
-      paddingHorizontal: 4,
+      paddingHorizontal: TAB_PADDING,
       justifyContent: 'space-between',
       alignItems: 'center',
       ...Platform.select({
@@ -243,9 +370,9 @@ const createStyles = (colors: ThemeColors) =>
       }),
     },
     extraButton: {
-      height: 60,
-      minWidth: 60,
-      borderRadius: 30,
+      height: TAB_SIZE + 2 * TAB_PADDING,
+      minWidth: TAB_SIZE + 2 * TAB_PADDING,
+      borderRadius: (TAB_SIZE + 2 * TAB_PADDING) / 2,
       backgroundColor: colors.navigationSurface,
       flexDirection: 'row',
       alignItems: 'center',
@@ -263,14 +390,14 @@ const createStyles = (colors: ThemeColors) =>
       }),
     },
     tab: {
-      width: 52,
-      minHeight: 52,
+      width: TAB_SIZE,
+      minHeight: TAB_SIZE,
       alignItems: 'center',
       justifyContent: 'center',
     },
     icon: {
-      width: 52,
-      height: 52,
+      width: TAB_SIZE,
+      height: TAB_SIZE,
       borderRadius: 9999,
       overflow: 'hidden',
       flexShrink: 0,
@@ -281,8 +408,8 @@ const createStyles = (colors: ThemeColors) =>
       position: 'absolute',
       top: 0,
       left: 0,
-      width: 52,
-      height: 52,
+      width: TAB_SIZE,
+      height: TAB_SIZE,
       borderRadius: 9999,
       backgroundColor: colors.navigationSelection,
     },
