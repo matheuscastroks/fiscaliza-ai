@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useIsFocused } from 'expo-router';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
@@ -31,6 +31,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useTerritorySelection } from '@/stores/territoryStore';
 
 export default function HomeScreen() {
+  const isFocused = useIsFocused();
   const { colors } = useTheme();
   const cityStyles = useThemedStyles(createCityStyles);
   const styles = useThemedStyles(createStyles);
@@ -40,16 +41,22 @@ export default function HomeScreen() {
   const { neighborhood, neighborhoodId, setNeighborhood } =
     useTerritorySelection();
 
-  const officialOverview = useOfficialOverview({
-    neighborhoodId,
-    bairro: neighborhoodId ? undefined : neighborhood || undefined,
-  });
-  const officialFilters = useOfficialFilters();
-  const recentCalls = useOfficialCalls({
-    neighborhoodId,
-    bairro: neighborhoodId ? undefined : neighborhood || undefined,
-    limit: 15,
-  });
+  const officialOverview = useOfficialOverview(
+    {
+      neighborhoodId,
+      bairro: neighborhoodId ? undefined : neighborhood || undefined,
+    },
+    isFocused,
+  );
+  const officialFilters = useOfficialFilters(isFocused);
+  const recentCalls = useOfficialCalls(
+    {
+      neighborhoodId,
+      bairro: neighborhoodId ? undefined : neighborhood || undefined,
+      limit: 15,
+    },
+    isFocused,
+  );
 
   const bairroOptions = officialFilters.data?.bairros || [];
   const calls = recentCalls.data?.calls || [];

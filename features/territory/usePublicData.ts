@@ -17,12 +17,15 @@ export function usePublicFacilities(
   return useInfiniteQuery({
     queryKey: ['publicFacilities', '3304557', scope, params],
     initialPageParam: { page: 1, sources: null as SourceCoverage[] | null },
-    queryFn: async ({ pageParam }) => {
-      const result = await fetchPublicFacilities({
-        ...params,
-        page: pageParam.page,
-        limit: 100,
-      });
+    queryFn: async ({ pageParam, signal }) => {
+      const result = await fetchPublicFacilities(
+        {
+          ...params,
+          page: pageParam.page,
+          limit: 100,
+        },
+        signal,
+      );
       if (
         pageParam.sources &&
         !samePublication(pageParam.sources, result.sources)
@@ -57,10 +60,11 @@ export const useNeighborhoodBoundary = (id?: string) =>
     enabled: Boolean(id),
     staleTime: 300000,
   });
-export const usePublicSources = () =>
+export const usePublicSources = (enabled = true) =>
   useQuery({
     queryKey: ['publicSources', '3304557'],
     queryFn: fetchPublicSources,
+    enabled,
     staleTime: 60000,
   });
 export const useNeighborhoodOverview = (

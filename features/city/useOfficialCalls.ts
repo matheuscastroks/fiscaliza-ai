@@ -11,10 +11,13 @@ import {
 } from '@/services/officialCalls';
 import type { OfficialCallsQueryParams } from '@/shared/contracts';
 
-export function useOfficialCalls(params: OfficialCallsQueryParams = {}, enabled = true) {
+export function useOfficialCalls(
+  params: OfficialCallsQueryParams = {},
+  enabled = true,
+) {
   const query = useQuery({
     queryKey: ['officialCalls', params],
-    queryFn: () => fetchOfficialCalls(params),
+    queryFn: ({ signal }) => fetchOfficialCalls(params, signal),
     enabled,
     staleTime: 30 * 1000,
   });
@@ -54,7 +57,7 @@ export function useOfficialOverview(
 ) {
   const query = useQuery({
     queryKey: ['officialCallsOverview', params || ''],
-    queryFn: () => fetchOfficialOverview(params),
+    queryFn: ({ signal }) => fetchOfficialOverview(params, signal),
     enabled,
     staleTime: 30 * 1000,
   });

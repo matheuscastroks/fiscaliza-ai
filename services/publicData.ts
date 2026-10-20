@@ -10,13 +10,14 @@ import type {
 } from '@/shared/public-data';
 export function fetchPublicFacilities(
   params: FacilitiesQuery,
+  signal?: AbortSignal,
 ): Promise<FacilitiesPage> {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== '')
       query.set(key, Array.isArray(value) ? value.join(',') : String(value));
   }
-  return request(`/public-facilities?${query}`);
+  return request(`/public-facilities?${query}`, 'GET', undefined, signal);
 }
 export const fetchPublicFacility = (id: string) =>
   request<PublicFacility>(`/public-facilities/${encodeURIComponent(id)}`);

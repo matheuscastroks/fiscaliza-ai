@@ -294,7 +294,10 @@ export function OsmMapView({
       attribution: '${attribution}'
     }).addTo(map);
 
-    var markersMap = {};
+    var markersMap = Object.create(null);
+    var markerDataMap = Object.create(null);
+    var pendingMarkerAdditions = Object.create(null);
+    var markerAdditionScheduled = false;
     var currentSelectedId = ${scriptJson(selectedId || null)};
     var currentSelectedClusterIds = ${scriptJson(selectedClusterIds || [])};
 
@@ -302,6 +305,7 @@ export function OsmMapView({
     if (typeof L.markerClusterGroup === 'function') {
       clusterGroup = L.markerClusterGroup({
         maxClusterRadius: 45,
+        animate: false,
         spiderfyOnMaxZoom: false,
         showCoverageOnHover: false,
         zoomToBoundsOnClick: false,
@@ -387,52 +391,76 @@ export function OsmMapView({
     }
 
     function updateMarkers(markers, selectedId, clusterIds) {
-      clusterGroup.clearLayers();
-      markersMap = {};
+      var previousSelectedId = currentSelectedId;
+      var clustersChanged = JSON.stringify(currentSelectedClusterIds) !== JSON.stringify(clusterIds || []);
       currentSelectedId = selectedId;
       currentSelectedClusterIds = clusterIds || [];
-
-      var leafletMarkers = [];
+      var nextIds = Object.create(null);
+      var additions = [];
+      var removals = [];
       markers.forEach(function(m) {
+        nextIds[m.id] = true;
+        var marker = markersMap[m.id];
+        var previous = markerDataMap[m.id];
         var isSelected = m.id === selectedId;
-        var marker = L.marker([m.latitude, m.longitude], {
-          icon: createMarkerIcon(m, isSelected),
-          draggable: !!m.draggable,
-          zIndexOffset: isSelected ? 1000 : 0
-        });
-        marker.markerId = m.id;
-        var label = document.createElement('span'); label.textContent = m.title || '';
-        marker.bindTooltip(label);
-
-
-        marker.on('click', function(e) {
-          L.DomEvent.stopPropagation(e);
-          postAppMessage({
-            type: 'onMarkerClick',
-            id: m.id
-          });
-        });
-
-        if (m.draggable) {
-          marker.on('dragend', function(e) {
-            var latLng = e.target.getLatLng();
-            postAppMessage({
-              type: 'onMapClick',
-              latitude: latLng.lat,
-              longitude: latLng.lng
-            });
-          });
+        if (marker && !!previous.draggable !== !!m.draggable) {
+          removals.push(marker); marker = null;
         }
-
-        leafletMarkers.push(marker);
-        markersMap[m.id] = marker;
+        if (!marker) {
+          marker = L.marker([m.latitude, m.longitude], {
+            icon: createMarkerIcon(m, isSelected), draggable: !!m.draggable,
+            zIndexOffset: isSelected ? 1000 : 0
+          });
+          marker.markerId = m.id;
+          var label = document.createElement('span'); label.textContent = m.title || '';
+          marker.bindTooltip(label);
+          marker.on('click', function(e) {
+            L.DomEvent.stopPropagation(e);
+            postAppMessage({ type: 'onMarkerClick', id: m.id });
+          });
+          if (m.draggable) marker.on('dragend', function(e) {
+            var point = e.target.getLatLng();
+            postAppMessage({ type: 'onMapClick', latitude: point.lat, longitude: point.lng });
+          });
+          additions.push(marker);
+          markersMap[m.id] = marker;
+        } else {
+          if (previous.latitude !== m.latitude || previous.longitude !== m.longitude) marker.setLatLng([m.latitude, m.longitude]);
+          if (previous.kind !== m.kind || previous.color !== m.color || (m.id === previousSelectedId) !== isSelected) {
+            marker.setIcon(createMarkerIcon(m, isSelected));
+            marker.setZIndexOffset(isSelected ? 1000 : 0);
+          }
+          if (previous.title !== m.title) {
+            var label = document.createElement('span'); label.textContent = m.title || '';
+            marker.setTooltipContent(label);
+          }
+        }
+        markerDataMap[m.id] = m;
       });
-
-      if (clusterGroup.addLayers) {
-        clusterGroup.addLayers(leafletMarkers);
-      } else {
-        leafletMarkers.forEach(function(mk) { clusterGroup.addLayer(mk); });
+      Object.keys(markersMap).forEach(function(id) {
+        if (!nextIds[id]) { removals.push(markersMap[id]); delete markersMap[id]; delete markerDataMap[id]; delete pendingMarkerAdditions[id]; }
+      });
+      if (removals.length) {
+        if (clusterGroup.removeLayers) clusterGroup.removeLayers(removals);
+        else removals.forEach(function(marker) { clusterGroup.removeLayer(marker); });
       }
+      additions.forEach(function(marker) { pendingMarkerAdditions[marker.markerId] = marker; });
+      if (additions.length && !markerAdditionScheduled) {
+        markerAdditionScheduled = true;
+        function addNextBatch() {
+          var batch = Object.keys(pendingMarkerAdditions).slice(0, 50).map(function(id) {
+            var marker = pendingMarkerAdditions[id]; delete pendingMarkerAdditions[id]; return marker;
+          });
+          if (batch.length) {
+            if (clusterGroup.addLayers) clusterGroup.addLayers(batch);
+            else batch.forEach(function(marker) { clusterGroup.addLayer(marker); });
+          }
+          if (Object.keys(pendingMarkerAdditions).length) setTimeout(addNextBatch, 16);
+          else markerAdditionScheduled = false;
+        }
+        addNextBatch();
+      }
+      if (clustersChanged && clusterGroup.refreshClusters) clusterGroup.refreshClusters();
     }
 
     updateMarkers(${scriptJson(markers)}, currentSelectedId, currentSelectedClusterIds);
@@ -488,6 +516,8 @@ export function OsmMapView({
     `;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDark, interactive]);
+
+  const nativeSource = useMemo(() => ({ html: htmlContent }), [htmlContent]);
 
   // Sync external region movements (ignoring internal move echoes)
   useEffect(() => {
@@ -555,7 +585,7 @@ export function OsmMapView({
         <WebView
           ref={webViewRef}
           originWhitelist={['*']}
-          source={{ html: htmlContent }}
+          source={nativeSource}
           style={styles.webView}
           scrollEnabled={false}
           overScrollMode="never"

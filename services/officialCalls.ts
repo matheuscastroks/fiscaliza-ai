@@ -9,6 +9,7 @@ import type {
 
 export async function fetchOfficialCalls(
   params: OfficialCallsQueryParams = {},
+  signal?: AbortSignal,
 ): Promise<OfficialCallsListResponse> {
   const query = new URLSearchParams();
   if (params.page !== undefined) query.set('page', String(params.page));
@@ -35,6 +36,9 @@ export async function fetchOfficialCalls(
   const qs = query.toString();
   return request<OfficialCallsListResponse>(
     `/rio1746/calls${qs ? `?${qs}` : ''}`,
+    'GET',
+    undefined,
+    signal,
   );
 }
 
@@ -58,6 +62,7 @@ export interface OfficialOverviewQueryParams {
 
 export async function fetchOfficialOverview(
   params?: string | OfficialOverviewQueryParams,
+  signal?: AbortSignal,
 ): Promise<OfficialCallsOverview> {
   const normalized: OfficialOverviewQueryParams =
     typeof params === 'string' ? { bairro: params } : params || {};
@@ -75,6 +80,9 @@ export async function fetchOfficialOverview(
   const qs = query.toString();
   return request<OfficialCallsOverview>(
     `/rio1746/overview${qs ? `?${qs}` : ''}`,
+    'GET',
+    undefined,
+    signal,
   );
 }
 

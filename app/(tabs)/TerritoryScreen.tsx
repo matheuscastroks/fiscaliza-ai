@@ -1,3 +1,4 @@
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { LayerPicker } from '@/components/territory/LayerPicker';
 import { FacilityRow, facilityTitle } from '@/components/territory/FacilityRow';
 import {
@@ -22,10 +23,11 @@ import {
   Modal,
   Pressable,
   ScrollView,
+  FlatList,
   StyleSheet,
   View,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useIsFocused } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -37,12 +39,10 @@ import { QueryState, createCityStyles } from '@/features/city/CityUI';
 import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
-import { inMapRegion } from '@/shared/territory';
 import type { OfficialCall } from '@/shared/contracts';
 import {
   useOfficialCalls,
   useOfficialFilters,
-  useOfficialOverview,
 } from '@/features/city/useOfficialCalls';
 import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { spacing } from '@/theme/spacing';
@@ -92,6 +92,7 @@ export default function TerritoryScreen() {
 }
 
 function TerritoryContent() {
+  const isFocused = useIsFocused();
   const { colors, mode } = useTheme();
   const insets = useSafeAreaInsets();
   const cityStyles = useThemedStyles(createCityStyles);
@@ -157,6 +158,8 @@ function TerritoryContent() {
   const [serviceType, setServiceType] = useState<string>('all');
   const [period, setPeriod] = useState<string>('30');
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search, 300);
+  const appliedSearch = search.trim() ? debouncedSearch.trim() : '';
   const [status, setStatus] = useState<string>('all');
   const [pageLimit, setPageLimit] = useState<number>(300);
   const { isListView, setIsListView } = useTerritoryViewMode();
@@ -174,54 +177,50 @@ function TerritoryContent() {
 
   const facilityParams = {
     neighborhoodId,
-    search: search || undefined,
+    search: appliedSearch || undefined,
     ...(areaOnly && appliedBounds ? appliedBounds : {}),
   };
   const facilitiesConfirmed = !neighborhood || Boolean(neighborhoodId);
   const facilityScope = neighborhoodId || neighborhood || 'municipality';
   const schools = usePublicFacilities(
     { ...facilityParams, categories: ['school'] },
-    layers.includes('school') && facilitiesConfirmed,
+    isFocused && layers.includes('school') && facilitiesConfirmed,
     facilityScope,
   );
   const health = usePublicFacilities(
     { ...facilityParams, categories: ['health'] },
-    layers.includes('health') && facilitiesConfirmed,
+    isFocused && layers.includes('health') && facilitiesConfirmed,
     facilityScope,
   );
   const squares = usePublicFacilities(
     { ...facilityParams, categories: ['square'] },
-    layers.includes('square') && facilitiesConfirmed,
+    isFocused && layers.includes('square') && facilitiesConfirmed,
     facilityScope,
   );
   const facilityQueries = { school: schools, health, square: squares };
-  const sources = usePublicSources();
+  const sources = usePublicSources(isFocused);
   const officialSource = sources.data?.find((s) => s.sourceId === 'rio1746');
-  const officialFilters = useOfficialFilters();
+  const officialFilters = useOfficialFilters(isFocused);
   const officialTime = {
     startDate,
     endDate,
     periodDays:
       startDate || endDate || period === 'all' ? undefined : Number(period),
   };
-  const officialOverview = useOfficialOverview({
-    neighborhoodId,
-    bairro: neighborhoodId ? undefined : neighborhood || undefined,
-    tipo: serviceType === 'all' ? undefined : serviceType,
-    situacao: status === 'all' ? undefined : status,
-    ...officialTime,
-  });
-  const officialCalls = useOfficialCalls({
-    neighborhoodId,
-    bairro: neighborhoodId ? undefined : neighborhood || undefined,
-    tipo: serviceType === 'all' ? undefined : serviceType,
-    situacao: status === 'all' ? undefined : status,
-    ...officialTime,
-    search: search || undefined,
-    limit: pageLimit,
-    hasCoordinates: isListView ? undefined : true,
-    ...(areaOnly && appliedBounds ? appliedBounds : {}),
-  });
+  const officialCalls = useOfficialCalls(
+    {
+      neighborhoodId,
+      bairro: neighborhoodId ? undefined : neighborhood || undefined,
+      tipo: serviceType === 'all' ? undefined : serviceType,
+      situacao: status === 'all' ? undefined : status,
+      ...officialTime,
+      search: appliedSearch || undefined,
+      limit: pageLimit,
+      hasCoordinates: isListView ? undefined : true,
+      ...(areaOnly && appliedBounds ? appliedBounds : {}),
+    },
+    isFocused && layers.includes('official'),
+  );
 
   const bairroOptions =
     neighborhoods.data?.map((x) => x.name) ||
@@ -230,14 +229,11 @@ function TerritoryContent() {
 
   const serviceTypeOptions = useMemo(() => {
     const allTypes = officialFilters.data?.tipos || [];
-    const topTypes =
-      officialOverview.data?.topServices?.map((s) => s.type) || [];
-    const merged = Array.from(new Set([...topTypes, ...allTypes]));
     return [
       { value: 'all', label: 'Todos os serviços' },
-      ...merged.map((t) => ({ value: t, label: t })),
+      ...allTypes.map((t) => ({ value: t, label: t })),
     ];
-  }, [officialOverview.data?.topServices, officialFilters.data?.tipos]);
+  }, [officialFilters.data?.tipos]);
 
   const statusOptions = useMemo(
     () => [
@@ -297,7 +293,6 @@ function TerritoryContent() {
     latitude: number;
     longitude: number;
   } | null>(null);
-  const [showUnlocated, setShowUnlocated] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
   const [locating, setLocating] = useState(false);
 
@@ -364,11 +359,14 @@ function TerritoryContent() {
     neighborhoodId,
   ]);
 
-  const unlocated = entries.filter((entry) => !entryLocation(entry));
-  const located = entries.filter((entry) => {
-    const point = entryLocation(entry);
-    return point && (!areaOnly || inMapRegion(point, region));
-  });
+  const unlocated = useMemo(
+    () => entries.filter((entry) => !entryLocation(entry)),
+    [entries],
+  );
+  const located = useMemo(
+    () => entries.filter((entry) => Boolean(entryLocation(entry))),
+    [entries],
+  );
   const listed = areaOnly ? located : entries;
 
   const selectedEntry = useMemo<Entry | null>(() => {
@@ -811,6 +809,8 @@ function TerritoryContent() {
     </ScrollView>
   );
 
+  if (!isFocused) return null;
+
   return (
     <View style={styles.container}>
       {locationMessage !== '' && (
@@ -831,39 +831,41 @@ function TerritoryContent() {
       )}
 
       {/* 1. MAPA DE FUNDO EDGE-TO-EDGE */}
-      <View style={StyleSheet.absoluteFill}>
-        <OsmMapView
-          style={StyleSheet.absoluteFill}
-          region={region}
-          markers={osmMarkers}
-          boundary={boundary.data?.geometry}
-          selectedId={selectedId}
-          selectedClusterIds={selectedCluster?.ids || null}
-          isDark={mode === 'dark'}
-          onMarkerClick={(id) => {
-            setSelectedId(id);
-            setSelectedCluster(null);
-          }}
-          onClusterClick={(event) => {
-            setSelectedCluster(event);
-            setSelectedId(null);
-          }}
-          onMapClick={() => {
-            setSelectedId(null);
-            setSelectedCluster(null);
-          }}
-          onRegionChange={(newRegion) => {
-            setRegion((curr: TerritoryMapRegion) => ({
-              ...curr,
-              latitude: newRegion.latitude,
-              longitude: newRegion.longitude,
-              latitudeDelta: newRegion.latitudeDelta,
-              longitudeDelta: newRegion.longitudeDelta,
-              zoom: newRegion.zoom ?? curr.zoom,
-            }));
-          }}
-        />
-      </View>
+      {!isListView && (
+        <View style={StyleSheet.absoluteFill}>
+          <OsmMapView
+            style={StyleSheet.absoluteFill}
+            region={region}
+            markers={osmMarkers}
+            boundary={boundary.data?.geometry}
+            selectedId={selectedId}
+            selectedClusterIds={selectedCluster?.ids || null}
+            isDark={mode === 'dark'}
+            onMarkerClick={(id) => {
+              setSelectedId(id);
+              setSelectedCluster(null);
+            }}
+            onClusterClick={(event) => {
+              setSelectedCluster(event);
+              setSelectedId(null);
+            }}
+            onMapClick={() => {
+              setSelectedId(null);
+              setSelectedCluster(null);
+            }}
+            onRegionChange={(newRegion) => {
+              setRegion((curr: TerritoryMapRegion) => ({
+                ...curr,
+                latitude: newRegion.latitude,
+                longitude: newRegion.longitude,
+                latitudeDelta: newRegion.latitudeDelta,
+                longitudeDelta: newRegion.longitudeDelta,
+                zoom: newRegion.zoom ?? curr.zoom,
+              }));
+            }}
+          />
+        </View>
+      )}
 
       {/* 2. TOP FLOATING HEADER COMPACTO (BUSCA + BARRA DE SELECTS) */}
       {!isListView && (
@@ -1034,7 +1036,14 @@ function TerritoryContent() {
             </View>
           </View>
 
-          <ScrollView
+          <FlatList<Entry>
+            data={listed}
+            keyExtractor={(entry) => entry.type + ':' + entry.item.id}
+            renderItem={({ item }) => renderEntry(item)}
+            initialNumToRender={10}
+            maxToRenderPerBatch={8}
+            windowSize={7}
+            ItemSeparatorComponent={TerritoryRowSeparator}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -1046,73 +1055,71 @@ function TerritoryContent() {
             }
             contentContainerStyle={[
               cityStyles.content,
-              { paddingBottom: insets.bottom + 100 },
+              { gap: 0, paddingBottom: insets.bottom + 100 },
             ]}
-          >
-            {(officialCalls.isLoading ||
-              officialCalls.error ||
-              officialCalls.fetchStatus === 'paused') && (
-              <View style={{ gap: spacing.xs }}>
-                <QueryState
-                  loading={officialCalls.isLoading}
-                  error={officialCalls.error}
-                  retry={officialCalls.refetch}
-                />
+            ListHeaderComponent={
+              <View style={{ gap: spacing.md, marginBottom: spacing.md }}>
+                {(officialCalls.isLoading ||
+                  officialCalls.error ||
+                  officialCalls.fetchStatus === 'paused') && (
+                  <View style={{ gap: spacing.xs }}>
+                    <QueryState
+                      loading={officialCalls.isLoading}
+                      error={officialCalls.error}
+                      retry={officialCalls.refetch}
+                    />
+                  </View>
+                )}
+                <View style={cityStyles.section}>
+                  <AppText variant="sectionTitle">
+                    {areaOnly
+                      ? 'Registros na área visível'
+                      : 'Registros no território'}{' '}
+                    (
+                    {layers.length === 1 &&
+                    layers[0] === 'official' &&
+                    listed.length < totalCalls
+                      ? `${listed.length} de ${totalCalls.toLocaleString('pt-BR')}`
+                      : listed.length.toLocaleString('pt-BR')}
+                    )
+                  </AppText>
+                </View>
               </View>
-            )}
-            <View style={cityStyles.section}>
-              <AppText variant="sectionTitle">
-                {areaOnly
-                  ? 'Registros na área visível'
-                  : 'Registros no território'}{' '}
-                (
-                {layers.length === 1 &&
-                layers[0] === 'official' &&
-                listed.length < totalCalls
-                  ? `${listed.length} de ${totalCalls.toLocaleString('pt-BR')}`
-                  : listed.length.toLocaleString('pt-BR')}
-                )
-              </AppText>
-              {listed.map(renderEntry)}
-              {layers.includes('official') && hasMoreCalls && (
-                <AppButton
-                  title={`Carregar mais chamados (${listed.length} de ${totalCalls.toLocaleString('pt-BR')})`}
-                  variant="secondary"
-                  onPress={() =>
-                    setPageLimit((prev) => Math.min(1000, prev + 300))
-                  }
-                />
-              )}
-              {dataReady &&
-                listed.length === 0 &&
-                layers.length === 1 &&
-                layers[0] === 'official' && (
-                  <IllustratedEmptyState
-                    kind="territory"
-                    title="Nenhum chamado 1746 neste recorte"
-                    description="Nenhum chamado oficial encontrado com os filtros atuais."
-                    action={{
-                      title: 'Limpar filtros',
-                      onPress: resetFilters,
-                    }}
+            }
+            ListFooterComponent={
+              <View style={{ gap: spacing.md, marginTop: spacing.md }}>
+                {layers.includes('official') && hasMoreCalls && (
+                  <AppButton
+                    title={`Carregar mais chamados (${listed.length} de ${totalCalls.toLocaleString('pt-BR')})`}
+                    variant="secondary"
+                    onPress={() =>
+                      setPageLimit((prev) => Math.min(1000, prev + 300))
+                    }
                   />
                 )}
-            </View>
-            {unlocated.length > 0 && (
-              <View style={cityStyles.section}>
-                <AppButton
-                  title={
-                    (showUnlocated ? 'Ocultar' : 'Ver') +
-                    ' chamados sem coordenada exata · ' +
-                    unlocated.length
-                  }
-                  variant="quiet"
-                  onPress={() => setShowUnlocated(!showUnlocated)}
-                />
-                {showUnlocated && unlocated.map(renderEntry)}
+                {dataReady &&
+                  listed.length === 0 &&
+                  layers.length === 1 &&
+                  layers[0] === 'official' && (
+                    <IllustratedEmptyState
+                      kind="territory"
+                      title="Nenhum chamado 1746 neste recorte"
+                      description="Nenhum chamado oficial encontrado com os filtros atuais."
+                      action={{
+                        title: 'Limpar filtros',
+                        onPress: resetFilters,
+                      }}
+                    />
+                  )}
+                {unlocated.length > 0 && (
+                  <AppText variant="caption" color="muted">
+                    Esta lista inclui {unlocated.length} registros sem ponto no
+                    mapa.
+                  </AppText>
+                )}
               </View>
-            )}
-          </ScrollView>
+            }
+          />
         </View>
       )}
 
@@ -1304,6 +1311,10 @@ function TerritoryContent() {
       </Modal>
     </View>
   );
+}
+
+function TerritoryRowSeparator() {
+  return <View style={{ height: spacing.md }} />;
 }
 
 const createStyles = (colors: ThemeColors) =>

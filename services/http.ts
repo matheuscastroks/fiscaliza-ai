@@ -44,8 +44,16 @@ export async function request<T>(
   path: string,
   method = 'GET',
   body?: unknown,
+  signal?: AbortSignal,
 ): Promise<T> {
   const controller = new AbortController();
+  const cancel = () => controller.abort();
+  if (signal?.aborted) {
+    const error = new Error('Solicitação cancelada.');
+    error.name = 'AbortError';
+    throw error;
+  }
+  signal?.addEventListener('abort', cancel, { once: true });
   const timer = setTimeout(() => controller.abort(), 15000);
   try {
     const multipart = body instanceof FormData;
@@ -70,6 +78,8 @@ export async function request<T>(
     const result = (await response.json()) as ApiResult<T>;
     return await readResult(path, response.status, result);
   } catch (error) {
+    // A superseded query is cancellation, not an offline error to show to users.
+    if (signal?.aborted) throw error;
     if (
       error instanceof TypeError ||
       (error instanceof Error && error.name === 'AbortError')
@@ -80,6 +90,7 @@ export async function request<T>(
     throw error;
   } finally {
     clearTimeout(timer);
+    signal?.removeEventListener('abort', cancel);
   }
 }
 export async function mutation<T>(
