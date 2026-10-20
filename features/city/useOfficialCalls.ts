@@ -7,6 +7,7 @@ import {
   fetchOfficialFilters,
   fetchOfficialOverview,
   fetchSyncStatus,
+  type OfficialOverviewQueryParams,
 } from '@/services/officialCalls';
 import type { OfficialCallsQueryParams } from '@/shared/contracts';
 
@@ -47,10 +48,13 @@ export function useOfficialFilters(enabled = true) {
   });
 }
 
-export function useOfficialOverview(bairro?: string, enabled = true) {
+export function useOfficialOverview(
+  params?: string | OfficialOverviewQueryParams,
+  enabled = true,
+) {
   const query = useQuery({
-    queryKey: ['officialCallsOverview', bairro || ''],
-    queryFn: () => fetchOfficialOverview(bairro || undefined),
+    queryKey: ['officialCallsOverview', params || ''],
+    queryFn: () => fetchOfficialOverview(params),
     enabled,
     staleTime: 30 * 1000,
   });

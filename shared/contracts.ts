@@ -221,6 +221,7 @@ export interface OfficialCallsQueryParams {
   situacao?: string;
   hasCoordinates?: boolean;
   search?: string;
+  periodDays?: number;
   startDate?: string;
   endDate?: string;
   north?: number;
@@ -242,9 +243,15 @@ export interface OfficialCallsOverview {
   openCalls: number;
   closedCalls: number;
   callsWithCoordinates: number;
+  withinDeadlineCount?: number;
+  overdueCount?: number;
+  withinDeadlineRate?: number;
   topServices: { type: string; count: number }[];
   topNeighborhoods: { neighborhood: string; count: number }[];
   situationBreakdown: { situation: string; count: number }[];
+  statusBreakdown?: { status: string; count: number }[];
+  minOpenedAt?: string | null;
+  maxOpenedAt?: string | null;
   lastPartitionDate: string | null;
   lastSyncedAt: string | null;
 }

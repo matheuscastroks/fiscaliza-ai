@@ -308,6 +308,33 @@ test(
     assert.equal(cp.recordsImported, 3);
     assert.equal(cp.recordsUpdated, 1);
 
+    // Verify bounding-box, exact bairro, periodDays, pagination and SLA overview endpoints
+    const centroRes = await app.inject({
+      method: 'GET',
+      url: '/api/rio1746/calls?bairro=Centro&periodDays=30',
+    });
+    assert.equal(centroRes.statusCode, 200);
+    const centroData = centroRes.json().data;
+    assert.equal(centroData.total, 2);
+
+    const bboxRes = await app.inject({
+      method: 'GET',
+      url: '/api/rio1746/calls?south=-22.925&north=-22.915&west=-43.215&east=-43.205',
+    });
+    assert.equal(bboxRes.statusCode, 200);
+    assert.equal(bboxRes.json().data.total, 1);
+    assert.equal(bboxRes.json().data.calls[0].neighborhoodName, 'Copacabana');
+
+    const overviewRes = await app.inject({
+      method: 'GET',
+      url: '/api/rio1746/overview?bairro=Centro&periodDays=30',
+    });
+    assert.equal(overviewRes.statusCode, 200);
+    const ov = overviewRes.json().data;
+    assert.equal(ov.totalCalls, 2);
+    assert.equal(ov.withinDeadlineRate, 100);
+    assert.ok(Array.isArray(ov.statusBreakdown));
+
     await db.execute(sql`DELETE FROM official_calls WHERE external_id IN ('test-bq-1', 'test-bq-2', 'test-bq-3')`);
   },
 );

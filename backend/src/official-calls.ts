@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { and, desc, eq, gte, ilike, isNotNull, lte, or, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, ilike, isNotNull, lte, or, sql, type SQL } from 'drizzle-orm';
 import type { Database } from './db.js';
 import { officialCalls } from './schema.js';
 import {
@@ -9,8 +9,6 @@ import {
 } from './integrations/rio1746/sync.js';
 import type {
   OfficialCall,
-  OfficialCallsFilterOptions,
-  OfficialCallsOverview,
 } from '../../shared/contracts.js';
 
 function formatOfficialCall(row: typeof officialCalls.$inferSelect): OfficialCall {
@@ -44,13 +42,22 @@ function formatOfficialCall(row: typeof officialCalls.$inferSelect): OfficialCal
   };
 }
 
+function buildPeriodCondition(periodDaysRaw?: string): SQL | undefined {
+  if (!periodDaysRaw) return undefined;
+  const periodDays = parseInt(periodDaysRaw, 10);
+  if (!Number.isInteger(periodDays) || periodDays < 1 || periodDays > 365) {
+    return undefined;
+  }
+  return sql`${officialCalls.openedAt} >= (SELECT MAX(opened_at) - (${periodDays} * INTERVAL '1 day') FROM official_calls)`;
+}
+
 export function registerOfficialCallsRoutes(
   app: FastifyInstance,
   db: Database,
   ok: (data: unknown) => { success: boolean; data: unknown },
   fail: (statusCode: number, message: string) => Error,
 ) {
-  // 1. List calls with rich filtering and pagination
+  // 1. List calls with rich filtering, visible map area bounding box, period, and pagination
   app.get<{
     Querystring: {
       page?: string;
@@ -61,6 +68,7 @@ export function registerOfficialCallsRoutes(
       situacao?: string;
       hasCoordinates?: string;
       search?: string;
+      periodDays?: string;
       startDate?: string;
       endDate?: string;
       north?: string;
@@ -73,10 +81,10 @@ export function registerOfficialCallsRoutes(
     const limit = Math.min(1000, Math.max(1, parseInt(req.query.limit || '100', 10) || 100));
     const offset = (page - 1) * limit;
 
-    const conditions = [];
+    const conditions: SQL[] = [];
 
     if (req.query.bairro) {
-      conditions.push(ilike(officialCalls.neighborhoodName, `%${req.query.bairro.trim()}%`));
+      conditions.push(ilike(officialCalls.neighborhoodName, req.query.bairro.trim()));
     }
     if (req.query.tipo) {
       conditions.push(eq(officialCalls.serviceType, req.query.tipo.trim()));
@@ -91,6 +99,12 @@ export function registerOfficialCallsRoutes(
       conditions.push(isNotNull(officialCalls.latitude));
       conditions.push(isNotNull(officialCalls.longitude));
     }
+
+    const periodCondition = buildPeriodCondition(req.query.periodDays);
+    if (periodCondition) {
+      conditions.push(periodCondition);
+    }
+
     if (req.query.startDate) {
       try {
         const start = new Date(req.query.startDate);
@@ -109,16 +123,15 @@ export function registerOfficialCallsRoutes(
     }
     if (req.query.search) {
       const term = `%${req.query.search.trim()}%`;
-      conditions.push(
-        or(
-          ilike(officialCalls.serviceType, term),
-          ilike(officialCalls.serviceSubtype, term),
-          ilike(officialCalls.neighborhoodName, term),
-          ilike(officialCalls.organizationName, term),
-          ilike(officialCalls.statusJustification, term),
-          ilike(officialCalls.externalId, term),
-        ),
+      const searchCond = or(
+        ilike(officialCalls.serviceType, term),
+        ilike(officialCalls.serviceSubtype, term),
+        ilike(officialCalls.neighborhoodName, term),
+        ilike(officialCalls.organizationName, term),
+        ilike(officialCalls.statusJustification, term),
+        ilike(officialCalls.externalId, term),
       );
+      if (searchCond) conditions.push(searchCond);
     }
 
     // Spatial bounding box filter if coordinates passed
@@ -132,14 +145,13 @@ export function registerOfficialCallsRoutes(
       Number.isFinite(east) &&
       Number.isFinite(west)
     ) {
-      conditions.push(
-        and(
-          gte(officialCalls.latitude, south),
-          lte(officialCalls.latitude, north),
-          gte(officialCalls.longitude, west),
-          lte(officialCalls.longitude, east),
-        ),
+      const bboxCond = and(
+        gte(officialCalls.latitude, Math.min(south, north)),
+        lte(officialCalls.latitude, Math.max(south, north)),
+        gte(officialCalls.longitude, Math.min(west, east)),
+        lte(officialCalls.longitude, Math.max(west, east)),
       );
+      if (bboxCond) conditions.push(bboxCond);
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -155,7 +167,7 @@ export function registerOfficialCallsRoutes(
       .select()
       .from(officialCalls)
       .where(whereClause)
-      .orderBy(desc(officialCalls.openedAt))
+      .orderBy(desc(officialCalls.openedAt), desc(officialCalls.externalId))
       .limit(limit)
       .offset(offset);
 
@@ -223,11 +235,31 @@ export function registerOfficialCallsRoutes(
     });
   });
 
-  // 4. Aggregated territorial overview and indicators
-  app.get<{ Querystring: { bairro?: string } }>('/api/rio1746/overview', async (req) => {
-    const bairroCondition = req.query.bairro
-      ? ilike(officialCalls.neighborhoodName, `%${req.query.bairro.trim()}%`)
-      : undefined;
+  // 4. Aggregated territorial overview and SLA/outcome indicators
+  app.get<{
+    Querystring: {
+      bairro?: string;
+      tipo?: string;
+      situacao?: string;
+      periodDays?: string;
+    };
+  }>('/api/rio1746/overview', async (req) => {
+    const conditions: SQL[] = [];
+    if (req.query.bairro) {
+      conditions.push(ilike(officialCalls.neighborhoodName, req.query.bairro.trim()));
+    }
+    if (req.query.tipo) {
+      conditions.push(eq(officialCalls.serviceType, req.query.tipo.trim()));
+    }
+    if (req.query.situacao) {
+      conditions.push(eq(officialCalls.officialSituation, req.query.situacao.trim()));
+    }
+    const periodCondition = buildPeriodCondition(req.query.periodDays);
+    if (periodCondition) {
+      conditions.push(periodCondition);
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     const [counts] = await db
       .select({
@@ -235,53 +267,85 @@ export function registerOfficialCallsRoutes(
         open: sql<number>`count(case when ${officialCalls.officialSituation} = 'Não Encerrado' then 1 end)::int`,
         closed: sql<number>`count(case when ${officialCalls.officialSituation} = 'Encerrado' then 1 end)::int`,
         withCoords: sql<number>`count(case when ${officialCalls.latitude} is not null then 1 end)::int`,
+        withinDeadline: sql<number>`count(case when ${officialCalls.withinDeadline} in ('No Prazo', 'A Vencer (No Prazo)') then 1 end)::int`,
+        overdue: sql<number>`count(case when ${officialCalls.withinDeadline} = 'Fora do Prazo' then 1 end)::int`,
+        minOpenedAt: sql<string>`min(${officialCalls.openedAt})::text`,
+        maxOpenedAt: sql<string>`max(${officialCalls.openedAt})::text`,
         latestPartition: sql<string>`max(${officialCalls.sourcePartitionDate})::text`,
       })
       .from(officialCalls)
-      .where(bairroCondition);
+      .where(whereClause);
 
-    const [topServices, topNeighborhoods, situationBreakdown, checkpoint] = await Promise.all([
-      db
-        .select({
-          type: officialCalls.serviceType,
-          count: sql<number>`count(*)::int`,
-        })
-        .from(officialCalls)
-        .where(bairroCondition)
-        .groupBy(officialCalls.serviceType)
-        .orderBy(desc(sql`count(*)`))
-        .limit(10),
-      db
-        .select({
-          neighborhood: officialCalls.neighborhoodName,
-          count: sql<number>`count(*)::int`,
-        })
-        .from(officialCalls)
-        .where(isNotNull(officialCalls.neighborhoodName))
-        .groupBy(officialCalls.neighborhoodName)
-        .orderBy(desc(sql`count(*)`))
-        .limit(10),
-      db
-        .select({
-          situation: officialCalls.officialSituation,
-          count: sql<number>`count(*)::int`,
-        })
-        .from(officialCalls)
-        .where(
-          bairroCondition
-            ? and(isNotNull(officialCalls.officialSituation), bairroCondition)
-            : isNotNull(officialCalls.officialSituation),
-        )
-        .groupBy(officialCalls.officialSituation)
-        .orderBy(desc(sql`count(*)`)),
-      getSyncStatus(db),
-    ]);
+    const [topServices, topNeighborhoods, situationBreakdown, statusBreakdown, checkpoint] =
+      await Promise.all([
+        db
+          .select({
+            type: officialCalls.serviceType,
+            count: sql<number>`count(*)::int`,
+          })
+          .from(officialCalls)
+          .where(whereClause)
+          .groupBy(officialCalls.serviceType)
+          .orderBy(desc(sql`count(*)`))
+          .limit(10),
+        db
+          .select({
+            neighborhood: officialCalls.neighborhoodName,
+            count: sql<number>`count(*)::int`,
+          })
+          .from(officialCalls)
+          .where(
+            whereClause
+              ? and(isNotNull(officialCalls.neighborhoodName), whereClause)
+              : isNotNull(officialCalls.neighborhoodName),
+          )
+          .groupBy(officialCalls.neighborhoodName)
+          .orderBy(desc(sql`count(*)`))
+          .limit(10),
+        db
+          .select({
+            situation: officialCalls.officialSituation,
+            count: sql<number>`count(*)::int`,
+          })
+          .from(officialCalls)
+          .where(
+            whereClause
+              ? and(isNotNull(officialCalls.officialSituation), whereClause)
+              : isNotNull(officialCalls.officialSituation),
+          )
+          .groupBy(officialCalls.officialSituation)
+          .orderBy(desc(sql`count(*)`)),
+        db
+          .select({
+            status: officialCalls.officialStatus,
+            count: sql<number>`count(*)::int`,
+          })
+          .from(officialCalls)
+          .where(
+            whereClause
+              ? and(isNotNull(officialCalls.officialStatus), whereClause)
+              : isNotNull(officialCalls.officialStatus),
+          )
+          .groupBy(officialCalls.officialStatus)
+          .orderBy(desc(sql`count(*)`))
+          .limit(8),
+        getSyncStatus(db),
+      ]);
+
+    const withinDeadlineCount = counts?.withinDeadline || 0;
+    const overdueCount = counts?.overdue || 0;
+    const slaDenominator = withinDeadlineCount + overdueCount;
+    const withinDeadlineRate =
+      slaDenominator > 0 ? Math.round((withinDeadlineCount / slaDenominator) * 100) : 0;
 
     return ok({
       totalCalls: counts?.total || 0,
       openCalls: counts?.open || 0,
       closedCalls: counts?.closed || 0,
       callsWithCoordinates: counts?.withCoords || 0,
+      withinDeadlineCount,
+      overdueCount,
+      withinDeadlineRate,
       topServices: topServices.map((s) => ({ type: s.type, count: s.count })),
       topNeighborhoods: topNeighborhoods.map((n) => ({
         neighborhood: n.neighborhood || 'Desconhecido',
@@ -291,7 +355,13 @@ export function registerOfficialCallsRoutes(
         situation: sb.situation || 'Não informada',
         count: sb.count,
       })),
-      lastPartitionDate: counts?.latestPartition || null,
+      statusBreakdown: statusBreakdown.map((st) => ({
+        status: st.status || 'Não informado',
+        count: st.count,
+      })),
+      minOpenedAt: counts?.minOpenedAt || null,
+      maxOpenedAt: counts?.maxOpenedAt || null,
+      lastPartitionDate: counts?.latestPartition || checkpoint?.lastPartition || null,
       lastSyncedAt: checkpoint?.lastSyncedAt ? checkpoint.lastSyncedAt.toISOString() : null,
     });
   });

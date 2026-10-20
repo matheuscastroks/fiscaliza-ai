@@ -90,20 +90,46 @@ function TerritoryContent() {
   const { neighborhood, setNeighborhood } = useTerritorySelection();
   const [region, setRegion] = useState<TerritoryMapRegion>(initial);
   const [areaOnly, setAreaOnly] = useState(false);
+  const [appliedBounds, setAppliedBounds] = useState<{
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  } | null>(null);
   const [serviceType, setServiceType] = useState<string>('all');
+  const [period, setPeriod] = useState<string>('30');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<string>('all');
+  const [pageLimit, setPageLimit] = useState<number>(300);
   const { isListView, setIsListView } = useTerritoryViewMode();
 
+  const computeRegionBounds = (r: TerritoryMapRegion) => {
+    const latSpan = Math.max(0.008, r.latitudeDelta || 0.08);
+    const lngSpan = Math.max(0.008, r.longitudeDelta || 0.08);
+    return {
+      north: r.latitude + latSpan / 2,
+      south: r.latitude - latSpan / 2,
+      east: r.longitude + lngSpan / 2,
+      west: r.longitude - lngSpan / 2,
+    };
+  };
+
   const officialFilters = useOfficialFilters();
-  const officialOverview = useOfficialOverview();
+  const officialOverview = useOfficialOverview({
+    bairro: neighborhood || undefined,
+    tipo: serviceType === 'all' ? undefined : serviceType,
+    situacao: status === 'all' ? undefined : status,
+    periodDays: period === 'all' ? undefined : Number(period),
+  });
   const officialCalls = useOfficialCalls({
     bairro: neighborhood || undefined,
     tipo: serviceType === 'all' ? undefined : serviceType,
     situacao: status === 'all' ? undefined : status,
+    periodDays: period === 'all' ? undefined : Number(period),
     search: search || undefined,
-    limit: 500,
+    limit: pageLimit,
     hasCoordinates: isListView ? undefined : true,
+    ...(areaOnly && appliedBounds ? appliedBounds : {}),
   });
 
   const bairroOptions = officialFilters.data?.bairros || [];
@@ -123,6 +149,16 @@ function TerritoryContent() {
       { value: 'all', label: 'Todas situações' },
       { value: 'Não Encerrado', label: 'Em atendimento' },
       { value: 'Encerrado', label: 'Encerrados' },
+    ],
+    [],
+  );
+
+  const periodOptions = useMemo(
+    () => [
+      { value: '30', label: 'Últimos 30 dias' },
+      { value: '7', label: 'Últimos 7 dias' },
+      { value: '1', label: 'Últimas 24h' },
+      { value: 'all', label: 'Todo o período' },
     ],
     [],
   );
@@ -281,9 +317,21 @@ function TerritoryContent() {
     Number(Boolean(neighborhood)) +
     Number(status !== 'all') +
     Number(serviceType !== 'all') +
+    Number(period !== '30') +
     Number(areaOnly);
 
+  const totalCalls = officialCalls.data?.total ?? listed.length;
+  const hasMoreCalls = Boolean(officialCalls.data?.hasMore && pageLimit < 1000);
   const dataReady = officialCalls.data !== undefined;
+
+  // Auto-focus map camera when user chooses a specific neighborhood
+  useEffect(() => {
+    if (!neighborhood || areaOnly || focusId) return;
+    const hasLocated = entries.some((entry) => Boolean(entryLocation(entry)));
+    if (hasLocated) {
+      setRegion(municipalOverviewRegion);
+    }
+  }, [neighborhood, areaOnly, focusId, entries, municipalOverviewRegion]);
 
   const openEntry = (entry: Entry) => {
     router.push({
@@ -344,11 +392,14 @@ function TerritoryContent() {
   const resetFilters = () => {
     setSearch('');
     setServiceType('all');
+    setPeriod('30');
     setSelectedId(null);
     setSelectedCluster(null);
     setStatus('all');
     setNeighborhood('');
     setAreaOnly(false);
+    setAppliedBounds(null);
+    setPageLimit(300);
   };
 
   const locate = async () => {
@@ -392,6 +443,9 @@ function TerritoryContent() {
         value={neighborhood}
         onChange={(value) => {
           setNeighborhood(value);
+          setAreaOnly(false);
+          setAppliedBounds(null);
+          setPageLimit(300);
           setSelectedId(null);
           setSelectedCluster(null);
         }}
@@ -407,6 +461,22 @@ function TerritoryContent() {
         value={serviceType}
         onChange={(value) => {
           setServiceType(value);
+          setPageLimit(300);
+          setSelectedId(null);
+          setSelectedCluster(null);
+        }}
+      />
+
+      <AppSelect
+        compact
+        label="Período disponível"
+        icon="calendar-outline"
+        defaultValue="30"
+        options={periodOptions}
+        value={period}
+        onChange={(value) => {
+          setPeriod(value);
+          setPageLimit(300);
           setSelectedId(null);
           setSelectedCluster(null);
         }}
@@ -421,6 +491,7 @@ function TerritoryContent() {
         value={status}
         onChange={(value) => {
           setStatus(value);
+          setPageLimit(300);
           setSelectedId(null);
           setSelectedCluster(null);
         }}
@@ -428,7 +499,9 @@ function TerritoryContent() {
 
       <View style={[styles.resultsBadge, { backgroundColor: colors.surface + 'F2' }]}>
         <AppText variant="caption" color="muted" style={{ fontWeight: '700' }}>
-          {officialCalls.isLoading ? '...' : `${listed.length}`}
+          {officialCalls.isLoading
+            ? '...'
+            : totalCalls.toLocaleString('pt-BR')}
         </AppText>
       </View>
     </ScrollView>
@@ -539,7 +612,15 @@ function TerritoryContent() {
         <View style={[styles.areaButtonWrapper, { bottom: insets.bottom + 95 }]}>
           <Pressable
             style={[styles.areaPillButton, { backgroundColor: colors.surface }]}
-            onPress={() => setAreaOnly(!areaOnly)}
+            onPress={() => {
+              if (areaOnly) {
+                setAreaOnly(false);
+                setAppliedBounds(null);
+              } else {
+                setAppliedBounds(computeRegionBounds(region));
+                setAreaOnly(true);
+              }
+            }}
           >
             <Ionicons
               name={areaOnly ? 'globe-outline' : 'scan-outline'}
@@ -639,9 +720,20 @@ function TerritoryContent() {
             )}
             <View style={cityStyles.section}>
               <AppText variant="sectionTitle">
-                {areaOnly ? 'Chamados na área visível' : 'Chamados da Central 1746'} ({listed.length})
+                {areaOnly ? 'Chamados na área visível' : 'Chamados da Central 1746'} (
+                {listed.length < totalCalls
+                  ? `${listed.length} de ${totalCalls.toLocaleString('pt-BR')}`
+                  : totalCalls.toLocaleString('pt-BR')}
+                )
               </AppText>
               {listed.map(renderEntry)}
+              {hasMoreCalls && (
+                <AppButton
+                  title={`Carregar mais chamados (${listed.length} de ${totalCalls.toLocaleString('pt-BR')})`}
+                  variant="secondary"
+                  onPress={() => setPageLimit((prev) => Math.min(1000, prev + 300))}
+                />
+              )}
               {dataReady && listed.length === 0 && (
                 <IllustratedEmptyState
                   kind="territory"
@@ -766,6 +858,24 @@ function TerritoryContent() {
 
               <View style={styles.filterField}>
                 <AppText variant="caption" color="muted" style={styles.filterLabel}>
+                  PERÍODO DISPONÍVEL
+                </AppText>
+                <SlidingTabs
+                  label="Período"
+                  scroll={false}
+                  edgeToEdge={false}
+                  options={periodOptions}
+                  value={period}
+                  onChange={(value) => {
+                    setPeriod(value);
+                    setPageLimit(300);
+                    setSelectedId(null);
+                  }}
+                />
+              </View>
+
+              <View style={styles.filterField}>
+                <AppText variant="caption" color="muted" style={styles.filterLabel}>
                   RECORTE ESPACIAL
                 </AppText>
                 <SlidingTabs
@@ -778,7 +888,9 @@ function TerritoryContent() {
                   ]}
                   value={areaOnly ? 'area' : 'all'}
                   onChange={(value) => {
-                    setAreaOnly(value === 'area');
+                    const nextArea = value === 'area';
+                    setAreaOnly(nextArea);
+                    setAppliedBounds(nextArea ? computeRegionBounds(region) : null);
                     setSelectedId(null);
                   }}
                 />
@@ -791,7 +903,7 @@ function TerritoryContent() {
                   onPress={resetFilters}
                 />
                 <AppButton
-                  title={`Ver ${listed.length} chamados`}
+                  title={`Ver ${totalCalls.toLocaleString('pt-BR')} chamados`}
                   variant="primary"
                   onPress={() => setFiltersOpen(false)}
                 />

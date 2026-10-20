@@ -21,6 +21,9 @@ export async function fetchOfficialCalls(
     query.set('hasCoordinates', String(params.hasCoordinates));
   }
   if (params.search) query.set('search', params.search);
+  if (params.periodDays !== undefined) {
+    query.set('periodDays', String(params.periodDays));
+  }
   if (params.startDate) query.set('startDate', params.startDate);
   if (params.endDate) query.set('endDate', params.endDate);
   if (params.north !== undefined) query.set('north', String(params.north));
@@ -40,9 +43,27 @@ export async function fetchOfficialFilters(): Promise<OfficialCallsFilterOptions
   return request<OfficialCallsFilterOptions>('/rio1746/filters');
 }
 
-export async function fetchOfficialOverview(bairro?: string): Promise<OfficialCallsOverview> {
-  const qs = bairro ? `?bairro=${encodeURIComponent(bairro)}` : '';
-  return request<OfficialCallsOverview>(`/rio1746/overview${qs}`);
+export interface OfficialOverviewQueryParams {
+  bairro?: string;
+  tipo?: string;
+  situacao?: string;
+  periodDays?: number;
+}
+
+export async function fetchOfficialOverview(
+  params?: string | OfficialOverviewQueryParams,
+): Promise<OfficialCallsOverview> {
+  const normalized: OfficialOverviewQueryParams =
+    typeof params === 'string' ? { bairro: params } : params || {};
+  const query = new URLSearchParams();
+  if (normalized.bairro) query.set('bairro', normalized.bairro);
+  if (normalized.tipo) query.set('tipo', normalized.tipo);
+  if (normalized.situacao) query.set('situacao', normalized.situacao);
+  if (normalized.periodDays !== undefined) {
+    query.set('periodDays', String(normalized.periodDays));
+  }
+  const qs = query.toString();
+  return request<OfficialCallsOverview>(`/rio1746/overview${qs ? `?${qs}` : ''}`);
 }
 
 export interface SyncStatusResult {
