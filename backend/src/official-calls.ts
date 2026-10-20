@@ -298,17 +298,43 @@ export function registerOfficialCallsRoutes(
     return ok(status);
   });
 
-  // 6. Trigger manual / scheduled sync
+  // 6. Trigger manual / scheduled sync (restricted to admin role)
   app.post<{
     Body?: {
       partitionDate?: string;
       limit?: number;
     };
-  }>('/api/rio1746/sync', async (req) => {
-    const partition = req.body?.partitionDate || '2026-09-20';
-    const limit = Math.min(5000, Math.max(10, req.body?.limit || 2000));
+  }>(
+    '/api/rio1746/sync',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            partitionDate: {
+              type: 'string',
+              pattern: '^\\d{4}-\\d{2}-\\d{2}$',
+            },
+            limit: {
+              type: 'integer',
+              minimum: 10,
+              maximum: 10000,
+            },
+          },
+        },
+      },
+    },
+    async (req) => {
+      if (!req.user || req.user.role !== 'admin') {
+        throw fail(403, 'Acesso restrito à administração.');
+      }
 
-    const result = await runRio1746Sync(db, partition, limit);
-    return ok(result);
-  });
+      const partition = req.body?.partitionDate || '2026-09-20';
+      const limit = Math.min(10000, Math.max(10, req.body?.limit || 2000));
+
+      const result = await runRio1746Sync(db, partition, limit);
+      return ok(result);
+    },
+  );
 }

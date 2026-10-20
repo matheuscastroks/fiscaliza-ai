@@ -21,11 +21,12 @@ export async function importPartition(
   limit = 2000,
 ): Promise<ImportResult> {
   const startTime = Date.now();
-  const query = buildPartitionCallsQuery(partitionDate, limit);
+  const { query, params } = buildPartitionCallsQuery(partitionDate, limit);
 
   // Conservative safety threshold: 500 MB maximum billed bytes
   const [rows] = await bq.query({
     query,
+    params,
     maximumBytesBilled: '500000000',
   });
 

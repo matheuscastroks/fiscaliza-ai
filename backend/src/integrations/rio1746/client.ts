@@ -12,12 +12,6 @@ function ensureDefaultCredentials() {
   const candidateAdc = resolve(appData, 'gcloud/application_default_credentials.json');
   if (existsSync(candidateAdc)) {
     process.env.GOOGLE_APPLICATION_CREDENTIALS = candidateAdc;
-    return;
-  }
-
-  const legacyCandidate = resolve(appData, 'gcloud/legacy_credentials/matheus.cocao30@gmail.com/adc.json');
-  if (existsSync(legacyCandidate)) {
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = legacyCandidate;
   }
 }
 

@@ -49,7 +49,7 @@ export function AppDrawer({ children }: { children: ReactNode }) {
   const open = useMenu((state) => state.open);
   const user = useAuthStore((state) => state.user);
   const authenticated = useAuthStore((state) => state.isAuthenticated);
-  const segments = useSegments();
+  const segments: readonly string[] = useSegments();
   const { width } = useWindowDimensions();
   const desktop = Platform.OS === 'web' && width >= 1100;
   const showNavigation =

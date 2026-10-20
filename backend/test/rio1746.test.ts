@@ -1,7 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { buildApp } from '../src/app.js';
 import { mapRawRowToOfficialCall } from '../src/integrations/rio1746/mapper.js';
-import { buildPartitionCallsQuery, buildLatestPartitionsQuery } from '../src/integrations/rio1746/queries.js';
+import {
+  assertValidPartitionDate,
+  buildPartitionCallsQuery,
+  buildLatestPartitionsQuery,
+} from '../src/integrations/rio1746/queries.js';
 import type { RawBigQuery1746Row } from '../src/integrations/rio1746/types.js';
 
 test('rio1746: mapper maps valid row within Rio coordinates correctly', () => {
@@ -91,13 +96,104 @@ test('rio1746: mapper handles BigQuery value wrappers and ISO timestamps', () =>
   assert.equal(mapped.sourcePartitionDate, '2026-09-20');
 });
 
-test('rio1746: queries are bounded with partition filters and no SELECT *', () => {
-  const callQuery = buildPartitionCallsQuery('2026-09-20', 100);
-  assert.ok(callQuery.includes("c.data_particao = '2026-09-20'"));
-  assert.ok(callQuery.includes('LIMIT 100'));
-  assert.ok(!callQuery.includes('SELECT *'));
+test('rio1746: queries use BigQuery parameters (@partitionDate, @limit) and reject SQL injection', () => {
+  const callQuery = buildPartitionCallsQuery('2026-09-20', 100, 200);
+  assert.ok(callQuery.query.includes('c.data_particao = DATE(@partitionDate)'));
+  assert.ok(callQuery.query.includes('LIMIT @limit'));
+  assert.ok(callQuery.query.includes('OFFSET @offset'));
+  assert.ok(!callQuery.query.includes('2026-09-20'));
+  assert.ok(!callQuery.query.includes('SELECT *'));
+  assert.deepEqual(callQuery.params, {
+    partitionDate: '2026-09-20',
+    limit: 100,
+    offset: 200,
+  });
 
   const partitionQuery = buildLatestPartitionsQuery(7);
-  assert.ok(partitionQuery.includes('INTERVAL 7 DAY'));
-  assert.ok(partitionQuery.includes('LIMIT 7'));
+  assert.ok(partitionQuery.query.includes('INTERVAL @days DAY'));
+  assert.ok(partitionQuery.query.includes('LIMIT @limit'));
+  assert.deepEqual(partitionQuery.params, { days: 7, limit: 7 });
+
+  assert.throws(
+    () => assertValidPartitionDate("2026-09-20' OR 1=1 --"),
+    /Invalid partition date format/,
+  );
+  assert.throws(
+    () => assertValidPartitionDate('2026-02-30'),
+    /Invalid calendar date/,
+  );
 });
+
+test('rio1746: POST /api/rio1746/sync rejects unauthenticated callers', async (t) => {
+  const app = await buildApp();
+  t.after(() => app.close());
+
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/rio1746/sync',
+    payload: { partitionDate: '2026-09-20' },
+  });
+  assert.equal(res.statusCode, 401);
+  assert.equal(res.json().success, false);
+});
+
+test(
+  'rio1746: POST /api/rio1746/sync rejects citizen and staff roles (403) and malformed partitionDate (400)',
+  {
+    skip: !process.env.DATABASE_URL
+      ? 'DATABASE_URL absent; skipping DB role authorization test'
+      : false,
+  },
+  async (t) => {
+    const { database } = await import('../src/db.js');
+    const { seed } = await import('../src/seed-data.js');
+    const { db, pool } = database();
+    t.after(() => pool.end());
+    await seed(db);
+
+    const app = await buildApp();
+    t.after(() => app.close());
+
+    async function login(email: string) {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        payload: {
+          email,
+          password: process.env.DEMO_PASSWORD || 'Fiscaliza123!',
+        },
+      });
+      assert.equal(response.statusCode, 200);
+      return { authorization: `Bearer ${response.json().data.token}` };
+    }
+
+    const citizen = await login('beatrizarante@gmail.com');
+    const staff = await login('gestao@vilaesperanca.exemplo');
+    const admin = await login('admin@vilaesperanca.exemplo');
+
+    const citizenSync = await app.inject({
+      method: 'POST',
+      url: '/api/rio1746/sync',
+      headers: citizen,
+      payload: { partitionDate: '2026-09-20' },
+    });
+    assert.equal(citizenSync.statusCode, 403);
+
+    const staffSync = await app.inject({
+      method: 'POST',
+      url: '/api/rio1746/sync',
+      headers: staff,
+      payload: { partitionDate: '2026-09-20' },
+    });
+    assert.equal(staffSync.statusCode, 403);
+
+    const badDateSync = await app.inject({
+      method: 'POST',
+      url: '/api/rio1746/sync',
+      headers: admin,
+      payload: { partitionDate: "2026-09-20' OR 1=1" },
+    });
+    assert.equal(badDateSync.statusCode, 400);
+  },
+);
+

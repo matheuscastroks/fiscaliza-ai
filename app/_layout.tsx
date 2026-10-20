@@ -52,7 +52,7 @@ export default function RootLayout() {
     InstrumentSans_700Bold,
   });
   const { isReady, isAuthenticated, initialize, user } = useAuthStore();
-  const segments = useSegments();
+  const segments: readonly string[] = useSegments();
   useEffect(() => {
     void initialize();
   }, [initialize]);

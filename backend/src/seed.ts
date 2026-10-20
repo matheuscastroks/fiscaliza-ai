@@ -52,11 +52,9 @@ try {
     await tx.execute(
       sql`UPDATE users SET name='Beatriz Arantes', email='beatrizarante@gmail.com', municipality_id='3304557' WHERE id='citizen-ana'`,
     );
-    await tx.execute(sql`DELETE FROM demo_engagement`);
-    await tx.execute(sql`DELETE FROM records`);
   });
 
-  console.log('Base accounts seeded and fake records cleared.');
+  console.log('Base municipality and accounts seeded.');
 } finally {
   await pool.end();
 }
