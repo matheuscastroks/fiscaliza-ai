@@ -16,7 +16,6 @@ import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, type Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { AppText } from './AppText';
 import { useTerritoryViewMode } from '@/stores/territoryStore';
 import { useFollowStore } from '@/stores/followStore';
 
@@ -208,22 +207,9 @@ export function FloatingGlassTabBar({
         >
           <Ionicons
             name={isListView ? 'map' : 'list'}
-            size={20}
+            size={22}
             color={colors.navigationIcon}
           />
-          {width >= 360 && (
-            <AppText
-              variant="label"
-              style={{
-                color: colors.navigationIcon,
-                fontWeight: '700',
-                fontSize: 13,
-                marginLeft: 5,
-              }}
-            >
-              {isListView ? 'Mapa' : 'Lista'}
-            </AppText>
-          )}
         </Pressable>
       )}
 
@@ -243,22 +229,9 @@ export function FloatingGlassTabBar({
         >
           <Ionicons
             name="stats-chart"
-            size={20}
+            size={22}
             color={colors.navigationIcon}
           />
-          {width >= 360 && (
-            <AppText
-              variant="label"
-              style={{
-                color: colors.navigationIcon,
-                fontWeight: '700',
-                fontSize: 13,
-                marginLeft: 5,
-              }}
-            >
-              Resultados
-            </AppText>
-          )}
         </Pressable>
       )}
 
@@ -278,22 +251,9 @@ export function FloatingGlassTabBar({
         >
           <Ionicons
             name="bulb-outline"
-            size={20}
+            size={22}
             color={colors.navigationIcon}
           />
-          {width >= 360 && (
-            <AppText
-              variant="label"
-              style={{
-                color: colors.navigationIcon,
-                fontWeight: '700',
-                fontSize: 13,
-                marginLeft: 5,
-              }}
-            >
-              Propor
-            </AppText>
-          )}
         </Pressable>
       )}
 
@@ -317,22 +277,9 @@ export function FloatingGlassTabBar({
         >
           <Ionicons
             name={statusFilter === 'open' ? 'time-outline' : 'checkmark-circle-outline'}
-            size={20}
+            size={22}
             color={statusFilter === 'open' ? colors.attention : colors.completed}
           />
-          {width >= 360 && (
-            <AppText
-              variant="label"
-              style={{
-                color: colors.navigationIcon,
-                fontWeight: '700',
-                fontSize: 13,
-                marginLeft: 5,
-              }}
-            >
-              {statusFilter === 'open' ? 'Abertos' : 'Resolvidos'}
-            </AppText>
-          )}
         </Pressable>
       )}
     </View>
@@ -370,14 +317,12 @@ const createStyles = (colors: ThemeColors) =>
       }),
     },
     extraButton: {
+      width: TAB_SIZE + 2 * TAB_PADDING,
       height: TAB_SIZE + 2 * TAB_PADDING,
-      minWidth: TAB_SIZE + 2 * TAB_PADDING,
       borderRadius: (TAB_SIZE + 2 * TAB_PADDING) / 2,
       backgroundColor: colors.navigationSurface,
-      flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: 16,
       ...Platform.select({
         ios: {
           shadowColor: colors.black,
