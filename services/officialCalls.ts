@@ -40,8 +40,9 @@ export async function fetchOfficialFilters(): Promise<OfficialCallsFilterOptions
   return request<OfficialCallsFilterOptions>('/rio1746/filters');
 }
 
-export async function fetchOfficialOverview(): Promise<OfficialCallsOverview> {
-  return request<OfficialCallsOverview>('/rio1746/overview');
+export async function fetchOfficialOverview(bairro?: string): Promise<OfficialCallsOverview> {
+  const qs = bairro ? `?bairro=${encodeURIComponent(bairro)}` : '';
+  return request<OfficialCallsOverview>(`/rio1746/overview${qs}`);
 }
 
 export interface SyncStatusResult {

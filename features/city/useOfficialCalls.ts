@@ -1,3 +1,5 @@
+import { useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   fetchOfficialCalls,
@@ -9,12 +11,19 @@ import {
 import type { OfficialCallsQueryParams } from '@/shared/contracts';
 
 export function useOfficialCalls(params: OfficialCallsQueryParams = {}, enabled = true) {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['officialCalls', params],
     queryFn: () => fetchOfficialCalls(params),
     enabled,
-    staleTime: 60 * 1000, // 1 min cache
+    staleTime: 30 * 1000,
   });
+  const { refetch } = query;
+  useFocusEffect(
+    useCallback(() => {
+      if (enabled) void refetch();
+    }, [refetch, enabled]),
+  );
+  return query;
 }
 
 export function useOfficialCall(id: string | null | undefined, enabled = true) {
@@ -25,7 +34,7 @@ export function useOfficialCall(id: string | null | undefined, enabled = true) {
       return fetchOfficialCall(id);
     },
     enabled: Boolean(enabled && id),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
   });
 }
 
@@ -34,17 +43,24 @@ export function useOfficialFilters(enabled = true) {
     queryKey: ['officialCallsFilters'],
     queryFn: () => fetchOfficialFilters(),
     enabled,
-    staleTime: 10 * 60 * 1000, // 10 min cache
+    staleTime: 5 * 60 * 1000,
   });
 }
 
-export function useOfficialOverview(enabled = true) {
-  return useQuery({
-    queryKey: ['officialCallsOverview'],
-    queryFn: () => fetchOfficialOverview(),
+export function useOfficialOverview(bairro?: string, enabled = true) {
+  const query = useQuery({
+    queryKey: ['officialCallsOverview', bairro || ''],
+    queryFn: () => fetchOfficialOverview(bairro || undefined),
     enabled,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 30 * 1000,
   });
+  const { refetch } = query;
+  useFocusEffect(
+    useCallback(() => {
+      if (enabled) void refetch();
+    }, [refetch, enabled]),
+  );
+  return query;
 }
 
 export function useSyncStatus(enabled = true) {

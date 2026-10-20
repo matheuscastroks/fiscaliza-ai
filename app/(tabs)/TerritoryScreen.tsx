@@ -1,5 +1,5 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
-import { lightColors, type ThemeColors } from '@/theme/colors';
+import type { ThemeColors } from '@/theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { layout } from '@/theme/layout';
 import React, { useMemo, useState, useEffect } from 'react';
@@ -16,36 +16,21 @@ import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { CitySearch } from '@/components/ui/CitySearch';
-import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
 import {
-  CivicRow,
   QueryState,
   createCityStyles,
-  kindLabel,
-  statusLabel,
 } from '@/features/city/CityUI';
 import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
-import {
-  compareTerritoryRecords,
-  withinPeriod,
-  type TerritoryOrder,
-} from '@/shared/territory-order';
-import { useCityQuery } from '@/features/city/useCityQuery';
 import { inMapRegion } from '@/shared/territory';
+import type { OfficialCall } from '@/shared/contracts';
 import {
-  civicLocation,
-  civicTerritory,
-  matchesNeighborhood,
-  neighborhoodOptions,
-  normalizeNeighborhood,
-  occurrenceMatchesNeighborhood,
-} from '@/shared/civic-territory';
-import type { CivicItem, Occurrence, OfficialCall } from '@/shared/contracts';
-import { useOfficialCalls } from '@/features/city/useOfficialCalls';
+  useOfficialCalls,
+  useOfficialFilters,
+  useOfficialOverview,
+} from '@/features/city/useOfficialCalls';
 import { OfficialCallRow } from '@/components/official/OfficialCallRow';
-
 import { spacing } from '@/theme/spacing';
 import { useAuthStore } from '@/stores/authStore';
 import { useTerritorySelection, useTerritoryViewMode } from '@/stores/territoryStore';
@@ -62,16 +47,6 @@ type TerritoryMapRegion = {
   zoom?: number;
 };
 
-type Kind = 'all' | 'official' | 'occurrences' | CivicItem['kind'];
-
-const locatedOccurrence = (item: Occurrence) =>
-  Number.isFinite(item.location.latitude) &&
-  Number.isFinite(item.location.longitude) &&
-  Math.abs(item.location.latitude) <= 90 &&
-  Math.abs(item.location.longitude) <= 180
-    ? item.location
-    : undefined;
-
 const locatedOfficialCall = (item: OfficialCall) =>
   item.latitude !== null &&
   item.latitude !== undefined &&
@@ -85,9 +60,8 @@ const locatedOfficialCall = (item: OfficialCall) =>
     : undefined;
 
 const entryLocation = (entry: Entry) => {
-  if (entry.type === 'occurrence') return locatedOccurrence(entry.item);
   if (entry.type === 'official') return locatedOfficialCall(entry.item);
-  return civicLocation(entry.item);
+  return undefined;
 };
 
 export default function TerritoryScreen() {
@@ -98,25 +72,11 @@ export default function TerritoryScreen() {
 function TerritoryContent() {
   const { colors, mode } = useTheme();
   const insets = useSafeAreaInsets();
-  const pinColors = useMemo(
-    () => ({
-      occurrence: lightColors.ink,
-      proposal: lightColors.attention,
-      consultation: lightColors.muted,
-      action: lightColors.completed,
-    }),
-    [],
-  );
   const cityStyles = useThemedStyles(createCityStyles);
   const styles = useThemedStyles(createStyles);
 
-  const [order, setOrder] = useState<TerritoryOrder>('date');
-  const [period, setPeriod] = useState(0);
   const user = useAuthStore((state) => state.user);
   const municipality = user?.municipality;
-  const isRio =
-    municipality?.id === '3304557' ||
-    municipality?.name?.toLowerCase().includes('rio');
   const initial = useMemo(
     () => ({
       ...municipalityRegion(municipality),
@@ -124,30 +84,38 @@ function TerritoryContent() {
     }),
     [municipality],
   );
-  const occurrences = useCityQuery<Occurrence[]>('/occurrences');
-  const civic = useCityQuery<CivicItem[]>('/civic-items');
-  const { neighborhood, setNeighborhood } = useTerritorySelection();
-  const [kind, setKind] = useState<Kind>('all');
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('all');
-  const { isListView, setIsListView } = useTerritoryViewMode();
 
-  const officialCalls = useOfficialCalls(
-    {
-      bairro: neighborhood || undefined,
-      limit: 150,
-      search: search || undefined,
-      hasCoordinates: isListView ? undefined : true,
-    },
-    Boolean(isRio && (kind === 'all' || kind === 'official')),
-  );
-  const options = neighborhoodOptions(
-    occurrences.data || [],
-    civic.data || [],
-    user?.neighborhood,
-  );
+  const { neighborhood, setNeighborhood } = useTerritorySelection();
   const [region, setRegion] = useState<TerritoryMapRegion>(initial);
   const [areaOnly, setAreaOnly] = useState(false);
+  const [serviceType, setServiceType] = useState<string>('all');
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<string>('all');
+  const { isListView, setIsListView } = useTerritoryViewMode();
+
+  const officialFilters = useOfficialFilters();
+  const officialOverview = useOfficialOverview();
+  const officialCalls = useOfficialCalls({
+    bairro: neighborhood || undefined,
+    tipo: serviceType === 'all' ? undefined : serviceType,
+    situacao: status === 'all' ? undefined : status,
+    search: search || undefined,
+    limit: 500,
+    hasCoordinates: isListView ? undefined : true,
+  });
+
+  const bairroOptions = officialFilters.data?.bairros || [];
+
+  const serviceTypeOptions = useMemo(() => {
+    const top = officialOverview.data?.topServices?.map((s) => s.type) || [];
+    const fallback = officialFilters.data?.tipos?.slice(0, 8) || [];
+    const list = top.length > 0 ? top.slice(0, 8) : fallback;
+    return [
+      { value: 'all', label: 'Tudo' },
+      ...list.map((t) => ({ value: t, label: t })),
+    ];
+  }, [officialOverview.data?.topServices, officialFilters.data?.tipos]);
+
   const {
     filters,
     focusId,
@@ -161,6 +129,7 @@ function TerritoryContent() {
     lng?: string;
     neighborhood?: string;
   }>();
+
   const [filterVisibility, setFilterVisibility] = useState<{
     param?: string;
     open: boolean;
@@ -171,6 +140,7 @@ function TerritoryContent() {
       : Boolean(filters);
   const setFiltersOpen = (open: boolean) =>
     setFilterVisibility({ param: filters, open });
+
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<{
     ids: string[];
@@ -189,7 +159,7 @@ function TerritoryContent() {
       setIsListView(false);
       setAreaOnly(false);
       setStatus('all');
-      setKind('all');
+      setServiceType('all');
       setSearch('');
 
       if (paramNeighborhood) {
@@ -199,19 +169,10 @@ function TerritoryContent() {
       let targetLat = lat ? Number(lat) : NaN;
       let targetLng = lng ? Number(lng) : NaN;
       if (!Number.isFinite(targetLat) || !Number.isFinite(targetLng)) {
-        const occ = occurrences.data?.find((i) => i.id === focusId);
-        if (occ) {
-          targetLat = occ.location.latitude;
-          targetLng = occ.location.longitude;
-        } else {
-          const civ = civic.data?.find((i) => i.id === focusId);
-          if (civ) {
-            const loc = civicLocation(civ);
-            if (loc) {
-              targetLat = loc.latitude;
-              targetLng = loc.longitude;
-            }
-          }
+        const off = officialCalls.data?.calls?.find((i) => i.id === focusId);
+        if (off && off.latitude != null && off.longitude != null) {
+          targetLat = off.latitude;
+          targetLng = off.longitude;
         }
       }
 
@@ -229,90 +190,15 @@ function TerritoryContent() {
     lat,
     lng,
     paramNeighborhood,
-    occurrences.data,
-    civic.data,
+    officialCalls.data?.calls,
     setIsListView,
     setNeighborhood,
   ]);
 
-  const entries = useMemo(() => {
-    const term = normalizeNeighborhood(search);
-    const result: Entry[] = [];
-    if (kind === 'all' || kind === 'occurrences') {
-      for (const item of occurrences.data || []) {
-        if (
-          occurrenceMatchesNeighborhood(item, neighborhood) &&
-          (status === 'all' || item.status === status) &&
-          normalizeNeighborhood(
-            [
-              item.title,
-              item.description,
-              item.location.address,
-              item.location.neighborhood,
-            ].join(' '),
-          ).includes(term)
-        )
-          result.push({ type: 'occurrence', item });
-      }
-    }
-    if (kind !== 'occurrences') {
-      for (const item of civic.data || []) {
-        const territory = civicTerritory(item);
-        const label =
-          territory.scope === 'municipality'
-            ? 'Todo o município'
-            : territory.neighborhood;
-        if (
-          (kind === 'all' || item.kind === kind) &&
-          matchesNeighborhood(item, neighborhood) &&
-          (status === 'all' || item.status === status) &&
-          normalizeNeighborhood(
-            [
-              item.title,
-              item.summary,
-              label,
-              territory.scope === 'location' ? territory.location.address : '',
-            ].join(' '),
-          ).includes(term)
-        )
-          result.push({ type: 'civic', item });
-      }
-    }
-    if (isRio && (kind === 'all' || kind === 'official')) {
-      for (const item of officialCalls.data?.calls || []) {
-        if (
-          (status === 'all' ||
-            item.officialSituation === status ||
-            item.officialStatus === status) &&
-          normalizeNeighborhood(
-            [
-              item.serviceType,
-              item.serviceSubtype,
-              item.neighborhoodName || '',
-              item.organizationName || '',
-              item.externalId,
-            ].join(' '),
-          ).includes(term)
-        ) {
-          result.push({ type: 'official', item });
-        }
-      }
-    }
-    return result
-      .filter((entry) => withinPeriod(entry.item, period))
-      .sort((a, b) => compareTerritoryRecords(a.item, b.item, order));
-  }, [
-    occurrences.data,
-    civic.data,
-    officialCalls.data,
-    kind,
-    isRio,
-    status,
-    search,
-    neighborhood,
-    period,
-    order,
-  ]);
+  const entries = useMemo<Entry[]>(() => {
+    const calls = officialCalls.data?.calls || [];
+    return calls.map((item) => ({ type: 'official' as const, item }));
+  }, [officialCalls.data?.calls]);
 
   const unlocated = entries.filter((entry) => !entryLocation(entry));
   const located = entries.filter((entry) => {
@@ -320,20 +206,17 @@ function TerritoryContent() {
     return point && (!areaOnly || inMapRegion(point, region));
   });
   const listed = areaOnly ? located : entries;
-  const selectedEntry = useMemo(() => {
+
+  const selectedEntry = useMemo<Entry | null>(() => {
     if (!selectedId) return null;
     const fromEntries = entries.find((entry) => entry.item.id === selectedId);
     if (fromEntries) return fromEntries;
-    const occ = occurrences.data?.find((item) => item.id === selectedId);
-    if (occ) return { type: 'occurrence' as const, item: occ };
-    const civ = civic.data?.find((item) => item.id === selectedId);
-    if (civ) return { type: 'civic' as const, item: civ };
     const off = officialCalls.data?.calls?.find((item) => item.id === selectedId);
     if (off) return { type: 'official' as const, item: off };
     return null;
-  }, [selectedId, entries, occurrences.data, civic.data, officialCalls.data]);
+  }, [selectedId, entries, officialCalls.data?.calls]);
 
-  const selectedClusterEntries = useMemo(() => {
+  const selectedClusterEntries = useMemo<Entry[]>(() => {
     if (!selectedCluster || selectedCluster.ids.length === 0) return [];
     const idSet = new Set(selectedCluster.ids);
     const matched: Entry[] = [];
@@ -342,28 +225,8 @@ function TerritoryContent() {
         matched.push(entry);
       }
     }
-    for (const id of selectedCluster.ids) {
-      if (!matched.some((m) => m.item.id === id)) {
-        const occ = occurrences.data?.find((i) => i.id === id);
-        if (occ) matched.push({ type: 'occurrence', item: occ });
-        else {
-          const civ = civic.data?.find((i) => i.id === id);
-          if (civ) matched.push({ type: 'civic', item: civ });
-          else {
-            const off = officialCalls.data?.calls?.find((i) => i.id === id);
-            if (off) matched.push({ type: 'official', item: off });
-          }
-        }
-      }
-    }
     return matched;
-  }, [
-    selectedCluster,
-    entries,
-    occurrences.data,
-    civic.data,
-    officialCalls.data?.calls,
-  ]);
+  }, [selectedCluster, entries]);
 
   const municipalOverviewRegion = useMemo(() => {
     const points = entries
@@ -406,150 +269,70 @@ function TerritoryContent() {
   const filterCount =
     Number(Boolean(neighborhood)) +
     Number(status !== 'all') +
-    Number(areaOnly) +
-    Number(period !== 0) +
-    Number(order !== 'date');
+    Number(serviceType !== 'all') +
+    Number(areaOnly);
 
-  const statuses: [string, string][] =
-    kind === 'official'
-      ? [
-          ['Em andamento', 'Em andamento'],
-          ['Encerrado', 'Encerrado'],
-        ]
-      : kind === 'occurrences'
-        ? [
-            ['pending', 'Recebida'],
-            ['in_progress', 'Em atendimento'],
-            ['resolved', 'Concluída'],
-          ]
-      : kind === 'proposal'
-        ? ['submitted', 'under_review', 'accepted', 'declined'].map((key) => [
-            key,
-            statusLabel[key],
-          ])
-        : kind === 'consultation'
-          ? ['open', 'closed'].map((key) => [key, statusLabel[key]])
-          : kind === 'action'
-            ? ['planned', 'in_progress', 'completed'].map((key) => [
-                key,
-                statusLabel[key],
-              ])
-            : [];
-
-  const showOccurrences = kind === 'all' || kind === 'occurrences';
-  const showCivic = kind !== 'occurrences';
-  const dataReady =
-    (!showOccurrences || occurrences.data !== undefined) &&
-    (!showCivic || civic.data !== undefined);
+  const dataReady = officialCalls.data !== undefined;
 
   const openEntry = (entry: Entry) => {
-    if (entry.type === 'official') {
-      router.push({
-        pathname: '/OfficialCallDetailsScreen',
-        params: { id: entry.item.id },
-      });
-      return;
-    }
     router.push({
-      pathname:
-        entry.type === 'occurrence'
-          ? '/ProblemDetailsScreen'
-          : '/CivicDetailsScreen',
+      pathname: '/OfficialCallDetailsScreen',
       params: { id: entry.item.id },
     });
   };
 
-  const renderEntry = (entry: Entry) => (
-    <View key={entry.type + entry.item.id}>
-      {entry.type === 'official' ? (
+  const renderEntry = (entry: Entry) => {
+    if (entry.type !== 'official') return null;
+    return (
+      <View key={entry.item.id}>
         <OfficialCallRow call={entry.item} onPress={() => openEntry(entry)} />
-      ) : entry.type === 'occurrence' ? (
-        <OccurrenceRow problem={entry.item} onPress={() => openEntry(entry)} />
-      ) : (
-        <>
-          {civicTerritory(entry.item).scope === 'municipality' && (
-            <AppText variant="caption" color="accent">
-              Abrangência: todo o município
-            </AppText>
-          )}
-          <CivicRow item={entry.item} />
-        </>
-      )}
-    </View>
-  );
+      </View>
+    );
+  };
 
   const osmMarkers: MapMarker[] = useMemo(() => {
     const list: MapMarker[] = located.flatMap((entry): MapMarker[] => {
+      if (entry.type !== 'official') return [];
       const point = entryLocation(entry);
       if (!point) return [];
-      if (entry.type === 'official') {
-        return [
-          {
-            id: entry.item.id,
-            latitude: point.latitude,
-            longitude: point.longitude,
-            title: `1746 · ${entry.item.serviceSubtype || entry.item.serviceType}`,
-            color: '#0072BB',
-            kind: 'official',
-          },
-        ];
-      }
-      const markerKind =
-        entry.type === 'occurrence' ? 'occurrence' : entry.item.kind;
+      const isClosed = entry.item.officialSituation === 'Encerrado';
       return [
         {
           id: entry.item.id,
           latitude: point.latitude,
           longitude: point.longitude,
-          title: `${entry.type === 'occurrence' ? 'Ocorrência' : kindLabel[entry.item.kind]} · ${entry.item.title}`,
-          color:
-            entry.type === 'occurrence'
-              ? pinColors.occurrence
-              : pinColors[entry.item.kind],
-          kind: markerKind,
+          title: `1746 · ${entry.item.serviceSubtype || entry.item.serviceType}`,
+          color: isClosed ? '#236B50' : '#0072BB',
+          kind: 'official',
         },
       ];
     });
 
-    if (selectedEntry && !list.some((m) => m.id === selectedEntry.item.id)) {
+    if (
+      selectedEntry &&
+      selectedEntry.type === 'official' &&
+      !list.some((m) => m.id === selectedEntry.item.id)
+    ) {
       const point = entryLocation(selectedEntry);
       if (point) {
-        if (selectedEntry.type === 'official') {
-          list.push({
-            id: selectedEntry.item.id,
-            latitude: point.latitude,
-            longitude: point.longitude,
-            title: `1746 · ${selectedEntry.item.serviceSubtype || selectedEntry.item.serviceType}`,
-            color: '#0072BB',
-            kind: 'official',
-          });
-        } else {
-          list.push({
-            id: selectedEntry.item.id,
-            latitude: point.latitude,
-            longitude: point.longitude,
-            title: `${selectedEntry.type === 'occurrence' ? 'Ocorrência' : kindLabel[selectedEntry.item.kind]} · ${selectedEntry.item.title}`,
-            color:
-              selectedEntry.type === 'occurrence'
-                ? pinColors.occurrence
-                : pinColors[selectedEntry.item.kind],
-            kind:
-              selectedEntry.type === 'occurrence'
-                ? 'occurrence'
-                : selectedEntry.item.kind,
-          });
-        }
+        const isClosed = selectedEntry.item.officialSituation === 'Encerrado';
+        list.push({
+          id: selectedEntry.item.id,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          title: `1746 · ${selectedEntry.item.serviceSubtype || selectedEntry.item.serviceType}`,
+          color: isClosed ? '#236B50' : '#0072BB',
+          kind: 'official',
+        });
       }
     }
 
     return list;
-  }, [located, selectedEntry, pinColors]);
+  }, [located, selectedEntry]);
 
   const resetFilters = () => {
-    setOrder('date');
-    setPeriod(0);
     setSearch('');
-    setKind('all');
+    setServiceType('all');
     setSelectedId(null);
     setSelectedCluster(null);
     setStatus('all');
@@ -574,13 +357,13 @@ function TerritoryContent() {
         ...current,
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-        zoom: 16,
+        latitudeDelta: 0.018,
+        longitudeDelta: 0.018,
+        zoom: 15,
       }));
       setLocationMessage('');
     } catch {
-      setLocationMessage(
-        'Não foi possível obter sua posição. Tente novamente ou volte ao município.',
-      );
+      setLocationMessage('Não foi possível obter a localização atual.');
     } finally {
       setLocating(false);
     }
@@ -588,58 +371,47 @@ function TerritoryContent() {
 
   const renderFilterDrawer = () => (
     <View style={[styles.filtersDrawer, { backgroundColor: colors.surface }]}>
-      <AppText variant="label">Bairro</AppText>
+      <AppText variant="label">Bairro (Central 1746)</AppText>
       <NeighborhoodPicker
-        options={options}
+        options={bairroOptions}
         value={neighborhood}
         onChange={(value) => {
           setNeighborhood(value);
-          setAreaOnly(false);
           setSelectedId(null);
         }}
       />
-      {statuses.length > 0 && (
-        <>
-          <AppText variant="label">Situação</AppText>
-          <SlidingTabs
-            label="Filtrar por situação"
-            options={[['all', 'Todas'], ...statuses].map(([val, lab]) => ({
-              value: val,
-              label: lab,
-            }))}
-            value={status}
-            onChange={setStatus}
-          />
-        </>
-      )}
-      <AppText variant="label">Período</AppText>
+
+      <AppText variant="label">Situação do chamado</AppText>
       <SlidingTabs
-        label="Filtrar por período"
+        label="Situação"
         edgeToEdge={false}
         options={[
-          { value: '0', label: 'Todo o período' },
-          { value: '1', label: 'Últimas 24h' },
-          { value: '7', label: 'Últimos 7 dias' },
-          { value: '30', label: 'Últimos 30 dias' },
+          { value: 'all', label: 'Todas' },
+          { value: 'Não Encerrado', label: 'Em atendimento' },
+          { value: 'Encerrado', label: 'Encerrados' },
         ]}
-        value={String(period)}
+        value={status}
         onChange={(value) => {
-          setPeriod(Number(value));
+          setStatus(value);
           setSelectedId(null);
         }}
       />
-      <AppText variant="label">Ordenar por</AppText>
+
+      <AppText variant="label">Recorte espacial</AppText>
       <SlidingTabs
-        label="Ordenar território"
+        label="Recorte espacial"
         edgeToEdge={false}
         options={[
-          { value: 'date', label: 'Mais recentes' },
-          { value: 'supports', label: 'Mais apoiados' },
-          { value: 'views', label: 'Mais vistos' },
+          { value: 'all', label: 'Todo o Rio' },
+          { value: 'area', label: 'Na área visível do mapa' },
         ]}
-        value={order}
-        onChange={(value) => setOrder(value as TerritoryOrder)}
+        value={areaOnly ? 'area' : 'all'}
+        onChange={(value) => {
+          setAreaOnly(value === 'area');
+          setSelectedId(null);
+        }}
       />
+
       <View style={styles.filterActionsRow}>
         <AppButton
           title="Limpar filtros"
@@ -662,20 +434,12 @@ function TerritoryContent() {
       contentContainerStyle={styles.categoryScroll}
     >
       <SlidingTabs
-        label="Categorias"
+        label="Tipos de Serviço 1746"
         edgeToEdge={false}
-        options={[
-          { value: 'all', label: 'Tudo' },
-          ...(isRio ? [{ value: 'official', label: '1746 Oficial' }] : []),
-          { value: 'occurrences', label: 'Cidadão' },
-          { value: 'proposal', label: 'Propostas' },
-          { value: 'consultation', label: 'Consultas' },
-          { value: 'action', label: 'Ações' },
-        ]}
-        value={kind}
+        options={serviceTypeOptions}
+        value={serviceType}
         onChange={(value) => {
-          setKind(value as Kind);
-          setStatus('all');
+          setServiceType(value);
           setSelectedId(null);
           setSelectedCluster(null);
           setAreaOnly(false);
@@ -728,7 +492,7 @@ function TerritoryContent() {
         />
       </View>
 
-      {/* 2. TOP FLOATING HEADER (BUSCA + CHIPS DE CATEGORIA + FILTROS - NO MAPA) */}
+      {/* 2. TOP FLOATING HEADER (BUSCA + CHIPS DE SERVIÇO 1746 + FILTROS - NO MAPA) */}
       {!isListView && (
         <View style={[styles.topFloatingHeader, { paddingTop: insets.top + spacing.xs }]}>
           <View style={styles.searchContainer}>
@@ -747,18 +511,19 @@ function TerritoryContent() {
           <View style={styles.resultsBadgeRow}>
             <View style={[styles.resultsBadge, { backgroundColor: colors.surface + 'EE' }]}>
               <AppText variant="caption" style={{ fontWeight: '700' }}>
-                {listed.length} {listed.length === 1 ? 'registro' : 'registros'}
-                {areaOnly ? ' nesta área' : ''}
+                {officialCalls.isLoading
+                  ? 'Carregando chamados 1746...'
+                  : `${listed.length} ${listed.length === 1 ? 'chamado 1746' : 'chamados 1746'}${areaOnly ? ' nesta área' : ' no mapa'}`}
               </AppText>
             </View>
           </View>
 
-          {/* FILTROS AVANÇADOS EXPANSÍVEIS (MODAL / GAVETA) */}
+          {/* FILTROS AVANÇADOS EXPANSÍVEIS */}
           {filtersOpen && renderFilterDrawer()}
         </View>
       )}
 
-      {/* 3. BOTÕES FLUTUANTES LATERAIS (GPS, RESET, BUSCAR NESTA ÁREA) */}
+      {/* 3. BOTÕES FLUTUANTES LATERAIS (GPS, RESET) */}
       {!isListView && (
         <View style={[styles.mapActionsRight, { top: insets.top + 160 }]}>
           <Pressable
@@ -797,7 +562,7 @@ function TerritoryContent() {
         </View>
       )}
 
-      {/* 4. BOTÃO 'BUSCAR NESTA ÁREA' QUANDO MOVE O MAPA */}
+      {/* 4. BOTÃO 'BUSCAR NESTA ÁREA' */}
       {!isListView && !selectedEntry && selectedClusterEntries.length === 0 && (
         <View style={[styles.areaButtonWrapper, { bottom: insets.bottom + 95 }]}>
           <Pressable
@@ -866,15 +631,10 @@ function TerritoryContent() {
           ]}
         >
           <AppHeader
-            title="Território"
-            context={
-              municipality
-                ? `${municipality.name} · ${municipality.state}`
-                : 'Seu município'
-            }
+            title="Território · Central 1746"
+            context="Rio de Janeiro · RJ · Dados Oficiais DATA.RIO"
           />
 
-          {/* FILTROS INTEGRADOS NA VISUALIZAÇÃO EM LISTA */}
           <View style={styles.listFilterBar}>
             <View style={{ paddingHorizontal: spacing.md }}>
               <CitySearch
@@ -891,7 +651,7 @@ function TerritoryContent() {
             <View style={[styles.resultsBadgeRow, { paddingHorizontal: spacing.md }]}>
               <View style={[styles.resultsBadge, { backgroundColor: colors.surface }]}>
                 <AppText variant="caption" style={{ fontWeight: '700' }}>
-                  {listed.length} {listed.length === 1 ? 'registro' : 'registros'}
+                  {listed.length} {listed.length === 1 ? 'chamado 1746' : 'chamados 1746'}
                   {areaOnly ? ' nesta área' : ''}
                 </AppText>
               </View>
@@ -907,40 +667,27 @@ function TerritoryContent() {
           <ScrollView
             contentContainerStyle={[cityStyles.content, { paddingBottom: insets.bottom + 100 }]}
           >
-            {showOccurrences &&
-              (occurrences.isLoading ||
-                occurrences.error ||
-                occurrences.fetchStatus === 'paused') && (
-                <View style={{ gap: spacing.xs }}>
-                  <QueryState
-                    loading={occurrences.isLoading}
-                    error={occurrences.error}
-                    retry={occurrences.refetch}
-                  />
-                </View>
-              )}
-            {showCivic &&
-              (civic.isLoading ||
-                civic.error ||
-                civic.fetchStatus === 'paused') && (
-                <View style={{ gap: spacing.xs }}>
-                  <QueryState
-                    loading={civic.isLoading}
-                    error={civic.error}
-                    retry={civic.refetch}
-                  />
-                </View>
-              )}
+            {(officialCalls.isLoading ||
+              officialCalls.error ||
+              officialCalls.fetchStatus === 'paused') && (
+              <View style={{ gap: spacing.xs }}>
+                <QueryState
+                  loading={officialCalls.isLoading}
+                  error={officialCalls.error}
+                  retry={officialCalls.refetch}
+                />
+              </View>
+            )}
             <View style={cityStyles.section}>
               <AppText variant="sectionTitle">
-                {areaOnly ? 'Itens na área visível' : 'Lista do território'} ({listed.length})
+                {areaOnly ? 'Chamados na área visível' : 'Chamados da Central 1746'} ({listed.length})
               </AppText>
               {listed.map(renderEntry)}
               {dataReady && listed.length === 0 && (
                 <IllustratedEmptyState
                   kind="territory"
-                  title="Nenhum resultado neste recorte"
-                  description="Nenhuma ocorrência, proposta, consulta ou ação encontrada com os filtros atuais."
+                  title="Nenhum chamado 1746 neste recorte"
+                  description="Nenhum chamado oficial encontrado com os filtros atuais."
                   action={{
                     title: 'Limpar filtros',
                     onPress: resetFilters,
@@ -953,7 +700,7 @@ function TerritoryContent() {
                 <AppButton
                   title={
                     (showUnlocated ? 'Ocultar' : 'Ver') +
-                    ' participações sem ponto no mapa · ' +
+                    ' chamados sem coordenada exata · ' +
                     unlocated.length
                   }
                   variant="quiet"

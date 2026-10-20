@@ -66,7 +66,7 @@ export function registerOfficialCallsRoutes(
     };
   }>('/api/rio1746/calls', async (req) => {
     const page = Math.max(1, parseInt(req.query.page || '1', 10) || 1);
-    const limit = Math.min(200, Math.max(1, parseInt(req.query.limit || '50', 10) || 50));
+    const limit = Math.min(1000, Math.max(1, parseInt(req.query.limit || '100', 10) || 100));
     const offset = (page - 1) * limit;
 
     const conditions = [];
@@ -220,7 +220,11 @@ export function registerOfficialCallsRoutes(
   });
 
   // 4. Aggregated territorial overview and indicators
-  app.get('/api/rio1746/overview', async () => {
+  app.get<{ Querystring: { bairro?: string } }>('/api/rio1746/overview', async (req) => {
+    const bairroCondition = req.query.bairro
+      ? ilike(officialCalls.neighborhoodName, `%${req.query.bairro.trim()}%`)
+      : undefined;
+
     const [counts] = await db
       .select({
         total: sql<number>`count(*)::int`,
@@ -229,7 +233,8 @@ export function registerOfficialCallsRoutes(
         withCoords: sql<number>`count(case when ${officialCalls.latitude} is not null then 1 end)::int`,
         latestPartition: sql<string>`max(${officialCalls.sourcePartitionDate})::text`,
       })
-      .from(officialCalls);
+      .from(officialCalls)
+      .where(bairroCondition);
 
     const [topServices, topNeighborhoods, situationBreakdown, checkpoint] = await Promise.all([
       db
@@ -238,6 +243,7 @@ export function registerOfficialCallsRoutes(
           count: sql<number>`count(*)::int`,
         })
         .from(officialCalls)
+        .where(bairroCondition)
         .groupBy(officialCalls.serviceType)
         .orderBy(desc(sql`count(*)`))
         .limit(10),
@@ -257,7 +263,11 @@ export function registerOfficialCallsRoutes(
           count: sql<number>`count(*)::int`,
         })
         .from(officialCalls)
-        .where(isNotNull(officialCalls.officialSituation))
+        .where(
+          bairroCondition
+            ? and(isNotNull(officialCalls.officialSituation), bairroCondition)
+            : isNotNull(officialCalls.officialSituation),
+        )
         .groupBy(officialCalls.officialSituation)
         .orderBy(desc(sql`count(*)`)),
       getSyncStatus(db),

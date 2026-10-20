@@ -320,6 +320,7 @@ export async function buildApp(
       !path.startsWith('/api/auth/') &&
       !path.startsWith('/api/profile/') &&
       path !== '/api/health' &&
+      !(req.method === 'GET' && path.startsWith('/api/rio1746/')) &&
       !(
         req.method === 'GET' &&
         (path === '/api/activity' || path.startsWith('/api/activity/'))

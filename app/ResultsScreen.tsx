@@ -6,104 +6,67 @@ import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
-import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
-import { useCityQuery } from '@/features/city/useCityQuery';
-import { CivicRow, QueryState, createCityStyles } from '@/features/city/CityUI';
-import { CityCarousel } from '@/features/city/CityCarousel';
+import { QueryState, createCityStyles } from '@/features/city/CityUI';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useTerritorySelection } from '@/stores/territoryStore';
-import { useAuthStore } from '@/stores/authStore';
 import {
-  matchesNeighborhood,
-  neighborhoodOptions,
-  occurrenceMatchesNeighborhood,
-} from '@/shared/civic-territory';
-import type { CivicItem, Occurrence } from '@/shared/contracts';
+  useOfficialCalls,
+  useOfficialFilters,
+} from '@/features/city/useOfficialCalls';
+import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
+import { spacing } from '@/theme/spacing';
 
 export default function ResultsScreen() {
   const cityStyles = useThemedStyles(createCityStyles);
-
-  const civic = useCityQuery<CivicItem[]>('/civic-items');
-  const occurrences = useCityQuery<Occurrence[]>('/occurrences');
-  const profileNeighborhood = useAuthStore((state) => state.user?.neighborhood);
   const { neighborhood, setNeighborhood } = useTerritorySelection();
 
-  const results =
-    civic.data?.filter(
-      (item) =>
-        matchesNeighborhood(item, neighborhood) &&
-        (item.status === 'completed' ||
-          item.status === 'closed' ||
-          item.status === 'accepted' ||
-          item.status === 'declined'),
-    ) || [];
+  const officialFilters = useOfficialFilters();
+  const closedCallsQuery = useOfficialCalls({
+    bairro: neighborhood || undefined,
+    situacao: 'Encerrado',
+    limit: 50,
+  });
 
-  const resolved =
-    occurrences.data?.filter(
-      (item) =>
-        item.status === 'resolved' &&
-        occurrenceMatchesNeighborhood(item, neighborhood),
-    ) || [];
-
-  const completedActions = results.filter((item) => item.kind === 'action');
-  const decidedProposals = results.filter((item) => item.kind === 'proposal');
-  const closedConsultations = results.filter(
-    (item) => item.kind === 'consultation',
-  );
-
-  const hasResults =
-    completedActions.length > 0 ||
-    decidedProposals.length > 0 ||
-    closedConsultations.length > 0 ||
-    resolved.length > 0;
+  const bairroOptions = officialFilters.data?.bairros || [];
+  const closedCalls = closedCallsQuery.data?.calls || [];
+  const totalClosed = closedCallsQuery.data?.total ?? 0;
 
   return (
     <AppScreen>
-      <AppHeader title="Resultados da cidade" onBack={() => goBack()} />
+      <AppHeader title="Resultados · Central 1746" onBack={() => goBack()} />
       <ScrollView contentContainerStyle={cityStyles.content}>
         <AppText variant="screenTitle">
-          {neighborhood || 'Todo o município'}
+          {neighborhood || 'Todo o Rio de Janeiro'}
         </AppText>
         <NeighborhoodPicker
-          options={neighborhoodOptions(
-            occurrences.data || [],
-            civic.data || [],
-            profileNeighborhood,
-          )}
+          options={bairroOptions}
           value={neighborhood}
           onChange={setNeighborhood}
         />
         <AppText color="muted">
-          Decisões publicadas, ações concluídas e atendimentos com retorno à
-          comunidade.
+          Chamados oficiais da Central 1746 encerrados pelos órgãos executores da
+          Prefeitura do Rio de Janeiro.
         </AppText>
-        {Boolean(neighborhood) && (
-          <AppText variant="caption" color="muted">
-            Iniciativas municipais também aparecem neste recorte, com sua
-            abrangência identificada.
-          </AppText>
-        )}
+
         <QueryState
-          loading={civic.isPending || occurrences.isPending}
-          error={civic.error || occurrences.error}
+          loading={closedCallsQuery.isPending}
+          error={closedCallsQuery.error}
           retry={() => {
-            void civic.refetch();
-            void occurrences.refetch();
+            void closedCallsQuery.refetch();
           }}
         />
-        {civic.data &&
-        occurrences.data &&
-        !civic.error &&
-        !occurrences.error &&
-        !hasResults ? (
+
+        {!closedCallsQuery.isPending &&
+        !closedCallsQuery.error &&
+        closedCalls.length === 0 ? (
           <IllustratedEmptyState
             kind="target"
-            title="Nenhum resultado neste recorte"
+            title="Nenhum chamado encerrado neste recorte"
             description={
               neighborhood
-                ? 'Ainda não há decisões ou atendimentos concluídos para este bairro. Você pode selecionar outro bairro ou ver todo o município.'
-                : 'Decisões publicadas, ações concluídas e atendimentos com retorno à comunidade aparecerão aqui assim que a gestão prestar contas.'
+                ? 'Não há chamados encerrados sincronizados para este bairro no momento.'
+                : 'Chamados encerrados pela prefeitura aparecerão aqui.'
             }
             action={
               neighborhood
@@ -115,68 +78,27 @@ export default function ResultsScreen() {
             }
           />
         ) : (
-          <>
-            {completedActions.length > 0 && (
-              <View style={cityStyles.section}>
-                <AppText variant="sectionTitle">
-                  Ações públicas concluídas
-                </AppText>
-                <CityCarousel
-                  key={neighborhood + '-actions'}
-                  label="Ações públicas concluídas"
-                  items={completedActions}
-                  renderItem={(item) => <CivicRow item={item} />}
-                />
+          closedCalls.length > 0 && (
+            <View style={cityStyles.section}>
+              <AppText variant="sectionTitle">
+                Atendimentos 1746 encerrados ({totalClosed.toLocaleString('pt-BR')})
+              </AppText>
+              <View style={{ gap: spacing.xs }}>
+                {closedCalls.map((call) => (
+                  <OfficialCallRow
+                    key={call.id}
+                    call={call}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/OfficialCallDetailsScreen',
+                        params: { id: call.id },
+                      })
+                    }
+                  />
+                ))}
               </View>
-            )}
-
-            {resolved.length > 0 && (
-              <View style={cityStyles.section}>
-                <AppText variant="sectionTitle">Atendimentos concluídos</AppText>
-                <CityCarousel
-                  key={neighborhood + '-resolved'}
-                  label="Atendimentos concluídos"
-                  items={resolved}
-                  renderItem={(problem) => (
-                    <OccurrenceRow
-                      problem={problem}
-                      featured
-                      onPress={() =>
-                        router.push({
-                          pathname: '/ProblemDetailsScreen',
-                          params: { id: problem.id },
-                        })
-                      }
-                    />
-                  )}
-                />
-              </View>
-            )}
-
-            {decidedProposals.length > 0 && (
-              <View style={cityStyles.section}>
-                <AppText variant="sectionTitle">Propostas decididas</AppText>
-                <CityCarousel
-                  key={neighborhood + '-proposals'}
-                  label="Propostas decididas"
-                  items={decidedProposals}
-                  renderItem={(item) => <CivicRow item={item} />}
-                />
-              </View>
-            )}
-
-            {closedConsultations.length > 0 && (
-              <View style={cityStyles.section}>
-                <AppText variant="sectionTitle">Consultas encerradas</AppText>
-                <CityCarousel
-                  key={neighborhood + '-consultations'}
-                  label="Consultas encerradas"
-                  items={closedConsultations}
-                  renderItem={(item) => <CivicRow item={item} />}
-                />
-              </View>
-            )}
-          </>
+            </View>
+          )
         )}
       </ScrollView>
     </AppScreen>
