@@ -21,7 +21,7 @@ services:
       DATABASE_URL: postgres://fiscaliza:${POSTGRES_PASSWORD}@postgres:5432/fiscaliza
       NODE_ENV: production
       DEMO_PASSWORD: ${DEMO_PASSWORD:?Configure DEMO_PASSWORD}
-      WEB_ORIGINS: https://${PUBLIC_DOMAIN:?Configure PUBLIC_DOMAIN},https://${MUNICIPAL_DOMAIN:?Configure MUNICIPAL_DOMAIN}
+      WEB_ORIGINS: https://${PUBLIC_DOMAIN:?Configure PUBLIC_DOMAIN}
       UPLOAD_DIR: /app/uploads
       TRUST_PROXY: 172.30.97.0/24
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
@@ -45,17 +45,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-  municipal:
-    image: ${IMAGE_PREFIX}-municipal:${IMAGE_TAG}
-    restart: unless-stopped
-    depends_on:
-      api:
-        condition: service_healthy
-    healthcheck:
-      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1/']
-      interval: 10s
-      timeout: 5s
-      retries: 10
   edge:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -64,15 +53,12 @@ services:
       - '443:443'
     environment:
       PUBLIC_DOMAIN: ${PUBLIC_DOMAIN}
-      MUNICIPAL_DOMAIN: ${MUNICIPAL_DOMAIN}
     volumes:
       - ${RELEASE_DIR:?Use deploy/deploy.sh}/deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - tls:/data
       - caddy_config:/config
     depends_on:
       citizen:
-        condition: service_healthy
-      municipal:
         condition: service_healthy
 volumes:
   postgres:

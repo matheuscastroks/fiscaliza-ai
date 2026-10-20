@@ -26,8 +26,6 @@ jobs:
             dockerfile: backend/Dockerfile
           - service: citizen
             dockerfile: deploy/citizen.Dockerfile
-          - service: municipal
-            dockerfile: municipal/Dockerfile
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3

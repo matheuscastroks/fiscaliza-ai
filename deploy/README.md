@@ -6,7 +6,7 @@ O CI valida o app, a API com PostgreSQL e o painel. Na `main`, `release.yml` reu
 
 Use Linux x86_64 com Docker Engine, plugin Compose v2 com suporte a `up --wait`, Bash, curl, tar e flock. Reserve inicialmente 2 vCPU e 4 GB de RAM; ajuste conforme uso. As imagens são compiladas no GitHub, não na VPS.
 
-1. Aponte os registros DNS de `app.seudominio.com.br` e `gestao.seudominio.com.br` para o IP. Se houver registro AAAA, ele também precisa apontar para este servidor. Libere TCP 80/443 e SSH. O Compose não publica PostgreSQL nem API diretamente.
+1. Aponte o registro DNS de `app.seudominio.com.br` para o IP. Se houver registro AAAA, ele também precisa apontar para este servidor. Libere TCP 80/443 e SSH. O Compose não publica PostgreSQL nem API diretamente.
 2. Crie um usuário de deploy e configure uma chave SSH exclusiva para o GitHub Actions. O usuário precisa executar Docker e escrever em `/opt/fiscaliza-ai`. Acesso ao grupo Docker equivale a administração do host; use chave dedicada.
 3. Crie a pasta e o arquivo de ambiente, substituindo `deploy` pelo usuário escolhido:
 
@@ -42,7 +42,7 @@ Faça push na `main` ou execute **Actions → Release web platform → Run workf
 
 ## Operação e recuperação
 
-Caddy emite e renova HTTPS automaticamente. Cidadão: `https://PUBLIC_DOMAIN`; gestão: `https://MUNICIPAL_DOMAIN`. Ambos acessam `/api` na própria origem. Banco, uploads e certificados possuem volumes persistentes. Dados e contas continuam sendo de apresentação; não representam atendimento oficial de uma prefeitura.
+Caddy emite e renova HTTPS automaticamente. Cidadão: `https://PUBLIC_DOMAIN`. Acesso a `/api` na própria origem. Banco, uploads e certificados possuem volumes persistentes. Dados e contas continuam sendo de apresentação; não representam atendimento oficial de uma prefeitura.
 
 O deploy espera os healthchecks, confere HTTPS, API/banco e páginas de login, e só então grava `/opt/fiscaliza-ai/current-release`. Uma falha fica vermelha no Actions; o serviço pode ter sido parcialmente atualizado e requer inspeção. Não há rollback automático de banco.
 

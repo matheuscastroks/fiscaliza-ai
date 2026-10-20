@@ -6,12 +6,3 @@
     reverse_proxy citizen:80
   }
 }
-
-{$MUNICIPAL_DOMAIN} {
-  handle /api/* {
-    reverse_proxy api:3001
-  }
-  handle {
-    reverse_proxy municipal:80
-  }
-}

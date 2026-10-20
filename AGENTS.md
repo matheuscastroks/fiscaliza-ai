@@ -9,8 +9,7 @@ Fiscaliza aí demonstra participação na gestão urbana: ocorrências, proposta
 - app/: rotas Expo Router; features/: jornadas; components/: UI compartilhada; theme/: tokens.
 - services/: transporte HTTP e compatibilidade; stores/: sessão, interface e adaptadores legados.
 - shared/: contratos públicos; backend/: Fastify, PostgreSQL, Drizzle, migrações e testes.
-- municipal/: painel React/Vite; demo/: fixtures, heurística e testes puros.
-- assets/: arquivos estáticos; plan/: decisões e evidências.
+- demo/: fixtures, heurística e testes puros; assets/: arquivos estáticos; plan/: decisões e evidências.
 
 ## Comandos
 
@@ -19,7 +18,6 @@ Use npm e preserve os package-lock.json. Instale módulos Expo com npx expo inst
 - npm start: Metro; npm run web: cidadão web.
 - npm test: testes locais Node; npx tsc --noEmit: tipos; npm run lint: Expo lint.
 - npm test --prefix backend: testes API; npm run typecheck --prefix backend: tipos.
-- npm run build --prefix municipal: painel.
 - npx expo run:android: build nativo; npx expo config --type prebuild: configuração.
   Consulte README.md para Docker e configuração.
 

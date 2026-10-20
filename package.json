@@ -12,9 +12,7 @@
     "icons:generate": "node scripts/generate-brand-icons.cjs",
     "lint": "expo lint",
     "api:start": "npm start --prefix backend",
-    "api:test": "npm test --prefix backend",
-    "municipal:dev": "npm run dev --prefix municipal",
-    "municipal:build": "npm run build --prefix municipal"
+    "api:test": "npm test --prefix backend"
   },
   "dependencies": {
     "@expo-google-fonts/instrument-sans": "^0.4.2",

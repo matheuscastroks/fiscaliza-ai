@@ -36,18 +36,14 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             backend/package-lock.json
-            municipal/package-lock.json
       - run: npm ci
       - run: npm ci --prefix backend
-      - run: npm ci --prefix municipal
       - run: npm test
       - run: npx tsc --noEmit
       - run: npm run lint
       - run: npm run migrate --prefix backend
       - run: npm test --prefix backend
       - run: npm run openapi --prefix backend
-      - run: npm test --prefix municipal
-      - run: npm run build --prefix municipal
       - run: npx expo export --platform web --output-dir .validation/web-export --max-workers 2
       - name: Validate deployment configuration
         env:
@@ -55,12 +51,11 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           RELEASE_DIR: ${{ github.workspace }}
           PUBLIC_DOMAIN: app.example.com
-          MUNICIPAL_DOMAIN: gestao.example.com
           POSTGRES_PASSWORD: validation-only
         run: |
           bash -n deploy/deploy.sh
           docker compose -f compose.production.yaml config --quiet
-          docker run --rm -e PUBLIC_DOMAIN -e MUNICIPAL_DOMAIN \
+          docker run --rm -e PUBLIC_DOMAIN \
             -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" \
             caddy:2-alpine caddy adapt --config /etc/caddy/Caddyfile --adapter caddyfile > /dev/null
       - uses: actions/upload-artifact@v4
