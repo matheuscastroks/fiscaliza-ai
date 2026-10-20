@@ -74,11 +74,14 @@ export default function TerritoryScreen() {
 function TerritoryContent() {
   const { colors, mode } = useTheme();
   const insets = useSafeAreaInsets();
-  const pinColors = {
-    proposal: colors.attention,
-    consultation: colors.muted,
-    action: colors.completed,
-  };
+  const pinColors = useMemo(
+    () => ({
+      proposal: colors.attention,
+      consultation: colors.muted,
+      action: colors.completed,
+    }),
+    [colors.attention, colors.muted, colors.completed],
+  );
   const cityStyles = useThemedStyles(createCityStyles);
   const styles = useThemedStyles(createStyles);
 
