@@ -68,9 +68,8 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
       </AppText>
 
       <AppInput
-        label="O que você encontrou?"
         maxLength={5000}
-        placeholder="Ex: Buraco profundo na pista próximo à travessia de pedestres..."
+        placeholder="O que você encontrou? (Ex.: Buraco na pista, poste sem luz...)"
         value={description}
         onChangeText={onDescriptionChange}
         multiline
@@ -81,9 +80,8 @@ export const DescriptionStep: React.FC<DescriptionStepProps> = ({
 
       {/* Título Ajustável */}
       <AppInput
-        label="Título da ocorrência"
         maxLength={120}
-        placeholder="Ex: Buraco na via pública"
+        placeholder="Título da ocorrência (Ex.: Buraco na via pública)"
         value={title}
         onChangeText={onTitleChange}
       />

@@ -240,10 +240,10 @@ export default function HomeScreen() {
           </View>
         )}
         {urgentHighlights.length > 0 && (
-          <HomeHighlights items={urgentHighlights.slice(0, 1)} />
+          <HomeHighlights items={urgentHighlights} />
         )}
         {responses.length > 0 && (
-          <HomeHighlights items={responses.slice(0, 1)} />
+          <HomeHighlights items={responses} />
         )}
         {localItems.some((item) => item.kind === 'proposal') && (
           <View style={cityStyles.section}>
@@ -258,54 +258,82 @@ export default function HomeScreen() {
             />
           </View>
         )}
-        <View style={cityStyles.section}>
-          <AppText variant="sectionTitle">
-            Decisões abertas à participação
-          </AppText>
-          {consultations.slice(0, 3).map((item) => (
-            <CivicRow key={item.id} item={item} />
-          ))}
-          {civic.data && consultations.length === 0 && (
-            <IllustratedEmptyState
-              kind="consultation"
-              description="Nenhuma consulta com prazo aberto neste recorte. Quando a gestão abrir consultas ou audiências com a população, elas aparecerão aqui."
-              height={140}
+        {consultations.length > 0 ? (
+          <View style={cityStyles.section}>
+            <AppText variant="sectionTitle">
+              Decisões abertas à participação
+            </AppText>
+            <CityCarousel
+              key={neighborhood + '-consultations'}
+              label="Decisões abertas à participação"
+              items={consultations}
+              renderItem={(item) => <CivicRow item={item} />}
             />
-          )}
-        </View>
-        <View style={cityStyles.section}>
-          <AppText variant="sectionTitle">Ações públicas</AppText>
-          {actions.slice(0, 3).map((item) => (
-            <CivicRow key={item.id} item={item} />
-          ))}
-          {civic.data && actions.length === 0 && (
-            <IllustratedEmptyState
-              kind="action"
-              description="Nenhuma ação pública programada ou em andamento neste recorte."
-              height={140}
+          </View>
+        ) : (
+          civic.data && (
+            <View style={cityStyles.section}>
+              <AppText variant="sectionTitle">
+                Decisões abertas à participação
+              </AppText>
+              <IllustratedEmptyState
+                kind="consultation"
+                description="Nenhuma consulta com prazo aberto neste recorte. Quando a gestão abrir consultas ou audiências com a população, elas aparecerão aqui."
+                height={140}
+              />
+            </View>
+          )
+        )}
+        {actions.length > 0 ? (
+          <View style={cityStyles.section}>
+            <AppText variant="sectionTitle">Ações públicas</AppText>
+            <CityCarousel
+              key={neighborhood + '-actions'}
+              label="Ações públicas"
+              items={actions}
+              renderItem={(item) => <CivicRow item={item} />}
             />
-          )}
-        </View>
+          </View>
+        ) : (
+          civic.data && (
+            <View style={cityStyles.section}>
+              <AppText variant="sectionTitle">Ações públicas</AppText>
+              <IllustratedEmptyState
+                kind="action"
+                description="Nenhuma ação pública programada ou em andamento neste recorte."
+                height={140}
+              />
+            </View>
+          )
+        )}
         <View style={cityStyles.section}>
           <AppText variant="sectionTitle">Meus acompanhamentos</AppText>
-          {localActivity.slice(0, 2).map((item) => (
-            <OccurrenceRow
-              key={item.id}
-              problem={item}
-              onPress={() =>
-                router.push({
-                  pathname: '/ProblemDetailsScreen',
-                  params: { id: item.id },
-                })
-              }
+          {localActivity.length > 0 ? (
+            <CityCarousel
+              key={neighborhood + '-activity'}
+              label="Meus acompanhamentos"
+              items={localActivity}
+              renderItem={(item) => (
+                <OccurrenceRow
+                  problem={item}
+                  featured
+                  onPress={() =>
+                    router.push({
+                      pathname: '/ProblemDetailsScreen',
+                      params: { id: item.id },
+                    })
+                  }
+                />
+              )}
             />
-          ))}
-          {activity.data && localActivity.length === 0 && (
-            <IllustratedEmptyState
-              kind="empty"
-              description="Seus registros e acompanhamentos deste território aparecerão aqui."
-              height={140}
-            />
+          ) : (
+            activity.data && (
+              <IllustratedEmptyState
+                kind="empty"
+                description="Seus registros e acompanhamentos deste território aparecerão aqui."
+                height={140}
+              />
+            )
           )}
           <AppButton
             title="Ver todos os acompanhamentos"

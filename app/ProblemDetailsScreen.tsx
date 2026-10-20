@@ -231,7 +231,7 @@ export default function ProblemDetailsScreen() {
                     ))}
                   </View>
                   <AppInput
-                    label="Comentário (opcional)"
+                    placeholder="Comentário sobre a resolução (opcional)..."
                     value={reason}
                     onChangeText={setReason}
                     multiline
@@ -257,7 +257,7 @@ export default function ProblemDetailsScreen() {
               <CommunityComment key={c.id} comment={c} path={path} />
             ))}
             <AppInput
-              label="Complementar o registro"
+              placeholder="Complementar o registro com novas informações..."
               value={comment}
               onChangeText={setComment}
               multiline

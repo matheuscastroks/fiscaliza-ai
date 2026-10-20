@@ -309,7 +309,7 @@ export default function CivicDetailsScreen() {
               <CommunityComment key={c.id} comment={c} path={path} />
             ))}
             <AppInput
-              label="Adicionar informação"
+              placeholder="Adicionar informação..."
               value={comment}
               onChangeText={setComment}
               multiline

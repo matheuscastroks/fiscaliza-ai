@@ -90,7 +90,7 @@ export function CommentActions({
         {mode === 'edit' && (
           <>
             <AppInput
-              label="Comentário"
+              placeholder="Editar comentário..."
               value={text}
               onChangeText={setText}
               multiline

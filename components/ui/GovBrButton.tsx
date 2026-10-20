@@ -58,7 +58,7 @@ export const GovBrButton: React.FC<GovBrButtonProps> = ({
         disabled={disabled || loading}
         accessibilityRole="button"
         accessibilityLabel="Entrar com gov.br"
-        accessibilityHint="Autenticação unificada do governo federal para assegurar autoria cidadã"
+        accessibilityHint="Identificação com conta gov.br"
       >
         {loading ? (
           <ActivityIndicator size="small" color="#FFFFFF" />
@@ -106,27 +106,15 @@ export const GovBrButton: React.FC<GovBrButtonProps> = ({
             </View>
 
             <AppText variant="sectionTitle" color="ink" style={{ marginTop: spacing.xs }}>
-              Acesso Cidadão com gov.br
+              Acesso com gov.br
             </AppText>
 
-            <AppText color="muted" style={{ marginTop: spacing.xs, lineHeight: 22 }}>
-              A autenticação direta via conta gov.br será o meio oficial de identificação no Fiscaliza aí.
+            <AppText color="muted" style={{ marginTop: spacing.sm, lineHeight: 22 }}>
+              Esta aplicação é um protótipo acadêmico e não possui convênio nem integração técnica com o sistema gov.br.
             </AppText>
 
-            <View style={[styles.infoBox, { backgroundColor: colors.canvas, borderColor: colors.border }]}>
-              <Ionicons name="finger-print" size={22} color={colors.accent} style={{ marginTop: 2 }} />
-              <View style={{ flex: 1, gap: 4 }}>
-                <AppText variant="label" color="ink">
-                  Autoria e Legitimidade
-                </AppText>
-                <AppText variant="meta" color="muted">
-                  Garante que cada relato, voto e proposta parta de uma pessoa real do município, prevenindo contas automatizadas e assegurando valor público ao debate.
-                </AppText>
-              </View>
-            </View>
-
-            <AppText variant="caption" color="subtle" style={{ marginTop: spacing.xs }}>
-              A integração SSO federal está em fase de homologação. No momento, você pode utilizar o acesso com e-mail e senha abaixo.
+            <AppText variant="caption" color="subtle" style={{ marginTop: spacing.sm, lineHeight: 20 }}>
+              Para acessar a demonstração, utilize e-mail e senha no formulário da tela.
             </AppText>
 
             <AppButton
@@ -223,13 +211,5 @@ const styles = StyleSheet.create({
     color: '#1351B4',
     fontWeight: '800',
     fontSize: 13,
-  },
-  infoBox: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: layout.radius.sm,
-    borderWidth: layout.borderWidth.hairline,
-    marginTop: spacing.md,
   },
 });

@@ -9,6 +9,7 @@ import { AppText } from '@/components/ui/AppText';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
 import { useCityQuery } from '@/features/city/useCityQuery';
 import { CivicRow, QueryState, createCityStyles } from '@/features/city/CityUI';
+import { CityCarousel } from '@/features/city/CityCarousel';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useTerritorySelection } from '@/stores/territoryStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -27,6 +28,7 @@ export default function ResultsScreen() {
   const occurrences = useCityQuery<Occurrence[]>('/occurrences');
   const profileNeighborhood = useAuthStore((state) => state.user?.neighborhood);
   const { neighborhood, setNeighborhood } = useTerritorySelection();
+
   const results =
     civic.data?.filter(
       (item) =>
@@ -36,12 +38,26 @@ export default function ResultsScreen() {
           item.status === 'accepted' ||
           item.status === 'declined'),
     ) || [];
+
   const resolved =
     occurrences.data?.filter(
       (item) =>
         item.status === 'resolved' &&
         occurrenceMatchesNeighborhood(item, neighborhood),
     ) || [];
+
+  const completedActions = results.filter((item) => item.kind === 'action');
+  const decidedProposals = results.filter((item) => item.kind === 'proposal');
+  const closedConsultations = results.filter(
+    (item) => item.kind === 'consultation',
+  );
+
+  const hasResults =
+    completedActions.length > 0 ||
+    decidedProposals.length > 0 ||
+    closedConsultations.length > 0 ||
+    resolved.length > 0;
+
   return (
     <AppScreen>
       <AppHeader title="Resultados da cidade" onBack={() => goBack()} />
@@ -80,8 +96,7 @@ export default function ResultsScreen() {
         occurrences.data &&
         !civic.error &&
         !occurrences.error &&
-        results.length === 0 &&
-        resolved.length === 0 ? (
+        !hasResults ? (
           <IllustratedEmptyState
             kind="target"
             title="Nenhum resultado neste recorte"
@@ -101,39 +116,66 @@ export default function ResultsScreen() {
           />
         ) : (
           <>
-            <View style={cityStyles.section}>
-              <AppText variant="sectionTitle">Decisões e entregas</AppText>
-              {results.map((item) => (
-                <CivicRow key={item.id} item={item} />
-              ))}
-              {civic.data && results.length === 0 && (
-                <AppText color="muted">
-                  Ainda não há decisões ou ações concluídas publicadas neste
-                  recorte.
+            {completedActions.length > 0 && (
+              <View style={cityStyles.section}>
+                <AppText variant="sectionTitle">
+                  Ações públicas concluídas
                 </AppText>
-              )}
-            </View>
-            <View style={cityStyles.section}>
-              <AppText variant="sectionTitle">Atendimentos concluídos</AppText>
-              {resolved.map((item) => (
-                <OccurrenceRow
-                  key={item.id}
-                  problem={item}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/ProblemDetailsScreen',
-                      params: { id: item.id },
-                    })
-                  }
+                <CityCarousel
+                  key={neighborhood + '-actions'}
+                  label="Ações públicas concluídas"
+                  items={completedActions}
+                  renderItem={(item) => <CivicRow item={item} />}
                 />
-              ))}
-              {occurrences.data && resolved.length === 0 && (
-                <AppText color="muted">
-                  Os atendimentos aparecerão aqui quando a gestão publicar a
-                  conclusão.
-                </AppText>
-              )}
-            </View>
+              </View>
+            )}
+
+            {resolved.length > 0 && (
+              <View style={cityStyles.section}>
+                <AppText variant="sectionTitle">Atendimentos concluídos</AppText>
+                <CityCarousel
+                  key={neighborhood + '-resolved'}
+                  label="Atendimentos concluídos"
+                  items={resolved}
+                  renderItem={(problem) => (
+                    <OccurrenceRow
+                      problem={problem}
+                      featured
+                      onPress={() =>
+                        router.push({
+                          pathname: '/ProblemDetailsScreen',
+                          params: { id: problem.id },
+                        })
+                      }
+                    />
+                  )}
+                />
+              </View>
+            )}
+
+            {decidedProposals.length > 0 && (
+              <View style={cityStyles.section}>
+                <AppText variant="sectionTitle">Propostas decididas</AppText>
+                <CityCarousel
+                  key={neighborhood + '-proposals'}
+                  label="Propostas decididas"
+                  items={decidedProposals}
+                  renderItem={(item) => <CivicRow item={item} />}
+                />
+              </View>
+            )}
+
+            {closedConsultations.length > 0 && (
+              <View style={cityStyles.section}>
+                <AppText variant="sectionTitle">Consultas encerradas</AppText>
+                <CityCarousel
+                  key={neighborhood + '-consultations'}
+                  label="Consultas encerradas"
+                  items={closedConsultations}
+                  renderItem={(item) => <CivicRow item={item} />}
+                />
+              </View>
+            )}
           </>
         )}
       </ScrollView>

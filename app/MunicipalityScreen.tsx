@@ -117,8 +117,7 @@ export default function MunicipalityScreen() {
                 </AppText>
               )}
               <AppInput
-                label="CEP"
-                placeholder="00000-000"
+                placeholder="Digite seu CEP (00000-000)"
                 value={postalCode}
                 maxLength={9}
                 keyboardType="number-pad"

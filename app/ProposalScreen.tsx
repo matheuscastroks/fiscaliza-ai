@@ -224,16 +224,14 @@ function ProposalForm() {
         <View style={styles.section}>
           <AppText variant="sectionTitle">Sua ideia para a cidade</AppText>
           <AppInput
-            label="Título da proposta"
-            placeholder="Ex.: Mais sombra e bancos na praça"
+            placeholder="Título da proposta (ex.: Mais sombra e bancos na praça)"
             value={title}
             onChangeText={setTitle}
             maxLength={120}
             editable={!save.isPending}
           />
           <AppInput
-            label="O que mudar e por quê"
-            placeholder="Conte como a melhoria ajudaria quem usa esse espaço."
+            placeholder="O que mudar e por quê? Conte como a melhoria ajudaria quem usa esse espaço."
             value={body}
             onChangeText={setBody}
             multiline
@@ -269,7 +267,7 @@ function ProposalForm() {
           />
           {scope === 'neighborhood' && (
             <AppInput
-              label="Bairro"
+              placeholder="Nome do bairro"
               value={neighborhood}
               onChangeText={setNeighborhood}
               maxLength={100}

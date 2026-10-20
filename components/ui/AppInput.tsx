@@ -16,7 +16,8 @@ import { useKeyboardAwareInput } from './KeyboardAwareScrollView';
 import { fontFamilies } from '@/theme/typography';
 
 export interface AppInputProps extends TextInputProps {
-  label: string;
+  label?: string;
+  showLabel?: boolean;
   error?: string | null;
   helper?: string;
   containerStyle?: ViewStyle;
@@ -24,6 +25,8 @@ export interface AppInputProps extends TextInputProps {
 
 export const AppInput: React.FC<AppInputProps> = ({
   label,
+  showLabel = false,
+  placeholder,
   error,
   helper,
   containerStyle,
@@ -52,16 +55,23 @@ export const AppInput: React.FC<AppInputProps> = ({
     onBlur?.(e);
   };
 
+  const effectivePlaceholder = placeholder || label;
+  const effectiveAccessibilityLabel =
+    rest.accessibilityLabel || label || placeholder;
+
   return (
     <View style={[styles.container, containerStyle]}>
-      <AppText variant="label" color="ink" style={styles.label}>
-        {label}
-      </AppText>
+      {showLabel && label ? (
+        <AppText variant="label" color="ink" style={styles.label}>
+          {label}
+        </AppText>
+      ) : null}
       <TextInput
         ref={input}
         keyboardAppearance={mode}
-        accessibilityLabel={label}
+        accessibilityLabel={effectiveAccessibilityLabel}
         accessibilityHint={error || helper}
+        placeholder={effectivePlaceholder}
         style={[
           styles.input,
           rest.multiline && styles.multiline,
