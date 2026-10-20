@@ -438,7 +438,7 @@ export function OsmMapView({
     updateMarkers(${scriptJson(markers)}, currentSelectedId, currentSelectedClusterIds);
 
     var boundaryLayer = L.geoJSON(null, { style: { color: '#6A7781', weight: 2, fillOpacity: 0.06 }, interactive: false }).addTo(map);
-    window.setBoundary = function(geometry) { boundaryLayer.clearLayers(); if (geometry) boundaryLayer.addData({type:'Feature', properties:{}, geometry:geometry}); };
+    window.setBoundary = function(geometry) { boundaryLayer.clearLayers(); if (geometry) { boundaryLayer.addData({type:'Feature', properties:{}, geometry:geometry}); if (boundaryLayer.getBounds().isValid()) map.fitBounds(boundaryLayer.getBounds(), { padding: [32,32], maxZoom: 15 }); } };
     window.setBoundary(${scriptJson(boundary || null)});
     window.addEventListener('message', function(event) {
       if (event.source !== window.parent) return;

@@ -141,7 +141,7 @@ Definir `TerritorialGeometry` como GeoJSON Point/Polygon/MultiPolygon com coorde
 - [x] Integrar queries com chaves por município, bairro, camadas, busca, bbox e página; fontes públicas não dependem de login. Cancelar ou ignorar resposta obsoleta; filtros de serviço/situação/período só afetam chamados. Manter “Todo o município” inicialmente e bairro do CEP na sequência, sem inferir código de bairro pelo CEP.
 - [x] Seletor horizontal combina camadas; padrão inicial mantém chamados para continuidade. Escolas/saúde/praças usam ícones próprios e detalhe sem ações de atendimento. Ícones/seleção legíveis em claro/escuro, hit targets >=44 e rótulos acessíveis. Reutilizar componentes Expo existentes; consultar skills expo-ui/native-ui/data-fetching na execução.
 - [x] Estender `MarkerKind` e o protocolo JSON do mapa para categoria e limites GeoJSON; renderizar shapes sem interpolar texto cadastral em HTML. Testar escape de nome com markup. Marcadores exibem ponto interno de praça; polígono preservado no detalhe. Preservar clustering, raio visual, busca na área e bordas arredondadas.
-- [x] Cada camada tem loading/erro/retry e fonte/período próprios; mostrar contagem exibida e total ou desconhecido. “Carregar mais” pagina por camada sem reiniciar as demais. Detalhe abre drawer com dados reais, sem imagem fictícia. Rodar tipos/lint e inspeção web mobile/desktop; comitar `feat(territorio): explorar equipamentos em camadas`.
+- [ ] Cada camada tem loading/erro/retry e fonte/período próprios; mostrar contagem exibida e total ou desconhecido. “Carregar mais” pagina por camada sem reiniciar as demais. Detalhe abre drawer com dados reais, sem imagem fictícia. Rodar tipos/lint e inspeção web mobile/desktop; comitar `feat(territorio): explorar equipamentos em camadas`.
 
 ## Tarefa 8 — Página de bairro com evidências
 
@@ -149,10 +149,12 @@ Definir `TerritorialGeometry` como GeoJSON Point/Polygon/MultiPolygon com coorde
 
 **Interfaces:** `fetchNeighborhoodOverview(id: string, dates: { startDate: string; endDate: string }): Promise<NeighborhoodOverview>`; `useNeighborhoodOverview(id, dates)`. Rota `/NeighborhoodScreen?neighborhoodId=...` com ID canônico validado; links para Território preservam bairro, categoria e datas.
 
-- [ ] Testar seletores de apresentação: `unknown facility count is not zero`, `historical range is explicit`, `partial source never produces complete neighborhood claim` e `links preserve the evidence scope`. Bairro inexistente tem recuperação para seleção, sem crash ou fallback silencioso.
-- [ ] Compor equipamentos por categoria, tipos de demandas e período visível; mostrar intervalo solicitado e disponível quando divergem, fonte e publicação. Dados antigos não viram “agora”; chamadas sem coordenadas continuam nas contagens com cobertura de mapa informada. Não criar score de qualidade de vida ou causalidade.
-- [ ] Oferecer entrada na Home após escolher bairro e na exploração territorial. Enquanto “Todo o município” estiver ativo, oferecer escolher bairro; não escolher um bairro arbitrário. Detalhe e Home suportam pull-to-refresh como os fluxos atuais.
+- [x] Testar seletores de apresentação: `unknown facility count is not zero`, `historical range is explicit`, `partial source never produces complete neighborhood claim` e `links preserve the evidence scope`. Bairro inexistente tem recuperação para seleção, sem crash ou fallback silencioso.
+- [x] Compor equipamentos por categoria, tipos de demandas e período visível; mostrar intervalo solicitado e disponível quando divergem, fonte e publicação. Dados antigos não viram “agora”; chamadas sem coordenadas continuam nas contagens com cobertura de mapa informada. Não criar score de qualidade de vida ou causalidade.
+- [x] Oferecer entrada na Home após escolher bairro e na exploração territorial. Enquanto “Todo o município” estiver ativo, oferecer escolher bairro; não escolher um bairro arbitrário. Detalhe e Home suportam pull-to-refresh como os fluxos atuais.
 - [ ] Inspecionar respostas atrasadas após trocar bairro/conta, duas fontes indisponíveis e nenhuma escola no snapshot. Validar UI sem overflow em 320 px e desktop, fonte ampliada e leitor de tela; rodar testes/tipos e comitar `feat(bairro): conectar servicos e demandas com evidencias`.
+
+Validação visual integrada à tarefa 9; implementação e verificações de código concluídas nesta tarefa.
 
 ## Tarefa 9 — Produto, CI e entrega verificada
 

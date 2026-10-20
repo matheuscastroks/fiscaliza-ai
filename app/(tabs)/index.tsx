@@ -1,3 +1,4 @@
+import { NeighborhoodEntry } from '@/features/territory/NeighborhoodEntry';
 import React, { useState } from 'react';
 import {
   ScrollView,
@@ -36,18 +37,24 @@ export default function HomeScreen() {
 
   const [refreshing, setRefreshing] = useState(false);
   const user = useAuthStore((s) => s.user);
-  const { neighborhood, setNeighborhood } = useTerritorySelection();
+  const { neighborhood, neighborhoodId, setNeighborhood } =
+    useTerritorySelection();
 
-  const officialOverview = useOfficialOverview(neighborhood || undefined);
+  const officialOverview = useOfficialOverview({
+    neighborhoodId,
+    bairro: neighborhoodId ? undefined : neighborhood || undefined,
+  });
   const officialFilters = useOfficialFilters();
   const recentCalls = useOfficialCalls({
-    bairro: neighborhood || undefined,
+    neighborhoodId,
+    bairro: neighborhoodId ? undefined : neighborhood || undefined,
     limit: 15,
   });
 
   const bairroOptions = officialFilters.data?.bairros || [];
   const calls = recentCalls.data?.calls || [];
-  const totalInSelection = recentCalls.data?.total ?? officialOverview.data?.totalCalls ?? 0;
+  const totalInSelection =
+    recentCalls.data?.total ?? officialOverview.data?.totalCalls ?? 0;
 
   const refresh = () => {
     void officialOverview.refetch();
@@ -72,7 +79,7 @@ export default function HomeScreen() {
     <AppScreen>
       <AppHeader
         title={`Olá, ${user?.name ? user.name.split(' ')[0] : 'Cidadão'}`}
-        context="Rio de Janeiro · RJ · Inteligência 1746"
+        context="Rio de Janeiro · Sua cidade por perto"
       />
       <ScrollView
         contentContainerStyle={[cityStyles.content, { flexGrow: 1 }]}
@@ -110,6 +117,11 @@ export default function HomeScreen() {
           />
         </View>
 
+        <NeighborhoodEntry
+          neighborhoodId={neighborhoodId}
+          neighborhood={neighborhood}
+        />
+
         <View style={cityStyles.section}>
           <Rio1746OverviewCard
             overview={officialOverview.data}
@@ -125,33 +137,39 @@ export default function HomeScreen() {
                 Bairros com maior volume de chamados
               </AppText>
               <View style={styles.neighborhoodGrid}>
-                {officialOverview.data.topNeighborhoods.slice(0, 6).map((item) => (
-                  <Pressable
-                    key={item.neighborhood}
-                    style={({ pressed }) => [
-                      styles.neighborhoodChip,
-                      pressed && { opacity: 0.75 },
-                    ]}
-                    onPress={() => setNeighborhood(item.neighborhood)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Filtrar por ${item.neighborhood}, ${item.count} chamados`}
-                  >
-                    <View style={styles.neighborhoodChipHeader}>
-                      <Ionicons name="location-outline" size={14} color="#0072BB" />
-                      <AppText
-                        variant="label"
-                        color="ink"
-                        numberOfLines={1}
-                        style={{ flex: 1 }}
-                      >
-                        {item.neighborhood}
+                {officialOverview.data.topNeighborhoods
+                  .slice(0, 6)
+                  .map((item) => (
+                    <Pressable
+                      key={item.neighborhood}
+                      style={({ pressed }) => [
+                        styles.neighborhoodChip,
+                        pressed && { opacity: 0.75 },
+                      ]}
+                      onPress={() => setNeighborhood(item.neighborhood)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Filtrar por ${item.neighborhood}, ${item.count} chamados`}
+                    >
+                      <View style={styles.neighborhoodChipHeader}>
+                        <Ionicons
+                          name="location-outline"
+                          size={14}
+                          color="#0072BB"
+                        />
+                        <AppText
+                          variant="label"
+                          color="ink"
+                          numberOfLines={1}
+                          style={{ flex: 1 }}
+                        >
+                          {item.neighborhood}
+                        </AppText>
+                      </View>
+                      <AppText variant="caption" color="muted">
+                        {item.count.toLocaleString('pt-BR')} chamados
                       </AppText>
-                    </View>
-                    <AppText variant="caption" color="muted">
-                      {item.count.toLocaleString('pt-BR')} chamados
-                    </AppText>
-                  </Pressable>
-                ))}
+                    </Pressable>
+                  ))}
               </View>
             </View>
           )}
@@ -169,7 +187,9 @@ export default function HomeScreen() {
               title="Nenhum chamado 1746 neste recorte"
               description="Não encontramos chamados sincronizados para este filtro no momento."
               action={{
-                title: neighborhood ? 'Limpar filtro de bairro' : 'Explorar o mapa',
+                title: neighborhood
+                  ? 'Limpar filtro de bairro'
+                  : 'Explorar o mapa',
                 onPress: () =>
                   neighborhood
                     ? setNeighborhood('')

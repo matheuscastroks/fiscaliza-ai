@@ -1,6 +1,7 @@
 import { LayerPicker } from '@/components/territory/LayerPicker';
 import { FacilityRow, facilityTitle } from '@/components/territory/FacilityRow';
 import {
+  usePublicSources,
   usePublicFacilities,
   useNeighborhoods,
   useNeighborhoodBoundary,
@@ -16,7 +17,14 @@ import type { ThemeColors } from '@/theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { layout } from '@/theme/layout';
 import React, { useMemo, useState, useEffect } from 'react';
-import { RefreshControl, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  RefreshControl,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
@@ -93,14 +101,46 @@ function TerritoryContent() {
   const municipality = user?.municipality;
   const initial = useMemo(
     () => ({
-      ...municipalityRegion(municipality),
+      ...(municipality
+        ? municipalityRegion(municipality)
+        : {
+            latitude: -22.92,
+            longitude: -43.32,
+            latitudeDelta: 0.4,
+            longitudeDelta: 0.55,
+          }),
       zoom: 12,
     }),
     [municipality],
   );
 
-  const { neighborhood, neighborhoodId, setNeighborhood } =
-    useTerritorySelection();
+  const {
+    neighborhoodId: routeNeighborhoodId,
+    layer: routeLayer,
+    startDate,
+    endDate,
+    filters,
+    focusId,
+    lat,
+    lng,
+    neighborhood: paramNeighborhood,
+  } = useLocalSearchParams<{
+    neighborhoodId?: string;
+    layer?: string;
+    startDate?: string;
+    endDate?: string;
+    filters?: string;
+    focusId?: string;
+    lat?: string;
+    lng?: string;
+    neighborhood?: string;
+  }>();
+  const {
+    neighborhood,
+    neighborhoodId: storedNeighborhoodId,
+    setNeighborhood,
+  } = useTerritorySelection();
+  const neighborhoodId = routeNeighborhoodId || storedNeighborhoodId;
   const layers = useTerritoryStore((s) => s.layers);
   const setLayers = useTerritoryStore((s) => s.setLayers);
   const neighborhoods = useNeighborhoods();
@@ -150,13 +190,22 @@ function TerritoryContent() {
     layers.includes('square') && (!neighborhood || Boolean(neighborhoodId)),
   );
   const facilityQueries = { school: schools, health, square: squares };
+  const sources = usePublicSources();
+  const officialSource = sources.data?.find((s) => s.sourceId === 'rio1746');
   const officialFilters = useOfficialFilters();
   const officialOverview = useOfficialOverview({
     neighborhoodId,
     bairro: neighborhoodId ? undefined : neighborhood || undefined,
     tipo: serviceType === 'all' ? undefined : serviceType,
     situacao: status === 'all' ? undefined : status,
-    periodDays: period === 'all' ? undefined : Number(period),
+    startDate,
+    endDate,
+    periodDays:
+      startDate || endDate
+        ? undefined
+        : period === 'all'
+          ? undefined
+          : Number(period),
   });
   const officialCalls = useOfficialCalls({
     neighborhoodId,
@@ -197,27 +246,13 @@ function TerritoryContent() {
 
   const periodOptions = useMemo(
     () => [
-      { value: '30', label: 'Últimos 30 dias' },
-      { value: '7', label: 'Últimos 7 dias' },
-      { value: '1', label: 'Últimas 24h' },
+      { value: '30', label: '30 dias da base' },
+      { value: '7', label: '7 dias da base' },
+      { value: '1', label: '1 dia da base' },
       { value: 'all', label: 'Todo o período' },
     ],
     [],
   );
-
-  const {
-    filters,
-    focusId,
-    lat,
-    lng,
-    neighborhood: paramNeighborhood,
-  } = useLocalSearchParams<{
-    filters?: string;
-    focusId?: string;
-    lat?: string;
-    lng?: string;
-    neighborhood?: string;
-  }>();
 
   const [filterVisibility, setFilterVisibility] = useState<{
     param?: string;
@@ -229,6 +264,24 @@ function TerritoryContent() {
       : Boolean(filters);
   const setFiltersOpen = (open: boolean) =>
     setFilterVisibility({ param: filters, open });
+
+  useEffect(() => {
+    if (!routeNeighborhoodId && !routeLayer) return;
+    const target = neighborhoods.data?.find(
+      (n) => n.id === routeNeighborhoodId,
+    );
+    if (target) setNeighborhood(target.name);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setStatus('all'); setServiceType('all'); setSearch(''); setAreaOnly(false); setAppliedBounds(null);
+    if (['official', 'school', 'health', 'square'].includes(routeLayer || ''))
+      setLayers([routeLayer as 'official']);
+  }, [
+    routeNeighborhoodId,
+    routeLayer,
+    neighborhoods.data,
+    setNeighborhood,
+    setLayers,
+  ]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<{
@@ -476,6 +529,12 @@ function TerritoryContent() {
     setSearch('');
     setServiceType('all');
     setPeriod('30');
+    router.setParams({
+      neighborhoodId: undefined,
+      layer: undefined,
+      startDate: undefined,
+      endDate: undefined,
+    });
     setSelectedId(null);
     setSelectedCluster(null);
     setStatus('all');
@@ -546,6 +605,26 @@ function TerritoryContent() {
   const renderLayerControls = () => (
     <View style={{ gap: 4 }}>
       <LayerPicker value={layers} onChange={setLayers} />
+      {neighborhoodId && (
+        <AppButton
+          title="Conhecer este bairro"
+          variant="secondary"
+          onPress={() =>
+            router.push({
+              pathname: '/NeighborhoodScreen',
+              params: { neighborhoodId },
+            })
+          }
+        />
+      )}
+      {startDate && endDate && (
+        <AppText
+          variant="caption"
+          style={{ backgroundColor: colors.surface, padding: 5 }}
+        >
+          1746 · {startDate} a {endDate}
+        </AppText>
+      )}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -561,8 +640,9 @@ function TerritoryContent() {
             }}
           >
             1746 ·{' '}
-            {officialCalls.data?.territoryConfirmed === false
-              ? 'Bairro não confirmado'
+            {officialSource?.state === 'unavailable' ||
+            officialCalls.data?.territoryConfirmed === false
+              ? 'Cobertura não confirmada'
               : officialCalls.isLoading
                 ? 'Carregando'
                 : officialCalls.error
@@ -644,6 +724,7 @@ function TerritoryContent() {
         value={neighborhood}
         onChange={(value) => {
           setNeighborhood(value);
+          router.setParams({ neighborhoodId: undefined, layer: undefined });
           setAreaOnly(false);
           setAppliedBounds(null);
           setPageLimit(300);
@@ -677,6 +758,7 @@ function TerritoryContent() {
         value={period}
         onChange={(value) => {
           setPeriod(value);
+          router.setParams({ startDate: undefined, endDate: undefined });
           setPageLimit(300);
           setSelectedId(null);
           setSelectedCluster(null);
@@ -1076,6 +1158,10 @@ function TerritoryContent() {
                   value={neighborhood}
                   onChange={(value) => {
                     setNeighborhood(value);
+                    router.setParams({
+                      neighborhoodId: undefined,
+                      layer: undefined,
+                    });
                     setSelectedId(null);
                   }}
                 />

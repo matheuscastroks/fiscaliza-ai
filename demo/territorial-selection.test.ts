@@ -7,6 +7,28 @@ import {
   samePublication,
   scriptJson,
 } from '../features/territory/selectors.ts';
+import {
+  countLabel,
+  coverageLabel,
+  evidenceScope,
+  periodLabel,
+} from '../features/territory/evidence.ts';
+
+test('unknown facility count is not zero and partial source never claims complete coverage', () => {
+  assert.equal(countLabel(null), 'Indisponível');
+  assert.equal(countLabel(0), '0');
+  assert.equal(coverageLabel('partial'), 'Cobertura parcial');
+  assert.equal(coverageLabel('unknown'), 'Cobertura não confirmada');
+});
+test('historical ranges and links preserve their evidence scope', () => {
+  const dates = { startDate: '2024-01-01', endDate: '2024-01-31' };
+  assert.equal(periodLabel(dates), '01/01/2024 a 31/01/2024');
+  assert.deepEqual(evidenceScope('rio-neighborhood:005', 'school', dates), {
+    neighborhoodId: 'rio-neighborhood:005',
+    layer: 'school',
+    ...dates,
+  });
+});
 
 test('official filters never remove facilities and selected layers determine map and list entries', () => {
   const facilities = [
