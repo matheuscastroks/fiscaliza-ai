@@ -1,7 +1,7 @@
 # Inteligência territorial — primeira entrega
 
 Data: 20/10/2026. Base inspecionada: `3dd8a10`, branch `main` limpa.
-Estado: direção de produto aprovada na conversa; especificação técnica para revisão. Nenhuma integração nova foi implementada nesta etapa.
+Estado: direção de produto e especificação técnica aprovadas na conversa em 20/10/2026. Nenhuma integração nova foi implementada nesta etapa.
 
 ## Resultado esperado
 
