@@ -80,7 +80,7 @@ test('regionToCameraPosition converts region deltas to bounded zoom and coordina
   assert.equal(streetCamera.zoom, 15);
 });
 
-test('TerritoryScreen and LocationStep use AppleMaps.View and GoogleMaps.View from expo-maps', () => {
+test('TerritoryScreen and LocationStep integrate OsmMapView for Expo Go support', () => {
   const territorySource = fs.readFileSync(
     'app/(tabs)/TerritoryScreen.tsx',
     'utf8',
@@ -99,13 +99,8 @@ test('TerritoryScreen and LocationStep use AppleMaps.View and GoogleMaps.View fr
       `${name} should not reference react-native-maps`,
     );
     assert.ok(
-      source.includes("requireOptionalNativeModule('ExpoMaps')") &&
-        source.includes("require('expo-maps')"),
-      `${name} should guard require('expo-maps') with requireOptionalNativeModule('ExpoMaps')`,
-    );
-    assert.ok(
-      source.includes('AppleMaps.View') && source.includes('GoogleMaps.View'),
-      `${name} should render AppleMaps.View on iOS and GoogleMaps.View on Android`,
+      source.includes('OsmMapView'),
+      `${name} should integrate OsmMapView for universal map display in Expo Go`,
     );
   }
 });
