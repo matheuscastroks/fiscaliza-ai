@@ -18,8 +18,6 @@ import { useCityQuery } from '@/features/city/useCityQuery';
 import type { CivicItem, Occurrence } from '@/shared/contracts';
 import { useAuthStore } from '@/stores/authStore';
 import { useFollowStore } from '@/stores/followStore';
-import { Ionicons } from '@expo/vector-icons';
-import { Pressable } from 'react-native';
 
 export default function FollowScreen() {
   const { colors } = useTheme();
@@ -107,49 +105,6 @@ export default function FollowScreen() {
           error={query.error}
           retry={query.refetch}
         />
-
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            backgroundColor: colors.surface,
-            borderRadius: 12,
-            paddingHorizontal: 14,
-            paddingVertical: 10,
-            borderWidth: 1,
-            borderColor: colors.border,
-            marginHorizontal: 16,
-            marginBottom: 8,
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Ionicons
-              name={isOpen ? 'time-outline' : 'checkmark-circle-outline'}
-              size={16}
-              color={isOpen ? colors.attention : colors.completed}
-            />
-            <AppText variant="caption" style={{ fontWeight: '600' }}>
-              {isOpen
-                ? 'Demandas em andamento'
-                : 'Demandas resolvidas / concluídas'}
-            </AppText>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              isOpen ? 'Ver demandas resolvidas' : 'Ver demandas em aberto'
-            }
-            onPress={toggleStatusFilter}
-          >
-            <AppText
-              variant="caption"
-              style={{ color: colors.attention, fontWeight: '700' }}
-            >
-              {isOpen ? 'Ver resolvidas' : 'Ver em aberto'}
-            </AppText>
-          </Pressable>
-        </View>
 
         {query.data && !query.error && !hasLocalContent && (
           <IllustratedEmptyState
