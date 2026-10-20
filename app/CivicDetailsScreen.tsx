@@ -14,6 +14,8 @@ import { Image, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import { DetailSheet, DetailSection } from '@/components/ui/DetailSheet';
+import { ItemLocationMap } from '@/components/ui/ItemLocationMap';
+import { civicLocation } from '@/shared/civic-territory';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
@@ -158,6 +160,24 @@ export default function CivicDetailsScreen() {
             <ExecutionProgress progress={item.progress} />
           )}
           <AppText>{item.body}</AppText>
+          {(() => {
+            const point = civicLocation(item);
+            if (!point) return null;
+            const address =
+              item.territory?.scope === 'location'
+                ? item.territory.location.address
+                : undefined;
+            return (
+              <ItemLocationMap
+                latitude={point.latitude}
+                longitude={point.longitude}
+                address={address}
+                neighborhood={item.neighborhood}
+                title={item.title}
+                kind={item.kind}
+              />
+            );
+          })()}
           {item.kind === 'proposal' &&
             item.images?.slice(1).map((url, index) => (
               <Image

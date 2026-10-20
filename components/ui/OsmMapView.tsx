@@ -35,6 +35,7 @@ interface OsmMapViewProps {
     longitude: number;
     latitudeDelta: number;
     longitudeDelta: number;
+    zoom?: number;
   }) => void;
   interactive?: boolean;
   isDark?: boolean;
@@ -52,6 +53,16 @@ export function OsmMapView({
   isDark = false,
 }: OsmMapViewProps) {
   const webViewRef = useRef<WebView>(null);
+  const lastCenterRef = useRef<{
+    latitude: number;
+    longitude: number;
+    zoom?: number;
+  }>({
+    latitude: region.latitude,
+    longitude: region.longitude,
+    zoom: region.zoom,
+  });
+  const lastMarkersJsonRef = useRef<string>('');
 
   const zoom = useMemo(() => {
     if (region.zoom) return region.zoom;
@@ -153,9 +164,21 @@ export function OsmMapView({
 <body>
   <div id="map"></div>
   <script>
+    function postAppMessage(data) {
+      var str = JSON.stringify(data);
+      if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+        window.ReactNativeWebView.postMessage(str);
+      } else if (window.parent && window.parent.postMessage) {
+        window.parent.postMessage(str, '*');
+      }
+    }
+
+    var isProgrammaticMove = false;
     var map = L.map('map', {
       zoomControl: false,
       attributionControl: true,
+      minZoom: 3,
+      maxZoom: 19,
       dragging: ${interactive},
       touchZoom: ${interactive},
       scrollWheelZoom: ${interactive},
@@ -210,20 +233,20 @@ export function OsmMapView({
 
         marker.on('click', function(e) {
           L.DomEvent.stopPropagation(e);
-          window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({
+          postAppMessage({
             type: 'onMarkerClick',
             id: m.id
-          }));
+          });
         });
 
         if (m.draggable) {
           marker.on('dragend', function(e) {
             var latLng = e.target.getLatLng();
-            window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({
+            postAppMessage({
               type: 'onMapClick',
               latitude: latLng.lat,
               longitude: latLng.lng
-            }));
+            });
           });
         }
 
@@ -235,30 +258,37 @@ export function OsmMapView({
     updateMarkers(${JSON.stringify(markers)}, currentSelectedId);
 
     map.on('click', function(e) {
-      window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({
+      postAppMessage({
         type: 'onMapClick',
         latitude: e.latlng.lat,
         longitude: e.latlng.lng
-      }));
+      });
     });
 
     map.on('moveend', function() {
+      if (isProgrammaticMove) {
+        return;
+      }
       var center = map.getCenter();
       var bounds = map.getBounds();
       var latDelta = Math.abs(bounds.getNorth() - bounds.getSouth());
       var lngDelta = Math.abs(bounds.getEast() - bounds.getWest());
-      window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({
+      postAppMessage({
         type: 'onRegionChange',
         latitude: center.lat,
         longitude: center.lng,
         latitudeDelta: latDelta,
         longitudeDelta: lngDelta,
         zoom: map.getZoom()
-      }));
+      });
     });
 
     window.setView = function(lat, lng, zoomLevel) {
-      map.setView([lat, lng], zoomLevel || map.getZoom());
+      isProgrammaticMove = true;
+      map.setView([lat, lng], zoomLevel || map.getZoom(), { animate: false });
+      setTimeout(function() {
+        isProgrammaticMove = false;
+      }, 300);
     };
 
     window.setMarkers = function(newMarkers, newSelectedId) {
@@ -271,14 +301,37 @@ export function OsmMapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDark, interactive]);
 
-  // Sync external region movements
+  // Sync external region movements (ignoring internal move echoes)
   useEffect(() => {
-    const script = `if (window.setView) { window.setView(${region.latitude}, ${region.longitude}, ${zoom}); } true;`;
+    const last = lastCenterRef.current;
+    const currentTargetZoom = region.zoom ?? zoom;
+
+    const isSameLat = Math.abs(region.latitude - last.latitude) < 0.0001;
+    const isSameLng = Math.abs(region.longitude - last.longitude) < 0.0001;
+    const isSameZoom =
+      last.zoom !== undefined
+        ? Math.abs(currentTargetZoom - last.zoom) < 0.2
+        : false;
+
+    if (isSameLat && isSameLng && isSameZoom) {
+      return;
+    }
+
+    lastCenterRef.current = {
+      latitude: region.latitude,
+      longitude: region.longitude,
+      zoom: currentTargetZoom,
+    };
+
+    const script = `if (window.setView) { window.setView(${region.latitude}, ${region.longitude}, ${currentTargetZoom}); } true;`;
     webViewRef.current?.injectJavaScript(script);
-  }, [region.latitude, region.longitude, zoom]);
+  }, [region.latitude, region.longitude, region.zoom, zoom]);
 
   // Sync marker updates efficiently without reloading entire HTML
   useEffect(() => {
+    const payload = JSON.stringify({ markers, selectedId: selectedId || null });
+    if (payload === lastMarkersJsonRef.current) return;
+    lastMarkersJsonRef.current = payload;
     const script = `if (window.setMarkers) { window.setMarkers(${JSON.stringify(markers)}, ${JSON.stringify(selectedId || null)}); } true;`;
     webViewRef.current?.injectJavaScript(script);
   }, [markers, selectedId]);
@@ -300,11 +353,17 @@ export function OsmMapView({
             } else if (data.type === 'onMarkerClick' && onMarkerClick) {
               onMarkerClick(data.id);
             } else if (data.type === 'onRegionChange' && onRegionChange) {
+              lastCenterRef.current = {
+                latitude: data.latitude,
+                longitude: data.longitude,
+                zoom: data.zoom,
+              };
               onRegionChange({
                 latitude: data.latitude,
                 longitude: data.longitude,
                 latitudeDelta: data.latitudeDelta,
                 longitudeDelta: data.longitudeDelta,
+                zoom: data.zoom,
               });
             }
           } catch {}

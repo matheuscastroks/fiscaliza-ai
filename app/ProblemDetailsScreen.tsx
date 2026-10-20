@@ -15,6 +15,7 @@ import { spacing } from '@/theme/spacing';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import { DetailSheet, DetailSection } from '@/components/ui/DetailSheet';
+import { ItemLocationMap } from '@/components/ui/ItemLocationMap';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
@@ -132,6 +133,15 @@ export default function ProblemDetailsScreen() {
             {new Date(item.reportedAt).toLocaleDateString('pt-BR')}
           </AppText>
           <AppText>{item.description}</AppText>
+          <ItemLocationMap
+            latitude={item.location.latitude}
+            longitude={item.location.longitude}
+            address={item.location.address}
+            neighborhood={item.location.neighborhood}
+            title={item.title}
+            kind="occurrence"
+            status={item.status}
+          />
           {item.images.slice(1).map((url, index) => (
             <Image
               key={url}

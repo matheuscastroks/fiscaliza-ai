@@ -46,7 +46,7 @@ import type { CivicItem, Occurrence } from '@/shared/contracts';
 
 import { spacing } from '@/theme/spacing';
 import { useAuthStore } from '@/stores/authStore';
-import { useTerritorySelection } from '@/stores/territoryStore';
+import { useTerritorySelection, useTerritoryViewMode } from '@/stores/territoryStore';
 import { municipalityRegion } from '@/features/city/municipalContext';
 import { OsmMapView, type MapMarker } from '@/components/ui/OsmMapView';
 import { TerritoryPreviewCard, type Entry } from '@/components/territory/TerritoryPreviewCard';
@@ -103,7 +103,7 @@ function TerritoryContent() {
   const [kind, setKind] = useState<Kind>('all');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
-  const [isListView, setIsListView] = useState(false);
+  const { isListView } = useTerritoryViewMode();
   const { filters } = useLocalSearchParams<{ filters?: string }>();
   const [filterVisibility, setFilterVisibility] = useState<{
     param?: string;
@@ -245,24 +245,27 @@ function TerritoryContent() {
     </View>
   );
 
-  const osmMarkers: MapMarker[] = located.flatMap((entry) => {
-    const point = entryLocation(entry);
-    if (!point) return [];
-    const markerKind = entry.type === 'occurrence' ? 'occurrence' : entry.item.kind;
-    return [
-      {
-        id: entry.item.id,
-        latitude: point.latitude,
-        longitude: point.longitude,
-        title: `${entry.type === 'occurrence' ? 'Ocorrência' : kindLabel[entry.item.kind]} · ${entry.item.title}`,
-        color:
-          entry.type === 'occurrence'
-            ? colors.accent
-            : pinColors[entry.item.kind],
-        kind: markerKind,
-      },
-    ];
-  });
+  const osmMarkers: MapMarker[] = useMemo(() => {
+    return located.flatMap((entry) => {
+      const point = entryLocation(entry);
+      if (!point) return [];
+      const markerKind =
+        entry.type === 'occurrence' ? 'occurrence' : entry.item.kind;
+      return [
+        {
+          id: entry.item.id,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          title: `${entry.type === 'occurrence' ? 'Ocorrência' : kindLabel[entry.item.kind]} · ${entry.item.title}`,
+          color:
+            entry.type === 'occurrence'
+              ? colors.accent
+              : pinColors[entry.item.kind],
+          kind: markerKind,
+        },
+      ];
+    });
+  }, [located, colors.accent, pinColors]);
 
   const resetFilters = () => {
     setOrder('date');
@@ -331,6 +334,7 @@ function TerritoryContent() {
               longitude: newRegion.longitude,
               latitudeDelta: newRegion.latitudeDelta,
               longitudeDelta: newRegion.longitudeDelta,
+              zoom: newRegion.zoom,
             }));
           }}
         />
@@ -522,7 +526,12 @@ function TerritoryContent() {
 
       {/* 6. VISUALIZAÇÃO EM LISTA (QUANDO ATIVADA) */}
       {isListView && (
-        <View style={[styles.fullListOverlay, { backgroundColor: colors.canvas }]}>
+        <View
+          style={[
+            styles.fullListOverlay,
+            { backgroundColor: colors.canvas, paddingTop: insets.top },
+          ]}
+        >
           <AppHeader
             title="Território"
             context={
@@ -592,33 +601,6 @@ function TerritoryContent() {
           </ScrollView>
         </View>
       )}
-
-      {/* 7. BOTÃO FLUTUANTE ESTILO QUINTOANDAR / AIRBNB (MAPA <-> LISTA) */}
-      <View
-        style={[
-          styles.switchViewPillWrapper,
-          { bottom: insets.bottom + 20 },
-        ]}
-      >
-        <Pressable
-          style={[styles.switchViewPill, { backgroundColor: colors.ink }]}
-          onPress={() => setIsListView(!isListView)}
-          accessibilityRole="button"
-          accessibilityLabel={isListView ? 'Alternar para visualização no Mapa' : 'Alternar para visualização em Lista'}
-        >
-          <Ionicons
-            name={isListView ? 'map' : 'list'}
-            size={18}
-            color={colors.surface}
-          />
-          <AppText
-            variant="label"
-            style={{ color: colors.surface, fontWeight: '700', fontSize: 13 }}
-          >
-            {isListView ? 'Ver Mapa' : 'Ver Lista'}
-          </AppText>
-        </Pressable>
-      </View>
     </View>
   );
 }
@@ -740,23 +722,5 @@ const createStyles = (colors: ThemeColors) =>
       right: 0,
       bottom: 0,
       zIndex: 60,
-    },
-    switchViewPillWrapper: {
-      position: 'absolute',
-      alignSelf: 'center',
-      zIndex: 70,
-    },
-    switchViewPill: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      paddingHorizontal: 20,
-      paddingVertical: 12,
-      borderRadius: layout.radius.pill,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.25,
-      shadowRadius: 12,
-      elevation: 8,
     },
   });

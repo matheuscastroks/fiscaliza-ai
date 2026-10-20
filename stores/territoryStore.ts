@@ -5,7 +5,16 @@ import { useAuthStore } from './authStore';
 const useTerritoryStore = create<{
   key: string;
   neighborhood: string | undefined;
-}>(() => ({ key: '', neighborhood: undefined }));
+  isListView: boolean;
+  setIsListView: (value: boolean) => void;
+  toggleViewMode: () => void;
+}>((set) => ({
+  key: '',
+  neighborhood: undefined,
+  isListView: false,
+  setIsListView: (value: boolean) => set({ isListView: value }),
+  toggleViewMode: () => set((state) => ({ isListView: !state.isListView })),
+}));
 const scopeKey = () => {
   const user = useAuthStore.getState().user;
   return user?.id && user.municipality?.id
@@ -18,7 +27,11 @@ useAuthStore.subscribe((next, previous) => {
     next.user?.municipality?.id !== previous.user?.municipality?.id ||
     !next.isAuthenticated
   ) {
-    useTerritoryStore.setState({ key: scopeKey(), neighborhood: undefined });
+    useTerritoryStore.setState({
+      key: scopeKey(),
+      neighborhood: undefined,
+      isListView: false,
+    });
   }
 });
 
@@ -44,3 +57,20 @@ export function useTerritorySelection(): {
   );
   return { neighborhood, setNeighborhood };
 }
+
+export function useTerritoryViewMode(): {
+  isListView: boolean;
+  setIsListView: (value: boolean) => void;
+  toggleViewMode: () => void;
+} {
+  const isListView = useTerritoryStore((state) => state.isListView);
+  const setIsListView = useCallback((value: boolean) => {
+    useTerritoryStore.setState({ isListView: value });
+  }, []);
+  const toggleViewMode = useCallback(() => {
+    useTerritoryStore.setState((state) => ({ isListView: !state.isListView }));
+  }, []);
+  return { isListView, setIsListView, toggleViewMode };
+}
+
+export { useTerritoryStore };

@@ -13,6 +13,8 @@ import {
   kindLabel,
   statusLabel,
 } from '@/features/city/CityUI';
+import { ItemLocationMap } from '@/components/ui/ItemLocationMap';
+import { civicLocation } from '@/shared/civic-territory';
 import { useCityQuery } from '@/features/city/useCityQuery';
 import { assetUrl } from '@/services/http';
 import type { CivicItem, Occurrence } from '@/shared/contracts';
@@ -79,6 +81,33 @@ export default function HistoricalDetailsScreen() {
             <AppText>
               {occurrence ? occurrence.description : civic?.body}
             </AppText>
+            {(() => {
+              const coords = occurrence
+                ? occurrence.location
+                : civic
+                  ? civicLocation(civic)
+                  : undefined;
+              if (!coords) return null;
+              const address = occurrence
+                ? occurrence.location.address
+                : civic?.territory?.scope === 'location'
+                  ? civic.territory.location.address
+                  : undefined;
+              const neighborhood = occurrence
+                ? occurrence.location.neighborhood
+                : civic?.neighborhood;
+              return (
+                <ItemLocationMap
+                  latitude={coords.latitude}
+                  longitude={coords.longitude}
+                  address={address}
+                  neighborhood={neighborhood}
+                  title={item.title}
+                  kind={civic ? civic.kind : 'occurrence'}
+                  status={occurrence?.status}
+                />
+              );
+            })()}
             {images.map((url, index) => (
               <Image
                 key={url}

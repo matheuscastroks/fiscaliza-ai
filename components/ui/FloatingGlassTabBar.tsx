@@ -15,6 +15,9 @@ import {
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { AppText } from './AppText';
+import { useTerritoryViewMode } from '@/stores/territoryStore';
 
 export type FloatingGlassTabBarProps = Parameters<
   NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>
@@ -89,6 +92,10 @@ export function FloatingGlassTabBar({
       hide.remove();
     };
   }, []);
+  const activeRoute = state.routes[state.index]?.name;
+  const isTerritory = activeRoute === 'TerritoryScreen';
+  const { isListView, toggleViewMode } = useTerritoryViewMode();
+
   if (
     (Platform.OS === 'web' && width >= 1100) ||
     keyboard ||
@@ -97,77 +104,126 @@ export function FloatingGlassTabBar({
     return null;
   return (
     <View
+      pointerEvents="box-none"
       style={[
-        styles.bar,
+        styles.barContainer,
         {
-          width: barWidth,
-          left: (width - barWidth) / 2,
           bottom: Math.max(insets.bottom, 16),
         },
       ]}
     >
-      <Animated.View
-        pointerEvents="none"
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-        style={[
-          styles.selected,
-          { top: 4, left: 4, transform: [{ translateX: selection }] },
-        ]}
-      />
-      {state.routes
-        .filter((route) => VISIBLE.has(route.name))
-        .map((route) => {
-          const focused = state.routes[state.index]?.key === route.key;
-          const { options } = descriptors[route.key];
-          const label =
-            typeof options.tabBarLabel === 'string'
-              ? options.tabBarLabel
-              : options.title || route.name;
-          return (
-            <Pressable
-              key={route.key}
-              accessibilityRole="tab"
-              accessibilityLabel={label}
-              accessibilityState={{ selected: focused }}
-              onPress={() => {
-                const event = navigation.emit({
-                  type: 'tabPress',
-                  target: route.key,
-                  canPreventDefault: true,
-                });
-                if (!focused && !event.defaultPrevented)
-                  navigation.navigate(route.name);
-                if (Platform.OS !== 'web')
-                  void Haptics.selectionAsync().catch(() => {});
+      <View style={[styles.bar, { width: barWidth }]}>
+        <Animated.View
+          pointerEvents="none"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={[
+            styles.selected,
+            { top: 4, left: 4, transform: [{ translateX: selection }] },
+          ]}
+        />
+        {state.routes
+          .filter((route) => VISIBLE.has(route.name))
+          .map((route) => {
+            const focused = state.routes[state.index]?.key === route.key;
+            const { options } = descriptors[route.key];
+            const label =
+              typeof options.tabBarLabel === 'string'
+                ? options.tabBarLabel
+                : options.title || route.name;
+            return (
+              <Pressable
+                key={route.key}
+                accessibilityRole="tab"
+                accessibilityLabel={label}
+                accessibilityState={{ selected: focused }}
+                onPress={() => {
+                  const event = navigation.emit({
+                    type: 'tabPress',
+                    target: route.key,
+                    canPreventDefault: true,
+                  });
+                  if (!focused && !event.defaultPrevented)
+                    navigation.navigate(route.name);
+                  if (Platform.OS !== 'web')
+                    void Haptics.selectionAsync().catch(() => {});
+                }}
+                onLongPress={() =>
+                  navigation.emit({ type: 'tabLongPress', target: route.key })
+                }
+                style={({ pressed }) => [
+                  styles.tab,
+                  pressed && { opacity: 0.65 },
+                ]}
+              >
+                <View collapsable={false} style={styles.icon}>
+                  {options.tabBarIcon?.({
+                    focused,
+                    color: focused
+                      ? colors.navigationOnSelection
+                      : colors.navigationIcon,
+                    size: 24,
+                  })}
+                </View>
+              </Pressable>
+            );
+          })}
+      </View>
+
+      {isTerritory && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            isListView
+              ? 'Alternar para visualização no Mapa'
+              : 'Alternar para visualização em Lista'
+          }
+          onPress={() => {
+            if (Platform.OS !== 'web')
+              void Haptics.selectionAsync().catch(() => {});
+            toggleViewMode();
+          }}
+          style={({ pressed }) => [
+            styles.extraButton,
+            pressed && { opacity: 0.75, transform: [{ scale: 0.95 }] },
+          ]}
+        >
+          <Ionicons
+            name={isListView ? 'map' : 'list'}
+            size={20}
+            color={colors.navigationOnSelection}
+          />
+          {width >= 360 && (
+            <AppText
+              variant="label"
+              style={{
+                color: colors.navigationOnSelection,
+                fontWeight: '700',
+                fontSize: 13,
+                marginLeft: 5,
               }}
-              onLongPress={() =>
-                navigation.emit({ type: 'tabLongPress', target: route.key })
-              }
-              style={({ pressed }) => [
-                styles.tab,
-                pressed && { opacity: 0.65 },
-              ]}
             >
-              <View collapsable={false} style={styles.icon}>
-                {options.tabBarIcon?.({
-                  focused,
-                  color: focused
-                    ? colors.navigationOnSelection
-                    : colors.navigationIcon,
-                  size: 24,
-                })}
-              </View>
-            </Pressable>
-          );
-        })}
+              {isListView ? 'Mapa' : 'Lista'}
+            </AppText>
+          )}
+        </Pressable>
+      )}
     </View>
   );
 }
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
-    bar: {
+    barContainer: {
       position: 'absolute',
+      left: 0,
+      right: 0,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 8,
+      zIndex: 99,
+    },
+    bar: {
       height: 60,
       borderRadius: 30,
       backgroundColor: colors.navigationSurface,
@@ -175,6 +231,26 @@ const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: 4,
       justifyContent: 'space-between',
       alignItems: 'center',
+      ...Platform.select({
+        ios: {
+          shadowColor: colors.black,
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.12,
+          shadowRadius: 12,
+        },
+        android: { elevation: 4 },
+        web: { boxShadow: '0 8px 24px rgba(0,0,0,0.12)' },
+      }),
+    },
+    extraButton: {
+      height: 60,
+      minWidth: 60,
+      borderRadius: 30,
+      backgroundColor: colors.navigationSurface,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 16,
       ...Platform.select({
         ios: {
           shadowColor: colors.black,
