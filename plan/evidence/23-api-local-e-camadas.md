@@ -14,10 +14,25 @@ Backup pg_dump em formato custom salvo em .validation/filter-performance/local-a
 
 A inicialização aplicou migrações aditivas até 0011. Contagens e hashes das contas e registros foram comparados antes/depois: preservação confirmada. Permanecem 27 contas, zero registros comunitários e 27.811 chamados 1746; nenhum chamado foi apagado ou substituído.
 
-Após a atualização, pelo endereço de rede configurado no celular, school, health e square responderam HTTP200 sem login. O total é null e a fonte unavailable porque os cadastros ainda não foram publicados nesse banco. Isso representa ausência de importação, não falha HTTP nem zero equipamentos no município.
+Após a atualização, pelo endereço de rede configurado no celular, school, health e square responderam HTTP 200 sem login. Antes da importação, o total era null e a fonte unavailable: ausência de publicação nesse banco, não zero equipamentos no município.
 
 ## Publicação dos cadastros
 
-O comando preparado é a CLI do próprio container: docker exec fiscaliza-ai-api-1 node dist/backend/src/siurb-cli.js all. Ela publica limites de bairros antes de escolas, saúde e espaços públicos, com validação e recuperação já testadas.
+Foi executada a CLI do próprio container: `docker exec fiscaliza-ai-api-1 node dist/backend/src/siurb-cli.js all`. Ela publicou limites de bairros antes de escolas, saúde e espaços públicos.
 
-A revisão automática rejeitou essa importação por considerá-la mutação material no banco operacional fora da validação isolada anterior. Foi solicitada autorização explícita ao usuário. Nenhuma importação operacional foi executada enquanto essa aprovação permanece pendente. Os dados reais continuam disponíveis no banco isolado descrito na evidência 21.
+A importação operacional começou somente após autorização explícita do usuário: “Sim, importar no banco atual”. As quatro execuções terminaram com sucesso e cobertura completa, sem registros rejeitados:
+
+| Camada | Registros publicados |
+| --- | ---: |
+| Bairros | 167 |
+| Escolas | 1.540 |
+| Saúde | 344 |
+| Espaços públicos | 2.387 |
+
+## Verificação após a importação
+
+Pela API `192.168.1.38:3001` configurada no celular, as três categorias responderam HTTP 200 com os totais acima e fontes available. `/api/territorial-boundaries` retornou 167 bairros; `/api/data-sources` confirmou as quatro fontes SIURB com coverage complete. O panorama do Centro respondeu HTTP 200 com 11 escolas, sete unidades de saúde e 61 espaços públicos.
+
+A comparação de contagens e hashes das contas e registros continuou idêntica ao backup anterior: 27 contas, zero registros comunitários e 27.811 chamados 1746 preservados. O log integral da importação está em `.validation/filter-performance/local-siurb-import.log`, ignorado no Git. A data da importação não representa a data de atualização dos cadastros oficiais.
+
+Estas verificações comprovam publicação e acesso HTTP pelo endereço usado no dispositivo; não substituem inspeção visual nem medição de fluidez no Expo Go.
