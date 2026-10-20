@@ -7,140 +7,140 @@ export const rioDemoCitizens = [
     "name": "Carlos Eduardo Mendes",
     "email": "carlos.mendes@email.com",
     "neighborhood": "Copacabana",
-    "avatar": "/api/demo-media/avatar-ana.jpg"
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-mariana",
     "name": "Mariana Siqueira",
     "email": "mariana.siqueira@email.com",
     "neighborhood": "Tijuca",
-    "avatar": "/api/demo-media/avatar-ana.jpg"
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-rodrigo",
     "name": "Rodrigo Vasconcelos",
     "email": "rodrigo.vasconcelos@email.com",
     "neighborhood": "Barra da Tijuca",
-    "avatar": "/api/demo-media/avatar-gestao.jpg"
+    "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-camila",
     "name": "Camila Duarte",
     "email": "camila.duarte@email.com",
     "neighborhood": "Botafogo",
-    "avatar": "/api/demo-media/avatar-ana.jpg"
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-lucas",
     "name": "Lucas Peixoto",
     "email": "lucas.peixoto@email.com",
     "neighborhood": "Méier",
-    "avatar": "/api/demo-media/avatar-admin.jpg"
+    "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-fernanda",
     "name": "Fernanda Albuquerque",
     "email": "fernanda.albuquerque@email.com",
     "neighborhood": "Campo Grande",
-    "avatar": "/api/demo-media/avatar-ana.jpg"
+    "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-thiago",
     "name": "Thiago Nogueira",
     "email": "thiago.nogueira@email.com",
     "neighborhood": "Ipanema",
-    "avatar": "/api/demo-media/avatar-admin.jpg"
+    "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-priscila",
     "name": "Priscila Matos",
     "email": "priscila.matos@email.com",
     "neighborhood": "Madureira",
-    "avatar": "/api/demo-media/avatar-ana.jpg"
+    "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-roberto",
     "name": "Roberto Fonseca",
     "email": "roberto.fonseca@email.com",
     "neighborhood": "Lapa",
-    "avatar": "/api/demo-media/avatar-gestao.jpg"
+    "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-juliana",
     "name": "Juliana Guimarães",
     "email": "juliana.guimaraes@email.com",
     "neighborhood": "Santa Teresa",
-    "avatar": "/api/demo-media/avatar-ana.jpg"
+    "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-andre",
     "name": "André Luiz Ramos",
     "email": "andre.ramos@email.com",
     "neighborhood": "Bangu",
-    "avatar": "/api/demo-media/avatar-admin.jpg"
+    "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-aline",
     "name": "Aline Ferreira",
     "email": "aline.ferreira@email.com",
     "neighborhood": "Flamengo",
-    "avatar": "/api/demo-media/avatar-ana.jpg"
+    "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-gabriel",
     "name": "Gabriel Pires",
     "email": "gabriel.pires@email.com",
     "neighborhood": "Leblon",
-    "avatar": "/api/demo-media/avatar-gestao.jpg"
+    "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-vanessa",
     "name": "Vanessa Carvalho",
     "email": "vanessa.carvalho@email.com",
     "neighborhood": "Recreio dos Bandeirantes",
-    "avatar": "/api/demo-media/avatar-ana.jpg"
+    "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-marcelo",
     "name": "Marcelo Antunes",
     "email": "marcelo.antunes@email.com",
     "neighborhood": "São Cristóvão",
-    "avatar": "/api/demo-media/avatar-admin.jpg"
+    "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-larissa",
     "name": "Larissa Coutinho",
     "email": "larissa.coutinho@email.com",
     "neighborhood": "Vila Isabel",
-    "avatar": "/api/demo-media/avatar-ana.jpg"
+    "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-felipe",
     "name": "Felipe Medeiros",
     "email": "felipe.medeiros@email.com",
     "neighborhood": "Taquara",
-    "avatar": "/api/demo-media/avatar-gestao.jpg"
+    "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-tatiane",
     "name": "Tatiane Rocha",
     "email": "tatiane.rocha@email.com",
     "neighborhood": "Penha",
-    "avatar": "/api/demo-media/avatar-ana.jpg"
+    "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-diego",
     "name": "Diego Brandão",
     "email": "diego.brandao@email.com",
     "neighborhood": "Jardim Guanabara",
-    "avatar": "/api/demo-media/avatar-admin.jpg"
+    "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "citizen-renata",
     "name": "Renata Xavier",
     "email": "renata.xavier@email.com",
     "neighborhood": "Glória",
-    "avatar": "/api/demo-media/avatar-ana.jpg"
+    "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
   }
 ];
 
@@ -150,28 +150,32 @@ export const rioDemoStaff = [
     "name": "Rioluz Operacional",
     "email": "rioluz@fiscaliza.rio.gov.br",
     "role": "staff",
-    "sector": "Iluminação Pública"
+    "sector": "Iluminação Pública",
+    "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "staff-comlurb",
     "name": "Comlurb Limpeza Urbana",
     "email": "comlurb@fiscaliza.rio.gov.br",
     "role": "staff",
-    "sector": "Limpeza Urbana"
+    "sector": "Limpeza Urbana",
+    "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "staff-seconserva",
     "name": "Seconserva Vias e Calçadas",
     "email": "seconserva@fiscaliza.rio.gov.br",
     "role": "staff",
-    "sector": "Conservação e Vias"
+    "sector": "Conservação e Vias",
+    "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80"
   },
   {
     "id": "staff-cetrio",
     "name": "CET-Rio Engenharia de Tráfego",
     "email": "cetrio@fiscaliza.rio.gov.br",
     "role": "staff",
-    "sector": "Engenharia de Tráfego"
+    "sector": "Engenharia de Tráfego",
+    "avatar": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80"
   }
 ];
 
@@ -191,7 +195,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Centro"
     },
     "images": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-carlos",
     "reportedAt": "2026-10-07T15:00:00.000Z",
@@ -203,7 +207,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-09T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-centro-pavimento-2",
@@ -211,7 +215,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-11T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -247,7 +251,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Centro"
     },
     "images": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-mariana",
     "reportedAt": "2026-10-04T13:00:00.000Z",
@@ -259,7 +263,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-06T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-centro-iluminacao-2",
@@ -267,7 +271,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-08T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -303,7 +307,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Centro"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-rodrigo",
     "reportedAt": "2026-09-29T14:00:00.000Z",
@@ -316,7 +320,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-centro-limpeza-2",
@@ -324,7 +328,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-15T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -368,7 +372,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Centro"
     },
     "images": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-camila",
     "reportedAt": "2026-10-10T16:00:00.000Z",
@@ -380,7 +384,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -408,7 +412,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Lapa"
     },
     "images": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-camila",
     "reportedAt": "2026-10-06T15:00:00.000Z",
@@ -420,7 +424,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-08T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-lapa-pavimento-2",
@@ -428,7 +432,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-10T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -456,7 +460,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Lapa"
     },
     "images": [
-      "/api/demo-media/gloria-dark.jpg"
+      "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-lucas",
     "reportedAt": "2026-10-03T13:00:00.000Z",
@@ -468,7 +472,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-05T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-lapa-iluminacao-2",
@@ -476,7 +480,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-07T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -512,7 +516,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Lapa"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-fernanda",
     "reportedAt": "2026-09-28T14:00:00.000Z",
@@ -525,7 +529,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-lapa-limpeza-2",
@@ -533,7 +537,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -577,7 +581,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Lapa"
     },
     "images": [
-      "/api/demo-media/benches.jpg"
+      "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-thiago",
     "reportedAt": "2026-10-09T16:00:00.000Z",
@@ -589,7 +593,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-11T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -625,7 +629,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Santa Teresa"
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-thiago",
     "reportedAt": "2026-10-05T15:00:00.000Z",
@@ -637,7 +641,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-07T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-santa-teresa-pavimento-2",
@@ -645,7 +649,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-09T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -681,7 +685,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Santa Teresa"
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-priscila",
     "reportedAt": "2026-10-02T13:00:00.000Z",
@@ -693,7 +697,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-04T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-santa-teresa-iluminacao-2",
@@ -701,7 +705,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-06T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -737,7 +741,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Santa Teresa"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-roberto",
     "reportedAt": "2026-09-27T14:00:00.000Z",
@@ -750,7 +754,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-09-29T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-santa-teresa-limpeza-2",
@@ -758,7 +762,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-13T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -802,7 +806,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Santa Teresa"
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-juliana",
     "reportedAt": "2026-10-08T16:00:00.000Z",
@@ -814,7 +818,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-10T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -850,7 +854,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Glória"
     },
     "images": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-juliana",
     "reportedAt": "2026-10-04T15:00:00.000Z",
@@ -862,7 +866,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-06T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-gloria-pavimento-2",
@@ -870,7 +874,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-08T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -898,7 +902,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Glória"
     },
     "images": [
-      "/api/demo-media/legacy-light-1.jpg"
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-andre",
     "reportedAt": "2026-10-01T13:00:00.000Z",
@@ -910,7 +914,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-03T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-gloria-iluminacao-2",
@@ -918,7 +922,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-05T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -954,7 +958,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Glória"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-aline",
     "reportedAt": "2026-09-26T14:00:00.000Z",
@@ -967,7 +971,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-09-28T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-gloria-limpeza-2",
@@ -975,7 +979,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-15T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1019,7 +1023,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Glória"
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-gabriel",
     "reportedAt": "2026-10-07T16:00:00.000Z",
@@ -1031,7 +1035,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-09T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1059,7 +1063,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Santo Cristo"
     },
     "images": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-gabriel",
     "reportedAt": "2026-10-03T15:00:00.000Z",
@@ -1071,7 +1075,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-05T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-santo-cristo-pavimento-2",
@@ -1079,7 +1083,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-07T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1115,7 +1119,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Santo Cristo"
     },
     "images": [
-      "/api/demo-media/legacy-light-2.jpg"
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-vanessa",
     "reportedAt": "2026-09-30T13:00:00.000Z",
@@ -1127,7 +1131,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-02T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-santo-cristo-iluminacao-2",
@@ -1135,7 +1139,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1171,7 +1175,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Santo Cristo"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-marcelo",
     "reportedAt": "2026-09-25T14:00:00.000Z",
@@ -1184,7 +1188,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-09-27T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-santo-cristo-limpeza-2",
@@ -1192,7 +1196,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1236,7 +1240,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Santo Cristo"
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-larissa",
     "reportedAt": "2026-10-06T16:00:00.000Z",
@@ -1248,7 +1252,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-08T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1284,7 +1288,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Copacabana"
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-larissa",
     "reportedAt": "2026-10-02T15:00:00.000Z",
@@ -1296,7 +1300,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-copacabana-pavimento-2",
@@ -1304,7 +1308,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-06T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1332,7 +1336,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Copacabana"
     },
     "images": [
-      "/api/demo-media/legacy-light-3.jpg"
+      "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-felipe",
     "reportedAt": "2026-09-29T13:00:00.000Z",
@@ -1344,7 +1348,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-01T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-copacabana-iluminacao-2",
@@ -1352,7 +1356,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1388,7 +1392,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Copacabana"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-tatiane",
     "reportedAt": "2026-09-29T14:00:00.000Z",
@@ -1401,7 +1405,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-copacabana-limpeza-2",
@@ -1409,7 +1413,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-13T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1453,7 +1457,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Copacabana"
     },
     "images": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-diego",
     "reportedAt": "2026-10-05T16:00:00.000Z",
@@ -1465,7 +1469,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-07T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1501,7 +1505,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Ipanema"
     },
     "images": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-diego",
     "reportedAt": "2026-10-01T15:00:00.000Z",
@@ -1513,7 +1517,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-ipanema-pavimento-2",
@@ -1521,7 +1525,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-05T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1557,7 +1561,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Ipanema"
     },
     "images": [
-      "/api/demo-media/legacy-light-4.jpg"
+      "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-renata",
     "reportedAt": "2026-09-28T13:00:00.000Z",
@@ -1569,7 +1573,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-09-30T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-ipanema-iluminacao-2",
@@ -1577,7 +1581,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1613,7 +1617,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Ipanema"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1503596476-1c12a8ba09a9?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-carlos",
     "reportedAt": "2026-09-28T14:00:00.000Z",
@@ -1626,7 +1630,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-ipanema-limpeza-2",
@@ -1634,7 +1638,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-15T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1678,7 +1682,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Ipanema"
     },
     "images": [
-      "/api/demo-media/benches.jpg"
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-mariana",
     "reportedAt": "2026-10-04T16:00:00.000Z",
@@ -1690,7 +1694,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-06T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1718,7 +1722,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Leblon"
     },
     "images": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-mariana",
     "reportedAt": "2026-09-30T15:00:00.000Z",
@@ -1730,7 +1734,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-leblon-pavimento-2",
@@ -1738,7 +1742,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-04T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1766,7 +1770,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Leblon"
     },
     "images": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-rodrigo",
     "reportedAt": "2026-09-27T13:00:00.000Z",
@@ -1778,7 +1782,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-leblon-iluminacao-2",
@@ -1786,7 +1790,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1822,7 +1826,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Leblon"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-camila",
     "reportedAt": "2026-09-27T14:00:00.000Z",
@@ -1835,7 +1839,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-09-29T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-leblon-limpeza-2",
@@ -1843,7 +1847,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1887,7 +1891,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Leblon"
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-lucas",
     "reportedAt": "2026-10-10T16:00:00.000Z",
@@ -1899,7 +1903,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1935,7 +1939,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Botafogo"
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-lucas",
     "reportedAt": "2026-09-29T15:00:00.000Z",
@@ -1947,7 +1951,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-botafogo-pavimento-2",
@@ -1955,7 +1959,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-03T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -1991,7 +1995,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Botafogo"
     },
     "images": [
-      "/api/demo-media/gloria-dark.jpg"
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-fernanda",
     "reportedAt": "2026-10-04T13:00:00.000Z",
@@ -2003,7 +2007,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-06T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-botafogo-iluminacao-2",
@@ -2011,7 +2015,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-08T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2047,7 +2051,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Botafogo"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1516997121675-4c2d1684aa3e?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-thiago",
     "reportedAt": "2026-09-26T14:00:00.000Z",
@@ -2060,7 +2064,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-09-28T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-botafogo-limpeza-2",
@@ -2068,7 +2072,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-13T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2112,7 +2116,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Botafogo"
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-priscila",
     "reportedAt": "2026-10-09T16:00:00.000Z",
@@ -2124,7 +2128,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-11T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2160,7 +2164,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Flamengo"
     },
     "images": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-priscila",
     "reportedAt": "2026-09-28T15:00:00.000Z",
@@ -2172,7 +2176,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-flamengo-pavimento-2",
@@ -2180,7 +2184,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-02T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2208,7 +2212,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Flamengo"
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-roberto",
     "reportedAt": "2026-10-03T13:00:00.000Z",
@@ -2220,7 +2224,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-05T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-flamengo-iluminacao-2",
@@ -2228,7 +2232,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-07T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2264,7 +2268,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Flamengo"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1526951521990-620dc14c214b?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-juliana",
     "reportedAt": "2026-09-25T14:00:00.000Z",
@@ -2277,7 +2281,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-09-27T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-flamengo-limpeza-2",
@@ -2285,7 +2289,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-15T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2329,7 +2333,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Flamengo"
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-andre",
     "reportedAt": "2026-10-08T16:00:00.000Z",
@@ -2341,7 +2345,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-10T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2369,7 +2373,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Laranjeiras"
     },
     "images": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1580974852861-c381510bc98a?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-andre",
     "reportedAt": "2026-10-07T15:00:00.000Z",
@@ -2381,7 +2385,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-09T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-laranjeiras-pavimento-2",
@@ -2389,7 +2393,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-11T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2425,7 +2429,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Laranjeiras"
     },
     "images": [
-      "/api/demo-media/legacy-light-1.jpg"
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-aline",
     "reportedAt": "2026-10-02T13:00:00.000Z",
@@ -2437,7 +2441,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-04T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-laranjeiras-iluminacao-2",
@@ -2445,7 +2449,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-06T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2481,7 +2485,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Laranjeiras"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-gabriel",
     "reportedAt": "2026-09-29T14:00:00.000Z",
@@ -2494,7 +2498,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-laranjeiras-limpeza-2",
@@ -2502,7 +2506,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2546,7 +2550,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Laranjeiras"
     },
     "images": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-vanessa",
     "reportedAt": "2026-10-07T16:00:00.000Z",
@@ -2558,7 +2562,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-09T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2594,7 +2598,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Gávea"
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-vanessa",
     "reportedAt": "2026-10-06T15:00:00.000Z",
@@ -2606,7 +2610,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-08T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-gavea-pavimento-2",
@@ -2614,7 +2618,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-10T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2642,7 +2646,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Gávea"
     },
     "images": [
-      "/api/demo-media/legacy-light-2.jpg"
+      "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-marcelo",
     "reportedAt": "2026-10-01T13:00:00.000Z",
@@ -2654,7 +2658,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-03T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-gavea-iluminacao-2",
@@ -2662,7 +2666,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-05T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2698,7 +2702,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Gávea"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-larissa",
     "reportedAt": "2026-09-28T14:00:00.000Z",
@@ -2711,7 +2715,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-gavea-limpeza-2",
@@ -2719,7 +2723,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-13T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2763,7 +2767,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Gávea"
     },
     "images": [
-      "/api/demo-media/benches.jpg"
+      "https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-felipe",
     "reportedAt": "2026-10-06T16:00:00.000Z",
@@ -2775,7 +2779,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-08T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2811,7 +2815,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Jardim Botânico"
     },
     "images": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1563911302283-d2bc129e7570?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-felipe",
     "reportedAt": "2026-10-05T15:00:00.000Z",
@@ -2823,7 +2827,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-07T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-jardim-botanico-pavimento-2",
@@ -2831,7 +2835,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-09T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2867,7 +2871,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Jardim Botânico"
     },
     "images": [
-      "/api/demo-media/legacy-light-3.jpg"
+      "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-tatiane",
     "reportedAt": "2026-09-30T13:00:00.000Z",
@@ -2879,7 +2883,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-02T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-jardim-botanico-iluminacao-2",
@@ -2887,7 +2891,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2923,7 +2927,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Jardim Botânico"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-diego",
     "reportedAt": "2026-09-27T14:00:00.000Z",
@@ -2936,7 +2940,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-09-29T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-jardim-botanico-limpeza-2",
@@ -2944,7 +2948,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-15T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -2988,7 +2992,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Jardim Botânico"
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-renata",
     "reportedAt": "2026-10-05T16:00:00.000Z",
@@ -3000,7 +3004,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-07T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3028,7 +3032,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "São Conrado"
     },
     "images": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-renata",
     "reportedAt": "2026-10-04T15:00:00.000Z",
@@ -3040,7 +3044,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-06T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-sao-conrado-pavimento-2",
@@ -3048,7 +3052,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-08T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3076,7 +3080,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "São Conrado"
     },
     "images": [
-      "/api/demo-media/legacy-light-4.jpg"
+      "https://images.unsplash.com/photo-1498084393753-b411b2d26b34?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-carlos",
     "reportedAt": "2026-09-29T13:00:00.000Z",
@@ -3088,7 +3092,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-01T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-sao-conrado-iluminacao-2",
@@ -3096,7 +3100,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3132,7 +3136,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "São Conrado"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1595278069441-2cf29f8005a4?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-mariana",
     "reportedAt": "2026-09-26T14:00:00.000Z",
@@ -3145,7 +3149,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-09-28T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-sao-conrado-limpeza-2",
@@ -3153,7 +3157,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3197,7 +3201,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "São Conrado"
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-rodrigo",
     "reportedAt": "2026-10-04T16:00:00.000Z",
@@ -3209,7 +3213,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-06T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3245,7 +3249,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Tijuca"
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-rodrigo",
     "reportedAt": "2026-10-03T15:00:00.000Z",
@@ -3257,7 +3261,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-05T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-tijuca-pavimento-2",
@@ -3265,7 +3269,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-07T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3301,7 +3305,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Tijuca"
     },
     "images": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-camila",
     "reportedAt": "2026-09-28T13:00:00.000Z",
@@ -3313,7 +3317,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-09-30T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-tijuca-iluminacao-2",
@@ -3321,7 +3325,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3357,7 +3361,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Tijuca"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1605600659908-0ef719419d41?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-lucas",
     "reportedAt": "2026-09-25T14:00:00.000Z",
@@ -3370,7 +3374,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-09-27T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-tijuca-limpeza-2",
@@ -3378,7 +3382,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-13T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3422,7 +3426,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Tijuca"
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-fernanda",
     "reportedAt": "2026-10-10T16:00:00.000Z",
@@ -3434,7 +3438,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3470,7 +3474,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Maracanã"
     },
     "images": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1597733336794-12d05021d510?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-fernanda",
     "reportedAt": "2026-10-02T15:00:00.000Z",
@@ -3482,7 +3486,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-maracana-pavimento-2",
@@ -3490,7 +3494,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-06T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3518,7 +3522,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Maracanã"
     },
     "images": [
-      "/api/demo-media/gloria-dark.jpg"
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-thiago",
     "reportedAt": "2026-09-27T13:00:00.000Z",
@@ -3530,7 +3534,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-maracana-iluminacao-2",
@@ -3538,7 +3542,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3574,7 +3578,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Maracanã"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1584467735867-4297ae2ebcee?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-priscila",
     "reportedAt": "2026-09-29T14:00:00.000Z",
@@ -3587,7 +3591,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-maracana-limpeza-2",
@@ -3595,7 +3599,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-15T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3639,7 +3643,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Maracanã"
     },
     "images": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-roberto",
     "reportedAt": "2026-10-09T16:00:00.000Z",
@@ -3651,7 +3655,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-11T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3679,7 +3683,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Vila Isabel"
     },
     "images": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1584467735871-8e85353a8413?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-roberto",
     "reportedAt": "2026-10-01T15:00:00.000Z",
@@ -3691,7 +3695,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-vila-isabel-pavimento-2",
@@ -3699,7 +3703,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-05T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3735,7 +3739,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Vila Isabel"
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-juliana",
     "reportedAt": "2026-10-04T13:00:00.000Z",
@@ -3747,7 +3751,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-06T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-vila-isabel-iluminacao-2",
@@ -3755,7 +3759,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-08T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3791,7 +3795,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Vila Isabel"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-andre",
     "reportedAt": "2026-09-28T14:00:00.000Z",
@@ -3804,7 +3808,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-vila-isabel-limpeza-2",
@@ -3812,7 +3816,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3856,7 +3860,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Vila Isabel"
     },
     "images": [
-      "/api/demo-media/benches.jpg"
+      "https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-aline",
     "reportedAt": "2026-10-08T16:00:00.000Z",
@@ -3868,7 +3872,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-10T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3904,7 +3908,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Grajaú"
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-aline",
     "reportedAt": "2026-09-30T15:00:00.000Z",
@@ -3916,7 +3920,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-grajau-pavimento-2",
@@ -3924,7 +3928,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-04T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -3952,7 +3956,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Grajaú"
     },
     "images": [
-      "/api/demo-media/legacy-light-1.jpg"
+      "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-gabriel",
     "reportedAt": "2026-10-03T13:00:00.000Z",
@@ -3964,7 +3968,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-05T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-grajau-iluminacao-2",
@@ -3972,7 +3976,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-07T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4008,7 +4012,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Grajaú"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1537084642907-629340c7e59c?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-vanessa",
     "reportedAt": "2026-09-27T14:00:00.000Z",
@@ -4021,7 +4025,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-09-29T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-grajau-limpeza-2",
@@ -4029,7 +4033,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-13T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4073,7 +4077,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Grajaú"
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-marcelo",
     "reportedAt": "2026-10-07T16:00:00.000Z",
@@ -4085,7 +4089,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-09T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4121,7 +4125,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Méier"
     },
     "images": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1594818379496-da1e345b0ded?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-marcelo",
     "reportedAt": "2026-09-29T15:00:00.000Z",
@@ -4133,7 +4137,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-meier-pavimento-2",
@@ -4141,7 +4145,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-03T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4177,7 +4181,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Méier"
     },
     "images": [
-      "/api/demo-media/legacy-light-2.jpg"
+      "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-larissa",
     "reportedAt": "2026-10-02T13:00:00.000Z",
@@ -4189,7 +4193,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-04T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-meier-iluminacao-2",
@@ -4197,7 +4201,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-06T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4233,7 +4237,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Méier"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-felipe",
     "reportedAt": "2026-09-26T14:00:00.000Z",
@@ -4246,7 +4250,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-09-28T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-meier-limpeza-2",
@@ -4254,7 +4258,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-15T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4298,7 +4302,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Méier"
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-tatiane",
     "reportedAt": "2026-10-06T16:00:00.000Z",
@@ -4310,7 +4314,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-08T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4338,7 +4342,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Madureira"
     },
     "images": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-tatiane",
     "reportedAt": "2026-09-28T15:00:00.000Z",
@@ -4350,7 +4354,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-madureira-pavimento-2",
@@ -4358,7 +4362,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-02T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4386,7 +4390,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Madureira"
     },
     "images": [
-      "/api/demo-media/legacy-light-3.jpg"
+      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-diego",
     "reportedAt": "2026-10-01T13:00:00.000Z",
@@ -4398,7 +4402,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-03T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-madureira-iluminacao-2",
@@ -4406,7 +4410,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-05T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4442,7 +4446,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Madureira"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-renata",
     "reportedAt": "2026-09-25T14:00:00.000Z",
@@ -4455,7 +4459,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-09-27T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-madureira-limpeza-2",
@@ -4463,7 +4467,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4507,7 +4511,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Madureira"
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-carlos",
     "reportedAt": "2026-10-05T16:00:00.000Z",
@@ -4519,7 +4523,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-07T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4555,7 +4559,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "São Cristóvão"
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1525909002-1b05e0c869d8?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-carlos",
     "reportedAt": "2026-10-07T15:00:00.000Z",
@@ -4567,7 +4571,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-09T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-sao-cristovao-pavimento-2",
@@ -4575,7 +4579,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-11T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4611,7 +4615,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "São Cristóvão"
     },
     "images": [
-      "/api/demo-media/legacy-light-4.jpg"
+      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-mariana",
     "reportedAt": "2026-09-30T13:00:00.000Z",
@@ -4623,7 +4627,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-02T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-sao-cristovao-iluminacao-2",
@@ -4631,7 +4635,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4667,7 +4671,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "São Cristóvão"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-rodrigo",
     "reportedAt": "2026-09-29T14:00:00.000Z",
@@ -4680,7 +4684,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-sao-cristovao-limpeza-2",
@@ -4688,7 +4692,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-13T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4732,7 +4736,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "São Cristóvão"
     },
     "images": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-camila",
     "reportedAt": "2026-10-04T16:00:00.000Z",
@@ -4744,7 +4748,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-06T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4780,7 +4784,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Penha"
     },
     "images": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-camila",
     "reportedAt": "2026-10-06T15:00:00.000Z",
@@ -4792,7 +4796,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-08T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-penha-pavimento-2",
@@ -4800,7 +4804,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-10T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4828,7 +4832,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Penha"
     },
     "images": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-lucas",
     "reportedAt": "2026-09-29T13:00:00.000Z",
@@ -4840,7 +4844,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-01T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-penha-iluminacao-2",
@@ -4848,7 +4852,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4884,7 +4888,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Penha"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-fernanda",
     "reportedAt": "2026-09-28T14:00:00.000Z",
@@ -4897,7 +4901,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-penha-limpeza-2",
@@ -4905,7 +4909,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-15T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4949,7 +4953,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Penha"
     },
     "images": [
-      "/api/demo-media/benches.jpg"
+      "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-thiago",
     "reportedAt": "2026-10-10T16:00:00.000Z",
@@ -4961,7 +4965,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -4989,7 +4993,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Jardim Guanabara"
     },
     "images": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-thiago",
     "reportedAt": "2026-10-05T15:00:00.000Z",
@@ -5001,7 +5005,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-07T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-jardim-guanabara-pavimento-2",
@@ -5009,7 +5013,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-09T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5045,7 +5049,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Jardim Guanabara"
     },
     "images": [
-      "/api/demo-media/gloria-dark.jpg"
+      "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-priscila",
     "reportedAt": "2026-09-28T13:00:00.000Z",
@@ -5057,7 +5061,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-09-30T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-jardim-guanabara-iluminacao-2",
@@ -5065,7 +5069,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5101,7 +5105,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Jardim Guanabara"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-roberto",
     "reportedAt": "2026-09-27T14:00:00.000Z",
@@ -5114,7 +5118,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-09-29T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-jardim-guanabara-limpeza-2",
@@ -5122,7 +5126,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5166,7 +5170,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Jardim Guanabara"
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-juliana",
     "reportedAt": "2026-10-09T16:00:00.000Z",
@@ -5178,7 +5182,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-11T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5214,7 +5218,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Pavuna"
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1562654501-a0ccc0fc3fb1?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-juliana",
     "reportedAt": "2026-10-04T15:00:00.000Z",
@@ -5226,7 +5230,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-06T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-pavuna-pavimento-2",
@@ -5234,7 +5238,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-08T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5262,7 +5266,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Pavuna"
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-andre",
     "reportedAt": "2026-09-27T13:00:00.000Z",
@@ -5274,7 +5278,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-pavuna-iluminacao-2",
@@ -5282,7 +5286,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5318,7 +5322,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Pavuna"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-aline",
     "reportedAt": "2026-09-26T14:00:00.000Z",
@@ -5331,7 +5335,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-09-28T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-pavuna-limpeza-2",
@@ -5339,7 +5343,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-13T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5383,7 +5387,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Pavuna"
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-gabriel",
     "reportedAt": "2026-10-08T16:00:00.000Z",
@@ -5395,7 +5399,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-10T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5431,7 +5435,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Irajá"
     },
     "images": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-gabriel",
     "reportedAt": "2026-10-03T15:00:00.000Z",
@@ -5443,7 +5447,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-05T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-iraja-pavimento-2",
@@ -5451,7 +5455,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-07T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5487,7 +5491,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Irajá"
     },
     "images": [
-      "/api/demo-media/legacy-light-1.jpg"
+      "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-vanessa",
     "reportedAt": "2026-10-04T13:00:00.000Z",
@@ -5499,7 +5503,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-06T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-iraja-iluminacao-2",
@@ -5507,7 +5511,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-08T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5543,7 +5547,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Irajá"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-marcelo",
     "reportedAt": "2026-09-25T14:00:00.000Z",
@@ -5556,7 +5560,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-09-27T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-iraja-limpeza-2",
@@ -5564,7 +5568,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-15T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5608,7 +5612,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Irajá"
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-larissa",
     "reportedAt": "2026-10-07T16:00:00.000Z",
@@ -5620,7 +5624,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-09T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5648,7 +5652,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Barra da Tijuca"
     },
     "images": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-larissa",
     "reportedAt": "2026-10-02T15:00:00.000Z",
@@ -5660,7 +5664,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-barra-da-tijuca-pavimento-2",
@@ -5668,7 +5672,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-06T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5696,7 +5700,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Barra da Tijuca"
     },
     "images": [
-      "/api/demo-media/legacy-light-2.jpg"
+      "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-felipe",
     "reportedAt": "2026-10-03T13:00:00.000Z",
@@ -5708,7 +5712,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-05T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-barra-da-tijuca-iluminacao-2",
@@ -5716,7 +5720,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-07T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5752,7 +5756,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Barra da Tijuca"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-tatiane",
     "reportedAt": "2026-09-29T14:00:00.000Z",
@@ -5765,7 +5769,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-barra-da-tijuca-limpeza-2",
@@ -5773,7 +5777,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5817,7 +5821,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Barra da Tijuca"
     },
     "images": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-diego",
     "reportedAt": "2026-10-06T16:00:00.000Z",
@@ -5829,7 +5833,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-08T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5865,7 +5869,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Recreio dos Bandeirantes"
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-diego",
     "reportedAt": "2026-10-01T15:00:00.000Z",
@@ -5877,7 +5881,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-recreio-dos-bandeirantes-pavimento-2",
@@ -5885,7 +5889,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-05T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5921,7 +5925,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Recreio dos Bandeirantes"
     },
     "images": [
-      "/api/demo-media/legacy-light-3.jpg"
+      "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-renata",
     "reportedAt": "2026-10-02T13:00:00.000Z",
@@ -5933,7 +5937,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-04T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-recreio-dos-bandeirantes-iluminacao-2",
@@ -5941,7 +5945,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-06T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -5977,7 +5981,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Recreio dos Bandeirantes"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1503596476-1c12a8ba09a9?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-carlos",
     "reportedAt": "2026-09-28T14:00:00.000Z",
@@ -5990,7 +5994,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-recreio-dos-bandeirantes-limpeza-2",
@@ -5998,7 +6002,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-13T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6042,7 +6046,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Recreio dos Bandeirantes"
     },
     "images": [
-      "/api/demo-media/benches.jpg"
+      "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-mariana",
     "reportedAt": "2026-10-05T16:00:00.000Z",
@@ -6054,7 +6058,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-07T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6090,7 +6094,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Taquara"
     },
     "images": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-mariana",
     "reportedAt": "2026-09-30T15:00:00.000Z",
@@ -6102,7 +6106,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-taquara-pavimento-2",
@@ -6110,7 +6114,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-04T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6138,7 +6142,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Taquara"
     },
     "images": [
-      "/api/demo-media/legacy-light-4.jpg"
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-rodrigo",
     "reportedAt": "2026-10-01T13:00:00.000Z",
@@ -6150,7 +6154,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-03T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-taquara-iluminacao-2",
@@ -6158,7 +6162,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-05T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6194,7 +6198,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Taquara"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-camila",
     "reportedAt": "2026-09-27T14:00:00.000Z",
@@ -6207,7 +6211,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-09-29T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-taquara-limpeza-2",
@@ -6215,7 +6219,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-15T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6259,7 +6263,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Taquara"
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-lucas",
     "reportedAt": "2026-10-04T16:00:00.000Z",
@@ -6271,7 +6275,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-06T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6299,7 +6303,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Campo Grande"
     },
     "images": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-lucas",
     "reportedAt": "2026-09-29T15:00:00.000Z",
@@ -6311,7 +6315,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-campo-grande-pavimento-2",
@@ -6319,7 +6323,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-03T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6355,7 +6359,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Campo Grande"
     },
     "images": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-fernanda",
     "reportedAt": "2026-09-30T13:00:00.000Z",
@@ -6367,7 +6371,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-02T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-campo-grande-iluminacao-2",
@@ -6375,7 +6379,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6411,7 +6415,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Campo Grande"
     },
     "images": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1516997121675-4c2d1684aa3e?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-thiago",
     "reportedAt": "2026-09-26T14:00:00.000Z",
@@ -6424,7 +6428,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-09-28T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-campo-grande-limpeza-2",
@@ -6432,7 +6436,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6476,7 +6480,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Campo Grande"
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-priscila",
     "reportedAt": "2026-10-10T16:00:00.000Z",
@@ -6488,7 +6492,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6524,7 +6528,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Bangu"
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-priscila",
     "reportedAt": "2026-09-28T15:00:00.000Z",
@@ -6536,7 +6540,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-bangu-pavimento-2",
@@ -6544,7 +6548,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-02T14:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6572,7 +6576,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Bangu"
     },
     "images": [
-      "/api/demo-media/gloria-dark.jpg"
+      "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-roberto",
     "reportedAt": "2026-09-29T13:00:00.000Z",
@@ -6584,7 +6588,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-01T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-bangu-iluminacao-2",
@@ -6592,7 +6596,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6628,7 +6632,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Bangu"
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1526951521990-620dc14c214b?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-juliana",
     "reportedAt": "2026-09-25T14:00:00.000Z",
@@ -6641,7 +6645,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-09-27T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-occ-bangu-limpeza-2",
@@ -6649,7 +6653,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-13T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6693,7 +6697,7 @@ export const rioDemoOccurrences: Occurrence[] = [
       "neighborhood": "Bangu"
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&w=800&q=80"
     ],
     "reportedBy": "citizen-andre",
     "reportedAt": "2026-10-09T16:00:00.000Z",
@@ -6705,7 +6709,7 @@ export const rioDemoOccurrences: Occurrence[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-11T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "statusHistory": [
@@ -6747,7 +6751,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-carlos",
     "createdAt": "2026-09-24T14:00:00.000Z",
@@ -6760,7 +6764,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-centro-calcadas-2",
@@ -6768,7 +6772,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -6811,7 +6815,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-mariana",
     "createdAt": "2026-09-27T15:00:00.000Z",
@@ -6824,7 +6828,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-01T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -6859,7 +6863,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-rodrigo",
     "createdAt": "2026-09-30T16:00:00.000Z",
@@ -6872,7 +6876,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -6899,7 +6903,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1588714477688-cf28a50e94f7?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-camila",
     "createdAt": "2026-10-03T17:00:00.000Z",
@@ -6912,7 +6916,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-07T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -6939,7 +6943,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-camila",
     "createdAt": "2026-09-23T14:00:00.000Z",
@@ -6952,7 +6956,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-09-28T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-lapa-calcadas-2",
@@ -6960,7 +6964,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -6995,7 +6999,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-lucas",
     "createdAt": "2026-09-26T15:00:00.000Z",
@@ -7008,7 +7012,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-09-30T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7043,7 +7047,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1496868834840-5f4c98840aaa?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-fernanda",
     "createdAt": "2026-09-29T16:00:00.000Z",
@@ -7056,7 +7060,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7083,7 +7087,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-thiago",
     "createdAt": "2026-10-02T17:00:00.000Z",
@@ -7096,7 +7100,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-06T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7123,7 +7127,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-thiago",
     "createdAt": "2026-09-22T14:00:00.000Z",
@@ -7136,7 +7140,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-09-27T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-santa-teresa-calcadas-2",
@@ -7144,7 +7148,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7179,7 +7183,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-priscila",
     "createdAt": "2026-09-25T15:00:00.000Z",
@@ -7192,7 +7196,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7227,7 +7231,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-roberto",
     "createdAt": "2026-09-28T16:00:00.000Z",
@@ -7240,7 +7244,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7267,7 +7271,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-juliana",
     "createdAt": "2026-10-01T17:00:00.000Z",
@@ -7280,7 +7284,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-05T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7307,7 +7311,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-juliana",
     "createdAt": "2026-09-21T14:00:00.000Z",
@@ -7320,7 +7324,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-09-26T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-gloria-calcadas-2",
@@ -7328,7 +7332,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7371,7 +7375,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-andre",
     "createdAt": "2026-09-24T15:00:00.000Z",
@@ -7384,7 +7388,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-09-28T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7419,7 +7423,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-aline",
     "createdAt": "2026-09-27T16:00:00.000Z",
@@ -7432,7 +7436,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7459,7 +7463,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-gabriel",
     "createdAt": "2026-09-30T17:00:00.000Z",
@@ -7472,7 +7476,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-04T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7499,7 +7503,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-gabriel",
     "createdAt": "2026-09-20T14:00:00.000Z",
@@ -7512,7 +7516,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-09-25T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-santo-cristo-calcadas-2",
@@ -7520,7 +7524,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7555,7 +7559,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-vanessa",
     "createdAt": "2026-09-23T15:00:00.000Z",
@@ -7568,7 +7572,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-09-27T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7603,7 +7607,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1426604966848-d7adac402bff?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-marcelo",
     "createdAt": "2026-09-30T16:00:00.000Z",
@@ -7616,7 +7620,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7643,7 +7647,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-larissa",
     "createdAt": "2026-09-29T17:00:00.000Z",
@@ -7656,7 +7660,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-03T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7683,7 +7687,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-larissa",
     "createdAt": "2026-09-24T14:00:00.000Z",
@@ -7696,7 +7700,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-copacabana-calcadas-2",
@@ -7704,7 +7708,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7739,7 +7743,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-felipe",
     "createdAt": "2026-09-22T15:00:00.000Z",
@@ -7752,7 +7756,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-09-26T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7787,7 +7791,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-tatiane",
     "createdAt": "2026-09-29T16:00:00.000Z",
@@ -7800,7 +7804,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7827,7 +7831,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-diego",
     "createdAt": "2026-10-03T17:00:00.000Z",
@@ -7840,7 +7844,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-07T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7867,7 +7871,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-diego",
     "createdAt": "2026-09-23T14:00:00.000Z",
@@ -7880,7 +7884,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-09-28T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-ipanema-calcadas-2",
@@ -7888,7 +7892,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7931,7 +7935,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-renata",
     "createdAt": "2026-09-27T15:00:00.000Z",
@@ -7944,7 +7948,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-01T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -7979,7 +7983,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-carlos",
     "createdAt": "2026-09-28T16:00:00.000Z",
@@ -7992,7 +7996,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8019,7 +8023,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-mariana",
     "createdAt": "2026-10-02T17:00:00.000Z",
@@ -8032,7 +8036,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-06T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8059,7 +8063,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-mariana",
     "createdAt": "2026-09-22T14:00:00.000Z",
@@ -8072,7 +8076,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-09-27T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-leblon-calcadas-2",
@@ -8080,7 +8084,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8115,7 +8119,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-rodrigo",
     "createdAt": "2026-09-26T15:00:00.000Z",
@@ -8128,7 +8132,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-09-30T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8163,7 +8167,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-camila",
     "createdAt": "2026-09-27T16:00:00.000Z",
@@ -8176,7 +8180,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8203,7 +8207,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1588714477688-cf28a50e94f7?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-lucas",
     "createdAt": "2026-10-01T17:00:00.000Z",
@@ -8216,7 +8220,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-05T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8243,7 +8247,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-lucas",
     "createdAt": "2026-09-21T14:00:00.000Z",
@@ -8256,7 +8260,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-09-26T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-botafogo-calcadas-2",
@@ -8264,7 +8268,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8299,7 +8303,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1498084393753-b411b2d26b34?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-fernanda",
     "createdAt": "2026-09-25T15:00:00.000Z",
@@ -8312,7 +8316,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8347,7 +8351,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1496868834840-5f4c98840aaa?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-thiago",
     "createdAt": "2026-09-30T16:00:00.000Z",
@@ -8360,7 +8364,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8387,7 +8391,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-priscila",
     "createdAt": "2026-09-30T17:00:00.000Z",
@@ -8400,7 +8404,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-04T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8427,7 +8431,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-priscila",
     "createdAt": "2026-09-20T14:00:00.000Z",
@@ -8440,7 +8444,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-09-25T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-flamengo-calcadas-2",
@@ -8448,7 +8452,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8491,7 +8495,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-roberto",
     "createdAt": "2026-09-24T15:00:00.000Z",
@@ -8504,7 +8508,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-09-28T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8539,7 +8543,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-juliana",
     "createdAt": "2026-09-29T16:00:00.000Z",
@@ -8552,7 +8556,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8579,7 +8583,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-andre",
     "createdAt": "2026-09-29T17:00:00.000Z",
@@ -8592,7 +8596,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-03T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8619,7 +8623,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-andre",
     "createdAt": "2026-09-24T14:00:00.000Z",
@@ -8632,7 +8636,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-laranjeiras-calcadas-2",
@@ -8640,7 +8644,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8675,7 +8679,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-aline",
     "createdAt": "2026-09-23T15:00:00.000Z",
@@ -8688,7 +8692,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-09-27T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8723,7 +8727,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-gabriel",
     "createdAt": "2026-09-28T16:00:00.000Z",
@@ -8736,7 +8740,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8763,7 +8767,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-vanessa",
     "createdAt": "2026-10-03T17:00:00.000Z",
@@ -8776,7 +8780,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-07T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8803,7 +8807,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-vanessa",
     "createdAt": "2026-09-23T14:00:00.000Z",
@@ -8816,7 +8820,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-09-28T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-gavea-calcadas-2",
@@ -8824,7 +8828,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8859,7 +8863,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-marcelo",
     "createdAt": "2026-09-22T15:00:00.000Z",
@@ -8872,7 +8876,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-09-26T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8907,7 +8911,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1426604966848-d7adac402bff?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-larissa",
     "createdAt": "2026-09-27T16:00:00.000Z",
@@ -8920,7 +8924,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8947,7 +8951,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-felipe",
     "createdAt": "2026-10-02T17:00:00.000Z",
@@ -8960,7 +8964,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-06T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -8987,7 +8991,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-felipe",
     "createdAt": "2026-09-22T14:00:00.000Z",
@@ -9000,7 +9004,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-09-27T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-jardim-botanico-calcadas-2",
@@ -9008,7 +9012,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9051,7 +9055,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-tatiane",
     "createdAt": "2026-09-27T15:00:00.000Z",
@@ -9064,7 +9068,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-01T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9099,7 +9103,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-diego",
     "createdAt": "2026-09-30T16:00:00.000Z",
@@ -9112,7 +9116,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9139,7 +9143,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-renata",
     "createdAt": "2026-10-01T17:00:00.000Z",
@@ -9152,7 +9156,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-05T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9179,7 +9183,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-renata",
     "createdAt": "2026-09-21T14:00:00.000Z",
@@ -9192,7 +9196,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-09-26T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-sao-conrado-calcadas-2",
@@ -9200,7 +9204,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9235,7 +9239,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-carlos",
     "createdAt": "2026-09-26T15:00:00.000Z",
@@ -9248,7 +9252,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-09-30T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9283,7 +9287,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-mariana",
     "createdAt": "2026-09-29T16:00:00.000Z",
@@ -9296,7 +9300,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9323,7 +9327,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-rodrigo",
     "createdAt": "2026-09-30T17:00:00.000Z",
@@ -9336,7 +9340,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-04T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9363,7 +9367,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-rodrigo",
     "createdAt": "2026-09-20T14:00:00.000Z",
@@ -9376,7 +9380,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-09-25T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-tijuca-calcadas-2",
@@ -9384,7 +9388,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9419,7 +9423,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-camila",
     "createdAt": "2026-09-25T15:00:00.000Z",
@@ -9432,7 +9436,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9467,7 +9471,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-lucas",
     "createdAt": "2026-09-28T16:00:00.000Z",
@@ -9480,7 +9484,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9507,7 +9511,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1588714477688-cf28a50e94f7?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-fernanda",
     "createdAt": "2026-09-29T17:00:00.000Z",
@@ -9520,7 +9524,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-03T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9547,7 +9551,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-fernanda",
     "createdAt": "2026-09-24T14:00:00.000Z",
@@ -9560,7 +9564,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-maracana-calcadas-2",
@@ -9568,7 +9572,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9611,7 +9615,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-thiago",
     "createdAt": "2026-09-24T15:00:00.000Z",
@@ -9624,7 +9628,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-09-28T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9659,7 +9663,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1496868834840-5f4c98840aaa?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-priscila",
     "createdAt": "2026-09-27T16:00:00.000Z",
@@ -9672,7 +9676,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9699,7 +9703,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-roberto",
     "createdAt": "2026-10-03T17:00:00.000Z",
@@ -9712,7 +9716,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-07T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9739,7 +9743,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-roberto",
     "createdAt": "2026-09-23T14:00:00.000Z",
@@ -9752,7 +9756,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-09-28T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-vila-isabel-calcadas-2",
@@ -9760,7 +9764,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9795,7 +9799,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-juliana",
     "createdAt": "2026-09-23T15:00:00.000Z",
@@ -9808,7 +9812,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-09-27T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9843,7 +9847,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-andre",
     "createdAt": "2026-09-30T16:00:00.000Z",
@@ -9856,7 +9860,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9883,7 +9887,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-aline",
     "createdAt": "2026-10-02T17:00:00.000Z",
@@ -9896,7 +9900,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-06T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9923,7 +9927,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-aline",
     "createdAt": "2026-09-22T14:00:00.000Z",
@@ -9936,7 +9940,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-09-27T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-grajau-calcadas-2",
@@ -9944,7 +9948,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -9979,7 +9983,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-gabriel",
     "createdAt": "2026-09-22T15:00:00.000Z",
@@ -9992,7 +9996,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-09-26T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10027,7 +10031,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-vanessa",
     "createdAt": "2026-09-29T16:00:00.000Z",
@@ -10040,7 +10044,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10067,7 +10071,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-marcelo",
     "createdAt": "2026-10-01T17:00:00.000Z",
@@ -10080,7 +10084,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-05T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10107,7 +10111,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-marcelo",
     "createdAt": "2026-09-21T14:00:00.000Z",
@@ -10120,7 +10124,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-09-26T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-meier-calcadas-2",
@@ -10128,7 +10132,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10171,7 +10175,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-larissa",
     "createdAt": "2026-09-27T15:00:00.000Z",
@@ -10184,7 +10188,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-01T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10219,7 +10223,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1426604966848-d7adac402bff?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-felipe",
     "createdAt": "2026-09-28T16:00:00.000Z",
@@ -10232,7 +10236,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10259,7 +10263,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-tatiane",
     "createdAt": "2026-09-30T17:00:00.000Z",
@@ -10272,7 +10276,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-04T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10299,7 +10303,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-tatiane",
     "createdAt": "2026-09-20T14:00:00.000Z",
@@ -10312,7 +10316,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-09-25T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-madureira-calcadas-2",
@@ -10320,7 +10324,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10355,7 +10359,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-diego",
     "createdAt": "2026-09-26T15:00:00.000Z",
@@ -10368,7 +10372,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-09-30T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10403,7 +10407,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-renata",
     "createdAt": "2026-09-27T16:00:00.000Z",
@@ -10416,7 +10420,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10443,7 +10447,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-carlos",
     "createdAt": "2026-09-29T17:00:00.000Z",
@@ -10456,7 +10460,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-03T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10483,7 +10487,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-carlos",
     "createdAt": "2026-09-24T14:00:00.000Z",
@@ -10496,7 +10500,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-sao-cristovao-calcadas-2",
@@ -10504,7 +10508,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10539,7 +10543,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-mariana",
     "createdAt": "2026-09-25T15:00:00.000Z",
@@ -10552,7 +10556,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10587,7 +10591,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-rodrigo",
     "createdAt": "2026-09-30T16:00:00.000Z",
@@ -10600,7 +10604,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10627,7 +10631,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-camila",
     "createdAt": "2026-10-03T17:00:00.000Z",
@@ -10640,7 +10644,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-07T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10667,7 +10671,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-camila",
     "createdAt": "2026-09-23T14:00:00.000Z",
@@ -10680,7 +10684,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-09-28T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-penha-calcadas-2",
@@ -10688,7 +10692,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10731,7 +10735,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-lucas",
     "createdAt": "2026-09-24T15:00:00.000Z",
@@ -10744,7 +10748,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-09-28T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10779,7 +10783,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-fernanda",
     "createdAt": "2026-09-29T16:00:00.000Z",
@@ -10792,7 +10796,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10819,7 +10823,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1588714477688-cf28a50e94f7?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-thiago",
     "createdAt": "2026-10-02T17:00:00.000Z",
@@ -10832,7 +10836,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-06T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10859,7 +10863,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-thiago",
     "createdAt": "2026-09-22T14:00:00.000Z",
@@ -10872,7 +10876,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-09-27T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-jardim-guanabara-calcadas-2",
@@ -10880,7 +10884,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10915,7 +10919,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-priscila",
     "createdAt": "2026-09-23T15:00:00.000Z",
@@ -10928,7 +10932,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-09-27T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -10963,7 +10967,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1496868834840-5f4c98840aaa?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-roberto",
     "createdAt": "2026-09-28T16:00:00.000Z",
@@ -10976,7 +10980,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11003,7 +11007,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-juliana",
     "createdAt": "2026-10-01T17:00:00.000Z",
@@ -11016,7 +11020,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-05T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11043,7 +11047,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-juliana",
     "createdAt": "2026-09-21T14:00:00.000Z",
@@ -11056,7 +11060,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-09-26T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-pavuna-calcadas-2",
@@ -11064,7 +11068,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11099,7 +11103,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-andre",
     "createdAt": "2026-09-22T15:00:00.000Z",
@@ -11112,7 +11116,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-09-26T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11147,7 +11151,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-aline",
     "createdAt": "2026-09-27T16:00:00.000Z",
@@ -11160,7 +11164,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11187,7 +11191,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-gabriel",
     "createdAt": "2026-09-30T17:00:00.000Z",
@@ -11200,7 +11204,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-04T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11227,7 +11231,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-gabriel",
     "createdAt": "2026-09-20T14:00:00.000Z",
@@ -11240,7 +11244,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-09-25T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-iraja-calcadas-2",
@@ -11248,7 +11252,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11291,7 +11295,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-vanessa",
     "createdAt": "2026-09-27T15:00:00.000Z",
@@ -11304,7 +11308,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-01T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11339,7 +11343,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-marcelo",
     "createdAt": "2026-09-30T16:00:00.000Z",
@@ -11352,7 +11356,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11379,7 +11383,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-larissa",
     "createdAt": "2026-09-29T17:00:00.000Z",
@@ -11392,7 +11396,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-03T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11419,7 +11423,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-larissa",
     "createdAt": "2026-09-24T14:00:00.000Z",
@@ -11432,7 +11436,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-barra-da-tijuca-calcadas-2",
@@ -11440,7 +11444,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-04T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11475,7 +11479,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-felipe",
     "createdAt": "2026-09-26T15:00:00.000Z",
@@ -11488,7 +11492,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-09-30T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11523,7 +11527,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1426604966848-d7adac402bff?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-tatiane",
     "createdAt": "2026-09-29T16:00:00.000Z",
@@ -11536,7 +11540,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11563,7 +11567,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-diego",
     "createdAt": "2026-10-03T17:00:00.000Z",
@@ -11576,7 +11580,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-07T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11603,7 +11607,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-diego",
     "createdAt": "2026-09-23T14:00:00.000Z",
@@ -11616,7 +11620,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-09-28T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-recreio-dos-bandeirantes-calcadas-2",
@@ -11624,7 +11628,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11659,7 +11663,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-renata",
     "createdAt": "2026-09-25T15:00:00.000Z",
@@ -11672,7 +11676,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-09-29T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11707,7 +11711,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-carlos",
     "createdAt": "2026-09-28T16:00:00.000Z",
@@ -11720,7 +11724,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11747,7 +11751,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-mariana",
     "createdAt": "2026-10-02T17:00:00.000Z",
@@ -11760,7 +11764,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-06T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11787,7 +11791,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/recycling.jpg"
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-mariana",
     "createdAt": "2026-09-22T14:00:00.000Z",
@@ -11800,7 +11804,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-09-27T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-taquara-calcadas-2",
@@ -11808,7 +11812,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11851,7 +11855,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-rodrigo",
     "createdAt": "2026-09-24T15:00:00.000Z",
@@ -11864,7 +11868,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-09-28T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11899,7 +11903,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-camila",
     "createdAt": "2026-09-27T16:00:00.000Z",
@@ -11912,7 +11916,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11939,7 +11943,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-lucas",
     "createdAt": "2026-10-01T17:00:00.000Z",
@@ -11952,7 +11956,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-05T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -11979,7 +11983,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/gloria-light.jpg"
+      "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-lucas",
     "createdAt": "2026-09-21T14:00:00.000Z",
@@ -11992,7 +11996,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-09-26T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-campo-grande-calcadas-2",
@@ -12000,7 +12004,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-01T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12035,7 +12039,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-fernanda",
     "createdAt": "2026-09-23T15:00:00.000Z",
@@ -12048,7 +12052,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-09-27T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12083,7 +12087,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-thiago",
     "createdAt": "2026-09-30T16:00:00.000Z",
@@ -12096,7 +12100,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-03T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12123,7 +12127,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1588714477688-cf28a50e94f7?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-priscila",
     "createdAt": "2026-09-30T17:00:00.000Z",
@@ -12136,7 +12140,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-04T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12163,7 +12167,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-path.jpg"
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-priscila",
     "createdAt": "2026-09-20T14:00:00.000Z",
@@ -12176,7 +12180,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-09-25T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       },
       {
         "id": "cmt-prop-bangu-calcadas-2",
@@ -12184,7 +12188,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-09-30T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12219,7 +12223,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/park-shade.jpg"
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-roberto",
     "createdAt": "2026-09-22T15:00:00.000Z",
@@ -12232,7 +12236,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-09-26T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12267,7 +12271,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/crossing-day.jpg"
+      "https://images.unsplash.com/photo-1496868834840-5f4c98840aaa?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-juliana",
     "createdAt": "2026-09-29T16:00:00.000Z",
@@ -12280,7 +12284,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-02T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12307,7 +12311,7 @@ export const rioDemoProposals: Proposal[] = [
       }
     },
     "images": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80"
     ],
     "createdBy": "citizen-andre",
     "createdAt": "2026-09-29T17:00:00.000Z",
@@ -12320,7 +12324,7 @@ export const rioDemoProposals: Proposal[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-03T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12353,7 +12357,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -12366,7 +12370,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12406,7 +12410,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 45,
     "dueAt": "2026-11-18T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -12419,7 +12423,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12459,7 +12463,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-16T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -12472,7 +12476,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12512,7 +12516,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -12525,7 +12529,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12560,7 +12564,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -12573,7 +12577,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12618,7 +12622,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 50,
     "dueAt": "2026-11-19T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -12631,7 +12635,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12671,7 +12675,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -12684,7 +12688,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12724,7 +12728,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -12737,7 +12741,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12772,7 +12776,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -12785,7 +12789,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12825,7 +12829,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 55,
     "dueAt": "2026-11-20T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -12838,7 +12842,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12878,7 +12882,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1503596476-1c12a8ba09a9?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -12891,7 +12895,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12931,7 +12935,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -12944,7 +12948,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -12979,7 +12983,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1580974852861-c381510bc98a?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -12992,7 +12996,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13037,7 +13041,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 60,
     "dueAt": "2026-11-21T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -13050,7 +13054,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13090,7 +13094,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-16T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -13103,7 +13107,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13143,7 +13147,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -13156,7 +13160,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13191,7 +13195,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -13204,7 +13208,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13244,7 +13248,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-22T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1498084393753-b411b2d26b34?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -13257,7 +13261,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13297,7 +13301,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1516997121675-4c2d1684aa3e?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -13310,7 +13314,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13350,7 +13354,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -13363,7 +13367,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13398,7 +13402,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1563911302283-d2bc129e7570?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -13411,7 +13415,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13456,7 +13460,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-11-23T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -13469,7 +13473,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13509,7 +13513,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1526951521990-620dc14c214b?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -13522,7 +13526,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13562,7 +13566,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -13575,7 +13579,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13610,7 +13614,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -13623,7 +13627,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13663,7 +13667,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 75,
     "dueAt": "2026-11-24T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -13676,7 +13680,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13716,7 +13720,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-16T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -13729,7 +13733,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13769,7 +13773,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -13782,7 +13786,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13817,7 +13821,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -13830,7 +13834,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13875,7 +13879,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 80,
     "dueAt": "2026-11-25T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -13888,7 +13892,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13928,7 +13932,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -13941,7 +13945,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -13981,7 +13985,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -13994,7 +13998,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14029,7 +14033,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1597733336794-12d05021d510?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -14042,7 +14046,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14082,7 +14086,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 45,
     "dueAt": "2026-11-26T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -14095,7 +14099,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14135,7 +14139,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -14148,7 +14152,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14188,7 +14192,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -14201,7 +14205,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14236,7 +14240,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1584467735871-8e85353a8413?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -14249,7 +14253,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14294,7 +14298,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 50,
     "dueAt": "2026-11-27T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -14307,7 +14311,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14347,7 +14351,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-16T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1595278069441-2cf29f8005a4?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -14360,7 +14364,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14400,7 +14404,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -14413,7 +14417,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14448,7 +14452,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -14461,7 +14465,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14501,7 +14505,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 55,
     "dueAt": "2026-11-28T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -14514,7 +14518,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14554,7 +14558,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1605600659908-0ef719419d41?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -14567,7 +14571,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14607,7 +14611,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -14620,7 +14624,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14655,7 +14659,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1594818379496-da1e345b0ded?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -14668,7 +14672,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14713,7 +14717,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 60,
     "dueAt": "2026-11-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -14726,7 +14730,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14766,7 +14770,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1584467735867-4297ae2ebcee?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -14779,7 +14783,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14819,7 +14823,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -14832,7 +14836,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14867,7 +14871,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -14880,7 +14884,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14920,7 +14924,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-30T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -14933,7 +14937,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -14973,7 +14977,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-16T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -14986,7 +14990,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15026,7 +15030,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -15039,7 +15043,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15074,7 +15078,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1525909002-1b05e0c869d8?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -15087,7 +15091,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15132,7 +15136,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-12-01T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -15145,7 +15149,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15185,7 +15189,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1537084642907-629340c7e59c?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -15198,7 +15202,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15238,7 +15242,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -15251,7 +15255,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15286,7 +15290,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -15299,7 +15303,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15339,7 +15343,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 75,
     "dueAt": "2026-12-02T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -15352,7 +15356,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15392,7 +15396,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -15405,7 +15409,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15445,7 +15449,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -15458,7 +15462,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15493,7 +15497,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -15506,7 +15510,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15551,7 +15555,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 80,
     "dueAt": "2026-11-18T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -15564,7 +15568,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15604,7 +15608,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-16T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -15617,7 +15621,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15657,7 +15661,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -15670,7 +15674,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15705,7 +15709,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1562654501-a0ccc0fc3fb1?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -15718,7 +15722,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15758,7 +15762,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 45,
     "dueAt": "2026-11-19T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -15771,7 +15775,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15811,7 +15815,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -15824,7 +15828,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15864,7 +15868,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -15877,7 +15881,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15912,7 +15916,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -15925,7 +15929,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -15970,7 +15974,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 50,
     "dueAt": "2026-11-20T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -15983,7 +15987,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16023,7 +16027,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -16036,7 +16040,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16076,7 +16080,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -16089,7 +16093,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16124,7 +16128,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -16137,7 +16141,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16177,7 +16181,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 55,
     "dueAt": "2026-11-21T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -16190,7 +16194,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16230,7 +16234,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-16T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -16243,7 +16247,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16283,7 +16287,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -16296,7 +16300,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16331,7 +16335,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -16344,7 +16348,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16389,7 +16393,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 60,
     "dueAt": "2026-11-22T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -16402,7 +16406,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16442,7 +16446,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -16455,7 +16459,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16495,7 +16499,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -16508,7 +16512,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16543,7 +16547,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -16556,7 +16560,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16596,7 +16600,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-23T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -16609,7 +16613,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16649,7 +16653,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -16662,7 +16666,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16702,7 +16706,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -16715,7 +16719,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16750,7 +16754,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -16763,7 +16767,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16808,7 +16812,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-11-24T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -16821,7 +16825,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16861,7 +16865,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-16T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -16874,7 +16878,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16914,7 +16918,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -16927,7 +16931,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -16962,7 +16966,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -16975,7 +16979,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17015,7 +17019,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 75,
     "dueAt": "2026-11-25T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -17028,7 +17032,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17068,7 +17072,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1503596476-1c12a8ba09a9?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -17081,7 +17085,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17121,7 +17125,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -17134,7 +17138,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17169,7 +17173,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -17182,7 +17186,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17227,7 +17231,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 80,
     "dueAt": "2026-11-26T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -17240,7 +17244,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17280,7 +17284,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -17293,7 +17297,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-aline",
         "userName": "Aline Ferreira",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17333,7 +17337,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -17346,7 +17350,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17381,7 +17385,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -17394,7 +17398,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-gabriel",
         "userName": "Gabriel Pires",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17434,7 +17438,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 45,
     "dueAt": "2026-11-27T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -17447,7 +17451,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-vanessa",
         "userName": "Vanessa Carvalho",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17487,7 +17491,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-16T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1516997121675-4c2d1684aa3e?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -17500,7 +17504,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-marcelo",
         "userName": "Marcelo Antunes",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17540,7 +17544,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -17553,7 +17557,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17588,7 +17592,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -17601,7 +17605,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-larissa",
         "userName": "Larissa Coutinho",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17646,7 +17650,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 50,
     "dueAt": "2026-11-28T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -17659,7 +17663,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-felipe",
         "userName": "Felipe Medeiros",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17699,7 +17703,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1526951521990-620dc14c214b?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -17712,7 +17716,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-tatiane",
         "userName": "Tatiane Rocha",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17752,7 +17756,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -17765,7 +17769,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17800,7 +17804,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -17813,7 +17817,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-diego",
         "userName": "Diego Brandão",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17853,7 +17857,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 55,
     "dueAt": "2026-11-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -17866,7 +17870,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-renata",
         "userName": "Renata Xavier",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17906,7 +17910,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -17919,7 +17923,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-carlos",
         "userName": "Carlos Eduardo Mendes",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -17959,7 +17963,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -17972,7 +17976,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -18007,7 +18011,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/crossing.jpg"
+      "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -18020,7 +18024,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-mariana",
         "userName": "Mariana Siqueira",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -18065,7 +18069,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 60,
     "dueAt": "2026-11-30T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -18078,7 +18082,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-rodrigo",
         "userName": "Rodrigo Vasconcelos",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -18118,7 +18122,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-16T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -18131,7 +18135,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-camila",
         "userName": "Camila Duarte",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -18171,7 +18175,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -18184,7 +18188,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -18219,7 +18223,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-11-13T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/accessible-path.jpg"
+      "https://images.unsplash.com/photo-1580974852861-c381510bc98a?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -18232,7 +18236,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-lucas",
         "userName": "Lucas Peixoto",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -18272,7 +18276,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 65,
     "dueAt": "2026-12-01T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1498084393753-b411b2d26b34?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -18285,7 +18289,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-fernanda",
         "userName": "Fernanda Albuquerque",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -18325,7 +18329,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -18338,7 +18342,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-thiago",
         "userName": "Thiago Nogueira",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -18378,7 +18382,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -18391,7 +18395,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -18426,7 +18430,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 100,
     "dueAt": "2026-10-17T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/waste.jpg"
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Secretaria Municipal de Conservação - SECONSERVA",
     "createdBy": "staff-seconserva",
@@ -18439,7 +18443,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-priscila",
         "userName": "Priscila Matos",
         "createdAt": "2026-10-07T15:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -18484,7 +18488,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-12-02T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/road.jpg"
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Rioluz - Companhia Municipal de Energia e Iluminação",
     "createdBy": "staff-rioluz",
@@ -18497,7 +18501,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-roberto",
         "userName": "Roberto Fonseca",
         "createdAt": "2026-10-09T16:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-gestao.jpg"
+        "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -18537,7 +18541,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 70,
     "dueAt": "2026-10-29T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/sidewalk.jpg"
+      "https://images.unsplash.com/photo-1595278069441-2cf29f8005a4?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "Comlurb - Companhia Municipal de Limpeza Urbana",
     "createdBy": "staff-comlurb",
@@ -18550,7 +18554,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-juliana",
         "userName": "Juliana Guimarães",
         "createdAt": "2026-10-12T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-ana.jpg"
+        "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
@@ -18590,7 +18594,7 @@ export const rioDemoActions: PublicAction[] = [
     "progress": 15,
     "dueAt": "2026-12-03T18:00:00.000Z",
     "evidence": [
-      "/api/demo-media/lighting.jpg"
+      "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80"
     ],
     "responsible": "CET-Rio - Companhia de Engenharia de Tráfego",
     "createdBy": "staff-cetrio",
@@ -18603,7 +18607,7 @@ export const rioDemoActions: PublicAction[] = [
         "userId": "citizen-andre",
         "userName": "André Luiz Ramos",
         "createdAt": "2026-10-14T17:00:00.000Z",
-        "avatar": "/api/demo-media/avatar-admin.jpg"
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80"
       }
     ],
     "linkedIds": [
