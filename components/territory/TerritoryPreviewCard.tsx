@@ -1,3 +1,5 @@
+import { FacilityRow } from './FacilityRow';
+import type { PublicFacilitySummary } from '@/shared/public-data';
 import React, { useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
@@ -12,6 +14,7 @@ import { kindLabel, statusLabel } from '@/features/city/CityUI';
 import { assetUrl } from '@/services/http';
 
 export type Entry =
+  | { type: 'facility'; item: PublicFacilitySummary }
   | { type: 'occurrence'; item: Occurrence }
   | { type: 'civic'; item: CivicItem }
   | { type: 'official'; item: OfficialCall };
@@ -44,6 +47,28 @@ export function TerritoryCardContent({
   const styles = useThemedStyles(createStyles);
   const [imageError, setImageError] = useState(false);
 
+  if (entry.type === 'facility')
+    return (
+      <View style={{ gap: 6 }}>
+        <FacilityRow item={entry.item} onPress={() => onOpen(entry)} />
+        {!hideClose && onClose && (
+          <Pressable
+            accessibilityRole="button"
+            onPress={onClose}
+            style={{
+              minHeight: 44,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: colors.surface,
+              borderRadius: 22,
+            }}
+          >
+            <AppText variant="caption">Fechar</AppText>
+          </Pressable>
+        )}
+      </View>
+    );
+
   const title =
     entry.type === 'official'
       ? entry.item.serviceSubtype || entry.item.serviceType
@@ -59,7 +84,8 @@ export function TerritoryCardContent({
     const occ = entry.item;
     status = occurrenceStatus[occ.status] || occ.status;
     categoryLabel = 'Ocorrência';
-    address = occ.location.address || occ.location.neighborhood || 'Local indicado';
+    address =
+      occ.location.address || occ.location.neighborhood || 'Local indicado';
     rawPhoto = occ.images && occ.images.length > 0 ? occ.images[0] : null;
     badgeColor = colors.accent;
   } else if (entry.type === 'official') {
@@ -77,9 +103,13 @@ export function TerritoryCardContent({
     categoryLabel = kindLabel[civic.kind];
     address = civic.neighborhood || 'Território municipal';
     rawPhoto =
-      'images' in civic && Array.isArray(civic.images) && civic.images.length > 0
+      'images' in civic &&
+      Array.isArray(civic.images) &&
+      civic.images.length > 0
         ? civic.images[0]
-        : 'evidence' in civic && Array.isArray(civic.evidence) && civic.evidence.length > 0
+        : 'evidence' in civic &&
+            Array.isArray(civic.evidence) &&
+            civic.evidence.length > 0
           ? civic.evidence[0]
           : null;
     badgeColor =
@@ -297,11 +327,7 @@ export function TerritoryPreviewCard({
 
   return (
     <View style={[styles.card, { bottom: bottomOffset }]}>
-      <TerritoryCardContent
-        entry={entry}
-        onOpen={onOpen}
-        onClose={onClose}
-      />
+      <TerritoryCardContent entry={entry} onOpen={onOpen} onClose={onClose} />
     </View>
   );
 }

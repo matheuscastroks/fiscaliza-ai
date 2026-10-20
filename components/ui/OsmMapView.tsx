@@ -1,8 +1,18 @@
-import React, { useMemo, useRef, useEffect } from 'react';
-import { StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
+import React, { useMemo, useRef, useEffect, useCallback } from 'react';
+import { Platform, StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-export type MarkerKind = 'occurrence' | 'proposal' | 'consultation' | 'action' | 'official';
+import { scriptJson } from '@/features/territory/selectors';
+import type { TerritorialGeometry } from '@/shared/public-data';
+export type MarkerKind =
+  | 'school'
+  | 'health'
+  | 'square'
+  | 'occurrence'
+  | 'proposal'
+  | 'consultation'
+  | 'action'
+  | 'official';
 
 export interface MapMarker {
   id: string;
@@ -27,6 +37,7 @@ interface OsmMapViewProps {
   style?: StyleProp<ViewStyle>;
   region: MapRegion;
   markers?: MapMarker[];
+  boundary?: TerritorialGeometry | null;
   selectedId?: string | null;
   selectedClusterIds?: string[] | null;
   onMapClick?: (coords: { latitude: number; longitude: number }) => void;
@@ -51,6 +62,7 @@ export function OsmMapView({
   style,
   region,
   markers = [],
+  boundary,
   selectedId,
   selectedClusterIds,
   onMapClick,
@@ -61,6 +73,7 @@ export function OsmMapView({
   isDark = false,
 }: OsmMapViewProps) {
   const webViewRef = useRef<WebView>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const lastCenterRef = useRef<{
     latitude: number;
     longitude: number;
@@ -70,11 +83,55 @@ export function OsmMapView({
     longitude: region.longitude,
     zoom: region.zoom,
   });
+  const dispatch = useCallback((command: string, args: unknown[]) => {
+    if (Platform.OS === 'web')
+      iframeRef.current?.contentWindow?.postMessage({ command, args }, '*');
+    else
+      webViewRef.current?.injectJavaScript(
+        'if(window[' +
+          scriptJson(command) +
+          ']) window[' +
+          scriptJson(command) +
+          '].apply(null,' +
+          scriptJson(args) +
+          '); true;',
+      );
+  }, []);
+  const receive = useCallback(
+    (data: any) => {
+      if (data.type === 'onMapClick')
+        onMapClick?.({ latitude: data.latitude, longitude: data.longitude });
+      if (data.type === 'onMarkerClick') onMarkerClick?.(data.id);
+      if (data.type === 'onClusterClick') onClusterClick?.(data);
+      if (data.type === 'onRegionChange') {
+        lastCenterRef.current = data;
+        onRegionChange?.(data);
+      }
+    },
+    [onMapClick, onMarkerClick, onClusterClick, onRegionChange],
+  );
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const listener = (event: MessageEvent) => {
+      if (event.source !== iframeRef.current?.contentWindow) return;
+      try {
+        receive(
+          typeof event.data === 'string' ? JSON.parse(event.data) : event.data,
+        );
+      } catch {}
+    };
+    window.addEventListener('message', listener);
+    return () => window.removeEventListener('message', listener);
+  }, [receive]);
   const lastMarkersJsonRef = useRef<string>('');
 
   const zoom = useMemo(() => {
     if (region.zoom) return region.zoom;
-    const delta = Math.max(region.latitudeDelta || 0.05, region.longitudeDelta || 0.05, 0.001);
+    const delta = Math.max(
+      region.latitudeDelta || 0.05,
+      region.longitudeDelta || 0.05,
+      0.001,
+    );
     return Math.max(3, Math.min(18, Math.round(Math.log2(360 / delta))));
   }, [region.zoom, region.latitudeDelta, region.longitudeDelta]);
 
@@ -103,14 +160,18 @@ export function OsmMapView({
       overflow: hidden;
       touch-action: none;
     }
-    ${isDark ? `
+    ${
+      isDark
+        ? `
     .leaflet-tile-pane {
       filter: invert(100%) hue-rotate(180deg) brightness(92%) contrast(92%);
     }
     .leaflet-container {
       background: #121212 !important;
     }
-    ` : ''}
+    `
+        : ''
+    }
     .leaflet-control-attribution {
       font-size: 8px !important;
       background: rgba(255,255,255,0.7) !important;
@@ -234,8 +295,8 @@ export function OsmMapView({
     }).addTo(map);
 
     var markersMap = {};
-    var currentSelectedId = ${JSON.stringify(selectedId || null)};
-    var currentSelectedClusterIds = ${JSON.stringify(selectedClusterIds || [])};
+    var currentSelectedId = ${scriptJson(selectedId || null)};
+    var currentSelectedClusterIds = ${scriptJson(selectedClusterIds || [])};
 
     var clusterGroup;
     if (typeof L.markerClusterGroup === 'function') {
@@ -290,6 +351,9 @@ export function OsmMapView({
     map.addLayer(clusterGroup);
 
     var SVG_ICONS = {
+      school: '<path d="M2 9L12 3L22 9L12 15Z M5 12V19H19V12" fill="none" stroke="white" stroke-width="2"/>',
+      health: '<path d="M9 3H15V9H21V15H15V21H9V15H3V9H9Z" fill="white"/>',
+      square: '<path d="M12 2L3 15H9V21H15V15H21Z" fill="white"/>',
       occurrence: '<path d="M10.45 4.15L3.35 16.45C2.68 17.62 3.52 19.08 4.87 19.08H19.13C20.48 19.08 21.32 17.62 20.65 16.45L13.55 4.15C12.87 2.98 11.13 2.98 10.45 4.15ZM12 8.5C12.6 8.5 13.1 9.0 13.1 9.6V12.8C13.1 13.4 12.6 13.9 12 13.9C11.4 13.9 10.9 13.4 10.9 12.8V9.6C10.9 9.0 11.4 8.5 12 8.5ZM12 17.0C11.34 17.0 10.8 16.46 10.8 15.8C10.8 15.14 11.34 14.6 12 14.6C12.66 14.6 13.2 15.14 13.2 15.8C13.2 16.46 12.66 17.0 12 17.0Z" fill="#FFFFFF"/>',
       proposal: '<path d="M12 2.5C8.13 2.5 5 5.63 5 9.5C5 11.88 6.19 13.97 8 15.24V17.5C8 18.05 8.45 18.5 9 18.5H15C15.55 18.5 16 18.05 16 17.5V15.24C17.81 13.97 19 11.88 19 9.5C19 5.63 15.87 2.5 12 2.5ZM9.5 20C9.5 20.83 10.17 21.5 11 21.5H13C13.83 21.5 14.5 20.83 14.5 20V19.5H9.5V20Z" fill="#FFFFFF"/>',
       consultation: '<path d="M18 3H6C4.34 3 3 4.34 3 6V18C3 19.66 4.34 21 6 21H18C19.66 21 21 19.66 21 18V6C21 4.34 19.66 3 18 3ZM10.6 16.2L6.8 12.4C6.41 12.01 6.41 11.38 6.8 10.99C7.19 10.6 7.82 10.6 8.21 10.99L10.6 13.38L15.79 8.19C16.18 7.8 16.81 7.8 17.2 8.19C17.59 8.58 17.59 9.21 17.2 9.6L10.6 16.2Z" fill="#FFFFFF"/>',
@@ -298,7 +362,7 @@ export function OsmMapView({
     };
 
     function createMarkerIcon(markerData, isSelected) {
-      var pinColor = markerData.color || '#212529';
+      var pinColor = /^#[0-9a-f]{6}$/i.test(markerData.color || '') ? markerData.color : '#212529';
       var iconPath = SVG_ICONS[markerData.kind] || '<circle cx="12" cy="12" r="5" fill="#FFFFFF"/>';
       var pulseHtml = isSelected ? '<div class="pulse-ring" style="border-color:' + pinColor + '"></div>' : '';
 
@@ -337,6 +401,9 @@ export function OsmMapView({
           zIndexOffset: isSelected ? 1000 : 0
         });
         marker.markerId = m.id;
+        var label = document.createElement('span'); label.textContent = m.title || '';
+        marker.bindTooltip(label);
+
 
         marker.on('click', function(e) {
           L.DomEvent.stopPropagation(e);
@@ -368,8 +435,16 @@ export function OsmMapView({
       }
     }
 
-    updateMarkers(${JSON.stringify(markers)}, currentSelectedId, currentSelectedClusterIds);
+    updateMarkers(${scriptJson(markers)}, currentSelectedId, currentSelectedClusterIds);
 
+    var boundaryLayer = L.geoJSON(null, { style: { color: '#6A7781', weight: 2, fillOpacity: 0.06 }, interactive: false }).addTo(map);
+    window.setBoundary = function(geometry) { boundaryLayer.clearLayers(); if (geometry) boundaryLayer.addData({type:'Feature', properties:{}, geometry:geometry}); };
+    window.setBoundary(${scriptJson(boundary || null)});
+    window.addEventListener('message', function(event) {
+      if (event.source !== window.parent) return;
+      var data = event.data;
+      if (data && ['setView', 'setMarkers', 'setBoundary'].indexOf(data.command) !== -1 && Array.isArray(data.args)) window[data.command].apply(null, data.args);
+    });
     map.on('click', function(e) {
       postAppMessage({
         type: 'onMapClick',
@@ -436,9 +511,8 @@ export function OsmMapView({
       zoom: currentTargetZoom,
     };
 
-    const script = `if (window.setView) { window.setView(${region.latitude}, ${region.longitude}, ${currentTargetZoom}); } true;`;
-    webViewRef.current?.injectJavaScript(script);
-  }, [region.latitude, region.longitude, region.zoom, zoom]);
+    dispatch('setView', [region.latitude, region.longitude, currentTargetZoom]);
+  }, [region.latitude, region.longitude, region.zoom, zoom, dispatch]);
 
   // Sync marker updates efficiently without reloading entire HTML
   useEffect(() => {
@@ -449,49 +523,49 @@ export function OsmMapView({
     });
     if (payload === lastMarkersJsonRef.current) return;
     lastMarkersJsonRef.current = payload;
-    const script = `if (window.setMarkers) { window.setMarkers(${JSON.stringify(markers)}, ${JSON.stringify(selectedId || null)}, ${JSON.stringify(selectedClusterIds || [])}); } true;`;
-    webViewRef.current?.injectJavaScript(script);
-  }, [markers, selectedId, selectedClusterIds]);
+    dispatch('setMarkers', [
+      markers,
+      selectedId || null,
+      selectedClusterIds || [],
+    ]);
+  }, [markers, selectedId, selectedClusterIds, dispatch]);
+  useEffect(() => {
+    dispatch('setBoundary', [boundary || null]);
+  }, [boundary, dispatch]);
 
   return (
     <View style={[styles.container, style]}>
-      <WebView
-        ref={webViewRef}
-        originWhitelist={['*']}
-        source={{ html: htmlContent }}
-        style={styles.webView}
-        scrollEnabled={false}
-        overScrollMode="never"
-        onMessage={(event) => {
-          try {
-            const data = JSON.parse(event.nativeEvent.data);
-            if (data.type === 'onMapClick' && onMapClick) {
-              onMapClick({ latitude: data.latitude, longitude: data.longitude });
-            } else if (data.type === 'onMarkerClick' && onMarkerClick) {
-              onMarkerClick(data.id);
-            } else if (data.type === 'onClusterClick' && onClusterClick) {
-              onClusterClick({
-                ids: data.ids,
-                latitude: data.latitude,
-                longitude: data.longitude,
-              });
-            } else if (data.type === 'onRegionChange' && onRegionChange) {
-              lastCenterRef.current = {
-                latitude: data.latitude,
-                longitude: data.longitude,
-                zoom: data.zoom,
-              };
-              onRegionChange({
-                latitude: data.latitude,
-                longitude: data.longitude,
-                latitudeDelta: data.latitudeDelta,
-                longitudeDelta: data.longitudeDelta,
-                zoom: data.zoom,
-              });
-            }
-          } catch {}
-        }}
-      />
+      {Platform.OS === 'web' ? (
+        React.createElement('iframe', {
+          ref: iframeRef,
+          title: 'Mapa do território',
+          srcDoc: htmlContent,
+          style: { width: '100%', height: '100%', border: 0 },
+          onLoad: () => {
+            dispatch('setMarkers', [
+              markers,
+              selectedId || null,
+              selectedClusterIds || [],
+            ]);
+            dispatch('setBoundary', [boundary || null]);
+            dispatch('setView', [region.latitude, region.longitude, zoom]);
+          },
+        })
+      ) : (
+        <WebView
+          ref={webViewRef}
+          originWhitelist={['*']}
+          source={{ html: htmlContent }}
+          style={styles.webView}
+          scrollEnabled={false}
+          overScrollMode="never"
+          onMessage={(event) => {
+            try {
+              receive(JSON.parse(event.nativeEvent.data));
+            } catch {}
+          }}
+        />
+      )}
     </View>
   );
 }
@@ -499,6 +573,7 @@ export function OsmMapView({
 const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
+    borderRadius: 24,
     width: '100%',
     height: '100%',
   },

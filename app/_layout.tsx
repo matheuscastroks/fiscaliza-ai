@@ -68,6 +68,7 @@ export default function RootLayout() {
         '',
         '(tabs)',
         'OfficialCallDetailsScreen',
+        'FacilityDetailsScreen',
         'ResultsScreen',
         'CityScreen',
         'LoginScreen',

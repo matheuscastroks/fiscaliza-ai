@@ -1,15 +1,24 @@
 import { useCallback } from 'react';
+import { useNeighborhoods } from '@/features/territory/usePublicData';
+import {
+  resolveNeighborhood,
+  type TerritoryLayer,
+} from '@/features/territory/selectors';
 import { create } from 'zustand';
 import { useAuthStore } from './authStore';
 
 const useTerritoryStore = create<{
   key: string;
   neighborhood: string | undefined;
+  layers: TerritoryLayer[];
+  setLayers: (layers: TerritoryLayer[]) => void;
   isListView: boolean;
   setIsListView: (value: boolean) => void;
   toggleViewMode: () => void;
 }>((set) => ({
-  key: '',
+  key: 'public:3304557',
+  layers: ['official'],
+  setLayers: (layers) => set({ layers }),
   neighborhood: undefined,
   isListView: false,
   setIsListView: (value: boolean) => set({ isListView: value }),
@@ -19,7 +28,7 @@ const scopeKey = () => {
   const user = useAuthStore.getState().user;
   return user?.id && user.municipality?.id
     ? user.id + ':' + user.municipality.id
-    : '';
+    : 'public:3304557';
 };
 useAuthStore.subscribe((next, previous) => {
   if (
@@ -38,12 +47,13 @@ useAuthStore.subscribe((next, previous) => {
 export function useTerritorySelection(): {
   neighborhood: string;
   setNeighborhood: (value: string) => void;
+  neighborhoodId: string | undefined;
 } {
   const user = useAuthStore((state) => state.user);
   const key =
     user?.id && user.municipality?.id
       ? user.id + ':' + user.municipality.id
-      : '';
+      : 'public:3304557';
   const storedKey = useTerritoryStore((state) => state.key);
   const stored = useTerritoryStore((state) => state.neighborhood);
   const neighborhood =
@@ -55,7 +65,12 @@ export function useTerritorySelection(): {
     },
     [key],
   );
-  return { neighborhood, setNeighborhood };
+  const boundaries = useNeighborhoods();
+  const neighborhoodId = resolveNeighborhood(
+    neighborhood,
+    boundaries.data || [],
+  )?.id;
+  return { neighborhood, setNeighborhood, neighborhoodId };
 }
 
 export function useTerritoryViewMode(): {
