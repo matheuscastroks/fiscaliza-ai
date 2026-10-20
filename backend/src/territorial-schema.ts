@@ -92,7 +92,7 @@ export const publicFacilities = pgTable(
       .references(() => dataSources.id),
     externalId: text('external_id').notNull(),
     category: text('category').$type<FacilityCategory>().notNull(),
-    name: text('name').notNull(),
+    name: text('name'),
     address: text('address'),
     phone: text('phone'),
     openingHours: text('opening_hours'),

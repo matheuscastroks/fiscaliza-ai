@@ -1,0 +1,24 @@
+{
+  "type": "Feature",
+  "id": 1,
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      -43.24300844574303,
+      -22.90133878507425
+    ]
+  },
+  "properties": {
+    "objectid_1": 1,
+    "globalid": "4361a4fa-3e34-4975-bb04-7bdfb04867aa",
+    "nome": "CF Dona Zica ",
+    "endereco": "RUA JOAO RODRIGUES, 43",
+    "bairro": "SAO FRANCISCO XAVIER",
+    "telefone": "2218-3351",
+    "horario_se": " ",
+    "horario_sa": " ",
+    "tipo_unida": " ",
+    "flg_ativo": " ",
+    "cnes": "6023975"
+  }
+}

@@ -40,7 +40,7 @@ export interface PublicFacility {
   externalId: string;
   sourceId: string;
   category: FacilityCategory;
-  name: string;
+  name: string | null;
   address: string | null;
   phone: string | null;
   openingHours: string | null;

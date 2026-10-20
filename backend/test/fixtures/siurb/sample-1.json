@@ -1,0 +1,23 @@
+{
+  "type": "Feature",
+  "id": 16229,
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      -43.252938490735225,
+      -22.993558663166624
+    ]
+  },
+  "properties": {
+    "objectid": 16229,
+    "globalid": "{52C57AB8-972A-4DAF-B3A9-8B8B689C98F0}",
+    "nome_escola": "Escola Municipal Rinaldo De Lamare",
+    "endereco": "Avenida Niemeyer, 776  ",
+    "cod_bairro": "154",
+    "bairro": "Rocinha",
+    "cod_inep": "33149275",
+    "cod_atividade": 1,
+    "telefones": " ",
+    "flg_ativa": 1
+  }
+}

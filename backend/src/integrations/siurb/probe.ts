@@ -31,7 +31,25 @@ export async function readSiurbJson(
     headers: { accept: 'application/json' },
   });
   if (!response.ok) throw new Error(`ArcGIS HTTP ${response.status}.`);
-  const result: unknown = await response.json();
+  if (!response.body) throw new Error('ArcGIS retornou corpo vazio.');
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let bytes = 0;
+  try {
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      bytes += chunk.value.byteLength;
+      if (bytes > 8388608) throw new Error('ArcGIS: resposta acima de 8 MB.');
+      chunks.push(chunk.value);
+    }
+  } catch (error) {
+    await reader.cancel().catch(() => {});
+    throw error;
+  }
+  const result: unknown = JSON.parse(
+    new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks)),
+  );
   if (
     !result ||
     typeof result !== 'object' ||

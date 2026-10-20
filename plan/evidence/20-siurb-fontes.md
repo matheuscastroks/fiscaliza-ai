@@ -35,3 +35,13 @@ O catálogo identifica uso individual com base nesses metadados e mantém a URL 
 A descoberta Orbit foi consultada e retornou candidatos de outros provedores, inadequados ao SIURB; não foram adotados nem importados. A autoridade para o contrato é o serviço oficial acima. A rede estava bloqueada no sandbox; as leituras oficiais foram realizadas com a permissão de rede concedida para os scripts de validação, sem credenciais e sem consultas Google faturadas.
 
 Os dois testes de catálogo/probe passaram com transporte controlado, incluindo erro ArcGIS em HTTP 200 e ausência de data. Isso valida o tratamento do protocolo; as consultas reais acima validam o acesso às quatro camadas. Não há alegação de atualização operacional, extração completa ou inspeção de app nativo.
+
+## Complemento da tarefa 5 — extração completa validada
+
+Após implementar o importador, as quatro camadas foram extraídas, reconciliadas por IDs e publicadas integralmente no banco **isolado** `fiscaliza_territorial_utf8_preview_1020`: 167 bairros, 1.540 escolas, 344 unidades de saúde e 2.387 espaços públicos (4.271 equipamentos/espaços). Todos os runs terminaram com cobertura completa do cadastro consultado e zero rejeições. Isso não estabelece atualização operacional ou cobertura completa de serviços do município.
+
+A camada de espaços contém **226 registros sem nome**, preservados como `NULL` no cadastro normalizado e intactos em `original_data`. Ausência de nome não torna uma geometria ou identidade cadastral inválida. A interface identificará essa ausência sem inventar um nome oficial.
+
+A primeira tentativa no banco Windows herdado falhou com PostgreSQL `22P05`: WIN1252 não representa U+200B presente em nomes oficiais. Criamos bancos novos com UTF-8; os bancos anteriores foram mantidos. Nenhum dado do banco usado pelo aplicativo foi alterado, e nenhum caractere dos nomes foi removido para contornar o problema.
+
+Foram aprovados 57 testes da API em PostgreSQL UTF-8, incluindo persistência de Unicode, migração aditiva de nome opcional, amostras reais, importação idempotente, contagens de atualização, exclusão lógica por snapshot, falhas no último lote, timeout, geometrias com buracos e vínculos de bairro conflitantes. Os logs de trabalho ficam em `.validation/territorial-execution/task5-*`; os comandos e fixtures versionados permitem reproduzir o comportamento.
