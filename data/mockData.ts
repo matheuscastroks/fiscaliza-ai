@@ -619,6 +619,23 @@ export const mockUsers: User[] = [
     joinedDaysAgo: 13,
     nextLevelPoints: 1000,
   },
+  ...rioDemoCitizens.map((c, i) => ({
+    id: c.id,
+    name: c.name,
+    email: c.email,
+    avatar: c.avatar,
+    neighborhood: c.neighborhood,
+    level: 1 + (i % 5),
+    points: 150 + ((i * 45) % 600),
+    ranking: i + 1,
+    badges: [],
+    createdAt: '2026-09-01',
+    streak: 2 + (i % 7),
+    lastActivity: '2026-10-18T10:00:00.000Z',
+    totalComments: 3 + (i % 6),
+    joinedDaysAgo: 45,
+    nextLevelPoints: 500,
+  })),
 ];
 
 export const mockProblems: Problem[] = [
@@ -1202,6 +1219,7 @@ export const mockProblems: Problem[] = [
       },
     ],
   },
+  ...(rioDemoOccurrences as any),
 ];
 
 // Estatísticas globais
