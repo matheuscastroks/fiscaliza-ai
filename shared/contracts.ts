@@ -175,3 +175,76 @@ export interface Analysis {
   imageAnalysis?: string;
   imageAnalyzed?: boolean;
 }
+
+export interface OfficialCall {
+  id: string;
+  externalId: string;
+  source: 'rio1746';
+  municipalityId: string;
+  serviceCategory?: string | null;
+  serviceType: string;
+  serviceSubtype: string;
+  organizationName?: string | null;
+  officialStatus?: string | null;
+  officialSituation?: string | null;
+  officialSituationType?: string | null;
+  statusJustification?: string | null;
+  openedAt: string;
+  closedAt?: string | null;
+  targetDate?: string | null;
+  withinDeadline?: string | null;
+  timeRemaining?: number | null;
+  timeUnit?: string | null;
+  neighborhoodId?: string | null;
+  neighborhoodName?: string | null;
+  subprefecture?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  sourcePartitionDate?: string | null;
+  importedAt: string;
+  updatedAt: string;
+}
+
+export interface OfficialCallsFilterOptions {
+  bairros: string[];
+  tipos: string[];
+  subtipos: string[];
+  situacoes: string[];
+}
+
+export interface OfficialCallsQueryParams {
+  page?: number;
+  limit?: number;
+  bairro?: string;
+  tipo?: string;
+  subtipo?: string;
+  situacao?: string;
+  hasCoordinates?: boolean;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+  north?: number;
+  south?: number;
+  east?: number;
+  west?: number;
+}
+
+export interface OfficialCallsListResponse {
+  calls: OfficialCall[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+export interface OfficialCallsOverview {
+  totalCalls: number;
+  openCalls: number;
+  closedCalls: number;
+  callsWithCoordinates: number;
+  topServices: { type: string; count: number }[];
+  topNeighborhoods: { neighborhood: string; count: number }[];
+  situationBreakdown: { situation: string; count: number }[];
+  lastPartitionDate: string | null;
+  lastSyncedAt: string | null;
+}

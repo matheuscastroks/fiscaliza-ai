@@ -28,6 +28,8 @@ import type { CivicItem, Occurrence } from '@/shared/contracts';
 import { useAuthStore } from '@/stores/authStore';
 import { useTerritorySelection } from '@/stores/territoryStore';
 import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
+import { useOfficialOverview } from '@/features/city/useOfficialCalls';
+import { Rio1746OverviewCard } from '@/components/official/Rio1746OverviewCard';
 
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -49,6 +51,10 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const { width } = useWindowDimensions();
   const user = useAuthStore((s) => s.user);
+  const isRio =
+    user?.municipality?.id === '3304557' ||
+    user?.municipality?.name?.toLowerCase().includes('rio');
+  const officialOverview = useOfficialOverview(Boolean(isRio));
   const { neighborhood, setNeighborhood } = useTerritorySelection();
   const [clock, setClock] = useState(() => Date.now());
   useEffect(() => {
@@ -107,6 +113,7 @@ export default function HomeScreen() {
     void civic.refetch();
     void occurrences.refetch();
     void activity.refetch();
+    if (isRio) void officialOverview.refetch();
   };
   const pullRefresh = async () => {
     setRefreshing(true);
@@ -115,6 +122,7 @@ export default function HomeScreen() {
         civic.refetch(),
         occurrences.refetch(),
         activity.refetch(),
+        isRio ? officialOverview.refetch() : Promise.resolve(),
       ]);
       setClock(Date.now());
     } finally {
@@ -171,6 +179,14 @@ export default function HomeScreen() {
             })
           }
         />
+        {isRio && (
+          <View style={cityStyles.section}>
+            <Rio1746OverviewCard
+              overview={officialOverview.data}
+              isLoading={officialOverview.isLoading}
+            />
+          </View>
+        )}
         <View style={cityStyles.section}>
           <AppText variant="screenTitle">
             Agora em {neighborhood || user?.municipality?.name || 'sua cidade'}

@@ -7,13 +7,14 @@ import { AppText } from '@/components/ui/AppText';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
-import type { CivicItem, Occurrence } from '@/shared/contracts';
+import type { CivicItem, Occurrence, OfficialCall } from '@/shared/contracts';
 import { kindLabel, statusLabel } from '@/features/city/CityUI';
 import { assetUrl } from '@/services/http';
 
 export type Entry =
   | { type: 'occurrence'; item: Occurrence }
-  | { type: 'civic'; item: CivicItem };
+  | { type: 'civic'; item: CivicItem }
+  | { type: 'official'; item: OfficialCall };
 
 const occurrenceStatus: Record<string, string> = {
   pending: 'Recebida',
@@ -43,7 +44,10 @@ export function TerritoryCardContent({
   const styles = useThemedStyles(createStyles);
   const [imageError, setImageError] = useState(false);
 
-  const title = entry.item.title;
+  const title =
+    entry.type === 'official'
+      ? entry.item.serviceSubtype || entry.item.serviceType
+      : entry.item.title;
 
   let status = '';
   let categoryLabel = '';
@@ -58,6 +62,15 @@ export function TerritoryCardContent({
     address = occ.location.address || occ.location.neighborhood || 'Local indicado';
     rawPhoto = occ.images && occ.images.length > 0 ? occ.images[0] : null;
     badgeColor = colors.accent;
+  } else if (entry.type === 'official') {
+    const off = entry.item;
+    status = off.officialSituation || off.officialStatus || 'Registrado';
+    categoryLabel = off.serviceType || 'Central 1746';
+    address =
+      [off.neighborhoodName, off.subprefecture].filter(Boolean).join(' · ') ||
+      'Rio de Janeiro';
+    rawPhoto = null;
+    badgeColor = '#0072BB';
   } else {
     const civic = entry.item;
     status = statusLabel[civic.status] || civic.status;
@@ -112,6 +125,29 @@ export function TerritoryCardContent({
         {/* Top row: Badges + Close button */}
         <View style={styles.topRow}>
           <View style={styles.badgeGroup}>
+            {entry.type === 'official' && (
+              <View
+                style={[
+                  styles.badge,
+                  {
+                    backgroundColor: '#0072BB1A',
+                    borderColor: '#0072BB44',
+                    borderWidth: 1,
+                  },
+                ]}
+              >
+                <AppText
+                  variant="caption"
+                  style={{
+                    color: '#0072BB',
+                    fontWeight: '800',
+                    fontSize: 10,
+                  }}
+                >
+                  1746 OFICIAL
+                </AppText>
+              </View>
+            )}
             <View
               style={[
                 styles.badge,

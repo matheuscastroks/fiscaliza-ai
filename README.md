@@ -1,20 +1,40 @@
-# Fiscaliza aí
+# Fiscaliza aí — Plataforma de Inteligência Urbana do Rio de Janeiro
 
-Plataforma de participação na gestão urbana: cidadãos registram necessidades, propõem melhorias, participam de consultas e acompanham ações e respostas da gestão.
+Plataforma inteligente de exploração e análise de dados públicos urbanos com foco no município do Rio de Janeiro (IBGE `3304557`). A aplicação agrega dados oficiais da Central 1746 (DATA.RIO via Google BigQuery), democratizando o acesso a informações públicas sobre chamados, serviços, prazos de atendimento, secretarias e distribuição territorial na cidade.
 
-Aplicativo Expo Android/iOS/Web e API TypeScript/PostgreSQL. As cidades e seus limites são reais; os registros iniciais e contas são de apresentação acadêmica. Não existe vínculo ou encaminhamento a uma prefeitura real. Esse contexto fica em Sobre nas interfaces.
+Aplicativo Expo Android/iOS/Web e API TypeScript/PostgreSQL. A plataforma integra os dados oficiais da Prefeitura do Rio com as camadas participativas existentes (propostas comunitárias, consultas e ações públicas).
 
 ## Organização
 
-`app/`, `features/`, `components/` e `theme/` compõem o cidadão; `backend/` contém API, migrações, dados territoriais e testes; `shared/` define contratos. `PRODUCT.md`, `DESIGN.md` e `AGENTS.md` orientam contribuições.
+- `app/`, `features/`, `components/` e `theme/`: aplicativo Expo (cidadão e mapas territoriais com clustering).
+- `backend/`: API Fastify, PostgreSQL (Drizzle ORM), migrações e sincronizador BigQuery DATA.RIO.
+- `backend/src/integrations/rio1746/`: pipeline de ingestão, sanitização e sincronização da Central 1746.
+- `shared/`: contratos públicos TypeScript e helpers territoriais.
+- `docs/integracoes/`: documentação e diagnósticos técnicos da base de dados do BigQuery.
 
-## Município pelo CEP
+## Integração DATA.RIO & Central 1746 (BigQuery)
 
-No primeiro acesso, o cidadão informa o CEP e confirma município/UF. O servidor consulta ViaCEP, usa o código IBGE como identidade municipal e valida a localização de novas ocorrências no polígono da cidade. Um ponto no retângulo de visualização do mapa não é suficiente para permitir o registro.
+O Fiscaliza Aí conecta-se diretamente ao repositório público do DATA.RIO no Google BigQuery:
+- **Tabela de chamados**: `datario.adm_central_atendimento_1746.chamado`
+- **Tabela de bairros**: `datario.dados_mestres.bairro`
 
-Meu perfil → Atualizar CEP e município permite mudança de residência. Rascunhos e cache são separados por usuário/município. O histórico das cidades anteriores é preservado para consulta; novas interações ficam na cidade atual. CEP não é comprovação de residência.
+### Princípios da Integração
+1. **Desacoplamento**: O cliente mobile/web nunca consulta o BigQuery diretamente. Todas as leituras passam pelo PostgreSQL sincronizado.
+2. **Controle de Custos e Particionamento**: Todas as consultas ao BigQuery são limitadas por partição diária (`data_particao`), possuem `maximumBytesBilled` restrito (500 MB) e executam dry runs prévios.
+3. **Privacidade e Proteção de Dados**: Número de logradouro residencial é omitido da API pública; a base não contém dados pessoais identificáveis (CPF/nome).
+4. **Resiliência Espacial**: Coordenadas geográficas fora do polígono do município do Rio de Janeiro ou inválidas (0,0) são tratadas com segurança mantendo o registro oficial acessível por bairro/região.
 
-O cenário inicial usa Rio de Janeiro/RJ (3304557), coerente com o mapa. Para conhecê-lo como cidadão, use o CEP 20010-000 e confirme a cidade. A primeira consulta exige conexão; consultas válidas têm cache no servidor. A malha oficial do Rio acompanha o projeto.
+### Sincronização CLI
+
+Para executar uma sincronização pontual de partição a partir do BigQuery para o PostgreSQL local:
+
+```powershell
+npm run sync:rio1746 --prefix backend
+# Ou especificando data da partição e limite:
+npm run sync:rio1746 --prefix backend 2026-09-20 2000
+```
+
+Consulte [docs/integracoes/rio1746-diagnostico.md](docs/integracoes/rio1746-diagnostico.md) para a análise detalhada da estrutura da tabela e métricas de volume.
 
 ## Desenvolvimento
 
@@ -28,32 +48,26 @@ Copy-Item .env.compose.example .env.compose
 docker compose --env-file .env.compose up --build
 ```
 
-API: http://localhost:3001/api. Migrations e seed são executados antes da API no container. Volumes preservam banco e anexos. `docker compose down -v` remove os dados.
+API: `http://localhost:3001/api`. Migrations e seed são executados antes da API no container. Volumes preservam banco e anexos. `docker compose down -v` remove os dados.
 
-Com PostgreSQL já iniciado, defina DATABASE_URL e DEMO_PASSWORD no ambiente do processo. Execute `npm run migrate --prefix backend`, `npm run seed --prefix backend` e `npm start --prefix backend`. Os arquivos backend/.env.example são modelos; não são carregados automaticamente.
+Com PostgreSQL já iniciado, defina `DATABASE_URL` e `DEMO_PASSWORD` no ambiente do processo:
+```powershell
+npm run migrate --prefix backend
+npm run seed --prefix backend
+npm start --prefix backend
+```
 
-Copie `.env.example` para `.env`, configure `EXPO_PUBLIC_API_URL` e execute `npm start`. No celular, localhost é o próprio aparelho: use o IP do computador na mesma rede. No Compose, acesso LAN exige API_BIND=0.0.0.0; acrescente em WEB_ORIGINS as origens web efetivamente usadas. Gemini nunca usa `EXPO_PUBLIC_`.
+Para autenticação com o BigQuery durante o desenvolvimento local:
+```powershell
+gcloud auth application-default login
+```
 
-## Contas de apresentação
+Copie `.env.example` para `.env`, configure `EXPO_PUBLIC_API_URL` e execute `npm start`.
 
-O seed mantém `beatrizarante@gmail.com` (cidadão), `gestao@vilaesperanca.exemplo` (gestão) e `admin@vilaesperanca.exemplo` (admin). A cidadã confirma seu município no onboarding.
+## Testes e Verificação
 
-A senha é DEMO_PASSWORD. O padrão Fiscaliza123! existe apenas no desenvolvimento sem configuração; produção exige valor explícito. O seed não troca senhas ou vínculo de cidadão existente. Reset de cenários é exclusivo de admin e limitado ao cenário Rio; não apaga outras cidades ou seus anexos.
-
-## Jornadas e verificação
-
-Cidadão registra → ocorrência é processada → cidadão acompanha e avalia. Apoios e respostas de consulta são únicos por identidade. Decisões municipais exigem justificativa e histórico. Atualize/reabra telas para buscar mudanças; não há push.
-
-`npm test`, `npx tsc --noEmit` e `npm run lint` verificam o cidadão. `npm test --prefix backend` inclui integração real quando DATABASE_URL aponta para banco exclusivo de teste; não use banco de apresentação em testes que restauram cenários. `npm run openapi --prefix backend` gera o contrato. A coleção em `postman/` testa a API real sem publicar na nuvem.
-
-Evidências e limitações: `plan/11-validacao-integrada.md`. Skills oficiais Expo selecionadas, com licença e revisão fixada, estão em `.agents/skills`.
-
-## Hospedagem e serviços
-
-O deploy web para VPS inclui cidadão, API e HTTPS, usando `compose.production.yaml` e `.github/workflows/release.yml`. Consulte [deploy/README.md](deploy/README.md) para preparar DNS, ambiente, registry e SSH. A publicação automática depende de `VPS_DEPLOY_ENABLED=true`; o Compose local continua disponível para desenvolvimento.
-
-A assistência usa Gemini no servidor quando configurado. Pode analisar uma foto autorizada para sugerir título e descrição; sem chave ou em falhas, mantém o preenchimento manual e não afirma ter analisado a imagem. Os arquivos de evidência são públicos por URL UUID opaca. Persistência requer volumes e backup. ViaCEP e IBGE podem ficar indisponíveis: a interface conserva o trabalho e permite tentar novamente, sem inventar um município.
-
-## Demonstração e consolidação territorial
-
-Home, Território e Resultados compartilham o bairro escolhido. Ocorrências e iniciativas participam da exploração; o mapa exige coordenadas explícitas, enquanto a lista inclui conteúdos de bairro ou município sem ponto. Indicadores separam abrangência municipal de bairros. Acompanhamentos de cidades anteriores possuem detalhe autorizado somente leitura.
+- `npm test`: testes unitários e de integração locais Node.
+- `npx tsc --noEmit`: verificação estrita de tipos TypeScript (app).
+- `npm run lint`: linter oficial Expo.
+- `npm test --prefix backend`: suite de testes do backend Fastify e integração BigQuery/1746.
+- `npm run typecheck --prefix backend`: verificação de tipos do backend.

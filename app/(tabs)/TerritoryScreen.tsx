@@ -42,7 +42,9 @@ import {
   normalizeNeighborhood,
   occurrenceMatchesNeighborhood,
 } from '@/shared/civic-territory';
-import type { CivicItem, Occurrence } from '@/shared/contracts';
+import type { CivicItem, Occurrence, OfficialCall } from '@/shared/contracts';
+import { useOfficialCalls } from '@/features/city/useOfficialCalls';
+import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 
 import { spacing } from '@/theme/spacing';
 import { useAuthStore } from '@/stores/authStore';
@@ -60,7 +62,7 @@ type TerritoryMapRegion = {
   zoom?: number;
 };
 
-type Kind = 'all' | 'occurrences' | CivicItem['kind'];
+type Kind = 'all' | 'official' | 'occurrences' | CivicItem['kind'];
 
 const locatedOccurrence = (item: Occurrence) =>
   Number.isFinite(item.location.latitude) &&
@@ -70,10 +72,23 @@ const locatedOccurrence = (item: Occurrence) =>
     ? item.location
     : undefined;
 
-const entryLocation = (entry: Entry) =>
-  entry.type === 'occurrence'
-    ? locatedOccurrence(entry.item)
-    : civicLocation(entry.item);
+const locatedOfficialCall = (item: OfficialCall) =>
+  item.latitude !== null &&
+  item.latitude !== undefined &&
+  item.longitude !== null &&
+  item.longitude !== undefined &&
+  Number.isFinite(item.latitude) &&
+  Number.isFinite(item.longitude) &&
+  Math.abs(item.latitude) <= 90 &&
+  Math.abs(item.longitude) <= 180
+    ? { latitude: item.latitude, longitude: item.longitude }
+    : undefined;
+
+const entryLocation = (entry: Entry) => {
+  if (entry.type === 'occurrence') return locatedOccurrence(entry.item);
+  if (entry.type === 'official') return locatedOfficialCall(entry.item);
+  return civicLocation(entry.item);
+};
 
 export default function TerritoryScreen() {
   const user = useAuthStore((state) => state.user);
@@ -99,6 +114,9 @@ function TerritoryContent() {
   const [period, setPeriod] = useState(0);
   const user = useAuthStore((state) => state.user);
   const municipality = user?.municipality;
+  const isRio =
+    municipality?.id === '3304557' ||
+    municipality?.name?.toLowerCase().includes('rio');
   const initial = useMemo(
     () => ({
       ...municipalityRegion(municipality),
@@ -109,6 +127,20 @@ function TerritoryContent() {
   const occurrences = useCityQuery<Occurrence[]>('/occurrences');
   const civic = useCityQuery<CivicItem[]>('/civic-items');
   const { neighborhood, setNeighborhood } = useTerritorySelection();
+  const [kind, setKind] = useState<Kind>('all');
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('all');
+  const { isListView, setIsListView } = useTerritoryViewMode();
+
+  const officialCalls = useOfficialCalls(
+    {
+      bairro: neighborhood || undefined,
+      limit: 150,
+      search: search || undefined,
+      hasCoordinates: isListView ? undefined : true,
+    },
+    Boolean(isRio && (kind === 'all' || kind === 'official')),
+  );
   const options = neighborhoodOptions(
     occurrences.data || [],
     civic.data || [],
@@ -116,10 +148,6 @@ function TerritoryContent() {
   );
   const [region, setRegion] = useState<TerritoryMapRegion>(initial);
   const [areaOnly, setAreaOnly] = useState(false);
-  const [kind, setKind] = useState<Kind>('all');
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('all');
-  const { isListView, setIsListView } = useTerritoryViewMode();
   const {
     filters,
     focusId,
@@ -250,13 +278,35 @@ function TerritoryContent() {
           result.push({ type: 'civic', item });
       }
     }
+    if (isRio && (kind === 'all' || kind === 'official')) {
+      for (const item of officialCalls.data?.calls || []) {
+        if (
+          (status === 'all' ||
+            item.officialSituation === status ||
+            item.officialStatus === status) &&
+          normalizeNeighborhood(
+            [
+              item.serviceType,
+              item.serviceSubtype,
+              item.neighborhoodName || '',
+              item.organizationName || '',
+              item.externalId,
+            ].join(' '),
+          ).includes(term)
+        ) {
+          result.push({ type: 'official', item });
+        }
+      }
+    }
     return result
       .filter((entry) => withinPeriod(entry.item, period))
       .sort((a, b) => compareTerritoryRecords(a.item, b.item, order));
   }, [
     occurrences.data,
     civic.data,
+    officialCalls.data,
     kind,
+    isRio,
     status,
     search,
     neighborhood,
@@ -278,8 +328,10 @@ function TerritoryContent() {
     if (occ) return { type: 'occurrence' as const, item: occ };
     const civ = civic.data?.find((item) => item.id === selectedId);
     if (civ) return { type: 'civic' as const, item: civ };
+    const off = officialCalls.data?.calls?.find((item) => item.id === selectedId);
+    if (off) return { type: 'official' as const, item: off };
     return null;
-  }, [selectedId, entries, occurrences.data, civic.data]);
+  }, [selectedId, entries, occurrences.data, civic.data, officialCalls.data]);
 
   const selectedClusterEntries = useMemo(() => {
     if (!selectedCluster || selectedCluster.ids.length === 0) return [];
@@ -297,11 +349,21 @@ function TerritoryContent() {
         else {
           const civ = civic.data?.find((i) => i.id === id);
           if (civ) matched.push({ type: 'civic', item: civ });
+          else {
+            const off = officialCalls.data?.calls?.find((i) => i.id === id);
+            if (off) matched.push({ type: 'official', item: off });
+          }
         }
       }
     }
     return matched;
-  }, [selectedCluster, entries, occurrences.data, civic.data]);
+  }, [
+    selectedCluster,
+    entries,
+    occurrences.data,
+    civic.data,
+    officialCalls.data?.calls,
+  ]);
 
   const municipalOverviewRegion = useMemo(() => {
     const points = entries
@@ -349,12 +411,17 @@ function TerritoryContent() {
     Number(order !== 'date');
 
   const statuses: [string, string][] =
-    kind === 'occurrences'
+    kind === 'official'
       ? [
-          ['pending', 'Recebida'],
-          ['in_progress', 'Em atendimento'],
-          ['resolved', 'Concluída'],
+          ['Em andamento', 'Em andamento'],
+          ['Encerrado', 'Encerrado'],
         ]
+      : kind === 'occurrences'
+        ? [
+            ['pending', 'Recebida'],
+            ['in_progress', 'Em atendimento'],
+            ['resolved', 'Concluída'],
+          ]
       : kind === 'proposal'
         ? ['submitted', 'under_review', 'accepted', 'declined'].map((key) => [
             key,
@@ -375,7 +442,14 @@ function TerritoryContent() {
     (!showOccurrences || occurrences.data !== undefined) &&
     (!showCivic || civic.data !== undefined);
 
-  const openEntry = (entry: Entry) =>
+  const openEntry = (entry: Entry) => {
+    if (entry.type === 'official') {
+      router.push({
+        pathname: '/OfficialCallDetailsScreen',
+        params: { id: entry.item.id },
+      });
+      return;
+    }
     router.push({
       pathname:
         entry.type === 'occurrence'
@@ -383,10 +457,13 @@ function TerritoryContent() {
           : '/CivicDetailsScreen',
       params: { id: entry.item.id },
     });
+  };
 
   const renderEntry = (entry: Entry) => (
     <View key={entry.type + entry.item.id}>
-      {entry.type === 'occurrence' ? (
+      {entry.type === 'official' ? (
+        <OfficialCallRow call={entry.item} onPress={() => openEntry(entry)} />
+      ) : entry.type === 'occurrence' ? (
         <OccurrenceRow problem={entry.item} onPress={() => openEntry(entry)} />
       ) : (
         <>
@@ -402,9 +479,21 @@ function TerritoryContent() {
   );
 
   const osmMarkers: MapMarker[] = useMemo(() => {
-    const list: MapMarker[] = located.flatMap((entry) => {
+    const list: MapMarker[] = located.flatMap((entry): MapMarker[] => {
       const point = entryLocation(entry);
       if (!point) return [];
+      if (entry.type === 'official') {
+        return [
+          {
+            id: entry.item.id,
+            latitude: point.latitude,
+            longitude: point.longitude,
+            title: `1746 · ${entry.item.serviceSubtype || entry.item.serviceType}`,
+            color: '#0072BB',
+            kind: 'official',
+          },
+        ];
+      }
       const markerKind =
         entry.type === 'occurrence' ? 'occurrence' : entry.item.kind;
       return [
@@ -425,20 +514,31 @@ function TerritoryContent() {
     if (selectedEntry && !list.some((m) => m.id === selectedEntry.item.id)) {
       const point = entryLocation(selectedEntry);
       if (point) {
-        list.push({
-          id: selectedEntry.item.id,
-          latitude: point.latitude,
-          longitude: point.longitude,
-          title: `${selectedEntry.type === 'occurrence' ? 'Ocorrência' : kindLabel[selectedEntry.item.kind]} · ${selectedEntry.item.title}`,
-          color:
-            selectedEntry.type === 'occurrence'
-              ? pinColors.occurrence
-              : pinColors[selectedEntry.item.kind],
-          kind:
-            selectedEntry.type === 'occurrence'
-              ? 'occurrence'
-              : selectedEntry.item.kind,
-        });
+        if (selectedEntry.type === 'official') {
+          list.push({
+            id: selectedEntry.item.id,
+            latitude: point.latitude,
+            longitude: point.longitude,
+            title: `1746 · ${selectedEntry.item.serviceSubtype || selectedEntry.item.serviceType}`,
+            color: '#0072BB',
+            kind: 'official',
+          });
+        } else {
+          list.push({
+            id: selectedEntry.item.id,
+            latitude: point.latitude,
+            longitude: point.longitude,
+            title: `${selectedEntry.type === 'occurrence' ? 'Ocorrência' : kindLabel[selectedEntry.item.kind]} · ${selectedEntry.item.title}`,
+            color:
+              selectedEntry.type === 'occurrence'
+                ? pinColors.occurrence
+                : pinColors[selectedEntry.item.kind],
+            kind:
+              selectedEntry.type === 'occurrence'
+                ? 'occurrence'
+                : selectedEntry.item.kind,
+          });
+        }
       }
     }
 
@@ -566,7 +666,8 @@ function TerritoryContent() {
         edgeToEdge={false}
         options={[
           { value: 'all', label: 'Tudo' },
-          { value: 'occurrences', label: 'Ocorrências' },
+          ...(isRio ? [{ value: 'official', label: '1746 Oficial' }] : []),
+          { value: 'occurrences', label: 'Cidadão' },
           { value: 'proposal', label: 'Propostas' },
           { value: 'consultation', label: 'Consultas' },
           { value: 'action', label: 'Ações' },

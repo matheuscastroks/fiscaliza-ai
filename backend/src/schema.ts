@@ -5,6 +5,8 @@ import {
   jsonb,
   primaryKey,
   integer,
+  doublePrecision,
+  date,
 } from 'drizzle-orm/pg-core';
 import type {
   SessionUser,
@@ -109,4 +111,43 @@ export const demoEngagement = pgTable('demo_engagement', {
     .references(() => records.id, { onDelete: 'cascade' }),
   views: integer('views').notNull(),
   supports: integer('supports').notNull(),
+});
+
+export const officialCalls = pgTable('official_calls', {
+  id: text('id').primaryKey(),
+  externalId: text('external_id').notNull().unique(),
+  source: text('source').notNull().default('rio1746'),
+  municipalityId: text('municipality_id').notNull().default('3304557'),
+  serviceCategory: text('service_category'),
+  serviceType: text('service_type').notNull(),
+  serviceSubtype: text('service_subtype').notNull(),
+  organizationName: text('organization_name'),
+  officialStatus: text('official_status'),
+  officialSituation: text('official_situation'),
+  officialSituationType: text('official_situation_type'),
+  statusJustification: text('status_justification'),
+  openedAt: timestamp('opened_at', { withTimezone: true }).notNull(),
+  closedAt: timestamp('closed_at', { withTimezone: true }),
+  targetDate: timestamp('target_date', { withTimezone: true }),
+  withinDeadline: text('within_deadline'),
+  timeRemaining: integer('time_remaining'),
+  timeUnit: text('time_unit'),
+  neighborhoodId: text('neighborhood_id'),
+  neighborhoodName: text('neighborhood_name'),
+  subprefecture: text('subprefecture'),
+  latitude: doublePrecision('latitude'),
+  longitude: doublePrecision('longitude'),
+  sourcePartitionDate: date('source_partition_date'),
+  importedAt: timestamp('imported_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const syncCheckpoints = pgTable('sync_checkpoints', {
+  id: text('id').primaryKey(),
+  lastPartition: text('last_partition'),
+  recordsImported: integer('records_imported').notNull().default(0),
+  recordsUpdated: integer('records_updated').notNull().default(0),
+  status: text('status').notNull().default('idle'),
+  lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
+  errorMessage: text('error_message'),
 });
