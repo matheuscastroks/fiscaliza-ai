@@ -8,6 +8,7 @@ import {
   doublePrecision,
   date,
 } from 'drizzle-orm/pg-core';
+export * from './territorial-schema.js';
 import type {
   SessionUser,
   Occurrence,

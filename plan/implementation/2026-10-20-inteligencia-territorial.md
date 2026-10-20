@@ -102,10 +102,10 @@ interface PublicFacility {
 
 Definir `TerritorialGeometry` como GeoJSON Point/Polygon/MultiPolygon com coordenadas numéricas, sem biblioteca nova só de tipos. `NeighborhoodBoundary extends NeighborhoodSummary` acrescenta geometria poligonal e proveniência. `SyncCoverage` vem da tarefa 2, sem redefinição.
 
-- [ ] Testar `migration preserves existing calls and users`, `facility source and external ID are unique`, `unresolved neighborhood stays null` e `source usage defaults to unknown`. Aplicar migrações duas vezes no banco dedicado; esperar idempotência via journal, sem modificar SQL antigo.
-- [ ] Implementar tabelas `data_sources`, `public_facilities`, `territorial_boundaries` e `territorial_boundary_aliases` (origem/código externo único → bairro canônico); IDs canônicos do tipo `rio-neighborhood:<codigo-validado>`, sem equivalência numérica implícita. Fontes usam IDs `siurb-schools`, `siurb-health`, `siurb-squares`, `siurb-neighborhoods` e `rio1746`.
-- [ ] Geometria JSONB; índices por fonte/ID externo, categoria/bairro, coordenadas do ponto exibido e status de publicação. Sem PostGIS. Registros brutos de staging não são contratos públicos.
-- [ ] Rodar testes focais e tipos app/backend. Esperar PASS e nenhuma modificação em `official_calls`. Comitar `feat(data): modelar fontes e equipamentos territoriais`.
+- [x] Testar `migration preserves existing calls and users`, `facility source and external ID are unique`, `unresolved neighborhood stays null` e `source usage defaults to unknown`. Aplicar migrações duas vezes no banco dedicado; esperar idempotência via journal, sem modificar SQL antigo.
+- [x] Implementar tabelas `data_sources`, `public_facilities`, `territorial_boundaries` e `territorial_boundary_aliases` (origem/código externo único → bairro canônico); IDs canônicos do tipo `rio-neighborhood:<codigo-validado>`, sem equivalência numérica implícita. Fontes usam IDs `siurb-schools`, `siurb-health`, `siurb-squares`, `siurb-neighborhoods` e `rio1746`.
+- [x] Geometria JSONB; índices por fonte/ID externo, categoria/bairro, coordenadas do ponto exibido e status de publicação. Sem PostGIS. Registros brutos de staging não são contratos públicos.
+- [x] Rodar testes focais e tipos app/backend. Esperar PASS e nenhuma modificação em `official_calls`. Comitar `feat(data): modelar fontes e equipamentos territoriais`.
 
 ## Tarefa 5 — Importação recuperável do SIURB
 
