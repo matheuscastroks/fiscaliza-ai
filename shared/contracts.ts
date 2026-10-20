@@ -231,6 +231,7 @@ export interface OfficialCallsFilterOptions {
 }
 
 export interface OfficialCallsQueryParams {
+  neighborhoodId?: string;
   page?: number;
   limit?: number;
   bairro?: string;
@@ -249,6 +250,7 @@ export interface OfficialCallsQueryParams {
 }
 
 export interface OfficialCallsListResponse {
+  territoryConfirmed?: boolean;
   calls: OfficialCall[];
   total: number;
   page: number;
@@ -257,6 +259,7 @@ export interface OfficialCallsListResponse {
 }
 
 export interface OfficialCallsOverview {
+  territoryConfirmed?: boolean;
   totalCalls: number;
   openCalls: number;
   closedCalls: number;

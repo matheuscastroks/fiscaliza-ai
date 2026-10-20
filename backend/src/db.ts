@@ -11,3 +11,4 @@ export function database(url = process.env.DATABASE_URL) {
   return { pool, db: drizzle(pool, { schema }) };
 }
 export type Database = ReturnType<typeof database>['db'];
+export type ReadDatabase = Pick<Database, 'select' | 'selectDistinct'>;

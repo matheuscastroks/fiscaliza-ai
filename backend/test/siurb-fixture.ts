@@ -35,6 +35,7 @@ export function schoolFeature(id: number) {
 export async function siurbFixture() {
   const state = {
     rows: [schoolFeature(1), schoolFeature(2)] as unknown[],
+    boundaries: [neighborhoodFeature] as unknown[],
     fault: '',
   };
   const server = createServer((req, res) => {
@@ -46,7 +47,7 @@ export async function siurbFixture() {
         .find((part) => /^\d+$/.test(part)),
     ) as 1 | 2 | 16 | 18;
     const layer = getSiurbLayer(id);
-    const rows = (id === 18 ? [neighborhoodFeature] : state.rows) as {
+    const rows = (id === 18 ? state.boundaries : state.rows) as {
       properties: Record<string, unknown>;
     }[];
     const send = (value: unknown, status = 200) => {

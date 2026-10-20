@@ -13,3 +13,11 @@ O staging fica em memória dentro desses limites; somente um snapshot validado �
 Preservamos o GeoJSON recebido em `original_data`. Marcadores derivados de polígonos usam ponto interno validado, sem representar entrada ou endereço exato. Ambiguidades de bairro, divisas e códigos conflitantes ficam sem vínculo, em vez de receber uma aproximação por nome. Campos vazios permanecem ausentes. Data de importação não substitui uma data de referência desconhecida.
 
 Testes usam servidor HTTP local e PostgreSQL dedicado; há também uma amostra real por camada em `test/fixtures/siurb`, com proveniência. Consulte `plan/evidence/20-siurb-fontes.md` para as consultas reais. Aprovação dos testes não significa importação no banco do aplicativo ou validação nativa.
+
+## Leitura pública
+
+A API expõe `/api/data-sources`, `/api/public-facilities`, `/api/public-facilities/:id`, `/api/territorial-boundaries`, `/api/territorial-boundaries/:id` e `/api/neighborhoods/:id/overview`. Listas de equipamentos são paginadas (100 por padrão, máximo 500), sem polígonos; o detalhe contém geometria. Cada resposta mantém fonte, publicação e cobertura no mesmo snapshot de leitura. `publicationId` identifica a versão cadastral para paginação; não representa versão temporal do 1746.
+
+Contagem `null` significa publicação ausente/restrita; zero só resulta de fonte válida no recorte. `unresolvedCount` indica cadastros sem bairro confirmado. Datas de referência ausentes continuam nulas. O panorama exige startDate/endDate explícitos e usa bairro canônico; chamados sem equivalência comprovada não viram zero conhecido. O fim de um dia inclui todas as suas horas. MIN/MAX indica extensão disponível, nunca continuidade da cobertura. Filtros de chamados aceitam neighborhoodId ou bairro legado, sem misturá-los.
+
+`npm run openapi --prefix backend` gera o contrato local ignorado pelo Git, também produzido pelo CI. As rotas públicas não sincronizam fontes nem alteram aliases.

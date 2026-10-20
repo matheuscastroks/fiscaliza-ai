@@ -35,6 +35,7 @@ import {
 } from './schema.js';
 import { seed } from './seed-data.js';
 import { registerOfficialCallsRoutes } from './official-calls.js';
+import { registerPublicDataRoutes } from './public-data.js';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -321,6 +322,7 @@ export async function buildApp(
       !path.startsWith('/api/profile/') &&
       path !== '/api/health' &&
       !(req.method === 'GET' && path.startsWith('/api/rio1746/')) &&
+      !(req.method === 'GET' && ['/api/data-sources','/api/public-facilities','/api/territorial-boundaries','/api/neighborhoods'].some(base=>path===base||path.startsWith(base+'/'))) &&
       !(
         req.method === 'GET' &&
         (path === '/api/activity' || path.startsWith('/api/activity/'))
@@ -444,6 +446,7 @@ export async function buildApp(
   );
   app.get('/api/municipality', async (req) => ok(req.user!.municipality));
   registerOfficialCallsRoutes(app, db, connection.pool, ok, fail);
+  registerPublicDataRoutes(app, db);
 
   async function present(
     row: typeof records.$inferSelect,

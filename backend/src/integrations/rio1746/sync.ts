@@ -1,4 +1,4 @@
-import type { Database } from '../../db.js';
+import type { Database, ReadDatabase } from '../../db.js';
 import type pg from 'pg';
 import type { BigQuery } from '@google-cloud/bigquery';
 import { randomUUID } from 'node:crypto';
@@ -18,7 +18,7 @@ import { expandPartitionDateRange, assertSafeBoundedInt } from './queries.js';
 import { withSourceLock } from '../sync-lock.js';
 import { createSyncBudget } from '../sync-budget.js';
 
-export async function getSyncStatus(db: Database) {
+export async function getSyncStatus(db: ReadDatabase) {
   const [row] = await db
     .select()
     .from(syncCheckpoints)
@@ -46,7 +46,7 @@ function publicRun(row: typeof sourceSyncRuns.$inferSelect): SyncRunSummary {
   };
 }
 
-export async function getPublicSyncStatus(db: Database) {
+export async function getPublicSyncStatus(db: ReadDatabase) {
   const checkpoint = await getSyncStatus(db);
   const [latest] = await db
     .select()

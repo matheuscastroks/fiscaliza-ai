@@ -13,7 +13,8 @@ export async function fetchOfficialCalls(
   const query = new URLSearchParams();
   if (params.page !== undefined) query.set('page', String(params.page));
   if (params.limit !== undefined) query.set('limit', String(params.limit));
-  if (params.bairro) query.set('bairro', params.bairro);
+  if (params.neighborhoodId) query.set('neighborhoodId', params.neighborhoodId);
+  else if (params.bairro) query.set('bairro', params.bairro);
   if (params.tipo) query.set('tipo', params.tipo);
   if (params.subtipo) query.set('subtipo', params.subtipo);
   if (params.situacao) query.set('situacao', params.situacao);
@@ -46,6 +47,9 @@ export async function fetchOfficialFilters(): Promise<OfficialCallsFilterOptions
 }
 
 export interface OfficialOverviewQueryParams {
+  neighborhoodId?: string;
+  startDate?: string;
+  endDate?: string;
   bairro?: string;
   tipo?: string;
   situacao?: string;
@@ -58,7 +62,11 @@ export async function fetchOfficialOverview(
   const normalized: OfficialOverviewQueryParams =
     typeof params === 'string' ? { bairro: params } : params || {};
   const query = new URLSearchParams();
-  if (normalized.bairro) query.set('bairro', normalized.bairro);
+  if (normalized.neighborhoodId)
+    query.set('neighborhoodId', normalized.neighborhoodId);
+  else if (normalized.bairro) query.set('bairro', normalized.bairro);
+  if (normalized.startDate) query.set('startDate', normalized.startDate);
+  if (normalized.endDate) query.set('endDate', normalized.endDate);
   if (normalized.tipo) query.set('tipo', normalized.tipo);
   if (normalized.situacao) query.set('situacao', normalized.situacao);
   if (normalized.periodDays !== undefined) {

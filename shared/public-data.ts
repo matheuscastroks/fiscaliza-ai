@@ -11,6 +11,10 @@ export type TerritorialGeometry =
   | { type: 'Polygon'; coordinates: number[][][] }
   | { type: 'MultiPolygon'; coordinates: number[][][][] };
 export interface SourceCoverage {
+  /** Identifies the published cadastral snapshot, when the source uses snapshots. */
+  publicationId?: string | null;
+  /** Imported records whose neighborhood could not be confirmed. */
+  unresolvedCount?: number | null;
   sourceId: string;
   state: PublicationState;
   coverage: SyncCoverage;
@@ -65,13 +69,14 @@ export interface FacilitiesQuery {
   west?: number;
 }
 export interface FacilitiesPage {
-  items: PublicFacility[];
+  items: PublicFacilitySummary[];
   total: number | null;
   page: number;
   limit: number;
   hasMore: boolean;
   sources: SourceCoverage[];
 }
+export type PublicFacilitySummary = Omit<PublicFacility, 'geometry'>;
 export interface NeighborhoodOverview {
   neighborhood: NeighborhoodSummary;
   facilityCounts: Record<FacilityCategory, number | null>;
