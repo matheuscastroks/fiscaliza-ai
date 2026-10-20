@@ -86,3 +86,15 @@ npm run sync:siurb --prefix backend -- all
 O probe lê metadados e amostras; não equivale à extração integral. A importação é administrativa e nunca ocorre como efeito do build ou navegação. Fontes ausentes, cadastros sem nome e bairros sem vínculo são apresentados como tal. Consulte [integração SIURB](backend/src/integrations/siurb/README.md) para limites, codificação e recuperação e [evidência das fontes](plan/evidence/20-siurb-fontes.md) para licença e contagens reais.
 
 Leituras públicas: /api/data-sources, /api/public-facilities (paginado), /api/territorial-boundaries e seus detalhes, /api/neighborhoods/:id/overview?startDate=AAAA-MM-DD&endDate=AAAA-MM-DD. O OpenAPI gerado com npm run openapi --prefix backend documenta os schemas e é publicado como artefato de validação no CI.
+
+### Atualizar a API durante testes no Expo Go
+
+O Metro atualiza o aplicativo Expo; ele não recompila a API que está em Docker. Após mudanças no backend, atualize somente esse serviço usando o mesmo arquivo de ambiente da instalação:
+
+```powershell
+docker compose --env-file .env.compose up -d --build --no-deps api
+# Na primeira disponibilização dos cadastros:
+docker compose --env-file .env.compose exec api node dist/backend/src/siurb-cli.js all
+```
+
+A inicialização aplica migrações e o seed de instalação preserva contas existentes. Não use down -v ou clean:demo para atualizar. GET /api/data-sources e as consultas /api/public-facilities devem responder sem login; HTTP 401 nessas rotas pode indicar um serviço antigo. Verifique pelo endereço de API configurado no aparelho, não somente pela API isolada de validação.
