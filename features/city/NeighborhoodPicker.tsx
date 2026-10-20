@@ -1,15 +1,17 @@
 import React from 'react';
-import { SlidingTabs } from '@/components/ui/SlidingTabs';
+import { AppSelect } from '@/components/ui/AppSelect';
 import { normalizeNeighborhood } from '@/shared/civic-territory';
 
 export function NeighborhoodPicker({
   options,
   value,
   onChange,
+  compact = false,
 }: {
   options: string[];
   value: string;
   onChange: (value: string) => void;
+  compact?: boolean;
 }) {
   const labels =
     value &&
@@ -19,19 +21,25 @@ export function NeighborhoodPicker({
     )
       ? [value, ...options]
       : options;
+
+  const currentValue =
+    labels.find(
+      (option) =>
+        normalizeNeighborhood(option) === normalizeNeighborhood(value),
+    ) || '';
+
   return (
-    <SlidingTabs
+    <AppSelect
       label="Filtrar por bairro"
+      placeholder="Buscar bairro do Rio de Janeiro..."
+      icon="location-outline"
+      compact={compact}
+      defaultValue=""
       options={['', ...labels].map((option) => ({
         value: option,
-        label: option || 'Todo o município',
+        label: option || (compact ? 'Todos os bairros' : 'Todo o Rio de Janeiro'),
       }))}
-      value={
-        labels.find(
-          (option) =>
-            normalizeNeighborhood(option) === normalizeNeighborhood(value),
-        ) || ''
-      }
+      value={currentValue}
       onChange={onChange}
     />
   );

@@ -25,30 +25,32 @@ export function CitySearch({
   return (
     <View
       style={{
-        minHeight: 64,
+        minHeight: 48,
         backgroundColor: colors.surface,
-        borderRadius: 32,
-        paddingLeft: spacing.lg,
-        paddingRight: spacing.xs,
+        borderRadius: 24,
+        paddingLeft: spacing.md,
+        paddingRight: 5,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: spacing.sm,
+        gap: spacing.xs,
+        borderWidth: 1,
+        borderColor: colors.border,
       }}
     >
-      <Ionicons name="search-outline" size={24} color={colors.ink} />
+      <Ionicons name="search-outline" size={20} color={colors.muted} />
       {onChangeText ? (
         <TextInput
           accessibilityLabel="Buscar no território"
           keyboardAppearance={mode}
-          placeholder="Rua, bairro ou assunto"
+          placeholder="Buscar protocolo, serviço ou bairro..."
           value={value}
           onChangeText={onChangeText}
           placeholderTextColor={colors.muted}
           returnKeyType="search"
           style={{
             flex: 1,
-            minHeight: 56,
-            fontSize: 16,
+            minHeight: 44,
+            fontSize: 15,
             fontFamily: fontFamilies.regular,
             color: colors.ink,
           }}
@@ -58,9 +60,21 @@ export function CitySearch({
           accessibilityRole="button"
           accessibilityLabel="Pesquisar no território"
           onPress={onPress}
-          style={{ flex: 1, minHeight: 56, justifyContent: 'center' }}
+          style={{ flex: 1, minHeight: 44, justifyContent: 'center' }}
         >
-          <AppText color="muted">Pesquisar no território</AppText>
+          <AppText color="muted" style={{ fontSize: 15 }}>
+            Buscar serviço, bairro ou protocolo 1746...
+          </AppText>
+        </Pressable>
+      )}
+      {onChangeText && Boolean(value) && (
+        <Pressable
+          onPress={() => onChangeText('')}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Limpar busca"
+        >
+          <Ionicons name="close-circle" size={18} color={colors.muted} />
         </Pressable>
       )}
       <Pressable
@@ -70,30 +84,34 @@ export function CitySearch({
         aria-expanded={expanded}
         onPress={onFilters}
         style={{
-          width: 48,
-          height: 48,
-          borderRadius: 24,
-          backgroundColor: colors.ink,
+          width: 38,
+          height: 38,
+          borderRadius: 19,
+          backgroundColor: filterCount > 0 ? colors.accent : colors.ink,
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <Ionicons name="options-outline" size={22} color={colors.onAccent} />
+        <Ionicons name="options-outline" size={18} color={colors.onAccent} />
         {filterCount > 0 && (
           <View
             style={{
               position: 'absolute',
               right: -2,
               top: -2,
-              minWidth: 18,
-              height: 18,
+              minWidth: 17,
+              height: 17,
               borderRadius: 9,
               backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.border,
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <AppText variant="meta">{filterCount}</AppText>
+            <AppText variant="meta" style={{ fontSize: 10, fontWeight: '800' }}>
+              {filterCount}
+            </AppText>
           </View>
         )}
       </Pressable>

@@ -98,11 +98,12 @@ export default function HomeScreen() {
           }
         />
 
-        <View style={cityStyles.section}>
-          <AppText variant="screenTitle">
-            {neighborhood ? `Bairro: ${neighborhood}` : 'Panorama no Rio de Janeiro'}
+        <View style={styles.sectionHeaderRow}>
+          <AppText variant="sectionTitle" style={{ flex: 1 }}>
+            {neighborhood ? `Bairro: ${neighborhood}` : 'Panorama no Rio'}
           </AppText>
           <NeighborhoodPicker
+            compact
             options={bairroOptions}
             value={neighborhood}
             onChange={setNeighborhood}

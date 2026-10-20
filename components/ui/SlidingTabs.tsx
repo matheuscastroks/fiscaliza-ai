@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
+import { AppSelect } from './AppSelect';
 import { spacing } from '@/theme';
 
 export interface SlidingOption {
@@ -18,7 +19,7 @@ export interface SlidingOption {
   icon?: keyof typeof Ionicons.glyphMap;
 }
 
-/** One moving selection surface; labels keep their natural width. */
+/** One moving selection surface; automatically switches to a searchable select when > 5 options. */
 export function SlidingTabs({
   options,
   value,
@@ -85,6 +86,19 @@ export function SlidingTabs({
     motion.start();
     return () => motion.stop();
   }, [selected, reduced, left, width]);
+
+  if (options.length > 5) {
+    return (
+      <AppSelect
+        label={label}
+        options={options}
+        value={value}
+        onChange={onChange}
+        defaultValue={options[0]?.value ?? ''}
+      />
+    );
+  }
+
   const row = (
     <View
       accessibilityRole={tabs ? 'tablist' : undefined}
@@ -137,10 +151,10 @@ export function SlidingTabs({
               );
             }}
             style={{
-              minHeight: 48,
+              minHeight: 38,
               paddingHorizontal: spacing.md,
-              paddingVertical: spacing.xs,
-              borderRadius: 28,
+              paddingVertical: 6,
+              borderRadius: 24,
               flexDirection: 'row',
               gap: spacing.xs,
               alignItems: 'center',

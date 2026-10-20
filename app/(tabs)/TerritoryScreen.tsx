@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { layout } from '@/theme/layout';
 import React, { useMemo, useState, useEffect } from 'react';
 import {
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,6 +16,7 @@ import * as Location from 'expo-location';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
+import { AppSelect } from '@/components/ui/AppSelect';
 import { CitySearch } from '@/components/ui/CitySearch';
 import {
   QueryState,
@@ -107,14 +109,23 @@ function TerritoryContent() {
   const bairroOptions = officialFilters.data?.bairros || [];
 
   const serviceTypeOptions = useMemo(() => {
-    const top = officialOverview.data?.topServices?.map((s) => s.type) || [];
-    const fallback = officialFilters.data?.tipos?.slice(0, 8) || [];
-    const list = top.length > 0 ? top.slice(0, 8) : fallback;
+    const allTypes = officialFilters.data?.tipos || [];
+    const topTypes = officialOverview.data?.topServices?.map((s) => s.type) || [];
+    const merged = Array.from(new Set([...topTypes, ...allTypes]));
     return [
-      { value: 'all', label: 'Tudo' },
-      ...list.map((t) => ({ value: t, label: t })),
+      { value: 'all', label: 'Todos os serviços' },
+      ...merged.map((t) => ({ value: t, label: t })),
     ];
   }, [officialOverview.data?.topServices, officialFilters.data?.tipos]);
+
+  const statusOptions = useMemo(
+    () => [
+      { value: 'all', label: 'Todas situações' },
+      { value: 'Não Encerrado', label: 'Em atendimento' },
+      { value: 'Encerrado', label: 'Encerrados' },
+    ],
+    [],
+  );
 
   const {
     filters,
@@ -369,89 +380,64 @@ function TerritoryContent() {
     }
   };
 
-  const renderFilterDrawer = () => (
-    <View style={[styles.filtersDrawer, { backgroundColor: colors.surface }]}>
-      <AppText variant="label">Bairro (Central 1746)</AppText>
+  const renderCompactFilterStrip = () => (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.compactFilterStrip}
+    >
       <NeighborhoodPicker
+        compact
         options={bairroOptions}
         value={neighborhood}
         onChange={(value) => {
           setNeighborhood(value);
           setSelectedId(null);
+          setSelectedCluster(null);
         }}
       />
 
-      <AppText variant="label">Situação do chamado</AppText>
-      <SlidingTabs
-        label="Situação"
-        edgeToEdge={false}
-        options={[
-          { value: 'all', label: 'Todas' },
-          { value: 'Não Encerrado', label: 'Em atendimento' },
-          { value: 'Encerrado', label: 'Encerrados' },
-        ]}
-        value={status}
-        onChange={(value) => {
-          setStatus(value);
-          setSelectedId(null);
-        }}
-      />
-
-      <AppText variant="label">Recorte espacial</AppText>
-      <SlidingTabs
-        label="Recorte espacial"
-        edgeToEdge={false}
-        options={[
-          { value: 'all', label: 'Todo o Rio' },
-          { value: 'area', label: 'Na área visível do mapa' },
-        ]}
-        value={areaOnly ? 'area' : 'all'}
-        onChange={(value) => {
-          setAreaOnly(value === 'area');
-          setSelectedId(null);
-        }}
-      />
-
-      <View style={styles.filterActionsRow}>
-        <AppButton
-          title="Limpar filtros"
-          variant="quiet"
-          onPress={resetFilters}
-        />
-        <AppButton
-          title="Fechar"
-          variant="secondary"
-          onPress={() => setFiltersOpen(false)}
-        />
-      </View>
-    </View>
-  );
-
-  const renderCategoryChips = () => (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.categoryScroll}
-    >
-      <SlidingTabs
-        label="Tipos de Serviço 1746"
-        edgeToEdge={false}
+      <AppSelect
+        compact
+        label="Tipo de serviço 1746"
+        placeholder="Buscar serviço (ex: iluminação, entulho...)"
+        icon="construct-outline"
+        defaultValue="all"
         options={serviceTypeOptions}
         value={serviceType}
         onChange={(value) => {
           setServiceType(value);
           setSelectedId(null);
           setSelectedCluster(null);
-          setAreaOnly(false);
         }}
       />
+
+      <AppSelect
+        compact
+        label="Situação do chamado"
+        icon="pulse-outline"
+        defaultValue="all"
+        options={statusOptions}
+        value={status}
+        onChange={(value) => {
+          setStatus(value);
+          setSelectedId(null);
+          setSelectedCluster(null);
+        }}
+      />
+
+      <View style={[styles.resultsBadge, { backgroundColor: colors.surface + 'F2' }]}>
+        <AppText variant="caption" color="muted" style={{ fontWeight: '700' }}>
+          {officialCalls.isLoading ? '...' : `${listed.length}`}
+        </AppText>
+      </View>
     </ScrollView>
   );
 
   return (
     <View style={styles.container}>
       {locationMessage !== '' && (
-        <View style={[styles.messageBanner, { top: insets.top + 70, backgroundColor: colors.surface }]}>
+        <View style={[styles.messageBanner, { top: insets.top + 100, backgroundColor: colors.surface }]}>
           <AppText variant="caption" color="muted" accessibilityLiveRegion="polite">
             {locationMessage}
           </AppText>
@@ -492,40 +478,26 @@ function TerritoryContent() {
         />
       </View>
 
-      {/* 2. TOP FLOATING HEADER (BUSCA + CHIPS DE SERVIÇO 1746 + FILTROS - NO MAPA) */}
+      {/* 2. TOP FLOATING HEADER COMPACTO (BUSCA + BARRA DE SELECTS) */}
       {!isListView && (
         <View style={[styles.topFloatingHeader, { paddingTop: insets.top + spacing.xs }]}>
           <View style={styles.searchContainer}>
             <CitySearch
               value={search}
               onChangeText={setSearch}
-              onFilters={() => setFiltersOpen(!filtersOpen)}
+              onFilters={() => setFiltersOpen(true)}
               expanded={filtersOpen}
               filterCount={filterCount}
             />
           </View>
 
-          {renderCategoryChips()}
-
-          {/* CONTADOR DE RESULTADOS RÁPIDO */}
-          <View style={styles.resultsBadgeRow}>
-            <View style={[styles.resultsBadge, { backgroundColor: colors.surface + 'EE' }]}>
-              <AppText variant="caption" style={{ fontWeight: '700' }}>
-                {officialCalls.isLoading
-                  ? 'Carregando chamados 1746...'
-                  : `${listed.length} ${listed.length === 1 ? 'chamado 1746' : 'chamados 1746'}${areaOnly ? ' nesta área' : ' no mapa'}`}
-              </AppText>
-            </View>
-          </View>
-
-          {/* FILTROS AVANÇADOS EXPANSÍVEIS */}
-          {filtersOpen && renderFilterDrawer()}
+          {renderCompactFilterStrip()}
         </View>
       )}
 
       {/* 3. BOTÕES FLUTUANTES LATERAIS (GPS, RESET) */}
       {!isListView && (
-        <View style={[styles.mapActionsRight, { top: insets.top + 160 }]}>
+        <View style={[styles.mapActionsRight, { top: insets.top + 112 }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Minha posição"
@@ -538,7 +510,7 @@ function TerritoryContent() {
           >
             <Ionicons
               name="locate"
-              size={22}
+              size={20}
               color={locating ? colors.accent : colors.ink}
             />
           </Pressable>
@@ -555,7 +527,7 @@ function TerritoryContent() {
           >
             <Ionicons
               name="expand-outline"
-              size={22}
+              size={20}
               color={colors.ink}
             />
           </Pressable>
@@ -571,7 +543,7 @@ function TerritoryContent() {
           >
             <Ionicons
               name={areaOnly ? 'globe-outline' : 'scan-outline'}
-              size={16}
+              size={15}
               color={colors.ink}
             />
             <AppText variant="caption" style={{ fontWeight: '700' }}>
@@ -640,28 +612,15 @@ function TerritoryContent() {
               <CitySearch
                 value={search}
                 onChangeText={setSearch}
-                onFilters={() => setFiltersOpen(!filtersOpen)}
+                onFilters={() => setFiltersOpen(true)}
                 expanded={filtersOpen}
                 filterCount={filterCount}
               />
             </View>
 
-            {renderCategoryChips()}
-
-            <View style={[styles.resultsBadgeRow, { paddingHorizontal: spacing.md }]}>
-              <View style={[styles.resultsBadge, { backgroundColor: colors.surface }]}>
-                <AppText variant="caption" style={{ fontWeight: '700' }}>
-                  {listed.length} {listed.length === 1 ? 'chamado 1746' : 'chamados 1746'}
-                  {areaOnly ? ' nesta área' : ''}
-                </AppText>
-              </View>
+            <View style={{ paddingHorizontal: spacing.md }}>
+              {renderCompactFilterStrip()}
             </View>
-
-            {filtersOpen && (
-              <View style={{ paddingHorizontal: spacing.md, marginTop: spacing.xs }}>
-                {renderFilterDrawer()}
-              </View>
-            )}
           </View>
 
           <ScrollView
@@ -712,6 +671,135 @@ function TerritoryContent() {
           </ScrollView>
         </View>
       )}
+
+      {/* 7. MODAL DE FILTROS COMPACTO (BOTTOM SHEET) */}
+      <Modal
+        visible={filtersOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setFiltersOpen(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => setFiltersOpen(false)}
+          />
+          <View
+            style={[
+              styles.filterModalSheet,
+              {
+                backgroundColor: colors.surface,
+                paddingBottom: Math.max(insets.bottom, spacing.md),
+              },
+            ]}
+          >
+            <View style={styles.sheetHandleBar}>
+              <View style={[styles.sheetHandle, { backgroundColor: colors.divider }]} />
+            </View>
+
+            <View style={styles.filterModalHeader}>
+              <AppText variant="sectionTitle" style={{ fontSize: 18 }}>
+                Filtros do Território
+              </AppText>
+              <Pressable
+                onPress={() => setFiltersOpen(false)}
+                hitSlop={12}
+                style={[styles.closeButton, { backgroundColor: colors.surfaceSubdued }]}
+              >
+                <Ionicons name="close" size={18} color={colors.ink} />
+              </Pressable>
+            </View>
+
+            <View style={styles.filterModalBody}>
+              <View style={styles.filterField}>
+                <AppText variant="caption" color="muted" style={styles.filterLabel}>
+                  BAIRRO
+                </AppText>
+                <NeighborhoodPicker
+                  options={bairroOptions}
+                  value={neighborhood}
+                  onChange={(value) => {
+                    setNeighborhood(value);
+                    setSelectedId(null);
+                  }}
+                />
+              </View>
+
+              <View style={styles.filterField}>
+                <AppText variant="caption" color="muted" style={styles.filterLabel}>
+                  TIPO DE SERVIÇO (CENTRAL 1746)
+                </AppText>
+                <AppSelect
+                  label="Tipo de serviço 1746"
+                  placeholder="Buscar tipo de serviço..."
+                  icon="construct-outline"
+                  defaultValue="all"
+                  options={serviceTypeOptions}
+                  value={serviceType}
+                  onChange={(value) => {
+                    setServiceType(value);
+                    setSelectedId(null);
+                  }}
+                />
+              </View>
+
+              <View style={styles.filterField}>
+                <AppText variant="caption" color="muted" style={styles.filterLabel}>
+                  SITUAÇÃO DO CHAMADO
+                </AppText>
+                <SlidingTabs
+                  label="Situação"
+                  scroll={false}
+                  edgeToEdge={false}
+                  options={[
+                    { value: 'all', label: 'Todas' },
+                    { value: 'Não Encerrado', label: 'Abertos' },
+                    { value: 'Encerrado', label: 'Encerrados' },
+                  ]}
+                  value={status}
+                  onChange={(value) => {
+                    setStatus(value);
+                    setSelectedId(null);
+                  }}
+                />
+              </View>
+
+              <View style={styles.filterField}>
+                <AppText variant="caption" color="muted" style={styles.filterLabel}>
+                  RECORTE ESPACIAL
+                </AppText>
+                <SlidingTabs
+                  label="Recorte espacial"
+                  scroll={false}
+                  edgeToEdge={false}
+                  options={[
+                    { value: 'all', label: 'Todo o Rio' },
+                    { value: 'area', label: 'Área visível no mapa' },
+                  ]}
+                  value={areaOnly ? 'area' : 'all'}
+                  onChange={(value) => {
+                    setAreaOnly(value === 'area');
+                    setSelectedId(null);
+                  }}
+                />
+              </View>
+
+              <View style={styles.filterActionsRow}>
+                <AppButton
+                  title="Limpar tudo"
+                  variant="quiet"
+                  onPress={resetFilters}
+                />
+                <AppButton
+                  title={`Ver ${listed.length} chamados`}
+                  variant="primary"
+                  onPress={() => setFiltersOpen(false)}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -742,56 +830,90 @@ const createStyles = (colors: ThemeColors) =>
       right: 0,
       zIndex: 50,
       paddingHorizontal: spacing.md,
-      gap: spacing.xs,
+      gap: 8,
     },
     searchContainer: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.12,
-      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
       elevation: 4,
     },
-    categoryScroll: {
+    compactFilterStrip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
       paddingVertical: 2,
-      gap: spacing.xs,
     },
     listFilterBar: {
       paddingBottom: spacing.xs,
-      gap: spacing.xs,
+      gap: 8,
       backgroundColor: colors.canvas,
       zIndex: 10,
     },
-    resultsBadgeRow: {
-      flexDirection: 'row',
-      justifyContent: 'flex-start',
-    },
     resultsBadge: {
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 3,
+      height: 36,
+      paddingHorizontal: spacing.sm + 2,
       borderRadius: layout.radius.pill,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.08,
-      shadowRadius: 4,
-      elevation: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
     },
-    filtersDrawer: {
-      marginTop: spacing.xs,
-      padding: spacing.md,
-      borderRadius: layout.radius.card,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.15,
-      shadowRadius: 14,
-      elevation: 6,
-      gap: spacing.sm,
-      maxHeight: 400,
+    modalBackdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.45)',
+      justifyContent: 'flex-end',
+    },
+    filterModalSheet: {
+      borderTopLeftRadius: layout.radius.sheet,
+      borderTopRightRadius: layout.radius.sheet,
+      paddingTop: spacing.xs,
+    },
+    sheetHandleBar: {
+      alignItems: 'center',
+      paddingVertical: 6,
+    },
+    sheetHandle: {
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+    },
+    filterModalHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.xs,
+    },
+    closeButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    filterModalBody: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.xs,
+      gap: spacing.md,
+    },
+    filterField: {
+      gap: 6,
+    },
+    filterLabel: {
+      fontWeight: '700',
+      letterSpacing: 0.5,
+      fontSize: 11,
     },
     filterActionsRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginTop: spacing.xs,
+      paddingTop: spacing.xs,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.divider,
     },
     mapActionsRight: {
       position: 'absolute',
@@ -800,14 +922,14 @@ const createStyles = (colors: ThemeColors) =>
       gap: spacing.xs,
     },
     floatingCircleButton: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
       alignItems: 'center',
       justifyContent: 'center',
       shadowColor: '#000000',
       shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.15,
+      shadowOpacity: 0.14,
       shadowRadius: 6,
       elevation: 4,
       borderWidth: StyleSheet.hairlineWidth,
@@ -823,7 +945,7 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       gap: 6,
       paddingHorizontal: spacing.md,
-      paddingVertical: 9,
+      paddingVertical: 8,
       borderRadius: layout.radius.pill,
       shadowColor: '#000000',
       shadowOffset: { width: 0, height: 4 },
