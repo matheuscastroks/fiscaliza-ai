@@ -4,7 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { useTheme } from '@/theme/useTheme';
 import type { PublicFacilitySummary } from '@/shared/public-data';
-import { facilityLabels, facilityIcons } from '@/features/territory/selectors';
+import {
+  facilityLabels,
+  facilityIcons,
+  facilityNeighborhoodLabel,
+} from '@/features/territory/selectors';
 export const facilityTitle = (item: PublicFacilitySummary) =>
   item.name || item.address || 'Espaço público sem nome informado';
 export function FacilityRow({
@@ -52,7 +56,7 @@ export function FacilityRow({
         </AppText>
         <AppText variant="label">{facilityTitle(item)}</AppText>
         <AppText variant="caption" color="muted">
-          {item.neighborhoodName || 'Bairro não confirmado'}
+          {facilityNeighborhoodLabel(item)}
           {!item.location ? ' · Sem ponto no mapa' : ''}
         </AppText>
       </View>

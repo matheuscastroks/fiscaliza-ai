@@ -77,3 +77,49 @@ test('map protocol cannot close its script with a source label containing markup
   assert.ok(!encoded.includes('<'));
   assert.deepEqual(JSON.parse(encoded), value);
 });
+
+test('unresolved neighborhood cannot consume municipal facility cache or remove compatible calls', () => {
+  const cachedFacilities = [{ id: 'municipal-school', category: 'school' }];
+  const scope = {
+    neighborhood: 'Nome legado sem equivalência',
+    neighborhoodId: undefined,
+  };
+  assert.deepEqual(
+    chooseTerritorialEntries(
+      [{ id: 'call' }],
+      cachedFacilities,
+      ['official', 'school'],
+      scope,
+    ).map((x) => x.item.id),
+    ['call'],
+  );
+  assert.deepEqual(
+    chooseTerritorialEntries([], cachedFacilities, ['school'], {
+      neighborhood: '',
+    }).map((x) => x.item.id),
+    ['municipal-school'],
+  );
+});
+test('reported neighborhood names never imply a confirmed link for conflicts or boundary points', async () => {
+  const { facilityNeighborhoodLabel } = await import(
+    '../features/territory/selectors.ts'
+  );
+  assert.equal(
+    facilityNeighborhoodLabel({
+      neighborhoodId: null,
+      neighborhoodName: 'Centro',
+    }),
+    'Bairro não confirmado · Informado pela fonte: Centro',
+  );
+  assert.equal(
+    facilityNeighborhoodLabel({
+      neighborhoodId: 'rio-neighborhood:005',
+      neighborhoodName: 'Centro',
+    }),
+    'Centro',
+  );
+  assert.equal(
+    facilityNeighborhoodLabel({ neighborhoodId: null, neighborhoodName: null }),
+    'Bairro não confirmado',
+  );
+});

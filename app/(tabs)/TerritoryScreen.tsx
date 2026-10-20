@@ -101,7 +101,7 @@ function TerritoryContent() {
   const municipality = user?.municipality;
   const initial = useMemo(
     () => ({
-      ...(municipality
+      ...(municipality?.id === '3304557'
         ? municipalityRegion(municipality)
         : {
             latitude: -22.92,
@@ -177,42 +177,46 @@ function TerritoryContent() {
     search: search || undefined,
     ...(areaOnly && appliedBounds ? appliedBounds : {}),
   };
+  const facilitiesConfirmed = !neighborhood || Boolean(neighborhoodId);
+  const facilityScope = neighborhoodId || neighborhood || 'municipality';
   const schools = usePublicFacilities(
     { ...facilityParams, categories: ['school'] },
-    layers.includes('school') && (!neighborhood || Boolean(neighborhoodId)),
+    layers.includes('school') && facilitiesConfirmed,
+    facilityScope,
   );
   const health = usePublicFacilities(
     { ...facilityParams, categories: ['health'] },
-    layers.includes('health') && (!neighborhood || Boolean(neighborhoodId)),
+    layers.includes('health') && facilitiesConfirmed,
+    facilityScope,
   );
   const squares = usePublicFacilities(
     { ...facilityParams, categories: ['square'] },
-    layers.includes('square') && (!neighborhood || Boolean(neighborhoodId)),
+    layers.includes('square') && facilitiesConfirmed,
+    facilityScope,
   );
   const facilityQueries = { school: schools, health, square: squares };
   const sources = usePublicSources();
   const officialSource = sources.data?.find((s) => s.sourceId === 'rio1746');
   const officialFilters = useOfficialFilters();
+  const officialTime = {
+    startDate,
+    endDate,
+    periodDays:
+      startDate || endDate || period === 'all' ? undefined : Number(period),
+  };
   const officialOverview = useOfficialOverview({
     neighborhoodId,
     bairro: neighborhoodId ? undefined : neighborhood || undefined,
     tipo: serviceType === 'all' ? undefined : serviceType,
     situacao: status === 'all' ? undefined : status,
-    startDate,
-    endDate,
-    periodDays:
-      startDate || endDate
-        ? undefined
-        : period === 'all'
-          ? undefined
-          : Number(period),
+    ...officialTime,
   });
   const officialCalls = useOfficialCalls({
     neighborhoodId,
     bairro: neighborhoodId ? undefined : neighborhood || undefined,
     tipo: serviceType === 'all' ? undefined : serviceType,
     situacao: status === 'all' ? undefined : status,
-    periodDays: period === 'all' ? undefined : Number(period),
+    ...officialTime,
     search: search || undefined,
     limit: pageLimit,
     hasCoordinates: isListView ? undefined : true,
@@ -272,7 +276,11 @@ function TerritoryContent() {
     );
     if (target) setNeighborhood(target.name);
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setStatus('all'); setServiceType('all'); setSearch(''); setAreaOnly(false); setAppliedBounds(null);
+    setStatus('all');
+    setServiceType('all');
+    setSearch('');
+    setAreaOnly(false);
+    setAppliedBounds(null);
     if (['official', 'school', 'health', 'square'].includes(routeLayer || ''))
       setLayers([routeLayer as 'official']);
   }, [
@@ -342,13 +350,18 @@ function TerritoryContent() {
     const facilities = [schools.data, health.data, squares.data].flatMap(
       (data) => data?.pages.flatMap((p) => p.items) || [],
     );
-    return chooseTerritorialEntries(calls, facilities, layers);
+    return chooseTerritorialEntries(calls, facilities, layers, {
+      neighborhood,
+      neighborhoodId,
+    });
   }, [
     officialCalls.data?.calls,
     schools.data,
     health.data,
     squares.data,
     layers,
+    neighborhood,
+    neighborhoodId,
   ]);
 
   const unlocated = entries.filter((entry) => !entryLocation(entry));
@@ -579,9 +592,11 @@ function TerritoryContent() {
     try {
       await Promise.all([
         officialCalls.refetch(),
-        boundary.refetch(),
+        ...(neighborhoodId ? [boundary.refetch()] : []),
         ...Object.entries(facilityQueries)
-          .filter(([k]) => layers.includes(k as 'school'))
+          .filter(
+            ([k]) => facilitiesConfirmed && layers.includes(k as 'school'),
+          )
           .map(([, q]) => q.refetch()),
       ]);
     } finally {
@@ -617,7 +632,7 @@ function TerritoryContent() {
           }
         />
       )}
-      {startDate && endDate && (
+      {layers.includes('official') && startDate && endDate && (
         <AppText
           variant="caption"
           style={{ backgroundColor: colors.surface, padding: 5 }}
@@ -669,7 +684,10 @@ function TerritoryContent() {
                     ? 'Carregar mais ' + facilityLabels[category]
                     : 'Atualizar ' + facilityLabels[category]
                 }
+                disabled={!facilitiesConfirmed}
+                accessibilityState={{ disabled: !facilitiesConfirmed }}
                 onPress={() => {
+                  if (!facilitiesConfirmed) return;
                   void (q.hasNextPage && !q.error
                     ? q.fetchNextPage()
                     : q.refetch());
@@ -691,7 +709,7 @@ function TerritoryContent() {
                       : q.error
                         ? 'Falha · Tentar novamente'
                         : summarizeLayer(shown, page?.total ?? null)}
-                  {q.hasNextPage ? ' · Mais' : ''}
+                  {facilitiesConfirmed && q.hasNextPage ? ' · Mais' : ''}
                 </AppText>
                 {page?.sources.some((s) => s.state === 'stale') && (
                   <AppText variant="caption" color="muted">
@@ -1230,6 +1248,10 @@ function TerritoryContent() {
                   value={period}
                   onChange={(value) => {
                     setPeriod(value);
+                    router.setParams({
+                      startDate: undefined,
+                      endDate: undefined,
+                    });
                     setPageLimit(300);
                     setSelectedId(null);
                   }}

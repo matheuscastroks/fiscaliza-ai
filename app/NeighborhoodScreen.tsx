@@ -63,10 +63,13 @@ function NeighborhoodContent({ initialId }: { initialId?: string }) {
           placeholder="Buscar bairro"
           value={id || ''}
           onChange={setId}
-          options={(options.data || []).map((n) => ({
-            value: n.id,
-            label: n.name,
-          }))}
+          options={[
+            { value: '', label: 'Escolher bairro' },
+            ...(options.data || []).map((n) => ({
+              value: n.id,
+              label: n.name,
+            })),
+          ]}
         />
         <QueryState
           loading={options.isLoading || Boolean(id && overview.isLoading)}

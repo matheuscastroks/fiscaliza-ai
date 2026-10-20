@@ -22,15 +22,29 @@ export function chooseTerritorialEntries<C, F extends { category: string }>(
   calls: C[],
   facilities: F[],
   layers: TerritoryLayer[],
+  scope?: { neighborhood?: string; neighborhoodId?: string },
 ) {
   return [
     ...(layers.includes('official')
       ? calls.map((item) => ({ type: 'official' as const, item }))
       : []),
-    ...facilities
+    ...(scope?.neighborhood && !scope.neighborhoodId ? [] : facilities)
       .filter((item) => layers.includes(item.category as FacilityCategory))
       .map((item) => ({ type: 'facility' as const, item })),
   ];
+}
+export function facilityNeighborhoodLabel(item: {
+  neighborhoodId: string | null;
+  neighborhoodName: string | null;
+}) {
+  if (item.neighborhoodId)
+    return item.neighborhoodName || 'Nome do bairro não informado';
+  return (
+    'Bairro não confirmado' +
+    (item.neighborhoodName
+      ? ` · Informado pela fonte: ${item.neighborhoodName}`
+      : '')
+  );
 }
 export function summarizeLayer(displayed: number, total: number | null) {
   return total === null

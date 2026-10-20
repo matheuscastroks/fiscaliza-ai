@@ -11,6 +11,7 @@ import {
   facilityLabels,
   facilityIcons,
   facilityColors,
+  facilityNeighborhoodLabel,
 } from '@/features/territory/selectors';
 import { facilityTitle } from './FacilityRow';
 import { useTheme } from '@/theme/useTheme';
@@ -55,9 +56,7 @@ export function FacilityDetails({
             <AppText selectable>
               {item.address || 'Endereço não informado'}
             </AppText>
-            <AppText color="muted">
-              {item.neighborhoodName || 'Bairro não confirmado nesta base'}
-            </AppText>
+            <AppText color="muted">{facilityNeighborhoodLabel(item)}</AppText>
           </DetailSection>
           {item.location && (
             <View style={{ height: 230, borderRadius: 24, overflow: 'hidden' }}>

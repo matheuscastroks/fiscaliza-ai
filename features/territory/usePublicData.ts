@@ -9,9 +9,13 @@ import {
 } from '@/services/publicData';
 import type { FacilitiesQuery, SourceCoverage } from '@/shared/public-data';
 import { samePublication } from './selectors';
-export function usePublicFacilities(params: FacilitiesQuery, enabled = true) {
+export function usePublicFacilities(
+  params: FacilitiesQuery,
+  enabled = true,
+  scope = 'municipality',
+) {
   return useInfiniteQuery({
-    queryKey: ['publicFacilities', '3304557', params],
+    queryKey: ['publicFacilities', '3304557', scope, params],
     initialPageParam: { page: 1, sources: null as SourceCoverage[] | null },
     queryFn: async ({ pageParam }) => {
       const result = await fetchPublicFacilities({
