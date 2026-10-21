@@ -64,6 +64,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       useProblemsStore.getState().reset();
     }
     set({
+      isReady: true,
       isLoading: false,
       error: result.error || null,
       ...(result.data ? { user: result.data, isAuthenticated: true } : {}),

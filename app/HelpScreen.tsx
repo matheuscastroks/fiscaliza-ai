@@ -19,13 +19,14 @@ export default function HelpScreen() {
         <View style={{ gap: 20 }}>
           <AppText variant="sectionTitle">Escolher meu bairro</AppText>
           <AppText>
-            Na Home ou no Território, escolha um bairro. O panorama reúne
-            cadastros de escolas, saúde, espaços públicos e demandas do 1746.
-            Você não precisa entrar na conta para consultar dados públicos.
+            Em Preferências, escolha um bairro para ter um atalho na Home. Em
+            Explorar, você pode consultar outros bairros sem mudar essa
+            preferência. Todo o município continua disponível, sem conta, CEP ou
+            GPS obrigatório.
           </AppText>
           <AppText variant="sectionTitle">Combinar camadas</AppText>
           <AppText>
-            No Território, ative as categorias de seu interesse. Mapa e lista
+            Em Explorar, ative as categorias de seu interesse. Mapa e lista
             mostram os mesmos registros carregados; a lista também inclui
             cadastros sem ponto. Use a contagem de cada camada para carregar
             mais ou tentar novamente se houver falha. Situação, serviço e
@@ -41,16 +42,19 @@ export default function HelpScreen() {
           </AppText>
           <AppText variant="sectionTitle">Preciso de atendimento</AppText>
           <AppText>
-            O Fiscaliza Aí não abre chamados no 1746. Use os canais oficiais da
-            Prefeitura do Rio para solicitar serviços. As contribuições da
-            comunidade no app não substituem o protocolo municipal.
+            Na aba Agir, escolha um serviço ou abra o portal oficial do 1746. A
+            solicitação acontece fora do Fiscaliza Aí, no atendimento da
+            prefeitura. Salvar um registro aqui não gera um protocolo municipal.
           </AppText>
           <AppText variant="sectionTitle">Acompanhar e atualizar</AppText>
           <AppText>
             Salve os chamados de interesse no detalhe para retomá-los em
-            Acompanhar. Arraste para baixo nas telas com atualização para
-            consultar novamente a base do app. Isso não dispara uma importação
-            nem garante uma atualização na origem.
+            Acompanhar. Eles ficam salvos neste aparelho mesmo após fechar o
+            app. Arraste para baixo nas telas com atualização para consultar
+            novamente a base do app. Isso não dispara uma importação nem garante
+            uma atualização na origem. Em falha de conexão, o resumo salvo
+            permanece disponível. Encerrado no 1746 não confirma resolução no
+            local.
           </AppText>
           <AppText variant="sectionTitle">Leitura e conexão</AppText>
           <AppText>

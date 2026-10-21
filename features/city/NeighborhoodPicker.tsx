@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNeighborhoods } from '@/features/territory/usePublicData';
-import { useAuthStore } from '@/stores/authStore';
+import { useTerritoryStore } from '@/stores/territoryStore';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { normalizeNeighborhood } from '@/shared/civic-territory';
 
@@ -16,7 +16,7 @@ export function NeighborhoodPicker({
   compact?: boolean;
 }) {
   const boundaries = useNeighborhoods();
-  const home = useAuthStore((s) => s.user?.neighborhood);
+  const home = useTerritoryStore((s) => s.preferredNeighborhood);
   const canonical = boundaries.data?.map((x) => x.name) || options;
   options = [...canonical].sort((a, b) =>
     normalizeNeighborhood(a) === normalizeNeighborhood(home || '')

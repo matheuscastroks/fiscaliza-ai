@@ -22,36 +22,27 @@ const slides: {
 }[] = [
   {
     id: 'territory',
-    title: 'Explore o Rio',
+    title: 'Descubra sua região',
     description:
-      'Encontre escolas, unidades de saúde, espaços públicos e demandas do 1746 no mapa.',
-    imageLabel: 'Pessoas planejando e acompanhando um projeto',
-    note: 'Você pode explorar os dados públicos sem entrar na conta.',
-  },
-  {
-    id: 'report',
-    title: 'Conheça seu bairro',
-    description:
-      'Escolha um bairro para consultar seus equipamentos e demandas no período que interessa.',
-    imageLabel: 'Mãos registrando informações em uma prancheta',
-    note: 'Cada fonte informa sua publicação; dados antigos não significam situação atual.',
-  },
-  {
-    id: 'participation',
-    title: 'Contribua com a cidade',
-    description:
-      'Compartilhe necessidades e propostas com a comunidade, nos espaços de participação.',
-    imageLabel:
-      'Uma proposta representada por um avião de papel chegando ao alvo',
-    note: 'Contribuições no app não abrem chamados no 1746 nem representam decisões da prefeitura.',
+      'Explore demandas urbanas e encontre serviços públicos no mapa ou na lista.',
+    imageLabel: 'Pessoas explorando um território',
+    note: 'Escolher um bairro é opcional. Não precisa de conta ou GPS.',
   },
   {
     id: 'results',
     title: 'Salve e acompanhe',
     description:
-      'Salve os chamados de seu interesse e consulte as atualizações publicadas na base.',
-    imageLabel: 'Pessoas avaliando juntas o resultado de um trabalho',
-    note: 'Fiscaliza Aí é independente. O atendimento municipal continua nos canais oficiais.',
+      'Guarde os chamados de seu interesse e volte para consultar a situação publicada.',
+    imageLabel: 'Pessoas acompanhando um trabalho',
+    note: 'Seus salvos ficam neste aparelho. Encerrado no 1746 não significa resolução confirmada.',
+  },
+  {
+    id: 'participation',
+    title: 'Encontre como agir',
+    description:
+      'Acesse as orientações e o atendimento oficial para solicitar um serviço.',
+    imageLabel: 'Uma proposta representada por um avião de papel',
+    note: 'O Fiscaliza Aí é independente. Solicitações são feitas no canal oficial da prefeitura.',
   },
 ];
 

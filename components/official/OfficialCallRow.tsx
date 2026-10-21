@@ -1,3 +1,4 @@
+import { isOfficialCallClosed } from '@/shared/official-call-state';
 import React from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,11 +17,7 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
-  const isClosed = Boolean(
-    call.closedAt ||
-    call.officialSituation === 'Encerrado' ||
-    call.officialStatus?.toLowerCase().includes('fechado')
-  );
+  const isClosed = isOfficialCallClosed(call);
 
   const situationColor = isClosed ? colors.completed : colors.accent;
 
@@ -46,18 +43,19 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.card,
-        pressed && { opacity: 0.8 },
-      ]}
+      style={({ pressed }) => [styles.card, pressed && { opacity: 0.8 }]}
       accessibilityRole="button"
-      accessibilityLabel={`Chamado ${call.externalId}, ${call.serviceSubtype}, ${primaryStateLabel}`}
+      accessibilityLabel={`Chamado ${call.externalId}, ${call.serviceSubtype}, ${isClosed ? 'Encerrado no 1746' : primaryStateLabel}`}
       onPress={onPress}
     >
       {/* Header: Service Type + Protocol 1746 Tag */}
       <View style={styles.topRow}>
         <View style={styles.typeBadge}>
-          <AppText variant="caption" numberOfLines={1} style={styles.typeBadgeText}>
+          <AppText
+            variant="caption"
+            numberOfLines={1}
+            style={styles.typeBadgeText}
+          >
             {call.serviceType}
           </AppText>
         </View>
@@ -81,7 +79,12 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
         <AppText
           variant="label"
           numberOfLines={1}
-          style={{ color: situationColor, fontWeight: '700', fontSize: 13, flexShrink: 1 }}
+          style={{
+            color: situationColor,
+            fontWeight: '700',
+            fontSize: 13,
+            flexShrink: 1,
+          }}
         >
           {primaryStateLabel}
         </AppText>
@@ -96,7 +99,12 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
       <View style={styles.footerRow}>
         <View style={styles.locationGroup}>
           <Ionicons name="location-outline" size={14} color={colors.muted} />
-          <AppText variant="caption" color="muted" numberOfLines={1} style={{ flexShrink: 1 }}>
+          <AppText
+            variant="caption"
+            color="muted"
+            numberOfLines={1}
+            style={{ flexShrink: 1 }}
+          >
             {[call.neighborhoodName || 'Rio de Janeiro', call.organizationName]
               .filter(Boolean)
               .join(' · ')}

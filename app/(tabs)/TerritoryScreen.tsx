@@ -1,6 +1,7 @@
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { LayerPicker } from '@/components/territory/LayerPicker';
-import { FacilityRow, facilityTitle } from '@/components/territory/FacilityRow';
+import { facilityTitle } from '@/components/territory/FacilityRow';
+import { TerritoryListRow } from '@/components/territory/TerritoryListRow';
 import {
   usePublicSources,
   usePublicFacilities,
@@ -17,7 +18,13 @@ import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { layout } from '@/theme/layout';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, {
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from 'react';
 import {
   RefreshControl,
   Modal,
@@ -44,15 +51,12 @@ import {
   useOfficialCalls,
   useOfficialFilters,
 } from '@/features/city/useOfficialCalls';
-import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { spacing } from '@/theme/spacing';
-import { useAuthStore } from '@/stores/authStore';
 import {
   useTerritoryStore,
   useTerritorySelection,
   useTerritoryViewMode,
 } from '@/stores/territoryStore';
-import { municipalityRegion } from '@/features/city/municipalContext';
 import { OsmMapView, type MapMarker } from '@/components/ui/OsmMapView';
 import {
   TerritoryPreviewCard,
@@ -85,10 +89,10 @@ const entryLocation = (entry: Entry) => {
   if (entry.type === 'facility') return entry.item.location || undefined;
   return undefined;
 };
+const entryKey = (entry: Entry) => entry.type + ':' + entry.item.id;
 
 export default function TerritoryScreen() {
-  const user = useAuthStore((state) => state.user);
-  return <TerritoryContent key={user?.id + ':' + user?.municipality?.id} />;
+  return <TerritoryContent />;
 }
 
 function TerritoryContent() {
@@ -98,22 +102,22 @@ function TerritoryContent() {
   const cityStyles = useThemedStyles(createCityStyles);
   const styles = useThemedStyles(createStyles);
 
-  const user = useAuthStore((state) => state.user);
-  const municipality = user?.municipality;
   const initial = useMemo(
     () => ({
-      ...(municipality?.id === '3304557'
-        ? municipalityRegion(municipality)
-        : {
-            latitude: -22.92,
-            longitude: -43.32,
-            latitudeDelta: 0.4,
-            longitudeDelta: 0.55,
-          }),
+      latitude: -22.92,
+      longitude: -43.32,
+      latitudeDelta: 0.4,
+      longitudeDelta: 0.55,
       zoom: 12,
     }),
-    [municipality],
+    [],
   );
+  const listOffset = useRef(0);
+  const listRef = useRef<FlatList<Entry>>(null);
+  const restoreListOffset = useRef(true);
+  useEffect(() => {
+    if (!isFocused) restoreListOffset.current = true;
+  }, [isFocused]);
 
   const {
     neighborhoodId: routeNeighborhoodId,
@@ -453,7 +457,7 @@ function TerritoryContent() {
     }
   }, [neighborhood, areaOnly, focusId, entries, municipalOverviewRegion]);
 
-  const openEntry = (entry: Entry) => {
+  const openEntry = useCallback((entry: Entry) => {
     if (entry.type === 'facility') {
       router.push({
         pathname: '/FacilityDetailsScreen',
@@ -465,24 +469,14 @@ function TerritoryContent() {
       pathname: '/OfficialCallDetailsScreen',
       params: { id: entry.item.id },
     });
-  };
+  }, []);
 
-  const renderEntry = (entry: Entry) => {
-    if (entry.type === 'facility')
-      return (
-        <FacilityRow
-          key={entry.item.id}
-          item={entry.item}
-          onPress={() => openEntry(entry)}
-        />
-      );
-    if (entry.type !== 'official') return null;
-    return (
-      <View key={entry.item.id}>
-        <OfficialCallRow call={entry.item} onPress={() => openEntry(entry)} />
-      </View>
-    );
-  };
+  const renderEntry = useCallback(
+    ({ item }: { item: Entry }) => (
+      <TerritoryListRow entry={item} onOpen={openEntry} />
+    ),
+    [openEntry],
+  );
 
   const osmMarkers: MapMarker[] = useMemo(() => {
     const list: MapMarker[] = located.flatMap((entry): MapMarker[] => {
@@ -606,6 +600,8 @@ function TerritoryContent() {
     setSelectedId(null);
     setSelectedCluster(null);
     setPageLimit(300);
+    listOffset.current = 0;
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
   }, [
     neighborhoodId,
     neighborhood,
@@ -1037,9 +1033,24 @@ function TerritoryContent() {
           </View>
 
           <FlatList<Entry>
+            ref={listRef}
             data={listed}
-            keyExtractor={(entry) => entry.type + ':' + entry.item.id}
-            renderItem={({ item }) => renderEntry(item)}
+            onContentSizeChange={(_, height) => {
+              if (!restoreListOffset.current || height <= listOffset.current)
+                return;
+              listRef.current?.scrollToOffset({
+                offset: listOffset.current,
+                animated: false,
+              });
+              restoreListOffset.current = false;
+            }}
+            onScroll={(event) => {
+              if (!restoreListOffset.current)
+                listOffset.current = event.nativeEvent.contentOffset.y;
+            }}
+            scrollEventThrottle={32}
+            keyExtractor={entryKey}
+            renderItem={renderEntry}
             initialNumToRender={10}
             maxToRenderPerBatch={8}
             windowSize={7}

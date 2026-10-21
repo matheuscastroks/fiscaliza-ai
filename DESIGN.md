@@ -140,7 +140,7 @@ Este documento registra tokens e componentes do aplicativo cidadão presentes no
 
 ## Hierarquia orientada à jornada cidadã
 
-Direção para o próximo redesenho, conforme PRODUCT.md; estes critérios não comprovam implementação nas telas atuais.
+Direção aplicada à jornada pública descrita em PRODUCT.md. Validação de código, navegador e aparelho são evidências distintas.
 
 - **Home:** explorar o entorno é a ação principal. Salvos, demandas recentes e acesso ao atendimento dão continuidade. Contagens, rankings territoriais e gráficos não ocupam o protagonismo.
 - **Território:** mapa e lista são duas formas de realizar a mesma descoberta. Camadas de serviços são opcionais, com seleção legível e recorte preservado. Nunca apresentar um equipamento como responsável por demandas próximas.

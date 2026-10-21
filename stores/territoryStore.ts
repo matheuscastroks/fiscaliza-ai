@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback } from 'react';
 import { useNeighborhoods } from '@/features/territory/usePublicData';
 import {
@@ -5,87 +6,90 @@ import {
   type TerritoryLayer,
 } from '@/features/territory/selectors';
 import { create } from 'zustand';
-import { useAuthStore } from './authStore';
-
-const useTerritoryStore = create<{
-  key: string;
-  neighborhood: string | undefined;
+const REGION_KEY = 'fiscaliza-ai:region:3304557:v1';
+let initialization: Promise<void> | undefined;
+let writes = Promise.resolve();
+export const useTerritoryStore = create<{
+  hydrated: boolean;
+  persistenceError: string | null;
+  preferredNeighborhood: string;
+  initialize: () => Promise<void>;
+  setPreferredNeighborhood: (name: string) => Promise<boolean>;
+  neighborhood: string;
+  setNeighborhood: (name: string) => void;
   layers: TerritoryLayer[];
   setLayers: (layers: TerritoryLayer[]) => void;
   isListView: boolean;
   setIsListView: (value: boolean) => void;
   toggleViewMode: () => void;
-}>((set) => ({
-  key: 'public:3304557',
+}>((set, get) => ({
+  hydrated: false,
+  persistenceError: null,
+  preferredNeighborhood: '',
+  neighborhood: '',
   layers: ['official'],
-  setLayers: (layers) => set({ layers }),
-  neighborhood: undefined,
   isListView: false,
-  setIsListView: (value: boolean) => set({ isListView: value }),
-  toggleViewMode: () => set((state) => ({ isListView: !state.isListView })),
-}));
-const scopeKey = () => {
-  const user = useAuthStore.getState().user;
-  return user?.id && user.municipality?.id
-    ? user.id + ':' + user.municipality.id
-    : 'public:3304557';
-};
-useAuthStore.subscribe((next, previous) => {
-  if (
-    next.user?.id !== previous.user?.id ||
-    next.user?.municipality?.id !== previous.user?.municipality?.id ||
-    !next.isAuthenticated
-  ) {
-    useTerritoryStore.setState({
-      key: scopeKey(),
-      neighborhood: undefined,
-      isListView: false,
+  initialize: () => {
+    if (initialization) return initialization;
+    initialization = (async () => {
+      try {
+        const raw = await AsyncStorage.getItem(REGION_KEY);
+        if (!raw) return;
+        const value = JSON.parse(raw);
+        if (value.version !== 1 || typeof value.neighborhood !== 'string')
+          throw Error('format');
+        set({ preferredNeighborhood: value.neighborhood });
+      } catch {
+        set({
+          persistenceError: 'Não foi possível ler sua região neste aparelho.',
+        });
+      } finally {
+        set({ hydrated: true });
+      }
+    })();
+    return initialization;
+  },
+  setPreferredNeighborhood: (name) => {
+    let success = false;
+    const result = writes.then(async () => {
+      await get().initialize();
+      try {
+        const neighborhood = name.trim();
+        await AsyncStorage.setItem(
+          REGION_KEY,
+          JSON.stringify({ version: 1, neighborhood }),
+        );
+        set({ preferredNeighborhood: neighborhood, persistenceError: null });
+        success = true;
+      } catch {
+        set({
+          persistenceError:
+            'Não foi possível salvar sua região. Tente novamente.',
+        });
+      }
     });
-  }
-});
-
-export function useTerritorySelection(): {
-  neighborhood: string;
-  setNeighborhood: (value: string) => void;
-  neighborhoodId: string | undefined;
-} {
-  const user = useAuthStore((state) => state.user);
-  const key =
-    user?.id && user.municipality?.id
-      ? user.id + ':' + user.municipality.id
-      : 'public:3304557';
-  const storedKey = useTerritoryStore((state) => state.key);
-  const stored = useTerritoryStore((state) => state.neighborhood);
-  const neighborhood =
-    key && storedKey === key && stored !== undefined ? stored : '';
-  const setNeighborhood = useCallback(
-    (value: string) => {
-      if (key && key === scopeKey())
-        useTerritoryStore.setState({ key, neighborhood: value.trim() });
-    },
-    [key],
-  );
+    writes = result;
+    return result.then(() => success);
+  },
+  setNeighborhood: (name) => set({ neighborhood: name.trim() }),
+  setLayers: (layers) => set({ layers }),
+  setIsListView: (isListView) => set({ isListView }),
+  toggleViewMode: () => set({ isListView: !get().isListView }),
+}));
+export function useTerritorySelection() {
+  const neighborhood = useTerritoryStore((s) => s.neighborhood);
+  const set = useTerritoryStore((s) => s.setNeighborhood);
+  const setNeighborhood = useCallback((value: string) => set(value), [set]);
   const boundaries = useNeighborhoods();
   const neighborhoodId = resolveNeighborhood(
     neighborhood,
     boundaries.data || [],
   )?.id;
-  return { neighborhood, setNeighborhood, neighborhoodId };
+  return { neighborhood, neighborhoodId, setNeighborhood };
 }
-
-export function useTerritoryViewMode(): {
-  isListView: boolean;
-  setIsListView: (value: boolean) => void;
-  toggleViewMode: () => void;
-} {
-  const isListView = useTerritoryStore((state) => state.isListView);
-  const setIsListView = useCallback((value: boolean) => {
-    useTerritoryStore.setState({ isListView: value });
-  }, []);
-  const toggleViewMode = useCallback(() => {
-    useTerritoryStore.setState((state) => ({ isListView: !state.isListView }));
-  }, []);
+export function useTerritoryViewMode() {
+  const isListView = useTerritoryStore((s) => s.isListView);
+  const setIsListView = useTerritoryStore((s) => s.setIsListView);
+  const toggleViewMode = useTerritoryStore((s) => s.toggleViewMode);
   return { isListView, setIsListView, toggleViewMode };
 }
-
-export { useTerritoryStore };

@@ -63,7 +63,7 @@ export function CitySearch({
           style={{ flex: 1, minHeight: 44, justifyContent: 'center' }}
         >
           <AppText color="muted" style={{ fontSize: 15 }}>
-            Buscar serviço, bairro ou protocolo 1746...
+            Buscar na minha região…
           </AppText>
         </Pressable>
       )}

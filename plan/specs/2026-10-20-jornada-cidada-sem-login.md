@@ -1,6 +1,6 @@
 # Jornada cidadã sem login
 
-Status: proposta para revisão; sem implementação nesta etapa.
+Status: implementada localmente após autorização; validação nativa pendente. Evidência: `plan/evidence/24-jornada-sem-login.md`. Sem commit ou push desta implementação.
 Data: 20/10/2026.
 
 ## Objetivo

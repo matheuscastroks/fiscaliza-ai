@@ -42,8 +42,8 @@ export async function fetchOfficialCalls(
   );
 }
 
-export async function fetchOfficialCall(id: string): Promise<OfficialCall> {
-  return request<OfficialCall>(`/rio1746/calls/${encodeURIComponent(id)}`);
+export async function fetchOfficialCall(id: string, signal?: AbortSignal): Promise<OfficialCall> {
+  return request<OfficialCall>(`/rio1746/calls/${encodeURIComponent(id)}`, 'GET', undefined, signal);
 }
 
 export async function fetchOfficialFilters(): Promise<OfficialCallsFilterOptions> {

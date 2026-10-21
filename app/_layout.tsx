@@ -1,4 +1,4 @@
-import { useOnboardingStore } from '@/stores/onboardingStore';
+import { isPublicCitizenRoute } from '@/shared/citizen-navigation';
 import {
   OnboardingGate,
   useOnboardingInitialization,
@@ -24,6 +24,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { queryClient } from '@/services/http';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { SignOutSheet } from '@/components/ui/SignOutSheet';
+import { useFollowStore } from '@/stores/followStore';
+import { useTerritoryStore } from '@/stores/territoryStore';
 
 import {
   useFonts,
@@ -38,7 +40,6 @@ export default function RootLayout() {
   const { colors, isDark, mode } = useTheme();
   const themeReady = useThemeInitialization();
   const onboardingReady = useOnboardingInitialization();
-  const onboardingCompleted = useOnboardingStore((state) => state.completed);
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(colors.canvas).catch(() => undefined);
     if (Platform.OS === 'web')
@@ -54,30 +55,16 @@ export default function RootLayout() {
   const { isReady, isAuthenticated, initialize, user } = useAuthStore();
   const segments: readonly string[] = useSegments();
   useEffect(() => {
-    void initialize();
-  }, [initialize]);
+    void useFollowStore.getState().initialize();
+    void useTerritoryStore.getState().initialize();
+  }, []);
   useEffect(() => {
     const topSegment = segments[0] || '';
-    const subSegment = segments[1] || 'index';
-    const isProtectedTab =
-      topSegment === '(tabs)' &&
-      ['ReportScreen', 'ProfileScreen'].includes(subSegment);
-    const isPublicRoute =
-      !isProtectedTab &&
-      [
-        '',
-        '(tabs)',
-        'OfficialCallDetailsScreen',
-        'FacilityDetailsScreen',
-        'NeighborhoodScreen',
-        'ResultsScreen',
-        'CityScreen',
-        'LoginScreen',
-        'AboutScreen',
-        'HelpScreen',
-        'OnboardingScreen',
-      ].includes(topSegment);
-
+    const isPublicRoute = isPublicCitizenRoute(segments);
+    if (!isPublicRoute && !isReady) {
+      void initialize();
+      return;
+    }
     if (isReady && !isAuthenticated && !isPublicRoute)
       router.replace('/LoginScreen');
     else if (
@@ -88,13 +75,8 @@ export default function RootLayout() {
       topSegment !== 'MunicipalityScreen'
     )
       router.replace('/MunicipalityScreen');
-  }, [isReady, isAuthenticated, segments, user?.municipality]);
-  if (
-    !themeReady ||
-    !onboardingReady ||
-    (!isReady && onboardingCompleted) ||
-    (!fontsLoaded && !fontError)
-  )
+  }, [isReady, isAuthenticated, segments, user?.municipality, initialize]);
+  if (!themeReady || !onboardingReady || (!fontsLoaded && !fontError))
     return null;
   const base = isDark ? DarkTheme : DefaultTheme;
   const navigationTheme = {
@@ -122,14 +104,28 @@ export default function RootLayout() {
                 }}
               >
                 <Stack.Screen name="(tabs)" />
-                <Stack.Screen
-                  name="ProblemDetailsScreen"
-                  options={{ animation: 'slide_from_bottom' }}
-                />
-                <Stack.Screen
-                  name="CivicDetailsScreen"
-                  options={{ animation: 'slide_from_bottom' }}
-                />
+                <Stack.Protected guard={isReady && isAuthenticated}>
+                  <Stack.Screen
+                    name="ProblemDetailsScreen"
+                    options={{ animation: 'slide_from_bottom' }}
+                  />
+                  <Stack.Screen
+                    name="CivicDetailsScreen"
+                    options={{ animation: 'slide_from_bottom' }}
+                  />
+                  {[
+                    'HistoricalDetailsScreen',
+                    'HistoryScreen',
+                    'MunicipalityScreen',
+                    'PointsGuideScreen',
+                    'PresentationScreen',
+                    'ProposalScreen',
+                    'RankingScreen',
+                    'RelatedScreen',
+                  ].map((name) => (
+                    <Stack.Screen key={name} name={name} />
+                  ))}
+                </Stack.Protected>
               </Stack>
             </AppDrawer>
             <SignOutSheet />

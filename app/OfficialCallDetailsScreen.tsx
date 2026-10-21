@@ -1,5 +1,13 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView, Pressable, Linking } from 'react-native';
+import { OfficialChannel } from '@/features/city/OfficialChannel';
+import { isOfficialCallClosed } from '@/shared/official-call-state';
+import React, { useEffect } from 'react';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  RefreshControl,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,12 +29,20 @@ export default function OfficialCallDetailsScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
-  const { data: item, isLoading, isError, refetch } = useOfficialCall(id);
+  const { data, isLoading, isError, refetch, isRefetching } =
+    useOfficialCall(id);
   const savedCalls = useFollowStore((s) => s.savedCalls);
   const toggleSavedCall = useFollowStore((s) => s.toggleSavedCall);
+  const { busy, hydrated, persistenceError, updateSnapshots } =
+    useFollowStore();
+  const item = data || savedCalls.find((c) => c.id === id);
+  useEffect(() => {
+    if (data && useFollowStore.getState().isCallSaved(data.id))
+      void updateSnapshots([data]);
+  }, [data, updateSnapshots]);
   const isSaved = Boolean(item && savedCalls.some((c) => c.id === item.id));
 
-  if (isLoading) {
+  if (isLoading && !item) {
     return (
       <AppScreen>
         <AppHeader title="Chamado 1746" onBack={() => goBack()} />
@@ -40,29 +56,29 @@ export default function OfficialCallDetailsScreen() {
     );
   }
 
-  if (isError || !item) {
+  if (!item) {
     return (
       <AppScreen>
         <AppHeader title="Chamado 1746" onBack={() => goBack()} />
         <View style={styles.centerContainer}>
           <Ionicons name="alert-circle-outline" size={40} color={colors.risk} />
           <AppText variant="sectionTitle" style={{ textAlign: 'center' }}>
-            Chamado não encontrado
+            Chamado indisponível
           </AppText>
           <AppText variant="body" color="muted" style={{ textAlign: 'center' }}>
             Não foi possível carregar as informações oficiais deste chamado.
           </AppText>
-          <AppButton title="Tentar novamente" variant="primary" onPress={() => refetch()} />
+          <AppButton
+            title="Tentar novamente"
+            variant="primary"
+            onPress={() => refetch()}
+          />
         </View>
       </AppScreen>
     );
   }
 
-  const isClosed = Boolean(
-    item.closedAt ||
-    item.officialStatus === 'Encerrado' ||
-    item.officialSituation?.toLowerCase().includes('encerrad')
-  );
+  const isClosed = isOfficialCallClosed(item);
 
   const situationColor = isClosed ? colors.completed : colors.accent;
 
@@ -92,11 +108,43 @@ export default function OfficialCallDetailsScreen() {
       />
 
       <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={() => {
+              void refetch();
+            }}
+            tintColor={colors.ink}
+            colors={[colors.ink]}
+          />
+        }
         contentContainerStyle={[
           styles.scrollContent,
           { paddingBottom: insets.bottom + spacing.xl },
         ]}
       >
+        {!data && item && (
+          <AppText variant="caption" color="muted">
+            Última informação consultada e salva neste aparelho.
+          </AppText>
+        )}
+        {isError && (
+          <AppText color="risk">
+            Atualização indisponível. Exibindo a última informação salva neste
+            aparelho.
+          </AppText>
+        )}
+        {persistenceError && (
+          <AppText color="risk" accessibilityRole="alert">
+            {persistenceError}
+          </AppText>
+        )}
+        {isClosed && (
+          <AppText color="muted" variant="caption">
+            Encerrado no 1746. Esse estado administrativo não confirma a
+            resolução no local.
+          </AppText>
+        )}
         {/* Attribution Badge + Save Action */}
         <View style={styles.officialHeaderBadge}>
           <View style={styles.badgeShield}>
@@ -106,13 +154,19 @@ export default function OfficialCallDetailsScreen() {
             </AppText>
           </View>
           <Pressable
-            onPress={() => toggleSavedCall(item)}
+            disabled={!hydrated || busy}
+            onPress={() => {
+              void toggleSavedCall(item);
+            }}
             accessibilityRole="button"
             accessibilityLabel={
-              isSaved ? 'Remover dos chamados salvos' : 'Salvar chamado para acompanhar'
+              isSaved
+                ? 'Remover dos chamados salvos'
+                : 'Salvar chamado para acompanhar'
             }
             style={[
               styles.badgeShield,
+              { minHeight: 44, minWidth: 44 },
               isSaved && { backgroundColor: colors.ink },
             ]}
           >
@@ -182,7 +236,11 @@ export default function OfficialCallDetailsScreen() {
 
           {item.statusJustification ? (
             <View style={styles.justificationBox}>
-              <AppText variant="caption" color="muted" style={{ fontWeight: '700' }}>
+              <AppText
+                variant="caption"
+                color="muted"
+                style={{ fontWeight: '700' }}
+              >
                 Despacho / Justificativa oficial:
               </AppText>
               <AppText variant="body" color="ink">
@@ -235,7 +293,11 @@ export default function OfficialCallDetailsScreen() {
                 </AppText>
                 <AppText
                   variant="label"
-                  color={item.withinDeadline.toLowerCase().includes('no prazo') ? 'completed' : 'risk'}
+                  color={
+                    item.withinDeadline.toLowerCase().includes('no prazo')
+                      ? 'completed'
+                      : 'risk'
+                  }
                 >
                   {item.withinDeadline}
                 </AppText>
@@ -273,8 +335,13 @@ export default function OfficialCallDetailsScreen() {
               />
             </View>
           ) : (
-            <AppText variant="caption" color="muted" style={{ marginTop: spacing.sm }}>
-              Coordenadas exatas não fornecidas pela prefeitura para este chamado.
+            <AppText
+              variant="caption"
+              color="muted"
+              style={{ marginTop: spacing.sm }}
+            >
+              Coordenadas exatas não fornecidas pela prefeitura para este
+              chamado.
             </AppText>
           )}
         </View>
@@ -282,26 +349,29 @@ export default function OfficialCallDetailsScreen() {
         {/* Citizen Information & 1746 Channels */}
         <View style={[styles.sectionCard, styles.infoCard]}>
           <View style={styles.infoCardHeader}>
-            <Ionicons name="information-circle" size={20} color={colors.accent} />
-            <AppText variant="sectionTitle" color="ink" style={{ fontSize: 16 }}>
+            <Ionicons
+              name="information-circle"
+              size={20}
+              color={colors.accent}
+            />
+            <AppText
+              variant="sectionTitle"
+              color="ink"
+              style={{ fontSize: 16 }}
+            >
               Sobre a Central 1746
             </AppText>
           </View>
           <AppText variant="caption" color="muted" style={{ lineHeight: 18 }}>
-            O Fiscaliza Aí é uma plataforma independente de inteligência e transparência
-            urbana. As informações acima são sincronizadas diretamente do repositório
-            público DATA.RIO da Prefeitura da Cidade do Rio de Janeiro.
+            O Fiscaliza Aí é uma plataforma independente de inteligência e
+            transparência urbana. As informações acima são sincronizadas
+            diretamente do repositório público DATA.RIO da Prefeitura da Cidade
+            do Rio de Janeiro.
           </AppText>
-          <Pressable
-            style={styles.externalLink}
-            onPress={() => Linking.openURL('https://www.1746.rio')}
-            accessibilityRole="link"
-          >
-            <AppText variant="label" color="accent" style={{ fontWeight: '700' }}>
-              Acessar portal oficial 1746.rio
-            </AppText>
-            <Ionicons name="open-outline" size={14} color={colors.accent} />
-          </Pressable>
+          <AppText variant="caption" color="muted">
+            O atendimento acontece no canal oficial da prefeitura.
+          </AppText>
+          <OfficialChannel />
         </View>
       </ScrollView>
     </AppScreen>

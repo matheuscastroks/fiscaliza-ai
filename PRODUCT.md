@@ -16,9 +16,9 @@ O território organiza a experiência. Demandas do 1746 e equipamentos públicos
 
 Exemplo orientador: diante de uma rua sem iluminação, o morador procura relatos próximos, consulta o andamento de um chamado existente e o salva. Se não encontrar um registro, consegue acessar o atendimento oficial. Ausência na base sincronizada não prova ausência de chamado no 1746.
 
-## Jornada prioritária da próxima entrega
+## Jornada do cidadão
 
-Esta seção define a direção do redesenho; não descreve telas já entregues.
+O fluxo cidadão funciona sem conta. Salvos, bairro preferido e aparência ficam no aparelho ou navegador; não há sincronização entre dispositivos. A autenticação administrativa e os módulos legados de escrita permanecem separados.
 
 1. **Home:** acesso principal à exploração territorial, retorno aos chamados salvos, demandas recentes do recorte e acesso ao atendimento oficial. Mostrar bairro ou município selecionado e referência temporal. Panorama numérico e comparações ficam no aprofundamento.
 2. **Território:** mapa como ferramenta de descoberta, lista equivalente e camadas opcionais de serviços. Preservar o recorte ao abrir e fechar um item. Oferecer busca e caminho de recuperação quando não houver resultados.
@@ -29,7 +29,7 @@ Equipamentos públicos servem à descoberta de serviços: endereço, contato e h
 
 ## Capacidades atuais e limites de participação
 
-Já existem consulta de chamados, salvamento, mapa/lista multicamadas, fichas de equipamentos e panorama de bairro. A Home ainda dá destaque ao panorama numérico; sua hierarquia precisa ser revista conforme a jornada acima.
+Já existem consulta de chamados, salvamento persistente local, mapa/lista multicamadas, fichas de equipamentos e panorama de bairro. A Home prioriza exploração, salvos e demandas recentes; Agir oferece caminhos oficiais verificados. Preferências permitem escolher bairro, aparência e apagar os salvos com confirmação. A atualização dos salvos consulta somente seus identificadores, preservando o resumo anterior em caso de falha.
 
 Não existe integração de abertura de solicitações no 1746. Propostas, mobilizações e outras contribuições comunitárias são uma frente futura a validar; sua existência em módulos legados não comprova uma jornada atual disponível. Interações internas nunca representam decisões ou respostas oficiais.
 

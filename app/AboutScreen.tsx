@@ -18,11 +18,12 @@ export default function AboutScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ gap: 20 }}>
-          <AppText variant="sectionTitle">Conhecer e participar do Rio</AppText>
+          <AppText variant="sectionTitle">Descobrir, fiscalizar e agir</AppText>
           <AppText>
-            Fiscaliza Aí reúne dados públicos sobre serviços, equipamentos e
-            demandas do território. É uma plataforma independente, sem vínculo
-            institucional com a Prefeitura do Rio.
+            Fiscaliza Aí ajuda você a descobrir o que acontece na sua região,
+            acompanhar chamados e encontrar atendimento oficial. É uma
+            plataforma independente, sem vínculo institucional com a Prefeitura
+            do Rio.
           </AppText>
           <AppText variant="sectionTitle">Origem das informações</AppText>
           <AppText>
@@ -41,18 +42,17 @@ export default function AboutScreen() {
           </AppText>
           <AppText variant="sectionTitle">Participação independente</AppText>
           <AppText>
-            Contribuições, propostas e discussões internas não são chamados
-            oficiais do 1746 nem decisões municipais. Para solicitar atendimento
-            público, utilize os canais oficiais. Atualizações no app dependem da
-            publicação e importação das fontes; não são monitoramento em tempo
-            real.
+            Para solicitar atendimento público, acesse os canais oficiais pela
+            aba Agir. Salvar um chamado não envia uma solicitação à prefeitura.
+            Atualizações no app dependem da publicação e importação das fontes;
+            não são monitoramento em tempo real.
           </AppText>
           <AppText variant="sectionTitle">Seus dados</AppText>
           <AppText>
-            A leitura territorial é pública. Ao participar com uma conta, o CEP
-            ajuda a identificar seu município; não comprova residência.
-            Contribuições e anexos ficam no serviço da aplicação. Evite
-            documentos, rostos e dados pessoais de terceiros.
+            Não é preciso criar uma conta. Salvos, bairro preferido e aparência
+            ficam neste aparelho ou navegador, sem sincronização entre
+            dispositivos. Limpar os dados do aplicativo ou do site pode
+            removê-los. Você pode apagar os salvos nas preferências.
           </AppText>
           <AppText variant="sectionTitle">Ilustrações</AppText>
           <AppText>

@@ -2,8 +2,10 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { FloatingGlassTabBar } from '@/components/ui/FloatingGlassTabBar';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function TabLayout() {
+  const authenticated = useAuthStore((s) => s.isReady && s.isAuthenticated);
   return (
     <Tabs
       tabBar={(props) => <FloatingGlassTabBar {...props} />}
@@ -27,7 +29,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="TerritoryScreen"
         options={{
-          title: 'Território',
+          title: 'Explorar',
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
               name={focused ? 'map' : 'map-outline'}
@@ -38,12 +40,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="ParticipateScreen"
+        name="FollowScreen"
         options={{
-          title: 'Participar',
+          title: 'Acompanhar',
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
-              name={focused ? 'people' : 'people-outline'}
+              name={focused ? 'bookmark' : 'bookmark-outline'}
               color={color}
               size={size}
             />
@@ -51,21 +53,23 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="FollowScreen"
+        name="ParticipateScreen"
         options={{
-          title: 'Situação',
+          title: 'Agir',
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
-              name={focused ? 'pulse' : 'pulse-outline'}
+              name={focused ? 'hand-left' : 'hand-left-outline'}
               color={color}
               size={size}
             />
           ),
         }}
       />
-      <Tabs.Screen name="ReportScreen" options={{ href: null }} />
-      <Tabs.Screen name="ProblemsListScreen" options={{ href: null }} />
-      <Tabs.Screen name="ProfileScreen" options={{ href: null }} />
+      <Tabs.Protected guard={authenticated}>
+        <Tabs.Screen name="ReportScreen" options={{ href: null }} />
+        <Tabs.Screen name="ProblemsListScreen" options={{ href: null }} />
+        <Tabs.Screen name="ProfileScreen" options={{ href: null }} />
+      </Tabs.Protected>
     </Tabs>
   );
 }

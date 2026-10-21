@@ -14,10 +14,9 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router, type Tabs } from 'expo-router';
+import { type Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTerritoryViewMode } from '@/stores/territoryStore';
-import { useFollowStore } from '@/stores/followStore';
 
 const TAB_SIZE = 48;
 const TAB_PADDING = 8;
@@ -55,8 +54,7 @@ export function FloatingGlassTabBar({
       (route) => route.key === state.routes[state.index]?.key,
     ),
   );
-  const target =
-    (selectedIndex * (barWidth - 2 * TAB_PADDING - TAB_SIZE)) / 3;
+  const target = (selectedIndex * (barWidth - 2 * TAB_PADDING - TAB_SIZE)) / 3;
   const [selection] = useState(() => new Animated.Value(target));
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
@@ -102,12 +100,8 @@ export function FloatingGlassTabBar({
   }, []);
   const activeRoute = state.routes[state.index]?.name;
   const isTerritory = activeRoute === 'TerritoryScreen';
-  const isIndex = activeRoute === 'index';
-  const isParticipate = activeRoute === 'ParticipateScreen';
-  const isFollow = activeRoute === 'FollowScreen';
 
   const { isListView, toggleViewMode } = useTerritoryViewMode();
-  const { statusFilter, toggleStatusFilter } = useFollowStore();
 
   if (
     (Platform.OS === 'web' && width >= 1100) ||
@@ -213,75 +207,7 @@ export function FloatingGlassTabBar({
         </Pressable>
       )}
 
-      {isIndex && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Ver resultados e prazos da Central 1746"
-          onPress={() => {
-            if (Platform.OS !== 'web')
-              void Haptics.selectionAsync().catch(() => {});
-            router.push('/ResultsScreen');
-          }}
-          style={({ pressed }) => [
-            styles.extraButton,
-            pressed && { opacity: 0.75, transform: [{ scale: 0.95 }] },
-          ]}
-        >
-          <Ionicons
-            name="stats-chart"
-            size={22}
-            color={colors.navigationIcon}
-          />
-        </Pressable>
-      )}
 
-      {isParticipate && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Criar nova proposta popular"
-          onPress={() => {
-            if (Platform.OS !== 'web')
-              void Haptics.selectionAsync().catch(() => {});
-            router.push('/ProposalScreen');
-          }}
-          style={({ pressed }) => [
-            styles.extraButton,
-            pressed && { opacity: 0.75, transform: [{ scale: 0.95 }] },
-          ]}
-        >
-          <Ionicons
-            name="bulb-outline"
-            size={22}
-            color={colors.navigationIcon}
-          />
-        </Pressable>
-      )}
-
-      {isFollow && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={
-            statusFilter === 'open'
-              ? 'Mostrando demandas em andamento. Tocar para ver resolvidas'
-              : 'Mostrando demandas resolvidas. Tocar para ver em andamento'
-          }
-          onPress={() => {
-            if (Platform.OS !== 'web')
-              void Haptics.selectionAsync().catch(() => {});
-            toggleStatusFilter();
-          }}
-          style={({ pressed }) => [
-            styles.extraButton,
-            pressed && { opacity: 0.75, transform: [{ scale: 0.95 }] },
-          ]}
-        >
-          <Ionicons
-            name={statusFilter === 'open' ? 'time-outline' : 'checkmark-circle-outline'}
-            size={22}
-            color={statusFilter === 'open' ? colors.attention : colors.completed}
-          />
-        </Pressable>
-      )}
     </View>
   );
 }

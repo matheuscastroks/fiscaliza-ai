@@ -33,9 +33,9 @@ export function useOfficialCalls(
 export function useOfficialCall(id: string | null | undefined, enabled = true) {
   return useQuery({
     queryKey: ['officialCall', id],
-    queryFn: () => {
+    queryFn: ({ signal }) => {
       if (!id) throw new Error('Call ID is required');
-      return fetchOfficialCall(id);
+      return fetchOfficialCall(id, signal);
     },
     enabled: Boolean(enabled && id),
     staleTime: 60 * 1000,
