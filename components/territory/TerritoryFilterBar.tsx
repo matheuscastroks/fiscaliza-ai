@@ -34,11 +34,11 @@ export interface FacilityLayerQuerySummary {
   fetchNextPage: () => unknown;
   refetch: () => unknown;
   data?: {
-    pages: Array<{
+    pages: {
       items: unknown[];
       total: number | null;
       sources: SourceCoverage[];
-    }>;
+    }[];
   };
 }
 
@@ -53,13 +53,13 @@ export interface TerritoryFilterBarProps {
   neighborhoodId?: string;
   onNeighborhoodChange: (value: string) => void;
   serviceType: string;
-  serviceTypeOptions: Array<{ value: string; label: string }>;
+  serviceTypeOptions: { value: string; label: string }[];
   onServiceTypeChange: (value: string) => void;
   period: string;
-  periodOptions: Array<{ value: string; label: string }>;
+  periodOptions: { value: string; label: string }[];
   onPeriodChange: (value: string) => void;
   status: string;
-  statusOptions: Array<{ value: string; label: string }>;
+  statusOptions: { value: string; label: string }[];
   onStatusChange: (value: string) => void;
   layers: TerritoryLayer[];
   onLayersChange: (layers: TerritoryLayer[]) => void;
@@ -309,12 +309,12 @@ export interface TerritoryFilterModalProps {
   neighborhood: string;
   onNeighborhoodChange: (value: string) => void;
   serviceType: string;
-  serviceTypeOptions: Array<{ value: string; label: string }>;
+  serviceTypeOptions: { value: string; label: string }[];
   onServiceTypeChange: (value: string) => void;
   status: string;
   onStatusChange: (value: string) => void;
   period: string;
-  periodOptions: Array<{ value: string; label: string }>;
+  periodOptions: { value: string; label: string }[];
   onPeriodChange: (value: string) => void;
   areaOnly: boolean;
   onAreaOnlyChange: (nextArea: boolean) => void;

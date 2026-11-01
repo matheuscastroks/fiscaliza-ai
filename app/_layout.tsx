@@ -36,7 +36,7 @@ import {
 export const unstable_settings = { initialRouteName: '(tabs)' };
 
 export default function RootLayout() {
-  const { colors, isDark, mode } = useTheme();
+  const { colors, isDark } = useTheme();
   const themeReady = useThemeInitialization();
   const onboardingReady = useOnboardingInitialization();
   useEffect(() => {

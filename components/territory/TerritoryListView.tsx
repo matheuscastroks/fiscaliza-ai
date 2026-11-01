@@ -29,8 +29,8 @@ function TerritoryRowSeparator() {
 
 export interface TerritoryListViewProps {
   listRef: React.RefObject<FlatList<Entry> | null>;
-  listOffset: React.MutableRefObject<number>;
-  restoreListOffset: React.MutableRefObject<boolean>;
+  listOffsetRef: React.MutableRefObject<number>;
+  restoreListOffsetRef: React.MutableRefObject<boolean>;
   listed: Entry[];
   unlocatedCount: number;
   areaOnly: boolean;
@@ -56,8 +56,8 @@ export interface TerritoryListViewProps {
 
 export function TerritoryListView({
   listRef,
-  listOffset,
-  restoreListOffset,
+  listOffsetRef,
+  restoreListOffsetRef,
   listed,
   unlocatedCount,
   areaOnly,
@@ -101,17 +101,17 @@ export function TerritoryListView({
         ref={listRef}
         data={listed}
         onContentSizeChange={(_, height) => {
-          if (!restoreListOffset.current || height <= listOffset.current)
+          if (!restoreListOffsetRef.current || height <= listOffsetRef.current)
             return;
           listRef.current?.scrollToOffset({
-            offset: listOffset.current,
+            offset: listOffsetRef.current,
             animated: false,
           });
-          restoreListOffset.current = false;
+          restoreListOffsetRef.current = false;
         }}
         onScroll={(event) => {
-          if (!restoreListOffset.current)
-            listOffset.current = event.nativeEvent.contentOffset.y;
+          if (!restoreListOffsetRef.current)
+            listOffsetRef.current = event.nativeEvent.contentOffset.y;
         }}
         scrollEventThrottle={32}
         keyExtractor={entryKey}

@@ -1,4 +1,4 @@
-import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import { useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import React from 'react';
 import {

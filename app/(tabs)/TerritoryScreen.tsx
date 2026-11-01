@@ -79,11 +79,11 @@ function TerritoryContent() {
   const insets = useSafeAreaInsets();
   const styles = useThemedStyles(createStyles);
 
-  const listOffset = useRef(0);
+  const listOffsetRef = useRef(0);
   const listRef = useRef<FlatList<Entry>>(null);
-  const restoreListOffset = useRef(true);
+  const restoreListOffsetRef = useRef(true);
   useEffect(() => {
-    if (!isFocused) restoreListOffset.current = true;
+    if (!isFocused) restoreListOffsetRef.current = true;
   }, [isFocused]);
 
   const {
@@ -463,7 +463,7 @@ function TerritoryContent() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedId(null);
     setSelectedCluster(null);
-    listOffset.current = 0;
+    listOffsetRef.current = 0;
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
   }, [
     neighborhoodId,
@@ -744,8 +744,8 @@ function TerritoryContent() {
       {isListView && (
         <TerritoryListView
           listRef={listRef}
-          listOffset={listOffset}
-          restoreListOffset={restoreListOffset}
+          listOffsetRef={listOffsetRef}
+          restoreListOffsetRef={restoreListOffsetRef}
           listed={listed}
           unlocatedCount={unlocated.length}
           areaOnly={areaOnly}
