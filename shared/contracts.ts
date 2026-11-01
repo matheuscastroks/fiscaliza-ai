@@ -231,6 +231,8 @@ export interface OfficialCallsFilterOptions {
 }
 
 export interface OfficialCallsQueryParams {
+  cursor?: string;
+  includeTotal?: boolean;
   neighborhoodId?: string;
   page?: number;
   limit?: number;
@@ -250,9 +252,10 @@ export interface OfficialCallsQueryParams {
 }
 
 export interface OfficialCallsListResponse {
+  nextCursor?: string | null;
   territoryConfirmed?: boolean;
   calls: OfficialCall[];
-  total: number;
+  total: number | null;
   page: number;
   limit: number;
   hasMore: boolean;

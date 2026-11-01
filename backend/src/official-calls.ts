@@ -3,12 +3,18 @@ import {
   officialTerritoryScope,
 } from './neighborhood-overview.js';
 import { queryOfficialOverview } from './official-call-overview.js';
+import {
+  callCursorScope,
+  decodeCallCursor,
+  encodeCallCursor,
+} from './official-call-pagination.js';
 import type { FastifyInstance } from 'fastify';
 import {
   and,
   desc,
   eq,
   gte,
+  getTableColumns,
   ilike,
   isNotNull,
   lte,
@@ -81,6 +87,8 @@ export function registerOfficialCallsRoutes(
   app.get<{
     Querystring: {
       page?: string;
+      cursor?: string;
+      includeTotal?: string;
       limit?: string;
       neighborhoodId?: string;
       bairro?: string;
@@ -104,6 +112,17 @@ export function registerOfficialCallsRoutes(
       Math.max(1, parseInt(req.query.limit || '100', 10) || 100),
     );
     const offset = (page - 1) * limit;
+    if (req.query.cursor && page !== 1)
+      throw fail(400, 'Use cursor ou página, não ambos.');
+    const scope = callCursorScope(req.query);
+    let cursor: { date: string; id: string } | undefined;
+    if (req.query.cursor) {
+      try {
+        cursor = decodeCallCursor(req.query.cursor, scope);
+      } catch {
+        throw fail(400, 'Cursor inválido ou incompatível com os filtros.');
+      }
+    }
 
     const conditions: SQL[] = [eq(officialCalls.municipalityId, '3304557')];
     if (req.query.neighborhoodId && req.query.bairro)
@@ -182,28 +201,48 @@ export function registerOfficialCallsRoutes(
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const [countResult] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(officialCalls)
-      .where(whereClause);
-
-    const total = countResult?.count || 0;
+    // Continuations need only one look-ahead row, not another full COUNT.
+    const total =
+      req.query.includeTotal === 'false'
+        ? null
+        : ((
+            await db
+              .select({ count: sql<number>`count(*)::int` })
+              .from(officialCalls)
+              .where(whereClause)
+          )[0]?.count ?? 0);
+    const pageWhere = cursor
+      ? and(
+          whereClause,
+          sql`(${officialCalls.openedAt}, ${officialCalls.externalId}) < (${cursor.date}::timestamptz, ${cursor.id})`,
+        )
+      : whereClause;
 
     const rows = await db
-      .select()
+      .select({
+        ...getTableColumns(officialCalls),
+        cursorDate: sql<string>`to_char(${officialCalls.openedAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+      })
       .from(officialCalls)
-      .where(whereClause)
+      .where(pageWhere)
       .orderBy(desc(officialCalls.openedAt), desc(officialCalls.externalId))
-      .limit(limit)
+      .limit(limit + 1)
       .offset(offset);
+    const hasMore = rows.length > limit;
+    const visibleRows = rows.slice(0, limit);
+    const last = visibleRows.at(-1);
 
     return ok({
       territoryConfirmed: territory.confirmed,
-      calls: rows.map(formatOfficialCall),
+      calls: visibleRows.map(formatOfficialCall),
       total,
       page,
       limit,
-      hasMore: offset + rows.length < total,
+      hasMore,
+      nextCursor:
+        hasMore && last
+          ? encodeCallCursor(last.cursorDate, last.externalId, scope)
+          : null,
     });
   });
 
