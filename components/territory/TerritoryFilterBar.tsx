@@ -1,15 +1,17 @@
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import type { ThemeColors } from '@/theme/colors';
 import React from 'react';
 import {
-  Modal,
-  Pressable,
+  View,
   ScrollView,
   StyleSheet,
-  View,
+  Pressable,
+  Modal,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LayerPicker } from '@/components/territory/LayerPicker';
+import { router } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppSelect } from '@/components/ui/AppSelect';
@@ -17,15 +19,12 @@ import { CitySearch } from '@/components/ui/CitySearch';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import {
-  facilityLabels,
-  summarizeLayer,
-  type TerritoryLayer,
-} from '@/features/territory/selectors';
-import type { FacilityCategory, SourceCoverage } from '@/shared/public-data';
-import { useTheme, useThemedStyles } from '@/theme/useTheme';
-import type { ThemeColors } from '@/theme/colors';
-import { layout } from '@/theme/layout';
-import { spacing } from '@/theme/spacing';
+  type FacilityCategory,
+  type SourceCoverage,
+} from '@/shared/public-data';
+import { layout, spacing } from '@/theme';
+
+export type TerritoryLayer = 'official' | 'school' | 'health' | 'square';
 
 export interface FacilityLayerQuerySummary {
   isLoading: boolean;
@@ -89,30 +88,33 @@ export function TerritoryFilterBar({
   neighborhood,
   neighborhoodId,
   onNeighborhoodChange,
-  serviceType,
-  serviceTypeOptions,
-  onServiceTypeChange,
-  period,
-  periodOptions,
-  onPeriodChange,
-  status,
-  statusOptions,
-  onStatusChange,
   layers,
   onLayersChange,
-  startDate,
-  endDate,
   totalCalls,
   officialCallsStatus,
-  facilityQueries,
-  facilitiesConfirmed,
   padded = false,
 }: TerritoryFilterBarProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
+  const toggleLayer = (layer: TerritoryLayer) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (layers.includes(layer)) {
+      onLayersChange(layers.filter((l) => l !== layer));
+    } else {
+      onLayersChange([...layers, layer]);
+    }
+  };
+
+  const callsLabel = officialCallsStatus.isLoading
+    ? '...'
+    : totalCalls > 999
+      ? `${(totalCalls / 1000).toFixed(1)}k`
+      : `${totalCalls}`;
+
   return (
     <View style={[styles.wrapper, padded && styles.paddedWrapper]}>
+      {/* Barra de busca com botão de filtro integrado */}
       <View style={padded ? styles.paddedSection : styles.searchContainer}>
         <CitySearch
           value={search}
@@ -123,12 +125,14 @@ export function TerritoryFilterBar({
         />
       </View>
 
+      {/* Fileira única de chips rápidos (Bairro + Camadas + Mais Filtros) */}
       <View style={padded ? styles.paddedSection : undefined}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.compactFilterStrip}
+          contentContainerStyle={styles.quickChipsStrip}
         >
+          {/* Chip de Bairro */}
           <NeighborhoodPicker
             compact
             options={bairroOptions}
@@ -136,166 +140,181 @@ export function TerritoryFilterBar({
             onChange={onNeighborhoodChange}
           />
 
-          <AppSelect
-            compact
-            label="Tipo de serviço 1746"
-            placeholder="Buscar serviço (ex: iluminação, entulho...)"
-            icon="construct-outline"
-            defaultValue="all"
-            options={serviceTypeOptions}
-            value={serviceType}
-            onChange={onServiceTypeChange}
-          />
-
-          <AppSelect
-            compact
-            label="Período disponível"
-            icon="calendar-outline"
-            defaultValue="30"
-            options={periodOptions}
-            value={period}
-            onChange={onPeriodChange}
-          />
-
-          <AppSelect
-            compact
-            label="Situação do chamado"
-            icon="pulse-outline"
-            defaultValue="all"
-            options={statusOptions}
-            value={status}
-            onChange={onStatusChange}
-          />
-
-          <View
-            style={[
-              styles.resultsBadge,
-              { backgroundColor: colors.surface + 'F2' },
+          {/* Chip Chamados 1746 */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Alternar chamados 1746, ${totalCalls} chamados`}
+            accessibilityState={{ selected: layers.includes('official') }}
+            onPress={() => toggleLayer('official')}
+            style={({ pressed }) => [
+              styles.chip,
+              layers.includes('official') && styles.chipActive,
+              pressed && styles.chipPressed,
             ]}
           >
+            <Ionicons
+              name={layers.includes('official') ? 'warning' : 'warning-outline'}
+              size={15}
+              color={
+                layers.includes('official') ? colors.surface : colors.ink
+              }
+            />
             <AppText
               variant="caption"
-              color="muted"
-              style={{ fontWeight: '700' }}
+              style={[
+                styles.chipText,
+                layers.includes('official') && styles.chipTextActive,
+              ]}
             >
-              {officialCallsStatus.isLoading
-                ? '...'
-                : totalCalls.toLocaleString('pt-BR')}
+              1746 · {callsLabel}
             </AppText>
-          </View>
-        </ScrollView>
+          </Pressable>
 
-        <View style={styles.layerSection}>
-          <LayerPicker value={layers} onChange={onLayersChange} />
+          {/* Chip Escolas */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Alternar camada de escolas"
+            accessibilityState={{ selected: layers.includes('school') }}
+            onPress={() => toggleLayer('school')}
+            style={({ pressed }) => [
+              styles.chip,
+              layers.includes('school') && styles.chipActive,
+              pressed && styles.chipPressed,
+            ]}
+          >
+            <Ionicons
+              name={layers.includes('school') ? 'school' : 'school-outline'}
+              size={15}
+              color={layers.includes('school') ? colors.surface : colors.ink}
+            />
+            <AppText
+              variant="caption"
+              style={[
+                styles.chipText,
+                layers.includes('school') && styles.chipTextActive,
+              ]}
+            >
+              Escolas
+            </AppText>
+          </Pressable>
+
+          {/* Chip Saúde */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Alternar camada de saúde"
+            accessibilityState={{ selected: layers.includes('health') }}
+            onPress={() => toggleLayer('health')}
+            style={({ pressed }) => [
+              styles.chip,
+              layers.includes('health') && styles.chipActive,
+              pressed && styles.chipPressed,
+            ]}
+          >
+            <Ionicons
+              name={layers.includes('health') ? 'medkit' : 'medkit-outline'}
+              size={15}
+              color={layers.includes('health') ? colors.surface : colors.ink}
+            />
+            <AppText
+              variant="caption"
+              style={[
+                styles.chipText,
+                layers.includes('health') && styles.chipTextActive,
+              ]}
+            >
+              Saúde
+            </AppText>
+          </Pressable>
+
+          {/* Chip Praças */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Alternar camada de praças"
+            accessibilityState={{ selected: layers.includes('square') }}
+            onPress={() => toggleLayer('square')}
+            style={({ pressed }) => [
+              styles.chip,
+              layers.includes('square') && styles.chipActive,
+              pressed && styles.chipPressed,
+            ]}
+          >
+            <Ionicons
+              name={layers.includes('square') ? 'leaf' : 'leaf-outline'}
+              size={15}
+              color={layers.includes('square') ? colors.surface : colors.ink}
+            />
+            <AppText
+              variant="caption"
+              style={[
+                styles.chipText,
+                layers.includes('square') && styles.chipTextActive,
+              ]}
+            >
+              Praças
+            </AppText>
+          </Pressable>
+
+          {/* Atalho para Conhecer Bairro quando selecionado */}
           {neighborhoodId && (
-            <AppButton
-              title="Conhecer este bairro"
-              variant="secondary"
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Ver página do bairro"
               onPress={() =>
                 router.push({
                   pathname: '/NeighborhoodScreen',
                   params: { neighborhoodId },
                 })
               }
-            />
+              style={({ pressed }) => [
+                styles.chip,
+                styles.chipAccent,
+                pressed && styles.chipPressed,
+              ]}
+            >
+              <Ionicons
+                name="arrow-forward-circle-outline"
+                size={15}
+                color={colors.accent}
+              />
+              <AppText
+                variant="caption"
+                style={[styles.chipText, { color: colors.accent, fontWeight: '700' }]}
+              >
+                Conhecer bairro
+              </AppText>
+            </Pressable>
           )}
-          {layers.includes('official') && startDate && endDate && (
+
+          {/* Chip Mais Filtros */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Abrir todos os filtros"
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onOpenFilters();
+            }}
+            style={({ pressed }) => [
+              styles.chip,
+              filterCount > 0 && styles.chipFiltered,
+              pressed && styles.chipPressed,
+            ]}
+          >
+            <Ionicons
+              name="options-outline"
+              size={15}
+              color={filterCount > 0 ? colors.surface : colors.ink}
+            />
             <AppText
               variant="caption"
-              style={{ backgroundColor: colors.surface, padding: 5 }}
+              style={[
+                styles.chipText,
+                filterCount > 0 && styles.chipTextActive,
+              ]}
             >
-              1746 · {startDate} a {endDate}
+              {filterCount > 0 ? `Filtros (${filterCount})` : 'Filtros'}
             </AppText>
-          )}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 8 }}
-          >
-            {layers.includes('official') && (
-              <AppText
-                variant="caption"
-                style={{
-                  padding: 6,
-                  backgroundColor: colors.surface,
-                  borderRadius: 8,
-                }}
-              >
-                1746 ·{' '}
-                {officialCallsStatus.sourceState === 'unavailable' ||
-                officialCallsStatus.territoryConfirmed === false
-                  ? 'Cobertura não confirmada'
-                  : officialCallsStatus.isLoading
-                    ? 'Carregando'
-                    : officialCallsStatus.error
-                      ? 'Falha ao consultar'
-                      : summarizeLayer(
-                          officialCallsStatus.displayedCount,
-                          officialCallsStatus.total,
-                        )}
-              </AppText>
-            )}
-            {(['school', 'health', 'square'] as const)
-              .filter((c) => layers.includes(c))
-              .map((category) => {
-                const q = facilityQueries[category];
-                const page = q.data?.pages[0];
-                const shown =
-                  q.data?.pages.reduce((n, p) => n + p.items.length, 0) || 0;
-                return (
-                  <Pressable
-                    key={category}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      q.hasNextPage
-                        ? 'Carregar mais ' + facilityLabels[category]
-                        : 'Atualizar ' + facilityLabels[category]
-                    }
-                    disabled={!facilitiesConfirmed}
-                    accessibilityState={{ disabled: !facilitiesConfirmed }}
-                    onPress={() => {
-                      if (!facilitiesConfirmed) return;
-                      void (q.hasNextPage && !q.error
-                        ? q.fetchNextPage()
-                        : q.refetch());
-                    }}
-                    style={{
-                      minHeight: 44,
-                      padding: 8,
-                      justifyContent: 'center',
-                      backgroundColor: colors.surface,
-                      borderRadius: 12,
-                    }}
-                  >
-                    <AppText variant="caption">
-                      {facilityLabels[category]} ·{' '}
-                      {neighborhood && !neighborhoodId
-                        ? 'Bairro não confirmado'
-                        : q.isLoading
-                          ? 'Carregando'
-                          : q.error
-                            ? 'Falha · Tentar novamente'
-                            : summarizeLayer(shown, page?.total ?? null)}
-                      {facilitiesConfirmed && q.hasNextPage ? ' · Mais' : ''}
-                    </AppText>
-                    {page?.sources.some((s) => s.state === 'stale') && (
-                      <AppText variant="caption" color="muted">
-                        Última publicação disponível
-                      </AppText>
-                    )}
-                  </Pressable>
-                );
-              })}
-            {!layers.length && (
-              <AppText
-                variant="caption"
-                style={{ padding: 8, backgroundColor: colors.surface }}
-              >
-                Selecione uma camada
-              </AppText>
-            )}
-          </ScrollView>
-        </View>
+          </Pressable>
+        </ScrollView>
       </View>
     </View>
   );
@@ -343,6 +362,10 @@ export function TerritoryFilterModal({
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const styles = useThemedStyles(createStyles);
+
+  if (!visible) {
+    return null;
+  }
 
   return (
     <Modal
@@ -502,7 +525,7 @@ export function TerritoryFilterModal({
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     wrapper: {
-      gap: 8,
+      gap: 6,
     },
     paddedWrapper: {
       paddingBottom: spacing.xs,
@@ -519,23 +542,51 @@ const createStyles = (colors: ThemeColors) =>
       shadowRadius: 8,
       elevation: 4,
     },
-    compactFilterStrip: {
+    quickChipsStrip: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
       paddingVertical: 2,
     },
-    layerSection: {
-      gap: 4,
-    },
-    resultsBadge: {
-      height: 36,
-      paddingHorizontal: spacing.sm + 2,
-      borderRadius: layout.radius.pill,
+    chip: {
+      flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
+      gap: 6,
+      height: 38,
+      paddingHorizontal: 12,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    chipActive: {
+      backgroundColor: colors.ink,
+      borderColor: colors.ink,
+    },
+    chipAccent: {
+      backgroundColor: colors.surface,
+      borderColor: colors.accent,
+    },
+    chipFiltered: {
+      backgroundColor: colors.ink,
+      borderColor: colors.ink,
+    },
+    chipPressed: {
+      opacity: 0.8,
+      transform: [{ scale: 0.96 }],
+    },
+    chipText: {
+      fontWeight: '600',
+      color: colors.ink,
+      fontSize: 13,
+    },
+    chipTextActive: {
+      color: colors.surface,
     },
     modalBackdrop: {
       flex: 1,

@@ -588,7 +588,7 @@ function TerritoryContent() {
             <View
               style={{
                 position: 'absolute',
-                top: insets.top + 70,
+                top: insets.top + 115,
                 alignSelf: 'center',
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -632,7 +632,7 @@ function TerritoryContent() {
         <View
           style={[
             styles.mapActionsRight,
-            { top: insets.top + (neighborhoodId ? 290 : 220) },
+            { top: insets.top + 125 },
           ]}
         >
           <Pressable

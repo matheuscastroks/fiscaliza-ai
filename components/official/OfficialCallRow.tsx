@@ -61,127 +61,126 @@ export const OfficialCallRow = memo(function OfficialCallRow({
       style={({ pressed }) => [
         styles.card,
         width !== undefined ? { width: width as any } : undefined,
-        pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+        pressed && { opacity: 0.88 },
       ]}
       accessibilityRole="button"
       accessibilityLabel={`Chamado ${call.externalId}, ${call.serviceSubtype || call.serviceType}, ${isClosed ? 'Encerrado no 1746' : primaryStateLabel}`}
       onPress={onPress}
     >
-      {/* Imagem de Fundo por Categoria com Tratamento Visual e Gradiente */}
+      {/* Imagem de Fundo em alta resolução por Categoria */}
       <Image
         source={{ uri: theme.imageUrl }}
-        style={StyleSheet.absoluteFill}
+        style={styles.photo}
         contentFit="cover"
-        transition={200}
+        transition={250}
         priority="normal"
         accessibilityIgnoresInvertColors
       />
-      <LinearGradient
-        colors={[
-          'rgba(15, 23, 42, 0.40)',
-          'rgba(15, 23, 42, 0.75)',
-          'rgba(15, 23, 42, 0.96)',
-        ]}
-        locations={[0, 0.45, 1]}
-        style={StyleSheet.absoluteFill}
-      />
 
-      <View style={styles.cardInner}>
-        {/* Linha Superior: Tipo de Serviço + Protocolo + Ação Salvar */}
-        <View style={styles.topRow}>
-          <View style={styles.categoryBadge}>
-            <Ionicons name={theme.icon as any} size={14} color="#FFFFFF" />
-            <AppText
-              variant="caption"
-              numberOfLines={1}
-              style={styles.categoryBadgeText}
-            >
-              {call.serviceType}
+      {/* Linha Superior Flutuante: Categoria + Protocolo 1746 + Salvar */}
+      <View style={styles.topRow}>
+        <View style={styles.categoryBadge}>
+          <Ionicons name={theme.icon as any} size={14} color="#FFFFFF" />
+          <AppText
+            variant="caption"
+            numberOfLines={1}
+            style={styles.categoryBadgeText}
+          >
+            {theme.label || call.serviceType}
+          </AppText>
+        </View>
+
+        <View style={styles.rightHeaderGroup}>
+          <View style={styles.officialPill}>
+            <Ionicons name="shield-checkmark" size={12} color="#93C5FD" />
+            <AppText variant="caption" style={styles.officialPillText}>
+              #{call.externalId}
             </AppText>
           </View>
 
-          <View style={styles.rightHeaderGroup}>
-            <View style={styles.officialPill}>
-              <Ionicons name="shield-checkmark" size={12} color="#60A5FA" />
-              <AppText variant="caption" style={styles.officialPillText}>
-                #{call.externalId}
-              </AppText>
-            </View>
-
-            <Pressable
-              disabled={!hydrated || busy}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel={
-                isSaved
-                  ? `Remover chamado ${call.externalId} da sua conta`
-                  : `Salvar chamado ${call.externalId} na sua conta`
-              }
-              onPress={(e) => {
-                e.stopPropagation();
-                void toggleSavedCall(call);
-              }}
-              style={[
-                styles.savePill,
-                isSaved && { backgroundColor: '#FFFFFF' },
-              ]}
-            >
-              <Ionicons
-                name={isSaved ? 'bookmark' : 'bookmark-outline'}
-                size={14}
-                color={isSaved ? '#0F172A' : '#FFFFFF'}
-              />
-              <AppText
-                variant="caption"
-                style={[
-                  styles.savePillText,
-                  { color: isSaved ? '#0F172A' : '#FFFFFF' },
-                ]}
-              >
-                {isSaved ? 'Salvo' : 'Salvar'}
-              </AppText>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* Bloco Central: Subtipo e Descrição em Destaque */}
-        <View style={styles.centerBlock}>
-          <AppText variant="sectionTitle" numberOfLines={2} style={styles.title}>
-            {call.serviceSubtype || call.serviceType}
-          </AppText>
-
-          {/* Status do Atendimento com badge translúcida */}
-          <View style={styles.statusRow}>
-            <View
-              style={[
-                styles.statusDot,
-                { backgroundColor: situationColor },
-              ]}
+          <Pressable
+            disabled={!hydrated || busy}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={
+              isSaved
+                ? `Remover chamado ${call.externalId} da sua conta`
+                : `Salvar chamado ${call.externalId} na sua conta`
+            }
+            onPress={(e) => {
+              e.stopPropagation();
+              void toggleSavedCall(call);
+            }}
+            style={[
+              styles.savePill,
+              isSaved && styles.savePillActive,
+            ]}
+          >
+            <Ionicons
+              name={isSaved ? 'bookmark' : 'bookmark-outline'}
+              size={13}
+              color={isSaved ? '#0F172A' : '#FFFFFF'}
             />
             <AppText
-              variant="label"
-              numberOfLines={1}
-              style={{
-                color: '#FFFFFF',
-                fontWeight: '700',
-                fontSize: 13,
-                flexShrink: 1,
-              }}
+              variant="caption"
+              style={[
+                styles.savePillText,
+                { color: isSaved ? '#0F172A' : '#FFFFFF' },
+              ]}
             >
-              {primaryStateLabel}
+              {isSaved ? 'Salvo' : 'Salvar'}
             </AppText>
-            {call.withinDeadline ? (
-              <AppText variant="caption" style={styles.subtleText}>
-                · {call.withinDeadline}
-              </AppText>
-            ) : null}
-          </View>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Espaço de respiro para a fotografia respirar no topo */}
+      <View style={styles.photoSpace} />
+
+      {/* Conteúdo com Gradiente Editorial Contínuo (Scrim) */}
+      <View style={styles.content}>
+        <LinearGradient
+          pointerEvents="none"
+          colors={[
+            'rgba(15, 23, 42, 0)',
+            'rgba(15, 23, 42, 0.72)',
+            'rgba(15, 23, 42, 0.97)',
+          ]}
+          locations={[0, 0.3, 1]}
+          style={styles.scrim}
+        />
+
+        {/* Status do Atendimento com badge translúcida */}
+        <View style={styles.statusRow}>
+          <View
+            style={[
+              styles.statusDot,
+              { backgroundColor: situationColor },
+            ]}
+          />
+          <AppText
+            variant="label"
+            numberOfLines={1}
+            style={styles.statusLabelText}
+          >
+            {primaryStateLabel}
+          </AppText>
+          {call.withinDeadline ? (
+            <AppText variant="caption" style={styles.subtleText}>
+              · {call.withinDeadline}
+            </AppText>
+          ) : null}
         </View>
 
-        {/* Rodapé: Bairro / Órgão + Data */}
-        <View style={styles.footerRow}>
+        {/* Título Principal / Subtipo do Serviço */}
+        <AppText variant="sectionTitle" numberOfLines={2} style={styles.title}>
+          {call.serviceSubtype || call.serviceType}
+        </AppText>
+
+        {/* Metadados: Localização e Data */}
+        <View style={styles.metaRow}>
           <View style={styles.locationGroup}>
-            <Ionicons name="location-outline" size={15} color="#CBD5E1" />
+            <Ionicons name="location-outline" size={14} color="#94A3B8" />
             <AppText
               variant="caption"
               numberOfLines={1}
@@ -192,10 +191,19 @@ export const OfficialCallRow = memo(function OfficialCallRow({
                 .join(' · ')}
             </AppText>
           </View>
-
           <AppText variant="caption" style={styles.dateText}>
             {formatDate(call.openedAt)}
           </AppText>
+        </View>
+
+        {/* Ação em Pílula Translúcida com Botão de Avanço Circular */}
+        <View style={styles.photoAction}>
+          <AppText variant="label" style={styles.actionLabel}>
+            Ver detalhes do chamado
+          </AppText>
+          <View style={styles.actionArrow}>
+            <Ionicons name="arrow-forward" size={18} color="#0F172A" />
+          </View>
         </View>
       </View>
     </Pressable>
@@ -205,66 +213,67 @@ export const OfficialCallRow = memo(function OfficialCallRow({
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     card: {
-      minHeight: 220,
-      borderRadius: layout.radius.card + 4,
+      width: '100%',
+      minHeight: 380,
+      borderRadius: layout.radius.card,
+      backgroundColor: colors.surface,
       overflow: 'hidden',
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.12)',
+      borderColor: 'rgba(255, 255, 255, 0.14)',
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.25,
-      shadowRadius: 10,
-      elevation: 5,
-      backgroundColor: colors.surface,
-      marginVertical: 6,
-    },
-    cardInner: {
-      flex: 1,
-      minHeight: 220,
-      padding: spacing.lg,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.28,
+      shadowRadius: 14,
+      elevation: 6,
       justifyContent: 'space-between',
+    },
+    photo: {
+      ...StyleSheet.absoluteFillObject,
+      width: '100%',
+      height: '100%',
     },
     topRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: spacing.sm,
-      zIndex: 2,
+      padding: spacing.md,
+      zIndex: 3,
     },
     categoryBadge: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
-      backgroundColor: 'rgba(0, 0, 0, 0.45)',
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
       paddingHorizontal: spacing.sm + 2,
       paddingVertical: 5,
       borderRadius: layout.radius.pill,
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.18)',
+      borderColor: 'rgba(255, 255, 255, 0.2)',
       flexShrink: 1,
     },
     categoryBadgeText: {
       color: '#FFFFFF',
       fontWeight: '700',
       fontSize: 12,
-      letterSpacing: 0.3,
+      letterSpacing: 0.2,
     },
     rightHeaderGroup: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
+      gap: 6,
       flexShrink: 0,
     },
     officialPill: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 4,
-      backgroundColor: 'rgba(0, 0, 0, 0.45)',
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
       paddingHorizontal: 8,
       paddingVertical: 4,
       borderRadius: layout.radius.pill,
       borderWidth: 1,
-      borderColor: 'rgba(96, 165, 250, 0.35)',
+      borderColor: 'rgba(147, 197, 253, 0.35)',
     },
     officialPillText: {
       color: '#93C5FD',
@@ -274,78 +283,130 @@ function createStyles(colors: ThemeColors) {
     savePill: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 5,
-      backgroundColor: 'rgba(0, 0, 0, 0.45)',
-      paddingHorizontal: 10,
-      paddingVertical: 5,
+      gap: 4,
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
+      paddingHorizontal: 9,
+      paddingVertical: 4,
       borderRadius: layout.radius.pill,
       borderWidth: 1,
       borderColor: 'rgba(255, 255, 255, 0.22)',
     },
+    savePillActive: {
+      backgroundColor: '#FFFFFF',
+      borderColor: '#FFFFFF',
+    },
     savePillText: {
       fontWeight: '700',
-      fontSize: 12,
+      fontSize: 11,
     },
-    centerBlock: {
+    photoSpace: {
+      flexGrow: 1,
+      minHeight: 110,
+    },
+    content: {
+      padding: spacing.lg,
       gap: spacing.sm,
-      marginVertical: spacing.md,
+      position: 'relative',
       zIndex: 2,
     },
-    title: {
-      color: '#FFFFFF',
-      fontSize: 19,
-      lineHeight: 25,
-      fontWeight: '700',
-      textShadowColor: 'rgba(0, 0, 0, 0.65)',
-      textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 4,
+    scrim: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: -110,
+      bottom: 0,
     },
     statusRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
-      backgroundColor: 'rgba(0, 0, 0, 0.35)',
+      gap: 6,
+      backgroundColor: 'rgba(15, 23, 42, 0.55)',
       alignSelf: 'flex-start',
-      paddingHorizontal: spacing.sm + 2,
+      paddingHorizontal: 10,
       paddingVertical: 4,
       borderRadius: layout.radius.pill,
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderColor: 'rgba(255, 255, 255, 0.14)',
     },
     statusDot: {
-      width: 8,
-      height: 8,
+      width: 7,
+      height: 7,
       borderRadius: 4,
+    },
+    statusLabelText: {
+      color: '#FFFFFF',
+      fontWeight: '700',
+      fontSize: 12,
+      flexShrink: 1,
     },
     subtleText: {
       color: '#CBD5E1',
-      fontSize: 12,
+      fontSize: 11,
     },
-    footerRow: {
+    title: {
+      color: '#FFFFFF',
+      fontSize: 20,
+      lineHeight: 26,
+      fontWeight: '700',
+      textShadowColor: 'rgba(0, 0, 0, 0.6)',
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 4,
+    },
+    metaRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: 'rgba(255, 255, 255, 0.2)',
-      paddingTop: spacing.sm + 2,
-      zIndex: 2,
+      gap: spacing.sm,
+      paddingBottom: 2,
     },
     locationGroup: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 5,
+      gap: 4,
       flex: 1,
-      marginRight: spacing.md,
     },
     locationText: {
-      color: '#E2E8F0',
+      color: '#CBD5E1',
       fontSize: 12,
       fontWeight: '500',
     },
     dateText: {
-      color: '#CBD5E1',
+      color: '#94A3B8',
       fontSize: 12,
       fontWeight: '500',
+    },
+    photoAction: {
+      backgroundColor: 'rgba(255, 255, 255, 0.14)',
+      borderRadius: layout.radius.pill,
+      paddingLeft: spacing.lg,
+      paddingRight: spacing.xxs,
+      paddingVertical: spacing.xxs,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+      marginTop: spacing.xs,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.16)',
+    },
+    actionLabel: {
+      color: '#FFFFFF',
+      fontWeight: '700',
+      fontSize: 13,
+      letterSpacing: 0.2,
+    },
+    actionArrow: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: '#FFFFFF',
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.18,
+      shadowRadius: 4,
+      elevation: 2,
     },
   });
 }

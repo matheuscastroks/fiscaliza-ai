@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   FlatList,
   Modal,
@@ -66,21 +66,70 @@ export function AppSelect({
   const isFiltered = value !== defaultValue && Boolean(value);
 
   const filteredOptions = useMemo(() => {
+    if (!open) return [];
     if (!search.trim()) return options;
     const query = normalizeText(search);
     return options.filter((opt) => normalizeText(opt.label).includes(query));
-  }, [options, search]);
+  }, [open, options, search]);
 
   const handleOpen = () => {
     setSearch('');
     setOpen(true);
   };
 
-  const handleSelect = (nextValue: string) => {
-    onChange(nextValue);
-    setOpen(false);
-    setSearch('');
-  };
+  const handleSelect = useCallback(
+    (nextValue: string) => {
+      onChange(nextValue);
+      setOpen(false);
+      setSearch('');
+    },
+    [onChange],
+  );
+
+  const renderOption = useCallback(
+    ({ item }: { item: SelectOption }) => {
+      const active = item.value === value;
+      return (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ selected: active }}
+          onPress={() => handleSelect(item.value)}
+          style={({ pressed }) => [
+            styles.optionRow,
+            active && { backgroundColor: colors.surfaceSubdued },
+            pressed && { opacity: 0.75 },
+          ]}
+        >
+          <View style={styles.optionLeft}>
+            {item.icon && (
+              <Ionicons
+                name={item.icon}
+                size={18}
+                color={active ? colors.accent : colors.muted}
+              />
+            )}
+            <AppText
+              variant="body"
+              style={[
+                styles.optionLabel,
+                active && { fontWeight: '700', color: colors.ink },
+              ]}
+            >
+              {item.label}
+            </AppText>
+          </View>
+          {active && (
+            <Ionicons
+              name="checkmark-circle"
+              size={20}
+              color={colors.accent}
+            />
+          )}
+        </Pressable>
+      );
+    },
+    [colors.accent, colors.ink, colors.muted, colors.surfaceSubdued, handleSelect, styles.optionLabel, styles.optionLeft, styles.optionRow, value],
+  );
 
   return (
     <>
@@ -150,136 +199,101 @@ export function AppSelect({
         </View>
       </Pressable>
 
-      <Modal
-        visible={open}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setOpen(false)}
-      >
-        <KeyboardAvoidingView
-          style={styles.modalBackdrop}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      {open && (
+        <Modal
+          visible={open}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setOpen(false)}
         >
-          <Pressable
-            style={StyleSheet.absoluteFill}
-            onPress={() => setOpen(false)}
-            accessibilityLabel="Fechar seleção"
-          />
-
-          <View
-            style={[
-              styles.sheet,
-              {
-                backgroundColor: colors.surface,
-                paddingBottom: Math.max(insets.bottom, spacing.md),
-              },
-            ]}
+          <KeyboardAvoidingView
+            style={styles.modalBackdrop}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           >
-            <View style={styles.sheetHandleBar}>
-              <View style={[styles.sheetHandle, { backgroundColor: colors.divider }]} />
-            </View>
-
-            <View style={styles.sheetHeader}>
-              <AppText variant="sectionTitle" style={{ fontSize: 17 }}>
-                {label}
-              </AppText>
-              <Pressable
-                onPress={() => setOpen(false)}
-                hitSlop={12}
-                style={[styles.closeButton, { backgroundColor: colors.surfaceSubdued }]}
-                accessibilityRole="button"
-                accessibilityLabel="Fechar"
-              >
-                <Ionicons name="close" size={18} color={colors.ink} />
-              </Pressable>
-            </View>
-
-            {options.length > 5 && (
-              <View
-                style={[
-                  styles.searchBox,
-                  {
-                    backgroundColor: colors.surfaceSubdued,
-                    borderColor: colors.border,
-                  },
-                ]}
-              >
-                <Ionicons name="search-outline" size={18} color={colors.muted} />
-                <TextInput
-                  value={search}
-                  onChangeText={setSearch}
-                  placeholder={placeholder}
-                  placeholderTextColor={colors.muted}
-                  keyboardAppearance={mode}
-                  autoCorrect={false}
-                  style={[styles.searchInput, { color: colors.ink }]}
-                />
-                {search.length > 0 && (
-                  <Pressable onPress={() => setSearch('')} hitSlop={8}>
-                    <Ionicons name="close-circle" size={18} color={colors.muted} />
-                  </Pressable>
-                )}
-              </View>
-            )}
-
-            <FlatList
-              data={filteredOptions}
-              keyExtractor={(item) => item.value || '__empty__'}
-              keyboardShouldPersistTaps="handled"
-              style={styles.list}
-              contentContainerStyle={{ paddingBottom: spacing.md }}
-              ListEmptyComponent={
-                <View style={styles.emptyBox}>
-                  <AppText variant="body" color="muted">
-                    Nenhuma opção encontrada para &ldquo;{search}&rdquo;.
-                  </AppText>
-                </View>
-              }
-              renderItem={({ item }) => {
-                const active = item.value === value;
-                return (
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: active }}
-                    onPress={() => handleSelect(item.value)}
-                    style={({ pressed }) => [
-                      styles.optionRow,
-                      active && { backgroundColor: colors.surfaceSubdued },
-                      pressed && { opacity: 0.75 },
-                    ]}
-                  >
-                    <View style={styles.optionLeft}>
-                      {item.icon && (
-                        <Ionicons
-                          name={item.icon}
-                          size={18}
-                          color={active ? colors.accent : colors.muted}
-                        />
-                      )}
-                      <AppText
-                        variant="body"
-                        style={[
-                          styles.optionLabel,
-                          active && { fontWeight: '700', color: colors.ink },
-                        ]}
-                      >
-                        {item.label}
-                      </AppText>
-                    </View>
-                    {active && (
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={20}
-                        color={colors.accent}
-                      />
-                    )}
-                  </Pressable>
-                );
-              }}
+            <Pressable
+              style={StyleSheet.absoluteFill}
+              onPress={() => setOpen(false)}
+              accessibilityLabel="Fechar seleção"
             />
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+
+            <View
+              style={[
+                styles.sheet,
+                {
+                  backgroundColor: colors.surface,
+                  paddingBottom: Math.max(insets.bottom, spacing.md),
+                },
+              ]}
+            >
+              <View style={styles.sheetHandleBar}>
+                <View style={[styles.sheetHandle, { backgroundColor: colors.divider }]} />
+              </View>
+
+              <View style={styles.sheetHeader}>
+                <AppText variant="sectionTitle" style={{ fontSize: 17 }}>
+                  {label}
+                </AppText>
+                <Pressable
+                  onPress={() => setOpen(false)}
+                  hitSlop={12}
+                  style={[styles.closeButton, { backgroundColor: colors.surfaceSubdued }]}
+                  accessibilityRole="button"
+                  accessibilityLabel="Fechar"
+                >
+                  <Ionicons name="close" size={18} color={colors.ink} />
+                </Pressable>
+              </View>
+
+              {options.length > 5 && (
+                <View
+                  style={[
+                    styles.searchBox,
+                    {
+                      backgroundColor: colors.surfaceSubdued,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                >
+                  <Ionicons name="search-outline" size={18} color={colors.muted} />
+                  <TextInput
+                    value={search}
+                    onChangeText={setSearch}
+                    placeholder={placeholder}
+                    placeholderTextColor={colors.muted}
+                    keyboardAppearance={mode}
+                    autoCorrect={false}
+                    style={[styles.searchInput, { color: colors.ink }]}
+                  />
+                  {search.length > 0 && (
+                    <Pressable onPress={() => setSearch('')} hitSlop={8}>
+                      <Ionicons name="close-circle" size={18} color={colors.muted} />
+                    </Pressable>
+                  )}
+                </View>
+              )}
+
+              <FlatList
+                data={filteredOptions}
+                keyExtractor={(item) => item.value || '__empty__'}
+                keyboardShouldPersistTaps="handled"
+                style={styles.list}
+                contentContainerStyle={{ paddingBottom: spacing.md }}
+                initialNumToRender={15}
+                maxToRenderPerBatch={15}
+                windowSize={5}
+                ListEmptyComponent={
+                  <View style={styles.emptyBox}>
+                    <AppText variant="body" color="muted">
+                      Nenhuma opção encontrada para &ldquo;{search}&rdquo;.
+                    </AppText>
+                  </View>
+                }
+                renderItem={renderOption}
+              />
+            </View>
+          </KeyboardAvoidingView>
+        </Modal>
+      )}
     </>
   );
 }

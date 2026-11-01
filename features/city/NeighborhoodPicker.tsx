@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNeighborhoods } from '@/features/territory/usePublicData';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { normalizeNeighborhood } from '@/shared/civic-territory';
 
 export function NeighborhoodPicker({
-  options,
+  options: fallbackOptions,
   value,
   onChange,
   compact = false,
@@ -17,28 +17,48 @@ export function NeighborhoodPicker({
 }) {
   const boundaries = useNeighborhoods();
   const home = useTerritoryStore((s) => s.preferredNeighborhood);
-  const canonical = boundaries.data?.map((x) => x.name) || options;
-  options = [...canonical].sort((a, b) =>
-    normalizeNeighborhood(a) === normalizeNeighborhood(home || '')
-      ? -1
-      : normalizeNeighborhood(b) === normalizeNeighborhood(home || '')
-        ? 1
-        : a.localeCompare(b, 'pt-BR'),
-  );
-  const labels =
-    value &&
-    !options.some(
-      (option) =>
-        normalizeNeighborhood(option) === normalizeNeighborhood(value),
-    )
-      ? [value, ...options]
-      : options;
+  const boundaryNames = boundaries.data;
 
-  const currentValue =
-    labels.find(
-      (option) =>
-        normalizeNeighborhood(option) === normalizeNeighborhood(value),
-    ) || '';
+  const { currentValue, selectOptions } = useMemo(() => {
+    const canonical = boundaryNames?.map((x) => x.name) || fallbackOptions;
+    const normalizedHome = normalizeNeighborhood(home || '');
+
+    // Pre-calculate normalized names to avoid thousands of repetitive regex operations during sort
+    const normMap = new Map<string, string>();
+    const getNorm = (name: string) => {
+      let n = normMap.get(name);
+      if (n === undefined) {
+        n = normalizeNeighborhood(name);
+        normMap.set(name, n);
+      }
+      return n;
+    };
+
+    const sorted = [...canonical].sort((a, b) => {
+      const normA = getNorm(a);
+      const normB = getNorm(b);
+      if (normA === normalizedHome) return -1;
+      if (normB === normalizedHome) return 1;
+      return a.localeCompare(b, 'pt-BR');
+    });
+
+    const normValue = normalizeNeighborhood(value || '');
+    const hasValue = value && sorted.some((opt) => getNorm(opt) === normValue);
+    const resolvedLabels = value && !hasValue ? [value, ...sorted] : sorted;
+
+    const matched =
+      resolvedLabels.find((opt) => getNorm(opt) === normValue) || '';
+
+    const selectOpts = ['', ...resolvedLabels].map((option) => ({
+      value: option,
+      label: option || 'Todo o município',
+    }));
+
+    return {
+      currentValue: matched,
+      selectOptions: selectOpts,
+    };
+  }, [boundaryNames, fallbackOptions, home, value]);
 
   return (
     <AppSelect
@@ -47,10 +67,7 @@ export function NeighborhoodPicker({
       icon="location-outline"
       compact={compact}
       defaultValue=""
-      options={['', ...labels].map((option) => ({
-        value: option,
-        label: option || 'Todo o município',
-      }))}
+      options={selectOptions}
       value={currentValue}
       onChange={onChange}
     />

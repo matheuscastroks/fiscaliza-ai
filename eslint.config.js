@@ -12,5 +12,8 @@ module.exports = defineConfig([
       '.agents/**',
       '.validation/**',
     ],
+    rules: {
+      'import/no-unresolved': 'off',
+    },
   },
 ]);

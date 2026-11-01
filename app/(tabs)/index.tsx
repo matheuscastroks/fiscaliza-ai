@@ -3,8 +3,6 @@ import {
   ScrollView,
   View,
   RefreshControl,
-  FlatList,
-  useWindowDimensions,
 } from 'react-native';
 import { router, useIsFocused } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +18,7 @@ import { QueryState, createCityStyles } from '@/features/city/CityUI';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useOfficialCalls } from '@/features/city/useOfficialCalls';
 import { OfficialCallRow } from '@/components/official/OfficialCallRow';
+import { CityCarousel } from '@/features/city/CityCarousel';
 import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
 import {
   useTerritorySelection,
@@ -41,7 +40,6 @@ interface CategoryGroup {
 export default function HomeScreen() {
   const active = useIsFocused();
   const { colors } = useTheme();
-  const { width } = useWindowDimensions();
   const styles = useThemedStyles(createCityStyles);
   const [refreshing, setRefreshing] = useState(false);
   const { neighborhood, neighborhoodId, setNeighborhood } =
@@ -49,8 +47,6 @@ export default function HomeScreen() {
   const preferred = useTerritoryStore((s) => s.preferredNeighborhood);
   const saved = useFollowStore((s) => s.savedCalls);
   const hydrated = useFollowStore((s) => s.hydrated);
-
-  const cardWidth = Math.min(width - spacing.contentPadding * 2, 340);
 
   const calls = useOfficialCalls(
     {
@@ -148,22 +144,16 @@ export default function HomeScreen() {
             <View style={{ gap: 2 }}>
               <AppText variant="sectionTitle">Estou acompanhando</AppText>
               <AppText variant="caption" color="muted">
-                Salvos na sua conta · arraste para ver
+                Salvos na sua conta · deslize para ver
               </AppText>
             </View>
 
-            <FlatList
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: spacing.md }}
-              data={saved}
-              keyExtractor={(item) => item.id}
-              snapToInterval={cardWidth + spacing.md}
-              decelerationRate="fast"
-              renderItem={({ item }) => (
+            <CityCarousel
+              items={saved}
+              label="Chamados que você está acompanhando"
+              renderItem={(item) => (
                 <OfficialCallRow
                   call={item}
-                  width={cardWidth}
                   onPress={() =>
                     router.push({
                       pathname: '/OfficialCallDetailsScreen',
@@ -261,22 +251,13 @@ export default function HomeScreen() {
                 </AppText>
               </View>
 
-              {/* Slider Horizontal de Chamados dessa Categoria */}
-              <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: spacing.md }}
-                data={group.calls}
-                keyExtractor={(item) => item.id}
-                snapToInterval={cardWidth + spacing.md}
-                decelerationRate="fast"
-                initialNumToRender={3}
-                maxToRenderPerBatch={3}
-                windowSize={3}
-                renderItem={({ item }) => (
+              {/* Carrossel Tridimensional de Chamados dessa Categoria */}
+              <CityCarousel
+                items={group.calls}
+                label={`Chamados de ${group.theme.label}`}
+                renderItem={(item) => (
                   <OfficialCallRow
                     call={item}
-                    width={cardWidth}
                     onPress={() =>
                       router.push({
                         pathname: '/OfficialCallDetailsScreen',
