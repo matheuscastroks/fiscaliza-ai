@@ -5,7 +5,6 @@ import {
 } from '@/features/onboarding/OnboardingGate';
 import { useTheme, useThemeInitialization } from '@/theme/useTheme';
 import * as SystemUI from 'expo-system-ui';
-import { Platform } from 'react-native';
 import React, { useEffect } from 'react';
 import {
   router,
@@ -42,9 +41,7 @@ export default function RootLayout() {
   const onboardingReady = useOnboardingInitialization();
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(colors.canvas).catch(() => undefined);
-    if (Platform.OS === 'web')
-      document.documentElement.style.colorScheme = mode;
-  }, [colors.canvas, mode]);
+  }, [colors.canvas]);
 
   const [fontsLoaded, fontError] = useFonts({
     InstrumentSans_400Regular,

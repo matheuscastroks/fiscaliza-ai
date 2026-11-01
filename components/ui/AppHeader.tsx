@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { UserAvatar } from './UserAvatar';
@@ -8,8 +7,6 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Platform,
-  useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -36,8 +33,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const user = useAuthStore((state) => state.user);
-  const { width } = useWindowDimensions();
-  const desktop = Platform.OS === 'web' && width >= 1100;
 
   return (
     <View
@@ -45,16 +40,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       pointerEvents={overlay ? 'box-none' : 'auto'}
     >
       <View style={styles.topRow} pointerEvents={overlay ? 'box-none' : 'auto'}>
-        {!onBack && (user || !desktop) && (
+        {!onBack && (
           <TouchableOpacity
             style={styles.circleButton}
-            onPress={() =>
-              desktop
-                ? router.push('/(tabs)/ProfileScreen')
-                : useMenu.getState().setOpen(true)
-            }
+            onPress={() => useMenu.getState().setOpen(true)}
             accessibilityRole="button"
-            accessibilityLabel={desktop ? 'Abrir perfil' : 'Abrir menu'}
+            accessibilityLabel="Abrir menu"
           >
             {user ? (
               <UserAvatar size={48} />
@@ -125,7 +116,6 @@ const createStyles = (colors: ThemeColors) =>
       minHeight: layout.touchTarget.minHeight,
       gap: spacing.sm,
     },
-    // Botões circulares brancos com sombra sutil da referência
     circleButton: {
       width: 48,
       height: 48,

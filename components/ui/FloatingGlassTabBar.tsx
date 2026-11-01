@@ -103,12 +103,7 @@ export function FloatingGlassTabBar({
 
   const { isListView, toggleViewMode } = useTerritoryViewMode();
 
-  if (
-    (Platform.OS === 'web' && width >= 1100) ||
-    keyboard ||
-    !VISIBLE.has(state.routes[state.index]?.name)
-  )
-    return null;
+  if (keyboard || !VISIBLE.has(state.routes[state.index]?.name)) return null;
   return (
     <View
       pointerEvents="box-none"
@@ -156,8 +151,7 @@ export function FloatingGlassTabBar({
                   });
                   if (!focused && !event.defaultPrevented)
                     navigation.navigate(route.name);
-                  if (Platform.OS !== 'web')
-                    void Haptics.selectionAsync().catch(() => {});
+                  void Haptics.selectionAsync().catch(() => {});
                 }}
                 onLongPress={() =>
                   navigation.emit({ type: 'tabLongPress', target: route.key })
@@ -190,8 +184,7 @@ export function FloatingGlassTabBar({
               : 'Alternar para visualização em Lista'
           }
           onPress={() => {
-            if (Platform.OS !== 'web')
-              void Haptics.selectionAsync().catch(() => {});
+            void Haptics.selectionAsync().catch(() => {});
             toggleViewMode();
           }}
           style={({ pressed }) => [

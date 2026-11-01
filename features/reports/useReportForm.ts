@@ -5,7 +5,6 @@ import {
   useEffect,
   useRef,
 } from 'react';
-import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -292,7 +291,6 @@ export function useReportForm() {
       )({
         mediaTypes: ['images'],
         quality: 0.7,
-        base64: Platform.OS === 'web',
       });
       if (result.canceled || !result.assets[0]) return;
       const asset = result.assets[0];
@@ -301,13 +299,7 @@ export function useReportForm() {
         return;
       }
       let uri = asset.uri;
-      if (Platform.OS === 'web' && asset.base64)
-        uri =
-          'data:' +
-          (asset.mimeType || 'image/jpeg') +
-          ';base64,' +
-          asset.base64;
-      else if (FileSystem.documentDirectory) {
+      if (FileSystem.documentDirectory) {
         const folder = FileSystem.documentDirectory + 'drafts/';
         await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
         uri = folder + Date.now() + '-' + (asset.fileName || 'foto.jpg');

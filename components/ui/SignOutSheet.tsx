@@ -1,6 +1,6 @@
 import { useTheme } from '@/theme/useTheme';
 import { useState } from 'react';
-import { Platform, View, useWindowDimensions } from 'react-native';
+import { View, useWindowDimensions } from 'react-native';
 import { BottomSheet, RNHostView } from '@expo/ui';
 import { create } from 'zustand';
 import { useAuthStore } from '@/stores/authStore';
@@ -39,10 +39,7 @@ export function SignOutSheet() {
           style={{
             gap: spacing.sm,
             paddingTop: spacing.sm,
-            width:
-              Platform.OS === 'web'
-                ? '100%'
-                : Math.min(width, 640) - spacing.contentPadding * 2,
+            width: Math.min(width, 640) - spacing.contentPadding * 2,
           }}
         >
           <AppText variant="sectionTitle">Sair da conta?</AppText>

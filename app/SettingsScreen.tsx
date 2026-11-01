@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, ScrollView, Platform, useWindowDimensions } from 'react-native';
+import { View, ScrollView, useWindowDimensions } from 'react-native';
 import { BottomSheet, RNHostView } from '@expo/ui';
 import { router } from 'expo-router';
 import { goBack } from '@/utils/navigation';
@@ -160,10 +160,7 @@ export default function SettingsScreen() {
         <RNHostView matchContents={{ vertical: true }}>
           <View
             style={{
-              width:
-                Platform.OS === 'web'
-                  ? '100%'
-                  : Math.min(width, 640) - spacing.contentPadding * 2,
+              width: Math.min(width, 640) - spacing.contentPadding * 2,
               gap: spacing.md,
               paddingTop: spacing.sm,
             }}

@@ -1,7 +1,7 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -40,7 +40,6 @@ export function PhotoAttachments({
       setError('');
       try {
         if (
-          Platform.OS !== 'web' &&
           !(
             await (camera
               ? ImagePicker.requestCameraPermissionsAsync()
@@ -61,7 +60,6 @@ export function PhotoAttachments({
         )({
           mediaTypes: ['images'],
           quality: 0.75,
-          base64: Platform.OS === 'web',
         });
         if (result.canceled || !result.assets[0]) return;
         const asset = result.assets[0];
@@ -70,9 +68,7 @@ export function PhotoAttachments({
           return;
         }
         let uri = asset.uri;
-        if (Platform.OS === 'web' && asset.base64)
-          uri = `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`;
-        else if (FileSystem.documentDirectory) {
+        if (FileSystem.documentDirectory) {
           const folder = FileSystem.documentDirectory + 'drafts/';
           await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
           uri = folder + Date.now() + '-' + (asset.fileName || 'foto.jpg');

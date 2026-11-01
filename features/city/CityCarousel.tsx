@@ -4,7 +4,6 @@ import { useRef, useState, type ReactNode } from 'react';
 import {
   Animated,
   ScrollView,
-  Platform,
   Pressable,
   StyleSheet,
   View,
@@ -39,11 +38,7 @@ export function CityCarousel<T extends { id: string }>({
   const available = viewport - (edgeToEdge ? spacing.contentPadding * 2 : 0);
   const cardWidth = Math.max(
     120,
-    Platform.OS === 'web' && width >= 1100
-      ? Math.min(360, available)
-      : items.length > 1
-        ? available - 24
-        : available,
+    items.length > 1 ? available - 24 : available,
   );
   const step = Math.max(1, cardWidth + spacing.sm);
   const current = Math.min(index, items.length - 1);
@@ -76,7 +71,7 @@ export function CityCarousel<T extends { id: string }>({
         }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: Platform.OS !== 'web' },
+          { useNativeDriver: true },
         )}
         scrollEventThrottle={16}
         onMomentumScrollEnd={(event) =>

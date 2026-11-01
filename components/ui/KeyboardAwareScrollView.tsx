@@ -10,7 +10,6 @@ import React, {
 } from 'react';
 import {
   Keyboard,
-  Platform,
   ScrollView,
   ScrollViewProps,
   StyleSheet,
@@ -72,16 +71,7 @@ export const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
             if (scroll.current !== container || focusedInput.current !== input)
               return;
             let visibleBottom = viewportY + viewportHeight;
-            if (Platform.OS === 'web') {
-              // Mobile browsers resize the visual viewport independently of layout.
-              const viewport = window.visualViewport;
-              visibleBottom = Math.min(
-                visibleBottom,
-                viewport
-                  ? viewport.offsetTop + viewport.height
-                  : window.innerHeight,
-              );
-            } else if (keyboardTop.current !== null) {
+            if (keyboardTop.current !== null) {
               visibleBottom = Math.min(visibleBottom, keyboardTop.current);
             }
             const overlap = Math.max(
@@ -132,22 +122,6 @@ export const KeyboardAwareScrollView = forwardRef<ScrollView, ScrollViewProps>(
     }, []);
 
     useEffect(() => {
-      if (Platform.OS === 'web') {
-        const viewport = window.visualViewport;
-        const update = () => {
-          if (focusedInput.current) revealFocusedInput();
-          else setKeyboardOverlap(0);
-        };
-        viewport?.addEventListener('resize', update);
-        viewport?.addEventListener('scroll', update);
-        window.addEventListener('resize', update);
-        return () => {
-          viewport?.removeEventListener('resize', update);
-          viewport?.removeEventListener('scroll', update);
-          window.removeEventListener('resize', update);
-          if (frame.current !== null) cancelAnimationFrame(frame.current);
-        };
-      }
       const show = Keyboard.addListener('keyboardDidShow', (event) => {
         keyboardTop.current = event.endCoordinates.screenY;
         revealFocusedInput();

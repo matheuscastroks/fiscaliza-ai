@@ -1,6 +1,6 @@
 import { useTheme } from '@/theme/useTheme';
 import React, { useState } from 'react';
-import { View, Platform, useWindowDimensions } from 'react-native';
+import { View, useWindowDimensions } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppText } from '@/components/ui/AppText';
@@ -73,10 +73,7 @@ export function DeleteRecord({
             style={{
               gap: spacing.sm,
               paddingTop: spacing.sm,
-              width:
-                Platform.OS === 'web'
-                  ? '100%'
-                  : Math.min(width, 640) - 2 * spacing.contentPadding,
+              width: Math.min(width, 640) - 2 * spacing.contentPadding,
             }}
             accessibilityViewIsModal
           >

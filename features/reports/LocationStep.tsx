@@ -2,7 +2,7 @@ import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import { lightColors, type ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
 import React, { useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import * as Location from 'expo-location';
 import { AppText } from '@/components/ui/AppText';
 import { AppInput } from '@/components/ui/AppInput';
@@ -67,9 +67,7 @@ export function LocationStep({
       const permission = await Location.requestForegroundPermissionsAsync();
       if (!permission.granted) {
         setMessage(
-          Platform.OS === 'web'
-            ? 'Use as coordenadas do local ou autorize a localização.'
-            : 'Você pode marcar o ponto no mapa sem usar sua posição atual.',
+          'Você pode marcar o ponto no mapa sem usar sua posição atual.',
         );
         return;
       }

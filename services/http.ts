@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { fetch } from 'expo/fetch';
 import * as SecureStore from 'expo-secure-store';
 import { QueryClient } from '@tanstack/react-query';
@@ -30,14 +29,14 @@ export function onSessionExpired(callback: () => void) {
   onExpired = callback;
 }
 export async function restoreToken() {
-  if (Platform.OS !== 'web')
-    sessionToken = await SecureStore.getItemAsync('fiscaliza-session');
+  sessionToken = await SecureStore.getItemAsync('fiscaliza-session');
 }
 export async function saveToken(token: string | null) {
   sessionToken = token;
-  if (Platform.OS !== 'web') {
-    if (token) await SecureStore.setItemAsync('fiscaliza-session', token);
-    else await SecureStore.deleteItemAsync('fiscaliza-session');
+  if (token) {
+    await SecureStore.setItemAsync('fiscaliza-session', token);
+  } else {
+    await SecureStore.deleteItemAsync('fiscaliza-session');
   }
 }
 export async function request<T>(
@@ -118,44 +117,39 @@ export function assetUrl(url: string) {
 }
 export async function uploadImage(uri: string): Promise<string> {
   if (uri.startsWith('/api/attachments/') || /^https?:/.test(uri)) return uri;
-  if (Platform.OS !== 'web') {
-    // This API uses the existing native uploader, without constructing File or
-    // passing React Native URI descriptors through Expo fetch's FormData encoder.
-    const fs = await import('expo-file-system/legacy');
-    if (!(await fs.getInfoAsync(uri)).exists)
-      throw new Error(
-        'A foto não está mais disponível. Escolha a imagem novamente.',
-      );
-    const task = fs.createUploadTask(API_URL + '/attachments', uri, {
-      httpMethod: 'POST',
-      uploadType: fs.FileSystemUploadType.MULTIPART,
-      fieldName: 'file',
-      headers: {
-        'X-Fiscaliza-Client': 'citizen',
-        ...(sessionToken ? { Authorization: 'Bearer ' + sessionToken } : {}),
-      },
-    });
-    let expired = false;
-    const timer = setTimeout(() => {
-      expired = true;
-      void task.cancelAsync().catch(() => undefined);
-    }, 15000);
-    try {
-      const response = await task.uploadAsync();
-      if (expired || !response)
-        throw new Error('O envio da foto foi interrompido. Tente novamente.');
-      const result = await readResult<{ url: string }>(
-        '/attachments',
-        response.status,
-        JSON.parse(response.body),
-      );
-      return result.url;
-    } finally {
-      clearTimeout(timer);
-    }
+  // Native mobile uploader via Expo FileSystem
+  const fs = await import('expo-file-system/legacy');
+  if (!(await fs.getInfoAsync(uri)).exists) {
+    throw new Error(
+      'A foto não está mais disponível. Escolha a imagem novamente.',
+    );
   }
-  const form = new FormData();
-  const blob = await (await fetch(uri)).blob();
-  form.append('file', blob, 'evidencia.jpg');
-  return (await request<{ url: string }>('/attachments', 'POST', form)).url;
+  const task = fs.createUploadTask(API_URL + '/attachments', uri, {
+    httpMethod: 'POST',
+    uploadType: fs.FileSystemUploadType.MULTIPART,
+    fieldName: 'file',
+    headers: {
+      'X-Fiscaliza-Client': 'citizen',
+      ...(sessionToken ? { Authorization: 'Bearer ' + sessionToken } : {}),
+    },
+  });
+  let expired = false;
+  const timer = setTimeout(() => {
+    expired = true;
+    void task.cancelAsync().catch(() => undefined);
+  }, 15000);
+  try {
+    const response = await task.uploadAsync();
+    if (expired || !response) {
+      throw new Error('O envio da foto foi interrompido. Tente novamente.');
+    }
+    const result = await readResult<{ url: string }>(
+      '/attachments',
+      response.status,
+      JSON.parse(response.body),
+    );
+    return result.url;
+  } finally {
+    clearTimeout(timer);
+  }
 }

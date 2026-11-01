@@ -3,7 +3,6 @@ import type { ThemeColors } from '@/theme/colors';
 import { goBack } from '@/utils/navigation';
 import { useState } from 'react';
 import {
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -79,10 +78,7 @@ export default function ProfileScreen() {
     setPicking(true);
     setPhotoError('');
     try {
-      if (
-        Platform.OS !== 'web' &&
-        !(await ImagePicker.requestMediaLibraryPermissionsAsync()).granted
-      ) {
+      if (!(await ImagePicker.requestMediaLibraryPermissionsAsync()).granted) {
         setPhotoError('Permita o acesso à galeria para escolher sua foto.');
         return;
       }
@@ -91,33 +87,20 @@ export default function ProfileScreen() {
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.6,
-        base64: Platform.OS === 'web',
       });
       if (result.canceled || !result.assets[0]) return;
       const asset = result.assets[0];
-      if (
-        (asset.fileSize || 0) > 2 * 1024 * 1024 ||
-        (asset.base64?.length || 0) > 2800000
-      ) {
+      if ((asset.fileSize || 0) > 2 * 1024 * 1024) {
         setPhotoError('Escolha uma foto com até 2 MB.');
         return;
       }
-      let uri: string;
-      if (Platform.OS === 'web') {
-        if (!asset.base64) throw new Error('Foto indisponível');
-        uri =
-          'data:' +
-          (asset.mimeType || 'image/jpeg') +
-          ';base64,' +
-          asset.base64;
-      } else {
-        if (!FileSystem.documentDirectory)
-          throw new Error('Armazenamento indisponível');
-        const folder = FileSystem.documentDirectory + 'profile-photos/';
-        await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
-        uri = folder + Date.now() + '.jpg';
-        await FileSystem.copyAsync({ from: asset.uri, to: uri });
+      if (!FileSystem.documentDirectory) {
+        throw new Error('Armazenamento indisponível');
       }
+      const folder = FileSystem.documentDirectory + 'profile-photos/';
+      await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
+      const uri = folder + Date.now() + '.jpg';
+      await FileSystem.copyAsync({ from: asset.uri, to: uri });
       const current = useAuthStore.getState();
       if (current.user?.id !== userId || current.sessionVersion !== version)
         return;

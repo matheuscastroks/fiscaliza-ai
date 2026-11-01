@@ -15,10 +15,10 @@ Fiscaliza aí demonstra participação na gestão urbana: ocorrências, proposta
 
 Use npm e preserve os package-lock.json. Instale módulos Expo com npx expo install.
 
-- npm start: Metro; npm run web: cidadão web.
+- npm start: Metro; npx expo run:android: build nativo Android.
 - npm test: testes locais Node; npx tsc --noEmit: tipos; npm run lint: Expo lint.
 - npm test --prefix backend: testes API; npm run typecheck --prefix backend: tipos.
-- npx expo run:android: build nativo; npx expo config --type prebuild: configuração.
+- npx expo config --type prebuild: configuração.
   Consulte README.md para Docker e configuração.
 
 ## Convenções

@@ -1,4 +1,3 @@
-import { DesktopNavigation } from './DesktopNavigation';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import {
@@ -10,7 +9,6 @@ import {
 } from 'react';
 import {
   BackHandler,
-  Platform,
   StyleSheet,
   View,
   useWindowDimensions,
@@ -48,15 +46,8 @@ export function AppDrawer({ children }: { children: ReactNode }) {
   const open = useMenu((state) => state.open);
   const segments: readonly string[] = useSegments();
   const { width } = useWindowDimensions();
-  const desktop = Platform.OS === 'web' && width >= 1100;
-  const showNavigation =
-    desktop &&
-    segments[0] !== 'OnboardingScreen' &&
-    segments[0] !== 'LoginScreen';
   const enabled = Boolean(
-    !desktop &&
-      segments[0] === '(tabs)' &&
-      MAIN_TABS.has(segments[1] || 'index'),
+    segments[0] === '(tabs)' && MAIN_TABS.has(segments[1] || 'index'),
   );
 
   const close = useCallback((action?: () => void) => {
@@ -85,93 +76,54 @@ export function AppDrawer({ children }: { children: ReactNode }) {
     return () => back.remove();
   }, [open, close]);
 
-  useEffect(() => {
-    if (Platform.OS !== 'web' || !open) return;
-    const previous = document.activeElement as HTMLElement | null;
-    const container = menuView.current as unknown as HTMLElement | null;
-    const focusable = () =>
-      Array.from(
-        container?.querySelectorAll<HTMLElement>(
-          'button, [role="button"], [tabindex="0"]',
-        ) || [],
-      ).filter((element) => element.getClientRects().length > 0);
-    const frame = requestAnimationFrame(() => focusable()[0]?.focus());
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        close();
-      }
-      if (event.key !== 'Tab') return;
-      const elements = focusable();
-      const next = event.shiftKey ? elements.at(-1) : elements[0];
-      const boundary = event.shiftKey ? elements[0] : elements.at(-1);
-      if (
-        document.activeElement === boundary ||
-        !container?.contains(document.activeElement)
-      ) {
-        event.preventDefault();
-        next?.focus();
-      }
-    };
-    document.addEventListener('keydown', onKey);
-    return () => {
-      cancelAnimationFrame(frame);
-      document.removeEventListener('keydown', onKey);
-      if (previous?.isConnected) previous.focus();
-    };
-  }, [open, close]);
-
   return (
     <View
-      style={{ flex: 1, flexDirection: 'row', backgroundColor: colors.canvas }}
+      style={{ flex: 1, backgroundColor: colors.canvas }}
     >
-      {showNavigation && <DesktopNavigation />}
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <ReanimatedDrawerLayout
-          ref={drawer}
-          drawerPosition={DrawerPosition.LEFT}
-          drawerType={DrawerType.FRONT}
-          drawerWidth={Math.min(Math.round(width * 0.9), 480)}
-          drawerLockMode={
-            enabled ? DrawerLockMode.UNLOCKED : DrawerLockMode.LOCKED_CLOSED
-          }
-          edgeWidth={DRAWER_EDGE_WIDTH}
-          minSwipeDistance={DRAWER_MIN_SWIPE_DISTANCE}
-          keyboardDismissMode={DrawerKeyboardDismissMode.ON_DRAG}
-          enableTrackpadTwoFingerGesture
-          overlayColor={colors.scrim}
-          drawerBackgroundColor={colors.transparent}
-          onDrawerStateChanged={(state) => {
-            if (state !== DrawerState.IDLE) setVisible(true);
-          }}
-          onDrawerOpen={() => {
-            setVisible(true);
-            actualOpen.current = true;
-            useMenu.getState().setOpen(true);
-          }}
-          onDrawerClose={() => {
-            setVisible(false);
-            actualOpen.current = false;
-            useMenu.getState().setOpen(false);
-            const action = afterClose.current;
-            afterClose.current = undefined;
-            action?.();
-          }}
-          renderNavigationView={() => (
-            <View ref={menuView} style={styles.fill}>
-              <SideMenu onClose={close} visible={visible} />
-            </View>
-          )}
-        >
-          <View
-            style={styles.fill}
-            aria-hidden={open}
-            accessibilityElementsHidden={open}
-          >
-            {children}
+      <ReanimatedDrawerLayout
+        ref={drawer}
+        drawerPosition={DrawerPosition.LEFT}
+        drawerType={DrawerType.FRONT}
+        drawerWidth={Math.min(Math.round(width * 0.9), 480)}
+        drawerLockMode={
+          enabled ? DrawerLockMode.UNLOCKED : DrawerLockMode.LOCKED_CLOSED
+        }
+        edgeWidth={DRAWER_EDGE_WIDTH}
+        minSwipeDistance={DRAWER_MIN_SWIPE_DISTANCE}
+        keyboardDismissMode={DrawerKeyboardDismissMode.ON_DRAG}
+        enableTrackpadTwoFingerGesture
+        overlayColor={colors.scrim}
+        drawerBackgroundColor={colors.transparent}
+        onDrawerStateChanged={(state) => {
+          if (state !== DrawerState.IDLE) setVisible(true);
+        }}
+        onDrawerOpen={() => {
+          setVisible(true);
+          actualOpen.current = true;
+          useMenu.getState().setOpen(true);
+        }}
+        onDrawerClose={() => {
+          setVisible(false);
+          actualOpen.current = false;
+          useMenu.getState().setOpen(false);
+          const action = afterClose.current;
+          afterClose.current = undefined;
+          action?.();
+        }}
+        renderNavigationView={() => (
+          <View ref={menuView} style={styles.fill}>
+            <SideMenu onClose={close} visible={visible} />
           </View>
-        </ReanimatedDrawerLayout>
-      </View>
+        )}
+      >
+        <View
+          style={styles.fill}
+          aria-hidden={open}
+          accessibilityElementsHidden={open}
+        >
+          {children}
+        </View>
+      </ReanimatedDrawerLayout>
     </View>
   );
 }
