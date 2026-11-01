@@ -72,6 +72,12 @@ Copie `.env.example` para `.env`, configure `EXPO_PUBLIC_API_URL` e execute `npm
 - `npm test --prefix backend`: suite de testes do backend Fastify e integração BigQuery/1746.
 - `npm run typecheck --prefix backend`: verificação de tipos do backend.
 
+### Paginação dos chamados oficiais
+
+`GET /api/rio1746/calls?limit=50` preserva a resposta completa e o total. A resposta também inclui `nextCursor`. Para continuar, envie esse cursor com os mesmos filtros e `includeTotal=false`: a API retorna apenas a próxima página, com `total=null`, sem repetir a contagem. O cliente conserva o total da primeira página. Cursor de outro recorte ou combinado com `page>1` retorna HTTP 400. A paginação antiga por `page` continua disponível.
+
+A migração `0012` habilita `pg_trgm` e cria índices de busca e ordenação. Em instalações grandes, programe uma janela para a migração transacional, que pode bloquear escritas durante a construção dos índices. O usuário do banco precisa de permissão para instalar a extensão. Não execute testes de integração no banco pessoal.
+
 ## Cadastros territoriais SIURB
 
 Use PostgreSQL UTF-8. Aplique migrações no banco escolhido antes de importar. Não use o banco pessoal para testes. O seed de instalação preserva contas existentes; limpeza é uma operação separada e explícita.
