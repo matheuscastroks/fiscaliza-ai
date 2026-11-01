@@ -1,9 +1,14 @@
 module.exports = ({ config }) => {
-  const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-  const plugins = (config.plugins || []).filter(
-    (plugin) =>
-      (Array.isArray(plugin) ? plugin[0] : plugin) !== 'expo-image-picker',
-  );
+  const mapboxAccessToken =
+    process.env.EXPO_PUBLIC_API_MAPBOX ||
+    process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN ||
+    process.env.MAPBOX ||
+    '';
+  const mapboxDownloadToken = process.env.RNMAPBOX_MAPS_DOWNLOAD_TOKEN;
+  const plugins = (config.plugins || []).filter((plugin) => {
+    const name = Array.isArray(plugin) ? plugin[0] : plugin;
+    return name !== 'expo-image-picker' && name !== '@rnmapbox/maps';
+  });
   return {
     ...config,
     userInterfaceStyle: 'light',
@@ -17,19 +22,17 @@ module.exports = ({ config }) => {
           microphonePermission: false,
         },
       ],
+      [
+        '@rnmapbox/maps',
+        mapboxDownloadToken
+          ? { RNMapboxMapsDownloadToken: mapboxDownloadToken }
+          : {},
+      ],
       'expo-secure-store',
     ],
-    android: {
-      ...config.android,
-      config: {
-        ...(config.android?.config || {}),
-        googleMaps: { apiKey: googleMapsApiKey },
-      },
+    extra: {
+      ...(config.extra || {}),
+      mapboxAccessToken,
     },
-    ios: {
-      ...config.ios,
-      config: { ...(config.ios?.config || {}), googleMapsApiKey },
-    },
-    extra: { ...(config.extra || {}) },
   };
 };

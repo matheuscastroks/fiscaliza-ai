@@ -1,121 +1,133 @@
-﻿const test = require('node:test'),
-  assert = require('node:assert/strict'),
-  fs = require('node:fs'),
-  vm = require('node:vm');
-function harness() {
-  const source = fs.readFileSync('components/ui/OsmMapView.tsx', 'utf8');
-  const match = source.match(
-    /    function updateMarkers\(markers, selectedId, clusterIds\) \{[\s\S]*?\n    \}\n\n    updateMarkers/,
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const ts = require('typescript');
+
+function loadMapboxHelpers() {
+  const source = ts.transpileModule(
+    fs.readFileSync('components/ui/MapboxMapView.tsx', 'utf8'),
+    {
+      compilerOptions: {
+        module: ts.ModuleKind.CommonJS,
+        target: ts.ScriptTarget.ES2022,
+        esModuleInterop: true,
+        jsx: ts.JsxEmit.React,
+      },
+    },
+  ).outputText;
+
+  const mod = { exports: {} };
+  const mocks = {
+    react: {
+      useCallback: (fn) => fn,
+      useEffect: () => {},
+      useMemo: (fn) => fn(),
+      useRef: (v) => ({ current: v }),
+      createElement: () => ({}),
+    },
+    'react-native': {
+      NativeModules: {},
+      Platform: { OS: 'web' },
+      StyleSheet: { create: (s) => s },
+      View: 'View',
+    },
+    'expo-constants': {
+      default: { expoConfig: { extra: { mapboxAccessToken: 'pk.test_token' } } },
+    },
+    'react-native-webview': {
+      WebView: 'WebView',
+    },
+    '@/features/territory/selectors': {
+      scriptJson: (v) => JSON.stringify(v),
+    },
+  };
+
+  const fn = vm.runInThisContext(
+    '(function(require,module,exports,process){' + source + '\n})',
   );
-  assert.ok(match);
-  const scheduled = [];
-  const counts = { created: 0, cleared: 0, icons: 0, removed: 0, added: 0 };
-  const context = {
-    setTimeout: (fn) => scheduled.push(fn),
-    pendingMarkerAdditions: Object.create(null),
-    markerAdditionScheduled: false,
-    markersMap: Object.create(null),
-    markerDataMap: Object.create(null),
-    currentSelectedId: null,
-    currentSelectedClusterIds: [],
-    createMarkerIcon: () => ({}),
-    postAppMessage: () => {},
-    document: { createElement: () => ({ textContent: '' }) },
-    clusterGroup: {
-      clearLayers() {
-        counts.cleared++;
-      },
-      addLayers(items) {
-        counts.added += items.length;
-      },
-      removeLayers(items) {
-        counts.removed += items.length;
-      },
-      refreshClusters() {},
+  fn(
+    (id) => {
+      if (id in mocks) return mocks[id];
+      return require(id);
     },
-    L: {
-      marker() {
-        counts.created++;
-        return {
-          on() {
-            return this;
-          },
-          bindTooltip() {
-            return this;
-          },
-          setTooltipContent() {},
-          setIcon() {
-            counts.icons++;
-          },
-          setZIndexOffset() {},
-          setLatLng() {},
-        };
-      },
-      DomEvent: { stopPropagation() {} },
-    },
-  };
-  vm.createContext(context);
-  vm.runInContext(match[0].replace(/\n\n    updateMarkers$/, ''), context);
-  const flush = () => {
-    while (scheduled.length) scheduled.shift()();
-  };
-  return {
-    counts,
-    updateRaw: context.updateMarkers,
-    flush,
-    update: (...args) => {
-      context.updateMarkers(...args);
-      flush();
-    },
-  };
+    mod,
+    mod.exports,
+    { env: {} },
+  );
+  return mod.exports;
 }
-const markers = Array.from({ length: 300 }, (_, i) => ({
-  id: String(i),
-  latitude: -22.9 + i * 0.0001,
-  longitude: -43.2,
-  title: 'Registro ' + i,
-  kind: 'official',
-  color: '#0072BB',
-}));
-test('selecting a map item reuses 300 existing markers instead of rebuilding the layer', () => {
-  const h = harness();
-  h.update(markers, null, []);
-  h.update(markers, '10', []);
-  assert.equal(h.counts.created, 300);
-  assert.equal(h.counts.cleared, 0);
-  assert.equal(h.counts.icons, 1);
-});
-test('changing a filter only removes missing markers and inserts new records', () => {
-  const h = harness();
-  h.update(markers, null, []);
-  h.update([...markers.slice(1), { ...markers[0], id: 'new' }], null, []);
-  assert.equal(h.counts.created, 301);
-  assert.equal(h.counts.removed, 1);
-  assert.equal(h.counts.cleared, 0);
-});
-test('identical marker updates do not touch icons or cluster contents', () => {
-  const h = harness();
-  h.update(markers, null, []);
-  h.update(
-    markers.map((x) => ({ ...x })),
-    null,
-    [],
-  );
-  assert.equal(h.counts.created, 300);
-  assert.equal(h.counts.icons, 0);
-  assert.equal(h.counts.added, 300);
+
+test('buildMarkersFeatureCollection converts 14,000 markers into a GeoJSON FeatureCollection with selection state', () => {
+  const { buildMarkersFeatureCollection, mapboxStyleUrl } = loadMapboxHelpers();
+  const markers = Array.from({ length: 14000 }, (_, i) => ({
+    id: `call-${i}`,
+    latitude: -22.9 - (i % 100) * 0.001,
+    longitude: -43.2 - Math.floor(i / 100) * 0.001,
+    title: `Chamado ${i}`,
+    kind: 'official',
+    color: '#0072BB',
+  }));
+
+  const collection = buildMarkersFeatureCollection(markers, 'call-42');
+  assert.equal(collection.type, 'FeatureCollection');
+  assert.equal(collection.features.length, 14000);
+  assert.deepEqual(collection.features[42].geometry, {
+    type: 'Point',
+    coordinates: [markers[42].longitude, markers[42].latitude],
+  });
+  assert.equal(collection.features[42].properties.selected, 1);
+  assert.equal(collection.features[0].properties.selected, 0);
+  assert.equal(mapboxStyleUrl(false), 'mapbox://styles/mapbox/light-v11');
+  assert.equal(mapboxStyleUrl(true), 'mapbox://styles/mapbox/dark-v11');
 });
 
-test('bulk marker insertion yields between batches and a newer filter discards queued old markers', () => {
-  const h = harness();
-  h.updateRaw(markers, null, []);
-  assert.ok(h.counts.added <= 50, 'initial batch must be bounded');
-  h.updateRaw([], null, []);
-  const before = h.counts.added;
-  h.flush();
-  assert.equal(
-    h.counts.added,
-    before,
-    'queued removed markers must never be added',
+test('normalizeBoundaryFeatureCollection normalizes raw Polygon, Feature and FeatureCollection', () => {
+  const { normalizeBoundaryFeatureCollection } = loadMapboxHelpers();
+
+  const polygon = {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [-43.2, -22.9],
+        [-43.1, -22.9],
+        [-43.1, -22.8],
+        [-43.2, -22.9],
+      ],
+    ],
+  };
+
+  const normalized = normalizeBoundaryFeatureCollection(polygon);
+  assert.equal(normalized.type, 'FeatureCollection');
+  assert.equal(normalized.features.length, 1);
+  assert.deepEqual(normalized.features[0].geometry, polygon);
+
+  const empty = normalizeBoundaryFeatureCollection(null);
+  assert.deepEqual(empty, { type: 'FeatureCollection', features: [] });
+});
+
+test('TerritoryScreen updates viewportRef on pan without triggering state re-renders and delegates list/filters', () => {
+  const source = fs.readFileSync('app/(tabs)/TerritoryScreen.tsx', 'utf8');
+  assert.ok(
+    source.includes('viewportRef.current = {'),
+    'onRegionChange should update viewportRef.current without calling setRegion on every frame',
+  );
+  assert.ok(
+    source.includes('computeRegionBounds(viewportRef.current)'),
+    'area search should read bounds from viewportRef.current',
+  );
+  assert.ok(
+    !source.includes('if (!isFocused) return null;'),
+    'TerritoryScreen should stay mounted across tab switches to preserve the Mapbox instance',
+  );
+  assert.ok(
+    source.includes('TerritoryListView') &&
+      source.includes('TerritoryFilterBar') &&
+      source.includes('TerritoryFilterModal'),
+    'TerritoryScreen should delegate list and filter controls to dedicated components',
+  );
+  assert.ok(
+    source.split('\n').length < 900,
+    'TerritoryScreen should stay below 900 lines after modular extraction',
   );
 });

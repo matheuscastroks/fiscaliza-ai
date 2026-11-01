@@ -45,7 +45,7 @@ Não existe integração de abertura de solicitações no 1746. Propostas, mobil
 
 SIURB/IPP: escolas (1), saúde (2), espaços públicos (16) e limites de bairros (18). Central 1746/DATA.RIO: demandas via BigQuery. A evidência de uso e atribuição está em plan/evidence/20-siurb-fontes.md.
 
-O backend importa e valida; PostgreSQL conserva cadastros e proveniência; Fastify serve contratos públicos; Expo apresenta as evidências em Android/iOS/web. O cliente não consulta os provedores de importação diretamente. O mapa utiliza tiles OpenStreetMap e Leaflet.
+O backend importa e valida; PostgreSQL conserva cadastros e proveniência; Fastify serve contratos públicos; Expo apresenta as evidências em Android/iOS/web. O cliente não consulta os provedores de importação diretamente. O mapa utiliza Mapbox.
 
 Importações administrativas são limitadas, auditadas e protegidas por trava por fonte. Publicações cadastrais são atômicas; falhas preservam a versão anterior. Builds e abertura de telas não sincronizam dados.
 

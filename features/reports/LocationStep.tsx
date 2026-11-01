@@ -11,7 +11,7 @@ import { useAuthStore } from '@/stores/authStore';
 import {
   withinMunicipalBounds,
 } from '@/features/city/municipalContext';
-import { OsmMapView } from '@/components/ui/OsmMapView';
+import { MapboxMapView } from '@/components/ui/MapboxMapView';
 
 interface Props {
   address: string;
@@ -93,7 +93,7 @@ export function LocationStep({
         {municipality?.name} · {municipality?.state}
       </AppText>
       <View collapsable={false} style={styles.mapFrame}>
-        <OsmMapView
+        <MapboxMapView
           style={styles.map}
           region={{
             latitude: selected ? latitude : (municipality?.center.latitude || -22.9068),

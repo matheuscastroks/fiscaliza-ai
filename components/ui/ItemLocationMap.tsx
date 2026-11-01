@@ -7,7 +7,7 @@ import type { ThemeColors } from '@/theme/colors';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { AppText } from './AppText';
-import { OsmMapView, type MarkerKind } from './OsmMapView';
+import { MapboxMapView, type MarkerKind } from './MapboxMapView';
 
 export interface ItemLocationMapProps {
   id?: string;
@@ -116,7 +116,7 @@ export function ItemLocationMap({
         style={[styles.mapFrame, { height }]}
         collapsable={false}
       >
-        <OsmMapView
+        <MapboxMapView
           style={styles.map}
           region={{
             latitude,

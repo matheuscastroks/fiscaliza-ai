@@ -50,11 +50,7 @@
         }
       ],
       [
-        "expo-maps",
-        {
-          "requestLocationPermission": true,
-          "locationPermission": "O aplicativo utiliza sua localização para posicionar a ocorrência no mapa territorial."
-        }
+        "@rnmapbox/maps"
       ]
     ],
     "experiments": {

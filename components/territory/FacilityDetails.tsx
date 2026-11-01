@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { DetailSheet, DetailSection } from '@/components/ui/DetailSheet';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
-import { OsmMapView } from '@/components/ui/OsmMapView';
+import { MapboxMapView } from '@/components/ui/MapboxMapView';
 import { QueryState } from '@/features/city/CityUI';
 import { usePublicFacility } from '@/features/territory/usePublicData';
 import {
@@ -60,7 +60,7 @@ export function FacilityDetails({
           </DetailSection>
           {item.location && (
             <View style={{ height: 230, borderRadius: 24, overflow: 'hidden' }}>
-              <OsmMapView
+              <MapboxMapView
                 region={{ ...item.location, zoom: 16 }}
                 markers={[
                   {

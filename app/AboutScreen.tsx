@@ -32,7 +32,7 @@ export default function AboutScreen() {
             Rio de Janeiro. Os cadastros são atribuídos ao IPP/PCRJ e
             disponibilizados conforme os termos da fonte (CC BY 4.0 no serviço).
             As demandas vêm da Central 1746 / DATA.RIO. O mapa utiliza
-            OpenStreetMap e Leaflet.
+            Mapbox.
           </AppText>
           <AppText>
             Os detalhes mostram a última importação e as datas conhecidas na
