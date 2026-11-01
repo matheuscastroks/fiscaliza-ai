@@ -812,10 +812,13 @@ function buildMapboxGlHtml(options: {
 
     window.setView = function(lat, lng, nextZoom) {
       isProgrammaticMove = true;
-      map.easeTo({
-        center: [lng, lat],
-        zoom: typeof nextZoom === 'number' ? nextZoom : map.getZoom(),
-        duration: 300
+      var targetCenter = [lng, lat];
+      var targetZoom = typeof nextZoom === 'number' ? nextZoom : map.getZoom();
+      map.flyTo({
+        center: targetCenter,
+        zoom: targetZoom,
+        essential: true,
+        duration: 450
       });
     };
 
@@ -963,6 +966,7 @@ export function MapboxMapView(props: MapboxMapViewProps) {
     dispatch('setView', [region.latitude, region.longitude, currentTargetZoom]);
   }, [
     nativeMapbox,
+    region,
     region.latitude,
     region.longitude,
     region.zoom,

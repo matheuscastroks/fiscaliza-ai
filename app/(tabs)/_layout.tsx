@@ -9,8 +9,10 @@ export default function TabLayout() {
   return (
     <Tabs
       tabBar={(props) => <FloatingGlassTabBar {...props} />}
+      detachInactiveScreens={false}
       screenOptions={{
         headerShown: false,
+        freezeOnBlur: true,
       }}
     >
       <Tabs.Screen

@@ -29,7 +29,7 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
-import { Pressable, FlatList, StyleSheet, View } from 'react-native';
+import { Pressable, FlatList, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams, useIsFocused } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
@@ -342,7 +342,11 @@ function TerritoryContent() {
       .filter((pt): pt is { latitude: number; longitude: number } =>
         Boolean(pt),
       );
-    return computeOverviewRegion(points, INITIAL_REGION);
+    const calculated = computeOverviewRegion(points, INITIAL_REGION);
+    return {
+      ...calculated,
+      zoom: calculated.zoom ?? 12,
+    };
   }, [entries]);
 
   const filterCount =
@@ -422,14 +426,13 @@ function TerritoryContent() {
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
-      updateCameraRegion((current) => ({
-        ...current,
+      updateCameraRegion({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
         latitudeDelta: 0.018,
         longitudeDelta: 0.018,
         zoom: 15,
-      }));
+      });
       setLocationMessage('');
     } catch {
       setLocationMessage('Não foi possível obter a localização atual.');
@@ -580,6 +583,37 @@ function TerritoryContent() {
               };
             }}
           />
+
+          {officialCalls.isLoading && (
+            <View
+              style={{
+                position: 'absolute',
+                top: insets.top + 70,
+                alignSelf: 'center',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                paddingHorizontal: 14,
+                paddingVertical: 8,
+                borderRadius: layout.radius.pill,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.25,
+                shadowRadius: 4,
+                elevation: 5,
+                zIndex: 40,
+              }}
+            >
+              <ActivityIndicator size="small" color="#FFFFFF" />
+              <AppText
+                variant="caption"
+                style={{ color: '#FFFFFF', fontWeight: '600' }}
+              >
+                Carregando chamados...
+              </AppText>
+            </View>
+          )}
         </View>
       )}
 
