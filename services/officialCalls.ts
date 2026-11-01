@@ -12,6 +12,9 @@ export async function fetchOfficialCalls(
   signal?: AbortSignal,
 ): Promise<OfficialCallsListResponse> {
   const query = new URLSearchParams();
+  if (params.cursor) query.set('cursor', params.cursor);
+  if (params.includeTotal !== undefined)
+    query.set('includeTotal', String(params.includeTotal));
   if (params.page !== undefined) query.set('page', String(params.page));
   if (params.limit !== undefined) query.set('limit', String(params.limit));
   if (params.neighborhoodId) query.set('neighborhoodId', params.neighborhoodId);
@@ -42,8 +45,16 @@ export async function fetchOfficialCalls(
   );
 }
 
-export async function fetchOfficialCall(id: string, signal?: AbortSignal): Promise<OfficialCall> {
-  return request<OfficialCall>(`/rio1746/calls/${encodeURIComponent(id)}`, 'GET', undefined, signal);
+export async function fetchOfficialCall(
+  id: string,
+  signal?: AbortSignal,
+): Promise<OfficialCall> {
+  return request<OfficialCall>(
+    `/rio1746/calls/${encodeURIComponent(id)}`,
+    'GET',
+    undefined,
+    signal,
+  );
 }
 
 export async function fetchOfficialFilters(): Promise<OfficialCallsFilterOptions> {

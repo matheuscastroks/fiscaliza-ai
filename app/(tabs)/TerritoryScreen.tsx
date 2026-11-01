@@ -48,7 +48,7 @@ import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import type { OfficialCall } from '@/shared/contracts';
 import {
-  useOfficialCalls,
+  useInfiniteOfficialCalls,
   useOfficialFilters,
 } from '@/features/city/useOfficialCalls';
 import { spacing } from '@/theme/spacing';
@@ -165,7 +165,6 @@ function TerritoryContent() {
   const debouncedSearch = useDebouncedValue(search, 300);
   const appliedSearch = search.trim() ? debouncedSearch.trim() : '';
   const [status, setStatus] = useState<string>('all');
-  const [pageLimit, setPageLimit] = useState<number>(300);
   const { isListView, setIsListView } = useTerritoryViewMode();
 
   const computeRegionBounds = (r: TerritoryMapRegion) => {
@@ -211,7 +210,7 @@ function TerritoryContent() {
     periodDays:
       startDate || endDate || period === 'all' ? undefined : Number(period),
   };
-  const officialCalls = useOfficialCalls(
+  const officialCalls = useInfiniteOfficialCalls(
     {
       neighborhoodId,
       bairro: neighborhoodId ? undefined : neighborhood || undefined,
@@ -219,7 +218,7 @@ function TerritoryContent() {
       situacao: status === 'all' ? undefined : status,
       ...officialTime,
       search: appliedSearch || undefined,
-      limit: pageLimit,
+      limit: 50,
       hasCoordinates: isListView ? undefined : true,
       ...(areaOnly && appliedBounds ? appliedBounds : {}),
     },
@@ -444,7 +443,7 @@ function TerritoryContent() {
     Number(areaOnly);
 
   const totalCalls = officialCalls.data?.total ?? listed.length;
-  const hasMoreCalls = Boolean(officialCalls.data?.hasMore && pageLimit < 1000);
+  const hasMoreCalls = Boolean(officialCalls.hasNextPage);
   const dataReady = officialCalls.data !== undefined;
 
   // Auto-focus map camera when user chooses a specific neighborhood
@@ -546,7 +545,6 @@ function TerritoryContent() {
     setNeighborhood('');
     setAreaOnly(false);
     setAppliedBounds(null);
-    setPageLimit(300);
   };
 
   const locate = async () => {
@@ -583,7 +581,7 @@ function TerritoryContent() {
     setRefreshing(true);
     try {
       await Promise.all([
-        officialCalls.refetch(),
+        ...(layers.includes('official') ? [officialCalls.refetch()] : []),
         ...(neighborhoodId ? [boundary.refetch()] : []),
         ...Object.entries(facilityQueries)
           .filter(
@@ -599,7 +597,6 @@ function TerritoryContent() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedId(null);
     setSelectedCluster(null);
-    setPageLimit(300);
     listOffset.current = 0;
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
   }, [
@@ -739,7 +736,6 @@ function TerritoryContent() {
           router.setParams({ neighborhoodId: undefined, layer: undefined });
           setAreaOnly(false);
           setAppliedBounds(null);
-          setPageLimit(300);
           setSelectedId(null);
           setSelectedCluster(null);
         }}
@@ -755,7 +751,6 @@ function TerritoryContent() {
         value={serviceType}
         onChange={(value) => {
           setServiceType(value);
-          setPageLimit(300);
           setSelectedId(null);
           setSelectedCluster(null);
         }}
@@ -771,7 +766,6 @@ function TerritoryContent() {
         onChange={(value) => {
           setPeriod(value);
           router.setParams({ startDate: undefined, endDate: undefined });
-          setPageLimit(300);
           setSelectedId(null);
           setSelectedCluster(null);
         }}
@@ -786,7 +780,6 @@ function TerritoryContent() {
         value={status}
         onChange={(value) => {
           setStatus(value);
-          setPageLimit(300);
           setSelectedId(null);
           setSelectedCluster(null);
         }}
@@ -1103,9 +1096,11 @@ function TerritoryContent() {
                   <AppButton
                     title={`Carregar mais chamados (${listed.length} de ${totalCalls.toLocaleString('pt-BR')})`}
                     variant="secondary"
-                    onPress={() =>
-                      setPageLimit((prev) => Math.min(1000, prev + 300))
-                    }
+                    disabled={officialCalls.isFetchingNextPage}
+                    onPress={() => {
+                      if (!officialCalls.isFetching)
+                        void officialCalls.fetchNextPage();
+                    }}
                   />
                 )}
                 {dataReady &&
@@ -1270,7 +1265,6 @@ function TerritoryContent() {
                       startDate: undefined,
                       endDate: undefined,
                     });
-                    setPageLimit(300);
                     setSelectedId(null);
                   }}
                 />
