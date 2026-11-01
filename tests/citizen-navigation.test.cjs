@@ -53,3 +53,17 @@ test('administrative closure never mistakes Não Encerrado for closed', () => {
     assert.equal(closed({ officialSituation }), true);
   assert.equal(closed({ closedAt: '2026-10-20' }), true);
 });
+test('legacy gamified routes and redundant stores are removed', () => {
+  for (const legacyFile of [
+    'app/RankingScreen.tsx',
+    'app/PointsGuideScreen.tsx',
+    'stores/problemsStore.ts',
+    'stores/statsStore.ts',
+  ]) {
+    assert.equal(fs.existsSync(legacyFile), false, `${legacyFile} should not exist`);
+  }
+  const layout = fs.readFileSync('app/_layout.tsx', 'utf8');
+  assert.equal(layout.includes('RankingScreen'), false);
+  assert.equal(layout.includes('PointsGuideScreen'), false);
+});
+

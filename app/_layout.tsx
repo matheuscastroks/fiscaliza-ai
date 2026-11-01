@@ -133,10 +133,8 @@ export default function RootLayout() {
                     'HistoricalDetailsScreen',
                     'HistoryScreen',
                     'MunicipalityScreen',
-                    'PointsGuideScreen',
                     'PresentationScreen',
                     'ProposalScreen',
-                    'RankingScreen',
                     'RelatedScreen',
                   ].map((name) => (
                     <Stack.Screen key={name} name={name} />

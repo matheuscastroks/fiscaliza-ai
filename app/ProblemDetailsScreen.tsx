@@ -24,7 +24,6 @@ import { QueryState, createCityStyles } from '@/features/city/CityUI';
 import { useCityQuery } from '@/features/city/useCityQuery';
 import { assetUrl, mutation } from '@/services/http';
 import { useAuthStore } from '@/stores/authStore';
-import { useProblemsStore } from '@/stores/problemsStore';
 import type { Occurrence } from '@/shared/contracts';
 export default function ProblemDetailsScreen() {
   const { colors } = useTheme();
@@ -54,7 +53,6 @@ export default function ProblemDetailsScreen() {
     onSuccess: (_result, variables) => {
       if (variables.suffix === '/comments') setComment('');
       void query.refetch();
-      void useProblemsStore.getState().loadProblems();
     },
   });
   const send = (suffix: string, method: string, body?: unknown) =>

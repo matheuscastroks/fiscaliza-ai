@@ -12,8 +12,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import type { Problem } from '@/data/mockData';
 import type { Analysis } from '@/shared/contracts';
 import { problemsApi } from '@/services/mockApi';
-import { request, uploadImage } from '@/services/http';
-import { useProblemsStore } from '@/stores/problemsStore';
+import { queryClient, request, uploadImage } from '@/services/http';
 import { useAuthStore } from '@/stores/authStore';
 import { withinMunicipalBounds } from '@/features/city/municipalContext';
 export interface ReportFormData {
@@ -82,7 +81,6 @@ export function useReportForm() {
   const [createdProblem, setCreatedProblem] = useState<Problem | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [duplicates, setDuplicates] = useState<Problem[]>([]);
-  const loadProblems = useProblemsStore((s) => s.loadProblems);
   useEffect(() => {
     let active = true;
     readyRef.current = false;
@@ -383,7 +381,7 @@ export function useReportForm() {
       await AsyncStorage.removeItem(key).catch(() => {});
       if (currentSession()) {
         setCreatedProblem(response.data);
-        await loadProblems();
+        await queryClient.invalidateQueries({ queryKey: ['municipality'] });
       }
       return response.data;
     } catch (e) {

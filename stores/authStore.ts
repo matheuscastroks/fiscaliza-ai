@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import type { User } from '@/data/mockData';
 import type { SessionUser } from '@/shared/contracts';
 import { authApi, legacyUser } from '@/services/mockApi';
-import { useProblemsStore } from './problemsStore';
 import { applyCurrentProfile } from '@/shared/profile-session';
 import {
   onSessionExpired,
@@ -61,7 +60,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (result.success) {
       await queryClient.cancelQueries();
       queryClient.clear();
-      useProblemsStore.getState().reset();
     }
     set({
       isReady: true,
@@ -78,7 +76,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } finally {
       await saveToken(null);
       queryClient.clear();
-      useProblemsStore.getState().reset();
       set({ user: null, isAuthenticated: false, error: null });
     }
   },
@@ -103,7 +100,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         () => {
           if (result.data?.municipality?.id !== get().user?.municipality?.id) {
             queryClient.clear();
-            useProblemsStore.getState().reset();
           }
           set({ user: result.data, sessionVersion: get().sessionVersion + 1 });
         },
@@ -121,7 +117,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       () => queryClient.cancelQueries(),
       () => {
         queryClient.clear();
-        useProblemsStore.getState().reset();
         set({
           user: legacyUser(user),
           sessionVersion: get().sessionVersion + 1,
@@ -134,7 +129,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 }));
 onSessionExpired(() => {
   queryClient.clear();
-  useProblemsStore.getState().reset();
   useAuthStore.setState((state) => ({
     user: null,
     isAuthenticated: false,

@@ -1,7 +1,7 @@
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -13,7 +13,8 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Problem } from '@/data/mockData';
-import { useProblemsStore } from '@/stores/problemsStore';
+import type { Occurrence } from '@/shared/contracts';
+import { useCityQuery } from '@/features/city/useCityQuery';
 import { useAuthStore } from '@/stores/authStore';
 
 import { spacing } from '@/theme/spacing';
@@ -39,7 +40,12 @@ export default function ProblemsListScreen() {
   const styles = useThemedStyles(createStyles);
 
   const municipality = useAuthStore((state) => state.user?.municipality);
-  const { problems, loadProblems, isLoading } = useProblemsStore();
+  const occurrencesQuery = useCityQuery<Occurrence[]>('/occurrences');
+  const problems = occurrencesQuery.data || [];
+  const isLoading = occurrencesQuery.isLoading;
+  const loadProblems = () => {
+    void occurrencesQuery.refetch();
+  };
   const [sortOrder, setSortOrder] = useState<'recent' | 'votes'>('recent');
 
   const {
@@ -50,10 +56,6 @@ export default function ProblemsListScreen() {
     filteredProblems,
     clearFilters,
   } = useOccurrenceFilters(problems);
-
-  useEffect(() => {
-    if (municipality) void loadProblems();
-  }, [loadProblems, municipality]);
 
   const sortedProblems = [...filteredProblems].sort((a, b) => {
     if (sortOrder === 'votes') {

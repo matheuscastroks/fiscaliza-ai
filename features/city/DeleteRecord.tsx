@@ -6,7 +6,6 @@ import { AppButton } from '@/components/ui/AppButton';
 import { AppText } from '@/components/ui/AppText';
 import { mutation } from '@/services/http';
 import { useAuthStore } from '@/stores/authStore';
-import { useProblemsStore } from '@/stores/problemsStore';
 import { canDeleteRecord } from '@/shared/record-deletion';
 import type { CivicItem, Occurrence } from '@/shared/contracts';
 import { goBack } from '@/utils/navigation';
@@ -39,7 +38,6 @@ export function DeleteRecord({
       });
       goBack();
       void cache.invalidateQueries({ queryKey: ['municipality'] });
-      void useProblemsStore.getState().loadProblems();
     },
   });
   const author = 'kind' in item ? item.createdBy : item.reportedBy;
