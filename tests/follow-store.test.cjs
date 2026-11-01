@@ -137,3 +137,24 @@ test('hydration deduplicates and rejects records from other municipalities', asy
   assert.equal(store.getState().savedCalls.length, 1);
   assert.equal(store.getState().savedCalls[0].id, 'a');
 });
+test('saved calls are isolated per user account and municipality scope', async () => {
+  const entries = new Map();
+  const storage = {
+    getItem: async (key) => entries.get(key) ?? null,
+    setItem: async (key, next) => {
+      entries.set(key, next);
+    },
+  };
+  const store = setup(storage);
+  await store.getState().setScope('user-1', '3304557');
+  await store.getState().toggleSavedCall(sample);
+  assert.equal(store.getState().savedCalls.length, 1);
+  assert.ok(entries.has('fiscaliza-ai:saved:rio1746:user-1:3304557:v1'));
+
+  await store.getState().setScope('user-2', '3304557');
+  assert.equal(store.getState().savedCalls.length, 0);
+
+  await store.getState().setScope('user-1', '3304557');
+  assert.equal(store.getState().savedCalls.length, 1);
+  assert.equal(store.getState().savedCalls[0].id, 'a');
+});

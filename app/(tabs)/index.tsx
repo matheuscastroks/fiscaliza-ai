@@ -100,7 +100,7 @@ export default function HomeScreen() {
           <View style={styles.section}>
             <AppText variant="sectionTitle">Estou acompanhando</AppText>
             <AppText variant="caption" color="muted">
-              Salvos neste aparelho · última informação consultada
+              Salvos na sua conta · última informação consultada
             </AppText>
             {saved.slice(0, 3).map((call) => (
               <OfficialCallRow

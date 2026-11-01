@@ -125,13 +125,13 @@ export default function OfficialCallDetailsScreen() {
       >
         {!data && item && (
           <AppText variant="caption" color="muted">
-            Última informação consultada e salva neste aparelho.
+            Última informação consultada e salva na sua conta.
           </AppText>
         )}
         {isError && (
           <AppText color="risk">
-            Atualização indisponível. Exibindo a última informação salva neste
-            aparelho.
+            Atualização indisponível. Exibindo a última informação salva na sua
+            conta.
           </AppText>
         )}
         {persistenceError && (
@@ -161,8 +161,8 @@ export default function OfficialCallDetailsScreen() {
             accessibilityRole="button"
             accessibilityLabel={
               isSaved
-                ? 'Remover dos chamados salvos'
-                : 'Salvar chamado para acompanhar'
+                ? 'Remover dos chamados salvos na sua conta'
+                : 'Salvar chamado na sua conta para acompanhar'
             }
             style={[
               styles.badgeShield,
@@ -182,7 +182,7 @@ export default function OfficialCallDetailsScreen() {
                 isSaved && { color: colors.onAccent },
               ]}
             >
-              {isSaved ? 'Salvo' : 'Salvar'}
+              {isSaved ? 'Salvo na conta' : 'Salvar na conta'}
             </AppText>
           </Pressable>
         </View>

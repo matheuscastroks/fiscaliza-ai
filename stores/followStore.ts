@@ -3,12 +3,22 @@ import { create } from 'zustand';
 import type { OfficialCall } from '@/shared/contracts';
 
 export const FOLLOW_STORAGE_KEY = 'fiscaliza-ai:saved:rio1746:3304557:v1';
+export function followStorageKey(
+  userId?: string | null,
+  municipalityId = '3304557',
+): string {
+  return userId
+    ? `fiscaliza-ai:saved:rio1746:${userId}:${municipalityId}:v1`
+    : `fiscaliza-ai:saved:rio1746:${municipalityId}:v1`;
+}
 export type FollowStatusFilter = 'all' | 'open' | 'resolved' | 'saved';
 interface SavedMeta {
   savedAt: string;
   checkedAt: string;
 }
 interface FollowStore {
+  userId: string | null;
+  municipalityId: string;
   hydrated: boolean;
   busy: boolean;
   persistenceError: string | null;
@@ -16,6 +26,7 @@ interface FollowStore {
   savedCalls: OfficialCall[];
   metadata: Record<string, SavedMeta>;
   initialize: () => Promise<void>;
+  setScope: (userId: string | null, municipalityId?: string) => Promise<void>;
   setStatusFilter: (value: FollowStatusFilter) => void;
   toggleStatusFilter: () => void;
   toggleSavedCall: (call: OfficialCall) => Promise<boolean>;
@@ -23,12 +34,15 @@ interface FollowStore {
   updateSnapshots: (calls: OfficialCall[]) => Promise<boolean>;
   isCallSaved: (id: string) => boolean;
 }
-function validCall(value: unknown): value is OfficialCall {
+function validCall(
+  value: unknown,
+  municipalityId = '3304557',
+): value is OfficialCall {
   if (!value || typeof value !== 'object') return false;
   const c = value as OfficialCall;
   return (
     c.source === 'rio1746' &&
-    c.municipalityId === '3304557' &&
+    c.municipalityId === municipalityId &&
     [
       'id',
       'externalId',
@@ -101,11 +115,12 @@ export const useFollowStore = create<FollowStore>((set, get) => {
   ) => {
     const result = queue.then(async () => {
       await get().initialize();
+      const key = followStorageKey(get().userId, get().municipalityId);
       set({ busy: true });
       try {
         const next = change();
         await AsyncStorage.setItem(
-          FOLLOW_STORAGE_KEY,
+          key,
           JSON.stringify({
             version: 1,
             items: next.savedCalls.map((call) => ({
@@ -119,7 +134,7 @@ export const useFollowStore = create<FollowStore>((set, get) => {
       } catch {
         set({
           persistenceError:
-            'Não foi possível gravar os salvos neste aparelho. Tente novamente.',
+            'Não foi possível gravar os chamados salvos na sua conta. Tente novamente.',
         });
         return false;
       } finally {
@@ -130,6 +145,8 @@ export const useFollowStore = create<FollowStore>((set, get) => {
     return result;
   };
   return {
+    userId: null,
+    municipalityId: '3304557',
     hydrated: false,
     busy: false,
     persistenceError: null,
@@ -138,9 +155,12 @@ export const useFollowStore = create<FollowStore>((set, get) => {
     metadata: {},
     initialize: () => {
       if (initialization) return initialization;
+      const scopeUserId = get().userId;
+      const scopeMunicipalityId = get().municipalityId;
+      const key = followStorageKey(scopeUserId, scopeMunicipalityId);
       initialization = (async () => {
         try {
-          const raw = await AsyncStorage.getItem(FOLLOW_STORAGE_KEY);
+          const raw = await AsyncStorage.getItem(key);
           if (!raw) return;
           const document = JSON.parse(raw);
           if (document.version !== 1 || !Array.isArray(document.items))
@@ -148,7 +168,7 @@ export const useFollowStore = create<FollowStore>((set, get) => {
           const calls = new Map<string, OfficialCall>();
           const metadata: Record<string, SavedMeta> = {};
           for (const entry of document.items) {
-            if (!validCall(entry?.call)) continue;
+            if (!validCall(entry?.call, scopeMunicipalityId)) continue;
             calls.set(entry.call.id, snapshot(entry.call));
             metadata[entry.call.id] = {
               savedAt:
@@ -161,17 +181,52 @@ export const useFollowStore = create<FollowStore>((set, get) => {
                   : entry.call.importedAt,
             };
           }
-          set({ savedCalls: [...calls.values()], metadata });
+          if (
+            get().userId === scopeUserId &&
+            get().municipalityId === scopeMunicipalityId
+          ) {
+            set({ savedCalls: [...calls.values()], metadata });
+          }
         } catch {
-          set({
-            persistenceError:
-              'Não foi possível ler os salvos deste aparelho. Você pode tentar novamente ao reabrir o app.',
-          });
+          if (
+            get().userId === scopeUserId &&
+            get().municipalityId === scopeMunicipalityId
+          ) {
+            set({
+              persistenceError:
+                'Não foi possível carregar os chamados salvos da sua conta. Tente novamente ao reabrir o app.',
+            });
+          }
         } finally {
-          set({ hydrated: true });
+          if (
+            get().userId === scopeUserId &&
+            get().municipalityId === scopeMunicipalityId
+          ) {
+            set({ hydrated: true });
+          }
         }
       })();
       return initialization;
+    },
+    setScope: (userId, municipalityId = '3304557') => {
+      const nextMunicipalityId = municipalityId || '3304557';
+      if (
+        get().userId === userId &&
+        get().municipalityId === nextMunicipalityId &&
+        initialization
+      ) {
+        return initialization;
+      }
+      initialization = undefined;
+      set({
+        userId,
+        municipalityId: nextMunicipalityId,
+        hydrated: false,
+        persistenceError: null,
+        savedCalls: [],
+        metadata: {},
+      });
+      return get().initialize();
     },
     setStatusFilter: (statusFilter) => set({ statusFilter }),
     toggleStatusFilter: () =>
@@ -179,7 +234,7 @@ export const useFollowStore = create<FollowStore>((set, get) => {
         statusFilter: get().statusFilter === 'open' ? 'resolved' : 'open',
       }),
     toggleSavedCall: (call) => {
-      if (!validCall(call)) return Promise.resolve(false);
+      if (!validCall(call, get().municipalityId)) return Promise.resolve(false);
       return persist(() => {
         const exists = get().isCallSaved(call.id);
         const metadata = { ...get().metadata };
@@ -200,7 +255,12 @@ export const useFollowStore = create<FollowStore>((set, get) => {
     clearSavedCalls: () => persist(() => ({ savedCalls: [], metadata: {} })),
     updateSnapshots: (calls) =>
       persist(() => {
-        const current = new Map(calls.filter(validCall).map((c) => [c.id, c]));
+        const municipalityId = get().municipalityId;
+        const current = new Map(
+          calls
+            .filter((c) => validCall(c, municipalityId))
+            .map((c) => [c.id, c]),
+        );
         const metadata = { ...get().metadata };
         return {
           savedCalls: get().savedCalls.map((call) => {

@@ -9,6 +9,7 @@ import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
+import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore, isThemePreference } from '@/stores/themeStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { useFollowStore } from '@/stores/followStore';
@@ -25,6 +26,7 @@ const appearanceOptions = [
 export default function SettingsScreen() {
   const { colors } = useTheme();
   const { width } = useWindowDimensions();
+  const user = useAuthStore((s) => s.user);
   const {
     preference,
     setPreference,
@@ -89,18 +91,18 @@ export default function SettingsScreen() {
           )}
         </View>
         <View style={{ gap: spacing.md }}>
-          <AppText variant="sectionTitle">Dados deste aparelho</AppText>
+          <AppText variant="sectionTitle">Chamados salvos na conta</AppText>
           <AppText color="muted">
-            Seus salvos ficam neste aparelho e não são sincronizados. Limpar os
-            dados do aplicativo ou deste site pode removê-los.
+            Seus chamados acompanhados ficam vinculados à sua conta (
+            {user?.email || 'usuário conectado'}) neste município.
           </AppText>
           <AppText variant="caption" color="muted">
             {hydrated
-              ? `${savedCalls.length} chamados salvos`
+              ? `${savedCalls.length} chamados salvos na sua conta`
               : 'Carregando salvos…'}
           </AppText>
           <AppButton
-            title="Apagar salvos deste aparelho"
+            title="Limpar salvos da minha conta"
             variant="destructive"
             disabled={!hydrated || !savedCalls.length || busy}
             onPress={() => setConfirm(true)}
@@ -132,6 +134,13 @@ export default function SettingsScreen() {
             variant="secondary"
             onPress={() => router.push('/AboutScreen')}
           />
+          {user?.role === 'admin' && (
+            <AppButton
+              title="Controles de apresentação"
+              variant="quiet"
+              onPress={() => router.push('/PresentationScreen')}
+            />
+          )}
         </View>
       </ScrollView>
       <BottomSheet
@@ -159,10 +168,12 @@ export default function SettingsScreen() {
               paddingTop: spacing.sm,
             }}
           >
-            <AppText variant="sectionTitle">Apagar seus salvos?</AppText>
+            <AppText variant="sectionTitle">
+              Limpar salvos da sua conta?
+            </AppText>
             <AppText color="muted">
-              Os chamados serão removidos apenas da sua lista neste aparelho.
-              Sua região e aparência serão mantidas.
+              Os chamados serão removidos da lista de acompanhamento da sua
+              conta. Sua região e aparência serão mantidas.
             </AppText>
             {savedError && (
               <AppText color="risk" accessibilityRole="alert">

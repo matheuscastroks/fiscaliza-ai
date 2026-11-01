@@ -12,6 +12,7 @@ import { layout, spacing } from '@/theme';
 import type { CivicItem, Occurrence, OfficialCall } from '@/shared/contracts';
 import { kindLabel, statusLabel } from '@/features/city/CityUI';
 import { assetUrl } from '@/services/http';
+import { useFollowStore } from '@/stores/followStore';
 
 export type Entry =
   | { type: 'facility'; item: PublicFacilitySummary }
@@ -46,6 +47,13 @@ export function TerritoryCardContent({
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const [imageError, setImageError] = useState(false);
+  const officialId = entry.type === 'official' ? entry.item.id : '';
+  const isSaved = useFollowStore((s) =>
+    officialId ? s.savedCalls.some((c) => c.id === officialId) : false,
+  );
+  const hydrated = useFollowStore((s) => s.hydrated);
+  const busy = useFollowStore((s) => s.busy);
+  const toggleSavedCall = useFollowStore((s) => s.toggleSavedCall);
 
   if (entry.type === 'facility')
     return (
@@ -310,6 +318,45 @@ export function TerritoryCardContent({
                 color={hasPhoto ? '#111827' : colors.surface}
               />
             </View>
+            {entry.type === 'official' && (
+              <Pressable
+                disabled={!hydrated || busy}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  isSaved
+                    ? 'Remover chamado da conta'
+                    : 'Salvar chamado na conta'
+                }
+                onPress={(e) => {
+                  e.stopPropagation();
+                  void toggleSavedCall(entry.item);
+                }}
+                style={[
+                  styles.actionButton,
+                  {
+                    backgroundColor: isSaved
+                      ? '#0072BB'
+                      : colors.surfaceSubdued,
+                  },
+                ]}
+              >
+                <Ionicons
+                  name={isSaved ? 'bookmark' : 'bookmark-outline'}
+                  size={14}
+                  color={isSaved ? colors.white : colors.ink}
+                />
+                <AppText
+                  variant="label"
+                  style={{
+                    color: isSaved ? colors.white : colors.ink,
+                    fontWeight: '700',
+                    fontSize: 13,
+                  }}
+                >
+                  {isSaved ? 'Salvo na conta' : 'Salvar na conta'}
+                </AppText>
+              </Pressable>
+            )}
           </View>
         </View>
       </View>
@@ -419,6 +466,8 @@ const createStyles = (colors: ThemeColors) =>
       marginTop: 4,
       flexDirection: 'row',
       alignItems: 'center',
+      gap: 8,
+      flexWrap: 'wrap',
     },
     actionButton: {
       flexDirection: 'row',

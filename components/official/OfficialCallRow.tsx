@@ -6,6 +6,7 @@ import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
 import { AppText } from '@/components/ui/AppText';
+import { useFollowStore } from '@/stores/followStore';
 import type { OfficialCall } from '@/shared/contracts';
 
 export interface OfficialCallRowProps {
@@ -16,6 +17,12 @@ export interface OfficialCallRowProps {
 export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const isSaved = useFollowStore((s) =>
+    s.savedCalls.some((c) => c.id === call.id),
+  );
+  const hydrated = useFollowStore((s) => s.hydrated);
+  const busy = useFollowStore((s) => s.busy);
+  const toggleSavedCall = useFollowStore((s) => s.toggleSavedCall);
 
   const isClosed = isOfficialCallClosed(call);
 
@@ -48,7 +55,7 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
       accessibilityLabel={`Chamado ${call.externalId}, ${call.serviceSubtype}, ${isClosed ? 'Encerrado no 1746' : primaryStateLabel}`}
       onPress={onPress}
     >
-      {/* Header: Service Type + Protocol 1746 Tag */}
+      {/* Header: Service Type + Protocol 1746 Tag + Save Action */}
       <View style={styles.topRow}>
         <View style={styles.typeBadge}>
           <AppText
@@ -60,11 +67,47 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
           </AppText>
         </View>
 
-        <View style={styles.officialPill}>
-          <Ionicons name="shield-checkmark" size={12} color="#0072BB" />
-          <AppText variant="caption" style={styles.officialPillText}>
-            1746 · #{call.externalId}
-          </AppText>
+        <View style={styles.rightHeaderGroup}>
+          <View style={styles.officialPill}>
+            <Ionicons name="shield-checkmark" size={12} color="#0072BB" />
+            <AppText variant="caption" style={styles.officialPillText}>
+              1746 · #{call.externalId}
+            </AppText>
+          </View>
+
+          <Pressable
+            disabled={!hydrated || busy}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={
+              isSaved
+                ? `Remover chamado ${call.externalId} da sua conta`
+                : `Salvar chamado ${call.externalId} na sua conta`
+            }
+            onPress={(e) => {
+              e.stopPropagation();
+              void toggleSavedCall(call);
+            }}
+            style={[
+              styles.savePill,
+              isSaved && { backgroundColor: colors.ink },
+            ]}
+          >
+            <Ionicons
+              name={isSaved ? 'bookmark' : 'bookmark-outline'}
+              size={13}
+              color={isSaved ? colors.onAccent : colors.ink}
+            />
+            <AppText
+              variant="caption"
+              style={[
+                styles.savePillText,
+                { color: isSaved ? colors.onAccent : colors.ink },
+              ]}
+            >
+              {isSaved ? 'Salvo' : 'Salvar'}
+            </AppText>
+          </Pressable>
         </View>
       </View>
 
@@ -163,6 +206,25 @@ function createStyles(colors: ThemeColors) {
       color: '#0072BB',
       fontWeight: '800',
       fontSize: 10,
+    },
+    rightHeaderGroup: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      flexShrink: 0,
+    },
+    savePill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: colors.surfaceSubdued,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: layout.radius.pill,
+    },
+    savePillText: {
+      fontWeight: '700',
+      fontSize: 11,
     },
     title: {
       fontSize: 16,

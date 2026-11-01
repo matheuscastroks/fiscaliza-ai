@@ -21,8 +21,10 @@ import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useSignOutSheet } from '@/components/ui/SignOutSheet';
 import { useAuthStore } from '@/stores/authStore';
 import { useAvatarStore } from '@/stores/avatarStore';
+import { useFollowStore } from '@/stores/followStore';
 import { useCityQuery } from '@/features/city/useCityQuery';
 import { QueryState, createCityStyles } from '@/features/city/CityUI';
+import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { layout, spacing } from '@/theme';
 import type { Occurrence, CivicItem } from '@/shared/contracts';
 
@@ -63,6 +65,7 @@ export default function ProfileScreen() {
   const styles = useThemedStyles(createStyles);
 
   const { user } = useAuthStore();
+  const savedCalls = useFollowStore((s) => s.savedCalls);
   const [picking, setPicking] = useState(false);
   const [photoError, setPhotoError] = useState('');
   const activity = useCityQuery<{
@@ -125,32 +128,39 @@ export default function ProfileScreen() {
       setPicking(false);
     }
   };
-  const counts = activity.data
-    ? [
-        {
-          value: activity.data.occurrences.filter(
-            (item) => item.reportedBy === user?.id,
-          ).length,
-          label: 'Ocorrências',
-          icon: 'location-outline' as const,
-        },
-        {
-          value: activity.data.items.filter(
-            (item) => item.createdBy === user?.id && item.kind === 'proposal',
-          ).length,
-          label: 'Propostas',
-          icon: 'bulb-outline' as const,
-        },
-        {
-          value: activity.data.items.filter(
-            (item) =>
-              item.kind === 'consultation' && item.myAnswer !== undefined,
-          ).length,
-          label: 'Consultas',
-          icon: 'chatbubble-outline' as const,
-        },
-      ]
-    : [];
+  const counts = [
+    {
+      value: savedCalls.length,
+      label: 'Salvos 1746',
+      icon: 'bookmark-outline' as const,
+    },
+    ...(activity.data
+      ? [
+          {
+            value: activity.data.occurrences.filter(
+              (item) => item.reportedBy === user?.id,
+            ).length,
+            label: 'Ocorrências',
+            icon: 'location-outline' as const,
+          },
+          {
+            value: activity.data.items.filter(
+              (item) => item.createdBy === user?.id && item.kind === 'proposal',
+            ).length,
+            label: 'Propostas',
+            icon: 'bulb-outline' as const,
+          },
+          {
+            value: activity.data.items.filter(
+              (item) =>
+                item.kind === 'consultation' && item.myAnswer !== undefined,
+            ).length,
+            label: 'Consultas',
+            icon: 'chatbubble-outline' as const,
+          },
+        ]
+      : []),
+  ];
   return (
     <AppScreen>
       <AppHeader title="Meu perfil" onBack={goBack} />
@@ -237,21 +247,42 @@ export default function ProfileScreen() {
             error={activity.error}
             retry={activity.refetch}
           />
-          {activity.data && (
-            <View style={styles.stats}>
-              {counts.map((item) => (
-                <View key={item.label} style={styles.stat}>
-                  <Ionicons name={item.icon} size={22} color={colors.muted} />
-                  <AppText variant="screenTitle">{item.value}</AppText>
-                  <AppText variant="meta" color="muted">
-                    {item.label}
-                  </AppText>
-                </View>
+          <View style={styles.stats}>
+            {counts.map((item) => (
+              <View key={item.label} style={styles.stat}>
+                <Ionicons name={item.icon} size={22} color={colors.muted} />
+                <AppText variant="screenTitle">{item.value}</AppText>
+                <AppText variant="meta" color="muted">
+                  {item.label}
+                </AppText>
+              </View>
+            ))}
+          </View>
+          {savedCalls.length > 0 && (
+            <View style={{ gap: spacing.xs }}>
+              <AppText variant="label">
+                Chamados 1746 salvos na sua conta
+              </AppText>
+              {savedCalls.slice(0, 2).map((call) => (
+                <OfficialCallRow
+                  key={call.id}
+                  call={call}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/OfficialCallDetailsScreen',
+                      params: { id: call.id },
+                    })
+                  }
+                />
               ))}
             </View>
           )}
           <AppButton
-            title="Ver acompanhamentos"
+            title={
+              savedCalls.length > 0
+                ? `Ver acompanhamentos (${savedCalls.length})`
+                : 'Ver acompanhamentos'
+            }
             onPress={() => router.push('/(tabs)/FollowScreen')}
           />
         </View>

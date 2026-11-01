@@ -6,6 +6,7 @@ import { AppText } from '@/components/ui/AppText';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
+import { useAuthStore } from '@/stores/authStore';
 import { useFollowStore, type FollowStatusFilter } from '@/stores/followStore';
 import { useSavedRefresh } from '@/features/city/useSavedRefresh';
 import { useTheme, spacing } from '@/theme';
@@ -13,6 +14,7 @@ import { isOfficialCallClosed } from '@/shared/official-call-state';
 
 export default function FollowScreen() {
   const { colors } = useTheme();
+  const user = useAuthStore((s) => s.user);
   const {
     savedCalls,
     hydrated,
@@ -34,7 +36,11 @@ export default function FollowScreen() {
     <AppScreen>
       <AppHeader
         title="Acompanhar"
-        context="Seus chamados salvos neste aparelho"
+        context={
+          user?.name
+            ? `Conta de ${user.name.split(' ')[0]} · Chamados salvos`
+            : 'Chamados salvos na sua conta'
+        }
       />
       <FlatList
         data={hydrated ? calls : []}
@@ -96,7 +102,7 @@ export default function FollowScreen() {
               description={
                 savedCalls.length
                   ? 'Escolha Todos para consultar seus outros chamados.'
-                  : 'Encontre um chamado no mapa e salve para voltar a ele. Não precisa de conta.'
+                  : 'Selecione chamados de seu interesse no mapa ou na lista e salve na sua conta para acompanhar atualizações do 1746.'
               }
               action={{
                 title: savedCalls.length
