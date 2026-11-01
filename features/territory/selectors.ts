@@ -88,3 +88,70 @@ export function scriptJson(value: unknown) {
     .replace(/\u2028/g, '\\u2028')
     .replace(/\u2029/g, '\\u2029');
 }
+
+export const TERRITORY_STATUS_OPTIONS = [
+  { value: 'all', label: 'Todas situações' },
+  { value: 'Não Encerrado', label: 'Em atendimento' },
+  { value: 'Encerrado', label: 'Encerrados' },
+];
+
+export const TERRITORY_PERIOD_OPTIONS = [
+  { value: '30', label: '30 dias da base' },
+  { value: '7', label: '7 dias da base' },
+  { value: '1', label: '1 dia da base' },
+  { value: 'all', label: 'Todo o período' },
+];
+
+export function computeRegionBounds(r: {
+  latitude: number;
+  longitude: number;
+  latitudeDelta?: number;
+  longitudeDelta?: number;
+}) {
+  const latSpan = Math.max(0.008, r.latitudeDelta || 0.08);
+  const lngSpan = Math.max(0.008, r.longitudeDelta || 0.08);
+  return {
+    north: r.latitude + latSpan / 2,
+    south: r.latitude - latSpan / 2,
+    east: r.longitude + lngSpan / 2,
+    west: r.longitude - lngSpan / 2,
+  };
+}
+
+export function computeOverviewRegion<T extends { latitude: number; longitude: number }>(
+  points: T[],
+  fallback: {
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+    zoom?: number;
+  },
+) {
+  if (points.length === 0) return fallback;
+  let minLat = points[0].latitude;
+  let maxLat = points[0].latitude;
+  let minLng = points[0].longitude;
+  let maxLng = points[0].longitude;
+
+  for (const p of points) {
+    if (p.latitude < minLat) minLat = p.latitude;
+    if (p.latitude > maxLat) maxLat = p.latitude;
+    if (p.longitude < minLng) minLng = p.longitude;
+    if (p.longitude > maxLng) maxLng = p.longitude;
+  }
+
+  const latDelta = Math.max(0.04, (maxLat - minLat) * 1.35);
+  const lngDelta = Math.max(0.04, (maxLng - minLng) * 1.35);
+  const delta = Math.max(latDelta, lngDelta, 0.001);
+  const zoom = Math.max(11, Math.min(15, Math.round(Math.log2(360 / delta))));
+
+  return {
+    latitude: (minLat + maxLat) / 2,
+    longitude: (minLng + maxLng) / 2,
+    latitudeDelta: latDelta,
+    longitudeDelta: lngDelta,
+    zoom,
+  };
+}
+

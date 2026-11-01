@@ -1,5 +1,7 @@
-import { FacilityRow } from './FacilityRow';
+import { FacilityRow, facilityTitle } from './FacilityRow';
 import type { PublicFacilitySummary } from '@/shared/public-data';
+import { facilityColors } from '@/features/territory/selectors';
+import type { MapMarker } from '@/components/ui/MapboxMapView';
 import React, { useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
@@ -19,6 +21,49 @@ export type Entry =
   | { type: 'occurrence'; item: Occurrence }
   | { type: 'civic'; item: CivicItem }
   | { type: 'official'; item: OfficialCall };
+
+export function entryLocation(entry: Entry) {
+  if (entry.type === 'official') {
+    const item = entry.item;
+    return item.latitude != null &&
+      item.longitude != null &&
+      Number.isFinite(item.latitude) &&
+      Number.isFinite(item.longitude) &&
+      Math.abs(item.latitude) <= 90 &&
+      Math.abs(item.longitude) <= 180
+      ? { latitude: item.latitude, longitude: item.longitude }
+      : undefined;
+  }
+  if (entry.type === 'facility') return entry.item.location || undefined;
+  return undefined;
+}
+
+export function entryToMarker(entry: Entry): MapMarker | null {
+  if (entry.type === 'facility') {
+    return entry.item.location
+      ? {
+          id: entry.item.id,
+          ...entry.item.location,
+          title: facilityTitle(entry.item),
+          kind: entry.item.category,
+          color: facilityColors[entry.item.category],
+        }
+      : null;
+  }
+  if (entry.type !== 'official') return null;
+  const point = entryLocation(entry);
+  return point
+    ? {
+        id: entry.item.id,
+        latitude: point.latitude,
+        longitude: point.longitude,
+        title: `1746 · ${entry.item.serviceSubtype || entry.item.serviceType}`,
+        color:
+          entry.item.officialSituation === 'Encerrado' ? '#236B50' : '#0072BB',
+        kind: 'official',
+      }
+    : null;
+}
 
 const occurrenceStatus: Record<string, string> = {
   pending: 'Recebida',

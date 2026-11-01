@@ -1,7 +1,10 @@
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import { LayerPicker } from '@/components/territory/LayerPicker';
-import { facilityTitle } from '@/components/territory/FacilityRow';
-import { TerritoryListRow } from '@/components/territory/TerritoryListRow';
+import {
+  TerritoryFilterBar,
+  TerritoryFilterModal,
+  type TerritoryFilterBarProps,
+} from '@/components/territory/TerritoryFilterBar';
+import { TerritoryListView } from '@/components/territory/TerritoryListView';
 import {
   usePublicSources,
   usePublicFacilities,
@@ -10,9 +13,10 @@ import {
 } from '@/features/territory/usePublicData';
 import {
   chooseTerritorialEntries,
-  summarizeLayer,
-  facilityColors,
-  facilityLabels,
+  computeOverviewRegion,
+  computeRegionBounds,
+  TERRITORY_PERIOD_OPTIONS,
+  TERRITORY_STATUS_OPTIONS,
 } from '@/features/territory/selectors';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
@@ -25,28 +29,11 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
-import {
-  RefreshControl,
-  Modal,
-  Pressable,
-  ScrollView,
-  FlatList,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Pressable, FlatList, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams, useIsFocused } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
-import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
-import { AppButton } from '@/components/ui/AppButton';
-import { AppSelect } from '@/components/ui/AppSelect';
-import { CitySearch } from '@/components/ui/CitySearch';
-import { QueryState, createCityStyles } from '@/features/city/CityUI';
-import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
-import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
-import { SlidingTabs } from '@/components/ui/SlidingTabs';
-import type { OfficialCall } from '@/shared/contracts';
 import {
   useInfiniteOfficialCalls,
   useOfficialFilters,
@@ -57,9 +44,11 @@ import {
   useTerritorySelection,
   useTerritoryViewMode,
 } from '@/stores/territoryStore';
-import { OsmMapView, type MapMarker } from '@/components/ui/OsmMapView';
+import { MapboxMapView, type MapMarker } from '@/components/ui/MapboxMapView';
 import {
   TerritoryPreviewCard,
+  entryLocation,
+  entryToMarker,
   type Entry,
 } from '@/components/territory/TerritoryPreviewCard';
 import { TerritoryClusterCarousel } from '@/components/territory/TerritoryClusterCarousel';
@@ -72,24 +61,13 @@ type TerritoryMapRegion = {
   zoom?: number;
 };
 
-const locatedOfficialCall = (item: OfficialCall) =>
-  item.latitude !== null &&
-  item.latitude !== undefined &&
-  item.longitude !== null &&
-  item.longitude !== undefined &&
-  Number.isFinite(item.latitude) &&
-  Number.isFinite(item.longitude) &&
-  Math.abs(item.latitude) <= 90 &&
-  Math.abs(item.longitude) <= 180
-    ? { latitude: item.latitude, longitude: item.longitude }
-    : undefined;
-
-const entryLocation = (entry: Entry) => {
-  if (entry.type === 'official') return locatedOfficialCall(entry.item);
-  if (entry.type === 'facility') return entry.item.location || undefined;
-  return undefined;
+const INITIAL_REGION: TerritoryMapRegion = {
+  latitude: -22.92,
+  longitude: -43.32,
+  latitudeDelta: 0.4,
+  longitudeDelta: 0.55,
+  zoom: 12,
 };
-const entryKey = (entry: Entry) => entry.type + ':' + entry.item.id;
 
 export default function TerritoryScreen() {
   return <TerritoryContent />;
@@ -99,19 +77,8 @@ function TerritoryContent() {
   const isFocused = useIsFocused();
   const { colors, mode } = useTheme();
   const insets = useSafeAreaInsets();
-  const cityStyles = useThemedStyles(createCityStyles);
   const styles = useThemedStyles(createStyles);
 
-  const initial = useMemo(
-    () => ({
-      latitude: -22.92,
-      longitude: -43.32,
-      latitudeDelta: 0.4,
-      longitudeDelta: 0.55,
-      zoom: 12,
-    }),
-    [],
-  );
   const listOffset = useRef(0);
   const listRef = useRef<FlatList<Entry>>(null);
   const restoreListOffset = useRef(true);
@@ -151,7 +118,22 @@ function TerritoryContent() {
   const neighborhoods = useNeighborhoods();
   const boundary = useNeighborhoodBoundary(neighborhoodId);
 
-  const [region, setRegion] = useState<TerritoryMapRegion>(initial);
+  const [region, setRegion] = useState<TerritoryMapRegion>(INITIAL_REGION);
+  const viewportRef = useRef<TerritoryMapRegion>(INITIAL_REGION);
+  const updateCameraRegion = useCallback(
+    (
+      next:
+        | TerritoryMapRegion
+        | ((prev: TerritoryMapRegion) => TerritoryMapRegion),
+    ) => {
+      setRegion((prev) => {
+        const resolved = typeof next === 'function' ? next(prev) : next;
+        viewportRef.current = resolved;
+        return resolved;
+      });
+    },
+    [],
+  );
   const [areaOnly, setAreaOnly] = useState(false);
   const [appliedBounds, setAppliedBounds] = useState<{
     north: number;
@@ -166,17 +148,6 @@ function TerritoryContent() {
   const appliedSearch = search.trim() ? debouncedSearch.trim() : '';
   const [status, setStatus] = useState<string>('all');
   const { isListView, setIsListView } = useTerritoryViewMode();
-
-  const computeRegionBounds = (r: TerritoryMapRegion) => {
-    const latSpan = Math.max(0.008, r.latitudeDelta || 0.08);
-    const lngSpan = Math.max(0.008, r.longitudeDelta || 0.08);
-    return {
-      north: r.latitude + latSpan / 2,
-      south: r.latitude - latSpan / 2,
-      east: r.longitude + lngSpan / 2,
-      west: r.longitude - lngSpan / 2,
-    };
-  };
 
   const facilityParams = {
     neighborhoodId,
@@ -238,25 +209,6 @@ function TerritoryContent() {
     ];
   }, [officialFilters.data?.tipos]);
 
-  const statusOptions = useMemo(
-    () => [
-      { value: 'all', label: 'Todas situações' },
-      { value: 'Não Encerrado', label: 'Em atendimento' },
-      { value: 'Encerrado', label: 'Encerrados' },
-    ],
-    [],
-  );
-
-  const periodOptions = useMemo(
-    () => [
-      { value: '30', label: '30 dias da base' },
-      { value: '7', label: '7 dias da base' },
-      { value: '1', label: '1 dia da base' },
-      { value: 'all', label: 'Todo o período' },
-    ],
-    [],
-  );
-
   const [filterVisibility, setFilterVisibility] = useState<{
     param?: string;
     open: boolean;
@@ -300,38 +252,33 @@ function TerritoryContent() {
   const [locating, setLocating] = useState(false);
 
   useEffect(() => {
-    if (focusId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedId(focusId);
-      setSelectedCluster(null);
-      setIsListView(false);
-      setAreaOnly(false);
-      setStatus('all');
-      setServiceType('all');
-      setSearch('');
+    if (!focusId) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedId(focusId);
+    setSelectedCluster(null);
+    setIsListView(false);
+    setAreaOnly(false);
+    setStatus('all');
+    setServiceType('all');
+    setSearch('');
+    if (paramNeighborhood) setNeighborhood(paramNeighborhood);
 
-      if (paramNeighborhood) {
-        setNeighborhood(paramNeighborhood);
+    let targetLat = lat ? Number(lat) : NaN;
+    let targetLng = lng ? Number(lng) : NaN;
+    if (!Number.isFinite(targetLat) || !Number.isFinite(targetLng)) {
+      const off = officialCalls.data?.calls?.find((i) => i.id === focusId);
+      if (off && off.latitude != null && off.longitude != null) {
+        targetLat = off.latitude;
+        targetLng = off.longitude;
       }
-
-      let targetLat = lat ? Number(lat) : NaN;
-      let targetLng = lng ? Number(lng) : NaN;
-      if (!Number.isFinite(targetLat) || !Number.isFinite(targetLng)) {
-        const off = officialCalls.data?.calls?.find((i) => i.id === focusId);
-        if (off && off.latitude != null && off.longitude != null) {
-          targetLat = off.latitude;
-          targetLng = off.longitude;
-        }
-      }
-
-      if (Number.isFinite(targetLat) && Number.isFinite(targetLng)) {
-        setRegion((prev: TerritoryMapRegion) => ({
-          ...prev,
-          latitude: targetLat,
-          longitude: targetLng,
-          zoom: 17,
-        }));
-      }
+    }
+    if (Number.isFinite(targetLat) && Number.isFinite(targetLng)) {
+      updateCameraRegion((prev) => ({
+        ...prev,
+        latitude: targetLat,
+        longitude: targetLng,
+        zoom: 17,
+      }));
     }
   }, [
     focusId,
@@ -341,6 +288,7 @@ function TerritoryContent() {
     officialCalls.data?.calls,
     setIsListView,
     setNeighborhood,
+    updateCameraRegion,
   ]);
 
   const entries = useMemo<Entry[]>(() => {
@@ -379,20 +327,13 @@ function TerritoryContent() {
     const off = officialCalls.data?.calls?.find(
       (item) => item.id === selectedId,
     );
-    if (off) return { type: 'official' as const, item: off };
-    return null;
+    return off ? { type: 'official' as const, item: off } : null;
   }, [selectedId, entries, officialCalls.data?.calls]);
 
   const selectedClusterEntries = useMemo<Entry[]>(() => {
     if (!selectedCluster || selectedCluster.ids.length === 0) return [];
     const idSet = new Set(selectedCluster.ids);
-    const matched: Entry[] = [];
-    for (const entry of entries) {
-      if (idSet.has(entry.item.id)) {
-        matched.push(entry);
-      }
-    }
-    return matched;
+    return entries.filter((entry) => idSet.has(entry.item.id));
   }, [selectedCluster, entries]);
 
   const municipalOverviewRegion = useMemo(() => {
@@ -401,39 +342,8 @@ function TerritoryContent() {
       .filter((pt): pt is { latitude: number; longitude: number } =>
         Boolean(pt),
       );
-
-    if (points.length === 0) {
-      return initial;
-    }
-
-    let minLat = points[0].latitude;
-    let maxLat = points[0].latitude;
-    let minLng = points[0].longitude;
-    let maxLng = points[0].longitude;
-
-    for (const p of points) {
-      if (p.latitude < minLat) minLat = p.latitude;
-      if (p.latitude > maxLat) maxLat = p.latitude;
-      if (p.longitude < minLng) minLng = p.longitude;
-      if (p.longitude > maxLng) maxLng = p.longitude;
-    }
-
-    const latDelta = Math.max(0.04, (maxLat - minLat) * 1.35);
-    const lngDelta = Math.max(0.04, (maxLng - minLng) * 1.35);
-    const delta = Math.max(latDelta, lngDelta, 0.001);
-    const calculatedZoom = Math.max(
-      11,
-      Math.min(15, Math.round(Math.log2(360 / delta))),
-    );
-
-    return {
-      latitude: (minLat + maxLat) / 2,
-      longitude: (minLng + maxLng) / 2,
-      latitudeDelta: latDelta,
-      longitudeDelta: lngDelta,
-      zoom: calculatedZoom,
-    };
-  }, [entries, initial]);
+    return computeOverviewRegion(points, INITIAL_REGION);
+  }, [entries]);
 
   const filterCount =
     Number(Boolean(neighborhood)) +
@@ -446,86 +356,38 @@ function TerritoryContent() {
   const hasMoreCalls = Boolean(officialCalls.hasNextPage);
   const dataReady = officialCalls.data !== undefined;
 
-  // Auto-focus map camera when user chooses a specific neighborhood
   useEffect(() => {
     if (!neighborhood || areaOnly || focusId) return;
-    const hasLocated = entries.some((entry) => Boolean(entryLocation(entry)));
-    if (hasLocated) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setRegion(municipalOverviewRegion);
+    if (entries.some((entry) => Boolean(entryLocation(entry)))) {
+      updateCameraRegion(municipalOverviewRegion);
     }
-  }, [neighborhood, areaOnly, focusId, entries, municipalOverviewRegion]);
+  }, [
+    neighborhood,
+    areaOnly,
+    focusId,
+    entries,
+    municipalOverviewRegion,
+    updateCameraRegion,
+  ]);
 
   const openEntry = useCallback((entry: Entry) => {
-    if (entry.type === 'facility') {
-      router.push({
-        pathname: '/FacilityDetailsScreen',
-        params: { id: entry.item.id },
-      });
-      return;
-    }
     router.push({
-      pathname: '/OfficialCallDetailsScreen',
+      pathname:
+        entry.type === 'facility'
+          ? '/FacilityDetailsScreen'
+          : '/OfficialCallDetailsScreen',
       params: { id: entry.item.id },
     });
   }, []);
 
-  const renderEntry = useCallback(
-    ({ item }: { item: Entry }) => (
-      <TerritoryListRow entry={item} onOpen={openEntry} />
-    ),
-    [openEntry],
-  );
-
-  const osmMarkers: MapMarker[] = useMemo(() => {
-    const list: MapMarker[] = located.flatMap((entry): MapMarker[] => {
-      if (entry.type === 'facility') {
-        if (!entry.item.location) return [];
-        return [
-          {
-            id: entry.item.id,
-            ...entry.item.location,
-            title: facilityTitle(entry.item),
-            kind: entry.item.category,
-            color: facilityColors[entry.item.category],
-          },
-        ];
-      }
-      if (entry.type !== 'official') return [];
-      const point = entryLocation(entry);
-      if (!point) return [];
-      const isClosed = entry.item.officialSituation === 'Encerrado';
-      return [
-        {
-          id: entry.item.id,
-          latitude: point.latitude,
-          longitude: point.longitude,
-          title: `1746 · ${entry.item.serviceSubtype || entry.item.serviceType}`,
-          color: isClosed ? '#236B50' : '#0072BB',
-          kind: 'official',
-        },
-      ];
-    });
-
-    if (
-      selectedEntry &&
-      selectedEntry.type === 'official' &&
-      !list.some((m) => m.id === selectedEntry.item.id)
-    ) {
-      const point = entryLocation(selectedEntry);
-      if (point) {
-        const isClosed = selectedEntry.item.officialSituation === 'Encerrado';
-        list.push({
-          id: selectedEntry.item.id,
-          latitude: point.latitude,
-          longitude: point.longitude,
-          title: `1746 · ${selectedEntry.item.serviceSubtype || selectedEntry.item.serviceType}`,
-          color: isClosed ? '#236B50' : '#0072BB',
-          kind: 'official',
-        });
-      }
+  const mapMarkers: MapMarker[] = useMemo(() => {
+    const list = located
+      .map(entryToMarker)
+      .filter((m): m is MapMarker => m !== null);
+    if (selectedEntry && !list.some((m) => m.id === selectedEntry.item.id)) {
+      const extra = entryToMarker(selectedEntry);
+      if (extra) list.push(extra);
     }
-
     return list;
   }, [located, selectedEntry]);
 
@@ -560,7 +422,7 @@ function TerritoryContent() {
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
-      setRegion((current: TerritoryMapRegion) => ({
+      updateCameraRegion((current) => ({
         ...current,
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
@@ -593,6 +455,7 @@ function TerritoryContent() {
       setRefreshing(false);
     }
   };
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedId(null);
@@ -608,200 +471,65 @@ function TerritoryContent() {
     serviceType,
     period,
   ]);
-  const renderLayerControls = () => (
-    <View style={{ gap: 4 }}>
-      <LayerPicker value={layers} onChange={setLayers} />
-      {neighborhoodId && (
-        <AppButton
-          title="Conhecer este bairro"
-          variant="secondary"
-          onPress={() =>
-            router.push({
-              pathname: '/NeighborhoodScreen',
-              params: { neighborhoodId },
-            })
-          }
-        />
-      )}
-      {layers.includes('official') && startDate && endDate && (
-        <AppText
-          variant="caption"
-          style={{ backgroundColor: colors.surface, padding: 5 }}
-        >
-          1746 · {startDate} a {endDate}
-        </AppText>
-      )}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8 }}
-      >
-        {layers.includes('official') && (
-          <AppText
-            variant="caption"
-            style={{
-              padding: 6,
-              backgroundColor: colors.surface,
-              borderRadius: 8,
-            }}
-          >
-            1746 ·{' '}
-            {officialSource?.state === 'unavailable' ||
-            officialCalls.data?.territoryConfirmed === false
-              ? 'Cobertura não confirmada'
-              : officialCalls.isLoading
-                ? 'Carregando'
-                : officialCalls.error
-                  ? 'Falha ao consultar'
-                  : summarizeLayer(
-                      officialCalls.data?.calls.length || 0,
-                      officialCalls.data?.total ?? null,
-                    )}
-          </AppText>
-        )}
-        {(['school', 'health', 'square'] as const)
-          .filter((c) => layers.includes(c))
-          .map((category) => {
-            const q = facilityQueries[category];
-            const page = q.data?.pages[0];
-            const shown =
-              q.data?.pages.reduce((n, p) => n + p.items.length, 0) || 0;
-            return (
-              <Pressable
-                key={category}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  q.hasNextPage
-                    ? 'Carregar mais ' + facilityLabels[category]
-                    : 'Atualizar ' + facilityLabels[category]
-                }
-                disabled={!facilitiesConfirmed}
-                accessibilityState={{ disabled: !facilitiesConfirmed }}
-                onPress={() => {
-                  if (!facilitiesConfirmed) return;
-                  void (q.hasNextPage && !q.error
-                    ? q.fetchNextPage()
-                    : q.refetch());
-                }}
-                style={{
-                  minHeight: 44,
-                  padding: 8,
-                  justifyContent: 'center',
-                  backgroundColor: colors.surface,
-                  borderRadius: 12,
-                }}
-              >
-                <AppText variant="caption">
-                  {facilityLabels[category]} ·{' '}
-                  {neighborhood && !neighborhoodId
-                    ? 'Bairro não confirmado'
-                    : q.isLoading
-                      ? 'Carregando'
-                      : q.error
-                        ? 'Falha · Tentar novamente'
-                        : summarizeLayer(shown, page?.total ?? null)}
-                  {facilitiesConfirmed && q.hasNextPage ? ' · Mais' : ''}
-                </AppText>
-                {page?.sources.some((s) => s.state === 'stale') && (
-                  <AppText variant="caption" color="muted">
-                    Última publicação disponível
-                  </AppText>
-                )}
-              </Pressable>
-            );
-          })}
-        {!layers.length && (
-          <AppText
-            variant="caption"
-            style={{ padding: 8, backgroundColor: colors.surface }}
-          >
-            Selecione uma camada
-          </AppText>
-        )}
-      </ScrollView>
-    </View>
-  );
-  const renderCompactFilterStrip = () => (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.compactFilterStrip}
-    >
-      <NeighborhoodPicker
-        compact
-        options={bairroOptions}
-        value={neighborhood}
-        onChange={(value) => {
-          setNeighborhood(value);
-          router.setParams({ neighborhoodId: undefined, layer: undefined });
-          setAreaOnly(false);
-          setAppliedBounds(null);
-          setSelectedId(null);
-          setSelectedCluster(null);
-        }}
-      />
 
-      <AppSelect
-        compact
-        label="Tipo de serviço 1746"
-        placeholder="Buscar serviço (ex: iluminação, entulho...)"
-        icon="construct-outline"
-        defaultValue="all"
-        options={serviceTypeOptions}
-        value={serviceType}
-        onChange={(value) => {
-          setServiceType(value);
-          setSelectedId(null);
-          setSelectedCluster(null);
-        }}
-      />
-
-      <AppSelect
-        compact
-        label="Período disponível"
-        icon="calendar-outline"
-        defaultValue="30"
-        options={periodOptions}
-        value={period}
-        onChange={(value) => {
-          setPeriod(value);
-          router.setParams({ startDate: undefined, endDate: undefined });
-          setSelectedId(null);
-          setSelectedCluster(null);
-        }}
-      />
-
-      <AppSelect
-        compact
-        label="Situação do chamado"
-        icon="pulse-outline"
-        defaultValue="all"
-        options={statusOptions}
-        value={status}
-        onChange={(value) => {
-          setStatus(value);
-          setSelectedId(null);
-          setSelectedCluster(null);
-        }}
-      />
-
-      <View
-        style={[
-          styles.resultsBadge,
-          { backgroundColor: colors.surface + 'F2' },
-        ]}
-      >
-        <AppText variant="caption" color="muted" style={{ fontWeight: '700' }}>
-          {officialCalls.isLoading ? '...' : totalCalls.toLocaleString('pt-BR')}
-        </AppText>
-      </View>
-    </ScrollView>
-  );
-
-  if (!isFocused) return null;
+  const filterBarProps: TerritoryFilterBarProps = {
+    search,
+    onSearchChange: setSearch,
+    onOpenFilters: () => setFiltersOpen(true),
+    filtersOpen,
+    filterCount,
+    bairroOptions,
+    neighborhood,
+    neighborhoodId,
+    onNeighborhoodChange: (value) => {
+      setNeighborhood(value);
+      router.setParams({ neighborhoodId: undefined, layer: undefined });
+      setAreaOnly(false);
+      setAppliedBounds(null);
+      setSelectedId(null);
+      setSelectedCluster(null);
+    },
+    serviceType,
+    serviceTypeOptions,
+    onServiceTypeChange: (value) => {
+      setServiceType(value);
+      setSelectedId(null);
+      setSelectedCluster(null);
+    },
+    period,
+    periodOptions: TERRITORY_PERIOD_OPTIONS,
+    onPeriodChange: (value) => {
+      setPeriod(value);
+      router.setParams({ startDate: undefined, endDate: undefined });
+      setSelectedId(null);
+      setSelectedCluster(null);
+    },
+    status,
+    statusOptions: TERRITORY_STATUS_OPTIONS,
+    onStatusChange: (value) => {
+      setStatus(value);
+      setSelectedId(null);
+      setSelectedCluster(null);
+    },
+    layers,
+    onLayersChange: setLayers,
+    startDate,
+    endDate,
+    totalCalls,
+    officialCallsStatus: {
+      isLoading: officialCalls.isLoading,
+      error: officialCalls.error,
+      displayedCount: officialCalls.data?.calls.length || 0,
+      total: officialCalls.data?.total ?? null,
+      territoryConfirmed: officialCalls.data?.territoryConfirmed,
+      sourceState: officialSource?.state,
+    },
+    facilityQueries,
+    facilitiesConfirmed,
+  };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, !isFocused && { display: 'none' }]}>
       {locationMessage !== '' && (
         <View
           style={[
@@ -819,13 +547,12 @@ function TerritoryContent() {
         </View>
       )}
 
-      {/* 1. MAPA DE FUNDO EDGE-TO-EDGE */}
       {!isListView && (
         <View style={StyleSheet.absoluteFill}>
-          <OsmMapView
+          <MapboxMapView
             style={StyleSheet.absoluteFill}
             region={region}
-            markers={osmMarkers}
+            markers={mapMarkers}
             boundary={boundary.data?.geometry}
             selectedId={selectedId}
             selectedClusterIds={selectedCluster?.ids || null}
@@ -843,20 +570,19 @@ function TerritoryContent() {
               setSelectedCluster(null);
             }}
             onRegionChange={(newRegion) => {
-              setRegion((curr: TerritoryMapRegion) => ({
-                ...curr,
+              viewportRef.current = {
+                ...viewportRef.current,
                 latitude: newRegion.latitude,
                 longitude: newRegion.longitude,
                 latitudeDelta: newRegion.latitudeDelta,
                 longitudeDelta: newRegion.longitudeDelta,
-                zoom: newRegion.zoom ?? curr.zoom,
-              }));
+                zoom: newRegion.zoom ?? viewportRef.current.zoom,
+              };
             }}
           />
         </View>
       )}
 
-      {/* 2. TOP FLOATING HEADER COMPACTO (BUSCA + BARRA DE SELECTS) */}
       {!isListView && (
         <View
           style={[
@@ -864,22 +590,10 @@ function TerritoryContent() {
             { paddingTop: insets.top + spacing.xs },
           ]}
         >
-          <View style={styles.searchContainer}>
-            <CitySearch
-              value={search}
-              onChangeText={setSearch}
-              onFilters={() => setFiltersOpen(true)}
-              expanded={filtersOpen}
-              filterCount={filterCount}
-            />
-          </View>
-
-          {renderCompactFilterStrip()}
-          {renderLayerControls()}
+          <TerritoryFilterBar {...filterBarProps} />
         </View>
       )}
 
-      {/* 3. BOTÕES FLUTUANTES LATERAIS (GPS, RESET) */}
       {!isListView && (
         <View
           style={[
@@ -910,7 +624,7 @@ function TerritoryContent() {
             accessibilityRole="button"
             accessibilityLabel="Voltar ao município"
             onPress={() => {
-              setRegion(municipalOverviewRegion);
+              updateCameraRegion(municipalOverviewRegion);
               setAreaOnly(false);
               setSelectedId(null);
               setSelectedCluster(null);
@@ -925,7 +639,6 @@ function TerritoryContent() {
         </View>
       )}
 
-      {/* 4. BOTÃO 'BUSCAR NESTA ÁREA' */}
       {!isListView && !selectedEntry && selectedClusterEntries.length === 0 && (
         <View
           style={[styles.areaButtonWrapper, { bottom: insets.bottom + 95 }]}
@@ -937,7 +650,7 @@ function TerritoryContent() {
                 setAreaOnly(false);
                 setAppliedBounds(null);
               } else {
-                setAppliedBounds(computeRegionBounds(region));
+                setAppliedBounds(computeRegionBounds(viewportRef.current));
                 setAreaOnly(true);
               }
             }}
@@ -954,7 +667,6 @@ function TerritoryContent() {
         </View>
       )}
 
-      {/* 5. BOTTOM PREVIEW CARDS (INDIVIDUAL OU CARROSSEL DE CLUSTER) */}
       {!isListView && selectedClusterEntries.length > 1 && (
         <TerritoryClusterCarousel
           entries={selectedClusterEntries}
@@ -965,7 +677,7 @@ function TerritoryContent() {
               const targetLat = selectedCluster.latitude;
               const targetLng = selectedCluster.longitude;
               setSelectedCluster(null);
-              setRegion((curr: TerritoryMapRegion) => ({
+              updateCameraRegion((curr) => ({
                 ...curr,
                 latitude: targetLat,
                 longitude: targetLng,
@@ -995,331 +707,88 @@ function TerritoryContent() {
         />
       )}
 
-      {/* 6. VISUALIZAÇÃO EM LISTA (QUANDO ATIVADA) */}
       {isListView && (
-        <View
-          style={[
-            styles.fullListOverlay,
-            { backgroundColor: colors.canvas, paddingTop: insets.top },
-          ]}
-        >
-          <AppHeader
-            title="Território"
-            context="Rio de Janeiro · Serviços e demandas"
-          />
-
-          <View style={styles.listFilterBar}>
-            <View style={{ paddingHorizontal: spacing.md }}>
-              <CitySearch
-                value={search}
-                onChangeText={setSearch}
-                onFilters={() => setFiltersOpen(true)}
-                expanded={filtersOpen}
-                filterCount={filterCount}
-              />
-            </View>
-
-            <View style={{ paddingHorizontal: spacing.md }}>
-              {renderCompactFilterStrip()}
-              {renderLayerControls()}
-            </View>
-          </View>
-
-          <FlatList<Entry>
-            ref={listRef}
-            data={listed}
-            onContentSizeChange={(_, height) => {
-              if (!restoreListOffset.current || height <= listOffset.current)
-                return;
-              listRef.current?.scrollToOffset({
-                offset: listOffset.current,
-                animated: false,
-              });
-              restoreListOffset.current = false;
-            }}
-            onScroll={(event) => {
-              if (!restoreListOffset.current)
-                listOffset.current = event.nativeEvent.contentOffset.y;
-            }}
-            scrollEventThrottle={32}
-            keyExtractor={entryKey}
-            renderItem={renderEntry}
-            initialNumToRender={10}
-            maxToRenderPerBatch={8}
-            windowSize={7}
-            ItemSeparatorComponent={TerritoryRowSeparator}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={() => {
-                  void refreshAll();
-                }}
-                tintColor={colors.ink}
-              />
-            }
-            contentContainerStyle={[
-              cityStyles.content,
-              { gap: 0, paddingBottom: insets.bottom + 100 },
-            ]}
-            ListHeaderComponent={
-              <View style={{ gap: spacing.md, marginBottom: spacing.md }}>
-                {(officialCalls.isLoading ||
-                  officialCalls.error ||
-                  officialCalls.fetchStatus === 'paused') && (
-                  <View style={{ gap: spacing.xs }}>
-                    <QueryState
-                      loading={officialCalls.isLoading}
-                      error={officialCalls.error}
-                      retry={officialCalls.refetch}
-                    />
-                  </View>
-                )}
-                <View style={cityStyles.section}>
-                  <AppText variant="sectionTitle">
-                    {areaOnly
-                      ? 'Registros na área visível'
-                      : 'Registros no território'}{' '}
-                    (
-                    {layers.length === 1 &&
-                    layers[0] === 'official' &&
-                    listed.length < totalCalls
-                      ? `${listed.length} de ${totalCalls.toLocaleString('pt-BR')}`
-                      : listed.length.toLocaleString('pt-BR')}
-                    )
-                  </AppText>
-                </View>
-              </View>
-            }
-            ListFooterComponent={
-              <View style={{ gap: spacing.md, marginTop: spacing.md }}>
-                {layers.includes('official') && hasMoreCalls && (
-                  <AppButton
-                    title={`Carregar mais chamados (${listed.length} de ${totalCalls.toLocaleString('pt-BR')})`}
-                    variant="secondary"
-                    disabled={officialCalls.isFetchingNextPage}
-                    onPress={() => {
-                      if (!officialCalls.isFetching)
-                        void officialCalls.fetchNextPage();
-                    }}
-                  />
-                )}
-                {dataReady &&
-                  listed.length === 0 &&
-                  layers.length === 1 &&
-                  layers[0] === 'official' && (
-                    <IllustratedEmptyState
-                      kind="territory"
-                      title="Nenhum chamado 1746 neste recorte"
-                      description="Nenhum chamado oficial encontrado com os filtros atuais."
-                      action={{
-                        title: 'Limpar filtros',
-                        onPress: resetFilters,
-                      }}
-                    />
-                  )}
-                {unlocated.length > 0 && (
-                  <AppText variant="caption" color="muted">
-                    Esta lista inclui {unlocated.length} registros sem ponto no
-                    mapa.
-                  </AppText>
-                )}
-              </View>
-            }
-          />
-        </View>
+        <TerritoryListView
+          listRef={listRef}
+          listOffset={listOffset}
+          restoreListOffset={restoreListOffset}
+          listed={listed}
+          unlocatedCount={unlocated.length}
+          areaOnly={areaOnly}
+          layers={layers}
+          totalCalls={totalCalls}
+          hasMoreCalls={hasMoreCalls}
+          dataReady={dataReady}
+          refreshing={refreshing}
+          onRefresh={() => {
+            void refreshAll();
+          }}
+          onOpenEntry={openEntry}
+          onResetFilters={resetFilters}
+          officialQuery={{
+            isLoading: officialCalls.isLoading,
+            isFetching: officialCalls.isFetching,
+            isFetchingNextPage: officialCalls.isFetchingNextPage,
+            error: officialCalls.error,
+            fetchStatus: officialCalls.fetchStatus,
+            refetch: () => {
+              void officialCalls.refetch();
+            },
+            fetchNextPage: () => {
+              void officialCalls.fetchNextPage();
+            },
+          }}
+          filterBarProps={filterBarProps}
+        />
       )}
 
-      {/* 7. MODAL DE FILTROS COMPACTO (BOTTOM SHEET) */}
-      <Modal
+      <TerritoryFilterModal
         visible={filtersOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setFiltersOpen(false)}
-      >
-        <View style={styles.modalBackdrop}>
-          <Pressable
-            style={StyleSheet.absoluteFill}
-            onPress={() => setFiltersOpen(false)}
-          />
-          <View
-            style={[
-              styles.filterModalSheet,
-              {
-                backgroundColor: colors.surface,
-                paddingBottom: Math.max(insets.bottom, spacing.md),
-              },
-            ]}
-          >
-            <View style={styles.sheetHandleBar}>
-              <View
-                style={[
-                  styles.sheetHandle,
-                  { backgroundColor: colors.divider },
-                ]}
-              />
-            </View>
-
-            <View style={styles.filterModalHeader}>
-              <AppText variant="sectionTitle" style={{ fontSize: 18 }}>
-                Filtros do Território
-              </AppText>
-              <Pressable
-                onPress={() => setFiltersOpen(false)}
-                hitSlop={12}
-                style={[
-                  styles.closeButton,
-                  { backgroundColor: colors.surfaceSubdued },
-                ]}
-              >
-                <Ionicons name="close" size={18} color={colors.ink} />
-              </Pressable>
-            </View>
-
-            <View style={styles.filterModalBody}>
-              <View style={styles.filterField}>
-                <AppText
-                  variant="caption"
-                  color="muted"
-                  style={styles.filterLabel}
-                >
-                  BAIRRO
-                </AppText>
-                <NeighborhoodPicker
-                  options={bairroOptions}
-                  value={neighborhood}
-                  onChange={(value) => {
-                    setNeighborhood(value);
-                    router.setParams({
-                      neighborhoodId: undefined,
-                      layer: undefined,
-                    });
-                    setSelectedId(null);
-                  }}
-                />
-              </View>
-
-              <View style={styles.filterField}>
-                <AppText
-                  variant="caption"
-                  color="muted"
-                  style={styles.filterLabel}
-                >
-                  TIPO DE SERVIÇO (CENTRAL 1746)
-                </AppText>
-                <AppSelect
-                  label="Tipo de serviço 1746"
-                  placeholder="Buscar tipo de serviço..."
-                  icon="construct-outline"
-                  defaultValue="all"
-                  options={serviceTypeOptions}
-                  value={serviceType}
-                  onChange={(value) => {
-                    setServiceType(value);
-                    setSelectedId(null);
-                  }}
-                />
-              </View>
-
-              <View style={styles.filterField}>
-                <AppText
-                  variant="caption"
-                  color="muted"
-                  style={styles.filterLabel}
-                >
-                  SITUAÇÃO DO CHAMADO
-                </AppText>
-                <SlidingTabs
-                  label="Situação"
-                  scroll={false}
-                  edgeToEdge={false}
-                  options={[
-                    { value: 'all', label: 'Todas' },
-                    { value: 'Não Encerrado', label: 'Abertos' },
-                    { value: 'Encerrado', label: 'Encerrados' },
-                  ]}
-                  value={status}
-                  onChange={(value) => {
-                    setStatus(value);
-                    setSelectedId(null);
-                  }}
-                />
-              </View>
-
-              <View style={styles.filterField}>
-                <AppText
-                  variant="caption"
-                  color="muted"
-                  style={styles.filterLabel}
-                >
-                  PERÍODO DISPONÍVEL
-                </AppText>
-                <SlidingTabs
-                  label="Período"
-                  scroll={false}
-                  edgeToEdge={false}
-                  options={periodOptions}
-                  value={period}
-                  onChange={(value) => {
-                    setPeriod(value);
-                    router.setParams({
-                      startDate: undefined,
-                      endDate: undefined,
-                    });
-                    setSelectedId(null);
-                  }}
-                />
-              </View>
-
-              <View style={styles.filterField}>
-                <AppText
-                  variant="caption"
-                  color="muted"
-                  style={styles.filterLabel}
-                >
-                  RECORTE ESPACIAL
-                </AppText>
-                <SlidingTabs
-                  label="Recorte espacial"
-                  scroll={false}
-                  edgeToEdge={false}
-                  options={[
-                    { value: 'all', label: 'Todo o Rio' },
-                    { value: 'area', label: 'Área visível no mapa' },
-                  ]}
-                  value={areaOnly ? 'area' : 'all'}
-                  onChange={(value) => {
-                    const nextArea = value === 'area';
-                    setAreaOnly(nextArea);
-                    setAppliedBounds(
-                      nextArea ? computeRegionBounds(region) : null,
-                    );
-                    setSelectedId(null);
-                  }}
-                />
-              </View>
-
-              <View style={styles.filterActionsRow}>
-                <AppButton
-                  title="Limpar tudo"
-                  variant="quiet"
-                  onPress={resetFilters}
-                />
-                <AppButton
-                  title={`Ver ${totalCalls.toLocaleString('pt-BR')} chamados`}
-                  variant="primary"
-                  onPress={() => setFiltersOpen(false)}
-                />
-              </View>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setFiltersOpen(false)}
+        onReset={resetFilters}
+        bairroOptions={bairroOptions}
+        neighborhood={neighborhood}
+        onNeighborhoodChange={(value) => {
+          setNeighborhood(value);
+          router.setParams({
+            neighborhoodId: undefined,
+            layer: undefined,
+          });
+          setSelectedId(null);
+        }}
+        serviceType={serviceType}
+        serviceTypeOptions={serviceTypeOptions}
+        onServiceTypeChange={(value) => {
+          setServiceType(value);
+          setSelectedId(null);
+        }}
+        status={status}
+        onStatusChange={(value) => {
+          setStatus(value);
+          setSelectedId(null);
+        }}
+        period={period}
+        periodOptions={TERRITORY_PERIOD_OPTIONS}
+        onPeriodChange={(value) => {
+          setPeriod(value);
+          router.setParams({
+            startDate: undefined,
+            endDate: undefined,
+          });
+          setSelectedId(null);
+        }}
+        areaOnly={areaOnly}
+        onAreaOnlyChange={(nextArea) => {
+          setAreaOnly(nextArea);
+          setAppliedBounds(
+            nextArea ? computeRegionBounds(viewportRef.current) : null,
+          );
+          setSelectedId(null);
+        }}
+        totalCalls={totalCalls}
+      />
     </View>
   );
-}
-
-function TerritoryRowSeparator() {
-  return <View style={{ height: spacing.md }} />;
 }
 
 const createStyles = (colors: ThemeColors) =>
@@ -1349,89 +818,6 @@ const createStyles = (colors: ThemeColors) =>
       zIndex: 50,
       paddingHorizontal: spacing.md,
       gap: 8,
-    },
-    searchContainer: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 4,
-    },
-    compactFilterStrip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingVertical: 2,
-    },
-    listFilterBar: {
-      paddingBottom: spacing.xs,
-      gap: 8,
-      backgroundColor: colors.canvas,
-      zIndex: 10,
-    },
-    resultsBadge: {
-      height: 36,
-      paddingHorizontal: spacing.sm + 2,
-      borderRadius: layout.radius.pill,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    modalBackdrop: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.45)',
-      justifyContent: 'flex-end',
-    },
-    filterModalSheet: {
-      borderTopLeftRadius: layout.radius.sheet,
-      borderTopRightRadius: layout.radius.sheet,
-      paddingTop: spacing.xs,
-    },
-    sheetHandleBar: {
-      alignItems: 'center',
-      paddingVertical: 6,
-    },
-    sheetHandle: {
-      width: 36,
-      height: 4,
-      borderRadius: 2,
-    },
-    filterModalHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: spacing.lg,
-      paddingVertical: spacing.xs,
-    },
-    closeButton: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    filterModalBody: {
-      paddingHorizontal: spacing.lg,
-      paddingTop: spacing.xs,
-      gap: spacing.md,
-    },
-    filterField: {
-      gap: 6,
-    },
-    filterLabel: {
-      fontWeight: '700',
-      letterSpacing: 0.5,
-      fontSize: 11,
-    },
-    filterActionsRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginTop: spacing.xs,
-      paddingTop: spacing.xs,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: colors.divider,
     },
     mapActionsRight: {
       position: 'absolute',
@@ -1472,13 +858,5 @@ const createStyles = (colors: ThemeColors) =>
       elevation: 5,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
-    },
-    fullListOverlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      zIndex: 60,
     },
   });
