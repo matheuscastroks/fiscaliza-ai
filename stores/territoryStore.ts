@@ -7,13 +7,28 @@ import {
 } from '@/features/territory/selectors';
 import { create } from 'zustand';
 const REGION_KEY = 'fiscaliza-ai:region:3304557:v1';
+export function regionStorageKey(
+  userId?: string | null,
+  municipalityId = '3304557',
+): string {
+  return userId
+    ? `fiscaliza-ai:region:${userId}:${municipalityId}:v1`
+    : REGION_KEY;
+}
 let initialization: Promise<void> | undefined;
 let writes = Promise.resolve();
 export const useTerritoryStore = create<{
+  userId: string | null;
+  municipalityId: string;
   hydrated: boolean;
   persistenceError: string | null;
   preferredNeighborhood: string;
   initialize: () => Promise<void>;
+  setScope: (
+    userId: string | null,
+    municipalityId?: string,
+    defaultNeighborhood?: string,
+  ) => Promise<void>;
   setPreferredNeighborhood: (name: string) => Promise<boolean>;
   neighborhood: string;
   setNeighborhood: (name: string) => void;
@@ -23,6 +38,8 @@ export const useTerritoryStore = create<{
   setIsListView: (value: boolean) => void;
   toggleViewMode: () => void;
 }>((set, get) => ({
+  userId: null,
+  municipalityId: '3304557',
   hydrated: false,
   persistenceError: null,
   preferredNeighborhood: '',
@@ -31,32 +48,72 @@ export const useTerritoryStore = create<{
   isListView: false,
   initialize: () => {
     if (initialization) return initialization;
+    const scopeUserId = get().userId;
+    const scopeMunicipalityId = get().municipalityId;
+    const key = regionStorageKey(scopeUserId, scopeMunicipalityId);
     initialization = (async () => {
       try {
-        const raw = await AsyncStorage.getItem(REGION_KEY);
+        const raw = await AsyncStorage.getItem(key);
         if (!raw) return;
         const value = JSON.parse(raw);
         if (value.version !== 1 || typeof value.neighborhood !== 'string')
           throw Error('format');
-        set({ preferredNeighborhood: value.neighborhood });
+        if (
+          get().userId === scopeUserId &&
+          get().municipalityId === scopeMunicipalityId
+        ) {
+          set({ preferredNeighborhood: value.neighborhood });
+        }
       } catch {
-        set({
-          persistenceError: 'Não foi possível ler sua região neste aparelho.',
-        });
+        if (
+          get().userId === scopeUserId &&
+          get().municipalityId === scopeMunicipalityId
+        ) {
+          set({
+            persistenceError: 'Não foi possível ler sua região na sua conta.',
+          });
+        }
       } finally {
-        set({ hydrated: true });
+        if (
+          get().userId === scopeUserId &&
+          get().municipalityId === scopeMunicipalityId
+        ) {
+          set({ hydrated: true });
+        }
       }
     })();
     return initialization;
+  },
+  setScope: (userId, municipalityId = '3304557', defaultNeighborhood = '') => {
+    const nextMunicipalityId = municipalityId || '3304557';
+    if (
+      get().userId === userId &&
+      get().municipalityId === nextMunicipalityId &&
+      initialization
+    ) {
+      return initialization;
+    }
+    initialization = undefined;
+    set({
+      userId,
+      municipalityId: nextMunicipalityId,
+      hydrated: false,
+      persistenceError: null,
+      preferredNeighborhood: defaultNeighborhood.trim(),
+      neighborhood: '',
+      isListView: false,
+    });
+    return get().initialize();
   },
   setPreferredNeighborhood: (name) => {
     let success = false;
     const result = writes.then(async () => {
       await get().initialize();
+      const key = regionStorageKey(get().userId, get().municipalityId);
       try {
         const neighborhood = name.trim();
         await AsyncStorage.setItem(
-          REGION_KEY,
+          key,
           JSON.stringify({ version: 1, neighborhood }),
         );
         set({ preferredNeighborhood: neighborhood, persistenceError: null });

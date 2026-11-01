@@ -16,22 +16,26 @@ function load(path) {
   );
   return module.exports;
 }
-test('public citizen journeys include preferences but never legacy writes or profiles', () => {
+test('only login and introductory help screens are accessible without authentication', () => {
   const { isPublicCitizenRoute: publicRoute } = load(
     'shared/citizen-navigation.ts',
   );
+  for (const segments of [
+    ['LoginScreen'],
+    ['AboutScreen'],
+    ['HelpScreen'],
+    ['OnboardingScreen'],
+  ])
+    assert.equal(publicRoute(segments), true);
   for (const segments of [
     [],
     ['(tabs)'],
     ['(tabs)', 'FollowScreen'],
     ['(tabs)', 'ParticipateScreen'],
-    ['SettingsScreen'],
-    ['OfficialCallDetailsScreen'],
-  ])
-    assert.equal(publicRoute(segments), true);
-  for (const segments of [
     ['(tabs)', 'ReportScreen'],
     ['(tabs)', 'ProfileScreen'],
+    ['SettingsScreen'],
+    ['OfficialCallDetailsScreen'],
     ['ProposalScreen'],
     ['PresentationScreen'],
     ['MunicipalityScreen'],

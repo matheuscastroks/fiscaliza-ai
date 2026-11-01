@@ -1,5 +1,8 @@
+import { router } from 'expo-router';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
+import { UserAvatar } from './UserAvatar';
+import { useAuthStore } from '@/stores/authStore';
 import React from 'react';
 import {
   View,
@@ -32,6 +35,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 }) => {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const user = useAuthStore((state) => state.user);
   const { width } = useWindowDimensions();
   const desktop = Platform.OS === 'web' && width >= 1100;
 
@@ -41,14 +45,22 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       pointerEvents={overlay ? 'box-none' : 'auto'}
     >
       <View style={styles.topRow} pointerEvents={overlay ? 'box-none' : 'auto'}>
-        {!onBack && !desktop && (
+        {!onBack && (user || !desktop) && (
           <TouchableOpacity
             style={styles.circleButton}
-            onPress={() => useMenu.getState().setOpen(true)}
+            onPress={() =>
+              desktop
+                ? router.push('/(tabs)/ProfileScreen')
+                : useMenu.getState().setOpen(true)
+            }
             accessibilityRole="button"
-            accessibilityLabel="Abrir menu"
+            accessibilityLabel={desktop ? 'Abrir perfil' : 'Abrir menu'}
           >
-            <Ionicons name="menu-outline" size={24} color={colors.ink} />
+            {user ? (
+              <UserAvatar size={48} />
+            ) : (
+              <Ionicons name="menu-outline" size={24} color={colors.ink} />
+            )}
           </TouchableOpacity>
         )}
         {onBack && (

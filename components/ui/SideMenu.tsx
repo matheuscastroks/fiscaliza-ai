@@ -4,12 +4,19 @@ import { router, type Href } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { create } from 'zustand';
 import { AppText } from './AppText';
+import { AppButton } from './AppButton';
+import { UserAvatar } from './UserAvatar';
+import { useSignOutSheet } from './SignOutSheet';
 import { useTheme, spacing, layout } from '@/theme';
+import { useAuthStore } from '@/stores/authStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
+import { useFollowStore } from '@/stores/followStore';
+
 export const useMenu = create<{
   open: boolean;
   setOpen: (open: boolean) => void;
 }>((set) => ({ open: false, setOpen: (open) => set({ open }) }));
+
 export const citizenDestinations = [
   { label: 'Início', path: '/' as Href, icon: 'home-outline' as const },
   {
@@ -26,6 +33,11 @@ export const citizenDestinations = [
     label: 'Agir',
     path: '/(tabs)/ParticipateScreen' as Href,
     icon: 'hand-left-outline' as const,
+  },
+  {
+    label: 'Meu perfil',
+    path: '/(tabs)/ProfileScreen' as Href,
+    icon: 'person-outline' as const,
   },
   {
     label: 'Preferências',
@@ -53,6 +65,7 @@ export const citizenDestinations = [
     icon: 'stats-chart-outline' as const,
   },
 ];
+
 export function SideMenu({
   onClose,
   visible,
@@ -61,8 +74,12 @@ export function SideMenu({
   visible: boolean;
 }) {
   const { colors } = useTheme();
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const preferred = useTerritoryStore((s) => s.preferredNeighborhood);
+  const savedCount = useFollowStore((s) => s.savedCalls.length);
   const navigate = (path: Href) => onClose(() => router.push(path));
+
   return (
     <SafeAreaView
       edges={['top', 'bottom']}
@@ -106,6 +123,49 @@ export function SideMenu({
         <Pressable
           disabled={!visible}
           accessibilityRole="button"
+          accessibilityLabel={
+            isAuthenticated ? 'Abrir meu perfil' : 'Entrar na minha conta'
+          }
+          onPress={() =>
+            navigate(
+              isAuthenticated ? '/(tabs)/ProfileScreen' : '/LoginScreen',
+            )
+          }
+          style={{
+            backgroundColor: colors.surface,
+            borderRadius: layout.radius.card,
+            padding: spacing.lg,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+          }}
+        >
+          <UserAvatar size={56} />
+          <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+            <AppText variant="label" numberOfLines={1}>
+              {user?.name || 'Entrar na conta'}
+            </AppText>
+            <AppText color="muted" variant="caption" numberOfLines={1}>
+              {user?.municipality
+                ? `${user.municipality.name} · ${user.municipality.state}`
+                : isAuthenticated
+                  ? 'Definir município'
+                  : 'Acesse para salvar e acompanhar'}
+            </AppText>
+            {isAuthenticated && (
+              <AppText color="muted" variant="caption" numberOfLines={1}>
+                {savedCount === 1
+                  ? '1 chamado salvo na conta'
+                  : `${savedCount} chamados salvos na conta`}
+              </AppText>
+            )}
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+        </Pressable>
+
+        <Pressable
+          disabled={!visible}
+          accessibilityRole="button"
           accessibilityLabel="Escolher minha região"
           onPress={() => navigate('/SettingsScreen')}
           style={{
@@ -118,9 +178,10 @@ export function SideMenu({
           <Ionicons name="location-outline" size={26} color={colors.ink} />
           <AppText variant="label">Minha região</AppText>
           <AppText color="muted" variant="caption">
-            {preferred || 'Rio de Janeiro · todo o município'}
+            {preferred || user?.neighborhood || 'Rio de Janeiro · todo o município'}
           </AppText>
         </Pressable>
+
         <View
           style={{
             backgroundColor: colors.surface,
@@ -149,9 +210,21 @@ export function SideMenu({
             </Pressable>
           ))}
         </View>
-        <AppText variant="caption" color="muted">
-          Seus salvos ficam neste aparelho.
-        </AppText>
+
+        <AppButton
+          title={isAuthenticated ? 'Sair da conta' : 'Entrar na conta'}
+          variant="quiet"
+          disabled={!visible}
+          onPress={() =>
+            onClose(() => {
+              if (isAuthenticated) {
+                useSignOutSheet.getState().setOpen(true);
+              } else {
+                router.push('/LoginScreen');
+              }
+            })
+          }
+        />
       </ScrollView>
     </SafeAreaView>
   );

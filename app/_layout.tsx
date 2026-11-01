@@ -55,28 +55,44 @@ export default function RootLayout() {
   const { isReady, isAuthenticated, initialize, user } = useAuthStore();
   const segments: readonly string[] = useSegments();
   useEffect(() => {
-    void useFollowStore.getState().initialize();
-    void useTerritoryStore.getState().initialize();
-  }, []);
+    void initialize();
+  }, [initialize]);
   useEffect(() => {
+    if (!isReady) return;
+    const userId = isAuthenticated && user?.id ? user.id : null;
+    const municipalityId = user?.municipality?.id || '3304557';
+    void useFollowStore.getState().setScope(userId, municipalityId);
+    void useTerritoryStore
+      .getState()
+      .setScope(userId, municipalityId, user?.neighborhood || '');
+  }, [
+    isReady,
+    isAuthenticated,
+    user?.id,
+    user?.municipality?.id,
+    user?.neighborhood,
+  ]);
+  useEffect(() => {
+    if (!isReady) return;
     const topSegment = segments[0] || '';
     const isPublicRoute = isPublicCitizenRoute(segments);
-    if (!isPublicRoute && !isReady) {
-      void initialize();
+    if (!isAuthenticated) {
+      if (!isPublicRoute) router.replace('/LoginScreen');
       return;
     }
-    if (isReady && !isAuthenticated && !isPublicRoute)
-      router.replace('/LoginScreen');
-    else if (
-      isReady &&
-      isAuthenticated &&
+    if (
       !user?.municipality &&
       !isPublicRoute &&
       topSegment !== 'MunicipalityScreen'
-    )
+    ) {
       router.replace('/MunicipalityScreen');
-  }, [isReady, isAuthenticated, segments, user?.municipality, initialize]);
-  if (!themeReady || !onboardingReady || (!fontsLoaded && !fontError))
+      return;
+    }
+    if (topSegment === 'LoginScreen') {
+      router.replace(user?.municipality ? '/(tabs)' : '/MunicipalityScreen');
+    }
+  }, [isReady, isAuthenticated, segments, user?.municipality]);
+  if (!themeReady || !onboardingReady || !isReady || (!fontsLoaded && !fontError))
     return null;
   const base = isDark ? DarkTheme : DefaultTheme;
   const navigationTheme = {

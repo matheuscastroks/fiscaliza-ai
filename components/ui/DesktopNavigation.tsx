@@ -2,12 +2,18 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
 import { useTheme } from '@/theme/useTheme';
+import { useAuthStore } from '@/stores/authStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { AppText } from './AppText';
+import { UserAvatar } from './UserAvatar';
+import { useSignOutSheet } from './SignOutSheet';
 import { citizenDestinations } from './SideMenu';
+
 export function DesktopNavigation() {
   const { colors } = useTheme();
   const path = usePathname();
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const preferred = useTerritoryStore((s) => s.preferredNeighborhood);
   return (
     <View
@@ -35,7 +41,8 @@ export function DesktopNavigation() {
       >
         <AppText variant="label">Minha região</AppText>
         <AppText variant="caption" color="muted">
-          {preferred || 'Todo o município'} · Rio de Janeiro
+          {preferred || user?.neighborhood || 'Todo o município'} ·{' '}
+          {user?.municipality?.name || 'Rio de Janeiro'}
         </AppText>
       </Pressable>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ gap: 8 }}>
@@ -74,9 +81,44 @@ export function DesktopNavigation() {
           );
         })}
       </ScrollView>
-      <AppText variant="caption" color="muted">
-        Seus salvos ficam neste navegador.
-      </AppText>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Abrir perfil"
+        onPress={() =>
+          router.push(
+            isAuthenticated ? '/(tabs)/ProfileScreen' : '/LoginScreen',
+          )
+        }
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
+      >
+        <UserAvatar size={44} />
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <AppText variant="label" numberOfLines={1}>
+            {user?.name || 'Visitante'}
+          </AppText>
+          <AppText variant="caption" color="muted">
+            {isAuthenticated ? 'Meu perfil' : 'Entrar na conta'}
+          </AppText>
+        </View>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() =>
+          isAuthenticated
+            ? useSignOutSheet.getState().setOpen(true)
+            : router.push('/LoginScreen')
+        }
+        style={{
+          minHeight: 48,
+          justifyContent: 'center',
+          borderTopWidth: 1,
+          borderTopColor: colors.divider,
+        }}
+      >
+        <AppText variant="label">
+          {isAuthenticated ? 'Sair da conta' : 'Entrar na conta'}
+        </AppText>
+      </Pressable>
     </View>
   );
 }
