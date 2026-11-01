@@ -22,7 +22,7 @@ services:
       DATABASE_URL: postgres://fiscaliza:${POSTGRES_PASSWORD:-fiscaliza-local}@postgres:5432/fiscaliza
       NODE_ENV: ${NODE_ENV:-development}
       DEMO_PASSWORD: ${DEMO_PASSWORD:?Set DEMO_PASSWORD before starting compose}
-      WEB_ORIGINS: ${WEB_ORIGINS:-http://localhost:8080,http://localhost:5173,http://localhost:8081,http://localhost:8082}
+      WEB_ORIGINS: ${WEB_ORIGINS:-http://localhost:8080,http://localhost:5173,http://localhost:8081,http://localhost:8082,https://fiscalizaai.matheuscastroks.com.br}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
       UPLOAD_DIR: /app/uploads
@@ -34,6 +34,14 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      - api
   edge:
     image: caddy:2-alpine
     profiles: ['edge']
