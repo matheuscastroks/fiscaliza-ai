@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
-import { ScrollView, View, RefreshControl } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import {
+  ScrollView,
+  View,
+  RefreshControl,
+  FlatList,
+  useWindowDimensions,
+} from 'react-native';
 import { router, useIsFocused } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useThemedStyles, useTheme } from '@/theme/useTheme';
-import { spacing } from '@/theme';
+import { spacing, layout } from '@/theme';
 import { CitySearch } from '@/components/ui/CitySearch';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -20,10 +27,21 @@ import {
 } from '@/stores/territoryStore';
 import { useFollowStore } from '@/stores/followStore';
 import { CitizenAction } from '@/features/city/CitizenAction';
+import {
+  resolveServiceCategoryTheme,
+  type ServiceCategoryTheme,
+} from '@/features/city/officialCategoryThemes';
+import type { OfficialCall } from '@/shared/contracts';
+
+interface CategoryGroup {
+  theme: ServiceCategoryTheme;
+  calls: OfficialCall[];
+}
 
 export default function HomeScreen() {
   const active = useIsFocused();
   const { colors } = useTheme();
+  const { width } = useWindowDimensions();
   const styles = useThemedStyles(createCityStyles);
   const [refreshing, setRefreshing] = useState(false);
   const { neighborhood, neighborhoodId, setNeighborhood } =
@@ -31,21 +49,47 @@ export default function HomeScreen() {
   const preferred = useTerritoryStore((s) => s.preferredNeighborhood);
   const saved = useFollowStore((s) => s.savedCalls);
   const hydrated = useFollowStore((s) => s.hydrated);
+
+  const cardWidth = Math.min(width - spacing.contentPadding * 2, 340);
+
   const calls = useOfficialCalls(
     {
       neighborhoodId,
       bairro: neighborhoodId ? undefined : neighborhood || undefined,
-      limit: 5,
+      limit: 30,
     },
     active,
   );
+
   const explore = () => router.push('/(tabs)/TerritoryScreen');
+
+  // Agrupamento dos chamados por Categoria Temática
+  const groupedCategories = useMemo<CategoryGroup[]>(() => {
+    const list = calls.data?.calls || [];
+    const map = new Map<string, { theme: ServiceCategoryTheme; calls: OfficialCall[] }>();
+
+    for (const call of list) {
+      const theme = resolveServiceCategoryTheme(call.serviceType, call.serviceSubtype);
+      const existing = map.get(theme.id);
+      if (existing) {
+        existing.calls.push(call);
+      } else {
+        map.set(theme.id, { theme, calls: [call] });
+      }
+    }
+
+    return Array.from(map.values()).sort(
+      (a, b) => b.calls.length - a.calls.length,
+    );
+  }, [calls.data?.calls]);
+
   return (
     <AppScreen>
       <AppHeader title="Sua região" context="Rio de Janeiro · RJ" />
       <ScrollView
         contentContainerStyle={styles.content}
         alwaysBounceVertical
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -89,6 +133,7 @@ export default function HomeScreen() {
             onChange={setNeighborhood}
           />
         </View>
+
         <CitizenAction
           title="Explorar minha região"
           description="Demandas e serviços públicos no mapa"
@@ -96,24 +141,39 @@ export default function HomeScreen() {
           primary
           onPress={explore}
         />
+
+        {/* Seção: Acompanhados pelo Usuário */}
         {hydrated && saved.length > 0 && (
           <View style={styles.section}>
-            <AppText variant="sectionTitle">Estou acompanhando</AppText>
-            <AppText variant="caption" color="muted">
-              Salvos na sua conta · última informação consultada
-            </AppText>
-            {saved.slice(0, 3).map((call) => (
-              <OfficialCallRow
-                key={call.id}
-                call={call}
-                onPress={() =>
-                  router.push({
-                    pathname: '/OfficialCallDetailsScreen',
-                    params: { id: call.id },
-                  })
-                }
-              />
-            ))}
+            <View style={{ gap: 2 }}>
+              <AppText variant="sectionTitle">Estou acompanhando</AppText>
+              <AppText variant="caption" color="muted">
+                Salvos na sua conta · arraste para ver
+              </AppText>
+            </View>
+
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: spacing.md }}
+              data={saved}
+              keyExtractor={(item) => item.id}
+              snapToInterval={cardWidth + spacing.md}
+              decelerationRate="fast"
+              renderItem={({ item }) => (
+                <OfficialCallRow
+                  call={item}
+                  width={cardWidth}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/OfficialCallDetailsScreen',
+                      params: { id: item.id },
+                    })
+                  }
+                />
+              )}
+            />
+
             <AppButton
               title="Ver meus salvos"
               variant="secondary"
@@ -121,25 +181,31 @@ export default function HomeScreen() {
             />
           </View>
         )}
+
+        {/* Seção Principal: O que acontece na cidade organizado por Categoria em Slides */}
         <View style={styles.section}>
-          <AppText variant="sectionTitle">
-            O que acontece {neighborhood ? `em ${neighborhood}` : 'na cidade'}?
-          </AppText>
-          <AppText variant="caption" color="muted">
-            Demandas recentes na base disponível. A data de abertura aparece em
-            cada registro.
-          </AppText>
+          <View style={{ gap: 2 }}>
+            <AppText variant="sectionTitle">
+              O que acontece {neighborhood ? `em ${neighborhood}` : 'na cidade'}?
+            </AppText>
+            <AppText variant="caption" color="muted">
+              Demandas da Central 1746 organizadas por categoria temática.
+            </AppText>
+          </View>
+
           <QueryState
             loading={calls.isLoading}
             error={calls.error}
             retry={calls.refetch}
           />
+
           {calls.fetchStatus === 'paused' && (
             <AppText color="muted">
               Sem conexão. Os registros disponíveis voltam a ser atualizados
               quando a rede retornar.
             </AppText>
           )}
+
           {!calls.isPending && !calls.error && !calls.data?.calls.length && (
             <IllustratedEmptyState
               kind="territory"
@@ -148,24 +214,89 @@ export default function HomeScreen() {
               action={{ title: 'Explorar outro recorte', onPress: explore }}
             />
           )}
-          {calls.data?.calls.map((call) => (
-            <OfficialCallRow
-              key={call.id}
-              call={call}
-              onPress={() =>
-                router.push({
-                  pathname: '/OfficialCallDetailsScreen',
-                  params: { id: call.id },
-                })
-              }
-            />
+
+          {/* Carrosséis Horizontais por Categoria */}
+          {groupedCategories.map((group) => (
+            <View key={group.theme.id} style={{ gap: spacing.sm, marginTop: spacing.xs }}>
+              {/* Cabeçalho da Categoria com Ícone e Contagem */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingHorizontal: 2,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: layout.radius.pill,
+                      backgroundColor: group.theme.color + '22',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Ionicons
+                      name={group.theme.icon as any}
+                      size={16}
+                      color={group.theme.color}
+                    />
+                  </View>
+                  <AppText variant="label" style={{ fontWeight: '700' }}>
+                    {group.theme.label}
+                  </AppText>
+                </View>
+
+                <AppText variant="caption" color="muted">
+                  {group.calls.length}{' '}
+                  {group.calls.length === 1 ? 'chamado' : 'chamados'}
+                </AppText>
+              </View>
+
+              {/* Slider Horizontal de Chamados dessa Categoria */}
+              <FlatList
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: spacing.md }}
+                data={group.calls}
+                keyExtractor={(item) => item.id}
+                snapToInterval={cardWidth + spacing.md}
+                decelerationRate="fast"
+                initialNumToRender={3}
+                maxToRenderPerBatch={3}
+                windowSize={3}
+                renderItem={({ item }) => (
+                  <OfficialCallRow
+                    call={item}
+                    width={cardWidth}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/OfficialCallDetailsScreen',
+                        params: { id: item.id },
+                      })
+                    }
+                  />
+                )}
+              />
+            </View>
           ))}
+
           <AppButton
-            title="Explorar demandas"
+            title="Explorar todas as demandas no mapa"
             variant="secondary"
             onPress={explore}
+            style={{ marginTop: spacing.sm }}
           />
         </View>
+
         <CitizenAction
           title="Precisa solicitar um serviço?"
           description="Encontre o atendimento oficial da prefeitura"

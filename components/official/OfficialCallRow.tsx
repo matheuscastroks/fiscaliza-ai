@@ -1,20 +1,28 @@
-import { isOfficialCallClosed } from '@/shared/official-call-state';
-import React from 'react';
+import React, { memo } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
 import { AppText } from '@/components/ui/AppText';
 import { useFollowStore } from '@/stores/followStore';
+import { isOfficialCallClosed } from '@/shared/official-call-state';
+import { resolveServiceCategoryTheme } from '@/features/city/officialCategoryThemes';
 import type { OfficialCall } from '@/shared/contracts';
 
 export interface OfficialCallRowProps {
   call: OfficialCall;
   onPress: () => void;
+  width?: number | string;
 }
 
-export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
+export const OfficialCallRow = memo(function OfficialCallRow({
+  call,
+  onPress,
+  width,
+}: OfficialCallRowProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const isSaved = useFollowStore((s) =>
@@ -25,8 +33,8 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
   const toggleSavedCall = useFollowStore((s) => s.toggleSavedCall);
 
   const isClosed = isOfficialCallClosed(call);
-
   const situationColor = isClosed ? colors.completed : colors.accent;
+  const theme = resolveServiceCategoryTheme(call.serviceType, call.serviceSubtype);
 
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return '';
@@ -50,212 +58,294 @@ export function OfficialCallRow({ call, onPress }: OfficialCallRowProps) {
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, pressed && { opacity: 0.8 }]}
+      style={({ pressed }) => [
+        styles.card,
+        width !== undefined ? { width: width as any } : undefined,
+        pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+      ]}
       accessibilityRole="button"
-      accessibilityLabel={`Chamado ${call.externalId}, ${call.serviceSubtype}, ${isClosed ? 'Encerrado no 1746' : primaryStateLabel}`}
+      accessibilityLabel={`Chamado ${call.externalId}, ${call.serviceSubtype || call.serviceType}, ${isClosed ? 'Encerrado no 1746' : primaryStateLabel}`}
       onPress={onPress}
     >
-      {/* Header: Service Type + Protocol 1746 Tag + Save Action */}
-      <View style={styles.topRow}>
-        <View style={styles.typeBadge}>
-          <AppText
-            variant="caption"
-            numberOfLines={1}
-            style={styles.typeBadgeText}
-          >
-            {call.serviceType}
-          </AppText>
-        </View>
+      {/* Imagem de Fundo por Categoria com Tratamento Visual e Gradiente */}
+      <Image
+        source={{ uri: theme.imageUrl }}
+        style={StyleSheet.absoluteFill}
+        contentFit="cover"
+        transition={200}
+        priority="normal"
+        accessibilityIgnoresInvertColors
+      />
+      <LinearGradient
+        colors={[
+          'rgba(15, 23, 42, 0.40)',
+          'rgba(15, 23, 42, 0.75)',
+          'rgba(15, 23, 42, 0.96)',
+        ]}
+        locations={[0, 0.45, 1]}
+        style={StyleSheet.absoluteFill}
+      />
 
-        <View style={styles.rightHeaderGroup}>
-          <View style={styles.officialPill}>
-            <Ionicons name="shield-checkmark" size={12} color="#0072BB" />
-            <AppText variant="caption" style={styles.officialPillText}>
-              1746 · #{call.externalId}
+      <View style={styles.cardInner}>
+        {/* Linha Superior: Tipo de Serviço + Protocolo + Ação Salvar */}
+        <View style={styles.topRow}>
+          <View style={styles.categoryBadge}>
+            <Ionicons name={theme.icon as any} size={14} color="#FFFFFF" />
+            <AppText
+              variant="caption"
+              numberOfLines={1}
+              style={styles.categoryBadgeText}
+            >
+              {call.serviceType}
             </AppText>
           </View>
 
-          <Pressable
-            disabled={!hydrated || busy}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={
-              isSaved
-                ? `Remover chamado ${call.externalId} da sua conta`
-                : `Salvar chamado ${call.externalId} na sua conta`
-            }
-            onPress={(e) => {
-              e.stopPropagation();
-              void toggleSavedCall(call);
-            }}
-            style={[
-              styles.savePill,
-              isSaved && { backgroundColor: colors.ink },
-            ]}
-          >
-            <Ionicons
-              name={isSaved ? 'bookmark' : 'bookmark-outline'}
-              size={13}
-              color={isSaved ? colors.onAccent : colors.ink}
-            />
-            <AppText
-              variant="caption"
+          <View style={styles.rightHeaderGroup}>
+            <View style={styles.officialPill}>
+              <Ionicons name="shield-checkmark" size={12} color="#60A5FA" />
+              <AppText variant="caption" style={styles.officialPillText}>
+                #{call.externalId}
+              </AppText>
+            </View>
+
+            <Pressable
+              disabled={!hydrated || busy}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={
+                isSaved
+                  ? `Remover chamado ${call.externalId} da sua conta`
+                  : `Salvar chamado ${call.externalId} na sua conta`
+              }
+              onPress={(e) => {
+                e.stopPropagation();
+                void toggleSavedCall(call);
+              }}
               style={[
-                styles.savePillText,
-                { color: isSaved ? colors.onAccent : colors.ink },
+                styles.savePill,
+                isSaved && { backgroundColor: '#FFFFFF' },
               ]}
             >
-              {isSaved ? 'Salvo' : 'Salvar'}
+              <Ionicons
+                name={isSaved ? 'bookmark' : 'bookmark-outline'}
+                size={14}
+                color={isSaved ? '#0F172A' : '#FFFFFF'}
+              />
+              <AppText
+                variant="caption"
+                style={[
+                  styles.savePillText,
+                  { color: isSaved ? '#0F172A' : '#FFFFFF' },
+                ]}
+              >
+                {isSaved ? 'Salvo' : 'Salvar'}
+              </AppText>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Bloco Central: Subtipo e Descrição em Destaque */}
+        <View style={styles.centerBlock}>
+          <AppText variant="sectionTitle" numberOfLines={2} style={styles.title}>
+            {call.serviceSubtype || call.serviceType}
+          </AppText>
+
+          {/* Status do Atendimento com badge translúcida */}
+          <View style={styles.statusRow}>
+            <View
+              style={[
+                styles.statusDot,
+                { backgroundColor: situationColor },
+              ]}
+            />
+            <AppText
+              variant="label"
+              numberOfLines={1}
+              style={{
+                color: '#FFFFFF',
+                fontWeight: '700',
+                fontSize: 13,
+                flexShrink: 1,
+              }}
+            >
+              {primaryStateLabel}
             </AppText>
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Main Title: Subtype */}
-      <AppText variant="sectionTitle" numberOfLines={2} style={styles.title}>
-        {call.serviceSubtype || call.serviceType}
-      </AppText>
-
-      {/* Official Situation + Detailed Operational Status + SLA */}
-      <View style={styles.statusRow}>
-        <View style={[styles.statusDot, { backgroundColor: situationColor }]} />
-        <AppText
-          variant="label"
-          numberOfLines={1}
-          style={{
-            color: situationColor,
-            fontWeight: '700',
-            fontSize: 13,
-            flexShrink: 1,
-          }}
-        >
-          {primaryStateLabel}
-        </AppText>
-        {call.withinDeadline ? (
-          <AppText variant="caption" color="muted">
-            · {call.withinDeadline}
-          </AppText>
-        ) : null}
-      </View>
-
-      {/* Bottom Metadata: Neighborhood + Organization + Date */}
-      <View style={styles.footerRow}>
-        <View style={styles.locationGroup}>
-          <Ionicons name="location-outline" size={14} color={colors.muted} />
-          <AppText
-            variant="caption"
-            color="muted"
-            numberOfLines={1}
-            style={{ flexShrink: 1 }}
-          >
-            {[call.neighborhoodName || 'Rio de Janeiro', call.organizationName]
-              .filter(Boolean)
-              .join(' · ')}
-          </AppText>
+            {call.withinDeadline ? (
+              <AppText variant="caption" style={styles.subtleText}>
+                · {call.withinDeadline}
+              </AppText>
+            ) : null}
+          </View>
         </View>
 
-        <AppText variant="caption" color="muted">
-          {formatDate(call.openedAt)}
-        </AppText>
+        {/* Rodapé: Bairro / Órgão + Data */}
+        <View style={styles.footerRow}>
+          <View style={styles.locationGroup}>
+            <Ionicons name="location-outline" size={15} color="#CBD5E1" />
+            <AppText
+              variant="caption"
+              numberOfLines={1}
+              style={styles.locationText}
+            >
+              {[call.neighborhoodName || 'Rio de Janeiro', call.organizationName]
+                .filter(Boolean)
+                .join(' · ')}
+            </AppText>
+          </View>
+
+          <AppText variant="caption" style={styles.dateText}>
+            {formatDate(call.openedAt)}
+          </AppText>
+        </View>
       </View>
     </Pressable>
   );
-}
+});
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     card: {
-      backgroundColor: colors.surface,
-      borderRadius: layout.radius.card,
-      padding: spacing.md,
-      gap: spacing.sm,
+      minHeight: 220,
+      borderRadius: layout.radius.card + 4,
+      overflow: 'hidden',
       borderWidth: 1,
-      borderColor: colors.divider,
-      marginVertical: 4,
+      borderColor: 'rgba(255, 255, 255, 0.12)',
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.25,
+      shadowRadius: 10,
+      elevation: 5,
+      backgroundColor: colors.surface,
+      marginVertical: 6,
+    },
+    cardInner: {
+      flex: 1,
+      minHeight: 220,
+      padding: spacing.lg,
+      justifyContent: 'space-between',
     },
     topRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: spacing.xs,
+      gap: spacing.sm,
+      zIndex: 2,
     },
-    typeBadge: {
-      backgroundColor: colors.surfaceSubdued,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 3,
-      borderRadius: layout.radius.sm,
-      flexShrink: 1,
-    },
-    typeBadgeText: {
-      color: colors.muted,
-      fontWeight: '600',
-      fontSize: 11,
-      textTransform: 'uppercase',
-    },
-    officialPill: {
+    categoryBadge: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 3,
-      backgroundColor: '#0072BB14',
-      paddingHorizontal: 6,
-      paddingVertical: 2,
+      gap: 6,
+      backgroundColor: 'rgba(0, 0, 0, 0.45)',
+      paddingHorizontal: spacing.sm + 2,
+      paddingVertical: 5,
       borderRadius: layout.radius.pill,
-      flexShrink: 0,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.18)',
+      flexShrink: 1,
     },
-    officialPillText: {
-      color: '#0072BB',
-      fontWeight: '800',
-      fontSize: 10,
+    categoryBadgeText: {
+      color: '#FFFFFF',
+      fontWeight: '700',
+      fontSize: 12,
+      letterSpacing: 0.3,
     },
     rightHeaderGroup: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
+      gap: 8,
       flexShrink: 0,
+    },
+    officialPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: 'rgba(0, 0, 0, 0.45)',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: layout.radius.pill,
+      borderWidth: 1,
+      borderColor: 'rgba(96, 165, 250, 0.35)',
+    },
+    officialPillText: {
+      color: '#93C5FD',
+      fontWeight: '800',
+      fontSize: 11,
     },
     savePill: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 4,
-      backgroundColor: colors.surfaceSubdued,
-      paddingHorizontal: 8,
-      paddingVertical: 3,
+      gap: 5,
+      backgroundColor: 'rgba(0, 0, 0, 0.45)',
+      paddingHorizontal: 10,
+      paddingVertical: 5,
       borderRadius: layout.radius.pill,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.22)',
     },
     savePillText: {
       fontWeight: '700',
-      fontSize: 11,
+      fontSize: 12,
+    },
+    centerBlock: {
+      gap: spacing.sm,
+      marginVertical: spacing.md,
+      zIndex: 2,
     },
     title: {
-      fontSize: 16,
-      lineHeight: 22,
+      color: '#FFFFFF',
+      fontSize: 19,
+      lineHeight: 25,
+      fontWeight: '700',
+      textShadowColor: 'rgba(0, 0, 0, 0.65)',
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 4,
     },
     statusRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
-      flexWrap: 'wrap',
+      gap: 8,
+      backgroundColor: 'rgba(0, 0, 0, 0.35)',
+      alignSelf: 'flex-start',
+      paddingHorizontal: spacing.sm + 2,
+      paddingVertical: 4,
+      borderRadius: layout.radius.pill,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     statusDot: {
       width: 8,
       height: 8,
       borderRadius: 4,
     },
+    subtleText: {
+      color: '#CBD5E1',
+      fontSize: 12,
+    },
     footerRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: colors.divider,
-      paddingTop: spacing.xs,
-      marginTop: 2,
+      borderTopColor: 'rgba(255, 255, 255, 0.2)',
+      paddingTop: spacing.sm + 2,
+      zIndex: 2,
     },
     locationGroup: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 4,
+      gap: 5,
       flex: 1,
-      marginRight: spacing.sm,
+      marginRight: spacing.md,
+    },
+    locationText: {
+      color: '#E2E8F0',
+      fontSize: 12,
+      fontWeight: '500',
+    },
+    dateText: {
+      color: '#CBD5E1',
+      fontSize: 12,
+      fontWeight: '500',
     },
   });
 }
