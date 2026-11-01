@@ -248,7 +248,7 @@ As imagens de exemplo do cenário acadêmico são ilustrativas: não representam
 
 Para novos filtros, use cápsulas claras em repouso, escuras na seleção, texto legível e estado selecionado acessível.
 
-`FloatingGlassTabBar` conserva o nome histórico, mas implementa cápsula sólida em tinta: altura 64, raio 32 e largura 232, limitada à janela menos 32. São quatro alvos/círculos de 48, com gap de 8 e folga interna de 8 (congruente com a folga interna do campo de busca e botão de filtro); o ativo usa círculo branco e ícone escuro de 24. A barra é centralizada, com margem inferior `max(área segura, 16)`, some nas rotas internas e quando o teclado abre. Cada aba tem nome acessível e estado selecionado; pressionado reduz opacidade (0,65).
+`AppTabBar` implementa cápsula sólida em tinta: altura 64, raio 32 e largura 232, limitada à janela menos 32. São quatro alvos/círculos de 48, com gap de 8 e folga interna de 8 (congruente com a folga interna do campo de busca e botão de filtro); o ativo usa círculo branco e ícone escuro de 24. A barra é centralizada, com margem inferior `max(área segura, 16)`, some nas rotas internas e quando o teclado abre. Cada aba tem nome acessível e estado selecionado; pressionado reduz opacidade (0,75) e aplica micro-escala tátil com transição por física de mola (`Animated.spring`).
 
 `SideMenu` preserva seu layout lateral de 90% da janela, com teto de 480 a partir de 600. A abertura leva 280 ms e o fechamento 240 ms, com duração zero em movimento reduzido. Os destinos refletem tarefas reais, incluindo Propor melhoria; não use pontuação fictícia, selo institucional sem fundamento ou indicadores inventados. Valores animados permanecem estáveis entre renderizações. A integração de código não substitui revisão final renderizada.
 

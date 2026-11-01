@@ -1,14 +1,14 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { FloatingGlassTabBar } from '@/components/ui/FloatingGlassTabBar';
+import { AppTabBar } from '@/components/ui/AppTabBar';
 import { useAuthStore } from '@/stores/authStore';
 
 export default function TabLayout() {
   const authenticated = useAuthStore((s) => s.isReady && s.isAuthenticated);
   return (
     <Tabs
-      tabBar={(props) => <FloatingGlassTabBar {...props} />}
+      tabBar={(props) => <AppTabBar {...props} />}
       detachInactiveScreens={false}
       screenOptions={{
         headerShown: false,

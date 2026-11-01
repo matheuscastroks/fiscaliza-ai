@@ -1,6 +1,6 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Pressable,
@@ -9,7 +9,6 @@ import {
   useWindowDimensions,
   Keyboard,
   Animated,
-  Easing,
   AccessibilityInfo,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
@@ -22,9 +21,12 @@ const TAB_SIZE = 48;
 const TAB_PADDING = 8;
 const TAB_GAP = 8;
 
-export type FloatingGlassTabBarProps = Parameters<
+export type AppTabBarProps = Parameters<
   NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>
 >[0];
+
+export type FloatingGlassTabBarProps = AppTabBarProps;
+
 const VISIBLE = new Set([
   'index',
   'TerritoryScreen',
@@ -32,12 +34,14 @@ const VISIBLE = new Set([
   'FollowScreen',
 ]);
 
-/** Historical export name retained; the approved navigation is a solid onyx capsule. */
-export function FloatingGlassTabBar({
+/**
+ * Barra de abas principal com cápsula sólida, navegação tátil e indicador com física de mola.
+ */
+export function AppTabBar({
   state,
   descriptors,
   navigation,
-}: FloatingGlassTabBarProps) {
+}: AppTabBarProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
@@ -47,6 +51,7 @@ export function FloatingGlassTabBar({
     4 * TAB_SIZE + 3 * TAB_GAP + 2 * TAB_PADDING,
     width - 32,
   );
+
   const visibleRoutes = state.routes.filter((route) => VISIBLE.has(route.name));
   const selectedIndex = Math.max(
     0,
@@ -54,56 +59,64 @@ export function FloatingGlassTabBar({
       (route) => route.key === state.routes[state.index]?.key,
     ),
   );
+
   const target = (selectedIndex * (barWidth - 2 * TAB_PADDING - TAB_SIZE)) / 3;
-  const [selection] = useState(() => new Animated.Value(target));
-  const [reduced, setReduced] = useState(false);
+  const selectionAnim = useRef(new Animated.Value(target)).current;
+  const [reducedMotion, setReducedMotion] = useState(false);
+
   useEffect(() => {
     let active = true;
     void AccessibilityInfo.isReduceMotionEnabled().then((value) => {
-      if (active) setReduced(value);
+      if (active) setReducedMotion(value);
     });
     const sub = AccessibilityInfo.addEventListener(
       'reduceMotionChanged',
-      setReduced,
+      setReducedMotion,
     );
     return () => {
       active = false;
       sub.remove();
     };
   }, []);
+
   useEffect(() => {
-    if (reduced) {
-      selection.setValue(target);
+    if (reducedMotion) {
+      selectionAnim.setValue(target);
       return;
     }
-    const motion = Animated.timing(selection, {
+    const spring = Animated.spring(selectionAnim, {
       toValue: target,
-      duration: 200,
-      easing: Easing.out(Easing.cubic),
+      damping: 24,
+      stiffness: 280,
+      mass: 0.8,
       useNativeDriver: true,
     });
-    motion.start();
-    return () => motion.stop();
-  }, [target, reduced, selection]);
-  const [keyboard, setKeyboard] = useState(false);
+    spring.start();
+    return () => spring.stop();
+  }, [target, reducedMotion, selectionAnim]);
+
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', () =>
-      setKeyboard(true),
+      setKeyboardVisible(true),
     );
     const hide = Keyboard.addListener('keyboardDidHide', () =>
-      setKeyboard(false),
+      setKeyboardVisible(false),
     );
     return () => {
       show.remove();
       hide.remove();
     };
   }, []);
+
   const activeRoute = state.routes[state.index]?.name;
   const isTerritory = activeRoute === 'TerritoryScreen';
-
   const { isListView, toggleViewMode } = useTerritoryViewMode();
 
-  if (keyboard || !VISIBLE.has(state.routes[state.index]?.name)) return null;
+  if (keyboardVisible || !VISIBLE.has(state.routes[state.index]?.name)) {
+    return null;
+  }
+
   return (
     <View
       pointerEvents="box-none"
@@ -124,7 +137,7 @@ export function FloatingGlassTabBar({
             {
               top: TAB_PADDING,
               left: TAB_PADDING,
-              transform: [{ translateX: selection }],
+              transform: [{ translateX: selectionAnim }],
             },
           ]}
         />
@@ -137,6 +150,7 @@ export function FloatingGlassTabBar({
               typeof options.tabBarLabel === 'string'
                 ? options.tabBarLabel
                 : options.title || route.name;
+
             return (
               <Pressable
                 key={route.key}
@@ -149,16 +163,20 @@ export function FloatingGlassTabBar({
                     target: route.key,
                     canPreventDefault: true,
                   });
-                  if (!focused && !event.defaultPrevented)
+                  if (!focused && !event.defaultPrevented) {
                     navigation.navigate(route.name);
-                  void Haptics.selectionAsync().catch(() => {});
+                  }
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }}
                 onLongPress={() =>
                   navigation.emit({ type: 'tabLongPress', target: route.key })
                 }
                 style={({ pressed }) => [
                   styles.tab,
-                  pressed && { opacity: 0.65 },
+                  pressed && {
+                    opacity: 0.75,
+                    transform: [{ scale: 0.92 }],
+                  },
                 ]}
               >
                 <View collapsable={false} style={styles.icon}>
@@ -184,12 +202,12 @@ export function FloatingGlassTabBar({
               : 'Alternar para visualização em Lista'
           }
           onPress={() => {
-            void Haptics.selectionAsync().catch(() => {});
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             toggleViewMode();
           }}
           style={({ pressed }) => [
             styles.extraButton,
-            pressed && { opacity: 0.75, transform: [{ scale: 0.95 }] },
+            pressed && { opacity: 0.75, transform: [{ scale: 0.92 }] },
           ]}
         >
           <Ionicons
@@ -199,11 +217,13 @@ export function FloatingGlassTabBar({
           />
         </Pressable>
       )}
-
-
     </View>
   );
 }
+
+// Alias para retrocompatibilidade
+export const FloatingGlassTabBar = AppTabBar;
+
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     barContainer: {
@@ -228,11 +248,10 @@ const createStyles = (colors: ThemeColors) =>
         ios: {
           shadowColor: colors.black,
           shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.12,
-          shadowRadius: 12,
+          shadowOpacity: 0.14,
+          shadowRadius: 14,
         },
-        android: { elevation: 4 },
-        web: { boxShadow: '0 8px 24px rgba(0,0,0,0.12)' },
+        android: { elevation: 6 },
       }),
     },
     extraButton: {
@@ -246,11 +265,10 @@ const createStyles = (colors: ThemeColors) =>
         ios: {
           shadowColor: colors.black,
           shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.12,
-          shadowRadius: 12,
+          shadowOpacity: 0.14,
+          shadowRadius: 14,
         },
-        android: { elevation: 4 },
-        web: { boxShadow: '0 8px 24px rgba(0,0,0,0.12)' },
+        android: { elevation: 6 },
       }),
     },
     tab: {
