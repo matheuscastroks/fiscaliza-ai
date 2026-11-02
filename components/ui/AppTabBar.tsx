@@ -46,10 +46,14 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
   const { width } = useWindowDimensions();
 
   const visibleRoutes = state.routes.filter((route) => VISIBLE.has(route.name));
+  const isTerritory = state.routes[state.index]?.name === 'TerritoryScreen';
+  const horizontalPadding = isTerritory ? 4 : TAB_PADDING;
   const tabCount = Math.max(1, visibleRoutes.length);
   const barWidth = Math.min(
-    tabCount * TAB_SIZE + (tabCount - 1) * TAB_GAP + 2 * TAB_PADDING,
-    width - 32,
+    tabCount * TAB_SIZE +
+      (isTerritory ? 0 : (tabCount - 1) * TAB_GAP) +
+      2 * horizontalPadding,
+    width - 16 - (isTerritory ? TAB_SIZE + TAB_GAP : 0),
   );
 
   const selectedIndex = Math.max(
@@ -61,7 +65,7 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
 
   const target =
     tabCount > 1
-      ? (selectedIndex * (barWidth - 2 * TAB_PADDING - TAB_SIZE)) /
+      ? (selectedIndex * (barWidth - 2 * horizontalPadding - TAB_SIZE)) /
         (tabCount - 1)
       : 0;
   const selectionAnim = useRef(new Animated.Value(target)).current;
@@ -112,9 +116,6 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
     };
   }, []);
 
-  const activeRoute = state.routes[state.index]?.name;
-  const isTerritory = activeRoute === 'TerritoryScreen';
-  const stackViewToggle = isTerritory && barWidth + 72 + 32 > width;
   const { isListView, toggleViewMode } = useTerritoryViewMode();
 
   if (keyboardVisible || !VISIBLE.has(state.routes[state.index]?.name)) {
@@ -127,11 +128,16 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
       style={[
         styles.barContainer,
         {
-          bottom: Math.max(insets.bottom, 16),
+          bottom: insets.bottom + 16,
         },
       ]}
     >
-      <View style={[styles.bar, { width: barWidth }]}>
+      <View
+        style={[
+          styles.bar,
+          { width: barWidth, paddingHorizontal: horizontalPadding },
+        ]}
+      >
         <Animated.View
           pointerEvents="none"
           accessibilityElementsHidden
@@ -140,7 +146,7 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
             styles.selected,
             {
               top: TAB_PADDING,
-              left: TAB_PADDING,
+              left: horizontalPadding,
               transform: [{ translateX: selectionAnim }],
             },
           ]}
@@ -211,11 +217,6 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
           }}
           style={({ pressed }) => [
             styles.extraButton,
-            stackViewToggle && {
-              position: 'absolute',
-              bottom: TAB_SIZE + 2 * TAB_PADDING + TAB_GAP,
-              right: Math.max(16, (width - barWidth) / 2),
-            },
             pressed && { opacity: 0.75, transform: [{ scale: 0.92 }] },
           ]}
         >
@@ -264,9 +265,9 @@ const createStyles = (colors: ThemeColors) =>
       }),
     },
     extraButton: {
-      width: TAB_SIZE + 2 * TAB_PADDING,
-      height: TAB_SIZE + 2 * TAB_PADDING,
-      borderRadius: (TAB_SIZE + 2 * TAB_PADDING) / 2,
+      width: TAB_SIZE,
+      height: TAB_SIZE,
+      borderRadius: TAB_SIZE / 2,
       backgroundColor: colors.navigationSurface,
       alignItems: 'center',
       justifyContent: 'center',

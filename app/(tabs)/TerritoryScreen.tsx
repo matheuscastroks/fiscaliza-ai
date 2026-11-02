@@ -705,7 +705,7 @@ function TerritoryContent() {
 
       {!isListView && !selectedEntry && selectedClusterEntries.length === 0 && (
         <View
-          style={[styles.areaButtonWrapper, { bottom: insets.bottom + 95 }]}
+          style={[styles.areaButtonWrapper, { bottom: insets.bottom + 104 }]}
         >
           <Pressable
             style={[styles.areaPillButton, { backgroundColor: colors.surface }]}
@@ -749,7 +749,7 @@ function TerritoryContent() {
               }));
             }
           }}
-          bottomOffset={insets.bottom + 85}
+          bottomOffset={insets.bottom + 96}
         />
       )}
 
@@ -758,7 +758,7 @@ function TerritoryContent() {
           entry={selectedClusterEntries[0]}
           onOpen={openEntry}
           onClose={() => setSelectedCluster(null)}
-          bottomOffset={insets.bottom + 85}
+          bottomOffset={insets.bottom + 96}
         />
       )}
 
@@ -767,7 +767,7 @@ function TerritoryContent() {
           entry={selectedEntry}
           onOpen={openEntry}
           onClose={() => setSelectedId(null)}
-          bottomOffset={insets.bottom + 85}
+          bottomOffset={insets.bottom + 96}
         />
       )}
 

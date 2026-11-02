@@ -191,11 +191,6 @@ const createStyles = (colors: ThemeColors) =>
     cardItem: {
       backgroundColor: colors.surface,
       borderRadius: layout.radius.card,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.2,
-      shadowRadius: 14,
-      elevation: 8,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
       overflow: 'hidden',
