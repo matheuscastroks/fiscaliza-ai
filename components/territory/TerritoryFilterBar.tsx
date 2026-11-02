@@ -1,6 +1,6 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
-import React from 'react';
+import React, { memo } from 'react';
 import {
   View,
   ScrollView,
@@ -78,7 +78,7 @@ export interface TerritoryFilterBarProps {
   padded?: boolean;
 }
 
-export function TerritoryFilterBar({
+function TerritoryFilterBarComponent({
   search,
   onSearchChange,
   onOpenFilters,
@@ -320,6 +320,8 @@ export function TerritoryFilterBar({
   );
 }
 
+export const TerritoryFilterBar = memo(TerritoryFilterBarComponent);
+
 export interface TerritoryFilterModalProps {
   visible: boolean;
   onClose: () => void;
@@ -340,7 +342,7 @@ export interface TerritoryFilterModalProps {
   totalCalls: number;
 }
 
-export function TerritoryFilterModal({
+function TerritoryFilterModalComponent({
   visible,
   onClose,
   onReset,
@@ -521,6 +523,8 @@ export function TerritoryFilterModal({
     </Modal>
   );
 }
+
+export const TerritoryFilterModal = memo(TerritoryFilterModalComponent);
 
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({

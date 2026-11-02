@@ -29,7 +29,7 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
-import { Pressable, FlatList, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { Pressable, FlatList, StyleSheet, View, ActivityIndicator, InteractionManager } from 'react-native';
 import { router, useLocalSearchParams, useIsFocused } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
@@ -86,26 +86,25 @@ function TerritoryContent() {
     if (!isFocused) restoreListOffsetRef.current = true;
   }, [isFocused]);
 
+  const [interactionsComplete, setInteractionsComplete] = useState(false);
+  useEffect(() => {
+    if (!isFocused) return;
+    const task = InteractionManager.runAfterInteractions(() => {
+      setInteractionsComplete(true);
+    });
+    return () => {
+      task.cancel();
+      setInteractionsComplete(false);
+    };
+  }, [isFocused]);
+
   const {
-    neighborhoodId: routeNeighborhoodId,
-    layer: routeLayer,
-    startDate,
-    endDate,
-    filters,
-    focusId,
-    lat,
-    lng,
+    neighborhoodId: routeNeighborhoodId, layer: routeLayer,
+    startDate, endDate, filters, focusId, lat, lng,
     neighborhood: paramNeighborhood,
   } = useLocalSearchParams<{
-    neighborhoodId?: string;
-    layer?: string;
-    startDate?: string;
-    endDate?: string;
-    filters?: string;
-    focusId?: string;
-    lat?: string;
-    lng?: string;
-    neighborhood?: string;
+    neighborhoodId?: string; layer?: string; startDate?: string; endDate?: string;
+    filters?: string; focusId?: string; lat?: string; lng?: string; neighborhood?: string;
   }>();
   const {
     neighborhood,
@@ -136,10 +135,7 @@ function TerritoryContent() {
   );
   const [areaOnly, setAreaOnly] = useState(false);
   const [appliedBounds, setAppliedBounds] = useState<{
-    north: number;
-    south: number;
-    east: number;
-    west: number;
+    north: number; south: number; east: number; west: number;
   } | null>(null);
   const [serviceType, setServiceType] = useState<string>('all');
   const [period, setPeriod] = useState<string>('30');
@@ -149,38 +145,17 @@ function TerritoryContent() {
   const [status, setStatus] = useState<string>('all');
   const { isListView, setIsListView } = useTerritoryViewMode();
 
-  const facilityParams = {
-    neighborhoodId,
-    search: appliedSearch || undefined,
-    ...(areaOnly && appliedBounds ? appliedBounds : {}),
-  };
+  const facilityParams = { neighborhoodId, search: appliedSearch || undefined, ...(areaOnly && appliedBounds ? appliedBounds : {}) };
   const facilitiesConfirmed = !neighborhood || Boolean(neighborhoodId);
   const facilityScope = neighborhoodId || neighborhood || 'municipality';
-  const schools = usePublicFacilities(
-    { ...facilityParams, categories: ['school'] },
-    isFocused && layers.includes('school') && facilitiesConfirmed,
-    facilityScope,
-  );
-  const health = usePublicFacilities(
-    { ...facilityParams, categories: ['health'] },
-    isFocused && layers.includes('health') && facilitiesConfirmed,
-    facilityScope,
-  );
-  const squares = usePublicFacilities(
-    { ...facilityParams, categories: ['square'] },
-    isFocused && layers.includes('square') && facilitiesConfirmed,
-    facilityScope,
-  );
-  const facilityQueries = { school: schools, health, square: squares };
-  const sources = usePublicSources(isFocused);
+  const schools = usePublicFacilities({ ...facilityParams, categories: ['school'] }, isFocused && interactionsComplete && layers.includes('school') && facilitiesConfirmed, facilityScope);
+  const health = usePublicFacilities({ ...facilityParams, categories: ['health'] }, isFocused && interactionsComplete && layers.includes('health') && facilitiesConfirmed, facilityScope);
+  const squares = usePublicFacilities({ ...facilityParams, categories: ['square'] }, isFocused && interactionsComplete && layers.includes('square') && facilitiesConfirmed, facilityScope);
+  const facilityQueries = useMemo(() => ({ school: schools, health, square: squares }), [schools, health, squares]);
+  const sources = usePublicSources(isFocused && interactionsComplete);
   const officialSource = sources.data?.find((s) => s.sourceId === 'rio1746');
-  const officialFilters = useOfficialFilters(isFocused);
-  const officialTime = {
-    startDate,
-    endDate,
-    periodDays:
-      startDate || endDate || period === 'all' ? undefined : Number(period),
-  };
+  const officialFilters = useOfficialFilters(isFocused && interactionsComplete);
+  const officialTime = { startDate, endDate, periodDays: startDate || endDate || period === 'all' ? undefined : Number(period) };
   const officialCalls = useInfiniteOfficialCalls(
     {
       neighborhoodId,
@@ -196,10 +171,10 @@ function TerritoryContent() {
     isFocused && layers.includes('official'),
   );
 
-  const bairroOptions =
-    neighborhoods.data?.map((x) => x.name) ||
-    officialFilters.data?.bairros ||
-    [];
+  const bairroOptions = useMemo(
+    () => neighborhoods.data?.map((x) => x.name) || officialFilters.data?.bairros || [],
+    [neighborhoods.data, officialFilters.data?.bairros],
+  );
 
   const serviceTypeOptions = useMemo(() => {
     const allTypes = officialFilters.data?.tipos || [];
@@ -217,8 +192,10 @@ function TerritoryContent() {
     filterVisibility.param === filters
       ? filterVisibility.open
       : Boolean(filters);
-  const setFiltersOpen = (open: boolean) =>
-    setFilterVisibility({ param: filters, open });
+  const setFiltersOpen = useCallback(
+    (open: boolean) => setFilterVisibility({ param: filters, open }),
+    [filters],
+  );
 
   useEffect(() => {
     if (!routeNeighborhoodId && !routeLayer) return;
@@ -244,9 +221,7 @@ function TerritoryContent() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<{
-    ids: string[];
-    latitude: number;
-    longitude: number;
+    ids: string[]; latitude: number; longitude: number;
   } | null>(null);
   const [locationMessage, setLocationMessage] = useState('');
   const [locating, setLocating] = useState(false);
@@ -360,9 +335,12 @@ function TerritoryContent() {
   const hasMoreCalls = Boolean(officialCalls.hasNextPage);
   const dataReady = officialCalls.data !== undefined;
 
+  const lastFittedNeighborhoodRef = useRef<string | null>(null);
   useEffect(() => {
     if (!neighborhood || areaOnly || focusId) return;
+    if (lastFittedNeighborhoodRef.current === neighborhood) return;
     if (entries.some((entry) => Boolean(entryLocation(entry)))) {
+      lastFittedNeighborhoodRef.current = neighborhood;
       updateCameraRegion(municipalOverviewRegion);
     }
   }, [
@@ -433,7 +411,7 @@ function TerritoryContent() {
     [],
   );
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setSearch('');
     setServiceType('all');
     setPeriod('30');
@@ -449,7 +427,7 @@ function TerritoryContent() {
     setNeighborhood('');
     setAreaOnly(false);
     setAppliedBounds(null);
-  };
+  }, [setNeighborhood]);
 
   const locate = async () => {
     setLocating(true);
@@ -513,7 +491,16 @@ function TerritoryContent() {
     period,
   ]);
 
-  const filterBarProps: TerritoryFilterBarProps = {
+  const handleNeighborhoodChange = useCallback((value: string) => {
+    setNeighborhood(value);
+    router.setParams({ neighborhoodId: undefined, layer: undefined });
+    setAreaOnly(false);
+    setAppliedBounds(null);
+    setSelectedId(null);
+    setSelectedCluster(null);
+  }, [setNeighborhood]);
+
+  const filterBarProps: TerritoryFilterBarProps = useMemo(() => ({
     search,
     onSearchChange: setSearch,
     onOpenFilters: () => setFiltersOpen(true),
@@ -522,14 +509,7 @@ function TerritoryContent() {
     bairroOptions,
     neighborhood,
     neighborhoodId,
-    onNeighborhoodChange: (value) => {
-      setNeighborhood(value);
-      router.setParams({ neighborhoodId: undefined, layer: undefined });
-      setAreaOnly(false);
-      setAppliedBounds(null);
-      setSelectedId(null);
-      setSelectedCluster(null);
-    },
+    onNeighborhoodChange: handleNeighborhoodChange,
     serviceType,
     serviceTypeOptions,
     onServiceTypeChange: (value) => { setServiceType(value); setSelectedId(null); setSelectedCluster(null); },
@@ -559,7 +539,33 @@ function TerritoryContent() {
     },
     facilityQueries,
     facilitiesConfirmed,
-  };
+  }), [
+    search,
+    setFiltersOpen,
+    filtersOpen,
+    filterCount,
+    bairroOptions,
+    neighborhood,
+    neighborhoodId,
+    handleNeighborhoodChange,
+    serviceType,
+    serviceTypeOptions,
+    period,
+    status,
+    layers,
+    setLayers,
+    startDate,
+    endDate,
+    totalCalls,
+    officialCalls.isLoading,
+    officialCalls.error,
+    officialCalls.data?.calls.length,
+    officialCalls.data?.total,
+    officialCalls.data?.territoryConfirmed,
+    officialSource?.state,
+    facilityQueries,
+    facilitiesConfirmed,
+  ]);
 
   return (
     <View style={[styles.container, !isFocused && { display: 'none' }]}>
@@ -770,12 +776,9 @@ function TerritoryContent() {
           onOpenEntry={openEntry}
           onResetFilters={resetFilters}
           officialQuery={{
-            isLoading: officialCalls.isLoading,
-            isFetching: officialCalls.isFetching,
-            isFetchingNextPage: officialCalls.isFetchingNextPage,
-            error: officialCalls.error,
-            fetchStatus: officialCalls.fetchStatus,
-            refetch: () => { void officialCalls.refetch(); },
+            isLoading: officialCalls.isLoading, isFetching: officialCalls.isFetching,
+            isFetchingNextPage: officialCalls.isFetchingNextPage, error: officialCalls.error,
+            fetchStatus: officialCalls.fetchStatus, refetch: () => { void officialCalls.refetch(); },
             fetchNextPage: () => { void officialCalls.fetchNextPage(); },
           }}
           filterBarProps={filterBarProps}
@@ -800,17 +803,9 @@ function TerritoryContent() {
         onStatusChange={(value) => { setStatus(value); setSelectedId(null); }}
         period={period}
         periodOptions={TERRITORY_PERIOD_OPTIONS}
-        onPeriodChange={(value) => {
-          setPeriod(value);
-          router.setParams({ startDate: undefined, endDate: undefined });
-          setSelectedId(null);
-        }}
+        onPeriodChange={(value) => { setPeriod(value); router.setParams({ startDate: undefined, endDate: undefined }); setSelectedId(null); }}
         areaOnly={areaOnly}
-        onAreaOnlyChange={(nextArea) => {
-          setAreaOnly(nextArea);
-          setAppliedBounds(nextArea ? computeRegionBounds(viewportRef.current) : null);
-          setSelectedId(null);
-        }}
+        onAreaOnlyChange={(nextArea) => { setAreaOnly(nextArea); setAppliedBounds(nextArea ? computeRegionBounds(viewportRef.current) : null); setSelectedId(null); }}
         totalCalls={totalCalls}
       />
     </View>

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import {
   FlatList,
   RefreshControl,
@@ -54,7 +54,7 @@ export interface TerritoryListViewProps {
   filterBarProps: TerritoryFilterBarProps;
 }
 
-export function TerritoryListView({
+function TerritoryListViewComponent({
   listRef,
   listOffsetRef,
   restoreListOffsetRef,
@@ -199,6 +199,8 @@ export function TerritoryListView({
     </View>
   );
 }
+
+export const TerritoryListView = memo(TerritoryListViewComponent);
 
 const styles = StyleSheet.create({
   fullListOverlay: {
