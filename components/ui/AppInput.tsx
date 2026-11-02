@@ -3,11 +3,13 @@ import type { ThemeColors } from '@/theme/colors';
 import React, { useRef, useState } from 'react';
 import {
   View,
+  Pressable,
   TextInput,
   TextInputProps,
   StyleSheet,
   ViewStyle,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
@@ -32,6 +34,7 @@ export const AppInput: React.FC<AppInputProps> = ({
   containerStyle,
   style,
   editable = true,
+  secureTextEntry = false,
   onFocus,
   onBlur,
   ...rest
@@ -40,6 +43,7 @@ export const AppInput: React.FC<AppInputProps> = ({
   const styles = useThemedStyles(createStyles);
 
   const [isFocused, setIsFocused] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const input = useRef<TextInput>(null);
   const keyboardScroll = useKeyboardAwareInput();
 
@@ -66,27 +70,53 @@ export const AppInput: React.FC<AppInputProps> = ({
           {label}
         </AppText>
       ) : null}
-      <TextInput
-        ref={input}
-        keyboardAppearance={mode}
-        accessibilityLabel={effectiveAccessibilityLabel}
-        accessibilityHint={error || helper}
-        placeholder={effectivePlaceholder}
-        style={[
-          styles.input,
-          rest.multiline && styles.multiline,
-          isFocused && styles.inputFocused,
-          Boolean(error) && styles.inputError,
-          !editable && styles.inputDisabled,
-          style,
-        ]}
-        placeholderTextColor={colors.subtle}
-        scrollEnabled={rest.multiline ? true : undefined}
-        editable={editable}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        {...rest}
-      />
+      <View style={styles.inputWrapper}>
+        <TextInput
+          ref={input}
+          keyboardAppearance={mode}
+          accessibilityLabel={effectiveAccessibilityLabel}
+          accessibilityHint={error || helper}
+          placeholder={effectivePlaceholder}
+          style={[
+            styles.input,
+            rest.multiline && styles.multiline,
+            isFocused && styles.inputFocused,
+            Boolean(error) && styles.inputError,
+            !editable && styles.inputDisabled,
+            style,
+            secureTextEntry && styles.passwordInput,
+          ]}
+          placeholderTextColor={colors.subtle}
+          scrollEnabled={rest.multiline ? true : undefined}
+          editable={editable}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          {...rest}
+          secureTextEntry={secureTextEntry && !passwordVisible}
+        />
+        {secureTextEntry && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              passwordVisible ? 'Ocultar senha' : 'Mostrar senha'
+            }
+            accessibilityHint={effectiveAccessibilityLabel}
+            accessibilityState={{ disabled: !editable }}
+            disabled={!editable}
+            onPress={() => setPasswordVisible((visible) => !visible)}
+            style={({ pressed }) => [
+              styles.passwordToggle,
+              { opacity: pressed || !editable ? 0.6 : 1 },
+            ]}
+          >
+            <Ionicons
+              name={passwordVisible ? 'eye-off-outline' : 'eye-outline'}
+              size={22}
+              color={colors.muted}
+            />
+          </Pressable>
+        )}
+      </View>
       {error ? (
         <AppText
           variant="caption"
@@ -112,6 +142,18 @@ const createStyles = (colors: ThemeColors) =>
     },
     label: {
       marginBottom: spacing.xs,
+    },
+    inputWrapper: { position: 'relative' },
+    passwordInput: { paddingRight: layout.touchTarget.minWidth + spacing.sm },
+    passwordToggle: {
+      position: 'absolute',
+      right: spacing.xxs,
+      top: spacing.xxs,
+      minWidth: layout.touchTarget.minWidth,
+      minHeight: layout.touchTarget.minHeight,
+      borderRadius: layout.radius.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     input: {
       minHeight: 56,
