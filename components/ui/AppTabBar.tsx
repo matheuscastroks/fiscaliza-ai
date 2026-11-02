@@ -30,29 +30,28 @@ export type FloatingGlassTabBarProps = AppTabBarProps;
 const VISIBLE = new Set([
   'index',
   'TerritoryScreen',
-  'ParticipateScreen',
   'FollowScreen',
+  'ParticipateScreen',
+  'ProfileScreen',
 ]);
 
 /**
  * Barra de abas principal com cápsula sólida, navegação tátil e indicador com física de mola.
  */
-export function AppTabBar({
-  state,
-  descriptors,
-  navigation,
-}: AppTabBarProps) {
+export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
+
+  const visibleRoutes = state.routes.filter((route) => VISIBLE.has(route.name));
+  const tabCount = Math.max(1, visibleRoutes.length);
   const barWidth = Math.min(
-    4 * TAB_SIZE + 3 * TAB_GAP + 2 * TAB_PADDING,
+    tabCount * TAB_SIZE + (tabCount - 1) * TAB_GAP + 2 * TAB_PADDING,
     width - 32,
   );
 
-  const visibleRoutes = state.routes.filter((route) => VISIBLE.has(route.name));
   const selectedIndex = Math.max(
     0,
     visibleRoutes.findIndex(
@@ -60,7 +59,11 @@ export function AppTabBar({
     ),
   );
 
-  const target = (selectedIndex * (barWidth - 2 * TAB_PADDING - TAB_SIZE)) / 3;
+  const target =
+    tabCount > 1
+      ? (selectedIndex * (barWidth - 2 * TAB_PADDING - TAB_SIZE)) /
+        (tabCount - 1)
+      : 0;
   const selectionAnim = useRef(new Animated.Value(target)).current;
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -111,6 +114,7 @@ export function AppTabBar({
 
   const activeRoute = state.routes[state.index]?.name;
   const isTerritory = activeRoute === 'TerritoryScreen';
+  const stackViewToggle = isTerritory && barWidth + 72 + 32 > width;
   const { isListView, toggleViewMode } = useTerritoryViewMode();
 
   if (keyboardVisible || !VISIBLE.has(state.routes[state.index]?.name)) {
@@ -207,6 +211,11 @@ export function AppTabBar({
           }}
           style={({ pressed }) => [
             styles.extraButton,
+            stackViewToggle && {
+              position: 'absolute',
+              bottom: TAB_SIZE + 2 * TAB_PADDING + TAB_GAP,
+              right: Math.max(16, (width - barWidth) / 2),
+            },
             pressed && { opacity: 0.75, transform: [{ scale: 0.92 }] },
           ]}
         >

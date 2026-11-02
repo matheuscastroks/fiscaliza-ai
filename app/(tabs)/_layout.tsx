@@ -67,10 +67,22 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="ProfileScreen"
+        options={{
+          title: 'Perfil',
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons
+              name={focused ? 'person' : 'person-outline'}
+              color={color}
+              size={size}
+            />
+          ),
+        }}
+      />
       <Tabs.Protected guard={authenticated}>
         <Tabs.Screen name="ReportScreen" options={{ href: null }} />
         <Tabs.Screen name="ProblemsListScreen" options={{ href: null }} />
-        <Tabs.Screen name="ProfileScreen" options={{ href: null }} />
       </Tabs.Protected>
     </Tabs>
   );
