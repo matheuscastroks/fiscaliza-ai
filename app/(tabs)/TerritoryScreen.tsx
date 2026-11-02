@@ -29,7 +29,7 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
-import { Pressable, FlatList, StyleSheet, View, ActivityIndicator, InteractionManager } from 'react-native';
+import { Pressable, FlatList, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams, useIsFocused } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
@@ -89,11 +89,23 @@ function TerritoryContent() {
   const [interactionsComplete, setInteractionsComplete] = useState(false);
   useEffect(() => {
     if (!isFocused) return;
-    const task = InteractionManager.runAfterInteractions(() => {
-      setInteractionsComplete(true);
+    let cancelled = false;
+    const scheduleIdle =
+      typeof requestIdleCallback !== 'undefined'
+        ? requestIdleCallback
+        : (cb: () => void) => setTimeout(cb, 50);
+    const cancelIdle =
+      typeof cancelIdleCallback !== 'undefined'
+        ? cancelIdleCallback
+        : (id: any) => clearTimeout(id);
+
+    const handle = scheduleIdle(() => {
+      if (!cancelled) setInteractionsComplete(true);
     });
+
     return () => {
-      task.cancel();
+      cancelled = true;
+      cancelIdle(handle);
       setInteractionsComplete(false);
     };
   }, [isFocused]);
