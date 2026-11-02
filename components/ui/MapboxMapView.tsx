@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useEffect, useCallback, memo } from 'react';
+import React, { useRef, useMemo, useEffect, useCallback, useState, memo } from 'react';
 import {
   NativeModules,
   Platform,
@@ -7,6 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import Constants from 'expo-constants';
+import { mapPerformanceEvent } from '@/features/territory/mapPerformance';
 
 export type MarkerKind =
   | 'occurrence'
@@ -37,6 +38,8 @@ export interface MapboxRegion {
 }
 
 export interface MapboxMapViewProps {
+  performanceDiagnostics?: boolean;
+  diagnosticTrace?: number | null;
   style?: ViewStyle;
   region: MapboxRegion;
   markers?: MapMarker[];
@@ -217,8 +220,29 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
   onRegionChange,
   interactive = true,
   isDark = false,
+  performanceDiagnostics = false,
+  diagnosticTrace = null,
 }: MapboxMapViewProps) {
-  const Mapbox = getRnMapbox();
+  const [completedTrace, setCompletedTrace] = useState<number | null>(null);
+  const mounted = useRef(true);
+  const initialTrace = useRef(diagnosticTrace);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+  const moduleInfo = useMemo(() => {
+    const start = performanceDiagnostics ? performance.now() : 0;
+    return { Mapbox: getRnMapbox(), durationMs: performanceDiagnostics ? performance.now() - start : 0 };
+  }, [performanceDiagnostics]);
+  const { Mapbox } = moduleInfo;
+  useEffect(() => {
+    const trace = initialTrace.current;
+    if (performanceDiagnostics) {
+      mapPerformanceEvent('mount', {}, trace);
+      mapPerformanceEvent('module-ready', { durationMs: moduleInfo.durationMs }, trace);
+    }
+    return () => { if (performanceDiagnostics) mapPerformanceEvent('unmount', {}, trace); };
+  }, [performanceDiagnostics, moduleInfo]);
   const cameraRef = useRef<any>(null);
   const shapeSourceRef = useRef<any>(null);
   const zoom = useMemo(() => computeMapboxZoom(region), [region]);
@@ -237,10 +261,18 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
     [markers],
   );
 
-  const markersShape = useMemo(
-    () => buildMarkersFeatureCollection(nonDraggableMarkers),
-    [nonDraggableMarkers],
-  );
+  const markersResult = useMemo(() => {
+    const start = performanceDiagnostics ? performance.now() : 0;
+    const shape = buildMarkersFeatureCollection(nonDraggableMarkers);
+    return { shape, durationMs: performanceDiagnostics ? performance.now() - start : 0 };
+  }, [nonDraggableMarkers, performanceDiagnostics]);
+  const markersShape = markersResult.shape;
+  useEffect(() => {
+    if (performanceDiagnostics) {
+      mapPerformanceEvent('geojson-ready', { count: markersShape.features.length, durationMs: markersResult.durationMs }, diagnosticTrace);
+      mapPerformanceEvent('points-committed', { count: markersShape.features.length }, diagnosticTrace);
+    }
+  }, [markersShape, markersResult, performanceDiagnostics, diagnosticTrace]);
 
   const selectedMarker = useMemo(
     () =>
@@ -373,6 +405,13 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
         scaleBarEnabled={false}
         onPress={handleMapPress}
         onCameraChanged={handleCameraChanged}
+        onDidFinishLoadingStyle={performanceDiagnostics ? () => { if (mounted.current) mapPerformanceEvent('style-loaded', {}, diagnosticTrace); } : undefined}
+        onDidFinishRenderingFrameFully={performanceDiagnostics && diagnosticTrace !== null && completedTrace !== diagnosticTrace ? () => {
+          if (!mounted.current) return;
+          mapPerformanceEvent('frame-ready', {}, diagnosticTrace);
+          setCompletedTrace(diagnosticTrace);
+        } : undefined}
+        onMapLoadingError={performanceDiagnostics ? () => { if (mounted.current) mapPerformanceEvent('load-error', {}, diagnosticTrace); } : undefined}
       >
         <Mapbox.Camera
           ref={cameraRef}

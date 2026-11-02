@@ -21,6 +21,7 @@ test('returning to a screen reuses fresh query data and fetches after invalidati
   const mod = { exports: {} };
   vm.runInNewContext('(function(require,module,exports){' + source + '\n})')(
     (name) => {
+      if (name === '@/features/territory/mapPerformance') return {};
       if (name === 'react')
         return { useCallback: (fn) => fn, useMemo: (fn) => fn() };
       if (name === 'expo-router')

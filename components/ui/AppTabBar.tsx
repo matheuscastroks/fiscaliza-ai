@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { type Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTerritoryViewMode } from '@/stores/territoryStore';
+import { beginMapTrace } from '@/features/territory/mapPerformance';
 
 const TAB_SIZE = 48;
 const TAB_PADDING = 8;
@@ -174,6 +175,7 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
                     canPreventDefault: true,
                   });
                   if (!focused && !event.defaultPrevented) {
+                    if (route.name === 'TerritoryScreen' && !isListView) beginMapTrace('tab');
                     navigation.navigate(route.name);
                   }
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -212,6 +214,7 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
               : 'Alternar para visualização em Lista'
           }
           onPress={() => {
+            if (isListView) beginMapTrace('list-to-map');
             void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             toggleViewMode();
           }}

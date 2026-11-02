@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback } from 'react';
+import { beginMapTrace } from '@/features/territory/mapPerformance';
 import { ScrollView, View, RefreshControl, Pressable, StyleSheet } from 'react-native';
 import { router, useIsFocused } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -49,7 +50,10 @@ export default function HomeScreen() {
     active,
   );
 
-  const explore = useCallback(() => router.push('/(tabs)/TerritoryScreen'), []);
+  const explore = useCallback(() => {
+    beginMapTrace('direct');
+    router.push('/(tabs)/TerritoryScreen');
+  }, []);
 
   const handleOpenCall = useCallback((id: string) => {
     router.push({

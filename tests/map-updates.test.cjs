@@ -19,6 +19,7 @@ function loadMapboxHelpers() {
 
   const mod = { exports: {} };
   const mocks = {
+    '@/features/territory/mapPerformance': { mapPerformanceEvent() {} },
     react: {
       useCallback: (fn) => fn,
       useEffect: () => {},

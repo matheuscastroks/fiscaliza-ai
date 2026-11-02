@@ -1,4 +1,6 @@
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { mapPerformanceEnabled, mapPerformanceVariant } from '@/features/territory/mapPerformance';
+import { useMapPerformance } from '@/features/territory/useMapPerformance';
 import {
   TerritoryFilterBar,
   TerritoryFilterModal,
@@ -86,30 +88,6 @@ function TerritoryContent() {
     if (!isFocused) restoreListOffsetRef.current = true;
   }, [isFocused]);
 
-  const [interactionsComplete, setInteractionsComplete] = useState(false);
-  useEffect(() => {
-    if (!isFocused) return;
-    let cancelled = false;
-    const scheduleIdle =
-      typeof requestIdleCallback !== 'undefined'
-        ? requestIdleCallback
-        : (cb: () => void) => setTimeout(cb, 50);
-    const cancelIdle =
-      typeof cancelIdleCallback !== 'undefined'
-        ? cancelIdleCallback
-        : (id: any) => clearTimeout(id);
-
-    const handle = scheduleIdle(() => {
-      if (!cancelled) setInteractionsComplete(true);
-    });
-
-    return () => {
-      cancelled = true;
-      cancelIdle(handle);
-      setInteractionsComplete(false);
-    };
-  }, [isFocused]);
-
   const {
     neighborhoodId: routeNeighborhoodId, layer: routeLayer,
     startDate, endDate, filters, focusId, lat, lng,
@@ -156,6 +134,7 @@ function TerritoryContent() {
   const appliedSearch = search.trim() ? debouncedSearch.trim() : '';
   const [status, setStatus] = useState<string>('Não Encerrado');
   const { isListView, setIsListView } = useTerritoryViewMode();
+  const { mapVisited, interactionsComplete, visitTrace } = useMapPerformance(isFocused, isListView);
 
   const facilityParams = { neighborhoodId, search: appliedSearch || undefined, ...(areaOnly && appliedBounds ? appliedBounds : {}) };
   const facilitiesConfirmed = !neighborhood || Boolean(neighborhoodId);
@@ -181,6 +160,7 @@ function TerritoryContent() {
       ...(areaOnly && appliedBounds ? appliedBounds : {}),
     },
     isFocused && layers.includes('official'),
+    mapPerformanceEnabled,
   );
 
   const bairroOptions = useMemo(
@@ -580,7 +560,7 @@ function TerritoryContent() {
   ]);
 
   return (
-    <View style={[styles.container, !isFocused && { display: 'none' }]}>
+    <View style={[styles.container, !isFocused && mapPerformanceVariant !== 'visible-surface' && { display: 'none' }]}>
       {locationMessage !== '' && (
         <View
           style={[
@@ -598,8 +578,8 @@ function TerritoryContent() {
         </View>
       )}
 
-      {!isListView && (
-        <View style={StyleSheet.absoluteFill}>
+      {(!isListView || (mapPerformanceVariant === 'retained-map' && mapVisited)) && (
+        <View accessibilityElementsHidden={isListView} importantForAccessibility={isListView ? 'no-hide-descendants' : 'auto'} pointerEvents={isListView ? 'none' : 'auto'} style={[StyleSheet.absoluteFill, isListView && { opacity: 0 }]}>
           <MapboxMapView
             style={StyleSheet.absoluteFill}
             region={region}
@@ -608,6 +588,8 @@ function TerritoryContent() {
             selectedId={selectedId}
             selectedClusterIds={selectedCluster?.ids || null}
             isDark={mode === 'dark'}
+            performanceDiagnostics={mapPerformanceEnabled}
+            diagnosticTrace={visitTrace}
             onMarkerClick={handleMarkerClick}
             onClusterClick={handleClusterClick}
             onMapClick={handleMapClick}

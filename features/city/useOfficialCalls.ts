@@ -14,6 +14,7 @@ import {
   type OfficialOverviewQueryParams,
 } from '@/services/officialCalls';
 import type { OfficialCallsQueryParams } from '@/shared/contracts';
+import { mapPerformanceEvent, mapTraceId } from '@/features/territory/mapPerformance';
 
 // fetchQuery respects staleTime; refetch would bypass a still-fresh cache.
 function useFreshCallsOnFocus(
@@ -56,19 +57,33 @@ export function useOfficialCalls(
 export function useInfiniteOfficialCalls(
   params: OfficialCallsQueryParams,
   enabled = true,
+  performanceDiagnostics = false,
 ) {
   const query = useInfiniteQuery({
     queryKey: ['officialCallsPages', params],
     initialPageParam: undefined as string | undefined,
-    queryFn: ({ pageParam, signal }) =>
-      fetchOfficialCalls(
-        {
-          ...params,
-          cursor: pageParam,
-          includeTotal: !pageParam,
-        },
-        signal,
-      ),
+    queryFn: async ({ pageParam, signal }) => {
+      const trace = mapTraceId();
+      const started = performanceDiagnostics ? performance.now() : 0;
+      if (performanceDiagnostics) mapPerformanceEvent('calls-start', {}, trace);
+      try {
+        const result = await fetchOfficialCalls(
+          {
+            ...params,
+            cursor: pageParam,
+            includeTotal: !pageParam,
+          },
+          signal,
+        );
+        if (performanceDiagnostics) mapPerformanceEvent('calls-end', {
+          durationMs: performance.now() - started, count: result.calls.length,
+        }, trace);
+        return result;
+      } catch (error) {
+        if (performanceDiagnostics) mapPerformanceEvent('calls-error', {}, trace);
+        throw error;
+      }
+    },
     getNextPageParam: (last) =>
       last.hasMore ? (last.nextCursor ?? undefined) : undefined,
     enabled,
