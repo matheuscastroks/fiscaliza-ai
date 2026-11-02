@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
+import { ThemeToggleButton } from '@/components/ui/ThemeToggleButton';
 import { spacing, useTheme } from '@/theme';
 import { Illustration, type IllustrationKind } from './Illustration';
 
@@ -122,7 +123,10 @@ export function OnboardingFlow({
             padding: spacing.contentPadding,
           }}
         >
-          <AppText variant="sectionTitle">Fiscaliza aí</AppText>
+          <AppText variant="sectionTitle" style={{ flex: 1, flexShrink: 1 }}>
+            Fiscaliza aí
+          </AppText>
+          <ThemeToggleButton />
           <AppButton
             title={replay ? 'Fechar' : 'Pular'}
             variant="secondary"
