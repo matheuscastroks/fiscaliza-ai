@@ -385,15 +385,53 @@ function TerritoryContent() {
   }, []);
 
   const mapMarkers: MapMarker[] = useMemo(() => {
-    const list = located
+    return located
       .map(entryToMarker)
       .filter((m): m is MapMarker => m !== null);
-    if (selectedEntry && !list.some((m) => m.id === selectedEntry.item.id)) {
-      const extra = entryToMarker(selectedEntry);
-      if (extra) list.push(extra);
+  }, [located]);
+
+  const allMapMarkers = useMemo(() => {
+    if (
+      !selectedEntry ||
+      mapMarkers.some((m) => m.id === selectedEntry.item.id)
+    ) {
+      return mapMarkers;
     }
-    return list;
-  }, [located, selectedEntry]);
+    const extra = entryToMarker(selectedEntry);
+    return extra ? [...mapMarkers, extra] : mapMarkers;
+  }, [mapMarkers, selectedEntry]);
+
+  const handleMarkerClick = useCallback((id: string) => {
+    setSelectedId(id);
+    setSelectedCluster(null);
+  }, []);
+
+  const handleClusterClick = useCallback(
+    (event: { ids: string[]; count: number; latitude: number; longitude: number }) => {
+      setSelectedCluster(event);
+      setSelectedId(null);
+    },
+    [],
+  );
+
+  const handleMapClick = useCallback(() => {
+    setSelectedId(null);
+    setSelectedCluster(null);
+  }, []);
+
+  const handleRegionChange = useCallback(
+    (newRegion: { latitude: number; longitude: number; latitudeDelta: number; longitudeDelta: number; zoom?: number }) => {
+      viewportRef.current = {
+        ...viewportRef.current,
+        latitude: newRegion.latitude,
+        longitude: newRegion.longitude,
+        latitudeDelta: newRegion.latitudeDelta,
+        longitudeDelta: newRegion.longitudeDelta,
+        zoom: newRegion.zoom ?? viewportRef.current.zoom,
+      };
+    },
+    [],
+  );
 
   const resetFilters = () => {
     setSearch('');
@@ -494,11 +532,7 @@ function TerritoryContent() {
     },
     serviceType,
     serviceTypeOptions,
-    onServiceTypeChange: (value) => {
-      setServiceType(value);
-      setSelectedId(null);
-      setSelectedCluster(null);
-    },
+    onServiceTypeChange: (value) => { setServiceType(value); setSelectedId(null); setSelectedCluster(null); },
     period,
     periodOptions: TERRITORY_PERIOD_OPTIONS,
     onPeriodChange: (value) => {
@@ -509,11 +543,7 @@ function TerritoryContent() {
     },
     status,
     statusOptions: TERRITORY_STATUS_OPTIONS,
-    onStatusChange: (value) => {
-      setStatus(value);
-      setSelectedId(null);
-      setSelectedCluster(null);
-    },
+    onStatusChange: (value) => { setStatus(value); setSelectedId(null); setSelectedCluster(null); },
     layers,
     onLayersChange: setLayers,
     startDate,
@@ -555,33 +585,15 @@ function TerritoryContent() {
           <MapboxMapView
             style={StyleSheet.absoluteFill}
             region={region}
-            markers={mapMarkers}
+            markers={allMapMarkers}
             boundary={boundary.data?.geometry}
             selectedId={selectedId}
             selectedClusterIds={selectedCluster?.ids || null}
             isDark={mode === 'dark'}
-            onMarkerClick={(id) => {
-              setSelectedId(id);
-              setSelectedCluster(null);
-            }}
-            onClusterClick={(event) => {
-              setSelectedCluster(event);
-              setSelectedId(null);
-            }}
-            onMapClick={() => {
-              setSelectedId(null);
-              setSelectedCluster(null);
-            }}
-            onRegionChange={(newRegion) => {
-              viewportRef.current = {
-                ...viewportRef.current,
-                latitude: newRegion.latitude,
-                longitude: newRegion.longitude,
-                latitudeDelta: newRegion.latitudeDelta,
-                longitudeDelta: newRegion.longitudeDelta,
-                zoom: newRegion.zoom ?? viewportRef.current.zoom,
-              };
-            }}
+            onMarkerClick={handleMarkerClick}
+            onClusterClick={handleClusterClick}
+            onMapClick={handleMapClick}
+            onRegionChange={handleRegionChange}
           />
 
           {officialCalls.isLoading && (
@@ -754,9 +766,7 @@ function TerritoryContent() {
           hasMoreCalls={hasMoreCalls}
           dataReady={dataReady}
           refreshing={refreshing}
-          onRefresh={() => {
-            void refreshAll();
-          }}
+          onRefresh={() => { void refreshAll(); }}
           onOpenEntry={openEntry}
           onResetFilters={resetFilters}
           officialQuery={{
@@ -765,12 +775,8 @@ function TerritoryContent() {
             isFetchingNextPage: officialCalls.isFetchingNextPage,
             error: officialCalls.error,
             fetchStatus: officialCalls.fetchStatus,
-            refetch: () => {
-              void officialCalls.refetch();
-            },
-            fetchNextPage: () => {
-              void officialCalls.fetchNextPage();
-            },
+            refetch: () => { void officialCalls.refetch(); },
+            fetchNextPage: () => { void officialCalls.fetchNextPage(); },
           }}
           filterBarProps={filterBarProps}
         />
@@ -784,39 +790,25 @@ function TerritoryContent() {
         neighborhood={neighborhood}
         onNeighborhoodChange={(value) => {
           setNeighborhood(value);
-          router.setParams({
-            neighborhoodId: undefined,
-            layer: undefined,
-          });
+          router.setParams({ neighborhoodId: undefined, layer: undefined });
           setSelectedId(null);
         }}
         serviceType={serviceType}
         serviceTypeOptions={serviceTypeOptions}
-        onServiceTypeChange={(value) => {
-          setServiceType(value);
-          setSelectedId(null);
-        }}
+        onServiceTypeChange={(value) => { setServiceType(value); setSelectedId(null); }}
         status={status}
-        onStatusChange={(value) => {
-          setStatus(value);
-          setSelectedId(null);
-        }}
+        onStatusChange={(value) => { setStatus(value); setSelectedId(null); }}
         period={period}
         periodOptions={TERRITORY_PERIOD_OPTIONS}
         onPeriodChange={(value) => {
           setPeriod(value);
-          router.setParams({
-            startDate: undefined,
-            endDate: undefined,
-          });
+          router.setParams({ startDate: undefined, endDate: undefined });
           setSelectedId(null);
         }}
         areaOnly={areaOnly}
         onAreaOnlyChange={(nextArea) => {
           setAreaOnly(nextArea);
-          setAppliedBounds(
-            nextArea ? computeRegionBounds(viewportRef.current) : null,
-          );
+          setAppliedBounds(nextArea ? computeRegionBounds(viewportRef.current) : null);
           setSelectedId(null);
         }}
         totalCalls={totalCalls}

@@ -25,6 +25,7 @@ function loadMapboxHelpers() {
       useMemo: (fn) => fn(),
       useRef: (v) => ({ current: v }),
       createElement: () => ({}),
+      memo: (c) => c,
     },
     'react-native': {
       NativeModules: {},

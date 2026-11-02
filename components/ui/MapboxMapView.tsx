@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useEffect, useCallback } from 'react';
+import React, { useRef, useMemo, useEffect, useCallback, memo } from 'react';
 import {
   NativeModules,
   Platform,
@@ -95,32 +95,48 @@ export function buildMarkersFeatureCollection(
   markers: MapMarker[],
   selectedId?: string | null,
 ) {
-  return {
-    type: 'FeatureCollection' as const,
-    features: markers
-      .filter(
-        (m) =>
-          typeof m.latitude === 'number' &&
-          typeof m.longitude === 'number' &&
-          Number.isFinite(m.latitude) &&
-          Number.isFinite(m.longitude),
-      )
-      .map((m) => ({
+  const len = markers.length;
+  const features = new Array(len);
+  let count = 0;
+  for (let i = 0; i < len; i++) {
+    const m = markers[i];
+    const lat = m.latitude;
+    const lng = m.longitude;
+    if (
+      typeof lat === 'number' &&
+      typeof lng === 'number' &&
+      Number.isFinite(lat) &&
+      Number.isFinite(lng)
+    ) {
+      const c = m.color;
+      const validColor =
+        c && c.length === 7 && c.charCodeAt(0) === 35 && /^#[0-9a-f]{6}$/i.test(c)
+          ? c
+          : '#0072BB';
+      features[count++] = {
         type: 'Feature' as const,
         id: m.id,
         properties: {
           id: m.id,
           title: m.title || '',
-          color: /^#[0-9a-f]{6}$/i.test(m.color || '') ? m.color! : '#0072BB',
+          color: validColor,
           kind: m.kind || 'official',
           draggable: Boolean(m.draggable),
           selected: m.id === selectedId ? 1 : 0,
         },
         geometry: {
           type: 'Point' as const,
-          coordinates: [m.longitude, m.latitude] as [number, number],
+          coordinates: [lng, lat] as [number, number],
         },
-      })),
+      };
+    }
+  }
+  if (count < len) {
+    features.length = count;
+  }
+  return {
+    type: 'FeatureCollection' as const,
+    features,
   };
 }
 
@@ -186,7 +202,9 @@ function getRnMapbox(): any {
   }
 }
 
-export function MapboxMapView({
+const memoComponent = memo || ((c: any) => c);
+
+export const MapboxMapView = memoComponent(function MapboxMapView({
   style,
   region,
   markers = [],
@@ -220,9 +238,23 @@ export function MapboxMapView({
   );
 
   const markersShape = useMemo(
-    () => buildMarkersFeatureCollection(nonDraggableMarkers, selectedId),
+    () => buildMarkersFeatureCollection(nonDraggableMarkers),
+    [nonDraggableMarkers],
+  );
+
+  const selectedMarker = useMemo(
+    () =>
+      selectedId ? nonDraggableMarkers.find((m) => m.id === selectedId) : null,
     [nonDraggableMarkers, selectedId],
   );
+  const selectedMarkerShape = useMemo(
+    () =>
+      selectedMarker
+        ? buildMarkersFeatureCollection([selectedMarker], selectedId)
+        : null,
+    [selectedMarker, selectedId],
+  );
+
   const boundaryShape = useMemo(
     () => normalizeBoundaryFeatureCollection(boundary),
     [boundary],
@@ -280,6 +312,50 @@ export function MapboxMapView({
     [onClusterClick, onMarkerClick],
   );
 
+  const handleMapPress = useCallback(
+    (e: any) => {
+      const coords = e?.geometry?.coordinates;
+      if (Array.isArray(coords) && coords.length >= 2) {
+        onMapClick?.({
+          longitude: Number(coords[0]),
+          latitude: Number(coords[1]),
+        });
+      }
+    },
+    [onMapClick],
+  );
+
+  const lastEmittedCameraRef = useRef({ lat: 0, lng: 0, zoom: 0 });
+  const handleCameraChanged = useCallback(
+    (state: any) => {
+      const center = state?.properties?.center;
+      const currentZoom = state?.properties?.zoom;
+      if (Array.isArray(center) && center.length >= 2) {
+        const lat = Number(center[1]);
+        const lng = Number(center[0]);
+        const z = typeof currentZoom === 'number' ? currentZoom : zoom;
+        const last = lastEmittedCameraRef.current;
+        if (
+          Math.abs(lat - last.lat) < 0.00005 &&
+          Math.abs(lng - last.lng) < 0.00005 &&
+          Math.abs(z - last.zoom) < 0.02
+        ) {
+          return;
+        }
+        lastEmittedCameraRef.current = { lat, lng, zoom: z };
+        const approxDelta = 360 / Math.pow(2, Math.max(1, z));
+        onRegionChange?.({
+          latitude: lat,
+          longitude: lng,
+          latitudeDelta: approxDelta,
+          longitudeDelta: approxDelta,
+          zoom: z,
+        });
+      }
+    },
+    [onRegionChange, zoom],
+  );
+
   if (!Mapbox) {
     return <View style={[styles.container, style]} />;
   }
@@ -295,32 +371,8 @@ export function MapboxMapView({
         attributionEnabled={false}
         logoEnabled={false}
         scaleBarEnabled={false}
-        onPress={(e: any) => {
-          const coords = e?.geometry?.coordinates;
-          if (Array.isArray(coords) && coords.length >= 2) {
-            onMapClick?.({
-              longitude: Number(coords[0]),
-              latitude: Number(coords[1]),
-            });
-          }
-        }}
-        onCameraChanged={(state: any) => {
-          const center = state?.properties?.center;
-          const currentZoom = state?.properties?.zoom;
-          if (Array.isArray(center) && center.length >= 2) {
-            const lat = Number(center[1]);
-            const lng = Number(center[0]);
-            const z = typeof currentZoom === 'number' ? currentZoom : zoom;
-            const approxDelta = 360 / Math.pow(2, Math.max(1, z));
-            onRegionChange?.({
-              latitude: lat,
-              longitude: lng,
-              latitudeDelta: approxDelta,
-              longitudeDelta: approxDelta,
-              zoom: z,
-            });
-          }
-        }}
+        onPress={handleMapPress}
+        onCameraChanged={handleCameraChanged}
       >
         <Mapbox.Camera
           ref={cameraRef}
@@ -393,17 +445,29 @@ export function MapboxMapView({
             filter={['!', ['has', 'point_count']]}
             style={{
               circleColor: ['get', 'color'],
-              circleRadius: ['case', ['==', ['get', 'selected'], 1], 12, 8],
-              circleStrokeWidth: [
-                'case',
-                ['==', ['get', 'selected'], 1],
-                3.5,
-                2,
-              ],
+              circleRadius: 8,
+              circleStrokeWidth: 2,
               circleStrokeColor: '#ffffff',
             }}
           />
         </Mapbox.ShapeSource>
+
+        {selectedMarkerShape && (
+          <Mapbox.ShapeSource
+            id="selected-marker-source"
+            shape={selectedMarkerShape}
+          >
+            <Mapbox.CircleLayer
+              id="selected-marker-halo"
+              style={{
+                circleColor: ['get', 'color'],
+                circleRadius: 13,
+                circleStrokeWidth: 3.5,
+                circleStrokeColor: '#ffffff',
+              }}
+            />
+          </Mapbox.ShapeSource>
+        )}
 
         {draggableMarkers.map((m) => (
           <Mapbox.PointAnnotation
@@ -433,7 +497,7 @@ export function MapboxMapView({
       </Mapbox.MapView>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
