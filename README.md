@@ -49,6 +49,28 @@ docker compose --env-file .env.compose up --build
 
 API: `http://localhost:3001/api`. Migrations e seed são executados antes da API no container. Volumes preservam banco e anexos. `docker compose down -v` remove os dados.
 
+### Acesso e criação de conta
+
+O login oferece e-mail/senha e acesso a `Criar conta`. O cadastro usa
+`POST /api/auth/register` com `name`, `email` e `password` (8 a 128 caracteres).
+A API cria exclusivamente uma conta cidadã, inicia a sessão e retorna HTTP 201;
+e-mail já cadastrado retorna 409. Nome e e-mail são normalizados no servidor.
+O município é confirmado posteriormente pelo fluxo de CEP, sem aceitar papel
+ou município arbitrários no cadastro. O acesso com gov.br permanece desabilitado.
+
+`Entrar com conta de testes` utiliza a conta cidadã do seed pelo login normal.
+O botão aparece em desenvolvimento; para builds de teste, configure
+`EXPO_PUBLIC_ENABLE_TEST_LOGIN=true` antes do build. O seed deve ter sido
+executado com a senha de demonstração acordada para essa conta.
+
+A pasta `Cadastro de conta` em `postman/fiscaliza.collection.json` verifica cadastro,
+sessão, login, duplicidade, senha inválida e rejeição de privilégios e origem.
+Execute somente contra um banco isolado de validação, pois cria uma conta:
+
+```powershell
+postman collection run postman/fiscaliza.collection.json -i "Cadastro de conta" --env-var "baseUrl=http://localhost:3001/api" --no-report-events
+```
+
 Com PostgreSQL já iniciado, defina `DATABASE_URL` e `DEMO_PASSWORD` no ambiente do processo:
 ```powershell
 npm run migrate --prefix backend

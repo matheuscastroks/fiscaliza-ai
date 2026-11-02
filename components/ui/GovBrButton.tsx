@@ -57,15 +57,16 @@ export const GovBrButton: React.FC<GovBrButtonProps> = ({
         activeOpacity={0.82}
         disabled={disabled || loading}
         accessibilityRole="button"
+        accessibilityState={{ disabled: disabled || loading, busy: loading }}
         accessibilityLabel="Entrar com gov.br"
-        accessibilityHint="Identificação com conta gov.br"
+        accessibilityHint={disabled ? 'Acesso indisponível no momento' : 'Identificação com conta gov.br'}
       >
         {loading ? (
           <ActivityIndicator size="small" color="#FFFFFF" />
         ) : (
           <View style={styles.contentRow}>
             <View style={styles.iconCircle}>
-              <Ionicons name="person" size={14} color="#1351B4" />
+              <Ionicons name={disabled ? 'lock-closed' : 'person'} size={14} color="#1351B4" />
             </View>
             <AppText style={styles.label}>
               Entrar com{' '}

@@ -1,7 +1,12 @@
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import type { SessionUser } from '../../shared/contracts.js';
-import { newToken, tokenHash, verifyPassword } from './auth.js';
+import { hashPassword, newToken, tokenHash, verifyPassword } from './auth.js';
+import {
+  registrationError,
+  type RegistrationInput,
+} from '../../shared/registration.js';
 import type { Database } from './db.js';
 import type { municipalityService } from './municipality.js';
 import { sessions, users } from './schema.js';
@@ -44,6 +49,70 @@ export function registerAuthRoutes(
     schema,
   } = options;
 
+  function setSessionCookie(
+    req: FastifyRequest,
+    reply: FastifyReply,
+    token: string,
+  ) {
+    reply.setCookie(sessionCookie(req), token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/api',
+      maxAge: 7 * 24 * 60 * 60,
+    });
+  }
+
+  app.post<{ Body: RegistrationInput }>(
+    '/api/auth/register',
+    {
+      config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
+      schema: {
+        body: schema.object(
+          {
+            name: schema.string(100, 2),
+            email: schema.string(254),
+            password: schema.string(128, 8),
+          },
+          ['name', 'email', 'password'],
+        ),
+      },
+    },
+    async (req, reply) => {
+      const error = registrationError(req.body);
+      if (error) throw fail(400, error);
+      const passwordHash = await hashPassword(req.body.password);
+      const token = newToken();
+      const user = await db.transaction(async (tx) => {
+        const [created] = await tx
+          .insert(users)
+          .values({
+            id: randomUUID(),
+            name: req.body.name.trim(),
+            email: req.body.email.trim().toLowerCase(),
+            passwordHash,
+            role: 'citizen',
+          })
+          .onConflictDoNothing({ target: users.email })
+          .returning();
+        if (!created)
+          throw fail(
+            409,
+            'Este e-mail já possui uma conta. Entre com sua senha.',
+          );
+        await tx.insert(sessions).values({
+          tokenHash: tokenHash(token),
+          userId: created.id,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        });
+        return created;
+      });
+      setSessionCookie(req, reply, token);
+      reply.code(201);
+      return ok({ user: await hydrate(user), token });
+    },
+  );
+
   app.post<{ Body: { email: string; password: string } }>(
     '/api/auth/login',
     {
@@ -71,13 +140,7 @@ export function registerAuthRoutes(
         userId: u.id,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       });
-      reply.setCookie(sessionCookie(req), token, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/api',
-        maxAge: 7 * 24 * 60 * 60,
-      });
+      setSessionCookie(req, reply, token);
       return ok({ user: await hydrate(u), token });
     },
   );
@@ -89,7 +152,11 @@ export function registerAuthRoutes(
 
   app.put<{ Body: { avatar: string } }>(
     '/api/profile/avatar',
-    { schema: { body: schema.object({ avatar: schema.images.items }, ['avatar']) } },
+    {
+      schema: {
+        body: schema.object({ avatar: schema.images.items }, ['avatar']),
+      },
+    },
     async (req) => {
       await validateImages(req, [req.body.avatar]);
       const [updated] = await db

@@ -233,7 +233,9 @@ export async function buildApp(
     const bearer = req.headers.authorization?.match(
       /^Bearer ([A-Za-z0-9_-]+)$/,
     )?.[1];
-    const isLogin = req.url === '/api/auth/login';
+    const path = req.url.split('?')[0];
+    const isLogin = path === '/api/auth/login';
+    const isRegistration = path === '/api/auth/register';
     if (
       !isLogin &&
       mutation &&
@@ -266,9 +268,8 @@ export async function buildApp(
         req.sessionToken = token;
       }
     }
-    if (mutation && req.url !== '/api/auth/login' && !req.user)
+    if (mutation && !isLogin && !isRegistration && !req.user)
       throw fail(401, 'Entre para continuar.');
-    const path = req.url.split('?')[0];
     if (
       !path.startsWith('/api/auth/') &&
       !path.startsWith('/api/profile/') &&

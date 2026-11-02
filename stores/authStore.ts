@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { User } from '@/data/mockData';
 import type { SessionUser } from '@/shared/contracts';
+import type { RegistrationInput } from '@/shared/registration';
 import { authApi, legacyUser } from '@/services/mockApi';
 import { applyCurrentProfile } from '@/shared/profile-session';
 import {
@@ -23,6 +24,9 @@ interface AuthState {
     password: string,
   ) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  register: (
+    input: RegistrationInput,
+  ) => Promise<{ success: boolean; error?: string }>;
   clearError: () => void;
   refreshUser: () => Promise<void>;
   updateUser: (updates: Partial<User>) => Promise<void>;
@@ -51,12 +55,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
   login: async (email, password) => {
+    if (get().isLoading) return { success: false };
     set({
       isLoading: true,
       error: null,
       sessionVersion: get().sessionVersion + 1,
     });
     const result = await authApi.login(email, password);
+    if (result.success) {
+      await queryClient.cancelQueries();
+      queryClient.clear();
+    }
+    set({
+      isReady: true,
+      isLoading: false,
+      error: result.error || null,
+      ...(result.data ? { user: result.data, isAuthenticated: true } : {}),
+    });
+    return { success: result.success, error: result.error };
+  },
+  register: async (input) => {
+    if (get().isLoading) return { success: false };
+    set({
+      isLoading: true,
+      error: null,
+      sessionVersion: get().sessionVersion + 1,
+    });
+    const result = await authApi.register(input);
     if (result.success) {
       await queryClient.cancelQueries();
       queryClient.clear();

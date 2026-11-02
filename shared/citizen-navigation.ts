@@ -1,5 +1,6 @@
 const PUBLIC = new Set([
   'LoginScreen',
+  'RegisterScreen',
   'AboutScreen',
   'HelpScreen',
   'OnboardingScreen',

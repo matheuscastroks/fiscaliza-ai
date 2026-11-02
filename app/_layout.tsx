@@ -86,7 +86,7 @@ export default function RootLayout() {
       router.replace('/MunicipalityScreen');
       return;
     }
-    if (topSegment === 'LoginScreen') {
+    if (topSegment === 'LoginScreen' || topSegment === 'RegisterScreen') {
       router.replace(user?.municipality ? '/(tabs)' : '/MunicipalityScreen');
     }
   }, [isReady, isAuthenticated, segments, user?.municipality]);

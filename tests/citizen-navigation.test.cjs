@@ -22,6 +22,7 @@ test('only login and introductory help screens are accessible without authentica
   );
   for (const segments of [
     ['LoginScreen'],
+    ['RegisterScreen'],
     ['AboutScreen'],
     ['HelpScreen'],
     ['OnboardingScreen'],

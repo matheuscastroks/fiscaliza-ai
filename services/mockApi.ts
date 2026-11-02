@@ -7,6 +7,7 @@ import type {
   CityOverview,
 } from '@/shared/contracts';
 import { mutation, request, requestAll, saveToken } from './http';
+import type { RegistrationInput } from '@/shared/registration';
 export type ApiResponse<T> = ApiResult<T>;
 export function legacyUser(user: SessionUser): User {
   return {
@@ -34,6 +35,16 @@ async function wrap<T>(action: () => Promise<T>): Promise<ApiResult<T>> {
   }
 }
 export const authApi = {
+  register: (input: RegistrationInput) =>
+    wrap(async () => {
+      const session = await request<{ user: SessionUser; token: string }>(
+        '/auth/register',
+        'POST',
+        input,
+      );
+      await saveToken(session.token);
+      return legacyUser(session.user);
+    }),
   login: (email: string, password: string) =>
     wrap(async () => {
       const session = await request<{ user: SessionUser; token: string }>(
