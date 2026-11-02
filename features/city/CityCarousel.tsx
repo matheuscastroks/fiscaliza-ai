@@ -1,6 +1,6 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
-import { useRef, useState, type ReactNode } from 'react';
+import React, { useRef, useState, useCallback, memo, type ReactNode } from 'react';
 import {
   Animated,
   ScrollView,
@@ -13,46 +13,64 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { layout, spacing } from '@/theme';
 
-/** Native horizontal scrolling with the next cards set back, like the approved reference. */
-export function CityCarousel<T extends { id: string }>({
-  items,
-  renderItem,
-  label,
-  edgeToEdge = true,
-}: {
+export interface CityCarouselProps<T extends { id: string }> {
   items: T[];
   renderItem: (item: T) => ReactNode;
   label: string;
   edgeToEdge?: boolean;
-}) {
+}
+
+/** Native horizontal scrolling with the next cards set back, like the approved reference. */
+function CityCarouselComponent<T extends { id: string }>({
+  items,
+  renderItem,
+  label,
+  edgeToEdge = true,
+}: CityCarouselProps<T>) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
   const { width } = useWindowDimensions();
-  const [viewport, setViewport] = useState(
-    Math.min(width, 760) - spacing.contentPadding * 2,
-  );
+  const initialViewport = Math.min(width, 760) - spacing.contentPadding * 2;
+  const [viewport, setViewport] = useState(initialViewport);
   const [index, setIndex] = useState(0);
   const [scrollX] = useState(() => new Animated.Value(0));
   const list = useRef<ScrollView>(null);
+
+  const displayItems = items.length > 8 ? items.slice(0, 8) : items;
   const available = viewport - (edgeToEdge ? spacing.contentPadding * 2 : 0);
   const cardWidth = Math.max(
     120,
-    items.length > 1 ? available - 24 : available,
+    displayItems.length > 1 ? available - 24 : available,
   );
   const step = Math.max(1, cardWidth + spacing.sm);
-  const current = Math.min(index, items.length - 1);
-  const go = (next: number) => {
-    setIndex(next);
-    list.current?.scrollTo({ x: next * step, animated: true });
-  };
+  const current = Math.min(index, displayItems.length - 1);
+
+  const go = useCallback(
+    (next: number) => {
+      setIndex(next);
+      list.current?.scrollTo({ x: next * step, animated: true });
+    },
+    [step],
+  );
+
+  const handleLayout = useCallback(
+    (event: { nativeEvent: { layout: { width: number } } }) => {
+      const w = Math.round(event.nativeEvent.layout.width);
+      if (w > 0 && Math.abs(w - viewport) > 4) {
+        setViewport(w);
+      }
+    },
+    [viewport],
+  );
+
   return (
     <View
       style={[
         styles.container,
         edgeToEdge && { marginHorizontal: -spacing.contentPadding },
       ]}
-      onLayout={(event) => setViewport(event.nativeEvent.layout.width)}
+      onLayout={handleLayout}
     >
       <Animated.ScrollView
         ref={list}
@@ -66,7 +84,7 @@ export function CityCarousel<T extends { id: string }>({
           paddingLeft: edgeToEdge ? spacing.contentPadding : 0,
           paddingBottom: spacing.lg,
           paddingRight:
-            (items.length > 1 ? 24 : 0) +
+            (displayItems.length > 1 ? 24 : 0) +
             (edgeToEdge ? spacing.contentPadding : 0),
         }}
         onScroll={Animated.event(
@@ -79,14 +97,14 @@ export function CityCarousel<T extends { id: string }>({
             Math.max(
               0,
               Math.min(
-                items.length - 1,
+                displayItems.length - 1,
                 Math.round(event.nativeEvent.contentOffset.x / step),
               ),
             ),
           )
         }
       >
-        {items.map((item, itemIndex) => {
+        {displayItems.map((item, itemIndex) => {
           const inputRange = [
             (itemIndex - 1) * step,
             itemIndex * step,
@@ -148,11 +166,11 @@ export function CityCarousel<T extends { id: string }>({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Próximo cartão"
-              disabled={current >= items.length - 1}
+              disabled={current >= displayItems.length - 1}
               onPress={() => go(current + 1)}
               style={[
                 styles.arrow,
-                current >= items.length - 1 && styles.disabled,
+                current >= displayItems.length - 1 && styles.disabled,
               ]}
             >
               <Ionicons name="arrow-forward" size={20} color={colors.ink} />
@@ -163,6 +181,8 @@ export function CityCarousel<T extends { id: string }>({
     </View>
   );
 }
+
+export const CityCarousel = memo(CityCarouselComponent) as typeof CityCarouselComponent;
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     container: { gap: spacing.xxs },

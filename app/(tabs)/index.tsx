@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   ScrollView,
   View,
@@ -57,7 +57,24 @@ export default function HomeScreen() {
     active,
   );
 
-  const explore = () => router.push('/(tabs)/TerritoryScreen');
+  const explore = useCallback(() => router.push('/(tabs)/TerritoryScreen'), []);
+
+  const handleOpenCall = useCallback((id: string) => {
+    router.push({
+      pathname: '/OfficialCallDetailsScreen',
+      params: { id },
+    });
+  }, []);
+
+  const renderCallRow = useCallback(
+    (item: OfficialCall) => (
+      <OfficialCallRow
+        call={item}
+        onPress={() => handleOpenCall(item.id)}
+      />
+    ),
+    [handleOpenCall],
+  );
 
   // Agrupamento dos chamados por Categoria Temática
   const groupedCategories = useMemo<CategoryGroup[]>(() => {
@@ -151,17 +168,7 @@ export default function HomeScreen() {
             <CityCarousel
               items={saved}
               label="Chamados que você está acompanhando"
-              renderItem={(item) => (
-                <OfficialCallRow
-                  call={item}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/OfficialCallDetailsScreen',
-                      params: { id: item.id },
-                    })
-                  }
-                />
-              )}
+              renderItem={renderCallRow}
             />
 
             <AppButton
@@ -255,17 +262,7 @@ export default function HomeScreen() {
               <CityCarousel
                 items={group.calls}
                 label={`Chamados de ${group.theme.label}`}
-                renderItem={(item) => (
-                  <OfficialCallRow
-                    call={item}
-                    onPress={() =>
-                      router.push({
-                        pathname: '/OfficialCallDetailsScreen',
-                        params: { id: item.id },
-                      })
-                    }
-                  />
-                )}
+                renderItem={renderCallRow}
               />
             </View>
           ))}
