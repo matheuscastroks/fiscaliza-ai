@@ -1,6 +1,7 @@
 import { OfficialChannel } from '@/features/city/OfficialChannel';
 import { isOfficialCallClosed } from '@/shared/official-call-state';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { officialCallStatus } from '@/features/city/officialCallStatus';
 import {
   View,
   StyleSheet,
@@ -26,11 +27,11 @@ import { goBack } from '@/utils/navigation';
 export default function OfficialCallDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
+  const [saveFailed, setSaveFailed] = useState(false);
   const styles = useThemedStyles(createStyles);
 
-  const { data, isLoading, isError, refetch, isRefetching } =
-    useOfficialCall(id);
+  const { data, isLoading, isError, refetch, isRefetching } = useOfficialCall(id);
   const savedCalls = useFollowStore((s) => s.savedCalls);
   const toggleSavedCall = useFollowStore((s) => s.toggleSavedCall);
   const { busy, hydrated, persistenceError, updateSnapshots } =
@@ -80,7 +81,15 @@ export default function OfficialCallDetailsScreen() {
 
   const isClosed = isOfficialCallClosed(item);
 
-  const situationColor = isClosed ? colors.completed : colors.accent;
+  const status = officialCallStatus(item, colors, isDark);
+  const save = async () => {
+    setSaveFailed(false);
+    try {
+      if (!(await toggleSavedCall(item))) setSaveFailed(true);
+    } catch {
+      setSaveFailed(true);
+    }
+  };
 
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return '—';
@@ -102,8 +111,7 @@ export default function OfficialCallDetailsScreen() {
   return (
     <AppScreen>
       <AppHeader
-        title={`Chamado #${item.externalId}`}
-        context="Central 1746 · Prefeitura do Rio"
+        title="Chamado 1746"
         onBack={() => goBack()}
       />
 
@@ -134,105 +142,84 @@ export default function OfficialCallDetailsScreen() {
             conta.
           </AppText>
         )}
-        {persistenceError && (
-          <AppText color="risk" accessibilityRole="alert">
-            {persistenceError}
-          </AppText>
-        )}
-        {isClosed && (
-          <AppText color="muted" variant="caption">
-            Encerrado no 1746. Esse estado administrativo não confirma a
-            resolução no local.
+        {(persistenceError || saveFailed) && (
+          <AppText color="risk" accessibilityRole="alert" accessibilityLiveRegion="polite">
+            {persistenceError || 'Não foi possível salvar. Toque no coração para tentar novamente.'}
           </AppText>
         )}
         {/* Attribution Badge + Save Action */}
         <View style={styles.officialHeaderBadge}>
-          <View style={styles.badgeShield}>
-            <Ionicons name="shield-checkmark" size={16} color="#0072BB" />
-            <AppText variant="caption" style={styles.officialBadgeText}>
-              DADO OFICIAL PÚBLICO · DATA.RIO
+          <View style={{ flex: 1, gap: spacing.xxs }}>
+            <AppText variant="caption" color="muted">
+              Central 1746 · {item.serviceType}
+            </AppText>
+            <AppText variant="screenTitle" style={styles.mainTitle}>
+              {item.serviceSubtype || item.serviceType}
+            </AppText>
+            <AppText variant="caption" color="muted" selectable>
+              Protocolo {item.externalId}
             </AppText>
           </View>
           <Pressable
             disabled={!hydrated || busy}
             onPress={() => {
-              void toggleSavedCall(item);
+              void save();
             }}
-            accessibilityRole="button"
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: isSaved, disabled: !hydrated || busy, busy }}
             accessibilityLabel={
               isSaved
                 ? 'Remover dos chamados salvos na sua conta'
                 : 'Salvar chamado na sua conta para acompanhar'
             }
             style={[
-              styles.badgeShield,
-              { minHeight: 44, minWidth: 44 },
-              isSaved && { backgroundColor: colors.ink },
+              styles.saveButton,
+              { opacity: !hydrated || busy ? 0.5 : 1 },
             ]}
           >
             <Ionicons
-              name={isSaved ? 'bookmark' : 'bookmark-outline'}
-              size={14}
-              color={isSaved ? colors.onAccent : '#0072BB'}
+              name={isSaved ? 'heart' : 'heart-outline'}
+              size={24}
+              color={isSaved ? colors.risk : colors.ink}
             />
-            <AppText
-              variant="caption"
-              style={[
-                styles.officialBadgeText,
-                isSaved && { color: colors.onAccent },
-              ]}
-            >
-              {isSaved ? 'Salvo na conta' : 'Salvar na conta'}
-            </AppText>
           </Pressable>
         </View>
 
-        {/* Main Service Card */}
-        <View style={styles.sectionCard}>
-          <AppText variant="label" color="muted" style={styles.categoryLabel}>
-            {item.serviceType}
-          </AppText>
-          <AppText variant="screenTitle" style={styles.mainTitle}>
-            {item.serviceSubtype}
-          </AppText>
-
-          {item.organizationName ? (
-            <View style={styles.orgTag}>
-              <Ionicons name="business-outline" size={14} color={colors.ink} />
-              <AppText variant="label" color="ink">
-                Órgão executor: {item.organizationName}
-              </AppText>
-            </View>
-          ) : null}
+        <View style={styles.summaryRow}>
+          <View style={styles.neighborhood}>
+            <Ionicons name="location-outline" size={16} color={colors.muted} />
+            <AppText variant="meta" color="muted" style={{ flex: 1 }}>
+              {item.neighborhoodName || 'Bairro não informado'}
+            </AppText>
+          </View>
+          <View style={styles.statusRow}>
+            <View style={[styles.statusIndicator, { backgroundColor: status.color }]} />
+            <AppText variant="meta" style={{ color: status.color, flexShrink: 1 }}>
+              {status.label}
+            </AppText>
+          </View>
         </View>
 
         {/* Status / Situation Card */}
         <View style={styles.sectionCard}>
           <AppText variant="sectionTitle" style={styles.sectionHeading}>
-            Situação do atendimento
+            Atendimento
           </AppText>
 
-          <View style={styles.statusRow}>
-            <View
-              style={[
-                styles.statusIndicator,
-                { backgroundColor: situationColor },
-              ]}
-            />
-            <View style={{ flex: 1 }}>
-              <AppText
-                variant="body"
-                style={{ fontWeight: '700', color: situationColor }}
-              >
-                {item.officialSituation || item.officialStatus || 'Registrado'}
-              </AppText>
-              {item.officialSituationType ? (
-                <AppText variant="caption" color="muted">
-                  Tipo: {item.officialSituationType}
-                </AppText>
-              ) : null}
-            </View>
-          </View>
+          {item.organizationName && (
+            <AppText variant="body">{item.organizationName}</AppText>
+          )}
+          {item.officialSituationType ? (
+            <AppText variant="caption" color="muted">
+              Tipo: {item.officialSituationType}
+            </AppText>
+          ) : null}
+          {isClosed && (
+            <AppText color="muted" variant="caption">
+              Encerrado no 1746. Esse estado administrativo não confirma a
+              resolução no local.
+            </AppText>
+          )}
 
           {item.statusJustification ? (
             <View style={styles.justificationBox}>
@@ -241,7 +228,7 @@ export default function OfficialCallDetailsScreen() {
                 color="muted"
                 style={{ fontWeight: '700' }}
               >
-                Despacho / Justificativa oficial:
+                Justificativa oficial
               </AppText>
               <AppText variant="body" color="ink">
                 {item.statusJustification}
@@ -278,7 +265,7 @@ export default function OfficialCallDetailsScreen() {
             {item.closedAt ? (
               <View style={styles.gridItem}>
                 <AppText variant="caption" color="muted">
-                  Data de conclusão
+                  Data de encerramento
                 </AppText>
                 <AppText variant="label" color="ink">
                   {formatDate(item.closedAt)}
@@ -291,14 +278,7 @@ export default function OfficialCallDetailsScreen() {
                 <AppText variant="caption" color="muted">
                   Conformidade de prazo
                 </AppText>
-                <AppText
-                  variant="label"
-                  color={
-                    item.withinDeadline.toLowerCase().includes('no prazo')
-                      ? 'completed'
-                      : 'risk'
-                  }
-                >
+                <AppText variant="label">
                   {item.withinDeadline}
                 </AppText>
               </View>
@@ -320,7 +300,9 @@ export default function OfficialCallDetailsScreen() {
             </AppText>
           </View>
 
-          {item.latitude != null && item.longitude != null ? (
+          {item.latitude != null && item.longitude != null &&
+          Number.isFinite(item.latitude) && Number.isFinite(item.longitude) &&
+          Math.abs(item.latitude) <= 90 && Math.abs(item.longitude) <= 180 ? (
             <View style={styles.mapContainer}>
               <ItemLocationMap
                 id={item.id}
@@ -329,7 +311,7 @@ export default function OfficialCallDetailsScreen() {
                 neighborhood={item.neighborhoodName || undefined}
                 address={item.neighborhoodName || 'Rio de Janeiro'}
                 title={item.serviceSubtype}
-                color="#0072BB"
+                color={status.color}
                 height={200}
                 showExpandAction={true}
               />
@@ -359,14 +341,11 @@ export default function OfficialCallDetailsScreen() {
               color="ink"
               style={{ fontSize: 16 }}
             >
-              Sobre a Central 1746
+              Fonte e atendimento oficial
             </AppText>
           </View>
           <AppText variant="caption" color="muted" style={{ lineHeight: 18 }}>
-            O Fiscaliza Aí é uma plataforma independente de inteligência e
-            transparência urbana. As informações acima são sincronizadas
-            diretamente do repositório público DATA.RIO da Prefeitura da Cidade
-            do Rio de Janeiro.
+            Fonte: DATA.RIO, da Prefeitura do Rio de Janeiro. O Fiscaliza aí é independente da prefeitura.
           </AppText>
           <AppText variant="caption" color="muted">
             O atendimento acontece no canal oficial da prefeitura.
@@ -393,52 +372,40 @@ function createStyles(colors: ThemeColors) {
     },
     officialHeaderBadge: {
       flexDirection: 'row',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       justifyContent: 'space-between',
       paddingVertical: spacing.xs,
+      gap: spacing.sm,
     },
-    badgeShield: {
+    saveButton: {
+      width: 48,
+      height: 48,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surfaceSubdued,
+    },
+    summaryRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
-      backgroundColor: '#0072BB16',
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 4,
-      borderRadius: layout.radius.pill,
-    },
-    officialBadgeText: {
-      color: '#0072BB',
-      fontWeight: '800',
-      fontSize: 11,
-      letterSpacing: 0.5,
-    },
-    sectionCard: {
-      backgroundColor: colors.surface,
-      borderRadius: layout.radius.card,
-      padding: spacing.lg,
       gap: spacing.sm,
-      borderWidth: 1,
-      borderColor: colors.divider,
+      paddingBottom: spacing.sm,
     },
-    categoryLabel: {
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-      fontSize: 12,
-    },
-    mainTitle: {
-      fontSize: 20,
-      lineHeight: 26,
-    },
-    orgTag: {
+    neighborhood: {
+      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xs,
-      backgroundColor: colors.surfaceSubdued,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: spacing.xs,
-      borderRadius: layout.radius.pill,
-      alignSelf: 'flex-start',
-      marginTop: spacing.xs,
+    },
+    sectionCard: {
+      paddingVertical: spacing.md,
+      gap: spacing.sm,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.divider,
+    },
+    mainTitle: {
+      fontSize: 24,
+      lineHeight: 30,
     },
     sectionHeading: {
       fontSize: 16,
@@ -447,12 +414,14 @@ function createStyles(colors: ThemeColors) {
     statusRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: spacing.md,
+      gap: spacing.xs,
+      maxWidth: '55%',
+      flexShrink: 1,
     },
     statusIndicator: {
-      width: 12,
-      height: 12,
-      borderRadius: 6,
+      width: 7,
+      height: 7,
+      borderRadius: 4,
     },
     justificationBox: {
       backgroundColor: colors.surfaceSubdued,
@@ -482,19 +451,12 @@ function createStyles(colors: ThemeColors) {
       overflow: 'hidden',
     },
     infoCard: {
-      backgroundColor: colors.surfaceSubdued,
-      borderColor: 'transparent',
+      gap: spacing.sm,
     },
     infoCardHeader: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xs,
-    },
-    externalLink: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      marginTop: spacing.xs,
     },
   });
 }
