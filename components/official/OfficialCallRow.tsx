@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import { StyleSheet, View, Pressable } from 'react-native';
+import React, { memo, useState } from 'react';
+import { StyleSheet, View, Pressable, type ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,14 +8,14 @@ import type { ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
 import { AppText } from '@/components/ui/AppText';
 import { useFollowStore } from '@/stores/followStore';
-import { isOfficialCallClosed } from '@/shared/official-call-state';
 import { resolveServiceCategoryTheme } from '@/features/city/officialCategoryThemes';
 import type { OfficialCall } from '@/shared/contracts';
+import { officialCallStatus } from '@/features/city/officialCallStatus';
 
 export interface OfficialCallRowProps {
   call: OfficialCall;
   onPress: () => void;
-  width?: number | string;
+  width?: ViewStyle['width'];
 }
 
 export const OfficialCallRow = memo(function OfficialCallRow({
@@ -23,7 +23,7 @@ export const OfficialCallRow = memo(function OfficialCallRow({
   onPress,
   width,
 }: OfficialCallRowProps) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const styles = useThemedStyles(createStyles);
   const isSaved = useFollowStore((s) =>
     s.savedCalls.some((c) => c.id === call.id),
@@ -31,182 +31,173 @@ export const OfficialCallRow = memo(function OfficialCallRow({
   const hydrated = useFollowStore((s) => s.hydrated);
   const busy = useFollowStore((s) => s.busy);
   const toggleSavedCall = useFollowStore((s) => s.toggleSavedCall);
+  const [saveError, setSaveError] = useState('');
+  const theme = resolveServiceCategoryTheme(
+    call.serviceType,
+    call.serviceSubtype,
+  );
 
-  const isClosed = isOfficialCallClosed(call);
-  const situationColor = isClosed ? colors.completed : colors.accent;
-  const theme = resolveServiceCategoryTheme(call.serviceType, call.serviceSubtype);
-
-  const formatDate = (dateStr?: string | null) => {
-    if (!dateStr) return '';
-    try {
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      return d.toLocaleDateString('pt-BR', {
+  const title = call.serviceSubtype || call.serviceType;
+  const { label: situation, color: statusColor } = officialCallStatus(
+    call,
+    colors,
+    isDark,
+  );
+  const opened = new Date(call.openedAt);
+  const openedLabel = Number.isNaN(opened.getTime())
+    ? 'Data de abertura não informada'
+    : 'Aberto em ' +
+      opened.toLocaleDateString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
       });
+  const toggle = async () => {
+    setSaveError('');
+    try {
+      if (!(await toggleSavedCall(call)))
+        setSaveError(
+          'Não foi possível atualizar seus acompanhamentos. Toque no coração para tentar novamente.',
+        );
     } catch {
-      return dateStr;
+      setSaveError(
+        'Não foi possível atualizar seus acompanhamentos. Toque no coração para tentar novamente.',
+      );
     }
   };
-
-  const primaryStateLabel =
-    call.officialStatus && call.officialStatus !== call.officialSituation
-      ? `${call.officialSituation || 'Registrado'} · ${call.officialStatus}`
-      : call.officialSituation || call.officialStatus || 'Registrado';
-
   return (
-    <Pressable
-      style={({ pressed }) => [
-        styles.card,
-        width !== undefined ? { width: width as any } : undefined,
-        pressed && { opacity: 0.88 },
-      ]}
-      accessibilityRole="button"
-      accessibilityLabel={`Chamado ${call.externalId}, ${call.serviceSubtype || call.serviceType}, ${isClosed ? 'Encerrado no 1746' : primaryStateLabel}`}
-      onPress={onPress}
-    >
-      {/* Imagem de Fundo em alta resolução por Categoria */}
-      <Image
-        source={{ uri: theme.imageUrl }}
-        style={styles.photo}
-        contentFit="cover"
-        transition={250}
-        priority="normal"
-        accessibilityIgnoresInvertColors
-      />
-
-      {/* Linha Superior Flutuante: Categoria + Protocolo 1746 + Salvar */}
-      <View style={styles.topRow}>
-        <View style={styles.categoryBadge}>
-          <Ionicons name={theme.icon as any} size={14} color="#FFFFFF" />
-          <AppText
-            variant="caption"
-            numberOfLines={1}
-            style={styles.categoryBadgeText}
-          >
-            {theme.label || call.serviceType}
-          </AppText>
-        </View>
-
-        <View style={styles.rightHeaderGroup}>
-          <View style={styles.officialPill}>
-            <Ionicons name="shield-checkmark" size={12} color="#93C5FD" />
-            <AppText variant="caption" style={styles.officialPillText}>
-              #{call.externalId}
-            </AppText>
-          </View>
-
-          <Pressable
-            disabled={!hydrated || busy}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={
-              isSaved
-                ? `Remover chamado ${call.externalId} da sua conta`
-                : `Salvar chamado ${call.externalId} na sua conta`
-            }
-            onPress={(e) => {
-              e.stopPropagation();
-              void toggleSavedCall(call);
-            }}
-            style={[
-              styles.savePill,
-              isSaved && styles.savePillActive,
-            ]}
-          >
+    <View style={[styles.card, width !== undefined && { width }]}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`${title}. ${call.neighborhoodName || 'Bairro não informado'}. ${situation}. ${openedLabel}. Protocolo ${call.externalId}. Ver detalhes do chamado.`}
+        style={({ pressed }) => pressed && { opacity: 0.85 }}
+      >
+        <View style={styles.photoArea}>
+          <Image
+            source={{ uri: theme.imageUrl }}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            accessibilityIgnoresInvertColors
+            accessible={false}
+          />
+          <View style={styles.category}>
             <Ionicons
-              name={isSaved ? 'bookmark' : 'bookmark-outline'}
-              size={13}
-              color={isSaved ? '#0F172A' : '#FFFFFF'}
+              name={theme.icon as React.ComponentProps<typeof Ionicons>['name']}
+              size={16}
+              color={colors.white}
             />
             <AppText
               variant="caption"
-              style={[
-                styles.savePillText,
-                { color: isSaved ? '#0F172A' : '#FFFFFF' },
-              ]}
+              numberOfLines={2}
+              style={styles.categoryLabel}
             >
-              {isSaved ? 'Salvo' : 'Salvar'}
+              {theme.label}
             </AppText>
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Espaço de respiro para a fotografia respirar no topo */}
-      <View style={styles.photoSpace} />
-
-      {/* Conteúdo com Gradiente Editorial Contínuo (Scrim) */}
-      <View style={styles.content}>
-        <LinearGradient
-          pointerEvents="none"
-          colors={[
-            'rgba(15, 23, 42, 0)',
-            'rgba(15, 23, 42, 0.72)',
-            'rgba(15, 23, 42, 0.97)',
-          ]}
-          locations={[0, 0.3, 1]}
-          style={styles.scrim}
-        />
-
-        {/* Status do Atendimento com badge translúcida */}
-        <View style={styles.statusRow}>
-          <View
-            style={[
-              styles.statusDot,
-              { backgroundColor: situationColor },
-            ]}
+          </View>
+          <LinearGradient
+            pointerEvents="none"
+            colors={[colors.transparent, colors.surface]}
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 64,
+            }}
           />
+        </View>
+        <View style={styles.content}>
           <AppText
-            variant="label"
-            numberOfLines={1}
-            style={styles.statusLabelText}
+            variant="sectionTitle"
+            numberOfLines={2}
+            style={styles.title}
           >
-            {primaryStateLabel}
+            {title}
           </AppText>
-          {call.withinDeadline ? (
-            <AppText variant="caption" style={styles.subtleText}>
-              · {call.withinDeadline}
+          <View style={styles.locationStatusRow}>
+            <View style={styles.location}>
+              <Ionicons
+                name="location-outline"
+                size={17}
+                color={colors.muted}
+              />
+              <AppText color="muted" style={styles.flex} numberOfLines={2}>
+                {call.neighborhoodName || 'Bairro não informado'}
+              </AppText>
+            </View>
+            <View style={styles.status}>
+              <View
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor: statusColor,
+                }}
+              />
+              <AppText
+                variant="caption"
+                numberOfLines={2}
+                style={{
+                  color: statusColor,
+                  flexShrink: 1,
+                  textAlign: 'right',
+                }}
+              >
+                {situation}
+              </AppText>
+            </View>
+          </View>
+          <AppText variant="meta" color="muted">
+            {openedLabel}
+          </AppText>
+          <View style={styles.source}>
+            <AppText variant="caption" color="muted" selectable>
+              Central 1746 · Protocolo {call.externalId}
             </AppText>
-          ) : null}
+          </View>
         </View>
-
-        {/* Título Principal / Subtipo do Serviço */}
-        <AppText variant="sectionTitle" numberOfLines={2} style={styles.title}>
-          {call.serviceSubtype || call.serviceType}
+      </Pressable>
+      <Pressable
+        onPress={() => {
+          void toggle();
+        }}
+        disabled={!hydrated || busy}
+        accessibilityRole="checkbox"
+        accessibilityState={{
+          checked: isSaved,
+          disabled: !hydrated || busy,
+          busy,
+        }}
+        accessibilityLabel={
+          isSaved
+            ? `Deixar de acompanhar chamado ${call.externalId}`
+            : `Acompanhar chamado ${call.externalId}`
+        }
+        accessibilityHint="Guarda este chamado nos seus acompanhamentos."
+        style={({ pressed }) => [
+          styles.heart,
+          { opacity: !hydrated || busy ? 0.6 : pressed ? 0.75 : 1 },
+        ]}
+      >
+        <Ionicons
+          name={isSaved ? 'heart' : 'heart-outline'}
+          size={25}
+          color={isSaved ? colors.risk : colors.ink}
+        />
+      </Pressable>
+      {saveError !== '' && (
+        <AppText
+          color="risk"
+          variant="meta"
+          accessibilityRole="alert"
+          accessibilityLiveRegion="polite"
+          style={styles.error}
+        >
+          {saveError}
         </AppText>
-
-        {/* Metadados: Localização e Data */}
-        <View style={styles.metaRow}>
-          <View style={styles.locationGroup}>
-            <Ionicons name="location-outline" size={14} color="#94A3B8" />
-            <AppText
-              variant="caption"
-              numberOfLines={1}
-              style={styles.locationText}
-            >
-              {[call.neighborhoodName || 'Rio de Janeiro', call.organizationName]
-                .filter(Boolean)
-                .join(' · ')}
-            </AppText>
-          </View>
-          <AppText variant="caption" style={styles.dateText}>
-            {formatDate(call.openedAt)}
-          </AppText>
-        </View>
-
-        {/* Ação em Pílula Translúcida com Botão de Avanço Circular */}
-        <View style={styles.photoAction}>
-          <AppText variant="label" style={styles.actionLabel}>
-            Ver detalhes do chamado
-          </AppText>
-          <View style={styles.actionArrow}>
-            <Ionicons name="arrow-forward" size={18} color="#0F172A" />
-          </View>
-        </View>
-      </View>
-    </Pressable>
+      )}
+    </View>
   );
 });
 
@@ -214,199 +205,71 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     card: {
       width: '100%',
-      minHeight: 380,
       borderRadius: layout.radius.card,
       backgroundColor: colors.surface,
       overflow: 'hidden',
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.14)',
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.28,
-      shadowRadius: 14,
-      elevation: 6,
-      justifyContent: 'space-between',
+      borderColor: colors.border,
     },
-    photo: {
-      ...StyleSheet.absoluteFill,
-      width: '100%',
-      height: '100%',
-    },
-    topRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: spacing.sm,
-      padding: spacing.md,
-      zIndex: 3,
-    },
-    categoryBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      backgroundColor: 'rgba(15, 23, 42, 0.65)',
-      paddingHorizontal: spacing.sm + 2,
-      paddingVertical: 5,
-      borderRadius: layout.radius.pill,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-      flexShrink: 1,
-    },
-    categoryBadgeText: {
-      color: '#FFFFFF',
-      fontWeight: '700',
-      fontSize: 12,
-      letterSpacing: 0.2,
-    },
-    rightHeaderGroup: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      flexShrink: 0,
-    },
-    officialPill: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      backgroundColor: 'rgba(15, 23, 42, 0.65)',
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: layout.radius.pill,
-      borderWidth: 1,
-      borderColor: 'rgba(147, 197, 253, 0.35)',
-    },
-    officialPillText: {
-      color: '#93C5FD',
-      fontWeight: '800',
-      fontSize: 11,
-    },
-    savePill: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      backgroundColor: 'rgba(15, 23, 42, 0.65)',
-      paddingHorizontal: 9,
-      paddingVertical: 4,
-      borderRadius: layout.radius.pill,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.22)',
-    },
-    savePillActive: {
-      backgroundColor: '#FFFFFF',
-      borderColor: '#FFFFFF',
-    },
-    savePillText: {
-      fontWeight: '700',
-      fontSize: 11,
-    },
-    photoSpace: {
-      flexGrow: 1,
-      minHeight: 110,
-    },
-    content: {
-      padding: spacing.lg,
-      gap: spacing.sm,
-      position: 'relative',
-      zIndex: 2,
-    },
-    scrim: {
+    photoArea: { height: 132, backgroundColor: colors.surfaceSubdued },
+    category: {
       position: 'absolute',
-      left: 0,
-      right: 0,
-      top: -110,
-      bottom: 0,
-    },
-    statusRow: {
+      top: spacing.md,
+      left: spacing.md,
+      maxWidth: '65%',
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
-      backgroundColor: 'rgba(15, 23, 42, 0.55)',
-      alignSelf: 'flex-start',
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: layout.radius.pill,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.14)',
+      gap: spacing.xs,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: layout.radius.panel,
+      backgroundColor: 'rgba(0,0,0,0.75)',
     },
-    statusDot: {
-      width: 7,
-      height: 7,
-      borderRadius: 4,
-    },
-    statusLabelText: {
-      color: '#FFFFFF',
-      fontWeight: '700',
-      fontSize: 12,
-      flexShrink: 1,
-    },
-    subtleText: {
-      color: '#CBD5E1',
-      fontSize: 11,
-    },
-    title: {
-      color: '#FFFFFF',
-      fontSize: 20,
-      lineHeight: 26,
-      fontWeight: '700',
-      textShadowColor: 'rgba(0, 0, 0, 0.6)',
-      textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 4,
-    },
-    metaRow: {
+    categoryLabel: { color: colors.white, flexShrink: 1 },
+    content: { padding: spacing.md, gap: spacing.xs, minHeight: 0 },
+    title: { fontSize: 19, lineHeight: 25 },
+    flex: { flex: 1, minWidth: 0 },
+    locationStatusRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
       gap: spacing.sm,
-      paddingBottom: 2,
     },
-    locationGroup: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
+    location: {
       flex: 1,
+      minWidth: 0,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xxs,
     },
-    locationText: {
-      color: '#CBD5E1',
-      fontSize: 12,
-      fontWeight: '500',
+    status: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      flexShrink: 1,
+      maxWidth: '55%',
+      justifyContent: 'flex-end',
     },
-    dateText: {
-      color: '#94A3B8',
-      fontSize: 12,
-      fontWeight: '500',
-    },
-    photoAction: {
-      backgroundColor: 'rgba(255, 255, 255, 0.14)',
-      borderRadius: layout.radius.pill,
-      paddingLeft: spacing.lg,
-      paddingRight: spacing.xxs,
-      paddingVertical: spacing.xxs,
+    source: { gap: spacing.xxs, paddingTop: spacing.xs },
+    details: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: spacing.sm,
+      minHeight: 48,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
       marginTop: spacing.xs,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.16)',
     },
-    actionLabel: {
-      color: '#FFFFFF',
-      fontWeight: '700',
-      fontSize: 13,
-      letterSpacing: 0.2,
-    },
-    actionArrow: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: '#FFFFFF',
+    heart: {
+      position: 'absolute',
+      top: spacing.sm,
+      right: spacing.sm,
+      minWidth: 48,
+      minHeight: 48,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surface,
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.18,
-      shadowRadius: 4,
-      elevation: 2,
     },
+    error: { paddingHorizontal: spacing.md, paddingBottom: spacing.md },
   });
 }

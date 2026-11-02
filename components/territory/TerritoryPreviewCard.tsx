@@ -4,8 +4,6 @@ import { facilityColors } from '@/features/territory/selectors';
 import type { MapMarker } from '@/components/ui/MapboxMapView';
 import React, { useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
@@ -13,8 +11,8 @@ import type { ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
 import type { CivicItem, Occurrence, OfficialCall } from '@/shared/contracts';
 import { kindLabel, statusLabel } from '@/features/city/CityUI';
-import { assetUrl } from '@/services/http';
 import { useFollowStore } from '@/stores/followStore';
+import { officialCallStatus } from '@/features/city/officialCallStatus';
 
 export type Entry =
   | { type: 'facility'; item: PublicFacilitySummary }
@@ -65,12 +63,6 @@ export function entryToMarker(entry: Entry): MapMarker | null {
     : null;
 }
 
-const occurrenceStatus: Record<string, string> = {
-  pending: 'Recebida',
-  in_progress: 'Em atendimento',
-  resolved: 'Concluída',
-};
-
 interface TerritoryPreviewCardProps {
   entry: Entry;
   onOpen: (entry: Entry) => void;
@@ -89,323 +81,187 @@ export function TerritoryCardContent({
   onClose?: () => void;
   hideClose?: boolean;
 }) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const styles = useThemedStyles(createStyles);
-  const [imageError, setImageError] = useState(false);
   const officialId = entry.type === 'official' ? entry.item.id : '';
-  const isSaved = useFollowStore((s) =>
+  const saved = useFollowStore((s) =>
     officialId ? s.savedCalls.some((c) => c.id === officialId) : false,
   );
   const hydrated = useFollowStore((s) => s.hydrated);
   const busy = useFollowStore((s) => s.busy);
   const toggleSavedCall = useFollowStore((s) => s.toggleSavedCall);
+  const [failedId, setFailedId] = useState<string | null>(null);
+  const close =
+    !hideClose && onClose ? (
+      <Pressable
+        onPress={onClose}
+        accessibilityRole="button"
+        accessibilityLabel="Fechar visualização rápida"
+        style={styles.close}
+      >
+        <Ionicons name="close" size={20} color={colors.muted} />
+      </Pressable>
+    ) : null;
 
   if (entry.type === 'facility')
     return (
-      <View style={{ gap: 6 }}>
+      <View>
+        <View style={styles.facilityHeader}>
+          <AppText variant="caption" color="muted">
+            Equipamento público
+          </AppText>
+        </View>
         <FacilityRow item={entry.item} onPress={() => onOpen(entry)} />
-        {!hideClose && onClose && (
-          <Pressable
-            accessibilityRole="button"
-            onPress={onClose}
-            style={{
-              minHeight: 44,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: colors.surface,
-              borderRadius: 22,
-            }}
-          >
-            <AppText variant="caption">Fechar</AppText>
-          </Pressable>
-        )}
+        {close}
       </View>
     );
 
-  const title =
+  const official = entry.type === 'official' ? entry.item : null;
+  const title = entry.type === 'official'
+    ? entry.item.serviceSubtype || entry.item.serviceType
+    : entry.item.title;
+  const category = entry.type === 'official'
+    ? 'Central 1746 · ' + entry.item.serviceType
+    : entry.type === 'occurrence'
+      ? 'Ocorrência'
+      : kindLabel[entry.item.kind];
+  const address = entry.type === 'official'
+    ? entry.item.neighborhoodName || 'Bairro não informado'
+    : entry.type === 'occurrence'
+      ? entry.item.location.neighborhood ||
+        entry.item.location.address ||
+        'Local não informado'
+      : entry.item.neighborhood || 'Território municipal';
+  const status = entry.type === 'official'
+    ? officialCallStatus(entry.item, colors, isDark)
+    : {
+        label: statusLabel[entry.item.status] || entry.item.status,
+        color: colors.muted,
+      };
+  const date = new Date(
     entry.type === 'official'
-      ? entry.item.serviceSubtype || entry.item.serviceType
-      : entry.item.title;
-
-  let status = '';
-  let categoryLabel = '';
-  let address = '';
-  let rawPhoto: string | null = null;
-  let badgeColor = colors.accent;
-
-  if (entry.type === 'occurrence') {
-    const occ = entry.item;
-    status = occurrenceStatus[occ.status] || occ.status;
-    categoryLabel = 'Ocorrência';
-    address =
-      occ.location.address || occ.location.neighborhood || 'Local indicado';
-    rawPhoto = occ.images && occ.images.length > 0 ? occ.images[0] : null;
-    badgeColor = colors.accent;
-  } else if (entry.type === 'official') {
-    const off = entry.item;
-    status = off.officialSituation || off.officialStatus || 'Registrado';
-    categoryLabel = off.serviceType || 'Central 1746';
-    address =
-      [off.neighborhoodName, off.subprefecture].filter(Boolean).join(' · ') ||
-      'Rio de Janeiro';
-    rawPhoto = null;
-    badgeColor = '#0072BB';
-  } else {
-    const civic = entry.item;
-    status = statusLabel[civic.status] || civic.status;
-    categoryLabel = kindLabel[civic.kind];
-    address = civic.neighborhood || 'Território municipal';
-    rawPhoto =
-      'images' in civic &&
-      Array.isArray(civic.images) &&
-      civic.images.length > 0
-        ? civic.images[0]
-        : 'evidence' in civic &&
-            Array.isArray(civic.evidence) &&
-            civic.evidence.length > 0
-          ? civic.evidence[0]
-          : null;
-    badgeColor =
-      civic.kind === 'proposal'
-        ? colors.attention
-        : civic.kind === 'action'
-          ? colors.completed
-          : colors.muted;
-  }
-
-  const resolvedPhoto = rawPhoto ? assetUrl(rawPhoto) : null;
-  const hasPhoto = Boolean(resolvedPhoto && !imageError);
-
+      ? entry.item.openedAt
+      : entry.type === 'occurrence'
+        ? entry.item.reportedAt
+        : entry.item.createdAt,
+  );
+  const dateLabel = Number.isNaN(date.getTime())
+    ? 'Data não informada'
+    : date.toLocaleDateString('pt-BR');
+  const save = async () => {
+    if (!official) return;
+    setFailedId(null);
+    try {
+      if (!(await toggleSavedCall(official))) setFailedId(official.id);
+    } catch {
+      setFailedId(official.id);
+    }
+  };
   return (
-    <Pressable
-      style={styles.cardPressable}
-      accessibilityRole="button"
-      accessibilityLabel={`Ver detalhes de ${title}`}
-      onPress={() => onOpen(entry)}
-    >
-      {hasPhoto && resolvedPhoto && (
-        <>
-          <Image
-            source={{ uri: resolvedPhoto }}
-            style={StyleSheet.absoluteFill}
-            contentFit="cover"
-            transition={250}
-            onError={() => setImageError(true)}
-          />
-          <LinearGradient
-            colors={[
-              'rgba(15,18,20,0.35)',
-              'rgba(15,18,20,0.72)',
-              'rgba(15,18,20,0.96)',
-            ]}
-            locations={[0, 0.45, 1]}
-            style={StyleSheet.absoluteFill}
-          />
-        </>
-      )}
-
-      <View style={styles.cardInner}>
-        {/* Top row: Badges + Close button */}
-        <View style={styles.topRow}>
-          <View style={styles.badgeGroup}>
-            {entry.type === 'official' && (
-              <View
-                style={[
-                  styles.badge,
-                  {
-                    backgroundColor: '#0072BB1A',
-                    borderColor: '#0072BB44',
-                    borderWidth: 1,
-                  },
-                ]}
-              >
-                <AppText
-                  variant="caption"
-                  style={{
-                    color: '#0072BB',
-                    fontWeight: '800',
-                    fontSize: 10,
-                  }}
-                >
-                  1746 OFICIAL
-                </AppText>
-              </View>
-            )}
-            <View
-              style={[
-                styles.badge,
-                {
-                  backgroundColor: hasPhoto
-                    ? 'rgba(255,255,255,0.22)'
-                    : badgeColor + '18',
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.badgeDot,
-                  { backgroundColor: hasPhoto ? colors.white : badgeColor },
-                ]}
-              />
-              <AppText
-                variant="caption"
-                style={{
-                  color: hasPhoto ? colors.white : badgeColor,
-                  fontWeight: '700',
-                }}
-              >
-                {categoryLabel}
-              </AppText>
-            </View>
-
-            <View
-              style={[
-                styles.statusBadge,
-                {
-                  backgroundColor: hasPhoto
-                    ? 'rgba(0,0,0,0.35)'
-                    : colors.surfaceSubdued,
-                },
-              ]}
-            >
-              <AppText
-                variant="caption"
-                style={{
-                  color: hasPhoto ? 'rgba(255,255,255,0.9)' : colors.muted,
-                  fontWeight: '600',
-                }}
-              >
-                {status}
-              </AppText>
-            </View>
-          </View>
-
-          {!hideClose && onClose && (
-            <Pressable
-              style={[
-                styles.closeCircle,
-                {
-                  backgroundColor: hasPhoto
-                    ? 'rgba(0,0,0,0.45)'
-                    : colors.surfaceSubdued,
-                },
-              ]}
-              onPress={onClose}
-              hitSlop={12}
-              accessibilityLabel="Fechar visualização rápida"
-            >
-              <Ionicons
-                name="close"
-                size={16}
-                color={hasPhoto ? colors.white : colors.ink}
-              />
-            </Pressable>
-          )}
-        </View>
-
-        {/* Bottom section: Title, Location and Action CTA */}
-        <View style={styles.bottomSection}>
+    <View style={styles.content}>
+      <Pressable
+        onPress={() => onOpen(entry)}
+        accessibilityRole="button"
+        accessibilityLabel={`${title}. ${address}. ${status.label}. ${dateLabel}.${official ? ' Protocolo ' + official.externalId + '.' : ''} Ver detalhes.`}
+      >
+        <View style={[styles.heading, close && { paddingRight: 40 }]}>
           <AppText
-            variant="sectionTitle"
-            numberOfLines={2}
-            style={[
-              styles.cardTitle,
-              hasPhoto ? { color: colors.white } : { color: colors.ink },
-            ]}
+            variant="caption"
+            color="muted"
+            numberOfLines={1}
+            style={styles.flex}
           >
-            {title}
+            {category}
           </AppText>
-
-          <View style={styles.locationRow}>
-            <Ionicons
-              name="location"
-              size={14}
-              color={hasPhoto ? 'rgba(255,255,255,0.85)' : colors.muted}
-            />
+        </View>
+        <AppText variant="label" numberOfLines={2} style={styles.title}>
+          {title}
+        </AppText>
+        <View style={styles.meta}>
+          <View style={styles.location}>
+            <Ionicons name="location-outline" size={15} color={colors.muted} />
             <AppText
               variant="caption"
-              numberOfLines={1}
-              style={[
-                styles.addressText,
-                hasPhoto
-                  ? { color: 'rgba(255,255,255,0.85)' }
-                  : { color: colors.muted },
-              ]}
+              color="muted"
+              numberOfLines={2}
+              style={styles.flex}
             >
               {address}
             </AppText>
           </View>
-
-          <View style={styles.actionRow}>
-            <View
-              style={[
-                styles.actionButton,
-                {
-                  backgroundColor: hasPhoto
-                    ? 'rgba(255,255,255,0.92)'
-                    : colors.ink,
-                },
-              ]}
+          <View style={styles.status}>
+            <View style={[styles.dot, { backgroundColor: status.color }]} />
+            <AppText
+              variant="caption"
+              numberOfLines={2}
+              style={{ color: status.color, flexShrink: 1, textAlign: 'right' }}
             >
-              <AppText
-                variant="label"
-                style={{
-                  color: hasPhoto ? '#111827' : colors.surface,
-                  fontWeight: '700',
-                  fontSize: 13,
-                }}
-              >
-                Ver detalhes
-              </AppText>
-              <Ionicons
-                name="arrow-forward"
-                size={14}
-                color={hasPhoto ? '#111827' : colors.surface}
-              />
-            </View>
-            {entry.type === 'official' && (
-              <Pressable
-                disabled={!hydrated || busy}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  isSaved
-                    ? 'Remover chamado da conta'
-                    : 'Salvar chamado na conta'
-                }
-                onPress={(e) => {
-                  e.stopPropagation();
-                  void toggleSavedCall(entry.item);
-                }}
-                style={[
-                  styles.actionButton,
-                  {
-                    backgroundColor: isSaved
-                      ? '#0072BB'
-                      : colors.surfaceSubdued,
-                  },
-                ]}
-              >
-                <Ionicons
-                  name={isSaved ? 'bookmark' : 'bookmark-outline'}
-                  size={14}
-                  color={isSaved ? colors.white : colors.ink}
-                />
-                <AppText
-                  variant="label"
-                  style={{
-                    color: isSaved ? colors.white : colors.ink,
-                    fontWeight: '700',
-                    fontSize: 13,
-                  }}
-                >
-                  {isSaved ? 'Salvo na conta' : 'Salvar na conta'}
-                </AppText>
-              </Pressable>
-            )}
+              {status.label}
+            </AppText>
           </View>
         </View>
+        <AppText
+          variant="caption"
+          color="muted"
+          numberOfLines={1}
+          style={styles.date}
+        >
+          {dateLabel}
+          {official ? ' · Protocolo ' + official.externalId : ''}
+        </AppText>
+      </Pressable>
+      <View style={styles.actions}>
+        <Pressable
+          onPress={() => onOpen(entry)}
+          accessibilityRole="button"
+          accessibilityLabel={`Ver detalhes de ${title}`}
+          style={styles.details}
+        >
+          <AppText variant="label">Ver detalhes</AppText>
+          <Ionicons name="arrow-forward" size={18} color={colors.ink} />
+        </Pressable>
+        {official && (
+          <Pressable
+            onPress={() => {
+              void save();
+            }}
+            disabled={!hydrated || busy}
+            accessibilityRole="checkbox"
+            accessibilityState={{
+              checked: saved,
+              disabled: !hydrated || busy,
+              busy,
+            }}
+            accessibilityLabel={
+              saved
+                ? 'Deixar de acompanhar chamado ' + official.externalId
+                : 'Acompanhar chamado ' + official.externalId
+            }
+            style={({ pressed }) => [
+              styles.heart,
+              { opacity: !hydrated || busy ? 0.5 : pressed ? 0.7 : 1 },
+            ]}
+          >
+            <Ionicons
+              name={saved ? 'heart' : 'heart-outline'}
+              size={23}
+              color={saved ? colors.risk : colors.ink}
+            />
+          </Pressable>
+        )}
       </View>
-    </Pressable>
+      {failedId === officialId && (
+        <AppText
+          variant="meta"
+          color="risk"
+          accessibilityRole="alert"
+          accessibilityLiveRegion="polite"
+        >
+          Não foi possível salvar. Toque no coração para tentar novamente.
+        </AppText>
+      )}
+      {close}
+    </View>
   );
 }
 
@@ -416,14 +272,12 @@ export function TerritoryPreviewCard({
   bottomOffset = 90,
 }: TerritoryPreviewCardProps) {
   const styles = useThemedStyles(createStyles);
-
   return (
     <View style={[styles.card, { bottom: bottomOffset }]}>
       <TerritoryCardContent entry={entry} onOpen={onOpen} onClose={onClose} />
     </View>
   );
 }
-
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     card: {
@@ -432,94 +286,77 @@ const createStyles = (colors: ThemeColors) =>
       right: spacing.md,
       backgroundColor: colors.surface,
       borderRadius: layout.radius.card,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.22,
-      shadowRadius: 18,
-      elevation: 10,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.14,
+      shadowRadius: 10,
+      elevation: 8,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
       zIndex: 100,
       overflow: 'hidden',
     },
-    cardPressable: {
-      minHeight: 220,
+    content: {
+      paddingHorizontal: spacing.md,
+      paddingTop: spacing.xs,
+      paddingBottom: spacing.xxs,
+      gap: spacing.xxs,
     },
-    cardInner: {
-      flex: 1,
-      minHeight: 220,
-      padding: spacing.md,
-      justifyContent: 'space-between',
-    },
-    topRow: {
+    flex: { flex: 1, minWidth: 0 },
+    heading: {
+      minHeight: 32,
+      justifyContent: 'center',
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      zIndex: 2,
     },
-    badgeGroup: {
+    title: { fontSize: 17, lineHeight: 23, marginBottom: spacing.xs },
+    meta: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    location: {
+      flex: 1,
+      minWidth: 0,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xxs,
+    },
+    status: {
+      flexShrink: 1,
+      maxWidth: '55%',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      gap: spacing.xs,
+    },
+    dot: { width: 7, height: 7, borderRadius: 4 },
+    date: { marginTop: spacing.xs },
+    actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    details: {
+      flex: 1,
+      minHeight: 48,
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xs,
-      flexWrap: 'wrap',
     },
-    badge: {
-      flexDirection: 'row',
+    heart: {
+      minWidth: 48,
+      minHeight: 48,
       alignItems: 'center',
-      gap: 5,
-      paddingHorizontal: 9,
-      paddingVertical: 4,
+      justifyContent: 'center',
       borderRadius: layout.radius.pill,
     },
-    badgeDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-    },
-    statusBadge: {
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: layout.radius.pill,
-    },
-    closeCircle: {
-      width: 30,
-      height: 30,
-      borderRadius: 15,
+    close: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      minWidth: 48,
+      minHeight: 48,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    bottomSection: {
-      gap: 6,
-      zIndex: 2,
-      marginTop: spacing.md,
-    },
-    cardTitle: {
-      fontSize: 16,
-      lineHeight: 22,
-      fontWeight: '700',
-    },
-    locationRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    addressText: {
-      flex: 1,
-      fontSize: 12,
-    },
-    actionRow: {
-      marginTop: 4,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      flexWrap: 'wrap',
-    },
-    actionButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingHorizontal: 14,
-      paddingVertical: 8,
-      borderRadius: layout.radius.pill,
+    facilityHeader: {
+      paddingTop: spacing.sm,
+      paddingHorizontal: spacing.md,
+      paddingRight: 48,
+      minHeight: 40,
+      justifyContent: 'center',
     },
   });

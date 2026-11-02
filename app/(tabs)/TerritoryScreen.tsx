@@ -154,7 +154,7 @@ function TerritoryContent() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 300);
   const appliedSearch = search.trim() ? debouncedSearch.trim() : '';
-  const [status, setStatus] = useState<string>('all');
+  const [status, setStatus] = useState<string>('Não Encerrado');
   const { isListView, setIsListView } = useTerritoryViewMode();
 
   const facilityParams = { neighborhoodId, search: appliedSearch || undefined, ...(areaOnly && appliedBounds ? appliedBounds : {}) };
@@ -216,7 +216,7 @@ function TerritoryContent() {
     );
     if (target) setNeighborhood(target.name);
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setStatus('all');
+    setStatus('Não Encerrado');
     setServiceType('all');
     setSearch('');
     setAreaOnly(false);
@@ -435,7 +435,7 @@ function TerritoryContent() {
     });
     setSelectedId(null);
     setSelectedCluster(null);
-    setStatus('all');
+    setStatus('Não Encerrado');
     setNeighborhood('');
     setAreaOnly(false);
     setAppliedBounds(null);

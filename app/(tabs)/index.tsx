@@ -1,9 +1,5 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import {
-  ScrollView,
-  View,
-  RefreshControl,
-} from 'react-native';
+import { ScrollView, View, RefreshControl, Pressable } from 'react-native';
 import { router, useIsFocused } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemedStyles, useTheme } from '@/theme/useTheme';
@@ -13,17 +9,13 @@ import { AppButton } from '@/components/ui/AppButton';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppText } from '@/components/ui/AppText';
-import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import { QueryState, createCityStyles } from '@/features/city/CityUI';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useOfficialCalls } from '@/features/city/useOfficialCalls';
 import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { CityCarousel } from '@/features/city/CityCarousel';
 import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
-import {
-  useTerritorySelection,
-  useTerritoryStore,
-} from '@/stores/territoryStore';
+import { useTerritorySelection } from '@/stores/territoryStore';
 import { useFollowStore } from '@/stores/followStore';
 import { CitizenAction } from '@/features/city/CitizenAction';
 import {
@@ -44,7 +36,6 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const { neighborhood, neighborhoodId, setNeighborhood } =
     useTerritorySelection();
-  const preferred = useTerritoryStore((s) => s.preferredNeighborhood);
   const saved = useFollowStore((s) => s.savedCalls);
   const hydrated = useFollowStore((s) => s.hydrated);
 
@@ -52,6 +43,7 @@ export default function HomeScreen() {
     {
       neighborhoodId,
       bairro: neighborhoodId ? undefined : neighborhood || undefined,
+      situacao: 'Não Encerrado',
       limit: 30,
     },
     active,
@@ -68,10 +60,7 @@ export default function HomeScreen() {
 
   const renderCallRow = useCallback(
     (item: OfficialCall) => (
-      <OfficialCallRow
-        call={item}
-        onPress={() => handleOpenCall(item.id)}
-      />
+      <OfficialCallRow call={item} onPress={() => handleOpenCall(item.id)} />
     ),
     [handleOpenCall],
   );
@@ -79,10 +68,16 @@ export default function HomeScreen() {
   // Agrupamento dos chamados por Categoria Temática
   const groupedCategories = useMemo<CategoryGroup[]>(() => {
     const list = calls.data?.calls || [];
-    const map = new Map<string, { theme: ServiceCategoryTheme; calls: OfficialCall[] }>();
+    const map = new Map<
+      string,
+      { theme: ServiceCategoryTheme; calls: OfficialCall[] }
+    >();
 
     for (const call of list) {
-      const theme = resolveServiceCategoryTheme(call.serviceType, call.serviceSubtype);
+      const theme = resolveServiceCategoryTheme(
+        call.serviceType,
+        call.serviceSubtype,
+      );
       const existing = map.get(theme.id);
       if (existing) {
         existing.calls.push(call);
@@ -115,36 +110,78 @@ export default function HomeScreen() {
           />
         }
       >
-        <CitySearch
-          onPress={explore}
-          onFilters={() =>
-            router.push({
-              pathname: '/(tabs)/TerritoryScreen',
-              params: { filters: String(Date.now()) },
-            })
-          }
-        />
         <View style={{ gap: spacing.sm }}>
-          {Boolean(preferred || neighborhood) && (
-            <SlidingTabs
-              label="Região das demandas"
+          <CitySearch
+            onPress={explore}
+            onFilters={() =>
+              router.push({
+                pathname: '/(tabs)/TerritoryScreen',
+                params: { filters: String(Date.now()) },
+              })
+            }
+            filterCount={neighborhood ? 1 : 0}
+          />
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: spacing.xs, alignItems: 'center' }}
+          >
+            <NeighborhoodPicker
+              compact
+              options={[]}
               value={neighborhood}
-              options={[
-                { value: '', label: 'Todo o município' },
-                ...(preferred ? [{ value: preferred, label: preferred }] : []),
-                ...(neighborhood && neighborhood !== preferred
-                  ? [{ value: neighborhood, label: neighborhood }]
-                  : []),
-              ]}
               onChange={setNeighborhood}
             />
-          )}
-          <NeighborhoodPicker
-            compact
-            options={[]}
-            value={neighborhood}
-            onChange={setNeighborhood}
-          />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Abrir filtros avançados no mapa"
+              onPress={() =>
+                router.push({
+                  pathname: '/(tabs)/TerritoryScreen',
+                  params: { filters: String(Date.now()) },
+                })
+              }
+              style={({ pressed }) => ({
+                minHeight: 48,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: spacing.xs,
+                paddingHorizontal: spacing.md,
+                borderRadius: layout.radius.pill,
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: colors.border,
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <Ionicons name="options-outline" size={17} color={colors.ink} />
+              <AppText variant="meta">Filtros no mapa</AppText>
+            </Pressable>
+            {neighborhood !== '' && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Limpar filtro de bairro"
+                onPress={() => setNeighborhood('')}
+                style={({ pressed }) => ({
+                  minHeight: 48,
+                  paddingHorizontal: spacing.sm,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: spacing.xxs,
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <Ionicons
+                  name="close-circle-outline"
+                  size={18}
+                  color={colors.muted}
+                />
+                <AppText variant="meta" color="muted">
+                  Limpar
+                </AppText>
+              </Pressable>
+            )}
+          </ScrollView>
         </View>
 
         <CitizenAction
@@ -183,7 +220,8 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={{ gap: 2 }}>
             <AppText variant="sectionTitle">
-              O que acontece {neighborhood ? `em ${neighborhood}` : 'na cidade'}?
+              O que acontece {neighborhood ? `em ${neighborhood}` : 'na cidade'}
+              ?
             </AppText>
             <AppText variant="caption" color="muted">
               Demandas da Central 1746 organizadas por categoria temática.
@@ -214,7 +252,10 @@ export default function HomeScreen() {
 
           {/* Carrosséis Horizontais por Categoria */}
           {groupedCategories.map((group) => (
-            <View key={group.theme.id} style={{ gap: spacing.sm, marginTop: spacing.xs }}>
+            <View
+              key={group.theme.id}
+              style={{ gap: spacing.sm, marginTop: spacing.xs }}
+            >
               {/* Cabeçalho da Categoria com Ícone e Contagem */}
               <View
                 style={{
