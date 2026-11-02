@@ -10,6 +10,7 @@ import {
   Keyboard,
   Animated,
   AccessibilityInfo,
+  Easing,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -48,13 +49,17 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
 
   const visibleRoutes = state.routes.filter((route) => VISIBLE.has(route.name));
   const isTerritory = state.routes[state.index]?.name === 'TerritoryScreen';
-  const horizontalPadding = isTerritory ? 4 : TAB_PADDING;
   const tabCount = Math.max(1, visibleRoutes.length);
+  const extraSpace = TAB_SIZE + TAB_GAP;
+  // Reserve room for the contextual button on every route so navigation never
+  // changes the capsule's dimensions or its touch targets.
+  const availableWidth = width - insets.left - insets.right - 16 - extraSpace;
+  const horizontalPadding = Math.min(TAB_PADDING, Math.max(0, (availableWidth - tabCount * TAB_SIZE) / 2));
   const barWidth = Math.min(
     tabCount * TAB_SIZE +
-      (isTerritory ? 0 : (tabCount - 1) * TAB_GAP) +
+      (tabCount - 1) * TAB_GAP +
       2 * horizontalPadding,
-    width - 16 - (isTerritory ? TAB_SIZE + TAB_GAP : 0),
+    availableWidth,
   );
 
   const selectedIndex = Math.max(
@@ -71,6 +76,22 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
       : 0;
   const selectionAnim = useRef(new Animated.Value(target)).current;
   const [reducedMotion, setReducedMotion] = useState(false);
+  const territoryAnim = useRef(new Animated.Value(isTerritory ? 1 : 0)).current;
+
+  useEffect(() => {
+    if (reducedMotion) {
+      territoryAnim.setValue(isTerritory ? 1 : 0);
+      return;
+    }
+    const transition = Animated.timing(territoryAnim, {
+      toValue: isTerritory ? 1 : 0,
+      duration: 480,
+      easing: Easing.inOut(Easing.cubic),
+      useNativeDriver: true,
+    });
+    transition.start();
+    return () => transition.stop();
+  }, [isTerritory, reducedMotion, territoryAnim]);
 
   useEffect(() => {
     let active = true;
@@ -130,13 +151,36 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
         styles.barContainer,
         {
           bottom: insets.bottom + 16,
+          left: insets.left,
+          right: insets.right,
         },
       ]}
     >
-      <View
+      {/* The neck stretches out of the capsule, then pinches closed as the
+          contextual button separates. It never receives touches. */}
+      <Animated.View
+        pointerEvents="none"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={{
+          position: 'absolute',
+          left: '50%',
+          marginLeft: barWidth / 2 - 44,
+          width: 40,
+          height: 24,
+          borderRadius: 12,
+          backgroundColor: colors.navigationSurface,
+          transform: [
+            { scaleX: territoryAnim.interpolate({ inputRange: [0, 0.18, 0.45, 0.65, 0.82, 1], outputRange: [0, 0.4, 1, 0.7, 0, 0] }) },
+            { scaleY: territoryAnim.interpolate({ inputRange: [0, 0.18, 0.45, 0.65, 0.82, 1], outputRange: [0, 1, 0.65, 0.25, 0, 0] }) },
+          ],
+        }}
+      />
+      <Animated.View
         style={[
           styles.bar,
-          { width: barWidth, paddingHorizontal: horizontalPadding },
+          { width: barWidth, paddingHorizontal: horizontalPadding, zIndex: 2 },
+          { transform: [{ translateX: territoryAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -extraSpace / 2] }) }] },
         ]}
       >
         <Animated.View
@@ -203,10 +247,26 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
               </Pressable>
             );
           })}
-      </View>
+      </Animated.View>
 
-      {isTerritory && (
+      <Animated.View
+        pointerEvents={isTerritory ? 'auto' : 'none'}
+        accessibilityElementsHidden={!isTerritory}
+        importantForAccessibility={isTerritory ? 'auto' : 'no-hide-descendants'}
+        style={{
+          position: 'absolute',
+          left: '50%',
+          marginLeft: barWidth / 2 + TAB_GAP - extraSpace / 2,
+          zIndex: 1,
+          transform: [
+            { translateX: territoryAnim.interpolate({ inputRange: [0, 0.25, 0.6, 0.85, 1], outputRange: [-64, -42, -12, 3, 0] }) },
+            { scaleX: territoryAnim.interpolate({ inputRange: [0, 0.4, 0.75, 1], outputRange: [1, 1.14, 0.94, 1] }) },
+            { scaleY: territoryAnim.interpolate({ inputRange: [0, 0.4, 0.75, 1], outputRange: [1, 0.84, 1.06, 1] }) },
+          ],
+        }}
+      >
         <Pressable
+          disabled={!isTerritory}
           accessibilityRole="button"
           accessibilityLabel={
             isListView
@@ -229,7 +289,7 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
             color={colors.navigationIcon}
           />
         </Pressable>
-      )}
+      </Animated.View>
     </View>
   );
 }
@@ -243,6 +303,7 @@ const createStyles = (colors: ThemeColors) =>
       position: 'absolute',
       left: 0,
       right: 0,
+      height: TAB_SIZE + 2 * TAB_PADDING,
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
