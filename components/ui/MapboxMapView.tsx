@@ -284,9 +284,9 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
       const feature = event?.features?.[0];
       if (!feature) return;
       if (feature.properties?.cluster) {
-        const clusterId = feature.properties.cluster_id;
+        // Android parses this argument as a GeoJSON Feature, not a cluster ID.
         const leaves = await shapeSourceRef.current?.getClusterLeaves(
-          clusterId,
+          feature,
           100,
           0,
         );

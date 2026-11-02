@@ -26,6 +26,41 @@ function evaluateTs(filePath, mocks = {}) {
   return mod.exports;
 }
 
+test('cluster press sends the full GeoJSON feature to the native bridge', async () => {
+  const source = fs.readFileSync('components/ui/MapboxMapView.tsx', 'utf8');
+  const ast = ts.createSourceFile('map.tsx', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let callback;
+  function visit(node) {
+    if (ts.isVariableDeclaration(node) && node.name.getText(ast) === 'handleShapePress') {
+      callback = node.initializer.arguments[0].getText(ast);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(ast);
+  assert.ok(callback);
+  const feature = { type: 'Feature', geometry: { type: 'Point', coordinates: [-43.2, -22.9] }, properties: { cluster: true, cluster_id: 123, point_count: 2 } };
+  let opened;
+  const handler = vm.runInNewContext(ts.transpileModule('(' + callback + ')', {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  }).outputText, {
+    shapeSourceRef: { current: { async getClusterLeaves(input, limit, offset) {
+      // Android calls Feature.fromJson(JSON.stringify(input)), so numbers are invalid.
+      assert.equal(JSON.parse(JSON.stringify(input)).type, 'Feature');
+      assert.equal(input, feature);
+      assert.equal(limit, 100);
+      assert.equal(offset, 0);
+      return { features: [{ id: 'call-1' }, { properties: { id: 'call-2' } }] };
+    } } },
+    onClusterClick: (value) => { opened = value; },
+    onMarkerClick: () => assert.fail('cluster must not open a single marker'),
+  });
+  await handler({ features: [feature] });
+  assert.deepEqual(Array.from(opened.ids), ['call-1', 'call-2']);
+  assert.equal(opened.count, 2);
+  assert.equal(opened.longitude, -43.2);
+  assert.equal(opened.latitude, -22.9);
+});
+
 test('package.json and app.json register @rnmapbox/maps and remove legacy map packages', () => {
   const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
   assert.ok(
