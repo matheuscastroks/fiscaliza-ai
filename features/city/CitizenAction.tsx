@@ -24,7 +24,7 @@ export function CitizenAction({
       onPress={onPress}
       style={({ pressed }) => ({
         padding: spacing.lg,
-        borderRadius: layout.radius.card,
+        borderRadius: primary ? layout.radius.pill : layout.radius.card,
         backgroundColor: primary ? colors.ink : colors.surface,
         opacity: pressed ? 0.8 : 1,
         flexDirection: 'row',

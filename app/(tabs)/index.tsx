@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { ScrollView, View, RefreshControl, Pressable } from 'react-native';
+import { ScrollView, View, RefreshControl, Pressable, StyleSheet } from 'react-native';
 import { router, useIsFocused } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemedStyles, useTheme } from '@/theme/useTheme';
@@ -251,10 +251,16 @@ export default function HomeScreen() {
           )}
 
           {/* Carrosséis Horizontais por Categoria */}
-          {groupedCategories.map((group) => (
+          {groupedCategories.map((group, index) => (
             <View
               key={group.theme.id}
-              style={{ gap: spacing.sm, marginTop: spacing.xs }}
+              style={{
+                gap: spacing.sm,
+                marginTop: index > 0 ? spacing.lg : spacing.xs,
+                paddingTop: index > 0 ? spacing.xl : 0,
+                borderTopWidth: index > 0 ? StyleSheet.hairlineWidth : 0,
+                borderTopColor: colors.divider,
+              }}
             >
               {/* Cabeçalho da Categoria com Ícone e Contagem */}
               <View
@@ -272,22 +278,11 @@ export default function HomeScreen() {
                     gap: 8,
                   }}
                 >
-                  <View
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: layout.radius.pill,
-                      backgroundColor: group.theme.color + '22',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Ionicons
-                      name={group.theme.icon as any}
-                      size={16}
-                      color={group.theme.color}
-                    />
-                  </View>
+                  <Ionicons
+                    name={group.theme.icon as React.ComponentProps<typeof Ionicons>['name']}
+                    size={18}
+                    color={colors.ink}
+                  />
                   <AppText variant="label" style={{ fontWeight: '700' }}>
                     {group.theme.label}
                   </AppText>
