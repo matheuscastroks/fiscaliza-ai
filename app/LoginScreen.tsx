@@ -50,147 +50,154 @@ export default function LoginScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.canvas }]}>
-      {/* 1. Backdrop com fotografia urbana cívica */}
-      <View style={[styles.heroContainer, { height: heroHeight }]}>
-        <Image
-          source={require("@/assets/images/auth-backdrop.jpg")}
-          contentFit="cover"
-          style={StyleSheet.absoluteFill}
-          priority="high"
-          accessibilityLabel="Fotografia urbana de cidadãos caminhando na cidade"
-        />
-
-        <LinearGradient
-          colors={[
-            "rgba(15, 23, 42, 0.65)",
-            "rgba(15, 23, 42, 0.25)",
-            "rgba(15, 23, 42, 0.85)",
-          ]}
-          locations={[0, 0.45, 1]}
-          style={StyleSheet.absoluteFill}
-        />
-
-        {/* Barra superior com badge da marca à esquerda (substituindo o botão voltar) */}
-        <View
-          style={[
-            styles.topBar,
-            { paddingTop: Math.max(insets.top, 16) + spacing.xs },
-          ]}
-        >
-          <View style={styles.brandPill}>
-            <AppBrandGlyph size={18} color="#FFFFFF" active />
-            <AppText style={styles.brandTitle}>Fiscaliza aí</AppText>
-          </View>
-        </View>
-
-        {/* Apresentação do propósito cívico sobre a imagem */}
-        <View style={styles.heroFooter}>
-          <AppText style={styles.heroSubtitle}>
-            Participação cidadã e prestação de contas na gestão urbana
-          </AppText>
-        </View>
-      </View>
-
-      {/* 2. Cartão de superfície com as opções de acesso */}
-      <View
-        style={[
-          styles.sheetContainer,
-          {
-            backgroundColor: colors.surface,
-            shadowColor: colors.shadow,
-          },
+      <KeyboardAwareScrollView
+        bottomOffset={32}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.mainScroll,
+          { paddingBottom: Math.max(insets.bottom, spacing.xl) + spacing.md },
         ]}
       >
-        <KeyboardAwareScrollView
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[
-            styles.scrollContent,
-            isDesktop && styles.desktopContent,
-            { paddingBottom: Math.max(insets.bottom, spacing.xl) + spacing.md },
+        {/* 1. Backdrop com fotografia urbana cívica */}
+        <View style={[styles.heroContainer, { height: heroHeight }]}>
+          <Image
+            source={require("@/assets/images/auth-backdrop.jpg")}
+            contentFit="cover"
+            style={StyleSheet.absoluteFill}
+            priority="high"
+            accessibilityLabel="Fotografia urbana de cidadãos caminhando na cidade"
+          />
+
+          <LinearGradient
+            colors={[
+              "rgba(15, 23, 42, 0.65)",
+              "rgba(15, 23, 42, 0.25)",
+              "rgba(15, 23, 42, 0.85)",
+            ]}
+            locations={[0, 0.45, 1]}
+            style={StyleSheet.absoluteFill}
+          />
+
+          {/* Barra superior com badge da marca à esquerda (substituindo o botão voltar) */}
+          <View
+            style={[
+              styles.topBar,
+              { paddingTop: Math.max(insets.top, 16) + spacing.xs },
+            ]}
+          >
+            <View style={styles.brandPill}>
+              <AppBrandGlyph size={18} color="#FFFFFF" active />
+              <AppText style={styles.brandTitle}>Fiscaliza aí</AppText>
+            </View>
+          </View>
+
+          {/* Apresentação do propósito cívico sobre a imagem */}
+          <View style={styles.heroFooter}>
+            <AppText style={styles.heroSubtitle}>
+              Participação cidadã e prestação de contas na gestão urbana
+            </AppText>
+          </View>
+        </View>
+
+        {/* 2. Cartão de superfície com as opções de acesso */}
+        <View
+          style={[
+            styles.sheetContainer,
+            {
+              backgroundColor: colors.surface,
+              shadowColor: colors.shadow,
+            },
           ]}
         >
-          {/* Cabeçalho da área de acesso */}
-          <View style={styles.headerSection}>
-            <AppText variant="screenTitle" color="ink">
-              Acesse sua conta
-            </AppText>
-            <AppText color="muted" style={styles.headerSubtitle}>
-              Acompanhe sua cidade e contribua com as decisões do seu
-              território.
-            </AppText>
+          <View
+            style={[
+              styles.scrollContent,
+              isDesktop && styles.desktopContent,
+            ]}
+          >
+            {/* Cabeçalho da área de acesso */}
+            <View style={styles.headerSection}>
+              <AppText variant="screenTitle" color="ink">
+                Acesse sua conta
+              </AppText>
+              <AppText color="muted" style={styles.headerSubtitle}>
+                Acompanhe sua cidade e contribua com as decisões do seu
+                território.
+              </AppText>
+            </View>
+
+            {/* Destaque principal: Acesso oficial Gov.br */}
+            <View style={styles.govSection}>
+              <GovBrButton />
+              <AppText variant="caption" color="subtle" style={styles.govHint}>
+                Acesso com sua conta gov.br
+              </AppText>
+            </View>
+
+            {/* Divisor */}
+            <View style={styles.dividerRow}>
+              <View
+                style={[styles.dividerLine, { backgroundColor: colors.border }]}
+              />
+              <AppText
+                variant="caption"
+                color="subtle"
+                style={styles.dividerText}
+              >
+                ou com e-mail e senha
+              </AppText>
+              <View
+                style={[styles.dividerLine, { backgroundColor: colors.border }]}
+              />
+            </View>
+
+            {/* Formulário secundário com placeholders */}
+            <View style={styles.formSection}>
+              <AppInput
+                placeholder="E-mail"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+              />
+
+              <AppInput
+                placeholder="Senha"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoComplete="current-password"
+                onSubmitEditing={() => {
+                  void submit();
+                }}
+                error={error}
+              />
+
+              <AppButton
+                title="Entrar"
+                variant="primary"
+                loading={isLoading}
+                disabled={!email.trim() || !password}
+                onPress={() => {
+                  void submit();
+                }}
+                style={styles.submitButton}
+              />
+            </View>
+
+            {/* Rodapé informativo */}
+            <View style={styles.footerSection}>
+              <AppButton
+                title="Sobre o Fiscaliza aí"
+                variant="quiet"
+                onPress={() => router.push("/AboutScreen")}
+              />
+            </View>
           </View>
-
-          {/* Destaque principal: Acesso oficial Gov.br */}
-          <View style={styles.govSection}>
-            <GovBrButton />
-            <AppText variant="caption" color="subtle" style={styles.govHint}>
-              Acesso com sua conta gov.br
-            </AppText>
-          </View>
-
-          {/* Divisor */}
-          <View style={styles.dividerRow}>
-            <View
-              style={[styles.dividerLine, { backgroundColor: colors.border }]}
-            />
-            <AppText
-              variant="caption"
-              color="subtle"
-              style={styles.dividerText}
-            >
-              ou com e-mail e senha
-            </AppText>
-            <View
-              style={[styles.dividerLine, { backgroundColor: colors.border }]}
-            />
-          </View>
-
-          {/* Formulário secundário com placeholders */}
-          <View style={styles.formSection}>
-            <AppInput
-              placeholder="E-mail"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-            />
-
-            <AppInput
-              placeholder="Senha"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoComplete="current-password"
-              onSubmitEditing={() => {
-                void submit();
-              }}
-              error={error}
-            />
-
-            <AppButton
-              title="Entrar"
-              variant="primary"
-              loading={isLoading}
-              disabled={!email.trim() || !password}
-              onPress={() => {
-                void submit();
-              }}
-              style={styles.submitButton}
-            />
-          </View>
-
-          {/* Rodapé informativo */}
-          <View style={styles.footerSection}>
-            <AppButton
-              title="Sobre o Fiscaliza aí"
-              variant="quiet"
-              onPress={() => router.push("/AboutScreen")}
-            />
-          </View>
-        </KeyboardAwareScrollView>
-      </View>
+        </View>
+      </KeyboardAwareScrollView>
     </View>
   );
 }
@@ -198,6 +205,9 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  mainScroll: {
+    flexGrow: 1,
   },
   heroContainer: {
     width: "100%",

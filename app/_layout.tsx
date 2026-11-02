@@ -17,6 +17,7 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { useAuthStore } from '@/stores/authStore';
@@ -106,43 +107,45 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <ThemeProvider value={navigationTheme}>
-          <QueryClientProvider client={queryClient}>
-            <StatusBar style={isDark ? 'light' : 'dark'} />
-            <AppDrawer>
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: colors.canvas },
-                }}
-              >
-                <Stack.Screen name="(tabs)" />
-                <Stack.Protected guard={isReady && isAuthenticated}>
-                  <Stack.Screen
-                    name="ProblemDetailsScreen"
-                    options={{ animation: 'slide_from_bottom' }}
-                  />
-                  <Stack.Screen
-                    name="CivicDetailsScreen"
-                    options={{ animation: 'slide_from_bottom' }}
-                  />
-                  {[
-                    'HistoricalDetailsScreen',
-                    'HistoryScreen',
-                    'MunicipalityScreen',
-                    'PresentationScreen',
-                    'ProposalScreen',
-                    'RelatedScreen',
-                  ].map((name) => (
-                    <Stack.Screen key={name} name={name} />
-                  ))}
-                </Stack.Protected>
-              </Stack>
-            </AppDrawer>
-            <SignOutSheet />
-            <OnboardingGate enabled={segments[0] !== 'OnboardingScreen'} />
-          </QueryClientProvider>
-        </ThemeProvider>
+        <KeyboardProvider statusBarTranslucent navigationBarTranslucent>
+          <ThemeProvider value={navigationTheme}>
+            <QueryClientProvider client={queryClient}>
+              <StatusBar style={isDark ? 'light' : 'dark'} />
+              <AppDrawer>
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: colors.canvas },
+                  }}
+                >
+                  <Stack.Screen name="(tabs)" />
+                  <Stack.Protected guard={isReady && isAuthenticated}>
+                    <Stack.Screen
+                      name="ProblemDetailsScreen"
+                      options={{ animation: 'slide_from_bottom' }}
+                    />
+                    <Stack.Screen
+                      name="CivicDetailsScreen"
+                      options={{ animation: 'slide_from_bottom' }}
+                    />
+                    {[
+                      'HistoricalDetailsScreen',
+                      'HistoryScreen',
+                      'MunicipalityScreen',
+                      'PresentationScreen',
+                      'ProposalScreen',
+                      'RelatedScreen',
+                    ].map((name) => (
+                      <Stack.Screen key={name} name={name} />
+                    ))}
+                  </Stack.Protected>
+                </Stack>
+              </AppDrawer>
+              <SignOutSheet />
+              <OnboardingGate enabled={segments[0] !== 'OnboardingScreen'} />
+            </QueryClientProvider>
+          </ThemeProvider>
+        </KeyboardProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
