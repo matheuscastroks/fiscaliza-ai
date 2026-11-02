@@ -10,15 +10,26 @@ export const queryClient = new QueryClient({
 });
 let sessionToken: string | null = null;
 let onExpired: (() => void) | undefined;
+async function expireUnauthorizedSession(path: string, status: number) {
+  if (status === 401 && path !== '/auth/login') {
+    await saveToken(null);
+    onExpired?.();
+  }
+}
 async function readResult<T>(
   path: string,
   status: number,
   result: ApiResult<T>,
 ): Promise<T> {
-  if (status === 401 && path !== '/auth/login') {
-    await saveToken(null);
-    onExpired?.();
-  }
+  await expireUnauthorizedSession(path, status);
+  if (
+    !result ||
+    typeof result !== 'object' ||
+    typeof result.success !== 'boolean'
+  )
+    throw new Error(
+      'O serviço retornou uma resposta inválida. Tente novamente.',
+    );
   if (status < 200 || status >= 300 || !result.success)
     throw new Error(
       result.error || 'Não foi possível concluir. Tente novamente.',
@@ -74,7 +85,17 @@ export async function request<T>(
             ? body
             : JSON.stringify(body),
     });
-    const result = (await response.json()) as ApiResult<T>;
+    let result: ApiResult<T>;
+    try {
+      result = (await response.json()) as ApiResult<T>;
+    } catch {
+      await expireUnauthorizedSession(path, response.status);
+      throw new Error(
+        response.status >= 500
+          ? 'O serviço está temporariamente indisponível. Tente novamente em instantes.'
+          : 'O serviço retornou uma resposta inválida. Tente novamente.',
+      );
+    }
     return await readResult(path, response.status, result);
   } catch (error) {
     // A superseded query is cancellation, not an offline error to show to users.

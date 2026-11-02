@@ -5,6 +5,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
+import { AppErrorMessage } from '@/components/ui/AppErrorMessage';
 import type { CivicItem } from '@/shared/contracts';
 
 import { spacing } from '@/theme/spacing';
@@ -85,16 +86,16 @@ export function QueryState({
         />
       )}
       {error && (
-        <>
-          <AppText color="risk">{error.message}</AppText>
-          <AppButton
-            title="Tentar novamente"
-            variant="secondary"
-            onPress={() => {
-              retry?.();
-            }}
-          />
-        </>
+        <AppErrorMessage
+          message={error.message}
+          onRetry={
+            retry
+              ? () => {
+                  void retry();
+                }
+              : undefined
+          }
+        />
       )}
     </View>
   );
