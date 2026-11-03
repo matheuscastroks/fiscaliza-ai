@@ -59,6 +59,8 @@ export function useInfiniteOfficialCalls(
   enabled = true,
   performanceDiagnostics = false,
 ) {
+  const client = useQueryClient();
+  const filtersKey = JSON.stringify(params);
   const query = useInfiniteQuery({
     queryKey: ['officialCallsPages', params],
     initialPageParam: undefined as string | undefined,
@@ -89,6 +91,13 @@ export function useInfiniteOfficialCalls(
     enabled,
     staleTime: 30_000,
   });
+  const { refetch } = query;
+  useFocusEffect(useCallback(() => {
+    const state = client.getQueryState(['officialCallsPages', JSON.parse(filtersKey)]);
+    if (enabled && state && (state.isInvalidated || Date.now() - state.dataUpdatedAt >= 30_000)) {
+      void refetch();
+    }
+  }, [client, enabled, filtersKey, refetch]));
   const data = useMemo(() => {
     if (!query.data) return undefined;
     const pages = query.data.pages;

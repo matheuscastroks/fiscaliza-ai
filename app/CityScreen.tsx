@@ -1,7 +1,7 @@
 import { useThemedStyles } from '@/theme/useTheme';
 import { goBack } from '@/utils/navigation';
 import React from 'react';
-import { ScrollView, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -22,7 +22,7 @@ export default function CityScreen() {
   return (
     <AppScreen>
       <AppHeader title="Município e bairros" onBack={() => goBack()} />
-      <ScrollView contentContainerStyle={cityStyles.content}>
+      <FlatList data={query.data?.neighborhoods || []} keyExtractor={item => item.name} initialNumToRender={8} maxToRenderPerBatch={8} windowSize={5} contentContainerStyle={cityStyles.content} ListHeaderComponent={<View style={cityStyles.section}>
         <AppText variant="screenTitle">{municipality?.name}</AppText>
         <AppText color="muted">{municipality?.state}</AppText>
         <QueryState
@@ -48,7 +48,16 @@ export default function CityScreen() {
                 </AppText>
               )}
             <AppText variant="sectionTitle">Por bairro</AppText>
-            {query.data.neighborhoods.map((item) => (
+
+            {!query.data.neighborhoods.length && (
+              <AppText color="muted">
+                Ainda não há contribuições associadas a bairros.
+              </AppText>
+            )}
+
+          </>
+        )}
+      </View>} renderItem={({ item }) => (
               <View key={item.name} style={cityStyles.row}>
                 <AppText variant="sectionTitle">{item.name}</AppText>
                 <AppText color="muted">
@@ -69,19 +78,10 @@ export default function CityScreen() {
                   />
                 )}
               </View>
-            ))}
-            {!query.data.neighborhoods.length && (
-              <AppText color="muted">
-                Ainda não há contribuições associadas a bairros.
-              </AppText>
-            )}
-            <AppText color="muted">
+)} ListFooterComponent={query.data ? (            <AppText color="muted">
               Os números representam as contribuições registradas na plataforma.
               Não são uma medição de todos os problemas ou moradores da cidade.
-            </AppText>
-          </>
-        )}
-      </ScrollView>
+            </AppText>) : null} />
     </AppScreen>
   );
 }

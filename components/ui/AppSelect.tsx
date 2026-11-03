@@ -65,12 +65,16 @@ export function AppSelect({
 
   const isFiltered = value !== defaultValue && Boolean(value);
 
+  const searchableOptions = useMemo(
+    () => open ? options.map(option => ({ option, text: normalizeText(option.label) })) : [],
+    [open, options],
+  );
   const filteredOptions = useMemo(() => {
     if (!open) return [];
     if (!search.trim()) return options;
     const query = normalizeText(search);
-    return options.filter((opt) => normalizeText(opt.label).includes(query));
-  }, [open, options, search]);
+    return searchableOptions.filter(({ text }) => text.includes(query)).map(({ option }) => option);
+  }, [open, options, search, searchableOptions]);
 
   const handleOpen = () => {
     setSearch('');

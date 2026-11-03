@@ -1,3 +1,4 @@
+import { ProgressiveList } from '@/components/ui/ProgressiveList';
 import { useThemedStyles } from '@/theme/useTheme';
 import { ExecutionProgress } from '@/features/city/CivicCard';
 import { DeleteRecord } from '@/features/city/DeleteRecord';
@@ -249,7 +250,7 @@ export default function CivicDetailsScreen() {
               <AppText color="muted">
                 Previsão: {new Date(item.dueAt).toLocaleDateString('pt-BR')}
               </AppText>
-              {item.updates.map((update, index) => (
+              <ProgressiveList key={item.id + 'item.updates'} items={item.updates} renderItem={(update, index) => (
                 <View key={index} style={cityStyles.row}>
                   <AppText color="muted">
                     {new Date(update.at).toLocaleDateString('pt-BR')} ·{' '}
@@ -257,7 +258,7 @@ export default function CivicDetailsScreen() {
                   </AppText>
                   <AppText>{update.text}</AppText>
                 </View>
-              ))}
+              )} />
               {item.evidence.map((url, index) => (
                 <Image
                   key={url}
@@ -275,14 +276,14 @@ export default function CivicDetailsScreen() {
           )}
           {(item.history?.length || 0) > 0 && (
             <DetailSection title="Histórico de decisões">
-              {item.history?.map((event, index) => (
+              <ProgressiveList key={item.id + 'item.history?'} items={(item.history || [])} renderItem={(event, index) => (
                 <View key={index} style={cityStyles.row}>
                   <AppText color="muted">
                     {new Date(event.at).toLocaleString('pt-BR')} · {event.actor}
                   </AppText>
                   <AppText>{event.text}</AppText>
                 </View>
-              ))}
+              )} />
             </DetailSection>
           )}
           {item.linkedIds.length > 0 && (
@@ -305,9 +306,9 @@ export default function CivicDetailsScreen() {
 
           <DeleteRecord item={item} path={path} />
           <DetailSection title="Contribuições da comunidade">
-            {item.comments.map((c) => (
+            <ProgressiveList key={item.id + 'item.comments'} items={item.comments} renderItem={(c) => (
               <CommunityComment key={c.id} comment={c} path={path} />
-            ))}
+            )} />
             <AppInput
               placeholder="Adicionar informação..."
               value={comment}

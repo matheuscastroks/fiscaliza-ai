@@ -1,5 +1,5 @@
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
@@ -33,6 +33,10 @@ function NeighborhoodContent({ initialId }: { initialId?: string }) {
   const [dates, setDates] = useState(initialPeriod);
   const [refreshing, setRefreshing] = useState(false);
   const options = useNeighborhoods();
+  const neighborhoodOptions = useMemo(() => [
+    { value: '', label: 'Escolher bairro' },
+    ...(options.data || []).map(n => ({ value: n.id, label: n.name })),
+  ], [options.data]);
   const overview = useNeighborhoodOverview(id, dates);
   return (
     <AppScreen keyboardAvoiding>
@@ -63,13 +67,7 @@ function NeighborhoodContent({ initialId }: { initialId?: string }) {
           placeholder="Buscar bairro"
           value={id || ''}
           onChange={setId}
-          options={[
-            { value: '', label: 'Escolher bairro' },
-            ...(options.data || []).map((n) => ({
-              value: n.id,
-              label: n.name,
-            })),
-          ]}
+          options={neighborhoodOptions}
         />
         <QueryState
           loading={options.isLoading || Boolean(id && overview.isLoading)}

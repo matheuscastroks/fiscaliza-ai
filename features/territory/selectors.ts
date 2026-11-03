@@ -55,14 +55,16 @@ export function resolveNeighborhood<T extends { id: string; name: string }>(
   name: string,
   options: T[],
 ): T | null {
+  if (!name.trim()) return null;
   const normalize = (text: string) =>
     text
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .trim()
-      .toLocaleLowerCase('pt-BR');
+      .toLowerCase();
+  const normalizedName = normalize(name);
   const matches = options.filter(
-    (item) => normalize(item.name) === normalize(name),
+    (item) => normalize(item.name) === normalizedName,
   );
   return matches.length === 1 ? matches[0] : null;
 }

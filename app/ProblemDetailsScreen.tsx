@@ -1,3 +1,4 @@
+import { ProgressiveList } from '@/components/ui/ProgressiveList';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import { CityCarousel } from '@/features/city/CityCarousel';
 import { DeleteRecord } from '@/features/city/DeleteRecord';
@@ -33,8 +34,8 @@ export default function ProblemDetailsScreen() {
   const path = '/occurrences/' + encodeURIComponent(id || '');
   const user = useAuthStore((s) => s.user);
   const query = useCityQuery<Occurrence>(path);
-  const nearby = useCityQuery<Occurrence[]>('/occurrences');
   const item = query.data;
+  const nearby = useCityQuery<Occurrence[]>(path + '/nearby', Boolean(item));
   const related = item ? nearbyOccurrences(item, nearby.data || []) : [];
   const view = useRecordView(path, Boolean(item));
   const [comment, setComment] = useState('');
@@ -158,7 +159,7 @@ export default function ProblemDetailsScreen() {
             {item.sector && (
               <AppText color="muted">Setor responsável: {item.sector}</AppText>
             )}
-            {item.statusHistory.map((event, index) => (
+            <ProgressiveList key={item.id + 'item.statusHistory'} items={item.statusHistory} renderItem={(event, index) => (
               <View key={event.id || index} style={cityStyles.row}>
                 <AppText variant="caption" color="muted">
                   {new Date(event.at).toLocaleString('pt-BR')}
@@ -167,7 +168,7 @@ export default function ProblemDetailsScreen() {
                 <StatusText status={event.status} />
                 <AppText>{event.justification}</AppText>
               </View>
-            ))}
+            )} />
           </DetailSection>
           {(item.relatedIds?.length || 0) > 0 && (
             <DetailSection title="Ações e participações relacionadas">
@@ -251,9 +252,9 @@ export default function ProblemDetailsScreen() {
             </DetailSection>
           )}
           <DetailSection title="Informações da comunidade">
-            {item.comments.map((c) => (
+            <ProgressiveList key={item.id + 'item.comments'} items={item.comments} renderItem={(c) => (
               <CommunityComment key={c.id} comment={c} path={path} />
-            ))}
+            )} />
             <AppInput
               placeholder="Complementar o registro com novas informações..."
               value={comment}

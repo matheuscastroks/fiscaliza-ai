@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNeighborhoods } from '@/features/territory/usePublicData';
 import {
   resolveNeighborhood,
@@ -138,10 +138,10 @@ export function useTerritorySelection() {
   const set = useTerritoryStore((s) => s.setNeighborhood);
   const setNeighborhood = useCallback((value: string) => set(value), [set]);
   const boundaries = useNeighborhoods();
-  const neighborhoodId = resolveNeighborhood(
-    neighborhood,
-    boundaries.data || [],
-  )?.id;
+  const neighborhoodId = useMemo(
+    () => resolveNeighborhood(neighborhood, boundaries.data || [])?.id,
+    [neighborhood, boundaries.data],
+  );
   return { neighborhood, neighborhoodId, setNeighborhood };
 }
 export function useTerritoryViewMode() {

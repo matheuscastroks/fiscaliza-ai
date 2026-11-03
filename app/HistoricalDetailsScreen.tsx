@@ -1,3 +1,4 @@
+import { ProgressiveList } from '@/components/ui/ProgressiveList';
 import { useThemedStyles } from '@/theme/useTheme';
 import { goBack } from '@/utils/navigation';
 import React from 'react';
@@ -122,7 +123,7 @@ export default function HistoricalDetailsScreen() {
                 <AppText variant="sectionTitle">
                   Respostas e atendimento
                 </AppText>
-                {occurrence.statusHistory.map((event, index) => (
+                <ProgressiveList key={item.id + 'occurrence.statusHistory'} items={occurrence.statusHistory} renderItem={(event, index) => (
                   <View key={event.id || index} style={cityStyles.row}>
                     <AppText variant="caption" color="muted">
                       {new Date(event.at).toLocaleString('pt-BR')}
@@ -131,7 +132,7 @@ export default function HistoricalDetailsScreen() {
                     <StatusText status={event.status} />
                     <AppText>{event.justification}</AppText>
                   </View>
-                ))}
+                )} />
                 {occurrence.evaluation && (
                   <AppText>
                     {occurrence.evaluation.satisfied
@@ -147,7 +148,7 @@ export default function HistoricalDetailsScreen() {
                 <AppText color="muted">
                   Responsável: {civic.responsible || 'Gestão municipal'}
                 </AppText>
-                {civic.history?.map((event, index) => (
+                <ProgressiveList key={item.id + 'civic.history?'} items={(civic.history || [])} renderItem={(event, index) => (
                   <View key={index} style={cityStyles.row}>
                     <AppText variant="caption" color="muted">
                       {new Date(event.at).toLocaleString('pt-BR')} ·{' '}
@@ -155,7 +156,7 @@ export default function HistoricalDetailsScreen() {
                     </AppText>
                     <AppText>{event.text}</AppText>
                   </View>
-                ))}
+                )} />
                 {civic.kind === 'proposal' && civic.decision && (
                   <AppText>{civic.decision}</AppText>
                 )}
@@ -181,7 +182,7 @@ export default function HistoricalDetailsScreen() {
                 {civic.kind === 'action' && (
                   <>
                     <AppText>Execução: {civic.progress}%</AppText>
-                    {civic.updates.map((update, index) => (
+                    <ProgressiveList key={item.id + 'civic.updates'} items={civic.updates} renderItem={(update, index) => (
                       <View key={index} style={cityStyles.row}>
                         <AppText variant="caption" color="muted">
                           {new Date(update.at).toLocaleString('pt-BR')} ·{' '}
@@ -189,7 +190,7 @@ export default function HistoricalDetailsScreen() {
                         </AppText>
                         <AppText>{update.text}</AppText>
                       </View>
-                    ))}
+                    )} />
                   </>
                 )}
               </View>
@@ -198,12 +199,12 @@ export default function HistoricalDetailsScreen() {
               <AppText variant="sectionTitle">
                 Contribuições registradas
               </AppText>
-              {item.comments.map((comment) => (
+              <ProgressiveList key={item.id + 'item.comments'} items={item.comments} renderItem={(comment) => (
                 <View key={comment.id} style={cityStyles.row}>
                   <AppText variant="label">{comment.userName}</AppText>
                   <AppText>{comment.text}</AppText>
                 </View>
-              ))}
+              )} />
               {!item.comments.length && (
                 <AppText color="muted">
                   Nenhuma contribuição adicional neste registro.

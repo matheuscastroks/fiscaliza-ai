@@ -4,6 +4,9 @@ import { useTerritoryStore } from '@/stores/territoryStore';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { normalizeNeighborhood } from '@/shared/civic-territory';
 
+// Reuse ICU's Portuguese collation rules instead of constructing them per comparison.
+const neighborhoodCollator = new Intl.Collator('pt-BR');
+
 export function NeighborhoodPicker({
   options: fallbackOptions,
   value,
@@ -18,9 +21,10 @@ export function NeighborhoodPicker({
   const boundaries = useNeighborhoods();
   const home = useTerritoryStore((s) => s.preferredNeighborhood);
   const boundaryNames = boundaries.data;
+  const boundaryLabels = useMemo(() => boundaryNames?.map(x => x.name), [boundaryNames]);
+  const canonical = boundaryLabels?.length ? boundaryLabels : fallbackOptions;
 
   const { currentValue, selectOptions } = useMemo(() => {
-    const canonical = boundaryNames?.map((x) => x.name) || fallbackOptions;
     const normalizedHome = normalizeNeighborhood(home || '');
 
     // Pre-calculate normalized names to avoid thousands of repetitive regex operations during sort
@@ -39,7 +43,7 @@ export function NeighborhoodPicker({
       const normB = getNorm(b);
       if (normA === normalizedHome) return -1;
       if (normB === normalizedHome) return 1;
-      return a.localeCompare(b, 'pt-BR');
+      return neighborhoodCollator.compare(a, b);
     });
 
     const normValue = normalizeNeighborhood(value || '');
@@ -58,7 +62,7 @@ export function NeighborhoodPicker({
       currentValue: matched,
       selectOptions: selectOpts,
     };
-  }, [boundaryNames, fallbackOptions, home, value]);
+  }, [canonical, home, value]);
 
   return (
     <AppSelect

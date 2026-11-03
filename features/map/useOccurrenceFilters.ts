@@ -22,6 +22,7 @@ export function useOccurrenceFilters(
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const filteredProblems = useMemo(() => {
+    const query = searchQuery.toLowerCase().trim();
     return problems.filter((problem) => {
       // Filtro de status
       if (statusFilter !== 'all' && problem.status !== statusFilter) {
@@ -34,8 +35,7 @@ export function useOccurrenceFilters(
       }
 
       // Filtro de busca textual
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
+      if (query) {
         const matchesTitle = problem.title.toLowerCase().includes(query);
         const matchesDesc = problem.description.toLowerCase().includes(query);
         const matchesAddress = problem.location?.address?.toLowerCase().includes(query) ?? false;

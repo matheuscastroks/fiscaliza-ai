@@ -68,9 +68,10 @@ export default function ProfileScreen() {
   const [picking, setPicking] = useState(false);
   const [photoError, setPhotoError] = useState('');
   const activity = useCityQuery<{
+    counts?: { occurrences: number; proposals: number; consultations: number };
     occurrences: Occurrence[];
     items: CivicItem[];
-  }>('/activity');
+  }>('/activity?summary=true');
   const selectPhoto = async () => {
     if (!user || picking) return;
     const userId = user.id;
@@ -120,21 +121,21 @@ export default function ProfileScreen() {
     ...(activity.data
       ? [
           {
-            value: activity.data.occurrences.filter(
+            value: activity.data.counts?.occurrences ?? activity.data.occurrences.filter(
               (item) => item.reportedBy === user?.id,
             ).length,
             label: 'Ocorrências',
             icon: 'location-outline' as const,
           },
           {
-            value: activity.data.items.filter(
+            value: activity.data.counts?.proposals ?? activity.data.items.filter(
               (item) => item.createdBy === user?.id && item.kind === 'proposal',
             ).length,
             label: 'Propostas',
             icon: 'bulb-outline' as const,
           },
           {
-            value: activity.data.items.filter(
+            value: activity.data.counts?.consultations ?? activity.data.items.filter(
               (item) =>
                 item.kind === 'consultation' && item.myAnswer !== undefined,
             ).length,

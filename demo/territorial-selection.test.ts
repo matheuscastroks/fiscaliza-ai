@@ -59,6 +59,9 @@ test('switching neighborhood requires a unique identity and pagination cannot mi
     { id: '2', name: 'Centro' },
   ];
   assert.equal(resolveNeighborhood('sao cristovao', options)?.id, '1');
+  assert.equal(resolveNeighborhood('  SÃO CRISTÓVÃO  ', options)?.id, '1');
+  assert.equal(resolveNeighborhood('bairro inexistente', options), null);
+  assert.equal(resolveNeighborhood(' ', [{ get name() { throw new Error('municipal scope must not scan neighborhoods'); }, id: 'unused' }]), null);
   assert.equal(
     resolveNeighborhood('Centro', [...options, { id: '3', name: 'CENTRO' }]),
     null,

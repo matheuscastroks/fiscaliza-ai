@@ -5,6 +5,49 @@ const vm = require('node:vm');
 const ts = require('typescript');
 const { QueryClient } = require('@tanstack/react-query');
 
+test('infinite calls refresh on stale focus while keeping every loaded page', async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { gcTime: Infinity } } });
+  const filters = { situacao: 'Encerrado', limit: 50 };
+  const key = ['officialCallsPages', filters];
+  const pages = { pages: [
+    { calls: [{ id: 'first' }], hasMore: true, nextCursor: 'next' },
+    { calls: [{ id: 'second' }], hasMore: false },
+  ], pageParams: [undefined, 'next'] };
+  client.setQueryData(key, pages);
+  let focus;
+  let refreshes = 0;
+  const mod = { exports: {} };
+  const source = ts.transpileModule(fs.readFileSync('features/city/useOfficialCalls.ts', 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  vm.runInNewContext('(function(require,module,exports){' + source + '\n})', { JSON, Date })((name) => {
+    if (name === 'react') return { useCallback: fn => fn, useMemo: fn => fn() };
+    if (name === 'expo-router') return { useFocusEffect: fn => { focus = fn; } };
+    if (name === '@tanstack/react-query') return {
+      useQueryClient: () => client,
+      useInfiniteQuery: () => ({ data: client.getQueryData(key), refetch: async () => { refreshes++; } }),
+    };
+    if (name === '@/services/officialCalls' || name === '@/features/territory/mapPerformance') return {};
+    throw new Error(name);
+  }, mod, mod.exports);
+  try {
+    const result = mod.exports.useInfiniteOfficialCalls(filters);
+    assert.equal(result.data.calls.length, 2);
+    focus();
+    assert.equal(refreshes, 0, 'fresh pages are reused');
+    client.setQueryData(key, pages, { updatedAt: Date.now() - 31_000 });
+    focus();
+    assert.equal(refreshes, 1, 'stale pages refresh on return');
+    assert.equal(client.getQueryData(key).pages.length, 2, 'focus does not reset pagination');
+    await client.invalidateQueries({ queryKey: key, refetchType: 'none' });
+    focus();
+    assert.equal(refreshes, 2, 'invalidated pages refresh');
+    mod.exports.useInfiniteOfficialCalls(filters, false);
+    focus();
+    assert.equal(refreshes, 2, 'hidden layer does not refresh');
+  } finally { client.clear(); }
+});
+
 test('returning to a screen reuses fresh query data and fetches after invalidation', async () => {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: Infinity } },

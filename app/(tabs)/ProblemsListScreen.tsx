@@ -14,7 +14,9 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Problem } from '@/data/mockData';
 import type { Occurrence } from '@/shared/contracts';
-import { useCityQuery } from '@/features/city/useCityQuery';
+import { useCityPages } from '@/features/city/useCityPages';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { AppButton } from '@/components/ui/AppButton';
 import { useAuthStore } from '@/stores/authStore';
 
 import { spacing } from '@/theme/spacing';
@@ -24,7 +26,6 @@ import { AppText } from '@/components/ui/AppText';
 import { AppDivider } from '@/components/ui/AppDivider';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
 import {
-  useOccurrenceFilters,
   StatusFilterOption,
 } from '@/features/map/useOccurrenceFilters';
 
@@ -40,31 +41,19 @@ export default function ProblemsListScreen() {
   const styles = useThemedStyles(createStyles);
 
   const municipality = useAuthStore((state) => state.user?.municipality);
-  const occurrencesQuery = useCityQuery<Occurrence[]>('/occurrences');
-  const problems = occurrencesQuery.data || [];
-  const isLoading = occurrencesQuery.isLoading;
-  const loadProblems = () => {
-    void occurrencesQuery.refetch();
-  };
   const [sortOrder, setSortOrder] = useState<'recent' | 'votes'>('recent');
-
-  const {
-    statusFilter,
-    setStatusFilter,
-    searchQuery,
-    setSearchQuery,
-    filteredProblems,
-    clearFilters,
-  } = useOccurrenceFilters(problems);
-
-  const sortedProblems = [...filteredProblems].sort((a, b) => {
-    if (sortOrder === 'votes') {
-      return (b.votes || 0) - (a.votes || 0);
-    }
-    const dateA = new Date(a.reportedAt || 0).getTime();
-    const dateB = new Date(b.reportedAt || 0).getTime();
-    return dateB - dateA;
-  });
+  const [statusFilter, setStatusFilter] = useState<StatusFilterOption>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const search = useDebouncedValue(searchQuery.trim(), 300);
+  const params = new URLSearchParams({ order: sortOrder });
+  if (statusFilter !== 'all') params.set('status', statusFilter);
+  if (search) params.set('search', search);
+  const occurrencesQuery = useCityPages<Occurrence>('/occurrences?' + params.toString());
+  const problems = occurrencesQuery.items;
+  const sortedProblems = problems;
+  const isLoading = occurrencesQuery.isLoading;
+  const loadProblems = () => { void occurrencesQuery.refetch(); };
+  const clearFilters = () => { setStatusFilter('all'); setSearchQuery(''); };
 
   const toggleSortOrder = () => {
     setSortOrder((prev) => (prev === 'recent' ? 'votes' : 'recent'));
@@ -151,6 +140,10 @@ export default function ProblemsListScreen() {
       </View>
 
       <AppDivider />
+      {occurrencesQuery.error && <View style={{ padding: spacing.md }}>
+        <AppText color="risk" accessibilityRole="alert">{occurrencesQuery.error.message}</AppText>
+        <AppButton title="Tentar novamente" onPress={loadProblems} />
+      </View>}
 
       {/* Listagem de Ocorrências */}
       {isLoading && problems.length === 0 ? (
@@ -165,7 +158,11 @@ export default function ProblemsListScreen() {
           data={sortedProblems}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
-          refreshing={isLoading}
+          initialNumToRender={8}
+          maxToRenderPerBatch={8}
+          windowSize={5}
+          ListFooterComponent={occurrencesQuery.hasNextPage ? <AppButton title="Carregar mais" loading={occurrencesQuery.isFetchingNextPage} onPress={() => { void occurrencesQuery.fetchNextPage(); }} /> : null}
+          refreshing={occurrencesQuery.isRefetching}
           onRefresh={loadProblems}
           contentContainerStyle={
             sortedProblems.length === 0 ? styles.emptyContainer : undefined
@@ -178,7 +175,7 @@ export default function ProblemsListScreen() {
                 color={colors.subtle}
               />
               <AppText variant="label" color="ink" style={styles.emptyTitle}>
-                Nenhuma ocorrência encontrada
+                {occurrencesQuery.error ? 'Não foi possível carregar' : 'Nenhuma ocorrência encontrada'}
               </AppText>
               <AppText
                 variant="body"

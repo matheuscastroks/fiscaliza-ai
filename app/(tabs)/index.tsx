@@ -30,6 +30,8 @@ interface CategoryGroup {
   calls: OfficialCall[];
 }
 
+const EMPTY_NEIGHBORHOODS: string[] = [];
+
 export default function HomeScreen() {
   const active = useIsFocused();
   const { colors } = useTheme();
@@ -132,7 +134,7 @@ export default function HomeScreen() {
           >
             <NeighborhoodPicker
               compact
-              options={[]}
+              options={EMPTY_NEIGHBORHOODS}
               value={neighborhood}
               onChange={setNeighborhood}
             />

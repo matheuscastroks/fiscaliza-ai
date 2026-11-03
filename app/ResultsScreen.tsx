@@ -1,8 +1,8 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { goBack } from '@/utils/navigation';
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import React from 'react';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -12,7 +12,7 @@ import { QueryState, createCityStyles } from '@/features/city/CityUI';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useTerritorySelection } from '@/stores/territoryStore';
 import {
-  useOfficialCalls,
+  useInfiniteOfficialCalls,
   useOfficialFilters,
   useOfficialOverview,
 } from '@/features/city/useOfficialCalls';
@@ -25,7 +25,6 @@ export default function ResultsScreen() {
   const cityStyles = useThemedStyles(createCityStyles);
   const styles = useThemedStyles(createStyles);
   const { neighborhood, setNeighborhood } = useTerritorySelection();
-  const [pageLimit, setPageLimit] = useState(50);
 
   const officialFilters = useOfficialFilters();
   const overviewQuery = useOfficialOverview({
@@ -35,16 +34,16 @@ export default function ResultsScreen() {
     bairro: neighborhood || undefined,
     situacao: 'Encerrado',
   });
-  const closedCallsQuery = useOfficialCalls({
+  const closedCallsQuery = useInfiniteOfficialCalls({
     bairro: neighborhood || undefined,
     situacao: 'Encerrado',
-    limit: pageLimit,
+    limit: 50,
   });
 
   const bairroOptions = officialFilters.data?.bairros || [];
   const closedCalls = closedCallsQuery.data?.calls || [];
   const totalClosed = closedCallsQuery.data?.total ?? 0;
-  const hasMore = Boolean(closedCallsQuery.data?.hasMore && pageLimit < 500);
+  const hasMore = Boolean(closedCallsQuery.hasNextPage);
 
   const overview = overviewQuery.data;
   const closedOverview = closedOverviewQuery.data;
@@ -63,7 +62,15 @@ export default function ResultsScreen() {
         context="Desfecho de atendimentos e SLA da Prefeitura do Rio"
         onBack={() => goBack()}
       />
-      <ScrollView contentContainerStyle={cityStyles.content}>
+      <FlatList
+        data={closedCalls}
+        keyExtractor={call => call.id}
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={5}
+        contentContainerStyle={cityStyles.content}
+        renderItem={({ item: call }) => <OfficialCallRow call={call} onPress={() => router.push({ pathname: '/OfficialCallDetailsScreen', params: { id: call.id } })} />}
+        ListHeaderComponent={<View style={cityStyles.section}>
         <View style={styles.headerRow}>
           <AppText variant="screenTitle" style={{ flex: 1 }}>
             {neighborhood || 'Todo o Rio de Janeiro'}
@@ -74,7 +81,6 @@ export default function ResultsScreen() {
             value={neighborhood}
             onChange={(val) => {
               setNeighborhood(val);
-              setPageLimit(50);
             }}
           />
         </View>
@@ -184,37 +190,16 @@ export default function ResultsScreen() {
                 : undefined
             }
           />
-        ) : (
-          closedCalls.length > 0 && (
-            <View style={cityStyles.section}>
-              <AppText variant="sectionTitle">
-                Atendimentos 1746 encerrados ({totalClosed.toLocaleString('pt-BR')})
-              </AppText>
-              <View style={{ gap: spacing.xs }}>
-                {closedCalls.map((call) => (
-                  <OfficialCallRow
-                    key={call.id}
-                    call={call}
-                    onPress={() =>
-                      router.push({
-                        pathname: '/OfficialCallDetailsScreen',
-                        params: { id: call.id },
-                      })
-                    }
-                  />
-                ))}
-              </View>
-              {hasMore && (
-                <AppButton
-                  title={`Carregar mais (${closedCalls.length} de ${totalClosed.toLocaleString('pt-BR')})`}
-                  variant="secondary"
-                  onPress={() => setPageLimit((prev) => Math.min(500, prev + 100))}
-                />
-              )}
-            </View>
-          )
-        )}
-      </ScrollView>
+        ) : null}
+        {closedCalls.length > 0 && <AppText variant="sectionTitle">Atendimentos 1746 encerrados ({totalClosed.toLocaleString('pt-BR')})</AppText>}
+        </View>}
+        ListFooterComponent={hasMore ? <AppButton
+          title={closedCallsQuery.isFetchingNextPage ? 'Carregando...' : `Carregar mais (${closedCalls.length} de ${totalClosed.toLocaleString('pt-BR')})`}
+          disabled={closedCallsQuery.isFetchingNextPage}
+          variant="secondary"
+          onPress={() => { void closedCallsQuery.fetchNextPage(); }}
+        /> : null}
+      />
     </AppScreen>
   );
 }

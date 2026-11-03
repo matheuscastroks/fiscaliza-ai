@@ -1,12 +1,13 @@
 import { useThemedStyles } from '@/theme/useTheme';
-import { ScrollView, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { OccurrenceRow } from '@/components/occurrences/OccurrenceRow';
 import { QueryState, createCityStyles } from '@/features/city/CityUI';
-import { useCityQuery } from '@/features/city/useCityQuery';
+import { useCityPages } from '@/features/city/useCityPages';
+import { AppButton } from '@/components/ui/AppButton';
 import { useAuthStore } from '@/stores/authStore';
 import type { Occurrence } from '@/shared/contracts';
 import { goBack } from '@/utils/navigation';
@@ -14,23 +15,13 @@ export default function HistoryScreen() {
   const cityStyles = useThemedStyles(createCityStyles);
 
   const user = useAuthStore((state) => state.user);
-  const query = useCityQuery<Occurrence[]>('/occurrences');
-  const items = (query.data || [])
-    .filter(
-      (item) =>
-        item.reportedBy === user?.id &&
-        item.status === 'resolved' &&
-        item.evaluation,
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.evaluation!.at).getTime() -
-        new Date(a.evaluation!.at).getTime(),
-    );
+  const params = new URLSearchParams({ userId: user?.id || '', status: 'resolved', evaluated: 'true', order: 'evaluated' });
+  const query = useCityPages<Occurrence>('/occurrences?' + params.toString(), Boolean(user?.id));
+  const items = query.items;
   return (
     <AppScreen>
       <AppHeader title="Histórico de atendimentos" onBack={goBack} />
-      <ScrollView contentContainerStyle={cityStyles.content}>
+      <FlatList data={items} keyExtractor={item => item.id} initialNumToRender={8} maxToRenderPerBatch={8} windowSize={5} contentContainerStyle={cityStyles.content} ListHeaderComponent={<View style={cityStyles.section}>
         <QueryState
           loading={query.isLoading}
           error={query.error}
@@ -38,12 +29,13 @@ export default function HistoryScreen() {
             void query.refetch();
           }}
         />
-        {query.data && !items.length && (
+        {query.fetchStatus === 'paused' && <AppText color="muted">Sem conexão. Tente novamente quando a rede retornar.</AppText>}
+        {!query.isPending && !query.error && query.fetchStatus !== 'paused' && !items.length && (
           <AppText color="muted">
             Seus atendimentos concluídos e avaliados aparecerão aqui.
           </AppText>
         )}
-        {items.map((item) => (
+        </View>} renderItem={({ item }) => (
           <View key={item.id} style={cityStyles.section}>
             <AppText variant="label">
               {item.evaluation?.rating
@@ -60,8 +52,7 @@ export default function HistoryScreen() {
               }
             />
           </View>
-        ))}
-      </ScrollView>
+        )} ListFooterComponent={query.hasNextPage ? <AppButton title="Carregar mais" loading={query.isFetchingNextPage} onPress={() => { void query.fetchNextPage(); }} /> : null} />
     </AppScreen>
   );
 }

@@ -1,4 +1,5 @@
 import { FlatList, View, RefreshControl } from 'react-native';
+import { useMemo } from 'react';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -24,14 +25,14 @@ export default function FollowScreen() {
     metadata,
   } = useFollowStore();
   const { refresh, refreshing, error } = useSavedRefresh();
-  const calls = savedCalls.filter(
+  const calls = useMemo(() => savedCalls.filter(
     (c) =>
       statusFilter === 'all' ||
       statusFilter === 'saved' ||
       (statusFilter === 'resolved'
         ? isOfficialCallClosed(c)
         : !isOfficialCallClosed(c)),
-  );
+  ), [savedCalls, statusFilter]);
   return (
     <AppScreen>
       <AppHeader

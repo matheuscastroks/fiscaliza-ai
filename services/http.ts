@@ -122,17 +122,20 @@ export async function mutation<T>(
   await queryClient.invalidateQueries();
   return result;
 }
-export async function requestAll<T>(path: string): Promise<T[]> {
+/** Compatibility adapter only; interactive collection screens use paged queries. */
+export async function requestAll<T>(path: string, signal?: AbortSignal): Promise<T[]> {
   const result: T[] = [];
   for (let offset = 0; offset <= 100000; offset += 100) {
     const page = await request<T[]>(
       path + (path.includes('?') ? '&' : '?') + 'limit=100&offset=' + offset,
+      'GET', undefined, signal,
     );
     result.push(...page);
     if (page.length < 100) break;
   }
   return result;
 }
+
 export function assetUrl(url: string) {
   return url.startsWith('/') ? API_URL.replace(/\/api$/, '') + url : url;
 }

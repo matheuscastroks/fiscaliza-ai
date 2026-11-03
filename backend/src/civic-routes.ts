@@ -2,7 +2,7 @@ import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { randomUUID } from 'node:crypto';
 import { readFile, unlink } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { and, desc, eq, inArray, ne, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, ne, or, sql } from 'drizzle-orm';
 import type {
   CivicItem,
   CivicTerritory,
@@ -246,6 +246,27 @@ export function registerCivicRoutes(
     } as const;
   }
 
+  app.get<{ Params: { id: string } }>('/api/occurrences/:id/nearby', async req => {
+    const current = await find(municipalityId(req), req.params.id, 'occurrence');
+    const location = (current.data as Occurrence).location;
+    const latitude = location.latitude;
+    const longitude = location.longitude;
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return ok([]);
+    const latitudeDelta = 1500 / 110000;
+    const longitudeDelta = latitudeDelta / Math.max(0.01, Math.cos(latitude * Math.PI / 180));
+    const lat = sql`(${records.data}->'location'->>'latitude')::double precision`;
+    const lng = sql`(${records.data}->'location'->>'longitude')::double precision`;
+    const distance = sql`6371000 * 2 * asin(least(1, sqrt(power(sin(radians(${lat} - ${latitude}) / 2), 2) + cos(radians(${latitude})) * cos(radians(${lat})) * power(sin(radians(${lng} - ${longitude}) / 2), 2))))`;
+    const rows = await db.select().from(records).where(and(
+      eq(records.municipalityId, municipalityId(req)), eq(records.kind, 'occurrence'),
+      ne(records.id, current.id),
+      sql`${lat} BETWEEN ${latitude - latitudeDelta} AND ${latitude + latitudeDelta}`,
+      sql`${lng} BETWEEN ${longitude - longitudeDelta} AND ${longitude + longitudeDelta}`,
+      sql`${distance} <= 1500`,
+    )).orderBy(distance, records.id).limit(4);
+    return ok(await Promise.all(rows.map(row => present(row, req.user?.id))));
+  });
+
   const pagination = object({
     limit: { type: 'integer', minimum: 1, maximum: 100, default: 50 },
     offset: { type: 'integer', minimum: 0, maximum: 100000, default: 0 },
@@ -253,6 +274,9 @@ export function registerCivicRoutes(
     status: string(30),
     category,
     userId: string(100),
+    search: string(200),
+    order: enumeration(['recent', 'votes', 'evaluated']),
+    evaluated: { type: 'boolean' },
   });
 
   for (const [path, kind] of [
@@ -267,6 +291,9 @@ export function registerCivicRoutes(
         status?: string;
         category?: string;
         userId?: string;
+        search?: string;
+        order?: 'recent' | 'votes' | 'evaluated';
+        evaluated?: boolean;
       };
     }>(`/api/${path}`, { schema: { querystring: pagination } }, async (req) => {
       const q = req.query;
@@ -282,12 +309,20 @@ export function registerCivicRoutes(
           ? sql`${records.data}->>'category' = ${q.category}`
           : undefined,
         q.userId ? eq(records.authorId, q.userId) : undefined,
+        q.search?.trim() ? sql`strpos(lower(concat_ws(' ', ${records.data}->>'title', ${records.data}->>'description', ${records.data}->'location'->>'address')), lower(${q.search.trim()})) > 0` : undefined,
+        q.evaluated ? sql`${records.data}->'evaluation' IS NOT NULL AND ${records.data}->'evaluation' <> 'null'::jsonb` : undefined,
       );
+      // Match the persisted support count used by present(), before pagination.
+      const supports = sql`coalesce((select ${demoEngagement.supports} from ${demoEngagement} where ${demoEngagement.recordId} = ${records.id}), 0) + (select count(*) from ${relations} where ${relations.recordId} = ${records.id} and ${relations.kind} = 'support')`;
+      const order = q.order === 'votes' ? desc(supports)
+        : q.order === 'evaluated' ? sql`nullif(${records.data}->'evaluation'->>'at', '')::timestamptz DESC NULLS LAST`
+        : q.order === 'recent' && kind === 'occurrence' ? sql`coalesce(nullif(${records.data}->>'reportedAt', '')::timestamptz, ${records.createdAt}) DESC`
+        : desc(records.createdAt);
       const rows = await db
         .select()
         .from(records)
         .where(where)
-        .orderBy(desc(records.createdAt), records.id)
+        .orderBy(order, desc(records.createdAt), records.id)
         .limit(req.query.limit ?? 50)
         .offset(req.query.offset ?? 0);
       return ok(await Promise.all(rows.map((r) => present(r, req.user?.id))));
@@ -1000,8 +1035,16 @@ export function registerCivicRoutes(
     );
   }
 
-  app.get('/api/activity', async (req) => {
+  app.get<{ Querystring: { summary?: boolean } }>('/api/activity', {
+    schema: { querystring: object({ summary: { type: 'boolean' } }) },
+  }, async (req) => {
     if (!req.user) throw fail(401, 'Entre para acompanhar.');
+    const [counts] = await db.select({
+      occurrences: sql<number>`count(*) FILTER (WHERE ${records.kind} = 'occurrence' AND ${records.authorId} = ${req.user.id})`.mapWith(Number),
+      proposals: sql<number>`count(*) FILTER (WHERE ${records.kind} = 'proposal' AND ${records.authorId} = ${req.user.id})`.mapWith(Number),
+      consultations: sql<number>`count(*) FILTER (WHERE ${records.kind} = 'consultation' AND EXISTS (SELECT 1 FROM ${answers} WHERE ${answers.recordId} = ${records.id} AND ${answers.userId} = ${req.user.id}))`.mapWith(Number),
+    }).from(records).where(eq(records.municipalityId, municipalityId(req)));
+    if (req.query.summary) return ok({ counts, occurrences: [], items: [] });
     const relevant = await db
       .select({ id: relations.recordId })
       .from(relations)
@@ -1019,7 +1062,10 @@ export function registerCivicRoutes(
     const rows = await db
       .select()
       .from(records)
-      .orderBy(desc(records.createdAt));
+      .where(and(eq(records.municipalityId, municipalityId(req)),
+        or(eq(records.authorId, req.user.id), ids.size ? inArray(records.id, [...ids]) : undefined)))
+      .orderBy(desc(records.createdAt))
+      .limit(500);
     const values = await Promise.all(
       rows
         .filter((r) => r.authorId === req.user!.id || ids.has(r.id))
@@ -1027,6 +1073,7 @@ export function registerCivicRoutes(
         .map((r) => present(r, req.user!.id)),
     );
     return ok({
+      counts,
       occurrences: values.filter((v) => !('kind' in v)),
       items: values.filter((v) => 'kind' in v),
     });
