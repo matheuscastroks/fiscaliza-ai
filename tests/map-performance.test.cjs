@@ -16,6 +16,12 @@ test('summary separates runs and variants and never turns missing frames into ze
   assert.equal(report[0].frame.p50Ms, 300);
   assert.equal(report[1].frame.p95Ms, null);
   assert.equal(report[1].frame.samples, 0);
+  const android = summarizeMapPerformance([
+    "ReactNativeJS: '[map-perf]',",
+    "'{\"session\":\"c\",\"variant\":\"baseline\",\"trace\":7,\"origin\":\"tab\",\"event\":\"start\",\"elapsedMs\":0}'",
+    "ReactNativeJS: '[map-perf]', '{\"session\":\"c\",\"variant\":\"baseline\",\"trace\":7,\"event\":\"frame-ready\",\"elapsedMs\":1200}'",
+  ].join('\n'));
+  assert.equal(android[0].frame.p95Ms, 1200);
 });
 
 function load(enabled = true, variant = 'baseline') {

@@ -2,14 +2,55 @@
 
 ## Estado e decisão
 
-Baseline continua padrão. Nenhuma redução dos ~2 segundos foi comprovada no dispositivo.
+Baseline continua padrão. A investigação nativa identificou e corrigiu trabalho de localização
+de bairros que bloqueava a navegação em JavaScript; detalhes e medidas abaixo.
 Instrumentação opt-in, sem usuário, coordenadas, filtros, payloads ou mensagens de erro.
 O buffer tem limite de 1.000 eventos; callbacks de frames nativos só são habilitados com diagnóstico.
 
-Ruling: manter comportamento normal até haver comparação nativa válida, conforme plano aprovado.
-O Android conectado foi identificado, mas o aplicativo instalado continuou procurando o Metro
-antigo em 192.168.1.42:8081. O servidor de diagnóstico em 8082 não recebeu um bundle confirmado.
-Não usar esses testes como baseline nem inferir causa de FPS, rede ou CPU.
+O Android conectado passou a usar o Metro correto por USB (`localhost:8081`). Os eventos
+confirmaram a variante de cada bundle. As variantes isoladas `visible-surface` e `unfrozen`
+não eliminaram o atraso de aproximadamente três segundos até o foco.
+
+## Causa e correção medidas em 2026-11-02
+
+Dispositivo A6EUS4QKMZMRFQ59, Android, build de desenvolvimento instalado, Metro local,
+cache de dados e tiles preservado. Não representa medição de release nem FPS.
+
+O Profiler do React localizou aproximadamente 2,5 s na renderização da Home ao sair para o
+mapa. A ordenação de 167 bairros consumiu 1,9–3,1 s: `localeCompare('pt-BR')` era executado
+em cada comparação e um `options={[]}` invalidava a memoização em cada renderização.
+Um `Intl.Collator` reutilizado e uma lista vazia estável eliminaram essa repetição.
+
+Outro custo recorrente, de aproximadamente 400 ms, vinha de `useTerritorySelection`:
+resolvia o bairro percorrendo todos os nomes a cada renderização, inclusive sem seleção.
+Agora retorna imediatamente para seleção vazia, normaliza a busca uma vez, usa conversão
+de caixa Unicode compatível com português e memoiza pelo nome e pela lista de bairros.
+Identidades ambíguas continuam sem resolução. Os profilers temporários foram removidos.
+
+Antes: retornos aquecidos registrados de 2,7–3,1 s até foco e 5,9–6,7 s até frame completo.
+Após as correções, com baseline e código final: primeira sequência de 12 retornos com
+p95 de 152,35 ms até foco e 377,08 ms até frame completo. Uma sessão após reiniciar o
+processo registrou a primeira montagem em 459,33 ms até foco e 1.141,30 ms até frame.
+Não misturar primeira montagem com retornos aquecidos nem atribuir o ganho à rede.
+
+Repetição final no mesmo processo, sem profilers: 21 visitas (primeira montagem e 20
+retornos), p50/p95 até foco de 149,86/192,97 ms e até frame de 390,57/455,75 ms.
+O ganho foi obtido mantendo `freezeOnBlur`, superfície e montagem de mapa/lista do baseline.
+A lista exibiu os chamados com seus controles de detalhe e retorno ao mapa no Android.
+Memória PSS após 8 visitas: 965.715 KB; após 21: 1.011.125 KB. Esses dois pontos de um
+build de desenvolvimento não estabelecem vazamento nem estabilidade de memória em release.
+
+Cinco reinícios de processo com cache preservado: primeira abertura do mapa com p50/p95
+até foco de 568,12/596,45 ms e até frame de 1.259,52/1.289,26 ms. Esses tempos começam no
+toque em Explorar, depois de carregar a Home; não medem o lançamento completo do aplicativo.
+Arquivo: `.validation/map-fixed-cold-final.log`.
+
+Logs e perfis locais em `.validation/map-*-profile.log`, `.validation/map-fixed-final.log`;
+o diretório é ignorado pelo Git. Os arquivos não incluem coordenadas ou dados de usuários.
+O parser aceita os formatos de log Android com o JSON na mesma linha ou na seguinte.
+`npm test`: 38 testes de domínio e 53 testes de componentes/infraestrutura aprovados;
+inclui seleção territorial, normalização, identidade ambígua, escopo vazio sem varredura,
+mapa e parser de logs. `npx tsc --noEmit`, `npm run lint` e `git diff --check` aprovados.
 
 ## Executar uma variante por vez
 

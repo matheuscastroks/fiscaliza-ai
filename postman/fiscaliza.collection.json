@@ -1974,6 +1974,31 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Paginar ocorrencias com busca e ordenacao",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/occurrences?limit=50&offset=0&order=recent&status=resolved&evaluated=true",
+        "description": "Filtros e ordem aplicados antes do offset. search busca texto literal em titulo, descricao e endereco; order aceita recent, votes ou evaluated. Retorno preserva array e isolamento municipal. Buscar proxima pagina quando a anterior tiver 50 registros."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Pagina limitada de ocorrencias avaliadas', () => { const result = pm.response.json(); pm.expect(pm.response.code).to.eql(200); pm.expect(result.success).to.eql(true); pm.expect(result.data).to.be.an('array'); pm.expect(result.data.length).to.be.at.most(50); result.data.forEach(item => { pm.expect(item.status).to.eql('resolved'); pm.expect(item.evaluation).to.be.an('object'); }); });"
+            ]
+          }
+        }
+      ]
     }
   ]
 }

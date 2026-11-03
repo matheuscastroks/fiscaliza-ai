@@ -2,12 +2,18 @@ const fs = require('node:fs');
 
 function summarizeMapPerformance(log) {
   const traces = new Map();
+  let markerPending = false;
   for (const line of log.split('\n')) {
     const offset = line.indexOf('[map-perf]');
-    if (offset < 0) continue;
+    if (offset >= 0) markerPending = true;
+    if (!markerPending) continue;
+    const start = line.indexOf('{');
+    const end = line.lastIndexOf('}');
+    if (start < 0 || end <= start) continue;
     let event;
-    try { event = JSON.parse(line.slice(offset + '[map-perf]'.length).trim()); }
-    catch { continue; }
+    try { event = JSON.parse(line.slice(start, end + 1)); }
+    catch { markerPending = false; continue; }
+    markerPending = false;
     const key = `${event.session}:${event.variant}:${event.trace}`;
     if (event.event === 'start') traces.set(key, { variant: event.variant, origin: event.origin, samples: {} });
     const trace = traces.get(key);
