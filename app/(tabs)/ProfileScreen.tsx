@@ -21,11 +21,9 @@ import { useSignOutSheet } from '@/components/ui/SignOutSheet';
 import { useAuthStore } from '@/stores/authStore';
 import { useAvatarStore } from '@/stores/avatarStore';
 import { useFollowStore } from '@/stores/followStore';
-import { useCityQuery } from '@/features/city/useCityQuery';
-import { QueryState, createCityStyles } from '@/features/city/CityUI';
+import { createCityStyles } from '@/features/city/CityUI';
 import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { layout, spacing } from '@/theme';
-import type { Occurrence, CivicItem } from '@/shared/contracts';
 
 function ProfileLink({
   title,
@@ -67,11 +65,6 @@ export default function ProfileScreen() {
   const savedCalls = useFollowStore((s) => s.savedCalls);
   const [picking, setPicking] = useState(false);
   const [photoError, setPhotoError] = useState('');
-  const activity = useCityQuery<{
-    counts?: { occurrences: number; proposals: number; consultations: number };
-    occurrences: Occurrence[];
-    items: CivicItem[];
-  }>('/activity?summary=true');
   const selectPhoto = async () => {
     if (!user || picking) return;
     const userId = user.id;
@@ -118,32 +111,7 @@ export default function ProfileScreen() {
       label: 'Salvos 1746',
       icon: 'bookmark-outline' as const,
     },
-    ...(activity.data
-      ? [
-          {
-            value: activity.data.counts?.occurrences ?? activity.data.occurrences.filter(
-              (item) => item.reportedBy === user?.id,
-            ).length,
-            label: 'Ocorrências',
-            icon: 'location-outline' as const,
-          },
-          {
-            value: activity.data.counts?.proposals ?? activity.data.items.filter(
-              (item) => item.createdBy === user?.id && item.kind === 'proposal',
-            ).length,
-            label: 'Propostas',
-            icon: 'bulb-outline' as const,
-          },
-          {
-            value: activity.data.counts?.consultations ?? activity.data.items.filter(
-              (item) =>
-                item.kind === 'consultation' && item.myAnswer !== undefined,
-            ).length,
-            label: 'Consultas',
-            icon: 'chatbubble-outline' as const,
-          },
-        ]
-      : []),
+
   ];
   return (
     <AppScreen>
@@ -225,12 +193,7 @@ export default function ProfileScreen() {
           </View>
         </View>
         <View style={styles.section}>
-          <AppText variant="sectionTitle">Minha participação</AppText>
-          <QueryState
-            loading={activity.isPending}
-            error={activity.error}
-            retry={activity.refetch}
-          />
+          <AppText variant="sectionTitle">Meus acompanhamentos</AppText>
           <View style={styles.stats}>
             {counts.map((item) => (
               <View key={item.label} style={styles.stat}>
@@ -245,7 +208,7 @@ export default function ProfileScreen() {
           {savedCalls.length > 0 && (
             <View style={{ gap: spacing.xs }}>
               <AppText variant="label">
-                Chamados 1746 salvos na sua conta
+                Chamados 1746 salvos neste aparelho
               </AppText>
               {savedCalls.slice(0, 2).map((call) => (
                 <OfficialCallRow
@@ -273,11 +236,6 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <AppText variant="sectionTitle">Minha conta</AppText>
           <View style={styles.links}>
-            <ProfileLink
-              title="Histórico de atendimentos"
-              icon="time-outline"
-              href="/HistoryScreen"
-            />
             <ProfileLink
               title="Preferências"
               icon="options-outline"

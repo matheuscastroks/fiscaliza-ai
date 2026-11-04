@@ -16,7 +16,6 @@ import { registerOfficialCallsRoutes } from './official-calls.js';
 import { registerPublicDataRoutes } from './public-data.js';
 import { registerAuthRoutes } from './auth-routes.js';
 import { registerAttachmentsRoutes } from './attachments-routes.js';
-import { registerCivicRoutes } from './civic-routes.js';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -336,16 +335,6 @@ export async function buildApp(
   registerOfficialCallsRoutes(app, db, connection.pool, ok, fail);
   registerPublicDataRoutes(app, db);
 
-  registerCivicRoutes(app, {
-    db,
-    territory,
-    uploadDir,
-    ok,
-    fail,
-    municipalityId,
-    now,
-    validateImages,
-  });
 
   registerAttachmentsRoutes(app, {
     db,

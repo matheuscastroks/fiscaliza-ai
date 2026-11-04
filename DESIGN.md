@@ -228,11 +228,9 @@ Raios normativos vêm de `theme/layout.ts`. Controles circulares de cabeçalho e
 
 `RecordCard` reúne tipo/situação, título, local/data e ação explícita. Com imagem válida, a fotografia absoluta preenche o fundo em `cover`; um espaçador de 148 antecede o conteúdo em fluxo, cuja altura cresce com o texto e a fonte. A faixa legível e o avanço circular branco permanecem no fluxo, sem altura fixa para o cartão. Sem imagem, ou em falha de carregamento, usa cartão editorial branco com resumo. Não preencha automaticamente um registro do cidadão com imagem de catálogo. Os exemplos acadêmicos têm origem e uso ilustrativo definidos abaixo. Padding `lg`, intervalo `xs`; pressionado reduz opacidade (0,82).
 
-`CivicRow` seleciona a composição de `CivicCard` conforme a jornada. Melhoria usa foto horizontal de 170 sobre superfície branca e engajamento; consulta apresenta prazo e prévia de alternativas; ação destaca percentual, barra de execução de 6 e evidência de 84. Os detalhes usam cédula, percurso de decisão ou histórico de execução conforme a tarefa. Fotografias enviadas pelo cidadão não são substituídas por imagens de catálogo. Popularidade não substitui resposta, prazo ou resultado.
 
 ### Photo attachments and illustrative examples
 
-`PhotoAttachments` permite selecionar e remover até três fotos por proposta, cada uma com até 5 MB. O limite de cinco imagens aceito pelo contrato da API não amplia a seleção da UI. Miniaturas medem 144 × 160, com raio `panel`, intervalo `sm` e remoção circular de 48. Preserve fotos no rascunho; ausência de anexos continua válida.
 
 Durante seleção e preparação, mostre o indicador no botão Adicionar foto, bloqueie novas seleções e remoções e comunique `preparing` ao formulário. Permissão recusada informa como autorizar ou continuar sem anexos. Erro de preparação ou envio exige mensagem textual e nova tentativa pela ação correspondente, conservando texto e fotos já escolhidos; não confirme publicação antes da resposta do servidor. Uma falha de carregamento da foto no cartão/detalhe usa a alternativa editorial existente.
 
@@ -240,7 +238,7 @@ As imagens de exemplo do cenário acadêmico são ilustrativas: não representam
 
 ### Attached detail panel
 
-`DetailSheet` mantém imagem e ficha na mesma página, sem backdrop modal. Ocorrência com foto permite expandir/recolher pelo puxador de área 48 e botão com estado `expanded`. Ocorrência sem foto e proposta mantém versão editorial, sem reservar espaço para imagem inexistente. O conteúdo rola e a ação pode ficar no rodapé. Erros ao acompanhar ficam junto da ação no rodapé, mantendo recuperação visível. `DetailSection` agrupa informações recolhíveis com título e chevron; não transforme linhas simples em cartões aninhados.
+`DetailSheet` mantém a ficha do chamado oficial na mesma página, sem backdrop modal. O conteúdo rola e permite salvar o chamado. Erros ficam junto da ação, com recuperação visível.
 
 ### Header and navigation
 
@@ -273,7 +271,6 @@ Não diferenciar apenas por cor ou prefixos. As alternativas no card são prévi
 
 Carrosséis e faixas de filtro ultrapassam o padding lateral até as bordas da tela; o primeiro e último elementos mantêm respiro interno. Preserve controles acessíveis e indicação de posição. O avatar de 48 fica à esquerda da saudação, separado por 12; a câmera à direita inicia o relato com foto.
 
-Cadastro de ocorrência: **Relato → Local → Revisão**. Foto obrigatória, rascunho preservado em falhas e mapa recortado por contêiner com raio 28 e `overflow: hidden`. A avaliação concluída sai dos destaques pessoais e permanece no histórico do perfil e na exploração pública do território.
 
 Indicadores fictícios são permitidos nos cenários de apresentação por solicitação do responsável pelo projeto. Persistem separados das interações atribuíveis; não fabricar apoio da conta ativa nem substituir evidências enviadas. Fontes de fotos ilustrativas e a natureza dos números ficam documentadas em Sobre e nos créditos do banco.
 
@@ -319,9 +316,9 @@ A partir de 1100 px, o aplicativo cidadão usa navegação lateral persistente, 
 
 ## Apresentação inicial e estados vazios
 
-Quatro etapas apresentam território, registro com foto e local, propostas/consultas e acompanhamento/avaliação. O primeiro acesso oferece Pular e Começar; ambos concluem a apresentação neste aparelho, sem alterar conta ou município. O menu Como funciona reabre o mesmo conteúdo e permite voltar ao ponto anterior. A apresentação inicial não espera a autenticação remota.
+O onboarding apresenta exploração territorial, acompanhamento de chamados oficiais e acesso aos canais de atendimento. Não oferece envio de ocorrências ou participação dentro do aplicativo.
 
-Usar somente os oito SVGs originais selecionados do pacote Notion Resources Freebie fornecido pelo usuário (procedência em assets/illustrations/README.md). Renderizar com expo-image e tintColor dinâmico de acordo com o tema (colors.ink), sem fundo artificial, adaptando os traços naturalmente entre os modos claro e escuro. Estados vazios ilustrados cobrem Início (acompanhamentos, consultas e ações com ilustrações dedicadas), Território, Acompanhar, Participar e Resultados; erros de rede continuam com recuperação própria via QueryState.
+Usar somente os oito SVGs originais selecionados do pacote Notion Resources Freebie fornecido pelo usuário (procedência em assets/illustrations/README.md). Renderizar com expo-image e tintColor dinâmico de acordo com o tema (colors.ink), sem fundo artificial, adaptando os traços naturalmente entre os modos claro e escuro. Estados vazios ilustrados cobrem exploração e acompanhamento dos dados oficiais; erros de rede continuam com recuperação própria via QueryState.
 
 ## Camadas territoriais e fichas cadastrais
 

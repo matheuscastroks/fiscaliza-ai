@@ -42,7 +42,7 @@ const slides: {
     title: 'Encontre como agir',
     description:
       'Acesse as orientações e o atendimento oficial para solicitar um serviço.',
-    imageLabel: 'Uma proposta representada por um avião de papel',
+    imageLabel: 'Acesso aos canais oficiais representado por um avião de papel',
     note: 'O Fiscaliza Aí é independente. Solicitações são feitas no canal oficial da prefeitura.',
   },
 ];

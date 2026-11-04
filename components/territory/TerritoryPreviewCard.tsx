@@ -9,15 +9,12 @@ import { AppText } from '@/components/ui/AppText';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
-import type { CivicItem, Occurrence, OfficialCall } from '@/shared/contracts';
-import { kindLabel, statusLabel } from '@/features/city/CityUI';
+import type { OfficialCall } from '@/shared/contracts';
 import { useFollowStore } from '@/stores/followStore';
 import { officialCallStatus } from '@/features/city/officialCallStatus';
 
 export type Entry =
   | { type: 'facility'; item: PublicFacilitySummary }
-  | { type: 'occurrence'; item: Occurrence }
-  | { type: 'civic'; item: CivicItem }
   | { type: 'official'; item: OfficialCall };
 
 export function entryLocation(entry: Entry) {
@@ -116,35 +113,12 @@ export function TerritoryCardContent({
       </View>
     );
 
-  const official = entry.type === 'official' ? entry.item : null;
-  const title = entry.type === 'official'
-    ? entry.item.serviceSubtype || entry.item.serviceType
-    : entry.item.title;
-  const category = entry.type === 'official'
-    ? 'Central 1746 · ' + entry.item.serviceType
-    : entry.type === 'occurrence'
-      ? 'Ocorrência'
-      : kindLabel[entry.item.kind];
-  const address = entry.type === 'official'
-    ? entry.item.neighborhoodName || 'Bairro não informado'
-    : entry.type === 'occurrence'
-      ? entry.item.location.neighborhood ||
-        entry.item.location.address ||
-        'Local não informado'
-      : entry.item.neighborhood || 'Território municipal';
-  const status = entry.type === 'official'
-    ? officialCallStatus(entry.item, colors, isDark)
-    : {
-        label: statusLabel[entry.item.status] || entry.item.status,
-        color: colors.muted,
-      };
-  const date = new Date(
-    entry.type === 'official'
-      ? entry.item.openedAt
-      : entry.type === 'occurrence'
-        ? entry.item.reportedAt
-        : entry.item.createdAt,
-  );
+  const official = entry.item;
+  const title = official.serviceSubtype || official.serviceType;
+  const category = 'Central 1746 · ' + official.serviceType;
+  const address = official.neighborhoodName || 'Bairro não informado';
+  const status = officialCallStatus(official, colors, isDark);
+  const date = new Date(official.openedAt);
   const dateLabel = Number.isNaN(date.getTime())
     ? 'Data não informada'
     : date.toLocaleDateString('pt-BR');

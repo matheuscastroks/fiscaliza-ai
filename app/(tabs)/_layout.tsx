@@ -2,11 +2,9 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppTabBar } from '@/components/ui/AppTabBar';
-import { useAuthStore } from '@/stores/authStore';
 import { mapPerformanceVariant } from '@/features/territory/mapPerformance';
 
 export default function TabLayout() {
-  const authenticated = useAuthStore((s) => s.isReady && s.isAuthenticated);
   return (
     <Tabs
       tabBar={(props) => <AppTabBar {...props} />}
@@ -82,10 +80,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Protected guard={authenticated}>
-        <Tabs.Screen name="ReportScreen" options={{ href: null }} />
-        <Tabs.Screen name="ProblemsListScreen" options={{ href: null }} />
-      </Tabs.Protected>
     </Tabs>
   );
 }

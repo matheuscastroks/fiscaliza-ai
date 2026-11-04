@@ -134,13 +134,6 @@ export default function SettingsScreen() {
             variant="secondary"
             onPress={() => router.push('/AboutScreen')}
           />
-          {user?.role === 'admin' && (
-            <AppButton
-              title="Controles de apresentação"
-              variant="quiet"
-              onPress={() => router.push('/PresentationScreen')}
-            />
-          )}
         </View>
       </ScrollView>
       <BottomSheet

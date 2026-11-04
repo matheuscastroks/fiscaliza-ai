@@ -120,24 +120,7 @@ export default function RootLayout() {
                 >
                   <Stack.Screen name="(tabs)" />
                   <Stack.Protected guard={isReady && isAuthenticated}>
-                    <Stack.Screen
-                      name="ProblemDetailsScreen"
-                      options={{ animation: 'slide_from_bottom' }}
-                    />
-                    <Stack.Screen
-                      name="CivicDetailsScreen"
-                      options={{ animation: 'slide_from_bottom' }}
-                    />
-                    {[
-                      'HistoricalDetailsScreen',
-                      'HistoryScreen',
-                      'MunicipalityScreen',
-                      'PresentationScreen',
-                      'ProposalScreen',
-                      'RelatedScreen',
-                    ].map((name) => (
-                      <Stack.Screen key={name} name={name} />
-                    ))}
+                    <Stack.Screen name="MunicipalityScreen" />
                   </Stack.Protected>
                 </Stack>
               </AppDrawer>

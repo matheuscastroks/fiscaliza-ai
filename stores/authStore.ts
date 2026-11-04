@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { User } from '@/data/mockData';
 import type { SessionUser } from '@/shared/contracts';
 import type { RegistrationInput } from '@/shared/registration';
-import { authApi, legacyUser } from '@/services/mockApi';
+import { authApi, legacyUser } from '@/services/auth';
 import { applyCurrentProfile } from '@/shared/profile-session';
 import {
   onSessionExpired,

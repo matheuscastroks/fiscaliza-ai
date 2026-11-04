@@ -143,7 +143,6 @@ test('regionToCameraPosition converts region deltas to bounded zoom and coordina
 test('all map screens and components integrate MapboxMapView with zero legacy remnants', () => {
   for (const filePath of [
     'app/(tabs)/TerritoryScreen.tsx',
-    'features/reports/LocationStep.tsx',
     'components/territory/FacilityDetails.tsx',
     'components/ui/ItemLocationMap.tsx',
   ]) {

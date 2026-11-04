@@ -1,6 +1,6 @@
 # Serviços e integrações
 
-A API compartilhada é a fonte de dados do produto. http.ts implementa transporte, sessão móvel SecureStore, cookie web e cache TanStack Query. mockApi.ts é adaptador temporário para telas antigas; não deve voltar a inventar sucesso local.
+A API compartilhada é a fonte de dados do produto. http.ts implementa transporte, sessão móvel SecureStore, cookie web e cache TanStack Query. auth.ts atende a autenticação via HTTP. Não há adaptador de ocorrências ou participação.
 
 Respostas usam ApiResult<T> de shared/contracts.ts. Identidade e permissões são verificadas no backend. Não enviar userId como autoridade nem aceitar histórico pronto do cliente.
 
