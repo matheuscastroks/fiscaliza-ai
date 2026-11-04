@@ -96,5 +96,5 @@ Um PR deve ser revisado se:
 3. Descreva mudanças de ordem/hierarquia **antes** de trocar cores/radius.
 4. Execute `npm test`, `npm run lint`, `npx tsc --noEmit` e registre resultados reais (com desvios se houver).
 5. Teste estados vazios, longos, offline/erro local, fonte aumentada, permissão GPS negada quando pertinente.
-6. Teste impacto das mudanças nas outras rotas e preservação de `demo/repository.ts`.
+6. Teste impacto das mudanças nas outras rotas e preservação das consultas oficiais e dos salvos locais.
 7. Dê evidência de consistência sem uniformidade: por que **Mapa** não parece **Perfil**, e ambos parecem Fiscaliza aí?

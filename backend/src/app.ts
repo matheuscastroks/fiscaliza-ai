@@ -42,7 +42,6 @@ const images = {
 const fail = (statusCode: number, message: string) =>
   Object.assign(new Error(message), { statusCode });
 const ok = (data: unknown) => ({ success: true, data });
-const now = () => new Date().toISOString();
 const sessionCookie = (req: FastifyRequest) =>
   req.headers['x-fiscaliza-client'] === 'citizen'
     ? 'citizen_session'
@@ -282,10 +281,6 @@ export async function buildApp(
           '/api/territorial-boundaries',
           '/api/neighborhoods',
         ].some((base) => path === base || path.startsWith(base + '/'))
-      ) &&
-      !(
-        req.method === 'GET' &&
-        (path === '/api/activity' || path.startsWith('/api/activity/'))
       ) &&
       !(
         req.method === 'GET' &&

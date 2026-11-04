@@ -2,7 +2,6 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildApp } from '../src/app.js';
 import { hashPassword, verifyPassword } from '../src/auth.js';
-import { analyze } from '../src/analysis.js';
 
 test('password verification rejects a different password', async () => {
   const hash = await hashPassword('pass-123');
@@ -14,7 +13,7 @@ test('API rejects unauthenticated mutations and malformed login without a databa
   t.after(() => app.close());
   const unauthorized = await app.inject({
     method: 'POST',
-    url: '/api/occurrences',
+    url: '/api/attachments',
     payload: {},
   });
   assert.equal(unauthorized.statusCode, 401);
@@ -47,31 +46,13 @@ test('cookies require an allowed Origin for writes', async (t) => {
   });
   assert.equal(citizen.statusCode, 403);
 });
-test('AI without key returns deterministic heuristic suggestion', async () => {
-  const value = await analyze(
-    { description: 'Lâmpada apagada na rua' },
-    undefined,
-  );
-  assert.equal(value.analysisSource, 'heuristic');
-  assert.equal(value.suggestedCategory, 'lighting');
-});
-
-test('AI without a key never claims to have analyzed a photo', async () => {
-  const value = await analyze(
-    { description: '', image: { data: 'fixture', mimeType: 'image/webp' } },
-    undefined,
-  );
-  assert.equal(value.analysisSource, 'heuristic');
-  assert.equal(value.imageAnalyzed, false);
-  assert.equal(value.suggestedDescription, '');
-});
-test('browser preflight permits participation mutations and client headers', async (t) => {
+test('browser preflight permits account mutations and client headers', async (t) => {
   const app = await buildApp();
   t.after(() => app.close());
   for (const method of ['PUT', 'PATCH', 'DELETE']) {
     const response = await app.inject({
       method: 'OPTIONS',
-      url: '/api/occurrences/example/support',
+      url: '/api/auth/profile',
       headers: {
         origin: 'http://localhost:5173',
         'access-control-request-method': method,

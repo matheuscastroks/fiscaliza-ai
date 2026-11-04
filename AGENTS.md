@@ -2,14 +2,14 @@
 
 ## Produto e arquitetura
 
-Fiscaliza aí demonstra participação na gestão urbana: ocorrências, propostas, consultas e ações públicas. O cidadão contribui; a gestão responde e presta contas. Consulte PRODUCT.md e DESIGN.md. O plano integrado aprovado substitui decisões antigas de execução exclusivamente mockada.
+Fiscaliza aí permite explorar dados oficiais do 1746 e Data.Rio, acompanhar chamados salvos e acessar canais oficiais. Não recebe ocorrências, propostas, consultas ou ações públicas. Consulte PRODUCT.md e DESIGN.md. O plano integrado aprovado substitui decisões antigas de execução exclusivamente mockada.
 
 ## Organização
 
 - app/: rotas Expo Router; features/: jornadas; components/: UI compartilhada; theme/: tokens.
 - services/: transporte HTTP e compatibilidade; stores/: sessão, interface e adaptadores legados.
 - shared/: contratos públicos; backend/: Fastify, PostgreSQL, Drizzle, migrações e testes.
-- demo/: fixtures, heurística e testes puros; assets/: arquivos estáticos; plan/: decisões e evidências.
+- tests/: testes puros e de componentes; assets/: arquivos estáticos; plan/: decisões e evidências.
 
 ## Comandos
 

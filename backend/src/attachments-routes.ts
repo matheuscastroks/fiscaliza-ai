@@ -101,26 +101,9 @@ export function registerAttachmentsRoutes(
     async (req, reply) => {
       if (
         ![
-          'lighting.jpg',
-          'benches.jpg',
-          'sidewalk.jpg',
           'avatar-ana.jpg',
           'avatar-gestao.jpg',
           'avatar-admin.jpg',
-          'road.jpg',
-          'waste.jpg',
-          'crossing.jpg',
-          'gloria-dark.jpg',
-          'legacy-light-1.jpg',
-          'legacy-light-2.jpg',
-          'legacy-light-3.jpg',
-          'legacy-light-4.jpg',
-          'gloria-light.jpg',
-          'recycling.jpg',
-          'park-path.jpg',
-          'park-shade.jpg',
-          'crossing-day.jpg',
-          'accessible-path.jpg',
         ].includes(req.params.name)
       )
         throw fail(404, 'Imagem de exemplo não encontrada.');

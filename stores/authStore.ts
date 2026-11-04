@@ -1,8 +1,7 @@
 import { create } from 'zustand';
-import type { User } from '@/data/mockData';
 import type { SessionUser } from '@/shared/contracts';
 import type { RegistrationInput } from '@/shared/registration';
-import { authApi, legacyUser } from '@/services/auth';
+import { authApi } from '@/services/auth';
 import { applyCurrentProfile } from '@/shared/profile-session';
 import {
   onSessionExpired,
@@ -12,7 +11,7 @@ import {
   saveToken,
 } from '@/services/http';
 interface AuthState {
-  user: User | null;
+  user: SessionUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isReady: boolean;
@@ -29,7 +28,6 @@ interface AuthState {
   ) => Promise<{ success: boolean; error?: string }>;
   clearError: () => void;
   refreshUser: () => Promise<void>;
-  updateUser: (updates: Partial<User>) => Promise<void>;
   acceptProfile: (
     user: SessionUser,
     expectedVersion: number,
@@ -47,7 +45,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await restoreToken();
       const user = await request<SessionUser>('/auth/me');
-      set({ user: legacyUser(user), isAuthenticated: true });
+      set({ user: user, isAuthenticated: true });
     } catch {
       set({ user: null, isAuthenticated: false });
     } finally {
@@ -109,7 +107,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshUser: async () => {
     const expected = { userId: get().user?.id, version: get().sessionVersion };
     if (!expected.userId) return;
-    const result = await authApi.getUserById(expected.userId);
+    const result = await authApi.getCurrentUser();
     if (result.data) {
       await applyCurrentProfile(
         { userId: expected.userId, version: expected.version },
@@ -143,14 +141,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       () => {
         queryClient.clear();
         set({
-          user: legacyUser(user),
+          user: user,
           sessionVersion: get().sessionVersion + 1,
         });
       },
     );
   },
-  updateUser: async () =>
-    set({ error: 'A edição de conta não está disponível.' }),
 }));
 onSessionExpired(() => {
   queryClient.clear();

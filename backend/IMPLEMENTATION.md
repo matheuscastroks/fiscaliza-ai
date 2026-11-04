@@ -20,7 +20,6 @@ Listagens aceitam `limit` (até 100) e `offset`; `/activity` devolve no máximo 
 
 Anexos aceitam um arquivo multipart JPEG/PNG/WebP de até 5 MB, com validação de assinatura e MIME, UUID gerado e gravação em volume local. A API somente aceita URLs relativas emitidas pelo upload, verificando a existência dos anexos antes de vinculá-los. Não recebe URIs locais ou URLs arbitrárias para buscar imagens.
 
-Gemini usa chave exclusiva do servidor, limite por endpoint e timeout de 10 segundos. A assistência aceita texto e, conforme o fluxo solicitado, uma foto previamente enviada, normalizada e autorizada por proprietário e município. O backend envia a imagem ao Google apenas para essa análise; sem chave, falha ou resposta inválida retorna heurística textual com imageAnalyzed=false. O cidadão revisa título e descrição antes do envio, e edições durante a requisição são preservadas. Modelo configurável por GEMINI_MODEL, padrão gemini-3.8-flash. Referência REST: https://ai.google.dev/gemini-api/docs/generate-content/image-understanding.
 
 ## Verificação
 

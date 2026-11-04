@@ -82,7 +82,7 @@ Commits devem ser atômicos e autoexplicativos, viabilizando geração de change
 
 ### 3.5. Estratégia de Testes
 A pirâmide de testes prioriza velocidade e proteção contra quebras de regras cívicas:
-1. **Testes Unitários e Comportamentais (`demo/*.test.ts`, `tests/*.test.cjs`)**:
+1. **Testes Unitários e Comportamentais (`tests/*.test.ts`, `tests/*.test.cjs`)**:
    - Execução ultrarrápida via runner nativo do Node.js (`node --test`).
    - Validam lógica de negócios isolada: normalização de bairros, ordenação territorial, precedência de perfis, heurísticas de classificação de imagem e regras de expiração de consultas.
 2. **Testes de Integração de API (`backend/test/*.test.js`)**:

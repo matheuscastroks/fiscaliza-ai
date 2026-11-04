@@ -24,8 +24,6 @@ services:
       WEB_ORIGINS: https://${PUBLIC_DOMAIN:?Configure PUBLIC_DOMAIN}
       UPLOAD_DIR: /app/uploads
       TRUST_PROXY: 172.30.97.0/24
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
       RIO1746_MAX_RUN_BYTES: ${RIO1746_MAX_RUN_BYTES:-500000000}
       GCP_PROJECT_ID: ${GCP_PROJECT_ID:-}
     volumes:

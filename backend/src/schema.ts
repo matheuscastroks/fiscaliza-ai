@@ -11,9 +11,8 @@ import {
 export * from './territorial-schema.js';
 import type {
   SessionUser,
-  Occurrence,
-  CivicItem,
 } from '../../shared/contracts.js';
+import type { Occurrence, CivicItem } from './historical-records.js';
 export const municipalities = pgTable('municipalities', {
   id: text('id').primaryKey(),
   data: jsonb('data')

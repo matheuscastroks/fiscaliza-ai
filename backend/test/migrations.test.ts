@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { database } from '../src/db.js';
 import { applyMigrations } from '../src/migrations.js';
-import { seed } from '../src/seed-data.js';
+import { seedBase } from '../src/seed-base.js';
+import { officialRio } from '../src/municipality.js';
 
 test(
   'PostgreSQL: migration journal and seed preserve later unassigned staff and changed residence',
@@ -30,7 +31,7 @@ test(
     );
     try {
       await applyMigrations(pool);
-      await seed(db);
+      await seedBase(db, await officialRio(), 'unused-test-hash');
       const result = await pool.query<{
         id: string;
         municipality_id: string | null;

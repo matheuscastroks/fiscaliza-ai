@@ -16,7 +16,7 @@ test('neighborhood picker uses published labels when the geographic catalog is e
     if (name === '@/features/territory/usePublicData') return { useNeighborhoods: () => ({ data: boundaries }) };
     if (name === '@/stores/territoryStore') return { useTerritoryStore: select => select({ preferredNeighborhood: 'Centro' }) };
     if (name === '@/components/ui/AppSelect') return { AppSelect: 'select' };
-    if (name === '@/shared/civic-territory') return { normalizeNeighborhood: text => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim() };
+    if (name === '@/shared/neighborhood') return { normalizeNeighborhood: text => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim() };
     throw new Error(name);
   }, mod, mod.exports);
   const props = { options: ['Tijuca', 'Centro'], value: 'Centro', onChange: () => {} };

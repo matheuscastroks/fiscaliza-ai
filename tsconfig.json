@@ -8,5 +8,5 @@
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
-  "exclude": ["demo/**/*.test.ts", "backend/**", "municipal/**", ".agents/**"]
+  "exclude": ["tests/**/*.test.ts", "backend/**", "municipal/**", ".agents/**"]
 }

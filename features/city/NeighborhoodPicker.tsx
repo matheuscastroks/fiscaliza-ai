@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useNeighborhoods } from '@/features/territory/usePublicData';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { AppSelect } from '@/components/ui/AppSelect';
-import { normalizeNeighborhood } from '@/shared/civic-territory';
+import { normalizeNeighborhood } from '@/shared/neighborhood';
 
 // Reuse ICU's Portuguese collation rules instead of constructing them per comparison.
 const neighborhoodCollator = new Intl.Collator('pt-BR');

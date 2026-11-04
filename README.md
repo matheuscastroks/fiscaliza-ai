@@ -125,4 +125,4 @@ docker compose --env-file .env.compose up -d --build --no-deps api
 docker compose --env-file .env.compose exec api node dist/backend/src/siurb-cli.js all
 ```
 
-A inicialização aplica migrações e o seed de instalação preserva contas existentes. Não use down -v ou clean:demo para atualizar. GET /api/data-sources e as consultas /api/public-facilities devem responder sem login; HTTP 401 nessas rotas pode indicar um serviço antigo. Verifique pelo endereço de API configurado no aparelho, não somente pela API isolada de validação.
+A inicialização aplica migrações e o seed de instalação preserva contas existentes. Não use down -v para atualizar. GET /api/data-sources e as consultas /api/public-facilities devem responder sem login; HTTP 401 nessas rotas pode indicar um serviço antigo. Verifique pelo endereço de API configurado no aparelho, não somente pela API isolada de validação.

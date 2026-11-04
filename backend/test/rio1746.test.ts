@@ -174,10 +174,12 @@ test(
   },
   async (t) => {
     const { database } = await import('../src/db.js');
-    const { seed } = await import('../src/seed-data.js');
+    const { seedBase } = await import('../src/seed-base.js');
+    const { officialRio } = await import('../src/municipality.js');
+    const { hashPassword } = await import('../src/auth.js');
     const { db, pool } = database();
     t.after(() => pool.end());
-    await seed(db);
+    await seedBase(db, await officialRio(), await hashPassword(process.env.DEMO_PASSWORD || 'Fiscaliza123!'));
 
     const app = await buildApp();
     t.after(() => app.close());
