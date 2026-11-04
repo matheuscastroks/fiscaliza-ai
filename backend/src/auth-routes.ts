@@ -199,11 +199,6 @@ export function registerAuthRoutes(
       },
     },
     async (req) => {
-      if (req.user!.role !== 'citizen')
-        throw fail(
-          403,
-          'O município da gestão é definido pela autorização da conta.',
-        );
       const found = await territory.lookup(req.body.postalCode);
       if (found.municipality.id !== req.body.municipalityId)
         throw fail(

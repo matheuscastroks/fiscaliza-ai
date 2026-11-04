@@ -20,7 +20,6 @@ services:
     environment:
       DATABASE_URL: postgres://fiscaliza:${POSTGRES_PASSWORD}@postgres:5432/fiscaliza
       NODE_ENV: production
-      DEMO_PASSWORD: ${DEMO_PASSWORD:?Configure DEMO_PASSWORD}
       WEB_ORIGINS: https://${PUBLIC_DOMAIN:?Configure PUBLIC_DOMAIN}
       UPLOAD_DIR: /app/uploads
       TRUST_PROXY: 172.30.97.0/24

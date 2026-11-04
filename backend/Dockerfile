@@ -14,4 +14,4 @@ RUN npm run build
 RUN mkdir -p /app/uploads && chown -R node:node /app
 USER node
 EXPOSE 3001
-CMD ["sh", "-c", "node dist/backend/src/migrate.js && node dist/backend/src/seed.js && node dist/backend/src/server.js"]
+CMD ["sh", "-c", "node dist/backend/src/migrate.js && node dist/backend/src/server.js"]

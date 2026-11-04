@@ -152,97 +152,27 @@ test('rio1746: queries use BigQuery parameters (@partitionDate, @limit) and reje
   );
 });
 
-test('rio1746: POST /api/rio1746/sync rejects unauthenticated callers', async (t) => {
+test('rio1746 sync is absent from the public HTTP API', async (t) => {
   const app = await buildApp();
   t.after(() => app.close());
-
-  const res = await app.inject({
-    method: 'POST',
-    url: '/api/rio1746/sync',
-    payload: { partitionDate: '2026-09-20' },
-  });
-  assert.equal(res.statusCode, 401);
-  assert.equal(res.json().success, false);
+  await app.ready();
+  assert.equal(app.hasRoute({ method: 'POST', url: '/api/rio1746/sync' }), false);
+  assert.equal(app.swagger().paths?.['/api/rio1746/sync'], undefined);
 });
 
 test(
-  'rio1746: POST /api/rio1746/sync rejects citizen and staff roles (403) and malformed partitionDate (400)',
+  'rio1746 import pagination, checkpoints and public read endpoints',
   {
     skip: !process.env.DATABASE_URL
-      ? 'DATABASE_URL absent; skipping DB role authorization test'
+      ? 'DATABASE_URL absent; skipping integration test'
       : false,
   },
   async (t) => {
     const { database } = await import('../src/db.js');
-    const { seedBase } = await import('../src/seed-base.js');
-    const { officialRio } = await import('../src/municipality.js');
-    const { hashPassword } = await import('../src/auth.js');
     const { db, pool } = database();
     t.after(() => pool.end());
-    await seedBase(db, await officialRio(), await hashPassword(process.env.DEMO_PASSWORD || 'Fiscaliza123!'));
-
     const app = await buildApp();
     t.after(() => app.close());
-
-    async function login(email: string) {
-      const response = await app.inject({
-        method: 'POST',
-        url: '/api/auth/login',
-        payload: {
-          email,
-          password: process.env.DEMO_PASSWORD || 'Fiscaliza123!',
-        },
-      });
-      assert.equal(response.statusCode, 200);
-      return { authorization: `Bearer ${response.json().data.token}` };
-    }
-
-    const citizen = await login('beatrizarante@gmail.com');
-    const staff = await login('gestao@vilaesperanca.exemplo');
-    const admin = await login('admin@vilaesperanca.exemplo');
-
-    const citizenSync = await app.inject({
-      method: 'POST',
-      url: '/api/rio1746/sync',
-      headers: citizen,
-      payload: { partitionDate: '2026-09-20' },
-    });
-    assert.equal(citizenSync.statusCode, 403);
-
-    const staffSync = await app.inject({
-      method: 'POST',
-      url: '/api/rio1746/sync',
-      headers: staff,
-      payload: { partitionDate: '2026-09-20' },
-    });
-    assert.equal(staffSync.statusCode, 403);
-
-    const badDateSync = await app.inject({
-      method: 'POST',
-      url: '/api/rio1746/sync',
-      headers: admin,
-      payload: { partitionDate: "2026-09-20' OR 1=1" },
-    });
-    assert.equal(badDateSync.statusCode, 400);
-
-    for (const payload of [
-      {},
-      { startDate: '2026-09-20' },
-      {
-        partitionDate: '2026-09-20',
-        startDate: '2026-09-20',
-        endDate: '2026-09-21',
-      },
-      { partitionDate: '2026-02-30' },
-    ]) {
-      const invalid = await app.inject({
-        method: 'POST',
-        url: '/api/rio1746/sync',
-        headers: admin,
-        payload,
-      });
-      assert.equal(invalid.statusCode, 400, JSON.stringify(payload));
-    }
 
     // Verify multi-page pagination, auditable imported vs updated counts, and non-regressing checkpoint
     const { sql } = await import('drizzle-orm');

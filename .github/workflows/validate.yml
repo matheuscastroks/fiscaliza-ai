@@ -23,7 +23,6 @@ jobs:
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DATABASE_URL: postgres://fiscaliza:validation-ci-only@localhost:5432/fiscaliza_test
-      DEMO_PASSWORD: validation-ci-only
       CI: true
       EXPO_PUBLIC_API_URL: /api
       EXPO_NO_TELEMETRY: 1

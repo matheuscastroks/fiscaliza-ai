@@ -29,7 +29,6 @@ export default function MunicipalityScreen() {
   const requestVersion = useRef(0);
   const digits = postalCode.replace(/\D/g, '');
   const linked = user?.municipality;
-  const editing = user?.role === 'citizen';
   const search = async () => {
     const version = ++requestVersion.current;
     setBusy(true);
@@ -88,101 +87,84 @@ export default function MunicipalityScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ gap: 20 }}>
-          {!editing ? (
-            <>
-              <AppText variant="sectionTitle">Município da equipe</AppText>
-              <AppText>
-                {linked
-                  ? `${linked.name} · ${linked.state}`
-                  : 'Sua conta ainda não tem vínculo municipal. Solicite a configuração ao administrador.'}
+          <View style={{ gap: 8 }}>
+            <AppText variant="screenTitle">
+              {linked ? 'Atualizar meu CEP' : 'Onde você mora?'}
+            </AppText>
+            <AppText color="muted">
+              Informe seu CEP para encontrar seu município.
+            </AppText>
+          </View>
+          {linked && (
+            <AppText>
+              Município atual: {linked.name} · {linked.state}
+            </AppText>
+          )}
+          <AppInput
+            placeholder="Digite seu CEP (00000-000)"
+            value={postalCode}
+            maxLength={9}
+            keyboardType="number-pad"
+            autoComplete="postal-code"
+            editable={!busy && !saving}
+            onChangeText={(value) => {
+              const normalized = value.replace(/\D/g, '').slice(0, 8);
+              setPostalCode(
+                normalized.length > 5
+                  ? normalized.slice(0, 5) + '-' + normalized.slice(5)
+                  : normalized,
+              );
+              requestVersion.current++;
+              setLookup(null);
+              setError('');
+            }}
+            onSubmitEditing={() => {
+              if (digits.length === 8 && !busy && !saving) void search();
+            }}
+          />
+          <AppButton
+            title="Buscar município"
+            loading={busy}
+            disabled={digits.length !== 8 || saving}
+            onPress={() => void search()}
+          />
+          {lookup && (
+            <View style={{ gap: 12 }}>
+              <AppText variant="sectionTitle">
+                {lookup.municipality.name} · {lookup.municipality.state}
               </AppText>
+              {Boolean(lookup.neighborhood) && (
+                <AppText>{lookup.neighborhood}</AppText>
+              )}
+              {Boolean(lookup.street) && (
+                <AppText color="muted">{lookup.street}</AppText>
+              )}
               <AppText color="muted">
-                O acesso da gestão é definido pela conta autorizada.
+                Seus registros serão limitados a este município.
               </AppText>
-            </>
-          ) : (
-            <>
-              <View style={{ gap: 8 }}>
-                <AppText variant="screenTitle">
-                  {linked ? 'Atualizar meu CEP' : 'Onde você mora?'}
-                </AppText>
-                <AppText color="muted">
-                  Informe seu CEP para encontrar o município onde você vai
-                  participar.
-                </AppText>
-              </View>
-              {linked && (
+              {linked && linked.id !== lookup.municipality.id && (
                 <AppText>
-                  Município atual: {linked.name} · {linked.state}
+                  Seu histórico em {linked.name} será preservado.
                 </AppText>
               )}
-              <AppInput
-                placeholder="Digite seu CEP (00000-000)"
-                value={postalCode}
-                maxLength={9}
-                keyboardType="number-pad"
-                autoComplete="postal-code"
-                editable={!busy && !saving}
-                onChangeText={(value) => {
-                  const normalized = value.replace(/\D/g, '').slice(0, 8);
-                  setPostalCode(
-                    normalized.length > 5
-                      ? normalized.slice(0, 5) + '-' + normalized.slice(5)
-                      : normalized,
-                  );
-                  requestVersion.current++;
-                  setLookup(null);
-                  setError('');
-                }}
-                onSubmitEditing={() => {
-                  if (digits.length === 8 && !busy && !saving) void search();
-                }}
+              <AppButton
+                title="Confirmar município"
+                loading={saving}
+                disabled={busy}
+                onPress={() => void confirm()}
               />
               <AppButton
-                title="Buscar município"
-                loading={busy}
-                disabled={digits.length !== 8 || saving}
-                onPress={() => void search()}
+                title="Corrigir CEP"
+                variant="quiet"
+                disabled={saving}
+                onPress={() => setLookup(null)}
               />
-              {lookup && (
-                <View style={{ gap: 12 }}>
-                  <AppText variant="sectionTitle">
-                    {lookup.municipality.name} · {lookup.municipality.state}
-                  </AppText>
-                  {Boolean(lookup.neighborhood) && (
-                    <AppText>{lookup.neighborhood}</AppText>
-                  )}
-                  {Boolean(lookup.street) && (
-                    <AppText color="muted">{lookup.street}</AppText>
-                  )}
-                  <AppText color="muted">
-                    Seus registros serão limitados a este município.
-                  </AppText>
-                  {linked && linked.id !== lookup.municipality.id && (
-                    <AppText>
-                      Seu histórico em {linked.name} será preservado.
-                    </AppText>
-                  )}
-                  <AppButton
-                    title="Confirmar município"
-                    loading={saving}
-                    disabled={busy}
-                    onPress={() => void confirm()}
-                  />
-                  <AppButton
-                    title="Corrigir CEP"
-                    variant="quiet"
-                    disabled={saving}
-                    onPress={() => setLookup(null)}
-                  />
-                </View>
-              )}
-              {error !== '' && (
-                <AppText color="risk" accessibilityLiveRegion="polite">
-                  {error}
-                </AppText>
-              )}
-            </>
+            </View>
+          )}
+          {error !== '' && (
+            <AppText color="risk" accessibilityLiveRegion="polite">
+              {error}
+            </AppText>
           )}
           {!linked && (
             <AppButton

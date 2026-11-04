@@ -7,7 +7,6 @@ import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppText } from '@/components/ui/AppText';
 import { GovBrButton } from '@/components/ui/GovBrButton';
-import { loginWithTestAccount, testLoginEnabled } from '@/services/testLogin';
 import { useAuthStore } from '@/stores/authStore';
 import { spacing } from '@/theme/spacing';
 import { useTheme } from '@/theme/useTheme';
@@ -36,25 +35,13 @@ export default function LoginScreen() {
   return (
     <AuthScreenLayout
       title="Acesse sua conta"
-      description="Acompanhe sua cidade e contribua com as decisões do seu território."
+      description="Consulte dados públicos e acompanhe informações da sua cidade."
     >
       <View style={styles.accessOptions}>
         <GovBrButton disabled />
         <AppText variant="caption" color="subtle" style={styles.hint}>
           Acesso com gov.br indisponível no momento
         </AppText>
-        {testLoginEnabled && (
-          <AppButton
-            title="Entrar com conta de testes"
-            variant="secondary"
-            loading={isLoading}
-            onPress={() => {
-              void loginWithTestAccount().then((result) => {
-                if (result.success) openSession();
-              });
-            }}
-          />
-        )}
       </View>
       <View style={styles.divider}>
         <View style={[styles.line, { backgroundColor: colors.border }]} />

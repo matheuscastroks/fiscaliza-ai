@@ -1,6 +1,6 @@
 /** Public HTTP contracts. Passwords, session secrets and database rows never belong here. */
 export * from './public-data.js';
-export type Role = 'citizen' | 'staff' | 'admin';
+export type Role = 'citizen';
 export type SyncCoverage = 'complete' | 'partial' | 'unknown';
 export interface SyncRunSummary {
   id: string;

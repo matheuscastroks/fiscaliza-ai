@@ -26,8 +26,6 @@ import type { Database } from './db.js';
 import type pg from 'pg';
 import { officialCalls } from './schema.js';
 import {
-  runRio1746RangeSync,
-  runRio1746Sync,
   getPublicSyncStatus,
 } from './integrations/rio1746/sync.js';
 import type { OfficialCall } from '../../shared/contracts.js';
@@ -363,85 +361,4 @@ export function registerOfficialCallsRoutes(
     return ok(status);
   });
 
-  // 6. Trigger manual / scheduled sync (restricted to admin role)
-  app.post<{
-    Body?: {
-      partitionDate?: string;
-      startDate?: string;
-      endDate?: string;
-      limit?: number;
-    };
-  }>(
-    '/api/rio1746/sync',
-    {
-      schema: {
-        body: {
-          type: 'object',
-          additionalProperties: false,
-          oneOf: [
-            {
-              required: ['partitionDate'],
-              not: {
-                anyOf: [{ required: ['startDate'] }, { required: ['endDate'] }],
-              },
-            },
-            {
-              required: ['startDate', 'endDate'],
-              not: { required: ['partitionDate'] },
-            },
-          ],
-          properties: {
-            partitionDate: {
-              type: 'string',
-              pattern: '^\\d{4}-\\d{2}-\\d{2}$',
-            },
-            startDate: {
-              type: 'string',
-              pattern: '^\\d{4}-\\d{2}-\\d{2}$',
-            },
-            endDate: {
-              type: 'string',
-              pattern: '^\\d{4}-\\d{2}-\\d{2}$',
-            },
-            limit: {
-              type: 'integer',
-              minimum: 10,
-              maximum: 50000,
-            },
-          },
-        },
-      },
-    },
-    async (req) => {
-      if (!req.user || req.user.role !== 'admin') {
-        throw fail(403, 'Acesso restrito à administração.');
-      }
-      if (!req.body)
-        throw fail(400, 'Informe uma data ou intervalo para sincronizar.');
-
-      const maxRecords = req.body?.limit
-        ? Math.min(50000, Math.max(10, req.body.limit))
-        : undefined;
-
-      if (req.body?.startDate && req.body?.endDate) {
-        const rangeResult = await runRio1746RangeSync(
-          db,
-          pool,
-          req.body.startDate,
-          req.body.endDate,
-          maxRecords ? { maxRecords } : {},
-        );
-        return ok(rangeResult);
-      }
-
-      const partition = req.body.partitionDate!;
-      const result = await runRio1746Sync(
-        db,
-        pool,
-        partition,
-        maxRecords ? { maxRecords } : {},
-      );
-      return ok(result);
-    },
-  );
 }

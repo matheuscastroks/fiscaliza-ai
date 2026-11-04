@@ -183,13 +183,11 @@ export default function ProfileScreen() {
                 ) : null}
               </View>
             </View>
-            {user?.role === 'citizen' && (
-              <AppButton
-                title="Atualizar CEP e município"
-                variant="secondary"
-                onPress={() => router.push('/MunicipalityScreen')}
-              />
-            )}
+            <AppButton
+              title="Atualizar CEP e município"
+              variant="secondary"
+              onPress={() => router.push('/MunicipalityScreen')}
+            />
           </View>
         </View>
         <View style={styles.section}>

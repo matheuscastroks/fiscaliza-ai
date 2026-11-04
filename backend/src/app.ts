@@ -51,7 +51,7 @@ const publicUser = (u: typeof users.$inferSelect): SessionUser => ({
   name: u.name,
   avatar: u.avatar ?? undefined,
   email: u.email,
-  role: u.role,
+  role: 'citizen',
   postalCode: u.postalCode ?? undefined,
   neighborhood: u.neighborhood ?? undefined,
   municipality: null,

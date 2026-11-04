@@ -3,11 +3,9 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { database } from '../src/db.js';
 import { applyMigrations } from '../src/migrations.js';
-import { seedBase } from '../src/seed-base.js';
-import { officialRio } from '../src/municipality.js';
 
 test(
-  'PostgreSQL: migration journal and seed preserve later unassigned staff and changed residence',
+  'PostgreSQL: migration journal preserves later unassigned user and changed residence',
   { skip: !process.env.DATABASE_URL },
   async (t) => {
     const { db, pool } = database();
@@ -25,13 +23,12 @@ test(
     );
     await pool.query(
       `INSERT INTO users(id,name,email,role,password_hash,municipality_id) VALUES
-    ($1,'Unassigned staff',$1 || '@test.invalid','staff','unused',NULL),
+    ($1,'Unassigned staff',$1 || '@test.invalid','citizen','unused',NULL),
     ($2,'Moved citizen',$2 || '@test.invalid','citizen','unused',$3)`,
       [staff, citizen, otherCity],
     );
     try {
       await applyMigrations(pool);
-      await seedBase(db, await officialRio(), 'unused-test-hash');
       const result = await pool.query<{
         id: string;
         municipality_id: string | null;

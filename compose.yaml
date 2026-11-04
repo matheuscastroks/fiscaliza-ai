@@ -21,7 +21,6 @@ services:
     environment:
       DATABASE_URL: postgres://fiscaliza:${POSTGRES_PASSWORD:-fiscaliza-local}@postgres:5432/fiscaliza
       NODE_ENV: ${NODE_ENV:-development}
-      DEMO_PASSWORD: ${DEMO_PASSWORD:?Set DEMO_PASSWORD before starting compose}
       WEB_ORIGINS: ${WEB_ORIGINS:-http://localhost:8080,http://localhost:5173,http://localhost:8081,http://localhost:8082,https://fiscalizaai.matheuscastroks.com.br}
       UPLOAD_DIR: /app/uploads
       TRUST_PROXY: 172.30.97.0/24
