@@ -71,10 +71,9 @@ Execute somente contra um banco isolado de validação, pois cria uma conta:
 postman collection run postman/fiscaliza.collection.json -i "Cadastro de conta" --env-var "baseUrl=http://localhost:3001/api" --no-report-events
 ```
 
-Com PostgreSQL já iniciado, defina `DATABASE_URL` e `DEMO_PASSWORD` no ambiente do processo:
+Com PostgreSQL já iniciado, defina `DATABASE_URL` no ambiente do processo:
 ```powershell
 npm run migrate --prefix backend
-npm run seed --prefix backend
 npm start --prefix backend
 ```
 
@@ -125,4 +124,4 @@ docker compose --env-file .env.compose up -d --build --no-deps api
 docker compose --env-file .env.compose exec api node dist/backend/src/siurb-cli.js all
 ```
 
-A inicialização aplica migrações e o seed de instalação preserva contas existentes. Não use down -v para atualizar. GET /api/data-sources e as consultas /api/public-facilities devem responder sem login; HTTP 401 nessas rotas pode indicar um serviço antigo. Verifique pelo endereço de API configurado no aparelho, não somente pela API isolada de validação.
+A inicialização aplica migrações, sem criar contas ou dados de exemplo. Não use down -v para atualizar. GET /api/data-sources e as consultas /api/public-facilities devem responder sem login; HTTP 401 nessas rotas pode indicar um serviço antigo. Verifique pelo endereço de API configurado no aparelho, não somente pela API isolada de validação.

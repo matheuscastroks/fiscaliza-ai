@@ -18,7 +18,7 @@ Exemplo orientador: diante de uma rua sem iluminação, o morador procura relato
 
 ## Jornada do cidadão
 
-O fluxo cidadão funciona sem conta. Salvos, bairro preferido e aparência ficam no aparelho ou navegador; não há sincronização entre dispositivos. A autenticação administrativa permanece separada. As jornadas legadas de escrita foram removidas do aplicativo.
+O fluxo cidadão funciona sem conta. Salvos, bairro preferido e aparência ficam no aparelho ou navegador; não há sincronização entre dispositivos. Contas possuem apenas o perfil cidadão; importações são operadas pelos comandos do servidor. As jornadas legadas de escrita foram removidas do aplicativo.
 
 1. **Home:** acesso principal à exploração territorial, retorno aos chamados salvos, demandas recentes do recorte e acesso ao atendimento oficial. Mostrar bairro ou município selecionado e referência temporal. Panorama numérico e comparações ficam no aprofundamento.
 2. **Território:** mapa como ferramenta de descoberta, lista equivalente e camadas opcionais de serviços. Preservar o recorte ao abrir e fechar um item. Oferecer busca e caminho de recuperação quando não houver resultados.

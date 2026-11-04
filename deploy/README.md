@@ -18,7 +18,7 @@ chmod 600 /opt/fiscaliza-ai/.env.production
 openssl rand -hex 32
 ```
 
-Preencha os dois domínios sem `https://` e sem barra, a senha do banco e `DEMO_PASSWORD`. Use uma senha hexadecimal para PostgreSQL, pois ela entra em uma URL de conexão. Não altere a senha do banco já inicializado apenas editando esse arquivo. O seed não altera senhas de contas existentes. Gemini é opcional e fica somente no servidor.
+Preencha os dois domínios sem `https://` e sem barra e a senha do banco. Use uma senha hexadecimal para PostgreSQL, pois ela entra em uma URL de conexão. Não altere a senha do banco já inicializado apenas editando esse arquivo. A inicialização não cria contas ou dados de exemplo.
 
 4. Autorize o servidor a baixar as imagens. Pacotes GHCR podem ser privados mesmo em repositório público: faça `docker login ghcr.io -u SEU_USUARIO` na VPS usando um token com `read:packages` e acesso aos três pacotes. Alternativamente, torne os pacotes públicos e confira o pull anônimo. O workflow publica com `GITHUB_TOKEN`; ele não instala credenciais de registry na VPS.
 

@@ -23,7 +23,7 @@ Use npm e preserve os package-lock.json. Instale módulos Expo com npx expo inst
 
 ## Convenções
 
-O município vem da sessão e usa código IBGE. Não aceite cidade arbitrária em mutações; registros validam o polígono no servidor. Cache e rascunhos incluem usuário e município. Gestão não escolhe território pelo onboarding cidadão.
+O município vem da sessão e usa código IBGE. Não aceite cidade arbitrária em mutações; registros validam o polígono no servidor. Cache e rascunhos incluem usuário e município. Não há papéis de gestão ou administração nas contas; sincronização é operação do servidor.
 
 TypeScript estrito, indentação de dois espaços, componentes PascalCase, hooks useX e funções com responsabilidade delimitada. Preserve contratos compartilhados e valide entradas no servidor. API/banco são a autoridade; cache e rascunho nunca podem confirmar gravação inexistente. Apoios/respostas devem ter unicidade persistida. Mudanças de atendimento/decisão exigem justificativa e histórico com ator.
 
