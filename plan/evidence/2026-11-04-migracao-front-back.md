@@ -84,3 +84,11 @@ Foram apagados também `LEIA_PRIMEIRO.md` e `ANTI_SLOP.md`, documentos substitu�
 Configuração e fontes do Android antigo foram preservadas privadamente em `/tmp/fiscaliza-migration/android-legacy-config.tar.gz`, sem caches de build. Uma DLL do resolvedor Windows permanecia carregada e recusava exclusão; o pequeno resíduo foi movido para a pasta temporária do Windows (`fiscaliza-legacy-node-*`), fora do repositório, sem encerrar processos do usuário. Todos os demais artefatos listados foram excluídos.
 
 Conferência final: nenhum dos caminhos antigos permanece na raiz; dependências de `front/` e `back/`, ambiente `front/.env`, uploads e `shared/` preservados. Os hashes dos dois lockfiles continuam iguais aos registrados na linha de base. Após a limpeza física, `npm test` passou (3 arquivos TS e 20 CJS, sem falhas ou skips) e `npm run typecheck` passou para app e API. A limpeza e seus ajustes de ignore foram preparados em commit adicional, sem push.
+
+## Contexto e ferramentas específicos do frontend — 05/11/2026
+
+Por solicitação do usuário, `DESIGN.md`, `.impeccable/` e `.agents/skills/` passaram para `front/`. As 41 cópias de skills, licença, origem e sidecar foram preservadas byte a byte. No documento de design, os caminhos foram ajustados ao novo diretório; `PRODUCT.md` continua na raiz como fonte canônica do produto.
+
+Criado `front/AGENTS.md` com comandos locais, leitura do PRODUCT da raiz e entrada pelas skills Expo. O AGENTS geral aponta para esses caminhos. Metro, TypeScript, ESLint e Docker excluem os metadados locais dos seus respectivos inputs. As referências ativas de documentação foram corrigidas; registros históricos de decisões anteriores permanecem históricos.
+
+Validações: testes do app passaram (3 arquivos TS e 20 CJS); tipos do frontend passaram; configuração efetiva do Metro bloqueia metadados e servidor sem bloquear app ou shared; hashes dos metadados e links locais verificados. O lint sem cache passou na cópia limpa com configurações idênticas às atuais. A API do ESLint confirmou a exclusão global das skills; os ignores foram separados do bloco de regras para terem esse efeito. A primeira tentativa no workspace teve gravação de cache bloqueada pela sandbox. Nenhuma funcionalidade do aplicativo ou contrato HTTP foi alterado.

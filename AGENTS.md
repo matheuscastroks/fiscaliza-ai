@@ -2,7 +2,7 @@
 
 ## Produto e arquitetura
 
-Fiscaliza aí permite explorar dados oficiais do 1746 e Data.Rio, acompanhar chamados salvos e acessar canais oficiais. Não recebe ocorrências, propostas, consultas ou ações públicas. Consulte PRODUCT.md e DESIGN.md. O plano integrado aprovado substitui decisões antigas de execução exclusivamente mockada.
+Fiscaliza aí permite explorar dados oficiais do 1746 e Data.Rio, acompanhar chamados salvos e acessar canais oficiais. Não recebe ocorrências, propostas, consultas ou ações públicas. Consulte PRODUCT.md e front/DESIGN.md. O plano integrado aprovado substitui decisões antigas de execução exclusivamente mockada.
 
 ## Organização
 
@@ -36,4 +36,4 @@ Aplique RITO: razão, informação, tarefa e originalidade funcional. Sem slogan
 ## Segurança e colaboração
 
 Nunca comite .env, credenciais ou android/ios gerados. Gemini somente no servidor; fotos permanecem nesta aplicação. Atualize templates de ambiente. Commits seguem feat/fix/docs e escopo quando útil; sem prefixos de ferramenta na branch ou mensagem. PRs descrevem comportamento, validação e limitações reais.
-Skills oficiais selecionadas estão em .agents/skills; instruções do projeto prevalecem.
+Skills Expo selecionadas ficam em front/.agents/skills. Em tarefas do aplicativo, leia front/AGENTS.md e carregue primeiro front/.agents/skills/expo-overview/SKILL.md. As instruções do projeto prevalecem.

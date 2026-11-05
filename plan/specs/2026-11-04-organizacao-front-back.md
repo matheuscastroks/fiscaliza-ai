@@ -6,7 +6,7 @@
 
 Organizar o aplicativo em `front/`, renomear `backend/` para `back/` e manter `shared/` na raiz. O resultado deve preservar as jornadas, os contratos HTTP, as rotas do Expo Router, a identidade nativa, os dados persistidos e a operação local e em containers.
 
-Esta especificação formaliza a proposta discutida na conversa, cuja execução foi autorizada depois da criação do plano. Durante a execução o usuário restringiu as validações ao aplicativo móvel e à API: não criar interface web nem executar exportações ou testes de navegador. Ajustar somente os caminhos da infraestrutura web preexistente; esses testes deixam de ser critérios de conclusão desta execução. As regras vigentes são [AGENTS.md](../../AGENTS.md), [PRODUCT.md](../../PRODUCT.md) e [DESIGN.md](../../DESIGN.md). Decisões históricas de execução exclusivamente mockada não se aplicam.
+Esta especificação formaliza a proposta discutida na conversa, cuja execução foi autorizada depois da criação do plano. Durante a execução o usuário restringiu as validações ao aplicativo móvel e à API: não criar interface web nem executar exportações ou testes de navegador. Ajustar somente os caminhos da infraestrutura web preexistente; esses testes deixam de ser critérios de conclusão desta execução. As regras vigentes são [AGENTS.md](../../AGENTS.md), [PRODUCT.md](../../PRODUCT.md) e [DESIGN.md](../../front/DESIGN.md). Decisões históricas de execução exclusivamente mockada não se aplicam.
 
 ## Decisões
 

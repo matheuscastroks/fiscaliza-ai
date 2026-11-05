@@ -10,8 +10,11 @@ module.exports = defineConfig([
       'back/**',
       'municipal/**',
       '.agents/**',
+      '.impeccable/**',
       '.validation/**',
     ],
+  },
+  {
     rules: {
       'import/no-unresolved': 'off',
     },

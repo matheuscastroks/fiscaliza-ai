@@ -8,6 +8,8 @@ Aplicativo Expo Android/iOS e API Fastify/PostgreSQL. Consulte [PRODUCT.md](PROD
 
 - `front/`: aplicativo Expo; rotas em `app/`, jornadas em `features/`, UI em `components/` e tokens em `theme/`.
 - `front/tests/` e `front/scripts/`: testes e ferramentas do aplicativo.
+- [front/DESIGN.md](front/DESIGN.md) e `front/.impeccable/`: sistema visual e seus metadados.
+- `front/.agents/skills/`: skills Expo; orientações locais em [front/AGENTS.md](front/AGENTS.md).
 - `package.json` da raiz: atalhos para instalar e executar os dois projetos, sem workspaces ou dependências próprias.
 - `back/`: API Fastify, PostgreSQL (Drizzle ORM), migrações e sincronizador BigQuery DATA.RIO.
 - `back/src/integrations/rio1746/`: pipeline de ingestão, sanitização e sincronização da Central 1746.

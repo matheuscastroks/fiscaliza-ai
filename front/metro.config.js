@@ -18,13 +18,11 @@ config.watchFolders = [
 // Separate services and vendored instructions are not mobile bundle inputs.
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 config.resolver.blockList = [
-  'back',
-  'municipal',
-  '.agents',
-  '.validation',
-].map(
-  (folder) =>
-    new RegExp('^' + escapeRegExp(path.join(repositoryRoot, folder)) + '[\\\\/].*'),
-);
+  path.join(repositoryRoot, 'back'),
+  path.join(repositoryRoot, 'municipal'),
+  path.join(repositoryRoot, '.validation'),
+  path.join(__dirname, '.agents'),
+  path.join(__dirname, '.impeccable'),
+].map((folder) => new RegExp('^' + escapeRegExp(folder) + '[\\\\/].*'));
 
 module.exports = config;
