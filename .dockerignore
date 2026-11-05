@@ -8,7 +8,6 @@
 .agents
 android
 ios
-backend/uploads
 postman/reports
 web-dist
 

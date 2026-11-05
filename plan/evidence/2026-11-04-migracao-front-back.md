@@ -74,3 +74,13 @@ Nas duas instalações, o React Native DevTools registrou ausência da bibliotec
 ### Artefatos de auditoria
 
 Logs privados, configurações resolvidas, inventário, manifesto, relatório de pastas vazias e ensaio de reversão estão em `/tmp/fiscaliza-migration/`. Não adicionar esses conteúdos integralmente ao Git: a configuração resolvida pode conter valores do ambiente local. A evidência pública é este resumo. Os containers de validação são exclusivos do projeto Compose `fiscaliza-migration`; não foram utilizados os serviços ou volumes habituais da aplicação.
+
+## Limpeza posterior da raiz — 05/11/2026
+
+Após solicitação explícita do usuário, os artefatos que haviam sido preservados por bloqueios do filesystem foram retirados da raiz: `backend/`, `node_modules/`, `android/`, `.expo/`, `dist/` e `expo-env.d.ts`. O `backend/` residual continha somente dependências, build e OpenAPI antigos; código e uploads ativos já estavam em `back/`.
+
+Foram apagados também `LEIA_PRIMEIRO.md` e `ANTI_SLOP.md`, documentos substituídos que ainda descreviam o protótipo mockado e o painel municipal. README, PRODUCT, DESIGN, AGENTS e a documentação histórica em `plan/` permanecem. Removidas as regras específicas obsoletas de `backend/` e `municipal/` nos arquivos de ignore.
+
+Configuração e fontes do Android antigo foram preservadas privadamente em `/tmp/fiscaliza-migration/android-legacy-config.tar.gz`, sem caches de build. Uma DLL do resolvedor Windows permanecia carregada e recusava exclusão; o pequeno resíduo foi movido para a pasta temporária do Windows (`fiscaliza-legacy-node-*`), fora do repositório, sem encerrar processos do usuário. Todos os demais artefatos listados foram excluídos.
+
+Conferência final: nenhum dos caminhos antigos permanece na raiz; dependências de `front/` e `back/`, ambiente `front/.env`, uploads e `shared/` preservados. Os hashes dos dois lockfiles continuam iguais aos registrados na linha de base. Após a limpeza física, `npm test` passou (3 arquivos TS e 20 CJS, sem falhas ou skips) e `npm run typecheck` passou para app e API. A limpeza e seus ajustes de ignore foram preparados em commit adicional, sem push.
