@@ -4,6 +4,8 @@ Aplicativo independente que ajuda moradores do Rio de Janeiro (IBGE 3304557) a d
 
 Aplicativo Expo Android/iOS e API Fastify/PostgreSQL. Consulte [PRODUCT.md](PRODUCT.md) para escopo e limites de interpretação.
 
+CI, merge automático das suas branches e ativação das proteções: [.github/README.md](.github/README.md). A release publica somente a API; instruções de VPS em [deploy/README.md](deploy/README.md).
+
 ## Organização
 
 - `front/`: aplicativo Expo; rotas em `app/`, jornadas em `features/`, UI em `components/` e tokens em `theme/`.
@@ -23,7 +25,7 @@ O Fiscaliza Aí conecta-se diretamente ao repositório público do DATA.RIO no G
 - **Tabela de bairros**: `datario.dados_mestres.bairro`
 
 ### Princípios da Integração
-1. **Desacoplamento**: O cliente mobile/web nunca consulta o BigQuery diretamente. Todas as leituras passam pelo PostgreSQL sincronizado.
+1. **Desacoplamento**: O aplicativo móvel nunca consulta o BigQuery diretamente. Todas as leituras passam pelo PostgreSQL sincronizado.
 2. **Controle de Custos e Particionamento**: Todas as consultas ao BigQuery são limitadas por partição diária (`data_particao`), compartilham um orçamento por execução (500 MB por padrão), executam dry runs e definem maximumBytesBilled pelo saldo disponível.
 3. **Privacidade e Proteção de Dados**: Número de logradouro residencial é omitido da API pública; a base não contém dados pessoais identificáveis (CPF/nome).
 4. **Resiliência Espacial**: Coordenadas geográficas fora do polígono do município do Rio de Janeiro ou inválidas (0,0) são tratadas com segurança mantendo o registro oficial acessível por bairro/região.

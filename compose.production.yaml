@@ -20,6 +20,7 @@ services:
     environment:
       DATABASE_URL: postgres://fiscaliza:${POSTGRES_PASSWORD}@postgres:5432/fiscaliza
       NODE_ENV: production
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:?Configure PUBLIC_DOMAIN}
       WEB_ORIGINS: https://${PUBLIC_DOMAIN:?Configure PUBLIC_DOMAIN}
       UPLOAD_DIR: /app/uploads
       TRUST_PROXY: 172.30.97.0/24
@@ -36,34 +37,18 @@ services:
       timeout: 5s
       start_period: 40s
       retries: 18
-  citizen:
-    image: ${IMAGE_PREFIX}-citizen:${IMAGE_TAG}
+  cloudflared:
+    image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    healthcheck:
-      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1/LoginScreen']
-      interval: 10s
-      timeout: 5s
-      retries: 10
-  edge:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    ports:
-      - '80:80'
-      - '443:443'
+    command: tunnel --no-autoupdate run
     environment:
-      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN}
-    volumes:
-      - ${RELEASE_DIR:?Use deploy/deploy.sh}/deploy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - tls:/data
-      - caddy_config:/config
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?Configure CLOUDFLARE_TUNNEL_TOKEN}
     depends_on:
-      citizen:
+      api:
         condition: service_healthy
 volumes:
   postgres:
   uploads:
-  tls:
-  caddy_config:
 networks:
   default:
     ipam:
