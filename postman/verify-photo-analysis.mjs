@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
-import { analyze } from '../backend/dist/backend/src/analysis.js';
+import { analyze } from '../back/dist/back/src/analysis.js';
 
 const require = createRequire(
-  new URL('../backend/package.json', import.meta.url),
+  new URL('../back/package.json', import.meta.url),
 );
 const sharp = require('sharp');
 const base = process.env.GEMINI_API_BASE_URL || 'http://127.0.0.1:4900/gemini';
@@ -13,7 +13,7 @@ if (!/^http:\/\/(127\.0\.0\.1|localhost):\d+(\/|$)/.test(base))
 process.env.GEMINI_API_BASE_URL = base;
 const bytes = await sharp(
   await readFile(
-    new URL('../backend/data/demo-media/lighting.jpg', import.meta.url),
+    new URL('../back/data/demo-media/lighting.jpg', import.meta.url),
   ),
 )
   .webp()

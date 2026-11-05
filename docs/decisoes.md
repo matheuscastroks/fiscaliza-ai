@@ -51,15 +51,18 @@ Para manter a consistência entre múltiplos desenvolvedores, o projeto segue di
 ### 3.1. Arquitetura de Pastas e Responsabilidades
 ```
 fiscaliza-ai/
-├── app/               # Rotas exclusivas do Expo Router (sem regras de negócio pesadas)
-├── features/          # Módulos verticais de domínio (city, reports, onboarding)
-├── components/        # Componentes visuais desacoplados e reutilizáveis (ui, territory)
-├── theme/             # Tokens do Design System (colors, spacing, layout, useTheme)
-├── stores/            # Estados locais da aplicação (Zustand)
-├── services/          # Clientes HTTP, adaptadores de transporte e APIs externas
-├── shared/            # Contratos de tipos TypeScript compartilhados entre App e API
-├── tests/             # Testes de comportamento, stores e UI do cliente (node:test)
-└── backend/           # API Fastify, schemas Drizzle, migrações e testes de integração
+├── front/             # Aplicativo Expo Android/iOS
+│   ├── app/           # Rotas Expo Router
+│   ├── features/      # Jornadas e regras do cliente
+│   ├── components/    # UI compartilhada
+│   ├── theme/         # Tokens visuais
+│   ├── stores/        # Estado local
+│   ├── services/      # Transporte HTTP
+│   └── tests/         # Testes do aplicativo
+├── back/              # API Fastify, migrações, integrações e testes
+├── shared/            # Contratos e helpers comuns
+├── deploy/            # Infraestrutura existente
+└── package.json       # Atalhos; instalações independentes em front/ e back/
 ```
 
 ### 3.2. Contratos Compartilhados (`Single Source of Truth`)
@@ -82,14 +85,14 @@ Commits devem ser atômicos e autoexplicativos, viabilizando geração de change
 
 ### 3.5. Estratégia de Testes
 A pirâmide de testes prioriza velocidade e proteção contra quebras de regras cívicas:
-1. **Testes Unitários e Comportamentais (`tests/*.test.ts`, `tests/*.test.cjs`)**:
+1. **Testes Unitários e Comportamentais (`front/tests/*.test.ts`, `front/tests/*.test.cjs`)**:
    - Execução ultrarrápida via runner nativo do Node.js (`node --test`).
    - Validam lógica de negócios isolada: normalização de bairros, ordenação territorial, precedência de perfis, heurísticas de classificação de imagem e regras de expiração de consultas.
-2. **Testes de Integração de API (`backend/test/*.test.js`)**:
+2. **Testes de Integração de API (`back/test/*.test.ts`)**:
    - Testam endpoints reais Fastify e consultas SQL.
    - Cobrem autenticação, cookies de sessão, CSRF, limites de taxa, validação de polígonos territoriais e unicidade de apoios comunitários.
 3. **Smoke Tests e Pré-deploy (`.github/workflows/validate.yml`)**:
-   - Verificação estática (`npx tsc --noEmit`), lint (`npm run lint`), compilação de contrato OpenAPI e teste de export web antes de qualquer release.
+   - Verificação estática (`npm run typecheck`), lint (`npm run lint`), compilação de contrato OpenAPI e teste de export web antes de qualquer release.
 
 ---
 
@@ -149,5 +152,5 @@ flowchart TD
 * **Webhooks por Unidade**: A API disparará eventos específicos (`occurrence.created`, `occurrence.updated`) para endpoints registrados de cada secretaria responsável, permitindo que cada órgão acompanhe e responda no seu próprio ritmo sem travar a base central.
 
 ### 4.4. Manutenibilidade e Ciclo de Vida
-* **Isolamento de Mudanças**: O desacoplamento rígido entre `app/` (rotas), `features/` (regras e fluxos) e `components/` (UI pura) garante que refatorações visuais ou atualizações de dependências (e.g. novas versões do Expo SDK) não quebrem regras de negócio nem exijam reescrita de testes de integração.
+* **Isolamento de Mudanças**: O desacoplamento rígido entre `front/app/` (rotas), `front/features/` (regras e fluxos) e `front/components/` (UI pura) garante que refatorações visuais ou atualizações de dependências (e.g. novas versões do Expo SDK) não quebrem regras de negócio nem exijam reescrita de testes de integração.
 * **Observabilidade**: Fastify integrado com Pino Logger estruturado em JSON, pronto para ingestão por ferramentas de monitoramento (Prometheus, Grafana, Datadog ou OpenTelemetry).

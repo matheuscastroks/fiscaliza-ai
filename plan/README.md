@@ -1,5 +1,9 @@
 # Plano de evolução — Fiscaliza aí com Superpowers
 
+## Migração da organização do repositório
+
+Migração executada em 04–05/11/2026: [especificação front/back/shared](specs/2026-11-04-organizacao-front-back.md), [plano](implementation/2026-11-04-migracao-front-back.md) e [evidências e limitações](evidence/2026-11-04-migracao-front-back.md). A API está em `back/`, o aplicativo em `front/` e `shared/` permanece na raiz, com instalações npm independentes. As validações focaram mobile e API, conforme solicitado. As regras atuais de `AGENTS.md` e `PRODUCT.md` prevalecem sobre o roteiro histórico de mocks abaixo.
+
 ## Como usar este planejamento
 
 Revisão de 29/09/2026. Este é um roteiro de descoberta, especificação e entrega. Os documentos de fase não são planos de implementação prontos para execução: decisões de arquitetura e produto ainda precisam ser fechadas. Consulte o [brief consolidado](00-brief-e-decisoes.md) e o [catálogo de skills](07-skills-e-metodo.md).

@@ -45,11 +45,17 @@ app-example
 
 # Local verification and service outputs
 .validation/
-backend/dist/
-backend/uploads/
-backend/openapi.json
-municipal/dist/
 postman/reports/
 
 # Production runtime credentials
 .env.production
+
+# API outputs
+back/dist/
+back/uploads/
+back/openapi.json
+
+# Expo app relocated; generated native projects stay local
+/front/android/
+/front/ios/
+/front/web-dist/

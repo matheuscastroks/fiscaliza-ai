@@ -2,23 +2,25 @@
 
 ## Produto e arquitetura
 
-Fiscaliza aí permite explorar dados oficiais do 1746 e Data.Rio, acompanhar chamados salvos e acessar canais oficiais. Não recebe ocorrências, propostas, consultas ou ações públicas. Consulte PRODUCT.md e DESIGN.md. O plano integrado aprovado substitui decisões antigas de execução exclusivamente mockada.
+Fiscaliza aí permite explorar dados oficiais do 1746 e Data.Rio, acompanhar chamados salvos e acessar canais oficiais. Não recebe ocorrências, propostas, consultas ou ações públicas. Consulte PRODUCT.md e front/DESIGN.md. O plano integrado aprovado substitui decisões antigas de execução exclusivamente mockada.
 
 ## Organização
 
-- app/: rotas Expo Router; features/: jornadas; components/: UI compartilhada; theme/: tokens.
-- services/: transporte HTTP e compatibilidade; stores/: sessão, interface e adaptadores legados.
-- shared/: contratos públicos; backend/: Fastify, PostgreSQL, Drizzle, migrações e testes.
-- tests/: testes puros e de componentes; assets/: arquivos estáticos; plan/: decisões e evidências.
+- front/: aplicativo Expo; front/app/: rotas Expo Router; front/features/: jornadas; front/components/: UI compartilhada; front/theme/: tokens.
+- front/services/: transporte HTTP e compatibilidade; front/stores/: sessão, interface e adaptadores legados.
+- shared/: contratos públicos; back/: Fastify, PostgreSQL, Drizzle, migrações e testes.
+- front/tests/: testes puros e de componentes; front/assets/: arquivos estáticos; plan/: decisões e evidências.
+- package.json da raiz: atalhos; instalações npm independentes em front/ e back/, sem workspaces.
 
 ## Comandos
 
 Use npm e preserve os package-lock.json. Instale módulos Expo com npx expo install.
 
-- npm start: Metro; npx expo run:android: build nativo Android.
-- npm test: testes locais Node; npx tsc --noEmit: tipos; npm run lint: Expo lint.
-- npm test --prefix backend: testes API; npm run typecheck --prefix backend: tipos.
-- npx expo config --type prebuild: configuração.
+- npm run install:all: instalar os dois projetos com seus lockfiles; não executar npm ci na raiz.
+- npm start: Metro; npm run android: build nativo Android.
+- npm test: testes locais Node do app; npm run typecheck: tipos do app e da API; npm run lint: Expo lint.
+- npm test --prefix back: testes API; npm run typecheck --prefix back: tipos.
+- npm run config:prebuild: configuração. Comandos diretos npx expo e npx tsc devem executar dentro de front/.
   Consulte README.md para Docker e configuração.
 
 ## Convenções
@@ -34,4 +36,4 @@ Aplique RITO: razão, informação, tarefa e originalidade funcional. Sem slogan
 ## Segurança e colaboração
 
 Nunca comite .env, credenciais ou android/ios gerados. Gemini somente no servidor; fotos permanecem nesta aplicação. Atualize templates de ambiente. Commits seguem feat/fix/docs e escopo quando útil; sem prefixos de ferramenta na branch ou mensagem. PRs descrevem comportamento, validação e limitações reais.
-Skills oficiais selecionadas estão em .agents/skills; instruções do projeto prevalecem.
+Skills Expo selecionadas ficam em front/.agents/skills. Em tarefas do aplicativo, leia front/AGENTS.md e carregue primeiro front/.agents/skills/expo-overview/SKILL.md. As instruções do projeto prevalecem.

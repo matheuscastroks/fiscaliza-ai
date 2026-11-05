@@ -1,15 +1,71 @@
-name: Validate participation platform
+name: CI
 on:
   push:
     branches-ignore: [main]
-  pull_request:
+    tags-ignore: ['**']
   workflow_call:
+  workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
-  checks:
+  owner:
+    name: Owner
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 2
+    steps:
+      - name: Require repository owner
+        env:
+          REPOSITORY_ID: ${{ github.repository_id }}
+          ACTOR_ID: ${{ github.actor_id }}
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+        run: |
+          test "$REPOSITORY_ID" = '997154192'
+          if [ "$ACTOR_ID" = '49662686' ]; then exit 0; fi
+          test "$REF" = 'refs/heads/main'
+          test "$EVENT_NAME" = 'workflow_dispatch'
+          test "$ACTOR_ID" = '41898282'
+  app:
+    name: App
+    needs: owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: true
+      EXPO_NO_TELEMETRY: 1
+      EXPO_PUBLIC_API_URL: http://127.0.0.1:3001/api
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: front/package-lock.json
+      - run: npm ci --prefix front
+      - run: npm test
+      - run: npm run typecheck --prefix front
+      - run: npm run lint
+      - run: npm run export:android --prefix front -- --output-dir ../.validation/android-bundle --max-workers 2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-js-validation
+          path: .validation/android-bundle
+          if-no-files-found: error
+          retention-days: 7
+  api:
+    name: API Node ${{ matrix.node }}
+    needs: owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
     services:
       postgres:
         image: postgres:17-alpine
@@ -24,45 +80,63 @@ jobs:
     env:
       DATABASE_URL: postgres://fiscaliza:validation-ci-only@localhost:5432/fiscaliza_test
       CI: true
-      EXPO_PUBLIC_API_URL: /api
-      EXPO_NO_TELEMETRY: 1
+    defaults:
+      run:
+        working-directory: back
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: back/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: node dist/back/src/migrate.js
+      - run: node --test --test-concurrency=1 dist/back/test/*.test.js
+      - run: node dist/back/src/openapi.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: api-contract-node-${{ matrix.node }}
+          path: back/openapi.json
+          if-no-files-found: error
+          retention-days: 7
+  automation:
+    name: Automation
+    needs: owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            backend/package-lock.json
-      - run: npm ci
-      - run: npm ci --prefix backend
-      - run: npm test
-      - run: npx tsc --noEmit
-      - run: npm run lint
-      - run: npm run migrate --prefix backend
-      - run: npm run typecheck --prefix backend
-      - run: npm test --prefix backend
-      - run: npm run openapi --prefix backend
-      - run: npx expo export --platform web --output-dir .validation/web-export --max-workers 2
+      - run: node --test .github/tests/*.test.cjs
+      - name: Validate workflows
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 -color
       - name: Validate deployment configuration
         env:
           IMAGE_PREFIX: ghcr.io/example/fiscaliza-ai
           IMAGE_TAG: ${{ github.sha }}
           RELEASE_DIR: ${{ github.workspace }}
-          PUBLIC_DOMAIN: app.example.com
+          PUBLIC_DOMAIN: fiscalizaai.matheuscastroks.com.br
+          CLOUDFLARE_TUNNEL_TOKEN: validation-only-not-a-real-token
           POSTGRES_PASSWORD: validation-only
         run: |
           bash -n deploy/deploy.sh
           docker compose -f compose.production.yaml config --quiet
-          docker run --rm -e PUBLIC_DOMAIN \
-            -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" \
-            caddy:2-alpine caddy adapt --config /etc/caddy/Caddyfile --adapter caddyfile > /dev/null
-      - uses: actions/upload-artifact@v4
-        with:
-          name: web-and-api-contract
-          path: |
-            .validation/web-export
-            backend/openapi.json
-          include-hidden-files: true
-          retention-days: 7
+  gate:
+    name: CI gate
+    needs: [owner, app, api, automation]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require every job to succeed
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: node -e 'const r=JSON.parse(process.env.RESULTS); if(r.length!==4 || r.some(x=>x!=="success")) process.exit(1);'

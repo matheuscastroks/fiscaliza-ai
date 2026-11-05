@@ -1,0 +1,45 @@
+name: Merge owner branch
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: ID do CI de push autorizado (também permite repetir uma release que falhou)
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: owner-auto-merge-${{ github.event.workflow_run.head_branch || inputs.run_id }}
+  cancel-in-progress: false
+jobs:
+  merge:
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.repository_id == '997154192' &&
+      ((github.event_name == 'workflow_run' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.actor.id == 49662686) ||
+       (github.event_name == 'workflow_dispatch' && github.actor_id == '49662686'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - name: Checkout trusted default-branch controller
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate identity, CI, rules and exact head before merge
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/auto-merge.cjs

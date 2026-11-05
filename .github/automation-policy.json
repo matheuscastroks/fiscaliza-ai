@@ -1,0 +1,11 @@
+{
+  "repositoryId": 997154192,
+  "ownerId": 49662686,
+  "ownerLogin": "matheuscastroks",
+  "baseBranch": "main",
+  "ciWorkflow": "validate.yml",
+  "releaseWorkflow": "release.yml",
+  "checkName": "CI gate",
+  "actionsAppId": 15368,
+  "requiredJobs": ["Owner", "App", "API Node 22", "API Node 24", "Automation", "CI gate"]
+}

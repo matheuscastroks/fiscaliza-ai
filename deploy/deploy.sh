@@ -21,9 +21,8 @@ compose=(docker compose --project-name fiscaliza-ai --project-directory "$root_d
 "${compose[@]}" up -d --wait --wait-timeout 300 --remove-orphans
 
 # Validate the actual public paths, including certificate and API/database health.
-public_domain="$("${compose[@]}" exec -T edge printenv PUBLIC_DOMAIN | tr -d '\r')"
+public_domain="$("${compose[@]}" exec -T api printenv PUBLIC_DOMAIN | tr -d '\r')"
 [[ "$public_domain" =~ ^[a-zA-Z0-9.-]+$ ]] || exit 2
-curl --fail --silent --show-error --retry 12 --retry-all-errors --retry-delay 5 "https://$public_domain/api/health" >/dev/null
-curl --fail --silent --show-error "https://$public_domain/LoginScreen" >/dev/null
+curl --fail --silent --show-error --user-agent 'Fiscaliza-healthcheck/1.0' --retry 12 --retry-all-errors --retry-delay 5 "https://$public_domain/api/health" >/dev/null
 printf '%s\n' "$IMAGE_TAG" > "$root_dir/current-release"
 echo "Deployment healthy: $IMAGE_TAG"
