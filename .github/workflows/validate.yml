@@ -33,18 +33,19 @@ jobs:
           node-version: '24'
           cache: npm
           cache-dependency-path: |
-            package-lock.json
-            backend/package-lock.json
-      - run: npm ci
-      - run: npm ci --prefix backend
+            front/package-lock.json
+            back/package-lock.json
+      - run: npm ci --prefix front
+      - run: npm ci --prefix back
       - run: npm test
-      - run: npx tsc --noEmit
+      - run: npm run typecheck --prefix front
       - run: npm run lint
-      - run: npm run migrate --prefix backend
-      - run: npm run typecheck --prefix backend
-      - run: npm test --prefix backend
-      - run: npm run openapi --prefix backend
-      - run: npx expo export --platform web --output-dir .validation/web-export --max-workers 2
+      - run: npm run migrate --prefix back
+      - run: npm run typecheck --prefix back
+      - run: npm test --prefix back
+      - run: npm run openapi --prefix back
+      - run: npx expo export --platform web --output-dir ../.validation/web-export --max-workers 2
+        working-directory: front
       - name: Validate deployment configuration
         env:
           IMAGE_PREFIX: ghcr.io/example/fiscaliza-ai
@@ -63,6 +64,6 @@ jobs:
           name: web-and-api-contract
           path: |
             .validation/web-export
-            backend/openapi.json
+            back/openapi.json
           include-hidden-files: true
           retention-days: 7

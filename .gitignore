@@ -53,3 +53,13 @@ postman/reports/
 
 # Production runtime credentials
 .env.production
+
+# API relocated; retain legacy exclusions until local artifacts are retired
+back/dist/
+back/uploads/
+back/openapi.json
+
+# Expo app relocated; generated native projects stay local
+/front/android/
+/front/ios/
+/front/web-dist/

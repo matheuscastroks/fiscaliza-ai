@@ -11,3 +11,16 @@ ios
 backend/uploads
 postman/reports
 web-dist
+
+# Nested application artifacts and local credentials
+**/.env
+**/.env.*
+**/.expo
+**/android
+**/ios
+**/uploads
+**/web-dist
+.aws
+.codex
+.superpowers
+.impeccable

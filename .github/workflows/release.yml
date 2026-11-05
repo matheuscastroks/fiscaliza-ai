@@ -23,7 +23,7 @@ jobs:
       matrix:
         include:
           - service: api
-            dockerfile: backend/Dockerfile
+            dockerfile: back/Dockerfile
           - service: citizen
             dockerfile: deploy/citizen.Dockerfile
     steps:
