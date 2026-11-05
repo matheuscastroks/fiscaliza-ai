@@ -1,6 +1,6 @@
 # Publicação em VPS
 
-O CI valida o app, a API com PostgreSQL e o painel. Na `main`, `release.yml` reutiliza essas verificações, publica três imagens no GHCR com o SHA completo do commit e faz deploy por SSH somente quando `VPS_DEPLOY_ENABLED=true`. Sem VPS, imagens são geradas e o job de deploy é pulado. Não há publicação Android/iOS nas lojas.
+A infraestrutura web existente valida o app e a API com PostgreSQL. O projeto Expo fica em `front/`, a API em `back/` e os Dockerfiles mantêm a raiz do repositório como contexto para acessar `shared/`. Na `main`, `release.yml` reutiliza essas verificações, publica duas imagens no GHCR com o SHA completo do commit e faz deploy por SSH somente quando `VPS_DEPLOY_ENABLED=true`. Sem VPS, imagens são geradas e o job de deploy é pulado. Não há publicação Android/iOS nas lojas.
 
 ## Preparar o servidor uma vez
 
@@ -20,7 +20,7 @@ openssl rand -hex 32
 
 Preencha os dois domínios sem `https://` e sem barra e a senha do banco. Use uma senha hexadecimal para PostgreSQL, pois ela entra em uma URL de conexão. Não altere a senha do banco já inicializado apenas editando esse arquivo. A inicialização não cria contas ou dados de exemplo.
 
-4. Autorize o servidor a baixar as imagens. Pacotes GHCR podem ser privados mesmo em repositório público: faça `docker login ghcr.io -u SEU_USUARIO` na VPS usando um token com `read:packages` e acesso aos três pacotes. Alternativamente, torne os pacotes públicos e confira o pull anônimo. O workflow publica com `GITHUB_TOKEN`; ele não instala credenciais de registry na VPS.
+4. Autorize o servidor a baixar as imagens. Pacotes GHCR podem ser privados mesmo em repositório público: faça `docker login ghcr.io -u SEU_USUARIO` na VPS usando um token com `read:packages` e acesso aos dois pacotes. Alternativamente, torne os pacotes públicos e confira o pull anônimo. O workflow publica com `GITHUB_TOKEN`; ele não instala credenciais de registry na VPS.
 
 ## Configurar o GitHub
 

@@ -176,7 +176,7 @@ A paleta neutra das referências dá protagonismo ao conteúdo; cores semântica
 
 ## Typography
 
-Use Instrument Sans em toda nova UI cidadã. A família é carregada localmente por `useFonts` em `app/_layout.tsx`, a partir dos TTF de `@expo-google-fonts/instrument-sans`: Regular (400), Medium (500), SemiBold (600) e Bold (700). A licença SIL Open Font License 1.1 está em `node_modules/@expo-google-fonts/instrument-sans/LICENSE_FONT`; autores: The Instrument Sans Project Authors. Preserve a licença ao redistribuir os arquivos. Não depende de requisição ao Google Fonts em execução.
+Use Instrument Sans em toda nova UI cidadã. A família é carregada localmente por `useFonts` em `front/app/_layout.tsx`, a partir dos TTF de `@expo-google-fonts/instrument-sans`: Regular (400), Medium (500), SemiBold (600) e Bold (700). A licença SIL Open Font License 1.1 está em `front/node_modules/@expo-google-fonts/instrument-sans/LICENSE_FONT`; autores: The Instrument Sans Project Authors. Preserve a licença ao redistribuir os arquivos. Não depende de requisição ao Google Fonts em execução.
 
 `AppText` seleciona o arquivo pela espessura efetiva via `fontForWeight`. Não invente pesos sintéticos nem substitua por fonte nativa. Em previews HTML, use `"Instrument Sans", sans-serif`; o fallback não representa a fonte aprovada. Preserve o escalonamento de texto.
 
@@ -192,7 +192,7 @@ Use Instrument Sans em toda nova UI cidadã. A família é carregada localmente 
 | `protocol`     | Identificador com números tabulares (`tabular-nums`). |
 | `caption`      | Ajuda e informação complementar.                      |
 
-A escala normativa do frontmatter vem de `theme/typography.ts`; não possui razão modular fixa.
+A escala normativa do frontmatter vem de `front/theme/typography.ts`; não possui razão modular fixa.
 
 ## Layout
 
@@ -212,7 +212,7 @@ A expansão do painel leva 220 ms; com movimento reduzido, é imediata. O gesto 
 
 Use cápsulas em ações e campos de uma linha; círculos em voltar, abrir menu e avançar. Cartões fotográficos têm recorte amplo com `overflow: hidden`; o painel arredonda somente cantos superiores. Campos multilinha usam `panel`, sem esticar uma cápsula.
 
-Raios normativos vêm de `theme/layout.ts`. Controles circulares de cabeçalho e cartões medem 48 × 48, raio 24. Bordas usuais têm uma unidade. O tema oferece espessura de foco de duas, mas `AppInput` atualmente muda a cor da borda de uma unidade.
+Raios normativos vêm de `front/theme/layout.ts`. Controles circulares de cabeçalho e cartões medem 48 × 48, raio 24. Bordas usuais têm uma unidade. O tema oferece espessura de foco de duas, mas `AppInput` atualmente muda a cor da borda de uma unidade.
 
 ## Components
 
@@ -234,7 +234,7 @@ Raios normativos vêm de `theme/layout.ts`. Controles circulares de cabeçalho e
 
 Durante seleção e preparação, mostre o indicador no botão Adicionar foto, bloqueie novas seleções e remoções e comunique `preparing` ao formulário. Permissão recusada informa como autorizar ou continuar sem anexos. Erro de preparação ou envio exige mensagem textual e nova tentativa pela ação correspondente, conservando texto e fotos já escolhidos; não confirme publicação antes da resposta do servidor. Uma falha de carregamento da foto no cartão/detalhe usa a alternativa editorial existente.
 
-As imagens de exemplo do cenário acadêmico são ilustrativas: não representam os locais fictícios dos registros nem comprovam serviço municipal. Fontes, autores, CC0 e preparação estão em `backend/data/demo-media/README.md`; a identificação da versão permanece em Sobre. Os arquivos são servidos localmente por `/api/demo-media/`, sem hotlink, e suas referências pertencem aos registros persistidos. A carga de cenário preenche apenas fotos ausentes dos registros controlados e preserva fotos enviadas, situações e interações. Isso não autoriza associar uma fotografia qualquer a um novo registro do cidadão.
+As imagens de exemplo do cenário acadêmico são ilustrativas: não representam os locais fictícios dos registros nem comprovam serviço municipal. Fontes, autores, CC0 e preparação estão em `back/data/demo-media/README.md`; a identificação da versão permanece em Sobre. Os arquivos são servidos localmente por `/api/demo-media/`, sem hotlink, e suas referências pertencem aos registros persistidos. A carga de cenário preenche apenas fotos ausentes dos registros controlados e preserva fotos enviadas, situações e interações. Isso não autoriza associar uma fotografia qualquer a um novo registro do cidadão.
 
 ### Attached detail panel
 
@@ -276,7 +276,7 @@ Indicadores fictícios são permitidos nos cenários de apresentação por solic
 
 ### Do:
 
-- **Do** usar Instrument Sans local, tokens de theme/ e componentes compartilhados antes de criar variações.
+- **Do** usar Instrument Sans local, tokens de front/theme/ e componentes compartilhados antes de criar variações.
 - **Do** mostrar foto enviada da contribuição, exemplo acadêmico explicitamente ilustrativo ou ficha editorial sem imagem, conforme a origem do registro.
 - **Do** manter situação textual, ação concreta e retorno da gestão acima de contagens.
 - **Do** preservar estados remotos, rascunhos, contexto territorial e alvos acessíveis.
@@ -318,7 +318,7 @@ A partir de 1100 px, o aplicativo cidadão usa navegação lateral persistente, 
 
 O onboarding apresenta exploração territorial, acompanhamento de chamados oficiais e acesso aos canais de atendimento. Não oferece envio de ocorrências ou participação dentro do aplicativo.
 
-Usar somente os oito SVGs originais selecionados do pacote Notion Resources Freebie fornecido pelo usuário (procedência em assets/illustrations/README.md). Renderizar com expo-image e tintColor dinâmico de acordo com o tema (colors.ink), sem fundo artificial, adaptando os traços naturalmente entre os modos claro e escuro. Estados vazios ilustrados cobrem exploração e acompanhamento dos dados oficiais; erros de rede continuam com recuperação própria via QueryState.
+Usar somente os oito SVGs originais selecionados do pacote Notion Resources Freebie fornecido pelo usuário (procedência em front/assets/illustrations/README.md). Renderizar com expo-image e tintColor dinâmico de acordo com o tema (colors.ink), sem fundo artificial, adaptando os traços naturalmente entre os modos claro e escuro. Estados vazios ilustrados cobrem exploração e acompanhamento dos dados oficiais; erros de rede continuam com recuperação própria via QueryState.
 
 ## Camadas territoriais e fichas cadastrais
 
