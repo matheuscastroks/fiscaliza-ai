@@ -1,21 +1,20 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
-  FlatList,
-  Modal,
   Pressable,
   StyleSheet,
-  TextInput,
   View,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
 import { fontFamilies } from '@/theme/typography';
 import { AppText } from './AppText';
+import {
+  AppBottomSheetModal,
+  BottomSheetFlatList,
+  BottomSheetTextInput,
+} from './AppBottomSheetModal';
 
 export interface SelectOption {
   value: string;
@@ -56,7 +55,6 @@ export function AppSelect({
 }: AppSelectProps) {
   const { colors, mode } = useTheme();
   const styles = useThemedStyles(createStyles);
-  const insets = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
 
@@ -205,101 +203,59 @@ export function AppSelect({
         </View>
       </Pressable>
 
-      {open && (
-        <Modal
-          visible={open}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setOpen(false)}
-        >
-          <KeyboardAvoidingView
-            style={styles.modalBackdrop}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      <AppBottomSheetModal
+        visible={open}
+        onClose={() => setOpen(false)}
+        title={label}
+        snapPoints={['55%', '85%']}
+      >
+        {options.length > 5 && (
+          <View
+            style={[
+              styles.searchBox,
+              {
+                backgroundColor: colors.surfaceSubdued,
+                borderColor: colors.border,
+              },
+            ]}
           >
-            <Pressable
-              style={StyleSheet.absoluteFill}
-              onPress={() => setOpen(false)}
-              accessibilityLabel="Fechar seleção"
+            <Ionicons name="search-outline" size={18} color={colors.muted} />
+            <BottomSheetTextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder={placeholder}
+              placeholderTextColor={colors.muted}
+              keyboardAppearance={mode}
+              autoCorrect={false}
+              style={[styles.searchInput, { color: colors.ink }]}
             />
+            {search.length > 0 && (
+              <Pressable onPress={() => setSearch('')} hitSlop={8}>
+                <Ionicons name="close-circle" size={18} color={colors.muted} />
+              </Pressable>
+            )}
+          </View>
+        )}
 
-            <View
-              style={[
-                styles.sheet,
-                {
-                  backgroundColor: colors.surface,
-                  paddingBottom: Math.max(insets.bottom, spacing.md),
-                },
-              ]}
-            >
-              <View style={styles.sheetHandleBar}>
-                <View style={[styles.sheetHandle, { backgroundColor: colors.divider }]} />
-              </View>
-
-              <View style={styles.sheetHeader}>
-                <AppText variant="sectionTitle" style={{ fontSize: 17 }}>
-                  {label}
-                </AppText>
-                <Pressable
-                  onPress={() => setOpen(false)}
-                  hitSlop={12}
-                  style={[styles.closeButton, { backgroundColor: colors.surfaceSubdued }]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Fechar"
-                >
-                  <Ionicons name="close" size={18} color={colors.ink} />
-                </Pressable>
-              </View>
-
-              {options.length > 5 && (
-                <View
-                  style={[
-                    styles.searchBox,
-                    {
-                      backgroundColor: colors.surfaceSubdued,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                >
-                  <Ionicons name="search-outline" size={18} color={colors.muted} />
-                  <TextInput
-                    value={search}
-                    onChangeText={setSearch}
-                    placeholder={placeholder}
-                    placeholderTextColor={colors.muted}
-                    keyboardAppearance={mode}
-                    autoCorrect={false}
-                    style={[styles.searchInput, { color: colors.ink }]}
-                  />
-                  {search.length > 0 && (
-                    <Pressable onPress={() => setSearch('')} hitSlop={8}>
-                      <Ionicons name="close-circle" size={18} color={colors.muted} />
-                    </Pressable>
-                  )}
-                </View>
-              )}
-
-              <FlatList
-                data={filteredOptions}
-                keyExtractor={(item) => item.value || '__empty__'}
-                keyboardShouldPersistTaps="handled"
-                style={styles.list}
-                contentContainerStyle={{ paddingBottom: spacing.md }}
-                initialNumToRender={15}
-                maxToRenderPerBatch={15}
-                windowSize={5}
-                ListEmptyComponent={
-                  <View style={styles.emptyBox}>
-                    <AppText variant="body" color="muted">
-                      Nenhuma opção encontrada para &ldquo;{search}&rdquo;.
-                    </AppText>
-                  </View>
-                }
-                renderItem={renderOption}
-              />
+        <BottomSheetFlatList
+          data={filteredOptions}
+          keyExtractor={(item) => item.value || '__empty__'}
+          keyboardShouldPersistTaps="handled"
+          style={styles.list}
+          contentContainerStyle={{ paddingBottom: spacing.md }}
+          initialNumToRender={15}
+          maxToRenderPerBatch={15}
+          windowSize={5}
+          ListEmptyComponent={
+            <View style={styles.emptyBox}>
+              <AppText variant="body" color="muted">
+                Nenhuma opção encontrada para &ldquo;{search}&rdquo;.
+              </AppText>
             </View>
-          </KeyboardAvoidingView>
-        </Modal>
-      )}
+          }
+          renderItem={renderOption}
+        />
+      </AppBottomSheetModal>
     </>
   );
 }
@@ -354,40 +310,6 @@ const createStyles = (colors: ThemeColors) =>
     },
     clearIconBtn: {
       padding: 2,
-    },
-    modalBackdrop: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.45)',
-      justifyContent: 'flex-end',
-    },
-    sheet: {
-      borderTopLeftRadius: layout.radius.sheet,
-      borderTopRightRadius: layout.radius.sheet,
-      maxHeight: '78%',
-      paddingTop: spacing.xs,
-    },
-    sheetHandleBar: {
-      alignItems: 'center',
-      paddingVertical: 6,
-    },
-    sheetHandle: {
-      width: 36,
-      height: 4,
-      borderRadius: 2,
-    },
-    sheetHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: spacing.lg,
-      paddingVertical: spacing.xs,
-    },
-    closeButton: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
     },
     searchBox: {
       flexDirection: 'row',

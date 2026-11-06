@@ -1,20 +1,22 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   View,
   ScrollView,
   StyleSheet,
   Pressable,
-  Modal,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppSelect } from '@/components/ui/AppSelect';
+import {
+  AppBottomSheetModal,
+  BottomSheetScrollView,
+} from '@/components/ui/AppBottomSheetModal';
 import { CitySearch } from '@/components/ui/CitySearch';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
@@ -386,166 +388,131 @@ function TerritoryFilterModalComponent({
   onAreaOnlyChange,
   totalCalls,
 }: TerritoryFilterModalProps) {
-  const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const styles = useThemedStyles(createStyles);
-
-  if (!visible) {
-    return null;
-  }
+  const snapPoints = useMemo(() => ['75%', '92%'], []);
 
   return (
-    <Modal
+    <AppBottomSheetModal
       visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
+      onClose={onClose}
+      title="Filtros do Território"
+      snapPoints={snapPoints}
     >
-      <View style={styles.modalBackdrop}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        <View
-          style={[
-            styles.filterModalSheet,
-            {
-              backgroundColor: colors.surface,
-              paddingBottom: Math.max(insets.bottom, spacing.md),
-            },
-          ]}
-        >
-          <View style={styles.sheetHandleBar}>
-            <View
-              style={[styles.sheetHandle, { backgroundColor: colors.divider }]}
-            />
-          </View>
-
-          <View style={styles.filterModalHeader}>
-            <AppText variant="sectionTitle" style={{ fontSize: 18 }}>
-              Filtros do Território
-            </AppText>
-            <Pressable
-              onPress={onClose}
-              hitSlop={12}
-              style={[
-                styles.closeButton,
-                { backgroundColor: colors.surfaceSubdued },
-              ]}
-            >
-              <Ionicons name="close" size={18} color={colors.ink} />
-            </Pressable>
-          </View>
-
-          <View style={styles.filterModalBody}>
-            <View style={styles.filterField}>
-              <AppText
-                variant="caption"
-                color="muted"
-                style={styles.filterLabel}
-              >
-                BAIRRO
-              </AppText>
-              <NeighborhoodPicker
-                options={bairroOptions}
-                value={neighborhood}
-                onChange={onNeighborhoodChange}
-              />
-            </View>
-
-            <View style={styles.filterField}>
-              <AppText
-                variant="caption"
-                color="muted"
-                style={styles.filterLabel}
-              >
-                TIPO DE SERVIÇO (CENTRAL 1746)
-              </AppText>
-              <AppSelect
-                label="Tipo de serviço 1746"
-                placeholder="Buscar tipo de serviço..."
-                icon="construct-outline"
-                defaultValue="all"
-                options={serviceTypeOptions}
-                value={serviceType}
-                onChange={onServiceTypeChange}
-              />
-            </View>
-
-            <View style={styles.filterField}>
-              <AppText
-                variant="caption"
-                color="muted"
-                style={styles.filterLabel}
-              >
-                SITUAÇÃO DO CHAMADO
-              </AppText>
-              <SlidingTabs
-                label="Situação"
-                scroll={false}
-                edgeToEdge={false}
-                options={[
-                  { value: 'all', label: 'Todas' },
-                  { value: 'Não Encerrado', label: 'Abertos' },
-                  { value: 'Encerrado', label: 'Encerrados' },
-                ]}
-                value={status}
-                onChange={onStatusChange}
-              />
-            </View>
-
-            <View style={styles.filterField}>
-              <AppText
-                variant="caption"
-                color="muted"
-                style={styles.filterLabel}
-              >
-                PERÍODO DISPONÍVEL
-              </AppText>
-              <SlidingTabs
-                label="Período"
-                scroll={false}
-                edgeToEdge={false}
-                options={periodOptions}
-                value={period}
-                onChange={onPeriodChange}
-              />
-            </View>
-
-            <View style={styles.filterField}>
-              <AppText
-                variant="caption"
-                color="muted"
-                style={styles.filterLabel}
-              >
-                RECORTE ESPACIAL
-              </AppText>
-              <SlidingTabs
-                label="Recorte espacial"
-                scroll={false}
-                edgeToEdge={false}
-                options={[
-                  { value: 'all', label: 'Todo o Rio' },
-                  { value: 'area', label: 'Área visível no mapa' },
-                ]}
-                value={areaOnly ? 'area' : 'all'}
-                onChange={(value) => onAreaOnlyChange(value === 'area')}
-              />
-            </View>
-
-            <View style={styles.filterActionsRow}>
-              <AppButton
-                title="Limpar tudo"
-                variant="quiet"
-                onPress={onReset}
-              />
-              <AppButton
-                title={`Ver ${totalCalls.toLocaleString('pt-BR')} chamados`}
-                variant="primary"
-                onPress={onClose}
-              />
-            </View>
-          </View>
+      <BottomSheetScrollView
+        style={styles.filterModalScroll}
+        contentContainerStyle={styles.filterModalBody}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.filterField}>
+          <AppText
+            variant="caption"
+            color="muted"
+            style={styles.filterLabel}
+          >
+            BAIRRO
+          </AppText>
+          <NeighborhoodPicker
+            options={bairroOptions}
+            value={neighborhood}
+            onChange={onNeighborhoodChange}
+          />
         </View>
-      </View>
-    </Modal>
+
+        <View style={styles.filterField}>
+          <AppText
+            variant="caption"
+            color="muted"
+            style={styles.filterLabel}
+          >
+            TIPO DE SERVIÇO (CENTRAL 1746)
+          </AppText>
+          <AppSelect
+            label="Tipo de serviço 1746"
+            placeholder="Buscar tipo de serviço..."
+            icon="construct-outline"
+            defaultValue="all"
+            options={serviceTypeOptions}
+            value={serviceType}
+            onChange={onServiceTypeChange}
+          />
+        </View>
+
+        <View style={styles.filterField}>
+          <AppText
+            variant="caption"
+            color="muted"
+            style={styles.filterLabel}
+          >
+            SITUAÇÃO DO CHAMADO
+          </AppText>
+          <SlidingTabs
+            label="Situação"
+            scroll={false}
+            edgeToEdge={false}
+            options={[
+              { value: 'all', label: 'Todas' },
+              { value: 'Não Encerrado', label: 'Abertos' },
+              { value: 'Encerrado', label: 'Encerrados' },
+            ]}
+            value={status}
+            onChange={onStatusChange}
+          />
+        </View>
+
+        <View style={styles.filterField}>
+          <AppText
+            variant="caption"
+            color="muted"
+            style={styles.filterLabel}
+          >
+            PERÍODO DISPONÍVEL
+          </AppText>
+          <SlidingTabs
+            label="Período"
+            scroll={false}
+            edgeToEdge={false}
+            options={periodOptions}
+            value={period}
+            onChange={onPeriodChange}
+          />
+        </View>
+
+        <View style={styles.filterField}>
+          <AppText
+            variant="caption"
+            color="muted"
+            style={styles.filterLabel}
+          >
+            RECORTE ESPACIAL
+          </AppText>
+          <SlidingTabs
+            label="Recorte espacial"
+            scroll={false}
+            edgeToEdge={false}
+            options={[
+              { value: 'all', label: 'Todo o Rio' },
+              { value: 'area', label: 'Área visível no mapa' },
+            ]}
+            value={areaOnly ? 'area' : 'all'}
+            onChange={(value) => onAreaOnlyChange(value === 'area')}
+          />
+        </View>
+
+        <View style={styles.filterActionsRow}>
+          <AppButton
+            title="Limpar tudo"
+            variant="quiet"
+            onPress={onReset}
+          />
+          <AppButton
+            title={`Ver ${totalCalls.toLocaleString('pt-BR')} chamados`}
+            variant="primary"
+            onPress={onClose}
+          />
+        </View>
+      </BottomSheetScrollView>
+    </AppBottomSheetModal>
   );
 }
 
@@ -642,42 +609,13 @@ const createStyles = (colors: ThemeColors) =>
     chipTextActive: {
       color: colors.surface,
     },
-    modalBackdrop: {
+    filterModalScroll: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.45)',
-      justifyContent: 'flex-end',
-    },
-    filterModalSheet: {
-      borderTopLeftRadius: layout.radius.sheet,
-      borderTopRightRadius: layout.radius.sheet,
-      paddingTop: spacing.xs,
-    },
-    sheetHandleBar: {
-      alignItems: 'center',
-      paddingVertical: 6,
-    },
-    sheetHandle: {
-      width: 36,
-      height: 4,
-      borderRadius: 2,
-    },
-    filterModalHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: spacing.lg,
-      paddingVertical: spacing.xs,
-    },
-    closeButton: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
     },
     filterModalBody: {
       paddingHorizontal: spacing.lg,
       paddingTop: spacing.xs,
+      paddingBottom: spacing.lg,
       gap: spacing.md,
     },
     filterField: {

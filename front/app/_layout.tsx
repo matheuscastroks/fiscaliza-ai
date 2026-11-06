@@ -17,6 +17,7 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
@@ -111,24 +112,26 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <KeyboardProvider>
           <ThemeProvider value={navigationTheme}>
-            <QueryClientProvider client={queryClient}>
-              <StatusBar style={isDark ? 'light' : 'dark'} />
-              <AppDrawer>
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                    contentStyle: { backgroundColor: colors.canvas },
-                  }}
-                >
-                  <Stack.Screen name="(tabs)" />
-                  <Stack.Protected guard={isReady && isAuthenticated}>
-                    <Stack.Screen name="MunicipalityScreen" />
-                  </Stack.Protected>
-                </Stack>
-              </AppDrawer>
-              <SignOutSheet />
-              <OnboardingGate enabled={segments[0] !== 'OnboardingScreen'} />
-            </QueryClientProvider>
+            <BottomSheetModalProvider>
+              <QueryClientProvider client={queryClient}>
+                <StatusBar style={isDark ? 'light' : 'dark'} />
+                <AppDrawer>
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      contentStyle: { backgroundColor: colors.canvas },
+                    }}
+                  >
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Protected guard={isReady && isAuthenticated}>
+                      <Stack.Screen name="MunicipalityScreen" />
+                    </Stack.Protected>
+                  </Stack>
+                </AppDrawer>
+                <SignOutSheet />
+                <OnboardingGate enabled={segments[0] !== 'OnboardingScreen'} />
+              </QueryClientProvider>
+            </BottomSheetModalProvider>
           </ThemeProvider>
         </KeyboardProvider>
       </SafeAreaProvider>

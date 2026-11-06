@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Pressable, StyleSheet } from 'react-native';
+import { View, Pressable, StyleSheet, LayoutAnimation } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
@@ -83,7 +83,10 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
         ]}
       >
         <Pressable
-          onPress={() => setExpanded(!expanded)}
+          onPress={() => {
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            setExpanded(!expanded);
+          }}
           accessibilityRole="button"
           accessibilityLabel={`Local atual: ${title}, ${subtitle}. Toque para alterar.`}
           style={styles.cardHeader}
