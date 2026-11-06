@@ -84,7 +84,7 @@ test('buildMarkersFeatureCollection converts 14,000 markers into a GeoJSON Featu
   assert.equal(collection.features[42].properties.selected, 1);
   assert.equal(collection.features[0].properties.selected, 0);
   assert.equal(mapboxStyleUrl(false), 'mapbox://styles/mapbox/streets-v12');
-  assert.equal(mapboxStyleUrl(true), 'mapbox://styles/mapbox/dark-v11');
+  assert.equal(mapboxStyleUrl(true), 'mapbox://styles/mapbox/streets-v12');
 });
 
 test('normalizeBoundaryFeatureCollection normalizes raw Polygon, Feature and FeatureCollection', () => {

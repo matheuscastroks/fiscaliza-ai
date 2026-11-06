@@ -6,11 +6,11 @@ type Point = ReturnType<typeof pointFeature>;
 // SDK is loaded conditionally by MapboxMapView, including on runtimes without RNMBX.
 type NativeMapbox = Record<string, React.ComponentType<any>>;
 
-export function MapAreaLayers({ Mapbox, searchCircle, accuracyCircle, isDark }: {
-  Mapbox: NativeMapbox; searchCircle: Circle; accuracyCircle: Circle; isDark: boolean;
+export function MapAreaLayers({ Mapbox, searchCircle, accuracyCircle }: {
+  Mapbox: NativeMapbox; searchCircle: Circle; accuracyCircle: Circle; isDark?: boolean;
 }) {
-  const palette = isDark ? darkColors : lightColors;
-  const positionColor = isDark ? '#69ACFF' : '#1677EB';
+  const palette = lightColors;
+  const positionColor = '#1677EB';
   return <>
     {searchCircle && <Mapbox.ShapeSource id="search-area-source" shape={searchCircle}>
       <Mapbox.FillLayer id="search-area-fill" style={{ fillColor: palette.ink, fillOpacity: 0.055 }} />
@@ -23,17 +23,17 @@ export function MapAreaLayers({ Mapbox, searchCircle, accuracyCircle, isDark }: 
   </>;
 }
 
-export function MapPositionLayers({ Mapbox, centerPoint, devicePoint, isDark }: {
-  Mapbox: NativeMapbox; centerPoint: Point; devicePoint: Point; isDark: boolean;
+export function MapPositionLayers({ Mapbox, centerPoint, devicePoint }: {
+  Mapbox: NativeMapbox; centerPoint: Point; devicePoint: Point; isDark?: boolean;
 }) {
-  const palette = isDark ? darkColors : lightColors;
+  const palette = lightColors;
   return <>
     {centerPoint && <Mapbox.ShapeSource id="search-center-source" shape={centerPoint}>
       <Mapbox.CircleLayer id="search-center-point" style={{ circleColor: palette.ink, circleRadius: 5, circleStrokeColor: palette.white, circleStrokeWidth: 2 }} />
       <Mapbox.SymbolLayer id="search-center-label" style={{ textField: 'Centro do entorno', textSize: 12, textOffset: [0, 1.2], textAnchor: 'top', textColor: palette.ink, textHaloColor: palette.surface, textHaloWidth: 1.5 }} />
     </Mapbox.ShapeSource>}
     {devicePoint && <Mapbox.ShapeSource id="device-position-source" shape={devicePoint}>
-      <Mapbox.CircleLayer id="device-position-point" style={{ circleColor: isDark ? '#69ACFF' : '#1677EB', circleRadius: 8, circleStrokeColor: '#FFFFFF', circleStrokeWidth: 3 }} />
+      <Mapbox.CircleLayer id="device-position-point" style={{ circleColor: '#1677EB', circleRadius: 8, circleStrokeColor: '#FFFFFF', circleStrokeWidth: 3 }} />
     </Mapbox.ShapeSource>}
   </>;
 }

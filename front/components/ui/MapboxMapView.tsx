@@ -74,7 +74,7 @@ export interface MapboxMapViewProps {
 
 export const MAPBOX_STYLE_STREETS = 'mapbox://styles/mapbox/streets-v12';
 export const MAPBOX_STYLE_LIGHT = MAPBOX_STYLE_STREETS;
-export const MAPBOX_STYLE_DARK = 'mapbox://styles/mapbox/dark-v11';
+export const MAPBOX_STYLE_DARK = MAPBOX_STYLE_STREETS;
 
 export function resolveMapboxAccessToken(): string {
   const envToken =
@@ -86,8 +86,8 @@ export function resolveMapboxAccessToken(): string {
   return typeof extraToken === 'string' ? extraToken.trim() : '';
 }
 
-export function mapboxStyleUrl(isDark?: boolean): string {
-  return isDark ? MAPBOX_STYLE_DARK : MAPBOX_STYLE_LIGHT;
+export function mapboxStyleUrl(_isDark?: boolean): string {
+  return MAPBOX_STYLE_STREETS;
 }
 
 export function computeMapboxZoom(region: MapboxRegion): number {
