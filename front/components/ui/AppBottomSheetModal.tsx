@@ -1,13 +1,13 @@
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useCallback, useMemo, useRef } from 'react';
 import {
+  Modal,
   StyleProp,
   StyleSheet,
   View,
   ViewStyle,
   Pressable,
 } from 'react-native';
-import {
-  BottomSheetModal,
+import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
   BottomSheetView,
@@ -15,6 +15,7 @@ import {
   BottomSheetScrollView,
   BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/useTheme';
@@ -39,16 +40,16 @@ export {
   BottomSheetScrollView,
   BottomSheetTextInput,
   BottomSheetView,
-  BottomSheetModal,
+  BottomSheet,
 };
 
-export const AppBottomSheetModal = forwardRef<BottomSheetModal, AppBottomSheetModalProps>(
+export const AppBottomSheetModal = forwardRef<BottomSheet, AppBottomSheetModalProps>(
   (
     {
       visible,
       onClose,
       title,
-      snapPoints = ['55%', '85%'],
+      snapPoints: rawSnapPoints = ['55%', '85%'],
       enablePanDownToClose = true,
       enableDynamicSizing = false,
       children,
@@ -60,17 +61,22 @@ export const AppBottomSheetModal = forwardRef<BottomSheetModal, AppBottomSheetMo
   ) => {
     const { colors } = useTheme();
     const insets = useSafeAreaInsets();
-    const sheetRef = useRef<BottomSheetModal>(null);
+    const sheetRef = useRef<BottomSheet>(null);
 
-    useImperativeHandle(ref, () => sheetRef.current as BottomSheetModal, []);
+    const snapPoints = useMemo(
+      () => rawSnapPoints,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [JSON.stringify(rawSnapPoints)],
+    );
 
-    useEffect(() => {
-      if (visible) {
-        sheetRef.current?.present();
-      } else {
-        sheetRef.current?.dismiss();
-      }
-    }, [visible]);
+    const handleSheetChanges = useCallback(
+      (index: number) => {
+        if (index === -1) {
+          onClose();
+        }
+      },
+      [onClose],
+    );
 
     const renderBackdrop = useCallback(
       (props: BottomSheetBackdropProps) => (
@@ -85,57 +91,71 @@ export const AppBottomSheetModal = forwardRef<BottomSheetModal, AppBottomSheetMo
       [],
     );
 
+    if (!visible) return null;
+
     return (
-      <BottomSheetModal
-        ref={sheetRef}
-        snapPoints={enableDynamicSizing ? undefined : snapPoints}
-        enablePanDownToClose={enablePanDownToClose}
-        enableDynamicSizing={enableDynamicSizing}
-        onDismiss={onClose}
-        backdropComponent={renderBackdrop}
-        keyboardBehavior="interactive"
-        android_keyboardInputMode="adjustResize"
-        backgroundStyle={[
-          styles.sheetBackground,
-          { backgroundColor: colors.surface },
-        ]}
-        handleIndicatorStyle={[
-          styles.handleIndicator,
-          { backgroundColor: colors.divider },
-        ]}
+      <Modal
+        visible={visible}
+        transparent
+        animationType="none"
+        onRequestClose={onClose}
+        statusBarTranslucent
       >
-        <View
-          style={[
-            styles.container,
-            { paddingBottom: Math.max(insets.bottom, spacing.md) },
-            contentContainerStyle,
-          ]}
-        >
-          {showHeader && (title || headerRight) ? (
-            <View style={styles.header}>
-              <AppText variant="sectionTitle" style={styles.headerTitle}>
-                {title || ''}
-              </AppText>
-              <View style={styles.headerRightContainer}>
-                {headerRight}
-                <Pressable
-                  onPress={onClose}
-                  hitSlop={12}
-                  style={[
-                    styles.closeButton,
-                    { backgroundColor: colors.surfaceSubdued },
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Fechar painel"
-                >
-                  <Ionicons name="close" size={18} color={colors.ink} />
-                </Pressable>
-              </View>
+        <GestureHandlerRootView style={StyleSheet.absoluteFill}>
+          <BottomSheet
+            ref={ref || sheetRef}
+            index={0}
+            snapPoints={enableDynamicSizing ? undefined : snapPoints}
+            enablePanDownToClose={enablePanDownToClose}
+            enableDynamicSizing={enableDynamicSizing}
+            onChange={handleSheetChanges}
+            onClose={onClose}
+            backdropComponent={renderBackdrop}
+            keyboardBehavior="interactive"
+            android_keyboardInputMode="adjustResize"
+            backgroundStyle={[
+              styles.sheetBackground,
+              { backgroundColor: colors.surface },
+            ]}
+            handleIndicatorStyle={[
+              styles.handleIndicator,
+              { backgroundColor: colors.divider },
+            ]}
+          >
+            <View
+              style={[
+                styles.container,
+                { paddingBottom: Math.max(insets.bottom, spacing.md) },
+                contentContainerStyle,
+              ]}
+            >
+              {showHeader && (title || headerRight) ? (
+                <View style={styles.header}>
+                  <AppText variant="sectionTitle" style={styles.headerTitle}>
+                    {title || ''}
+                  </AppText>
+                  <View style={styles.headerRightContainer}>
+                    {headerRight}
+                    <Pressable
+                      onPress={onClose}
+                      hitSlop={12}
+                      style={[
+                        styles.closeButton,
+                        { backgroundColor: colors.surfaceSubdued },
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityLabel="Fechar painel"
+                    >
+                      <Ionicons name="close" size={18} color={colors.ink} />
+                    </Pressable>
+                  </View>
+                </View>
+              ) : null}
+              {children}
             </View>
-          ) : null}
-          {children}
-        </View>
-      </BottomSheetModal>
+          </BottomSheet>
+        </GestureHandlerRootView>
+      </Modal>
     );
   },
 );
