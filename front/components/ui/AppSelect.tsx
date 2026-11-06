@@ -32,6 +32,7 @@ interface AppSelectProps {
   compact?: boolean;
   defaultValue?: string;
   clearable?: boolean;
+  snapPoints?: (string | number)[];
 }
 
 function normalizeText(text: string): string {
@@ -52,11 +53,19 @@ export function AppSelect({
   compact = false,
   defaultValue = '',
   clearable = true,
+  snapPoints: customSnapPoints,
 }: AppSelectProps) {
   const { colors, mode } = useTheme();
   const styles = useThemedStyles(createStyles);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+
+  const computedSnapPoints = useMemo(() => {
+    if (customSnapPoints) return customSnapPoints;
+    if (options.length <= 3) return ['30%'];
+    if (options.length <= 5) return ['40%'];
+    return ['55%', '85%'];
+  }, [customSnapPoints, options.length]);
 
   const selectedOption = useMemo(
     () => options.find((opt) => opt.value === value) || options[0],
@@ -207,7 +216,7 @@ export function AppSelect({
         visible={open}
         onClose={() => setOpen(false)}
         title={label}
-        snapPoints={['55%', '85%']}
+        snapPoints={computedSnapPoints}
       >
         {options.length > 5 && (
           <View
@@ -243,6 +252,8 @@ export function AppSelect({
           keyboardShouldPersistTaps="handled"
           style={styles.list}
           contentContainerStyle={{ paddingBottom: spacing.md }}
+          scrollEnabled={options.length > 3}
+          showsVerticalScrollIndicator={false}
           initialNumToRender={15}
           maxToRenderPerBatch={15}
           windowSize={5}
