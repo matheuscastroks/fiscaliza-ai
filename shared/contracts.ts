@@ -85,6 +85,9 @@ export interface OfficialCallsFilterOptions {
 }
 
 export interface OfficialCallsQueryParams {
+  centerLatitude?: number;
+  centerLongitude?: number;
+  radiusMeters?: number;
   cursor?: string;
   includeTotal?: boolean;
   neighborhoodId?: string;
