@@ -38,4 +38,8 @@ export const authApi = {
     }),
   getCurrentUser: () =>
     wrap(async () => await request<SessionUser>('/auth/me')),
+  deleteAccount: () =>
+    wrap(async () => {
+      await request('/profile', 'DELETE');
+    }),
 };

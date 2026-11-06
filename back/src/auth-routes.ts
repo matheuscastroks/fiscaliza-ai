@@ -168,6 +168,17 @@ export function registerAuthRoutes(
     },
   );
 
+  app.delete('/api/profile', async (req, reply) => {
+    if (!req.user) throw fail(401, 'Entre para continuar.');
+    await db.delete(users).where(eq(users.id, req.user.id));
+    if (req.sessionToken)
+      await db
+        .delete(sessions)
+        .where(eq(sessions.tokenHash, tokenHash(req.sessionToken)));
+    reply.clearCookie(sessionCookie(req), { path: '/api' });
+    return ok(null);
+  });
+
   app.post('/api/auth/logout', async (req, reply) => {
     if (req.sessionToken)
       await db

@@ -6,7 +6,6 @@ import {
   ScrollView,
   StyleSheet,
   View,
-  Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,6 +18,10 @@ import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useSignOutSheet } from '@/components/ui/SignOutSheet';
+import {
+  AppBottomSheetModal,
+  BottomSheetView,
+} from '@/components/ui/AppBottomSheetModal';
 import { useAuthStore } from '@/stores/authStore';
 import { useAvatarStore } from '@/stores/avatarStore';
 import { useFollowStore } from '@/stores/followStore';
@@ -26,64 +29,72 @@ import { usePlacesStore } from '@/stores/placesStore';
 import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { layout, spacing } from '@/theme';
 
-function ProfileLink({
-  title,
-  subtitle,
-  icon,
-  href,
-  last = false,
-}: {
-  title: string;
-  subtitle?: string;
+type MenuItem = {
+  label: string;
+  path: Href;
   icon: keyof typeof Ionicons.glyphMap;
-  href: Href;
-  last?: boolean;
-}) {
-  const { colors } = useTheme();
-  const styles = useThemedStyles(createStyles);
+};
 
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${title}${subtitle ? `, ${subtitle}` : ''}`}
-      onPress={() => {
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        router.push(href);
-      }}
-      style={({ pressed }) => [
-        styles.linkRow,
-        !last && styles.linkDivider,
-        pressed && styles.linkPressed,
-      ]}
-    >
-      <View style={styles.linkIconBadge}>
-        <Ionicons name={icon} size={20} color={colors.ink} />
-      </View>
-      <View style={styles.linkTextContainer}>
-        <AppText variant="body" style={styles.linkTitle}>
-          {title}
-        </AppText>
-        {subtitle ? (
-          <AppText variant="caption" color="muted" style={styles.linkSubtitle}>
-            {subtitle}
-          </AppText>
-        ) : null}
-      </View>
-      <Ionicons name="chevron-forward" size={18} color={colors.muted} />
-    </Pressable>
-  );
-}
+const navigationSections: {
+  title: string;
+  items: MenuItem[];
+}[] = [
+  {
+    title: 'Configurações',
+    items: [
+      {
+        label: 'Meus lugares',
+        path: '/PlacesScreen',
+        icon: 'navigate-outline',
+      },
+      {
+        label: 'Preferências',
+        path: '/SettingsScreen',
+        icon: 'settings-outline',
+      },
+    ],
+  },
+  {
+    title: 'Informações',
+    items: [
+      {
+        label: 'Como funciona',
+        path: '/OnboardingScreen',
+        icon: 'book-outline',
+      },
+      {
+        label: 'Ajuda',
+        path: '/HelpScreen',
+        icon: 'help-circle-outline',
+      },
+      {
+        label: 'Sobre e fontes',
+        path: '/AboutScreen',
+        icon: 'information-circle-outline',
+      },
+      {
+        label: 'Aprofundar nos dados',
+        path: '/ResultsScreen',
+        icon: 'stats-chart-outline',
+      },
+    ],
+  },
+];
 
 export default function ProfileScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
-  const { user } = useAuthStore();
+  const { user, deleteAccount } = useAuthStore();
   const savedCalls = useFollowStore((s) => s.savedCalls);
   const places = usePlacesStore((s) => s.places);
 
   const [picking, setPicking] = useState(false);
   const [photoError, setPhotoError] = useState('');
+
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const selectPhoto = async () => {
     if (!user || picking) return;
@@ -127,6 +138,24 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      const res = await deleteAccount();
+      if (!res.success) {
+        setDeleteError(res.error || 'Não foi possível apagar a conta. Tente novamente.');
+        setDeleting(false);
+        return;
+      }
+      setConfirmDelete(false);
+      router.replace('/LoginScreen');
+    } catch {
+      setDeleteError('Erro ao apagar conta. Tente novamente.');
+      setDeleting(false);
+    }
+  };
+
   const formattedCep = user?.postalCode
     ? user.postalCode.replace(/^(\d{5})(\d{3})$/, '$1-$2')
     : null;
@@ -143,7 +172,7 @@ export default function ProfileScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Cartão Hero: Identidade Cidadã */}
+        {/* Identidade Cidadã (Flat, suave e sem sombras) */}
         <View style={styles.heroCard}>
           <Pressable
             onPress={() => {
@@ -158,11 +187,11 @@ export default function ProfileScreen() {
               pressed && { opacity: 0.8 },
             ]}
           >
-            <UserAvatar size={84} />
+            <UserAvatar size={76} />
             <View style={styles.cameraBadge}>
               <Ionicons
                 name="camera"
-                size={16}
+                size={14}
                 color={colors.onAccent}
               />
             </View>
@@ -188,13 +217,13 @@ export default function ProfileScreen() {
         {photoError !== '' && (
           <View style={styles.errorAlert} accessibilityRole="alert">
             <Ionicons name="alert-circle" size={18} color={colors.risk} />
-            <AppText variant="caption" color="risk" style={{ flex: 1 }}>
+            <AppText variant="caption" color="risk" style={styles.flex}>
               {photoError}
             </AppText>
           </View>
         )}
 
-        {/* Métricas Cívicas: Chamados Salvos e Lugares de Interesse */}
+        {/* Métricas Cívicas (Cards suaves sem sombras) */}
         <View style={styles.metricsRow}>
           <Pressable
             accessibilityRole="button"
@@ -208,11 +237,9 @@ export default function ProfileScreen() {
               pressed && styles.cardPressed,
             ]}
           >
-            <View style={styles.metricCardHeader}>
-              <View style={[styles.metricIconCircle, { backgroundColor: colors.accent }]}>
-                <Ionicons name="bookmark" size={16} color={colors.onAccent} />
-              </View>
-              <Ionicons name="chevron-forward" size={14} color={colors.muted} />
+            <View style={styles.metricHeader}>
+              <Ionicons name="bookmark-outline" size={20} color={colors.accent} />
+              <Ionicons name="chevron-forward" size={16} color={colors.muted} />
             </View>
             <AppText variant="screenTitle" style={styles.metricValue}>
               {savedCalls.length}
@@ -237,11 +264,9 @@ export default function ProfileScreen() {
               pressed && styles.cardPressed,
             ]}
           >
-            <View style={styles.metricCardHeader}>
-              <View style={[styles.metricIconCircle, { backgroundColor: '#2563EB' }]}>
-                <Ionicons name="navigate" size={16} color="#FFFFFF" />
-              </View>
-              <Ionicons name="chevron-forward" size={14} color={colors.muted} />
+            <View style={styles.metricHeader}>
+              <Ionicons name="navigate-outline" size={20} color={colors.ink} />
+              <Ionicons name="chevron-forward" size={16} color={colors.muted} />
             </View>
             <AppText variant="screenTitle" style={styles.metricValue}>
               {places.length}
@@ -250,96 +275,44 @@ export default function ProfileScreen() {
               Meus lugares
             </AppText>
             <AppText variant="meta" color="muted">
-              Pontos de busca
+              Pontos e raios
             </AppText>
           </Pressable>
         </View>
 
-        {/* Seção: Minha Região de Referência */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="location" size={16} color={colors.accent} />
-            <AppText variant="label" style={styles.sectionHeading}>
-              Minha Região de Referência
-            </AppText>
-          </View>
-
-          <View style={styles.regionCard}>
-            <View style={styles.regionCardTop}>
-              <View style={styles.regionMainInfo}>
-                <AppText variant="body" style={styles.regionCityTitle}>
-                  {user?.municipality
-                    ? `${user.municipality.name} · ${user.municipality.state}`
-                    : 'Rio de Janeiro · RJ'}
+        {/* Seção: Minha Região de Referência (Flat, sem sombras) */}
+        <View style={styles.regionCard}>
+          <View style={styles.regionHeader}>
+            <Ionicons name="location-outline" size={22} color={colors.ink} />
+            <View style={styles.flex}>
+              <AppText variant="label">
+                {user?.municipality
+                  ? `${user.municipality.name} · ${user.municipality.state}`
+                  : 'Rio de Janeiro · RJ'}
+              </AppText>
+              {user?.neighborhood ? (
+                <AppText variant="meta" color="muted">
+                  {user.neighborhood}
                 </AppText>
-                <View style={styles.regionTagsRow}>
-                  {user?.neighborhood ? (
-                    <View style={styles.regionTag}>
-                      <Ionicons name="home-outline" size={12} color={colors.ink} />
-                      <AppText variant="caption" style={styles.regionTagText}>
-                        {user.neighborhood}
-                      </AppText>
-                    </View>
-                  ) : (
-                    <View style={styles.regionTag}>
-                      <Ionicons name="globe-outline" size={12} color={colors.muted} />
-                      <AppText variant="caption" color="muted" style={styles.regionTagText}>
-                        Todo o município
-                      </AppText>
-                    </View>
-                  )}
-
-                  {formattedCep ? (
-                    <View style={styles.regionTag}>
-                      <Ionicons name="mail-outline" size={12} color={colors.muted} />
-                      <AppText variant="caption" color="muted" style={styles.regionTagText}>
-                        CEP {formattedCep}
-                      </AppText>
-                    </View>
-                  ) : null}
-                </View>
-              </View>
-
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Alterar região de referência"
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push('/MunicipalityScreen');
-                }}
-                style={({ pressed }) => [
-                  styles.regionEditButton,
-                  pressed && { opacity: 0.8 },
-                ]}
-              >
-                <Ionicons name="pencil" size={13} color={colors.ink} />
-                <AppText variant="caption" style={styles.regionEditText}>
-                  Alterar
+              ) : null}
+              {formattedCep ? (
+                <AppText variant="meta" color="muted">
+                  CEP {formattedCep}
                 </AppText>
-              </Pressable>
+              ) : null}
             </View>
-
-            <AppText variant="meta" color="muted" style={styles.regionHelperText}>
-              Usamos sua região para priorizar demandas urbanas e equipamentos públicos próximos no mapa e na lista.
-            </AppText>
           </View>
+          <AppButton
+            title="Atualizar CEP e município"
+            variant="secondary"
+            onPress={() => router.push('/MunicipalityScreen')}
+          />
         </View>
 
         {/* Prévia de Chamados Salvos (se houver) */}
         {savedCalls.length > 0 && (
-          <View style={styles.sectionContainer}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="time-outline" size={16} color={colors.accent} />
-              <AppText variant="label" style={styles.sectionHeading}>
-                Acompanhamentos Recentes
-              </AppText>
-              <View style={styles.headerCountBadge}>
-                <AppText variant="meta" style={styles.headerCountText}>
-                  {savedCalls.length}
-                </AppText>
-              </View>
-            </View>
-
+          <View style={styles.savedCallsSection}>
+            <AppText variant="sectionTitle">Chamados salvos neste aparelho</AppText>
             <View style={styles.callsList}>
               {savedCalls.slice(0, 2).map((call) => (
                 <OfficialCallRow
@@ -354,78 +327,119 @@ export default function ProfileScreen() {
                 />
               ))}
             </View>
-
             <AppButton
               title={`Ver todos os ${savedCalls.length} acompanhamentos`}
-              variant="secondary"
               onPress={() => router.push('/(tabs)/FollowScreen')}
             />
           </View>
         )}
 
-        {/* Seção: Configurações e Suporte */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="settings-outline" size={16} color={colors.accent} />
-            <AppText variant="label" style={styles.sectionHeading}>
-              Configurações e Suporte
+        {/* Opções de Configuração e Informações (Idêntico ao layout do SideMenu) */}
+        {navigationSections.map((section) => (
+          <View key={section.title} style={styles.menuSection}>
+            <AppText
+              variant="label"
+              color="muted"
+              accessibilityRole="header"
+              style={styles.menuSectionTitle}
+            >
+              {section.title}
             </AppText>
+            {section.items.map((item) => (
+              <Pressable
+                key={item.label}
+                accessibilityRole="button"
+                accessibilityLabel={item.label}
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push(item.path);
+                }}
+                style={({ pressed }) => [
+                  styles.destination,
+                  pressed && styles.destinationPressed,
+                ]}
+              >
+                <Ionicons name={item.icon} size={21} color={colors.ink} />
+                <AppText style={styles.flex}>{item.label}</AppText>
+                <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+              </Pressable>
+            ))}
           </View>
+        ))}
 
-          <View style={styles.menuGroupCard}>
-            <ProfileLink
-              title="Meus locais de interesse"
-              subtitle="Cadastre casa, trabalho e raios de monitoramento"
-              icon="navigate-outline"
-              href="/PlacesScreen"
-            />
-            <ProfileLink
-              title="Aparência e preferências"
-              subtitle="Tema claro, escuro ou automático do sistema"
-              icon="color-palette-outline"
-              href="/SettingsScreen"
-            />
-            <ProfileLink
-              title="Central de ajuda"
-              subtitle="Dúvidas frequentes e orientações de uso cívico"
-              icon="help-circle-outline"
-              href="/HelpScreen"
-            />
-            <ProfileLink
-              title="Sobre o Fiscaliza.ai"
-              subtitle="Transparência, dados públicos PCRJ e versão"
-              icon="information-circle-outline"
-              href="/AboutScreen"
-              last
-            />
-          </View>
-        </View>
-
-        {/* Botão de Encerrar Sessão */}
-        <View style={styles.signOutContainer}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Encerrar sessão neste aparelho"
+        {/* Ações de Conta: Sair e Apagar Conta */}
+        <View style={styles.accountActionsContainer}>
+          <AppButton
+            title="Sair da conta"
+            variant="quiet"
             onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               useSignOutSheet.getState().setOpen(true);
             }}
-            style={({ pressed }) => [
-              styles.signOutButton,
-              pressed && styles.signOutButtonPressed,
-            ]}
-          >
-            <Ionicons name="log-out-outline" size={18} color={colors.risk} />
-            <AppText variant="caption" style={styles.signOutButtonText}>
-              Encerrar sessão neste aparelho
-            </AppText>
-          </Pressable>
+          />
+
+          <AppButton
+            title="Apagar minha conta"
+            variant="destructive"
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setDeleteError('');
+              setConfirmDelete(true);
+            }}
+          />
 
           <AppText variant="meta" color="muted" style={styles.versionFooter}>
             Fiscaliza.ai · Versão 1.0.0 · Dados Abertos PCRJ
           </AppText>
         </View>
       </ScrollView>
+
+      {/* Modal de Confirmação para Apagar Conta */}
+      <AppBottomSheetModal
+        visible={confirmDelete}
+        onClose={() => {
+          if (!deleting) setConfirmDelete(false);
+        }}
+        enableDynamicSizing
+        enablePanDownToClose={!deleting}
+        showHeader={false}
+        contentContainerStyle={{
+          paddingHorizontal: spacing.contentPadding,
+          paddingTop: spacing.sm,
+          paddingBottom: spacing.xl,
+        }}
+      >
+        <BottomSheetView style={styles.deleteModalContent}>
+          <AppText variant="sectionTitle">Apagar conta permanentemente?</AppText>
+          <AppText color="muted">
+            Esta ação é irreversível. Todos os seus dados de cadastro, preferências e acessos serão removidos dos nossos servidores.
+          </AppText>
+
+          {deleteError !== '' && (
+            <View style={styles.errorAlert} accessibilityRole="alert">
+              <Ionicons name="alert-circle" size={16} color={colors.risk} />
+              <AppText variant="caption" color="risk" style={styles.flex}>
+                {deleteError}
+              </AppText>
+            </View>
+          )}
+
+          <View style={styles.deleteModalActions}>
+            <AppButton
+              title="Sim, apagar minha conta"
+              variant="destructive"
+              loading={deleting}
+              onPress={handleDeleteAccount}
+            />
+            <AppButton
+              title="Cancelar"
+              variant="secondary"
+              disabled={deleting}
+              onPress={() => setConfirmDelete(false)}
+            />
+          </View>
+        </BottomSheetView>
+      </AppBottomSheetModal>
     </AppScreen>
   );
 }
@@ -447,15 +461,6 @@ const createStyles = (colors: ThemeColors) =>
       borderWidth: 1,
       borderColor: colors.border,
       gap: spacing.md,
-      ...Platform.select({
-        ios: {
-          shadowColor: '#000000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.06,
-          shadowRadius: 8,
-        },
-        android: { elevation: 2 },
-      }),
     },
     avatarContainer: {
       position: 'relative',
@@ -464,13 +469,13 @@ const createStyles = (colors: ThemeColors) =>
       position: 'absolute',
       right: -2,
       bottom: -2,
-      width: 28,
-      height: 28,
-      borderRadius: 14,
+      width: 26,
+      height: 26,
+      borderRadius: 13,
       backgroundColor: colors.ink,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 2.5,
+      borderWidth: 2,
       borderColor: colors.surface,
     },
     heroDetails: {
@@ -478,7 +483,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: 3,
     },
     heroName: {
-      fontSize: 20,
+      fontSize: 18,
       fontWeight: '800',
       color: colors.ink,
     },
@@ -487,7 +492,7 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       alignSelf: 'flex-start',
       gap: 4,
-      paddingVertical: 3,
+      paddingVertical: 2,
       paddingHorizontal: 8,
       borderRadius: layout.radius.pill,
       backgroundColor: colors.canvas,
@@ -522,35 +527,18 @@ const createStyles = (colors: ThemeColors) =>
       borderWidth: 1,
       borderColor: colors.border,
       gap: 2,
-      ...Platform.select({
-        ios: {
-          shadowColor: '#000000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 4,
-        },
-        android: { elevation: 2 },
-      }),
     },
     cardPressed: {
-      opacity: 0.85,
-      transform: [{ scale: 0.98 }],
+      opacity: 0.75,
     },
-    metricCardHeader: {
+    metricHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: 6,
     },
-    metricIconCircle: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     metricValue: {
-      fontSize: 26,
+      fontSize: 24,
       fontWeight: '800',
       color: colors.ink,
     },
@@ -560,173 +548,63 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: 13,
       marginTop: 2,
     },
-    sectionContainer: {
-      gap: spacing.xs,
-    },
-    sectionHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingHorizontal: spacing.xxs,
-      marginBottom: 2,
-    },
-    sectionHeading: {
-      fontWeight: '800',
-      fontSize: 13,
-      color: colors.ink,
-      letterSpacing: 0.2,
-    },
-    headerCountBadge: {
-      paddingVertical: 1,
-      paddingHorizontal: 6,
-      borderRadius: layout.radius.pill,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginLeft: 'auto',
-    },
-    headerCountText: {
-      fontWeight: '700',
-      fontSize: 11,
-      color: colors.muted,
-    },
     regionCard: {
+      padding: spacing.lg,
+      gap: spacing.lg,
       backgroundColor: colors.surface,
       borderRadius: layout.radius.card,
-      padding: spacing.md,
       borderWidth: 1,
       borderColor: colors.border,
-      gap: 10,
     },
-    regionCardTop: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      gap: 8,
-    },
-    regionMainInfo: {
-      flex: 1,
-      gap: 6,
-    },
-    regionCityTitle: {
-      fontWeight: '800',
-      fontSize: 16,
-      color: colors.ink,
-    },
-    regionTagsRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 6,
-    },
-    regionTag: {
+    regionHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 4,
-      paddingVertical: 3,
-      paddingHorizontal: 8,
-      borderRadius: layout.radius.pill,
-      backgroundColor: colors.canvas,
-      borderWidth: 1,
-      borderColor: colors.border,
+      gap: spacing.sm,
     },
-    regionTagText: {
-      fontSize: 11,
-      fontWeight: '600',
-    },
-    regionEditButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      paddingVertical: 6,
-      paddingHorizontal: 10,
-      borderRadius: layout.radius.pill,
-      backgroundColor: colors.canvas,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    regionEditText: {
-      fontWeight: '700',
-      fontSize: 12,
-      color: colors.ink,
-    },
-    regionHelperText: {
-      fontSize: 11,
-      lineHeight: 16,
+    savedCallsSection: {
+      gap: spacing.sm,
     },
     callsList: {
       gap: spacing.xs,
     },
-    menuGroupCard: {
-      backgroundColor: colors.surface,
-      borderRadius: layout.radius.card,
-      borderWidth: 1,
-      borderColor: colors.border,
-      overflow: 'hidden',
+    menuSection: {
+      gap: spacing.xxs,
     },
-    linkRow: {
+    menuSectionTitle: {
+      paddingHorizontal: spacing.sm,
+      marginBottom: spacing.xs,
+    },
+    destination: {
+      minHeight: 52,
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 14,
-      paddingHorizontal: spacing.md,
       gap: spacing.sm,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: layout.radius.sm,
     },
-    linkDivider: {
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.divider,
-    },
-    linkPressed: {
+    destinationPressed: {
       backgroundColor: colors.surfaceSubdued,
+      opacity: 0.75,
     },
-    linkIconBadge: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: colors.canvas,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    linkTextContainer: {
+    flex: {
       flex: 1,
-      gap: 2,
+      minWidth: 0,
     },
-    linkTitle: {
-      fontWeight: '700',
-      fontSize: 14,
-      color: colors.ink,
-    },
-    linkSubtitle: {
-      fontSize: 12,
-    },
-    signOutContainer: {
-      alignItems: 'center',
+    accountActionsContainer: {
       gap: spacing.sm,
-      marginTop: spacing.xs,
-    },
-    signOutButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      width: '100%',
-      paddingVertical: 14,
-      borderRadius: layout.radius.pill,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-    },
-    signOutButtonPressed: {
-      backgroundColor: colors.surfaceSubdued,
-      opacity: 0.8,
-    },
-    signOutButtonText: {
-      fontWeight: '700',
-      fontSize: 14,
-      color: colors.risk,
+      paddingTop: spacing.xs,
     },
     versionFooter: {
+      textAlign: 'center',
       fontSize: 11,
-      marginTop: 4,
+      marginTop: spacing.xs,
+    },
+    deleteModalContent: {
+      gap: spacing.md,
+    },
+    deleteModalActions: {
+      gap: spacing.xs,
+      marginTop: spacing.xs,
     },
   });

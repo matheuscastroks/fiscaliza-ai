@@ -32,6 +32,7 @@ interface AuthState {
     user: SessionUser,
     expectedVersion: number,
   ) => Promise<boolean>;
+  deleteAccount: () => Promise<{ success: boolean; error?: string }>;
   setLoading: (loading: boolean) => void;
 }
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -146,6 +147,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
       },
     );
+  },
+  deleteAccount: async () => {
+    set({ isLoading: true });
+    const result = await authApi.deleteAccount();
+    await get().logout();
+    set({ isLoading: false, user: null, isAuthenticated: false });
+    return result;
   },
 }));
 onSessionExpired(() => {
