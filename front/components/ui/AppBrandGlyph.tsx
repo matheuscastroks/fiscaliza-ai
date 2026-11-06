@@ -21,7 +21,7 @@ export function AppBrandGlyph({
   style?: ViewStyle;
 }) {
   const { colors } = useTheme();
-  const glyphColor = color || colors.onAccent;
+  const glyphColor = color || colors.ink;
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {

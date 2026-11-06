@@ -65,7 +65,8 @@ export interface MapboxMapViewProps {
   isDark?: boolean;
 }
 
-export const MAPBOX_STYLE_LIGHT = 'mapbox://styles/mapbox/light-v11';
+export const MAPBOX_STYLE_STREETS = 'mapbox://styles/mapbox/streets-v12';
+export const MAPBOX_STYLE_LIGHT = MAPBOX_STYLE_STREETS;
 export const MAPBOX_STYLE_DARK = 'mapbox://styles/mapbox/dark-v11';
 
 export function resolveMapboxAccessToken(): string {

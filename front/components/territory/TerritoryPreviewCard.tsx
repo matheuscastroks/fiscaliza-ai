@@ -12,6 +12,7 @@ import { layout, spacing } from '@/theme';
 import type { OfficialCall } from '@/shared/contracts';
 import { useFollowStore } from '@/stores/followStore';
 import { officialCallStatus } from '@/features/city/officialCallStatus';
+import { resolveServiceCategoryTheme } from '@/features/city/officialCategoryThemes';
 
 export type Entry =
   | { type: 'facility'; item: PublicFacilitySummary }
@@ -94,6 +95,7 @@ export function TerritoryCardContent({
         onPress={onClose}
         accessibilityRole="button"
         accessibilityLabel="Fechar visualização rápida"
+        hitSlop={8}
         style={styles.close}
       >
         <Ionicons name="close" size={20} color={colors.muted} />
@@ -115,7 +117,10 @@ export function TerritoryCardContent({
 
   const official = entry.item;
   const title = official.serviceSubtype || official.serviceType;
-  const category = 'Central 1746 · ' + official.serviceType;
+  const theme = resolveServiceCategoryTheme(
+    official.serviceType,
+    official.serviceSubtype,
+  );
   const address = official.neighborhoodName || 'Bairro não informado';
   const status = officialCallStatus(official, colors, isDark);
   const date = new Date(official.openedAt);
@@ -137,53 +142,78 @@ export function TerritoryCardContent({
         onPress={() => onOpen(entry)}
         accessibilityRole="button"
         accessibilityLabel={`${title}. ${address}. ${status.label}. ${dateLabel}.${official ? ' Protocolo ' + official.externalId + '.' : ''} Ver detalhes.`}
+        style={({ pressed }) => pressed && { opacity: 0.85 }}
       >
-        <View style={[styles.heading, close && { paddingRight: 40 }]}>
+        {/* Top: Category + Status Badge */}
+        <View style={[styles.headerRow, close && { paddingRight: 36 }]}>
+          <View style={styles.categoryBadge}>
+            <View
+              style={[
+                styles.categoryIconWrap,
+                { backgroundColor: isDark ? colors.surfaceSubdued : colors.canvas },
+              ]}
+            >
+              <Ionicons
+                name={theme.icon as React.ComponentProps<typeof Ionicons>['name']}
+                size={14}
+                color={colors.ink}
+              />
+            </View>
+            <AppText
+              variant="caption"
+              numberOfLines={1}
+              style={styles.categoryLabel}
+            >
+              {theme.label}
+            </AppText>
+          </View>
+
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: isDark ? status.color + '25' : status.color + '18' },
+            ]}
+          >
+            <View style={[styles.dot, { backgroundColor: status.color }]} />
+            <AppText
+              variant="caption"
+              style={[styles.statusText, { color: status.color }]}
+            >
+              {status.label}
+            </AppText>
+          </View>
+        </View>
+
+        {/* Title */}
+        <AppText variant="sectionTitle" numberOfLines={2} style={styles.title}>
+          {title}
+        </AppText>
+
+        {/* Location */}
+        <View style={styles.location}>
+          <Ionicons name="location-outline" size={15} color={colors.muted} />
           <AppText
             variant="caption"
             color="muted"
             numberOfLines={1}
             style={styles.flex}
           >
-            {category}
+            {address}
           </AppText>
         </View>
-        <AppText variant="label" numberOfLines={2} style={styles.title}>
-          {title}
-        </AppText>
-        <View style={styles.meta}>
-          <View style={styles.location}>
-            <Ionicons name="location-outline" size={15} color={colors.muted} />
-            <AppText
-              variant="caption"
-              color="muted"
-              numberOfLines={2}
-              style={styles.flex}
-            >
-              {address}
-            </AppText>
-          </View>
-          <View style={styles.status}>
-            <View style={[styles.dot, { backgroundColor: status.color }]} />
-            <AppText
-              variant="caption"
-              numberOfLines={2}
-              style={{ color: status.color, flexShrink: 1, textAlign: 'right' }}
-            >
-              {status.label}
-            </AppText>
-          </View>
-        </View>
+
+        {/* Date & Protocol */}
         <AppText
-          variant="caption"
+          variant="meta"
           color="muted"
           numberOfLines={1}
           style={styles.date}
         >
-          {dateLabel}
-          {official ? ' · Protocolo ' + official.externalId : ''}
+          {dateLabel} · Central 1746 #{official.externalId}
         </AppText>
       </Pressable>
+
+      {/* Action footer */}
       <View style={styles.actions}>
         <Pressable
           onPress={() => onOpen(entry)}
@@ -191,8 +221,8 @@ export function TerritoryCardContent({
           accessibilityLabel={`Ver detalhes de ${title}`}
           style={styles.details}
         >
-          <AppText variant="label">Ver detalhes</AppText>
-          <Ionicons name="arrow-forward" size={18} color={colors.ink} />
+          <AppText variant="label" style={{ color: colors.ink }}>Ver detalhes</AppText>
+          <Ionicons name="arrow-forward" size={16} color={colors.ink} />
         </Pressable>
         {official && (
           <Pressable
@@ -211,6 +241,7 @@ export function TerritoryCardContent({
                 ? 'Deixar de acompanhar chamado ' + official.externalId
                 : 'Acompanhar chamado ' + official.externalId
             }
+            hitSlop={8}
             style={({ pressed }) => [
               styles.heart,
               { opacity: !hydrated || busy ? 0.5 : pressed ? 0.7 : 1 },
@@ -218,12 +249,13 @@ export function TerritoryCardContent({
           >
             <Ionicons
               name={saved ? 'heart' : 'heart-outline'}
-              size={23}
-              color={saved ? colors.risk : colors.ink}
+              size={22}
+              color={saved ? colors.risk : colors.muted}
             />
           </Pressable>
         )}
       </View>
+
       {failedId === officialId && (
         <AppText
           variant="meta"
@@ -252,6 +284,7 @@ export function TerritoryPreviewCard({
     </View>
   );
 }
+
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     card: {
@@ -260,64 +293,99 @@ const createStyles = (colors: ThemeColors) =>
       right: spacing.md,
       backgroundColor: colors.surface,
       borderRadius: layout.radius.card,
-      borderWidth: StyleSheet.hairlineWidth,
+      borderWidth: 1,
       borderColor: colors.border,
       zIndex: 100,
       overflow: 'hidden',
     },
     content: {
-      paddingHorizontal: spacing.md,
-      paddingTop: spacing.xs,
-      paddingBottom: spacing.xxs,
-      gap: spacing.xxs,
+      padding: spacing.md,
+      gap: spacing.xs,
     },
     flex: { flex: 1, minWidth: 0 },
-    heading: {
-      minHeight: 32,
-      justifyContent: 'center',
+    headerRow: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.xs,
+      marginBottom: 2,
     },
-    title: { fontSize: 17, lineHeight: 23, marginBottom: spacing.xs },
-    meta: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-    location: {
+    categoryBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
       flex: 1,
       minWidth: 0,
+    },
+    categoryIconWrap: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    categoryLabel: {
+      fontWeight: '600',
+      color: colors.ink,
+      flexShrink: 1,
+    },
+    statusBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: layout.radius.pill,
+    },
+    dot: { width: 6, height: 6, borderRadius: 3 },
+    statusText: {
+      fontWeight: '600',
+      fontSize: 11,
+      lineHeight: 15,
+    },
+    title: {
+      fontSize: 16,
+      lineHeight: 22,
+      fontWeight: '700',
+      color: colors.ink,
+    },
+    location: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xxs,
+      marginTop: 2,
     },
-    status: {
-      flexShrink: 1,
-      maxWidth: '55%',
+    date: {
+      marginTop: spacing.xxs,
+    },
+    actions: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'flex-end',
-      gap: spacing.xs,
+      justifyContent: 'space-between',
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+      paddingTop: spacing.xs,
+      marginTop: spacing.xs,
     },
-    dot: { width: 7, height: 7, borderRadius: 4 },
-    date: { marginTop: spacing.xs },
-    actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     details: {
-      flex: 1,
-      minHeight: 48,
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xs,
+      paddingVertical: spacing.xs,
     },
     heart: {
-      minWidth: 48,
-      minHeight: 48,
+      width: 36,
+      height: 36,
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: layout.radius.pill,
     },
     close: {
       position: 'absolute',
-      top: 0,
-      right: 0,
-      minWidth: 48,
-      minHeight: 48,
+      top: spacing.sm,
+      right: spacing.sm,
+      width: 32,
+      height: 32,
       alignItems: 'center',
       justifyContent: 'center',
     },

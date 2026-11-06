@@ -119,7 +119,7 @@ export function SideMenu({
     >
       <View style={styles.header}>
         <View style={styles.brand}>
-          <AppBrandGlyph size={32} active={false} />
+          <AppBrandGlyph size={32} color={colors.ink} active={visible} />
           <AppText variant="sectionTitle" style={styles.brandName}>
             Fiscaliza aí
           </AppText>
