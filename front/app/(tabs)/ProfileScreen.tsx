@@ -158,13 +158,11 @@ export default function ProfileScreen() {
           <AppText variant="sectionTitle">Meu município</AppText>
           <View style={styles.municipality}>
             <View style={styles.municipalityHeading}>
-              <View style={styles.locationIcon}>
-                <Ionicons
-                  name="location-outline"
-                  size={24}
-                  color={colors.ink}
-                />
-              </View>
+              <Ionicons
+                name="location-outline"
+                size={24}
+                color={colors.ink}
+              />
               <View style={styles.flex}>
                 <AppText variant="label">
                   {user?.municipality
@@ -296,14 +294,6 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.sm,
-    },
-    locationIcon: {
-      width: layout.touchTarget.minWidth,
-      height: layout.touchTarget.minHeight,
-      borderRadius: layout.radius.pill,
-      backgroundColor: colors.canvas,
-      alignItems: 'center',
-      justifyContent: 'center',
     },
     flex: { flex: 1, gap: spacing.xxs },
     stats: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },

@@ -147,18 +147,11 @@ export function TerritoryCardContent({
         {/* Top: Category + Status Badge */}
         <View style={[styles.headerRow, close && { paddingRight: 36 }]}>
           <View style={styles.categoryBadge}>
-            <View
-              style={[
-                styles.categoryIconWrap,
-                { backgroundColor: isDark ? colors.surfaceSubdued : colors.canvas },
-              ]}
-            >
-              <Ionicons
-                name={theme.icon as React.ComponentProps<typeof Ionicons>['name']}
-                size={14}
-                color={colors.ink}
-              />
-            </View>
+            <Ionicons
+              name={theme.icon as React.ComponentProps<typeof Ionicons>['name']}
+              size={15}
+              color={colors.ink}
+            />
             <AppText
               variant="caption"
               numberOfLines={1}
@@ -316,13 +309,6 @@ const createStyles = (colors: ThemeColors) =>
       gap: spacing.xs,
       flex: 1,
       minWidth: 0,
-    },
-    categoryIconWrap: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      alignItems: 'center',
-      justifyContent: 'center',
     },
     categoryLabel: {
       fontWeight: '600',

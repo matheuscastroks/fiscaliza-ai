@@ -1,44 +1,25 @@
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { mapPerformanceEnabled, mapPerformanceVariant } from '@/features/territory/mapPerformance';
 import { useMapPerformance } from '@/features/territory/useMapPerformance';
-import {
-  TerritoryFilterBar,
-  TerritoryFilterModal,
-  type TerritoryFilterBarProps,
-} from '@/components/territory/TerritoryFilterBar';
+import { TerritoryFilterBar, TerritoryFilterModal, type TerritoryFilterBarProps } from '@/components/territory/TerritoryFilterBar';
 import { TerritoryListView } from '@/components/territory/TerritoryListView';
-import {
-  usePublicSources,
-  usePublicFacilities,
-  useNeighborhoods,
-  useNeighborhoodBoundary,
-} from '@/features/territory/usePublicData';
-import {
-  chooseTerritorialEntries,
-  computeOverviewRegion,
-  computeRegionBounds,
-  TERRITORY_PERIOD_OPTIONS,
-  TERRITORY_STATUS_OPTIONS,
-} from '@/features/territory/selectors';
+import { usePublicSources, usePublicFacilities, useNeighborhoods, useNeighborhoodBoundary } from '@/features/territory/usePublicData';
+import { chooseTerritorialEntries, computeOverviewRegion, computeRegionBounds, TERRITORY_PERIOD_OPTIONS, TERRITORY_STATUS_OPTIONS } from '@/features/territory/selectors';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { layout } from '@/theme/layout';
-import React, {
-  useMemo,
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-} from 'react';
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { Pressable, FlatList, StyleSheet, View, ActivityIndicator } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams, useIsFocused } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDeviceLocation } from '@/features/places/useDeviceLocation';
 import { useTerritoryFilters } from '@/features/places/useTerritoryFilters';
 import { usePlacesStore } from '@/stores/placesStore';
-import { mapOverlayContext, mapLocationDescription } from '@/features/territory/mapArea';
+import { mapOverlayContext } from '@/features/territory/mapArea';
 import { AppText } from '@/components/ui/AppText';
+import { AppToast } from '@/components/ui/AppToast';
 import {
   useInfiniteOfficialCalls,
   useOfficialFilters,
@@ -237,8 +218,13 @@ function TerritoryContent() {
   const capturedLocation = usePlacesStore((s) => s.deviceLocation);
   const mapOverlay = useMemo(() => mapOverlayContext(selection, capturedLocation, areaOnly || Boolean(routeNeighborhoodId)),
     [selection, capturedLocation, areaOnly, routeNeighborhoodId]);
-  const locationMessage = locationError || '';
-  const locationContext = mapLocationDescription(selection, capturedLocation);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (locationError) {
+      setToastMessage(locationError);
+    }
+  }, [locationError]);
 
   useEffect(() => {
     if (!focusId) return;
@@ -446,11 +432,37 @@ function TerritoryContent() {
   }, [setNeighborhood, setSearch, setServiceType, setPeriod, setStatus]);
 
   const locate = async () => {
+    if (capturedLocation && Number.isFinite(capturedLocation.latitude)) {
+      updateCameraRegion({
+        latitude: capturedLocation.latitude,
+        longitude: capturedLocation.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+        zoom: 15.5,
+      });
+    } else if (selection.kind === 'radius' && Number.isFinite(selection.latitude)) {
+      updateCameraRegion({
+        latitude: selection.latitude,
+        longitude: selection.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+        zoom: 15.5,
+      });
+    }
     const location = await captureLocation();
     if (location) {
       router.setParams({ neighborhoodId: undefined, layer: undefined, lat: undefined, lng: undefined, focusId: undefined });
-      setAreaOnly(false); setAppliedBounds(null);
-
+      setAreaOnly(false);
+      setAppliedBounds(null);
+      setSelectedId(null);
+      setSelectedCluster(null);
+      updateCameraRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+        zoom: 15.5,
+      });
     }
   };
 
@@ -571,22 +583,12 @@ function TerritoryContent() {
 
   return (
     <View style={[styles.container, !isFocused && mapPerformanceVariant !== 'visible-surface' && { display: 'none' }]}>
-      {(locationMessage !== '' || locationContext !== '') && (
-        <View
-          style={[
-            styles.messageBanner,
-            { top: insets.top + 100, right: 76, backgroundColor: colors.surface },
-          ]}
-        >
-          <AppText
-            variant="caption"
-            color="muted"
-            accessibilityLiveRegion="polite"
-          >
-              {locationMessage || locationContext}
-          </AppText>
-        </View>
-      )}
+      <AppToast
+        message={toastMessage}
+        onDismiss={() => setToastMessage(null)}
+        topOffset={insets.top + 104}
+        type={locationError ? 'warning' : 'info'}
+      />
 
       {(!isListView || (mapPerformanceVariant === 'retained-map' && mapVisited)) && (
         <View accessibilityElementsHidden={isListView} importantForAccessibility={isListView ? 'no-hide-descendants' : 'auto'} pointerEvents={isListView ? 'none' : 'auto'} style={[StyleSheet.absoluteFill, isListView && { opacity: 0 }]}>
@@ -653,24 +655,24 @@ function TerritoryContent() {
         </View>
       )}
 
-      {!isListView && (
+      {!isListView && !selectedEntry && selectedClusterEntries.length === 0 && (
         <View
-          style={[
-            styles.mapActionsRight,
-            { top: insets.top + 125 },
-          ]}
+          style={[styles.bottomFloatingDock, { bottom: insets.bottom + 104 }]}
         >
+          {/* Centralizar localização */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Minha posição"
             accessibilityState={{ disabled: locating, busy: locating }}
             disabled={locating}
             onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               void locate();
             }}
-            style={[
-              styles.floatingCircleButton,
+            style={({ pressed }) => [
+              styles.dockCircleButton,
               { backgroundColor: colors.surface },
+              pressed && styles.buttonPressed,
             ]}
           >
             <Ionicons
@@ -679,32 +681,20 @@ function TerritoryContent() {
               color={locating ? colors.accent : colors.ink}
             />
           </Pressable>
+
+          {/* Buscar nesta área */}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Voltar ao município"
-            onPress={() => {
-              updateCameraRegion(municipalOverviewRegion);
-              setAreaOnly(false);
-              setSelectedId(null);
-              setSelectedCluster(null);
-            }}
-            style={[
-              styles.floatingCircleButton,
+            accessibilityLabel={
+              areaOnly ? 'Voltar ao recorte selecionado' : 'Buscar nesta área'
+            }
+            style={({ pressed }) => [
+              styles.areaPillButton,
               { backgroundColor: colors.surface },
+              pressed && styles.buttonPressed,
             ]}
-          >
-            <Ionicons name="expand-outline" size={20} color={colors.ink} />
-          </Pressable>
-        </View>
-      )}
-
-      {!isListView && !selectedEntry && selectedClusterEntries.length === 0 && (
-        <View
-          style={[styles.areaButtonWrapper, { bottom: insets.bottom + 104 }]}
-        >
-          <Pressable
-            style={[styles.areaPillButton, { backgroundColor: colors.surface }]}
             onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               if (areaOnly) {
                 setAreaOnly(false);
                 setAppliedBounds(null);
@@ -716,12 +706,32 @@ function TerritoryContent() {
           >
             <Ionicons
               name={areaOnly ? 'globe-outline' : 'scan-outline'}
-              size={15}
+              size={16}
               color={colors.ink}
             />
             <AppText variant="caption" style={{ fontWeight: '700' }}>
-              {areaOnly ? 'Voltar ao recorte selecionado' : 'Buscar nesta área'}
+              {areaOnly ? 'Voltar ao recorte' : 'Buscar nesta área'}
             </AppText>
+          </Pressable>
+
+          {/* Expandir / Voltar ao município */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Voltar ao município"
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              updateCameraRegion(municipalOverviewRegion);
+              setAreaOnly(false);
+              setSelectedId(null);
+              setSelectedCluster(null);
+            }}
+            style={({ pressed }) => [
+              styles.dockCircleButton,
+              { backgroundColor: colors.surface },
+              pressed && styles.buttonPressed,
+            ]}
+          >
+            <Ionicons name="expand-outline" size={20} color={colors.ink} />
           </Pressable>
         </View>
       )}
@@ -825,19 +835,6 @@ const createStyles = (colors: ThemeColors) =>
       flex: 1,
       backgroundColor: colors.canvas,
     },
-    messageBanner: {
-      position: 'absolute',
-      left: spacing.md,
-      right: spacing.md,
-      zIndex: 55,
-      padding: spacing.xs,
-      borderRadius: layout.radius.button,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 3,
-    },
     topFloatingHeader: {
       position: 'absolute',
       top: 0,
@@ -847,16 +844,18 @@ const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: spacing.md,
       gap: 8,
     },
-    mapActionsRight: {
+    bottomFloatingDock: {
       position: 'absolute',
-      right: spacing.md,
+      alignSelf: 'center',
       zIndex: 40,
-      gap: spacing.xs,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
     },
-    floatingCircleButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+    dockCircleButton: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
       alignItems: 'center',
       justifyContent: 'center',
       shadowColor: '#000000',
@@ -867,17 +866,12 @@ const createStyles = (colors: ThemeColors) =>
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
     },
-    areaButtonWrapper: {
-      position: 'absolute',
-      alignSelf: 'center',
-      zIndex: 40,
-    },
     areaPillButton: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
+      height: 42,
       paddingHorizontal: spacing.md,
-      paddingVertical: 8,
       borderRadius: layout.radius.pill,
       shadowColor: '#000000',
       shadowOffset: { width: 0, height: 4 },
@@ -886,5 +880,9 @@ const createStyles = (colors: ThemeColors) =>
       elevation: 5,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
+    },
+    buttonPressed: {
+      opacity: 0.82,
+      transform: [{ scale: 0.94 }],
     },
   });

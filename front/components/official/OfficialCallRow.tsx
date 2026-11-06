@@ -74,18 +74,11 @@ export const OfficialCallRow = memo(function OfficialCallRow({
         {/* Header: Categoria e Ações */}
         <View style={styles.header}>
           <View style={styles.categoryBadge}>
-            <View
-              style={[
-                styles.categoryIconWrap,
-                { backgroundColor: isDark ? colors.surfaceSubdued : colors.canvas },
-              ]}
-            >
-              <Ionicons
-                name={theme.icon as React.ComponentProps<typeof Ionicons>['name']}
-                size={16}
-                color={colors.ink}
-              />
-            </View>
+            <Ionicons
+              name={theme.icon as React.ComponentProps<typeof Ionicons>['name']}
+              size={17}
+              color={colors.ink}
+            />
             <AppText
               variant="caption"
               numberOfLines={1}
@@ -215,13 +208,6 @@ function createStyles(colors: ThemeColors) {
       flex: 1,
       minWidth: 0,
       marginRight: spacing.xs,
-    },
-    categoryIconWrap: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      alignItems: 'center',
-      justifyContent: 'center',
     },
     categoryLabel: {
       fontWeight: '600',

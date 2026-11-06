@@ -1,6 +1,7 @@
-import { View } from 'react-native';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { View, Pressable, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppSelect } from '@/components/ui/AppSelect';
@@ -9,43 +10,318 @@ import { usePlacesStore } from '@/stores/placesStore';
 import { useDeviceLocation } from './useDeviceLocation';
 import { RadiusControl } from './RadiusControl';
 import { LocationEntryPrompt } from './LocationEntryPrompt';
-import { spacing } from '@/theme';
+import { layout, spacing, useTheme } from '@/theme';
 import type { TerritorySelection } from './types';
+
 export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
+  const { colors, isDark } = useTheme();
   const state = usePlacesStore();
   const { selection, places, setRadius } = state;
   const device = useDeviceLocation();
   const [expandedSelection, setExpandedSelection] = useState<TerritorySelection | null>(null);
+
   const expanded = expandedSelection === selection;
-  const setExpanded = (value: boolean) => setExpandedSelection(value ? selection : null);
-  if (!state.hydrated) return <AppText color="muted">Carregando seus lugares…</AppText>;
-  const activePlace = selection.kind === 'radius' && selection.source === 'place' ? places.find((p) => p.id === selection.placeId) : undefined;
-  const title = selection.kind === 'pending-current' ? 'Localização atual' : selection.kind === 'radius' ? activePlace?.name || 'Localização capturada' : selection.kind === 'neighborhood' ? selection.name : 'Rio de Janeiro';
-  return <View style={{ gap: spacing.sm }}>
-    {prompt && <LocationEntryPrompt busy={device.busy} onChoose={() => setExpanded(true)} onLocate={() => { void device.captureLocation(); }} />}
-    <AppText variant="sectionTitle">{title}</AppText>
-    {selection.kind === 'pending-current' && <>
-      <AppText color="muted">Atualize a localização para retomar a consulta do entorno. Sua posição anterior não foi guardada.</AppText>
-      <AppButton title="Atualizar localização" loading={device.busy} onPress={() => { void device.captureLocation(); }} />
-    </>}
-    <AppButton title={expanded ? 'Fechar escolha de lugar' : 'Trocar lugar ou bairro'} variant="secondary" onPress={() => setExpanded(!expanded)} />
-    {selection.kind === 'radius' && <>
-      <AppText color="muted">{selection.neighborhood?.name || 'Bairro não identificado'} · distância em linha reta</AppText>
-      <RadiusControl value={selection.radiusMeters} onChange={(radius) => { void setRadius(radius); }} />
-      {selection.source === 'current' && <AppText variant="caption" color="muted">
-        Capturada às {new Date(selection.capturedAt || 0).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}.
-        {selection.accuracyMeters != null ? ` Precisão aproximada: ${Math.round(selection.accuracyMeters)} m.` : ' Precisão não informada.'}
-        {selection.accuracyMeters != null && selection.accuracyMeters > selection.radiusMeters ? ' A precisão excede o raio; amplie o entorno ou confirme outro ponto.' : ''}
-      </AppText>}
-      {expanded && selection.neighborhood && <AppButton title="Consultar bairro inteiro" variant="secondary" onPress={() => { if (selection.neighborhood) void state.selectNeighborhood(selection.neighborhood.name, selection.neighborhood.id); }} />}
-    </>}
-    {expanded && places.length > 0 && <AppSelect clearable={false} label="Lugares salvos" value={activePlace?.id || ''} options={[{ value: '', label: 'Escolher lugar salvo' }, ...places.map((p) => ({ value: p.id, label: p.name }))]} onChange={(id) => { if (id) void state.selectPlace(id); }} />}
-    {expanded && <NeighborhoodPicker options={[]} value={selection.kind === 'neighborhood' ? selection.name : ''} onChange={(name) => { void state.dismissPrompt(); void state.selectNeighborhood(name); }} />}
-    {expanded && <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-      <AppButton title={selection.kind === 'radius' && selection.source === 'current' ? 'Atualizar localização' : 'Usar localização'} variant="secondary" loading={device.busy} onPress={() => { void device.captureLocation(); }} />
-      <AppButton title="Meus lugares" variant="secondary" onPress={() => router.push('/PlacesScreen')} />
-    </View>}
-    {(device.error || state.error) && <AppText color="risk" accessibilityRole="alert">{device.error || state.error}</AppText>}
-    {state.notice && <AppText color="muted" accessibilityLiveRegion="polite">{state.notice}</AppText>}
-  </View>;
+  const setExpanded = (value: boolean) =>
+    setExpandedSelection(value ? selection : null);
+
+  if (!state.hydrated) {
+    return <AppText color="muted">Carregando localização…</AppText>;
+  }
+
+  const activePlace =
+    selection.kind === 'radius' && selection.source === 'place'
+      ? places.find((p) => p.id === selection.placeId)
+      : undefined;
+
+  const title =
+    selection.kind === 'pending-current'
+      ? 'Localização atual'
+      : selection.kind === 'radius'
+      ? activePlace?.name || selection.neighborhood?.name || 'Ao seu redor'
+      : selection.kind === 'neighborhood'
+      ? selection.name
+      : 'Rio de Janeiro (Geral)';
+
+  const subtitle =
+    selection.kind === 'radius'
+      ? `${selection.radiusMeters >= 1000 ? `${selection.radiusMeters / 1000} km` : `${selection.radiusMeters} m`} de raio${
+          selection.neighborhood?.name ? ` · ${selection.neighborhood.name}` : ''
+        }`
+      : selection.kind === 'neighborhood'
+      ? 'Bairro completo'
+      : 'Toda a cidade do Rio';
+
+  const iconName: keyof typeof Ionicons.glyphMap =
+    selection.kind === 'radius' && selection.source === 'current'
+      ? 'navigate'
+      : selection.kind === 'radius' && selection.source === 'place'
+      ? 'bookmark'
+      : selection.kind === 'neighborhood'
+      ? 'business'
+      : 'map';
+
+  return (
+    <View style={styles.container}>
+      {prompt && (
+        <LocationEntryPrompt
+          busy={device.busy}
+          onChoose={() => setExpanded(true)}
+          onLocate={() => {
+            void device.captureLocation();
+          }}
+        />
+      )}
+
+      {/* Location Bar Card */}
+      <View
+        style={[
+          styles.locationCard,
+          {
+            backgroundColor: isDark ? colors.surfaceSubdued : colors.surface,
+            borderColor: colors.border,
+          },
+        ]}
+      >
+        <Pressable
+          onPress={() => setExpanded(!expanded)}
+          accessibilityRole="button"
+          accessibilityLabel={`Local atual: ${title}, ${subtitle}. Toque para alterar.`}
+          style={styles.cardHeader}
+        >
+          <Ionicons
+            name={iconName}
+            size={22}
+            color={colors.ink}
+            style={{ marginRight: 2 }}
+          />
+
+          <View style={styles.headerInfo}>
+            <AppText variant="meta" color="muted" style={styles.microLabel}>
+              LOCAL DE FISCALIZAÇÃO
+            </AppText>
+            <AppText variant="sectionTitle" numberOfLines={1} style={styles.locationTitle}>
+              {title}
+            </AppText>
+            <AppText variant="caption" color="muted" numberOfLines={1} style={styles.locationSubtitle}>
+              {subtitle}
+            </AppText>
+          </View>
+
+          <View
+            style={[
+              styles.changeBadge,
+              { backgroundColor: isDark ? colors.surface : '#F1F5F9' },
+            ]}
+          >
+            <AppText variant="caption" style={[styles.changeText, { color: colors.ink }]}>
+              {expanded ? 'Fechar' : 'Alterar'}
+            </AppText>
+            <Ionicons
+              name={expanded ? 'chevron-up' : 'chevron-down'}
+              size={14}
+              color={colors.ink}
+            />
+          </View>
+        </Pressable>
+
+        {/* Inline Radius Control when in radius mode (quick 1-tap change!) */}
+        {selection.kind === 'radius' && !expanded && (
+          <View style={styles.inlineRadius}>
+            <RadiusControl
+              value={selection.radiusMeters}
+              onChange={(radius) => {
+                void setRadius(radius);
+              }}
+            />
+          </View>
+        )}
+
+        {/* State for pending current location */}
+        {selection.kind === 'pending-current' && (
+          <View style={styles.pendingArea}>
+            <AppText variant="caption" color="muted">
+              Sua posição anterior não foi salva. Atualize o GPS para consultar o entorno.
+            </AppText>
+            <AppButton
+              title="Atualizar localização"
+              loading={device.busy}
+              onPress={() => {
+                void device.captureLocation();
+              }}
+            />
+          </View>
+        )}
+
+        {/* Expanded Options Drawer */}
+        {expanded && (
+          <View style={[styles.drawer, { borderTopColor: colors.border }]}>
+            {selection.kind === 'radius' && (
+              <View style={{ gap: spacing.xs }}>
+                <RadiusControl
+                  value={selection.radiusMeters}
+                  onChange={(radius) => {
+                    void setRadius(radius);
+                  }}
+                />
+                {selection.neighborhood && (
+                  <AppButton
+                    title={`Ver todo o bairro ${selection.neighborhood.name}`}
+                    variant="secondary"
+                    onPress={() => {
+                      if (selection.neighborhood) {
+                        void state.selectNeighborhood(
+                          selection.neighborhood.name,
+                          selection.neighborhood.id,
+                        );
+                        setExpanded(false);
+                      }
+                    }}
+                  />
+                )}
+              </View>
+            )}
+
+            {places.length > 0 && (
+              <AppSelect
+                clearable={false}
+                label="Lugares salvos"
+                value={activePlace?.id || ''}
+                options={[
+                  { value: '', label: 'Selecione um lugar salvo...' },
+                  ...places.map((p) => ({ value: p.id, label: p.name })),
+                ]}
+                onChange={(id) => {
+                  if (id) {
+                    void state.selectPlace(id);
+                    setExpanded(false);
+                  }
+                }}
+              />
+            )}
+
+            <View style={{ gap: spacing.xs }}>
+              <AppText variant="caption" color="muted" style={{ fontWeight: '600' }}>
+                Consultar por bairro:
+              </AppText>
+              <NeighborhoodPicker
+                options={[]}
+                value={selection.kind === 'neighborhood' ? selection.name : ''}
+                onChange={(name) => {
+                  void state.dismissPrompt();
+                  void state.selectNeighborhood(name);
+                  setExpanded(false);
+                }}
+              />
+            </View>
+
+            <View style={styles.drawerActions}>
+              <AppButton
+                title={
+                  selection.kind === 'radius' && selection.source === 'current'
+                    ? 'Atualizar GPS'
+                    : 'Usar minha localização'
+                }
+                variant="secondary"
+                loading={device.busy}
+                onPress={() => {
+                  void device.captureLocation();
+                }}
+              />
+              <AppButton
+                title="Meus lugares salvos"
+                variant="secondary"
+                onPress={() => router.push('/PlacesScreen')}
+              />
+            </View>
+          </View>
+        )}
+      </View>
+
+      {(device.error || state.error) && (
+        <AppText color="risk" accessibilityRole="alert" style={styles.errorText}>
+          {device.error || state.error}
+        </AppText>
+      )}
+
+      {state.notice && (
+        <AppText color="muted" accessibilityLiveRegion="polite" style={styles.noticeText}>
+          {state.notice}
+        </AppText>
+      )}
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    gap: spacing.xs,
+  },
+  locationCard: {
+    borderRadius: layout.radius.card,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  headerInfo: {
+    flex: 1,
+    gap: 1,
+  },
+  microLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+  },
+  locationTitle: {
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: '700',
+  },
+  locationSubtitle: {
+    fontSize: 13,
+    lineHeight: 17,
+  },
+  changeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: layout.radius.pill,
+  },
+  changeText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  inlineRadius: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  pendingArea: {
+    padding: spacing.md,
+    paddingTop: 0,
+    gap: spacing.xs,
+  },
+  drawer: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    padding: spacing.md,
+    gap: spacing.md,
+  },
+  drawerActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  errorText: {
+    paddingHorizontal: spacing.xs,
+    fontSize: 13,
+  },
+  noticeText: {
+    paddingHorizontal: spacing.xs,
+    fontSize: 13,
+  },
+});

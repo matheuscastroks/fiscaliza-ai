@@ -140,8 +140,23 @@ function TerritoryFilterBarComponent({
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.quickChipsStrip}
         >
-          {radiusMeters && onRadiusChange ? <RadiusControl value={radiusMeters} onChange={onRadiusChange} /> : null}
-          {radiusLabel ? <AppText variant="caption" color="muted">{radiusLabel}</AppText> : null}
+          {radiusMeters && onRadiusChange ? (
+            <View style={styles.radiusPillContainer}>
+              <RadiusControl
+                value={radiusMeters}
+                onChange={onRadiusChange}
+                compact
+              />
+            </View>
+          ) : null}
+          {radiusLabel ? (
+            <View style={styles.radiusBadge}>
+              <Ionicons name="location-outline" size={13} color={colors.ink} />
+              <AppText variant="caption" style={styles.radiusBadgeText}>
+                {radiusLabel}
+              </AppText>
+            </View>
+          ) : null}
           {/* Chip de Bairro */}
           {!radiusMeters && <NeighborhoodPicker
             compact
@@ -561,6 +576,31 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       gap: 6,
       paddingVertical: 2,
+    },
+    radiusPillContainer: {
+      width: 250,
+      justifyContent: 'center',
+    },
+    radiusBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      height: 38,
+      paddingHorizontal: 12,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    radiusBadgeText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.ink,
     },
     chip: {
       flexDirection: 'row',

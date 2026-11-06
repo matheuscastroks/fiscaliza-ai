@@ -47,11 +47,5 @@ export function mapOverlayContext(selection: TerritorySelection, location: Captu
 }
 
 export function mapLocationDescription(selection: TerritorySelection, location: CapturedDeviceLocation | null) {
-  if (selection.kind === 'pending-current') return 'Atualize a localização pelo botão de posição ou escolha um bairro para consultar.';
-  if (!location) return '';
-  const time = new Date(location.capturedAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-  const precision = location.accuracyMeters == null ? 'Precisão não informada.' : `Precisão aproximada: ${Math.round(location.accuracyMeters)} m.`;
-  const warning = selection.kind === 'radius' && location.accuracyMeters != null && location.accuracyMeters > selection.radiusMeters
-    ? ' A precisão excede o raio; amplie o entorno ou escolha outro ponto.' : '';
-  return `Ponto azul: posição capturada em ${time}. ${precision}${warning}`;
+  return '';
 }

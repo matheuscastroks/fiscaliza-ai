@@ -30,7 +30,7 @@ const MAIN_TABS = new Set([
   'ParticipateScreen',
   'FollowScreen',
 ]);
-const DRAWER_EDGE_WIDTH_RATIO = 0.5;
+const DRAWER_EDGE_WIDTH = 48;
 const DRAWER_MIN_SWIPE_DISTANCE = 8;
 
 /** Edge-only gestures on main tabs leave nested screens' back gestures intact. */
@@ -88,7 +88,7 @@ export function AppDrawer({ children }: { children: ReactNode }) {
         drawerLockMode={
           enabled ? DrawerLockMode.UNLOCKED : DrawerLockMode.LOCKED_CLOSED
         }
-        edgeWidth={Math.round(width * DRAWER_EDGE_WIDTH_RATIO)}
+        edgeWidth={DRAWER_EDGE_WIDTH}
         minSwipeDistance={DRAWER_MIN_SWIPE_DISTANCE}
         keyboardDismissMode={DrawerKeyboardDismissMode.ON_DRAG}
         enableTrackpadTwoFingerGesture
