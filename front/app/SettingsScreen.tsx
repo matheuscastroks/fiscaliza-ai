@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { View, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AppBottomSheetModal,
   BottomSheetView,
@@ -26,6 +27,7 @@ const appearanceOptions = [
   { value: 'dark', label: 'Escuro', icon: 'moon-outline' as const },
 ];
 export default function SettingsScreen() {
+  const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const {
     preference,
@@ -144,24 +146,23 @@ export default function SettingsScreen() {
         enableDynamicSizing
         enablePanDownToClose={!busy}
         showHeader={false}
-        contentContainerStyle={{
-          paddingHorizontal: spacing.contentPadding,
-          paddingTop: spacing.sm,
-          paddingBottom: spacing.xl,
-        }}
       >
         <BottomSheetView
           style={{
+            paddingHorizontal: spacing.contentPadding,
+            paddingTop: spacing.md,
+            paddingBottom: Math.max(insets.bottom + spacing.md, spacing.xxl),
             gap: spacing.md,
-            paddingTop: spacing.xs,
           }}
         >
-          <AppText variant="sectionTitle">
-            Limpar salvos neste aparelho?
-          </AppText>
-          <AppText color="muted">
-            Os chamados serão removidos da lista de acompanhamento desta sessão no aparelho. Sua região e aparência serão mantidas.
-          </AppText>
+          <View style={{ gap: spacing.xs }}>
+            <AppText variant="sectionTitle">
+              Limpar salvos neste aparelho?
+            </AppText>
+            <AppText color="muted">
+              Os chamados serão removidos da lista de acompanhamento desta sessão no aparelho. Sua região e aparência serão mantidas.
+            </AppText>
+          </View>
           {savedError && (
             <AppText color="risk" accessibilityRole="alert">
               {savedError}

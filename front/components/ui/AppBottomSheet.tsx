@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spacing } from '@/theme';
 import {
   AppBottomSheetModal,
@@ -21,6 +22,8 @@ export function AppBottomSheet({
   scroll?: boolean;
   snapPoints?: (string | number)[];
 }) {
+  const insets = useSafeAreaInsets();
+
   return (
     <AppBottomSheetModal
       visible={open}
@@ -31,21 +34,28 @@ export function AppBottomSheet({
       enableDynamicSizing={!scroll && !snapPoints}
       snapPoints={snapPoints || (scroll ? ['65%', '90%'] : undefined)}
       showHeader={false}
-      contentContainerStyle={{
-        paddingHorizontal: spacing.contentPadding,
-        paddingTop: spacing.xs,
-        paddingBottom: spacing.xl,
-      }}
     >
       {scroll ? (
         <BottomSheetScrollView
-          contentContainerStyle={{ gap: spacing.sm, paddingTop: spacing.xs }}
+          contentContainerStyle={{
+            gap: spacing.sm,
+            paddingHorizontal: spacing.contentPadding,
+            paddingTop: spacing.md,
+            paddingBottom: Math.max(insets.bottom + spacing.md, spacing.xxl),
+          }}
           showsVerticalScrollIndicator={false}
         >
           {children}
         </BottomSheetScrollView>
       ) : (
-        <BottomSheetView style={{ gap: spacing.sm, paddingTop: spacing.xs }}>
+        <BottomSheetView
+          style={{
+            gap: spacing.sm,
+            paddingHorizontal: spacing.contentPadding,
+            paddingTop: spacing.md,
+            paddingBottom: Math.max(insets.bottom + spacing.md, spacing.xxl),
+          }}
+        >
           {children}
         </BottomSheetView>
       )}

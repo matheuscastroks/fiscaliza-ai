@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { View } from 'react-native';
 import { create } from 'zustand';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/stores/authStore';
 import { spacing } from '@/theme';
 import { AppText } from './AppText';
@@ -17,6 +19,7 @@ export const useSignOutSheet = create<{
 export function SignOutSheet() {
   const { open, setOpen } = useSignOutSheet();
   const [busy, setBusy] = useState(false);
+  const insets = useSafeAreaInsets();
 
   return (
     <AppBottomSheetModal
@@ -27,43 +30,46 @@ export function SignOutSheet() {
       enableDynamicSizing
       enablePanDownToClose={!busy}
       showHeader={false}
-      contentContainerStyle={{
-        paddingHorizontal: spacing.contentPadding,
-        paddingTop: spacing.sm,
-        paddingBottom: spacing.xl,
-      }}
     >
       <BottomSheetView
         style={{
-          gap: spacing.sm,
+          paddingHorizontal: spacing.contentPadding,
+          paddingTop: spacing.md,
+          paddingBottom: Math.max(insets.bottom + spacing.md, spacing.xxl),
+          gap: spacing.md,
         }}
       >
-        <AppText variant="sectionTitle">Sair da conta?</AppText>
-        <AppText color="muted">
-          Você precisará entrar novamente para participar.
-        </AppText>
-        <AppButton
-          title="Sair da conta"
-          variant="destructive"
-          loading={busy}
-          onPress={() => {
-            setBusy(true);
-            void useAuthStore
-              .getState()
-              .logout()
-              .catch(() => undefined)
-              .finally(() => {
-                setBusy(false);
-                setOpen(false);
-              });
-          }}
-        />
-        <AppButton
-          title="Continuar no app"
-          variant="quiet"
-          disabled={busy}
-          onPress={() => setOpen(false)}
-        />
+        <View style={{ gap: spacing.xs }}>
+          <AppText variant="sectionTitle">Sair da conta?</AppText>
+          <AppText color="muted">
+            Você precisará entrar novamente para participar.
+          </AppText>
+        </View>
+
+        <View style={{ gap: spacing.xs, marginTop: spacing.xs }}>
+          <AppButton
+            title="Sair da conta"
+            variant="destructive"
+            loading={busy}
+            onPress={() => {
+              setBusy(true);
+              void useAuthStore
+                .getState()
+                .logout()
+                .catch(() => undefined)
+                .finally(() => {
+                  setBusy(false);
+                  setOpen(false);
+                });
+            }}
+          />
+          <AppButton
+            title="Continuar no app"
+            variant="quiet"
+            disabled={busy}
+            onPress={() => setOpen(false)}
+          />
+        </View>
       </BottomSheetView>
     </AppBottomSheetModal>
   );

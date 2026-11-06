@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, type Href } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
@@ -84,6 +85,7 @@ const navigationSections: {
 export default function ProfileScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const insets = useSafeAreaInsets();
 
   const { user, deleteAccount } = useAuthStore();
   const savedCalls = useFollowStore((s) => s.savedCalls);
@@ -403,17 +405,19 @@ export default function ProfileScreen() {
         enableDynamicSizing
         enablePanDownToClose={!deleting}
         showHeader={false}
-        contentContainerStyle={{
-          paddingHorizontal: spacing.contentPadding,
-          paddingTop: spacing.sm,
-          paddingBottom: spacing.xl,
-        }}
       >
-        <BottomSheetView style={styles.deleteModalContent}>
-          <AppText variant="sectionTitle">Apagar conta permanentemente?</AppText>
-          <AppText color="muted">
-            Esta ação é irreversível. Todos os seus dados de cadastro, preferências e acessos serão removidos dos nossos servidores.
-          </AppText>
+        <BottomSheetView
+          style={[
+            styles.deleteModalContent,
+            { paddingBottom: Math.max(insets.bottom + spacing.md, spacing.xxl) },
+          ]}
+        >
+          <View style={{ gap: spacing.xs }}>
+            <AppText variant="sectionTitle">Apagar conta permanentemente?</AppText>
+            <AppText color="muted">
+              Esta ação é irreversível. Todos os seus dados de cadastro, preferências e acessos serão removidos dos nossos servidores.
+            </AppText>
+          </View>
 
           {deleteError !== '' && (
             <View style={styles.errorAlert} accessibilityRole="alert">
@@ -601,6 +605,8 @@ const createStyles = (colors: ThemeColors) =>
       marginTop: spacing.xs,
     },
     deleteModalContent: {
+      paddingHorizontal: spacing.contentPadding,
+      paddingTop: spacing.md,
       gap: spacing.md,
     },
     deleteModalActions: {
