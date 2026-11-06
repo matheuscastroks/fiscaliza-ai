@@ -42,6 +42,15 @@ Toda decisão de engenharia em estágio inicial busca equilibrar velocidade de e
 * **Tradeoff**: Economia de bateria no dispositivo móvel e eliminação de conexões persistentes ociosas no servidor, com latência de poucos segundos na visualização de mudanças de status.
 * **Priorização**: Manter polling na maioria das telas e introduzir Server-Sent Events (SSE) exclusivamente na tela de acompanhamento detalhado (`ProblemDetailsScreen`) quando houver intervenção ativa em andamento.
 
+### 2.5. Segmentação Exclusiva dos Domínios Territoriais (Chamados 1746 vs. Serviços Públicos)
+* **O que foi feito**: A visualização no mapa e na lista foi dividida em dois domínios mutuamente exclusivos selecionáveis por abas pill: Chamados 1746 e Serviços Públicos (Educação, Saúde, Praças e Lazer).
+* **Racional Estratégico**: A exibição combinada de milhares de chamados de zeladoria com centenas de equipamentos públicos em uma mesma tela gerava confusão cognitiva para o morador e sobreposição de marcadores no mapa.
+* **Resolução**: Ao selecionar "Chamados 1746", os filtros exibem apenas parâmetros de ocorrências e recorte geográfico. Ao selecionar "Serviços Públicos", os filtros contextualizam exclusivamente as categorias de equipamentos municipais.
+
+### 2.6. Encerramento de Conta e Conformidade com a LGPD (`DELETE /api/profile`)
+* **O que foi feito**: Implementação de endpoint `DELETE /api/profile` com exclusão em cascata das sessões, lugares salvos e remoção segura de avatar do disco.
+* **Racional Estratégico**: Garantia do direito à exclusão e privacidade do cidadão sem intervenção manual de administradores, permitindo revogação total da conta através de fluxo seguro de confirmação em modal.
+
 ---
 
 ## 3. Padrões e Boas Práticas

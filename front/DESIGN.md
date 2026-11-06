@@ -302,11 +302,19 @@ Indicadores fictícios são permitidos nos cenários de apresentação por solic
 
 ### Perfil, menu e espaçamento de listas
 
-O perfil apresenta avatar circular de 104 unidades, nome e e-mail centralizados; município, participação e conta têm seções próprias. O mesmo `UserAvatar` aparece no início (48) e menu (64), com iniciais quando a imagem falta ou falha. A escolha de foto fica persistida por conta no aparelho. O menu usa os mesmos tokens, superfícies planas brancas, títulos sem caixa alta artificial e ícones sem caixas decorativas. Evite repetir “Meu perfil” abaixo do nome. Em Acompanhar, `cityStyles.section` define gap de 16 unidades entre os registros, sem margem própria nos cards.
+O perfil apresenta cabeçalho suave com avatar circular de 76 unidades e badge de câmera, nome, e-mail selecionável e pill de estado "Cidadão Conectado". Os cards de métricas cívicas (Chamados salvos e Lugares salvos) utilizam visual suave e limpo, sem elevações agressivas ou sombras opacas (`shadowOpacity: 0`, `elevation: 0`). As opções de Configurações e Informações seguem rigorosamente a anatomia e estilo do menu lateral (`SideMenu.tsx`): linhas com ícone, título descritivo e chevron à direita com efeito press sutil. Ações de conta no rodapé oferecem Sair da Conta e Apagar Minha Conta (destrutivo com confirmação modal). Em Acompanhar, `cityStyles.section` define gap de 16 unidades entre os registros, sem margem própria nos cards.
+
+### Modais e Bottom Sheets (`AppBottomSheetModal` / `BottomSheetView`)
+
+Ao utilizar componentes baseados em `@gorhom/bottom-sheet` com redimensionamento dinâmico (`enableDynamicSizing`), os estilos de espaçamento **devem** ser declarados diretamente no `BottomSheetView`, pois seu posicionamento interno absoluto sobrepõe paddings de contêineres externos:
+- `paddingHorizontal: spacing.contentPadding` (20px) para alinhamento horizontal com as margens do app.
+- `paddingTop: spacing.md` (16px) com respiro entre o handle indicator e o primeiro elemento textual.
+- `paddingBottom: Math.max(insets.bottom + spacing.md, spacing.xxl)` para respeitar a safe area de navegação por gestos/botões do Android e iOS.
+- Conteúdos textuais de confirmação utilizam contêiner com `gap: spacing.xs` (8px) entre título e descrição explicativa, seguidos pelo bloco de ações verticais com `gap: spacing.xs`.
 
 ### Território e detalhes com foto
 
-Busca e categorias ficam à vista. Bairro e situação aparecem no controle Filtros, com contagem ativa e limpeza completa. No nativo, Mapa e Lista são modos separados; a seleção de um marcador apresenta o registro correspondente. Itens sem ponto permanecem acessíveis, sem inventar coordenadas. O mapa é recortado por um contêiner de raio 28 com `overflow: hidden`. A foto de `DetailSheet` se estende até atrás da status bar; somente os controles e o painel expandido respeitam o inset superior. A barra inferior mede `min(largura - 64, 440)` e mantém o círculo ativo de 52 unidades em uma camada persistente.
+O Território divide-se em dois domínios exclusivos de exploração via abas superiores pill (`layout.radius.pill`): **Chamados 1746** (ocorrências urbanas) e **Serviços Públicos** (escolas, unidades de saúde e praças/lazer). Essa exclusividade impede poluição do mapa e conflito entre marcadores. Na barra de pesquisa, a alternância entre modo Mapa e modo Lista ocorre via botão de ação com ícone (`map-outline` / `list-outline`), enquanto o botão de filtros abre o painel inferior com rolagem interna contínua (`BottomSheetScrollView`), seletores contextuais do domínio ativo e botão de limpeza de filtros. Itens sem ponto permanecem acessíveis na lista, sem inventar coordenadas. O mapa é recortado por um contêiner de raio 28 com `overflow: hidden`. A foto de `DetailSheet` se estende até atrás da status bar; somente os controles e o painel expandido respeitam o inset superior. A barra inferior mede `min(largura - 64, 440)` e mantém o círculo ativo de 52 unidades em uma camada persistente.
 
 ### Menu por gesto
 

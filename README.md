@@ -4,7 +4,7 @@ Aplicativo independente que ajuda moradores do Rio de Janeiro (IBGE 3304557) a d
 
 Aplicativo Expo Android/iOS e API Fastify/PostgreSQL. Consulte [PRODUCT.md](PRODUCT.md) para escopo e limites de interpretação.
 
-Na Home, escolha um bairro ou consulte chamados a 500 m, 1 km, 2 km ou 5 km de um ponto. A localização só é solicitada pelo botão correspondente; Casa, Trabalho e outros lugares ficam no aparelho, com endereço/referência e ponto confirmado no mapa ou por coordenadas. Não há autocomplete de endereços nessa versão. O raio é calculado na API antes da paginação; chamados sem coordenadas continuam acessíveis por bairro. Implementação e validação em [evidências do entorno](plan/evidence/2026-11-06-home-entorno-configuravel.md).
+Na Home, escolha um bairro ou consulte chamados a 500 m, 1 km, 2 km ou 5 km de um ponto. A localização só é solicitada pelo botão correspondente; Casa, Trabalho e outros lugares ficam no aparelho, com endereço/referência e ponto confirmado no mapa ou por coordenadas. Não há autocomplete de endereços nessa versão. O raio é calculado na API antes da paginação; chamados sem coordenadas continuam acessíveis por bairro. No Território, a visualização divide-se entre dois domínios exclusivos: **Chamados 1746** (ocorrências de zeladoria) e **Serviços Públicos** (educação, saúde e praças/lazer), evitando sobreposição e garantindo filtros contextuais com rolagem interna suave. Implementação e validação em [evidências do entorno](plan/evidence/2026-11-06-home-entorno-configuravel.md).
 
 CI, merge automático das suas branches e ativação das proteções: [.github/README.md](.github/README.md). A release publica somente a API; instruções de VPS em [deploy/README.md](deploy/README.md).
 
@@ -56,7 +56,7 @@ docker compose --env-file .env.compose up --build
 
 API: `http://localhost:3001/api`. O container aplica migrações antes de iniciar a API, sem criar contas ou dados de exemplo. Volumes preservam banco e anexos. Não use `docker compose down -v` para atualizar os serviços, pois remove os dados.
 
-### Acesso e criação de conta
+### Acesso, criação e encerramento de conta
 
 O login oferece e-mail/senha e acesso a `Criar conta`. O cadastro usa
 `POST /api/auth/register` com `name`, `email` e `password` (8 a 128 caracteres).
@@ -64,6 +64,11 @@ A API cria exclusivamente uma conta cidadã, inicia a sessão e retorna HTTP 201
 e-mail já cadastrado retorna 409. Nome e e-mail são normalizados no servidor.
 O município é confirmado posteriormente pelo fluxo de CEP, sem aceitar papel
 ou município arbitrários no cadastro. O acesso com gov.br permanece desabilitado.
+
+O encerramento de conta é garantido em conformidade com a LGPD: o morador pode apagar
+sua conta pelo aplicativo em `Meu Perfil` com confirmação em painel seguro, ou via
+`DELETE /api/profile`. A exclusão remove os registros do usuário, revoga sessões em
+cascata e exclui lugares e foto de perfil nos servidores.
 
 Não há conta de teste pré-criada. O cadastro cria exclusivamente contas cidadãs.
 
