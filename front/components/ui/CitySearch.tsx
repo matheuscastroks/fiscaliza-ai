@@ -5,22 +5,42 @@ import { AppText } from './AppText';
 import { spacing } from '@/theme';
 import { fontFamilies } from '@/theme/typography';
 
+export interface CitySearchProps {
+  value?: string;
+  onChangeText?: (text: string) => void;
+  onPress?: () => void;
+  onAction?: () => void;
+  actionIcon?: keyof typeof Ionicons.glyphMap;
+  actionLabel?: string;
+  actionActive?: boolean;
+  /** @deprecated use onAction */
+  onFilters?: () => void;
+  /** @deprecated use actionActive */
+  expanded?: boolean;
+  filterCount?: number;
+}
+
 export function CitySearch({
   value,
   onChangeText,
   onPress,
+  onAction,
+  actionIcon,
+  actionLabel,
+  actionActive,
   onFilters,
   expanded = false,
   filterCount = 0,
-}: {
-  value?: string;
-  onChangeText?: (text: string) => void;
-  onPress?: () => void;
-  onFilters: () => void;
-  expanded?: boolean;
-  filterCount?: number;
-}) {
+}: CitySearchProps) {
   const { colors, mode } = useTheme();
+
+  const handleAction = onAction ?? onFilters;
+  const resolvedIcon =
+    actionIcon ?? (onAction ? 'list-outline' : 'options-outline');
+  const resolvedLabel =
+    actionLabel ??
+    (onAction ? 'Alternar visualização' : 'Filtros do território');
+  const isActionActive = actionActive ?? (filterCount > 0 || expanded);
 
   return (
     <View
@@ -77,44 +97,50 @@ export function CitySearch({
           <Ionicons name="close-circle" size={18} color={colors.muted} />
         </Pressable>
       )}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Filtros do território"
-        accessibilityState={{ expanded }}
-        aria-expanded={expanded}
-        onPress={onFilters}
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: 19,
-          backgroundColor: filterCount > 0 ? colors.accent : colors.ink,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Ionicons name="options-outline" size={18} color={colors.onAccent} />
-        {filterCount > 0 && (
-          <View
-            style={{
-              position: 'absolute',
-              right: -2,
-              top: -2,
-              minWidth: 17,
-              height: 17,
-              borderRadius: 9,
-              backgroundColor: colors.surface,
-              borderWidth: 1,
-              borderColor: colors.border,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <AppText variant="meta" style={{ fontSize: 10, fontWeight: '800' }}>
-              {filterCount}
-            </AppText>
-          </View>
-        )}
-      </Pressable>
+      {handleAction && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={resolvedLabel}
+          accessibilityState={{ expanded: expanded || Boolean(actionActive) }}
+          aria-expanded={expanded || Boolean(actionActive)}
+          onPress={handleAction}
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 19,
+            backgroundColor: isActionActive ? colors.accent : colors.ink,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Ionicons
+            name={resolvedIcon}
+            size={18}
+            color={colors.onAccent}
+          />
+          {filterCount > 0 && (
+            <View
+              style={{
+                position: 'absolute',
+                right: -2,
+                top: -2,
+                minWidth: 17,
+                height: 17,
+                borderRadius: 9,
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: colors.border,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <AppText variant="meta" style={{ fontSize: 10, fontWeight: '800' }}>
+                {filterCount}
+              </AppText>
+            </View>
+          )}
+        </Pressable>
+      )}
     </View>
   );
 }

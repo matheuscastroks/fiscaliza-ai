@@ -16,7 +16,7 @@ import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { type Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTerritoryViewMode } from '@/stores/territoryStore';
+import { useTerritoryStore } from '@/stores/territoryStore';
 import { beginMapTrace } from '@/features/territory/mapPerformance';
 
 const TAB_SIZE = 48;
@@ -138,7 +138,9 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
     };
   }, []);
 
-  const { isListView, toggleViewMode } = useTerritoryViewMode();
+  const isListView = useTerritoryStore((s) => s.isListView);
+  const filtersOpen = useTerritoryStore((s) => s.filtersOpen);
+  const setFiltersOpen = useTerritoryStore((s) => s.setFiltersOpen);
 
   if (keyboardVisible || !VISIBLE.has(state.routes[state.index]?.name)) {
     return null;
@@ -268,25 +270,22 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
         <Pressable
           disabled={!isTerritory}
           accessibilityRole="button"
-          accessibilityLabel={
-            isListView
-              ? 'Alternar para visualização no Mapa'
-              : 'Alternar para visualização em Lista'
-          }
+          accessibilityLabel="Filtros do território"
+          accessibilityState={{ expanded: filtersOpen }}
           onPress={() => {
-            if (isListView) beginMapTrace('list-to-map');
             void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            toggleViewMode();
+            setFiltersOpen(!filtersOpen);
           }}
           style={({ pressed }) => [
             styles.extraButton,
+            filtersOpen && { backgroundColor: colors.accent },
             pressed && { opacity: 0.75, transform: [{ scale: 0.92 }] },
           ]}
         >
           <Ionicons
-            name={isListView ? 'map' : 'list'}
+            name="options-outline"
             size={22}
-            color={colors.navigationIcon}
+            color={filtersOpen ? colors.onAccent : colors.navigationIcon}
           />
         </Pressable>
       </Animated.View>

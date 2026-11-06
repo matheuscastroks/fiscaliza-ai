@@ -39,6 +39,8 @@ export const useTerritoryStore = create<{
   isListView: boolean;
   setIsListView: (value: boolean) => void;
   toggleViewMode: () => void;
+  filtersOpen: boolean;
+  setFiltersOpen: (value: boolean) => void;
 }>((set, get) => ({
   userId: null,
   municipalityId: '3304557',
@@ -48,6 +50,7 @@ export const useTerritoryStore = create<{
   neighborhood: '',
   layers: ['official'],
   isListView: false,
+  filtersOpen: false,
   initialize: () => {
     if (initialization) return initialization;
     const scopeUserId = get().userId;
@@ -143,6 +146,7 @@ export const useTerritoryStore = create<{
   setLayers: (layers) => set({ layers }),
   setIsListView: (isListView) => set({ isListView }),
   toggleViewMode: () => set({ isListView: !get().isListView }),
+  setFiltersOpen: (filtersOpen) => set({ filtersOpen }),
 }));
 export function useTerritorySelection() {
   const selection = usePlacesStore((s) => s.selection);
@@ -160,4 +164,9 @@ export function useTerritoryViewMode() {
   const setIsListView = useTerritoryStore((s) => s.setIsListView);
   const toggleViewMode = useTerritoryStore((s) => s.toggleViewMode);
   return { isListView, setIsListView, toggleViewMode };
+}
+export function useTerritoryFiltersModal() {
+  const filtersOpen = useTerritoryStore((s) => s.filtersOpen);
+  const setFiltersOpen = useTerritoryStore((s) => s.setFiltersOpen);
+  return { filtersOpen, setFiltersOpen };
 }

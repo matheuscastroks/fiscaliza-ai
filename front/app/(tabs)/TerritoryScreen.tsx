@@ -29,6 +29,7 @@ import {
   useTerritoryStore,
   useTerritorySelection,
   useTerritoryViewMode,
+  useTerritoryFiltersModal,
 } from '@/stores/territoryStore';
 import { MapboxMapView, type MapMarker } from '@/components/ui/MapboxMapView';
 import {
@@ -173,18 +174,10 @@ function TerritoryContent() {
     ];
   }, [officialFilters.data?.tipos]);
 
-  const [filterVisibility, setFilterVisibility] = useState<{
-    param?: string;
-    open: boolean;
-  }>({ open: false });
-  const filtersOpen =
-    filterVisibility.param === filters
-      ? filterVisibility.open
-      : Boolean(filters);
-  const setFiltersOpen = useCallback(
-    (open: boolean) => setFilterVisibility({ param: filters, open }),
-    [filters],
-  );
+  const { filtersOpen, setFiltersOpen } = useTerritoryFiltersModal();
+  useEffect(() => {
+    if (filters) setFiltersOpen(true);
+  }, [filters, setFiltersOpen]);
 
   useEffect(() => {
     if (!routeNeighborhoodId && !routeLayer) return;

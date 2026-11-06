@@ -27,6 +27,7 @@ import {
 import { layout, spacing } from '@/theme';
 import { RadiusControl } from '@/features/places/RadiusControl';
 import type { RadiusMeters } from '@/features/places/types';
+import { useTerritoryViewMode } from '@/stores/territoryStore';
 
 export type TerritoryLayer = 'official' | 'school' | 'health' | 'square';
 
@@ -106,6 +107,7 @@ function TerritoryFilterBarComponent({
 }: TerritoryFilterBarProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const { isListView, toggleViewMode } = useTerritoryViewMode();
 
   const toggleLayer = (layer: TerritoryLayer) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -124,14 +126,18 @@ function TerritoryFilterBarComponent({
 
   return (
     <View style={[styles.wrapper, padded && styles.paddedWrapper]}>
-      {/* Barra de busca com botão de filtro integrado */}
+      {/* Barra de busca com botão de alternância lista/mapa integrado */}
       <View style={padded ? styles.paddedSection : styles.searchContainer}>
         <CitySearch
           value={search}
           onChangeText={onSearchChange}
-          onFilters={onOpenFilters}
-          expanded={filtersOpen}
-          filterCount={filterCount}
+          onAction={() => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            toggleViewMode();
+          }}
+          actionIcon={isListView ? 'map-outline' : 'list-outline'}
+          actionLabel={isListView ? 'Ver no mapa' : 'Ver em lista'}
+          actionActive={isListView}
         />
       </View>
 
