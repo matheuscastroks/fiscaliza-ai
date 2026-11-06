@@ -31,6 +31,10 @@ Equipamentos públicos servem à descoberta de serviços: endereço, contato e h
 
 Já existem consulta de chamados, salvamento persistente local, mapa/lista multicamadas, fichas de equipamentos e panorama de bairro. A Home prioriza exploração, salvos e demandas recentes; Agir oferece caminhos oficiais verificados. Preferências permitem escolher bairro, aparência e apagar os salvos com confirmação. A atualização dos salvos consulta somente seus identificadores, preservando o resumo anterior em caso de falha.
 
+A Home permite consultar os chamados a 500 m, 1 km, 2 km ou 5 km de um ponto, com 1 km como padrão. A localização do aparelho só é solicitada por ação explícita; bairro manual continua disponível. Casa, Trabalho e outros lugares são endereços/referências com ponto confirmado no mapa ou por coordenadas, salvos apenas no aparelho e separados por sessão e município. Não há busca automática de endereços nem geocodificação de CEP nessa jornada. Ao reabrir o app, a localização atual aguarda nova captura, sem persistir coordenadas do dispositivo. O raio pode atravessar bairros e inclui somente chamados com ponto publicado; chamados sem ponto permanecem na consulta por bairro.
+
+Home e Território compartilham lugar, abrangência e filtros de chamados. A entrada pela Home ativa a camada 1746 e substitui uma área de mapa anterior. A busca pela área visível é uma escolha explícita, separada do raio do lugar salvo. Equipamentos conservam seus filtros próprios; o raio é identificado como filtro de chamados 1746.
+
 Não existe integração de abertura de solicitações no 1746. O aplicativo não oferece cadastro de ocorrências, propostas, consultas ou ações públicas. Os endpoints legados de participação não são registrados na API. Tabelas e migrações históricas são preservadas para evitar perda de dados.
 
 ## Critérios de aceitação de produto

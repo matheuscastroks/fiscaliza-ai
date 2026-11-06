@@ -140,6 +140,16 @@ Este documento registra tokens e componentes do aplicativo cidadão presentes no
 
 ## Hierarquia orientada à jornada cidadã
 
+### Home e lugares próximos
+
+A Home usa uma lista curta de até cinco chamados do lugar selecionado, com acesso ao mapa e à lista antes dos resultados. Categorias, situação e período ficam em controles explícitos. O seletor de lugar se recolhe após mudar a seleção; o raio permanece visível em 500 m, 1 km, 2 km ou 5 km. Distâncias são aproximadas, em linha reta, e só aparecem quando os pontos existem.
+
+A apresentação de localização antecede a permissão do sistema e oferece escolher bairro ou continuar. Mostrar horário e precisão da captura, inclusive aviso quando a precisão excede o raio. Após reiniciar, pedir nova captura por ação explícita. O editor de lugares tem nome, endereço/referência opcional e ponto confirmado, com alternativa por coordenadas; digitar endereço não move o marcador. Falhas preservam os campos. Salvos e lugares são descritos como dados deste aparelho, sem promessa de sincronização. Controles compactos de seleção têm alvo mínimo de 48, e o raio não oferece uma ação de limpar para valor inválido.
+
+No mapa, o raio ativo aparece em metros com contorno tracejado e preenchimento discreto; bairro e busca por área visível removem esse círculo. O ponto azul com borda branca representa somente a última captura do aparelho, com halo de precisão e horário informado. Lugares salvos têm centro próprio identificado, sem assumir a identidade do GPS. Enquadrar o raio não bloqueia zoom em agrupamentos; uma recaptura recentraliza mesmo sem mudança de coordenadas. Evidência: `../plan/evidence/2026-11-06-mapa-raio-localizacao.md`.
+
+Validação Android desta entrega e limites estão em `../plan/evidence/2026-11-06-home-entorno-configuravel.md`; não equivalem a validação iOS ou web.
+
 Direção aplicada à jornada pública descrita em PRODUCT.md. Validação de código, navegador e aparelho são evidências distintas.
 
 - **Home:** explorar o entorno é a ação principal. Salvos, demandas recentes e acesso ao atendimento dão continuidade. Contagens, rankings territoriais e gráficos não ocupam o protagonismo.
