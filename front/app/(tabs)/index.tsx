@@ -1,329 +1,73 @@
-import React, { useMemo, useState, useCallback } from 'react';
-import { beginMapTrace } from '@/features/territory/mapPerformance';
-import { ScrollView, View, RefreshControl, Pressable, StyleSheet } from 'react-native';
+import { ScrollView, View, RefreshControl } from 'react-native';
 import { router, useIsFocused } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useThemedStyles, useTheme } from '@/theme/useTheme';
-import { spacing, layout } from '@/theme';
-import { CitySearch } from '@/components/ui/CitySearch';
-import { AppButton } from '@/components/ui/AppButton';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppText } from '@/components/ui/AppText';
-import { QueryState, createCityStyles } from '@/features/city/CityUI';
-import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
-import { useOfficialCalls } from '@/features/city/useOfficialCalls';
-import { OfficialCallRow } from '@/components/official/OfficialCallRow';
-import { CityCarousel } from '@/features/city/CityCarousel';
-import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
-import { useTerritorySelection } from '@/stores/territoryStore';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppSelect } from '@/components/ui/AppSelect';
+import { AppInput } from '@/components/ui/AppInput';
+import { QueryState } from '@/features/city/CityUI';
+import { useOfficialCalls, useOfficialFilters, useOfficialOverview, useSyncStatus } from '@/features/city/useOfficialCalls';
 import { useFollowStore } from '@/stores/followStore';
+import { useTerritoryStore } from '@/stores/territoryStore';
+import { useTerritoryFilters } from '@/features/places/useTerritoryFilters';
+import { PlaceSelector } from '@/features/places/PlaceSelector';
+import { NearbyCalls } from '@/features/home/NearbyCalls';
+import { TERRITORY_PERIOD_OPTIONS, TERRITORY_STATUS_OPTIONS } from '@/features/territory/selectors';
 import { CitizenAction } from '@/features/city/CitizenAction';
-import {
-  resolveServiceCategoryTheme,
-  type ServiceCategoryTheme,
-} from '@/features/city/officialCategoryThemes';
-import type { OfficialCall } from '@/shared/contracts';
-
-interface CategoryGroup {
-  theme: ServiceCategoryTheme;
-  calls: OfficialCall[];
-}
-
-const EMPTY_NEIGHBORHOODS: string[] = [];
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { spacing, useTheme } from '@/theme';
 
 export default function HomeScreen() {
   const active = useIsFocused();
   const { colors } = useTheme();
-  const styles = useThemedStyles(createCityStyles);
-  const [refreshing, setRefreshing] = useState(false);
-  const { neighborhood, neighborhoodId, setNeighborhood } =
-    useTerritorySelection();
+  const filters = useTerritoryFilters();
+  const search = useDebouncedValue(filters.search, 300);
+  const calls = useOfficialCalls({ ...filters.params, search: search.trim() || undefined, limit: 5 }, active && filters.hydrated, filters.cacheScope);
+  const options = useOfficialFilters(active);
+  const sync = useSyncStatus(active);
+  const overview = useOfficialOverview(undefined, active && filters.period !== 'all');
   const saved = useFollowStore((s) => s.savedCalls);
-  const hydrated = useFollowStore((s) => s.hydrated);
-
-  const calls = useOfficialCalls(
-    {
-      neighborhoodId,
-      bairro: neighborhoodId ? undefined : neighborhood || undefined,
-      situacao: 'Não Encerrado',
-      limit: 30,
-    },
-    active,
-  );
-
-  const explore = useCallback(() => {
-    beginMapTrace('direct');
-    router.push('/(tabs)/TerritoryScreen');
-  }, []);
-
-  const handleOpenCall = useCallback((id: string) => {
-    router.push({
-      pathname: '/OfficialCallDetailsScreen',
-      params: { id },
-    });
-  }, []);
-
-  const renderCallRow = useCallback(
-    (item: OfficialCall) => (
-      <OfficialCallRow call={item} onPress={() => handleOpenCall(item.id)} />
-    ),
-    [handleOpenCall],
-  );
-
-  // Agrupamento dos chamados por Categoria Temática
-  const groupedCategories = useMemo<CategoryGroup[]>(() => {
-    const list = calls.data?.calls || [];
-    const map = new Map<
-      string,
-      { theme: ServiceCategoryTheme; calls: OfficialCall[] }
-    >();
-
-    for (const call of list) {
-      const theme = resolveServiceCategoryTheme(
-        call.serviceType,
-        call.serviceSubtype,
-      );
-      const existing = map.get(theme.id);
-      if (existing) {
-        existing.calls.push(call);
-      } else {
-        map.set(theme.id, { theme, calls: [call] });
-      }
-    }
-
-    return Array.from(map.values()).sort(
-      (a, b) => b.calls.length - a.calls.length,
-    );
-  }, [calls.data?.calls]);
-
-  return (
-    <AppScreen>
-      <AppHeader title="Sua região" context="Rio de Janeiro · RJ" />
-      <ScrollView
-        contentContainerStyle={styles.content}
-        alwaysBounceVertical
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            tintColor={colors.ink}
-            colors={[colors.ink]}
-            onRefresh={() => {
-              setRefreshing(true);
-              void calls.refetch().finally(() => setRefreshing(false));
-            }}
-          />
-        }
-      >
-        <View style={{ gap: spacing.sm }}>
-          <CitySearch
-            onPress={explore}
-            onFilters={() =>
-              router.push({
-                pathname: '/(tabs)/TerritoryScreen',
-                params: { filters: String(Date.now()) },
-              })
-            }
-            filterCount={neighborhood ? 1 : 0}
-          />
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: spacing.xs, alignItems: 'center' }}
-          >
-            <NeighborhoodPicker
-              compact
-              options={EMPTY_NEIGHBORHOODS}
-              value={neighborhood}
-              onChange={setNeighborhood}
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Abrir filtros avançados no mapa"
-              onPress={() =>
-                router.push({
-                  pathname: '/(tabs)/TerritoryScreen',
-                  params: { filters: String(Date.now()) },
-                })
-              }
-              style={({ pressed }) => ({
-                minHeight: 48,
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: spacing.xs,
-                paddingHorizontal: spacing.md,
-                borderRadius: layout.radius.pill,
-                backgroundColor: colors.surface,
-                borderWidth: 1,
-                borderColor: colors.border,
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <Ionicons name="options-outline" size={17} color={colors.ink} />
-              <AppText variant="meta">Filtros no mapa</AppText>
-            </Pressable>
-            {neighborhood !== '' && (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Limpar filtro de bairro"
-                onPress={() => setNeighborhood('')}
-                style={({ pressed }) => ({
-                  minHeight: 48,
-                  paddingHorizontal: spacing.sm,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: spacing.xxs,
-                  opacity: pressed ? 0.7 : 1,
-                })}
-              >
-                <Ionicons
-                  name="close-circle-outline"
-                  size={18}
-                  color={colors.muted}
-                />
-                <AppText variant="meta" color="muted">
-                  Limpar
-                </AppText>
-              </Pressable>
-            )}
-          </ScrollView>
+  const savedReady = useFollowStore((s) => s.hydrated);
+  const explore = (list = false) => {
+    useTerritoryStore.getState().setIsListView(list);
+    useTerritoryStore.getState().setLayers(['official']);
+    router.push({ pathname: '/(tabs)/TerritoryScreen', params: { fromHome: String(Date.now()) } });
+  };
+  return <AppScreen>
+    <AppHeader title="Sua região" context="Rio de Janeiro · RJ" />
+    <ScrollView contentContainerStyle={{ padding: spacing.contentPadding, paddingBottom: 120, gap: spacing.xl }} refreshControl={<RefreshControl refreshing={calls.isRefetching} tintColor={colors.ink} onRefresh={() => { if (filters.hydrated) { void calls.refetch(); void sync.refetch(); } }} />}>
+      <PlaceSelector prompt />
+      <View style={{ gap: spacing.sm }}>
+        <AppText variant="sectionTitle">{filters.selection.kind === 'radius' || filters.selection.kind === 'pending-current' ? 'Chamados no entorno' : filters.selection.kind === 'neighborhood' ? `Chamados em ${filters.selection.name}` : 'Chamados no Rio'}</AppText>
+        <AppInput label="Buscar chamados" placeholder="Buscar serviço ou protocolo" value={filters.search} onChangeText={(value) => filters.setFilter('search', value)} />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.xs }}>
+          <AppSelect compact defaultValue="all" label="Categoria do serviço" value={filters.serviceType} options={[{ value: 'all', label: 'Todos os serviços' }, ...(options.data?.tipos || []).map((t) => ({ value: t, label: t }))]} onChange={(v) => filters.setFilter('serviceType', v)} />
+          <AppSelect compact defaultValue="all" label="Situação publicada" value={filters.status} options={TERRITORY_STATUS_OPTIONS} onChange={(v) => filters.setFilter('status', v)} />
+          <AppSelect compact defaultValue="all" label="Período dos chamados" value={filters.period} options={TERRITORY_PERIOD_OPTIONS} onChange={(v) => filters.setFilter('period', v)} />
+        </ScrollView>
+        {filters.period !== 'all' && <AppText variant="caption" color="muted">Período relativo à maior data de abertura da base: {overview.data?.maxOpenedAt ? new Date(overview.data.maxOpenedAt).toLocaleDateString('pt-BR') : 'referência indisponível'}.</AppText>}
+        <AppText variant="caption" color="muted">{sync.data?.lastSyncAt ? `Base importada em ${new Date(sync.data.lastSyncAt).toLocaleString('pt-BR')}` : 'Data de atualização da base indisponível'}. Exibindo até cinco chamados, dos mais recentes aos mais antigos.</AppText>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+          <AppButton title="Explorar no mapa" onPress={() => explore()} />
+          <AppButton title="Ver lista" variant="secondary" onPress={() => explore(true)} />
         </View>
-
-        <CitizenAction
-          title="Explorar minha região"
-          description="Demandas e serviços públicos no mapa"
-          icon="map-outline"
-          primary
-          onPress={explore}
-        />
-
-        {/* Seção: Acompanhados pelo Usuário */}
-        {hydrated && saved.length > 0 && (
-          <View style={styles.section}>
-            <View style={{ gap: 2 }}>
-              <AppText variant="sectionTitle">Estou acompanhando</AppText>
-              <AppText variant="caption" color="muted">
-                Salvos na sua conta · deslize para ver
-              </AppText>
-            </View>
-
-            <CityCarousel
-              items={saved}
-              label="Chamados que você está acompanhando"
-              renderItem={renderCallRow}
-            />
-
-            <AppButton
-              title="Ver meus salvos"
-              variant="secondary"
-              onPress={() => router.push('/(tabs)/FollowScreen')}
-            />
-          </View>
-        )}
-
-        {/* Seção Principal: O que acontece na cidade organizado por Categoria em Slides */}
-        <View style={styles.section}>
-          <View style={{ gap: 2 }}>
-            <AppText variant="sectionTitle">
-              O que acontece {neighborhood ? `em ${neighborhood}` : 'na cidade'}
-              ?
-            </AppText>
-            <AppText variant="caption" color="muted">
-              Demandas da Central 1746 organizadas por categoria temática.
-            </AppText>
-          </View>
-
-          <QueryState
-            loading={calls.isLoading}
-            error={calls.error}
-            retry={calls.refetch}
-          />
-
-          {calls.fetchStatus === 'paused' && (
-            <AppText color="muted">
-              Sem conexão. Os registros disponíveis voltam a ser atualizados
-              quando a rede retornar.
-            </AppText>
-          )}
-
-          {!calls.isPending && !calls.error && !calls.data?.calls.length && (
-            <IllustratedEmptyState
-              kind="territory"
-              title="Nenhum registro neste recorte"
-              description="A base sincronizada não contém registros para este filtro. Isso não significa ausência de chamados no 1746."
-              action={{ title: 'Explorar outro recorte', onPress: explore }}
-            />
-          )}
-
-          {/* Carrosséis Horizontais por Categoria */}
-          {groupedCategories.map((group, index) => (
-            <View
-              key={group.theme.id}
-              style={{
-                gap: spacing.sm,
-                marginTop: index > 0 ? spacing.lg : spacing.xs,
-                paddingTop: index > 0 ? spacing.xl : 0,
-                borderTopWidth: index > 0 ? StyleSheet.hairlineWidth : 0,
-                borderTopColor: colors.divider,
-              }}
-            >
-              {/* Cabeçalho da Categoria com Ícone e Contagem */}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  paddingHorizontal: 2,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 8,
-                  }}
-                >
-                  <Ionicons
-                    name={group.theme.icon as React.ComponentProps<typeof Ionicons>['name']}
-                    size={18}
-                    color={colors.ink}
-                  />
-                  <AppText variant="label" style={{ fontWeight: '700' }}>
-                    {group.theme.label}
-                  </AppText>
-                </View>
-
-                <AppText variant="caption" color="muted">
-                  {group.calls.length}{' '}
-                  {group.calls.length === 1 ? 'chamado' : 'chamados'}
-                </AppText>
-              </View>
-
-              {/* Carrossel Tridimensional de Chamados dessa Categoria */}
-              <CityCarousel
-                items={group.calls}
-                label={`Chamados de ${group.theme.label}`}
-                renderItem={renderCallRow}
-              />
-            </View>
-          ))}
-
-          <AppButton
-            title="Explorar todas as demandas no mapa"
-            variant="secondary"
-            onPress={explore}
-            style={{ marginTop: spacing.sm }}
-          />
-        </View>
-
-        <CitizenAction
-          title="Precisa solicitar um serviço?"
-          description="Encontre o atendimento oficial da prefeitura"
-          icon="open-outline"
-          onPress={() => router.push('/(tabs)/ParticipateScreen')}
-        />
-      </ScrollView>
-    </AppScreen>
-  );
+        <QueryState loading={calls.isLoading} error={calls.error} retry={calls.refetch} />
+        {filters.selection.kind === 'pending-current' && <AppText color="muted">Aguardando nova captura de localização ou escolha de outro lugar.</AppText>}
+        {calls.fetchStatus === 'paused' && <AppText color="muted">Sem conexão. Tente novamente quando a rede retornar.</AppText>}
+        {calls.data && calls.data.calls.length === 0 && <View style={{ gap: spacing.sm }}>
+          <AppText>Nenhum chamado encontrado neste recorte da base.</AppText>
+          <AppText color="muted">Amplie o raio, altere os filtros ou consulte o bairro inteiro. Isso não significa ausência de chamados no 1746.</AppText>
+        </View>}
+        <NearbyCalls calls={calls.data?.calls || []} selection={filters.selection} />
+      </View>
+      {savedReady && saved.length > 0 && <View style={{ gap: spacing.md }}>
+        <AppText variant="sectionTitle">Estou acompanhando</AppText>
+        <AppText variant="caption" color="muted">Salvos neste aparelho · independente do entorno selecionado</AppText>
+        <NearbyCalls calls={saved.slice(0, 2)} selection={{ kind: 'municipality' }} />
+        <AppButton title="Ver meus salvos" variant="secondary" onPress={() => router.push('/(tabs)/FollowScreen')} />
+      </View>}
+      <CitizenAction title="Precisa solicitar um serviço?" description="Acesse o atendimento oficial da prefeitura" icon="open-outline" onPress={() => router.push('/(tabs)/ParticipateScreen')} />
+    </ScrollView>
+  </AppScreen>;
 }

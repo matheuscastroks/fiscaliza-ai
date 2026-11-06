@@ -69,7 +69,9 @@ export async function buildApp(
     .map((value) => value.trim())
     .filter(Boolean);
   const app = Fastify({
-    logger: options.logger ?? false,
+    logger: options.logger ? { serializers: {
+      req: (req) => ({ method: req.method, url: req.url?.split('?')[0], hostname: req.hostname, remoteAddress: req.ip }),
+    } } : false,
     trustProxy: trustedProxies?.length ? trustedProxies : false,
     bodyLimit: 1024 * 1024,
     ajv: { customOptions: { removeAdditional: false } },
@@ -211,7 +213,7 @@ export async function buildApp(
       caught instanceof Error ? caught : new Error('Erro desconhecido.');
     const statusCode =
       error.statusCode && error.statusCode >= 400 ? error.statusCode : 500;
-    if (statusCode === 500) app.log.error(error);
+    if (statusCode === 500) app.log.error({ type: error.name, statusCode }, 'Erro interno ao atender requisição.');
     reply.code(statusCode).send({
       success: false,
       error:
@@ -280,6 +282,7 @@ export async function buildApp(
           '/api/public-facilities',
           '/api/territorial-boundaries',
           '/api/neighborhoods',
+          '/api/territory/resolve',
         ].some((base) => path === base || path.startsWith(base + '/'))
       ) &&
       !(

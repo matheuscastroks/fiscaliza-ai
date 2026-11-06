@@ -41,7 +41,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "O aplicativo utiliza sua localização para posicionar a ocorrência no mapa territorial."
+          "locationWhenInUsePermission": "O aplicativo utiliza sua localização para encontrar chamados do 1746 no entorno escolhido."
         }
       ],
       [

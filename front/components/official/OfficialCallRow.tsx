@@ -1,7 +1,5 @@
 import React, { memo, useState } from 'react';
 import { StyleSheet, View, Pressable, type ViewStyle } from 'react-native';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
@@ -71,121 +69,110 @@ export const OfficialCallRow = memo(function OfficialCallRow({
         onPress={onPress}
         accessibilityRole="button"
         accessibilityLabel={`${title}. ${call.neighborhoodName || 'Bairro não informado'}. ${situation}. ${openedLabel}. Protocolo ${call.externalId}. Ver detalhes do chamado.`}
-        style={({ pressed }) => pressed && { opacity: 0.85 }}
+        style={({ pressed }) => [styles.pressable, pressed && { opacity: 0.85 }]}
       >
-        <View style={styles.photoArea}>
-          <Image
-            source={{ uri: theme.imageUrl }}
-            style={StyleSheet.absoluteFill}
-            contentFit="cover"
-            accessibilityIgnoresInvertColors
-            accessible={false}
-          />
-          <View style={styles.category}>
-            <Ionicons
-              name={theme.icon as React.ComponentProps<typeof Ionicons>['name']}
-              size={16}
-              color={colors.white}
-            />
+        {/* Header: Categoria e Ações */}
+        <View style={styles.header}>
+          <View style={styles.categoryBadge}>
+            <View
+              style={[
+                styles.categoryIconWrap,
+                { backgroundColor: isDark ? colors.surfaceSubdued : colors.canvas },
+              ]}
+            >
+              <Ionicons
+                name={theme.icon as React.ComponentProps<typeof Ionicons>['name']}
+                size={16}
+                color={colors.ink}
+              />
+            </View>
             <AppText
               variant="caption"
-              numberOfLines={2}
+              numberOfLines={1}
               style={styles.categoryLabel}
             >
               {theme.label}
             </AppText>
           </View>
-          <LinearGradient
-            pointerEvents="none"
-            colors={[colors.transparent, colors.surface]}
-            style={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: 64,
-            }}
-          />
-        </View>
-        <View style={styles.content}>
-          <AppText
-            variant="sectionTitle"
-            numberOfLines={2}
-            style={styles.title}
-          >
-            {title}
-          </AppText>
-          <View style={styles.locationStatusRow}>
-            <View style={styles.location}>
-              <Ionicons
-                name="location-outline"
-                size={17}
-                color={colors.muted}
-              />
-              <AppText color="muted" style={styles.flex} numberOfLines={2}>
-                {call.neighborhoodName || 'Bairro não informado'}
-              </AppText>
-            </View>
-            <View style={styles.status}>
-              <View
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: statusColor,
-                }}
-              />
+
+          <View style={styles.headerRight}>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: isDark ? statusColor + '25' : statusColor + '18' },
+              ]}
+            >
+              <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
               <AppText
                 variant="caption"
-                numberOfLines={2}
-                style={{
-                  color: statusColor,
-                  flexShrink: 1,
-                  textAlign: 'right',
-                }}
+                style={[styles.statusText, { color: statusColor }]}
               >
                 {situation}
               </AppText>
             </View>
-          </View>
-          <AppText variant="meta" color="muted">
-            {openedLabel}
-          </AppText>
-          <View style={styles.source}>
-            <AppText variant="caption" color="muted" selectable>
-              Central 1746 · Protocolo {call.externalId}
-            </AppText>
+
+            <Pressable
+              onPress={() => {
+                void toggle();
+              }}
+              disabled={!hydrated || busy}
+              accessibilityRole="checkbox"
+              accessibilityState={{
+                checked: isSaved,
+                disabled: !hydrated || busy,
+                busy,
+              }}
+              accessibilityLabel={
+                isSaved
+                  ? `Deixar de acompanhar chamado ${call.externalId}`
+                  : `Acompanhar chamado ${call.externalId}`
+              }
+              accessibilityHint="Guarda este chamado nos seus acompanhamentos."
+              hitSlop={8}
+              style={({ pressed }) => [
+                styles.heart,
+                { opacity: !hydrated || busy ? 0.6 : pressed ? 0.75 : 1 },
+              ]}
+            >
+              <Ionicons
+                name={isSaved ? 'heart' : 'heart-outline'}
+                size={22}
+                color={isSaved ? colors.risk : colors.muted}
+              />
+            </Pressable>
           </View>
         </View>
+
+        {/* Título */}
+        <AppText
+          variant="sectionTitle"
+          numberOfLines={2}
+          style={styles.title}
+        >
+          {title}
+        </AppText>
+
+        {/* Localização */}
+        <View style={styles.locationRow}>
+          <Ionicons
+            name="location-outline"
+            size={16}
+            color={colors.muted}
+          />
+          <AppText color="muted" variant="caption" style={styles.flex} numberOfLines={1}>
+            {call.neighborhoodName || 'Bairro não informado'}
+          </AppText>
+        </View>
+
+        {/* Rodapé: Metadados e seta de ação */}
+        <View style={styles.footerRow}>
+          <AppText variant="caption" color="muted" numberOfLines={1} style={styles.flex}>
+            {openedLabel} · Central 1746 #{call.externalId}
+          </AppText>
+          <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+        </View>
       </Pressable>
-      <Pressable
-        onPress={() => {
-          void toggle();
-        }}
-        disabled={!hydrated || busy}
-        accessibilityRole="checkbox"
-        accessibilityState={{
-          checked: isSaved,
-          disabled: !hydrated || busy,
-          busy,
-        }}
-        accessibilityLabel={
-          isSaved
-            ? `Deixar de acompanhar chamado ${call.externalId}`
-            : `Acompanhar chamado ${call.externalId}`
-        }
-        accessibilityHint="Guarda este chamado nos seus acompanhamentos."
-        style={({ pressed }) => [
-          styles.heart,
-          { opacity: !hydrated || busy ? 0.6 : pressed ? 0.75 : 1 },
-        ]}
-      >
-        <Ionicons
-          name={isSaved ? 'heart' : 'heart-outline'}
-          size={25}
-          color={isSaved ? colors.risk : colors.ink}
-        />
-      </Pressable>
+
       {saveError !== '' && (
         <AppText
           color="risk"
@@ -207,69 +194,97 @@ function createStyles(colors: ThemeColors) {
       width: '100%',
       borderRadius: layout.radius.card,
       backgroundColor: colors.surface,
-      overflow: 'hidden',
       borderWidth: 1,
       borderColor: colors.border,
+      overflow: 'hidden',
     },
-    photoArea: { height: 132, backgroundColor: colors.surfaceSubdued },
-    category: {
-      position: 'absolute',
-      top: spacing.md,
-      left: spacing.md,
-      maxWidth: '65%',
+    pressable: {
+      padding: spacing.md,
+      gap: spacing.sm,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.xs,
+    },
+    categoryBadge: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xs,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: spacing.xs,
-      borderRadius: layout.radius.panel,
-      backgroundColor: 'rgba(0,0,0,0.75)',
-    },
-    categoryLabel: { color: colors.white, flexShrink: 1 },
-    content: { padding: spacing.md, gap: spacing.xs, minHeight: 0 },
-    title: { fontSize: 19, lineHeight: 25 },
-    flex: { flex: 1, minWidth: 0 },
-    locationStatusRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-    },
-    location: {
       flex: 1,
       minWidth: 0,
+      marginRight: spacing.xs,
+    },
+    categoryIconWrap: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    categoryLabel: {
+      fontWeight: '600',
+      color: colors.ink,
+      flexShrink: 1,
+    },
+    headerRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    statusBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: layout.radius.pill,
+    },
+    statusDot: {
+      width: 7,
+      height: 7,
+      borderRadius: 4,
+    },
+    statusText: {
+      fontWeight: '600',
+      fontSize: 12,
+      lineHeight: 16,
+    },
+    heart: {
+      width: 36,
+      height: 36,
+      borderRadius: layout.radius.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    title: {
+      fontSize: 17,
+      lineHeight: 23,
+      fontWeight: '700',
+      color: colors.ink,
+    },
+    locationRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xxs,
     },
-    status: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.xs,
-      flexShrink: 1,
-      maxWidth: '55%',
-      justifyContent: 'flex-end',
-    },
-    source: { gap: spacing.xxs, paddingTop: spacing.xs },
-    details: {
+    footerRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      minHeight: 48,
+      paddingTop: spacing.xs,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: colors.border,
-      marginTop: spacing.xs,
+      marginTop: 2,
     },
-    heart: {
-      position: 'absolute',
-      top: spacing.sm,
-      right: spacing.sm,
-      minWidth: 48,
-      minHeight: 48,
-      borderRadius: layout.radius.pill,
-      backgroundColor: colors.surface,
-      alignItems: 'center',
-      justifyContent: 'center',
+    flex: {
+      flex: 1,
+      minWidth: 0,
     },
-    error: { paddingHorizontal: spacing.md, paddingBottom: spacing.md },
+    error: {
+      paddingHorizontal: spacing.md,
+      paddingBottom: spacing.md,
+    },
   });
 }

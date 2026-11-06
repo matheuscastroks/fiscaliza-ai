@@ -133,7 +133,7 @@ export default function OfficialCallDetailsScreen() {
       >
         {!data && item && (
           <AppText variant="caption" color="muted">
-            Última informação consultada e salva na sua conta.
+            Última informação consultada e salva neste aparelho.
           </AppText>
         )}
         {isError && (
@@ -169,8 +169,8 @@ export default function OfficialCallDetailsScreen() {
             accessibilityState={{ checked: isSaved, disabled: !hydrated || busy, busy }}
             accessibilityLabel={
               isSaved
-                ? 'Remover dos chamados salvos na sua conta'
-                : 'Salvar chamado na sua conta para acompanhar'
+                ? 'Remover dos chamados salvos neste aparelho'
+                : 'Salvar chamado neste aparelho para acompanhar'
             }
             style={[
               styles.saveButton,

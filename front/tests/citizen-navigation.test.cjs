@@ -16,7 +16,7 @@ function load(path) {
   );
   return module.exports;
 }
-test('only login and introductory help screens are accessible without authentication', () => {
+test('territorial discovery and local places remain accessible without authentication', () => {
   const { isPublicCitizenRoute: publicRoute } = load(
     '../shared/citizen-navigation.ts',
   );
@@ -26,17 +26,22 @@ test('only login and introductory help screens are accessible without authentica
     ['AboutScreen'],
     ['HelpScreen'],
     ['OnboardingScreen'],
+    [],
+    ['(tabs)'],
+    ['(tabs)', 'index'],
+    ['(tabs)', 'TerritoryScreen'],
+    ['(tabs)', 'FollowScreen'],
+    ['(tabs)', 'ParticipateScreen'],
+    ['SettingsScreen'],
+    ['PlacesScreen'],
+    ['OfficialCallDetailsScreen'],
+    ['FacilityDetailsScreen'],
+    ['NeighborhoodScreen'],
   ])
     assert.equal(publicRoute(segments), true);
   for (const segments of [
-    [],
-    ['(tabs)'],
-    ['(tabs)', 'FollowScreen'],
-    ['(tabs)', 'ParticipateScreen'],
     ['(tabs)', 'ReportScreen'],
     ['(tabs)', 'ProfileScreen'],
-    ['SettingsScreen'],
-    ['OfficialCallDetailsScreen'],
     ['ProposalScreen'],
     ['PresentationScreen'],
     ['MunicipalityScreen'],

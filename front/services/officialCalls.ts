@@ -12,6 +12,9 @@ export async function fetchOfficialCalls(
   signal?: AbortSignal,
 ): Promise<OfficialCallsListResponse> {
   const query = new URLSearchParams();
+  if (params.centerLatitude !== undefined) query.set('centerLatitude', String(params.centerLatitude));
+  if (params.centerLongitude !== undefined) query.set('centerLongitude', String(params.centerLongitude));
+  if (params.radiusMeters !== undefined) query.set('radiusMeters', String(params.radiusMeters));
   if (params.cursor) query.set('cursor', params.cursor);
   if (params.includeTotal !== undefined)
     query.set('includeTotal', String(params.includeTotal));

@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { Database, ReadDatabase } from './db.js';
+import { resolveTerritoryLocation } from './territory-location.js';
 import type {
   FacilitiesQuery,
   FacilityCategory,
@@ -33,6 +34,20 @@ export function registerPublicDataRoutes(
       isolationLevel: 'repeatable read',
       accessMode: 'read only',
     });
+  app.get<{ Querystring: { latitude: number; longitude: number } }>(
+    '/api/territory/resolve',
+    { schema: {
+      tags: ['Território'],
+      querystring: { type: 'object', additionalProperties: false, required: ['latitude', 'longitude'], properties: {
+        latitude: { type: 'number', minimum: -90, maximum: 90 }, longitude: { type: 'number', minimum: -180, maximum: 180 },
+      } },
+      response: { 200: envelope({ type: 'object', required: ['municipalityId', 'insideMunicipality', 'neighborhood'], properties: {
+        municipalityId: { type: 'string' }, insideMunicipality: { type: 'boolean' },
+        neighborhood: { anyOf: [{ type: 'null' }, { type: 'object', required: ['id', 'name'], properties: { id: { type: 'string' }, name: { type: 'string' } } }] },
+      } }) },
+    } },
+    async (req) => ok(await read((connection) => resolveTerritoryLocation(connection, req.query))),
+  );
   app.get(
     '/api/data-sources',
     {

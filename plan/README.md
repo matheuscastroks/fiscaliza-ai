@@ -1,5 +1,9 @@
 # Plano de evolução — Fiscaliza aí com Superpowers
 
+## Home e entorno configurável
+
+Proposta de 06/11/2026: [especificação](specs/2026-11-06-home-entorno-configuravel.md) e [plano de implementação](implementation/2026-11-06-home-entorno-configuravel.md). Abrange localização por ação explícita, raio configurável, lugares salvos no aparelho e continuidade entre Home, mapa e lista. Documentos para revisão; implementação não iniciada.
+
 ## Migração da organização do repositório
 
 Migração executada em 04–05/11/2026: [especificação front/back/shared](specs/2026-11-04-organizacao-front-back.md), [plano](implementation/2026-11-04-migracao-front-back.md) e [evidências e limitações](evidence/2026-11-04-migracao-front-back.md). A API está em `back/`, o aplicativo em `front/` e `shared/` permanece na raiz, com instalações npm independentes. As validações focaram mobile e API, conforme solicitado. As regras atuais de `AGENTS.md` e `PRODUCT.md` prevalecem sobre o roteiro histórico de mocks abaixo.

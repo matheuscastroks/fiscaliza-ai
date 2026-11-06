@@ -1,4 +1,9 @@
 import { request } from './http';
+import type { TerritoryLocationResolution } from '@/shared/public-data';
+export function fetchTerritoryLocation(point: { latitude: number; longitude: number }, signal?: AbortSignal) {
+  const query = new URLSearchParams({ latitude: String(point.latitude), longitude: String(point.longitude) });
+  return request<TerritoryLocationResolution>(`/territory/resolve?${query}`, 'GET', undefined, signal);
+}
 import type {
   FacilitiesQuery,
   FacilitiesPage,

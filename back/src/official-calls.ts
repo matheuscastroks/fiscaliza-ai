@@ -2,6 +2,8 @@ import {
   officialDateConditions,
   officialTerritoryScope,
 } from './neighborhood-overview.js';
+import { parseRadiusFilter, officialRadiusCondition } from './official-call-radius.js';
+import { resolveTerritoryLocation } from './territory-location.js';
 import { queryOfficialOverview } from './official-call-overview.js';
 import {
   callCursorScope,
@@ -85,6 +87,9 @@ export function registerOfficialCallsRoutes(
   app.get<{
     Querystring: {
       page?: string;
+      centerLatitude?: string;
+      centerLongitude?: string;
+      radiusMeters?: string;
       cursor?: string;
       includeTotal?: string;
       limit?: string;
@@ -104,6 +109,11 @@ export function registerOfficialCallsRoutes(
       west?: string;
     };
   }>('/api/rio1746/calls', async (req) => {
+    const radius = parseRadiusFilter(req.query);
+    if (radius) {
+      const location = await resolveTerritoryLocation(db, { latitude: radius.centerLatitude, longitude: radius.centerLongitude });
+      if (!location.insideMunicipality) throw fail(422, 'Escolha um ponto dentro do Rio de Janeiro.');
+    }
     const page = Math.max(1, parseInt(req.query.page || '1', 10) || 1);
     const limit = Math.min(
       1000,
@@ -123,6 +133,7 @@ export function registerOfficialCallsRoutes(
     }
 
     const conditions: SQL[] = [eq(officialCalls.municipalityId, '3304557')];
+    if (radius) conditions.push(officialRadiusCondition(radius));
     if (req.query.neighborhoodId && req.query.bairro)
       throw fail(400, 'Use um identificador de bairro ou nome, não ambos.');
     const territory = req.query.neighborhoodId

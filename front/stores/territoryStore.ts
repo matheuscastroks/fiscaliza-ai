@@ -6,6 +6,7 @@ import {
   type TerritoryLayer,
 } from '@/features/territory/selectors';
 import { create } from 'zustand';
+import { usePlacesStore } from './placesStore';
 const REGION_KEY = 'fiscaliza-ai:region:3304557:v1';
 export function regionStorageKey(
   userId?: string | null,
@@ -17,6 +18,7 @@ export function regionStorageKey(
 }
 let initialization: Promise<void> | undefined;
 let writes = Promise.resolve();
+let scopeVersion = 0;
 export const useTerritoryStore = create<{
   userId: string | null;
   municipalityId: string;
@@ -94,6 +96,7 @@ export const useTerritoryStore = create<{
       return initialization;
     }
     initialization = undefined;
+    scopeVersion++;
     set({
       userId,
       municipalityId: nextMunicipalityId,
@@ -107,18 +110,26 @@ export const useTerritoryStore = create<{
   },
   setPreferredNeighborhood: (name) => {
     let success = false;
+    const requestedScope = scopeVersion;
+    const { userId, municipalityId } = get();
+    const key = regionStorageKey(userId, municipalityId);
     const result = writes.then(async () => {
+      if (requestedScope !== scopeVersion) return;
       await get().initialize();
-      const key = regionStorageKey(get().userId, get().municipalityId);
+      if (requestedScope !== scopeVersion) return;
       try {
         const neighborhood = name.trim();
         await AsyncStorage.setItem(
           key,
           JSON.stringify({ version: 1, neighborhood }),
         );
+        if (requestedScope !== scopeVersion) return;
         set({ preferredNeighborhood: neighborhood, persistenceError: null });
+        const places = usePlacesStore.getState();
+        if (places.userId === userId && places.municipalityId === municipalityId) await places.selectNeighborhood(neighborhood);
         success = true;
       } catch {
+        if (requestedScope !== scopeVersion) return;
         set({
           persistenceError:
             'Não foi possível salvar sua região. Tente novamente.',
@@ -134,13 +145,13 @@ export const useTerritoryStore = create<{
   toggleViewMode: () => set({ isListView: !get().isListView }),
 }));
 export function useTerritorySelection() {
-  const neighborhood = useTerritoryStore((s) => s.neighborhood);
-  const set = useTerritoryStore((s) => s.setNeighborhood);
-  const setNeighborhood = useCallback((value: string) => set(value), [set]);
+  const selection = usePlacesStore((s) => s.selection);
+  const neighborhood = selection.kind === 'neighborhood' ? selection.name : '';
+  const setNeighborhood = useCallback((value: string) => { void usePlacesStore.getState().selectNeighborhood(value); }, []);
   const boundaries = useNeighborhoods();
   const neighborhoodId = useMemo(
-    () => resolveNeighborhood(neighborhood, boundaries.data || [])?.id,
-    [neighborhood, boundaries.data],
+    () => selection.kind === 'neighborhood' && selection.id ? selection.id : resolveNeighborhood(neighborhood, boundaries.data || [])?.id,
+    [selection, neighborhood, boundaries.data],
   );
   return { neighborhood, neighborhoodId, setNeighborhood };
 }

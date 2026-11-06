@@ -91,3 +91,9 @@ export interface NeighborhoodOverview {
     coverage: SyncCoverage;
   };
 }
+export interface TerritoryLocationResolution {
+  municipalityId: string;
+  insideMunicipality: boolean;
+  neighborhood: { id: string; name: string } | null;
+}
+

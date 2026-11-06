@@ -19,6 +19,9 @@ function loadMapboxHelpers() {
 
   const mod = { exports: {} };
   const mocks = {
+    '@/features/territory/useMapCamera': {},
+    '@/features/territory/mapArea': {},
+    '@/components/territory/MapAreaLayers': {},
     '@/features/territory/mapPerformance': { mapPerformanceEvent() {} },
     react: {
       useCallback: (fn) => fn,
@@ -80,7 +83,7 @@ test('buildMarkersFeatureCollection converts 14,000 markers into a GeoJSON Featu
   });
   assert.equal(collection.features[42].properties.selected, 1);
   assert.equal(collection.features[0].properties.selected, 0);
-  assert.equal(mapboxStyleUrl(false), 'mapbox://styles/mapbox/light-v11');
+  assert.equal(mapboxStyleUrl(false), 'mapbox://styles/mapbox/streets-v12');
   assert.equal(mapboxStyleUrl(true), 'mapbox://styles/mapbox/dark-v11');
 });
 
