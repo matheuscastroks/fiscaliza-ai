@@ -461,7 +461,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
             id="clusters-circle"
             filter={['has', 'point_count']}
             style={{
-              circleColor: '#212529',
+              circleColor: '#16576C',
               circleRadius: [
                 'step',
                 ['get', 'point_count'],
@@ -537,7 +537,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
             <View
               style={[
                 styles.draggablePin,
-                { backgroundColor: m.color || '#212529' },
+                { backgroundColor: m.color || '#16576C' },
               ]}
             />
           </Mapbox.PointAnnotation>

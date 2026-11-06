@@ -2,14 +2,18 @@
 name: Fiscaliza aí — aplicativo cidadão
 description: Sistema visual territorial baseado nas referências aprovadas em 18/10/2026.
 colors:
-  ink: "#212529"
-  canvas: "#F5F6F7"
+  primary: "#16576C"
+  ink: "#192D35"
+  canvas: "#F3F7F8"
   surface: "#FFFFFF"
-  surfaceSubdued: "#ECEEF0"
-  muted: "#60666C"
-  subtle: "#676D73"
-  divider: "#E5E8EB"
-  accentPressed: "#383D42"
+  surfaceSubdued: "#E0EFF2"
+  muted: "#556B73"
+  subtle: "#69818B"
+  divider: "#D9E3E7"
+  border: "#D9E3E7"
+  borderActive: "#16576C"
+  accent: "#16576C"
+  accentPressed: "#0F3D4C"
   risk: "#9E3431"
   riskSurface: "#FCEDEC"
   attention: "#835916"
@@ -73,8 +77,8 @@ spacing:
   xxxl: "40px"
 components:
   button-primary:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.surface}"
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.onAccent}"
     typography: "{typography.label}"
     rounded: "{rounded.button}"
     padding: "12px 20px"
@@ -162,19 +166,23 @@ Preferir rótulos de tarefa, como “Explorar no mapa”, “Salvar chamado” e
 
 ## Colors
 
-A paleta neutra das referências dá protagonismo ao conteúdo; cores semânticas comunicam estados concretos.
+A paleta adota a identidade **Azul-Petróleo Urbana** (`#16576C`), separando estruturalmente os papéis de marca, texto, navegação, seleção e estados cívicos.
 
-### Primary
+### Identidade de Marca e Ações (`primary` / `accent`)
 
-- **Tinta escura** (`ink`): texto, ação dominante e seleção. Os aliases `accent`, `darkPill` e `borderActive` usam essa cor. `accentPressed` está disponível no tema; sua existência não implica uso em todos os botões.
+- **Azul-Petróleo** (`primary` / `accent`): `#16576C` (modo escuro: `#79CBD5`). Botões primários, links, seleção e destaques interativos.
+- **Pills e Seleção Ativa** (`darkPill` e `borderActive`): `#16576C` (modo escuro: `#79CBD5`). A borda ativa de foco e as pílulas de filtros selecionados assumem a cor de marca.
+- **Texto sobre Ações** (`onAccent` / `onPrimary`): `#FFFFFF` no tema claro; `#0E2A33` no tema escuro (garantindo legibilidade e alto contraste sobre os botões preenchidos).
+- **Recipiente Suave** (`primaryContainer` / `surfaceSubdued` / `accentSoft`): `#E0EFF2` (modo escuro: `#1A2C34`). Destaques leves, apoio e filtros secundários.
 
-### Neutral
+### Conteúdo e Superfícies
 
-- **Fundo claro** (`canvas`): página e painel de detalhe.
-- **Branco** (`surface`): cartões, campos e controles circulares; corresponde também a `white` no código.
-- **Cinza de apoio** (`surfaceSubdued`): áreas secundárias e controles indisponíveis; corresponde também a `accentSoft`.
-- **Texto secundário** (`muted`) e **texto discreto** (`subtle`): contexto, metadados e placeholders.
-- **Divisor claro** (`divider`): separação e borda fina; corresponde também a `border`.
+- **Texto Principal** (`ink`): `#192D35` (modo escuro: `#F0F6F8`). Títulos, informações e leitura principal — tonalidade profunda distinta do azul de ação.
+- **Texto Secundário** (`muted`) e **discreto** (`subtle`): `#556B73` e `#69818B` (modo escuro: `#8FA5AE` e `#748B94`). Metadados, datas, endereços e descrições secundárias.
+- **Fundo Geral** (`canvas`): `#F3F7F8` (modo escuro: `#0B1316`). Fundo sutil frio e moderno.
+- **Superfície** (`surface`): `#FFFFFF` (modo escuro: `#121E23`). Cartões, campos e cabeçalhos.
+- **Bordas e Divisórias** (`border` e `divider`): `#D9E3E7` (modo escuro: `#20343D`). Contraste estrutural aprimorado (> 3:1) para contornos de cartões e inputs.
+- **Navegação Flutuante** (`navigationSurface`): `#192D35` (modo escuro: `#121E23`), com seleção `#FFFFFF` (escuro: `#79CBD5`) e ícone ativo `#16576C` (escuro: `#0E2A33`).
 
 ### Estados semânticos
 
