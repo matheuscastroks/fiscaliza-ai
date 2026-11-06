@@ -1,9 +1,10 @@
-import { useTheme } from '@/theme/useTheme';
 import type { ReactNode } from 'react';
-import { View, useWindowDimensions } from 'react-native';
-import { BottomSheet, RNHostView } from '@expo/ui';
 import { spacing } from '@/theme';
-import { KeyboardAwareScrollView } from './KeyboardAwareScrollView';
+import {
+  AppBottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetView,
+} from './AppBottomSheetModal';
 
 export function AppBottomSheet({
   open,
@@ -11,53 +12,43 @@ export function AppBottomSheet({
   children,
   busy = false,
   scroll = false,
+  snapPoints,
 }: {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
   busy?: boolean;
   scroll?: boolean;
+  snapPoints?: (string | number)[];
 }) {
-  const { colors } = useTheme();
-  const { width } = useWindowDimensions();
-  const contentWidth = Math.min(width, 640) - 2 * spacing.contentPadding;
-
   return (
-    <BottomSheet
-      isPresented={open}
-      onDismiss={() => {
+    <AppBottomSheetModal
+      visible={open}
+      onClose={() => {
         if (!busy) onClose();
       }}
-      shouldDismissOnBackPress={!busy}
-      shouldDismissOnClickOutside={!busy}
-      snapPoints={scroll ? ['full'] : undefined}
-      containerColor={colors.surface}
-      contentPadding={{
-        left: spacing.contentPadding,
-        right: spacing.contentPadding,
-        bottom: spacing.xl,
+      enablePanDownToClose={!busy}
+      enableDynamicSizing={!scroll && !snapPoints}
+      snapPoints={snapPoints || (scroll ? ['65%', '90%'] : undefined)}
+      showHeader={false}
+      contentContainerStyle={{
+        paddingHorizontal: spacing.contentPadding,
+        paddingTop: spacing.xs,
+        paddingBottom: spacing.xl,
       }}
     >
-      <RNHostView matchContents={scroll ? false : { vertical: true }}>
-        {scroll ? (
-          <KeyboardAwareScrollView
-            style={{ flex: 1, width: contentWidth }}
-            contentContainerStyle={{ gap: spacing.sm, paddingTop: spacing.sm }}
-          >
-            {children}
-          </KeyboardAwareScrollView>
-        ) : (
-          <View
-            style={{
-              gap: spacing.sm,
-              paddingTop: spacing.sm,
-              width: contentWidth,
-            }}
-          >
-            {children}
-          </View>
-        )}
-      </RNHostView>
-    </BottomSheet>
+      {scroll ? (
+        <BottomSheetScrollView
+          contentContainerStyle={{ gap: spacing.sm, paddingTop: spacing.xs }}
+          showsVerticalScrollIndicator={false}
+        >
+          {children}
+        </BottomSheetScrollView>
+      ) : (
+        <BottomSheetView style={{ gap: spacing.sm, paddingTop: spacing.xs }}>
+          {children}
+        </BottomSheetView>
+      )}
+    </AppBottomSheetModal>
   );
 }

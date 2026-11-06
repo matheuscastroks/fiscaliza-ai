@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { View, ScrollView, useWindowDimensions } from 'react-native';
-import { BottomSheet, RNHostView } from '@expo/ui';
+import { View, ScrollView } from 'react-native';
+import {
+  AppBottomSheetModal,
+  BottomSheetView,
+} from '@/components/ui/AppBottomSheetModal';
 import { router } from 'expo-router';
 import { goBack } from '@/utils/navigation';
 import { AppScreen } from '@/components/ui/AppScreen';
@@ -24,7 +27,6 @@ const appearanceOptions = [
 ];
 export default function SettingsScreen() {
   const { colors } = useTheme();
-  const { width } = useWindowDimensions();
   const {
     preference,
     setPreference,
@@ -134,58 +136,55 @@ export default function SettingsScreen() {
           />
         </View>
       </ScrollView>
-      <BottomSheet
-        isPresented={confirm}
-        onDismiss={() => {
+      <AppBottomSheetModal
+        visible={confirm}
+        onClose={() => {
           if (!busy) setConfirm(false);
         }}
-        shouldDismissOnBackPress={!busy}
-        shouldDismissOnClickOutside={!busy}
-        containerColor={colors.surface}
-        contentPadding={{
-          left: spacing.contentPadding,
-          right: spacing.contentPadding,
-          bottom: spacing.xl,
+        enableDynamicSizing
+        enablePanDownToClose={!busy}
+        showHeader={false}
+        contentContainerStyle={{
+          paddingHorizontal: spacing.contentPadding,
+          paddingTop: spacing.sm,
+          paddingBottom: spacing.xl,
         }}
       >
-        <RNHostView matchContents={{ vertical: true }}>
-          <View
-            style={{
-              width: Math.min(width, 640) - spacing.contentPadding * 2,
-              gap: spacing.md,
-              paddingTop: spacing.sm,
+        <BottomSheetView
+          style={{
+            gap: spacing.md,
+            paddingTop: spacing.xs,
+          }}
+        >
+          <AppText variant="sectionTitle">
+            Limpar salvos neste aparelho?
+          </AppText>
+          <AppText color="muted">
+            Os chamados serão removidos da lista de acompanhamento desta sessão no aparelho. Sua região e aparência serão mantidas.
+          </AppText>
+          {savedError && (
+            <AppText color="risk" accessibilityRole="alert">
+              {savedError}
+            </AppText>
+          )}
+          <AppButton
+            title="Apagar salvos"
+            variant="destructive"
+            loading={busy}
+            onPress={() => {
+              void clearSavedCalls().then((ok) => {
+                if (ok) setConfirm(false);
+              });
             }}
-          >
-            <AppText variant="sectionTitle">
-              Limpar salvos neste aparelho?
-            </AppText>
-            <AppText color="muted">
-              Os chamados serão removidos da lista de acompanhamento desta sessão no aparelho. Sua região e aparência serão mantidas.
-            </AppText>
-            {savedError && (
-              <AppText color="risk" accessibilityRole="alert">
-                {savedError}
-              </AppText>
-            )}
-            <AppButton
-              title="Apagar salvos"
-              variant="destructive"
-              loading={busy}
-              onPress={() => {
-                void clearSavedCalls().then((ok) => {
-                  if (ok) setConfirm(false);
-                });
-              }}
-            />
-            <AppButton
-              title="Manter salvos"
-              variant="secondary"
-              disabled={busy}
-              onPress={() => setConfirm(false)}
-            />
-          </View>
-        </RNHostView>
-      </BottomSheet>
+          />
+          <AppButton
+            title="Manter salvos"
+            variant="secondary"
+            disabled={busy}
+            onPress={() => setConfirm(false)}
+          />
+        </BottomSheetView>
+      </AppBottomSheetModal>
     </AppScreen>
   );
 }
