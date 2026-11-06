@@ -817,6 +817,11 @@ function TerritoryContent() {
         areaOnly={areaOnly}
         onAreaOnlyChange={(nextArea) => { setAreaOnly(nextArea); setAppliedBounds(nextArea ? computeRegionBounds(viewportRef.current) : null); setSelectedId(null); }}
         totalCalls={totalCalls}
+        layers={layers}
+        onLayersChange={setLayers}
+        radiusMeters={!areaOnly && !routeNeighborhoodId && selection.kind === 'radius' ? selection.radiusMeters : undefined}
+        onRadiusChange={(value) => { void usePlacesStore.getState().setRadius(value); }}
+        radiusLabel={!areaOnly && !routeNeighborhoodId && selection.kind === 'radius' ? layers.some((layer) => layer !== 'official') ? 'Raio só no 1746' : 'Entorno 1746' : undefined}
       />
     </View>
   );
