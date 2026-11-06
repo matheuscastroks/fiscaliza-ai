@@ -135,6 +135,18 @@ function TerritoryFilterBarComponent({
         />
       </View>
 
+      {/* Indicador contextual de raio / entorno (exibido como texto informativo, fora dos filtros rápidos) */}
+      {radiusLabel ? (
+        <View style={padded ? styles.paddedSection : styles.scopeContextContainer}>
+          <View style={styles.scopeContextRow}>
+            <Ionicons name="location-sharp" size={12} color={colors.accent} />
+            <AppText variant="caption" color="muted" style={styles.scopeContextText}>
+              {radiusLabel}
+            </AppText>
+          </View>
+        </View>
+      ) : null}
+
       {/* Fileira única de chips rápidos (Bairro + Camadas + Mais Filtros) */}
       <View style={padded ? styles.paddedSection : undefined}>
         <ScrollView
@@ -149,14 +161,6 @@ function TerritoryFilterBarComponent({
                 onChange={onRadiusChange}
                 compact
               />
-            </View>
-          ) : null}
-          {radiusLabel ? (
-            <View style={styles.radiusBadge}>
-              <Ionicons name="location-outline" size={13} color={colors.ink} />
-              <AppText variant="caption" style={styles.radiusBadgeText}>
-                {radiusLabel}
-              </AppText>
             </View>
           ) : null}
           {/* Chip de Bairro */}
@@ -548,26 +552,21 @@ const createStyles = (colors: ThemeColors) =>
       width: 250,
       justifyContent: 'center',
     },
-    radiusBadge: {
+    scopeContextContainer: {
+      paddingHorizontal: spacing.sm,
+      marginTop: -2,
+      marginBottom: 2,
+    },
+    scopeContextRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 5,
-      height: 38,
-      paddingHorizontal: 12,
-      borderRadius: layout.radius.pill,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.08,
-      shadowRadius: 4,
-      elevation: 2,
+      gap: 4,
+      paddingHorizontal: spacing.xs,
     },
-    radiusBadgeText: {
-      fontSize: 12,
+    scopeContextText: {
+      fontSize: 11,
       fontWeight: '600',
-      color: colors.ink,
+      letterSpacing: 0.2,
     },
     chip: {
       flexDirection: 'row',
