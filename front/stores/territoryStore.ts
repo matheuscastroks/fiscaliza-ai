@@ -19,6 +19,8 @@ export function regionStorageKey(
 let initialization: Promise<void> | undefined;
 let writes = Promise.resolve();
 let scopeVersion = 0;
+export type TerritoryDomain = 'calls' | 'facilities';
+
 export const useTerritoryStore = create<{
   userId: string | null;
   municipalityId: string;
@@ -36,6 +38,10 @@ export const useTerritoryStore = create<{
   setNeighborhood: (name: string) => void;
   layers: TerritoryLayer[];
   setLayers: (layers: TerritoryLayer[]) => void;
+  territoryDomain: TerritoryDomain;
+  savedFacilityLayers: TerritoryLayer[];
+  setTerritoryDomain: (domain: TerritoryDomain) => void;
+  setFacilityLayers: (layers: TerritoryLayer[]) => void;
   isListView: boolean;
   setIsListView: (value: boolean) => void;
   toggleViewMode: () => void;
@@ -49,6 +55,8 @@ export const useTerritoryStore = create<{
   preferredNeighborhood: '',
   neighborhood: '',
   layers: ['official'],
+  territoryDomain: 'calls',
+  savedFacilityLayers: ['school', 'health', 'square'],
   isListView: false,
   filtersOpen: false,
   initialize: () => {
@@ -144,6 +152,28 @@ export const useTerritoryStore = create<{
   },
   setNeighborhood: (name) => set({ neighborhood: name.trim() }),
   setLayers: (layers) => set({ layers }),
+  setTerritoryDomain: (domain) => {
+    if (domain === 'calls') {
+      set({ territoryDomain: 'calls', layers: ['official'] });
+    } else {
+      const saved: TerritoryLayer[] =
+        get().savedFacilityLayers.length > 0
+          ? get().savedFacilityLayers
+          : ['school', 'health', 'square'];
+      set({ territoryDomain: 'facilities', layers: saved });
+    }
+  },
+  setFacilityLayers: (facilityLayers) => {
+    const sanitized = facilityLayers.filter(
+      (l): l is 'school' | 'health' | 'square' => l !== 'official',
+    );
+    const nextSaved: TerritoryLayer[] =
+      sanitized.length > 0 ? sanitized : ['school'];
+    set({
+      savedFacilityLayers: nextSaved,
+      ...(get().territoryDomain === 'facilities' ? { layers: nextSaved } : {}),
+    });
+  },
   setIsListView: (isListView) => set({ isListView }),
   toggleViewMode: () => set({ isListView: !get().isListView }),
   setFiltersOpen: (filtersOpen) => set({ filtersOpen }),
@@ -169,4 +199,16 @@ export function useTerritoryFiltersModal() {
   const filtersOpen = useTerritoryStore((s) => s.filtersOpen);
   const setFiltersOpen = useTerritoryStore((s) => s.setFiltersOpen);
   return { filtersOpen, setFiltersOpen };
+}
+export function useTerritoryDomain() {
+  const territoryDomain = useTerritoryStore((s) => s.territoryDomain);
+  const setTerritoryDomain = useTerritoryStore((s) => s.setTerritoryDomain);
+  const savedFacilityLayers = useTerritoryStore((s) => s.savedFacilityLayers);
+  const setFacilityLayers = useTerritoryStore((s) => s.setFacilityLayers);
+  return {
+    territoryDomain,
+    setTerritoryDomain,
+    savedFacilityLayers,
+    setFacilityLayers,
+  };
 }

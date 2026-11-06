@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
 import { AppSelect } from '@/components/ui/AppSelect';
 import {
@@ -24,7 +25,10 @@ import {
 import { layout, spacing } from '@/theme';
 import { RadiusControl } from '@/features/places/RadiusControl';
 import type { RadiusMeters } from '@/features/places/types';
-import { useTerritoryViewMode } from '@/stores/territoryStore';
+import {
+  useTerritoryViewMode,
+  useTerritoryDomain,
+} from '@/stores/territoryStore';
 
 export type TerritoryLayer = 'official' | 'school' | 'health' | 'square';
 
@@ -90,23 +94,27 @@ function TerritoryFilterBarComponent({
   filterCount,
   neighborhood,
   radiusLabel,
-  layers,
+  totalCalls,
+  officialCallsStatus,
   padded = false,
 }: TerritoryFilterBarProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const { isListView, toggleViewMode } = useTerritoryViewMode();
+  const { territoryDomain, setTerritoryDomain } = useTerritoryDomain();
 
-  const hasActiveFilters =
-    filterCount > 0 ||
-    Boolean(neighborhood) ||
-    Boolean(radiusLabel) ||
-    layers.length > 1 ||
-    !layers.includes('official');
+  const callsLabel = officialCallsStatus.isLoading
+    ? '...'
+    : totalCalls > 999
+      ? `${(totalCalls / 1000).toFixed(1)}k`
+      : `${totalCalls}`;
+
+  const hasSpecificActiveFilters =
+    filterCount > 0 || Boolean(neighborhood) || Boolean(radiusLabel);
 
   return (
     <View style={[styles.wrapper, padded && styles.paddedWrapper]}>
-      {/* Barra de busca com botão integrado de alternância Lista / Mapa */}
+      {/* Barra de busca com alternância Lista / Mapa */}
       <View style={padded ? styles.paddedSection : styles.searchContainer}>
         <CitySearch
           value={search}
@@ -121,35 +129,94 @@ function TerritoryFilterBarComponent({
         />
       </View>
 
-      {/* Indicador minimalista e discreto de filtros ativos (quando houver) */}
-      {hasActiveFilters && (
-        <View style={padded ? styles.paddedSection : styles.activeBadgeWrapper}>
+      {/* Barra de alternância rápida entre Chamados 1746 e Serviços Públicos */}
+      <View style={padded ? styles.paddedSection : styles.topSwitcherRow}>
+        <View style={styles.domainPillTrack}>
+          <Pressable
+            accessibilityRole="tab"
+            accessibilityLabel="Exibir chamados 1746"
+            accessibilityState={{ selected: territoryDomain === 'calls' }}
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setTerritoryDomain('calls');
+            }}
+            style={[
+              styles.domainPillButton,
+              territoryDomain === 'calls' && styles.domainPillButtonActive,
+            ]}
+          >
+            <Ionicons
+              name="warning"
+              size={13}
+              color={
+                territoryDomain === 'calls' ? colors.onAccent : colors.ink
+              }
+            />
+            <AppText
+              variant="caption"
+              style={[
+                styles.domainPillText,
+                territoryDomain === 'calls' && styles.domainPillTextActive,
+              ]}
+            >
+              1746 · {callsLabel}
+            </AppText>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="tab"
+            accessibilityLabel="Exibir serviços públicos"
+            accessibilityState={{ selected: territoryDomain === 'facilities' }}
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setTerritoryDomain('facilities');
+            }}
+            style={[
+              styles.domainPillButton,
+              territoryDomain === 'facilities' && styles.domainPillButtonActive,
+            ]}
+          >
+            <Ionicons
+              name="business"
+              size={13}
+              color={
+                territoryDomain === 'facilities' ? colors.onAccent : colors.ink
+              }
+            />
+            <AppText
+              variant="caption"
+              style={[
+                styles.domainPillText,
+                territoryDomain === 'facilities' && styles.domainPillTextActive,
+              ]}
+            >
+              Serviços Públicos
+            </AppText>
+          </Pressable>
+        </View>
+
+        {/* Atalho sutil para filtros específicos */}
+        {hasSpecificActiveFilters && (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Abrir filtros do território"
+            accessibilityLabel="Ver filtros aplicados"
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               onOpenFilters();
             }}
             style={({ pressed }) => [
               styles.activeFilterPill,
-              pressed && styles.activeFilterPillPressed,
+              pressed && { opacity: 0.8 },
             ]}
           >
-            <Ionicons name="options" size={13} color={colors.accent} />
+            <Ionicons name="options" size={12} color={colors.accent} />
             <AppText variant="caption" style={styles.activeFilterText}>
-              {neighborhood ? neighborhood : 'Filtros ativos'}
+              {neighborhood ? neighborhood : 'Filtros'}
               {filterCount > 0 ? ` (${filterCount})` : ''}
             </AppText>
-            {radiusLabel ? (
-              <AppText variant="caption" color="muted" style={styles.activeFilterSubtext}>
-                · {radiusLabel}
-              </AppText>
-            ) : null}
-            <Ionicons name="chevron-forward" size={12} color={colors.muted} />
           </Pressable>
-        </View>
-      )}
+        )}
+      </View>
     </View>
   );
 }
@@ -199,44 +266,41 @@ function TerritoryFilterModalComponent({
   areaOnly,
   onAreaOnlyChange,
   totalCalls,
-  layers = ['official'],
-  onLayersChange,
   radiusMeters,
   onRadiusChange,
   radiusLabel,
 }: TerritoryFilterModalProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
-  const snapPoints = useMemo(() => ['82%', '95%'], []);
+  const insets = useSafeAreaInsets();
+  const snapPoints = useMemo(() => ['78%', '94%'], []);
 
-  const toggleLayer = (layer: TerritoryLayer) => {
-    if (!onLayersChange) return;
+  const {
+    territoryDomain,
+    setTerritoryDomain,
+    savedFacilityLayers,
+    setFacilityLayers,
+  } = useTerritoryDomain();
+
+  const toggleFacility = (facilityId: FacilityCategory) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (layers.includes(layer)) {
-      onLayersChange(layers.filter((l) => l !== layer));
-    } else {
-      onLayersChange([...layers, layer]);
-    }
+    const current = savedFacilityLayers.filter(
+      (l): l is FacilityCategory => l !== 'official',
+    );
+    const next: TerritoryLayer[] = current.includes(facilityId)
+      ? current.filter((l) => l !== facilityId)
+      : [...current, facilityId];
+    if (next.length === 0) return; // Garante ao menos 1 selecionado
+    setFacilityLayers(next);
   };
 
-  const callsLabel = totalCalls > 999
-    ? `${(totalCalls / 1000).toFixed(1)}k`
-    : `${totalCalls}`;
-
-  const LAYER_CONFIGS: {
-    id: TerritoryLayer;
+  const FACILITY_CONFIGS: {
+    id: FacilityCategory;
     label: string;
     sublabel: string;
     icon: keyof typeof Ionicons.glyphMap;
     activeColor: string;
   }[] = [
-    {
-      id: 'official',
-      label: 'Chamados 1746',
-      sublabel: 'Serviços e zeladoria urbana',
-      icon: 'warning',
-      activeColor: colors.accent,
-    },
     {
       id: 'school',
       label: 'Escolas',
@@ -269,291 +333,550 @@ function TerritoryFilterModalComponent({
     >
       <BottomSheetScrollView
         style={styles.filterModalScroll}
-        contentContainerStyle={styles.filterModalBody}
+        contentContainerStyle={[
+          styles.filterModalBody,
+          { paddingBottom: Math.max(insets.bottom + 80, 110) },
+        ]}
+        nestedScrollEnabled={true}
+        bounces={false}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
       >
-        {/* Seção 1: Camadas no Mapa */}
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionTitleRow}>
-            <Ionicons name="layers" size={14} color={colors.accent} />
-            <AppText variant="caption" style={styles.sectionTitle}>
-              Camadas Visíveis no Mapa
+        {/* Seletor Principal de Domínio: Chamados 1746 vs. Serviços Públicos */}
+        <View style={styles.domainTabsTrack}>
+          <Pressable
+            accessibilityRole="tab"
+            accessibilityLabel="Filtrar Chamados 1746"
+            accessibilityState={{ selected: territoryDomain === 'calls' }}
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setTerritoryDomain('calls');
+            }}
+            style={[
+              styles.domainTabButton,
+              territoryDomain === 'calls' && styles.domainTabButtonActive,
+            ]}
+          >
+            <Ionicons
+              name="warning"
+              size={15}
+              color={
+                territoryDomain === 'calls' ? colors.onAccent : colors.ink
+              }
+            />
+            <AppText
+              variant="caption"
+              style={[
+                styles.domainTabButtonText,
+                territoryDomain === 'calls' && styles.domainTabButtonTextActive,
+              ]}
+            >
+              Chamados 1746
             </AppText>
-          </View>
-          <AppText variant="caption" color="muted" style={styles.sectionDesc}>
-            Escolha as informações e equipamentos públicos a exibir:
-          </AppText>
+          </Pressable>
 
-          <View style={styles.layerCardsGrid}>
-            {LAYER_CONFIGS.map((cfg) => {
-              const isSelected = layers.includes(cfg.id);
-              return (
-                <Pressable
-                  key={cfg.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Camada ${cfg.label}`}
-                  accessibilityState={{ selected: isSelected }}
-                  onPress={() => toggleLayer(cfg.id)}
-                  style={({ pressed }) => [
-                    styles.layerCard,
-                    isSelected && styles.layerCardSelected,
-                    pressed && styles.layerCardPressed,
-                  ]}
+          <Pressable
+            accessibilityRole="tab"
+            accessibilityLabel="Filtrar Serviços Públicos"
+            accessibilityState={{ selected: territoryDomain === 'facilities' }}
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setTerritoryDomain('facilities');
+            }}
+            style={[
+              styles.domainTabButton,
+              territoryDomain === 'facilities' && styles.domainTabButtonActive,
+            ]}
+          >
+            <Ionicons
+              name="business"
+              size={15}
+              color={
+                territoryDomain === 'facilities' ? colors.onAccent : colors.ink
+              }
+            />
+            <AppText
+              variant="caption"
+              style={[
+                styles.domainTabButtonText,
+                territoryDomain === 'facilities' &&
+                  styles.domainTabButtonTextActive,
+              ]}
+            >
+              Serviços Públicos
+            </AppText>
+          </Pressable>
+        </View>
+
+        {/* CONTEÚDO DA ABA: CHAMADOS 1746 */}
+        {territoryDomain === 'calls' && (
+          <>
+            {/* Card: Filtros dos Chamados 1746 */}
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionTitleRow}>
+                <Ionicons name="construct" size={14} color={colors.accent} />
+                <AppText variant="caption" style={styles.sectionTitle}>
+                  Demandas e Zeladoria (1746)
+                </AppText>
+              </View>
+
+              <View style={styles.filterSubfield}>
+                <AppText
+                  variant="caption"
+                  color="muted"
+                  style={styles.fieldSubLabel}
                 >
-                  <View style={styles.layerCardHeader}>
-                    <View
-                      style={[
-                        styles.layerIconBadge,
-                        { backgroundColor: isSelected ? cfg.activeColor : colors.border },
-                      ]}
-                    >
-                      <Ionicons
-                        name={cfg.icon}
-                        size={16}
-                        color={isSelected ? '#FFFFFF' : colors.muted}
-                      />
-                    </View>
+                  Tipo de serviço
+                </AppText>
+                <AppSelect
+                  label="Tipo de serviço 1746"
+                  placeholder="Buscar tipo de serviço..."
+                  icon="construct-outline"
+                  defaultValue="all"
+                  options={serviceTypeOptions}
+                  value={serviceType}
+                  onChange={onServiceTypeChange}
+                />
+              </View>
+
+              <View style={styles.filterSubfield}>
+                <AppText
+                  variant="caption"
+                  color="muted"
+                  style={styles.fieldSubLabel}
+                >
+                  Situação
+                </AppText>
+                <View style={styles.segmentContainer}>
+                  {[
+                    { value: 'all', label: 'Todas' },
+                    { value: 'Não Encerrado', label: 'Abertos' },
+                    { value: 'Encerrado', label: 'Encerrados' },
+                  ].map((opt) => {
+                    const isSelected = status === opt.value;
+                    return (
+                      <Pressable
+                        key={opt.value}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: isSelected }}
+                        onPress={() => {
+                          void Haptics.impactAsync(
+                            Haptics.ImpactFeedbackStyle.Light,
+                          );
+                          onStatusChange(opt.value);
+                        }}
+                        style={[
+                          styles.segmentButton,
+                          isSelected && styles.segmentButtonActive,
+                        ]}
+                      >
+                        <AppText
+                          variant="caption"
+                          style={[
+                            styles.segmentText,
+                            isSelected && styles.segmentTextActive,
+                          ]}
+                        >
+                          {opt.label}
+                        </AppText>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <View style={styles.filterSubfield}>
+                <AppText
+                  variant="caption"
+                  color="muted"
+                  style={styles.fieldSubLabel}
+                >
+                  Período
+                </AppText>
+                <View style={styles.wrapChipsRow}>
+                  {periodOptions.map((opt) => {
+                    const isSelected = period === opt.value;
+                    return (
+                      <Pressable
+                        key={opt.value}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: isSelected }}
+                        onPress={() => {
+                          void Haptics.impactAsync(
+                            Haptics.ImpactFeedbackStyle.Light,
+                          );
+                          onPeriodChange(opt.value);
+                        }}
+                        style={[
+                          styles.periodChip,
+                          isSelected && styles.periodChipActive,
+                        ]}
+                      >
+                        <AppText
+                          variant="caption"
+                          style={[
+                            styles.periodChipText,
+                            isSelected && styles.periodChipTextActive,
+                          ]}
+                        >
+                          {opt.label}
+                        </AppText>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            </View>
+
+            {/* Card: Localização para Chamados */}
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionTitleRow}>
+                <Ionicons name="location" size={14} color={colors.accent} />
+                <AppText variant="caption" style={styles.sectionTitle}>
+                  Localização e Recorte
+                </AppText>
+              </View>
+
+              <View style={styles.filterSubfield}>
+                <AppText
+                  variant="caption"
+                  color="muted"
+                  style={styles.fieldSubLabel}
+                >
+                  Bairro
+                </AppText>
+                <NeighborhoodPicker
+                  options={bairroOptions}
+                  value={neighborhood}
+                  onChange={onNeighborhoodChange}
+                />
+                {neighborhood ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => onNeighborhoodChange('')}
+                    style={styles.clearLink}
+                  >
                     <Ionicons
-                      name={isSelected ? 'checkmark-circle' : 'ellipse-outline'}
-                      size={20}
-                      color={isSelected ? cfg.activeColor : colors.muted}
+                      name="close-circle-outline"
+                      size={13}
+                      color={colors.accent}
                     />
-                  </View>
-                  <View style={styles.layerCardContent}>
+                    <AppText variant="caption" style={styles.clearLinkText}>
+                      Ver município inteiro (limpar bairro)
+                    </AppText>
+                  </Pressable>
+                ) : null}
+              </View>
+
+              <View style={styles.filterSubfield}>
+                <AppText
+                  variant="caption"
+                  color="muted"
+                  style={styles.fieldSubLabel}
+                >
+                  Abrangência territorial
+                </AppText>
+                <View style={styles.segmentContainer}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: !areaOnly }}
+                    onPress={() => {
+                      void Haptics.impactAsync(
+                        Haptics.ImpactFeedbackStyle.Light,
+                      );
+                      onAreaOnlyChange(false);
+                    }}
+                    style={[
+                      styles.segmentButton,
+                      !areaOnly && styles.segmentButtonActive,
+                    ]}
+                  >
+                    <Ionicons
+                      name="globe-outline"
+                      size={14}
+                      color={!areaOnly ? colors.surface : colors.ink}
+                      style={{ marginRight: 6 }}
+                    />
                     <AppText
                       variant="caption"
                       style={[
-                        styles.layerCardTitle,
-                        isSelected && { color: colors.ink, fontWeight: '700' },
+                        styles.segmentText,
+                        !areaOnly && styles.segmentTextActive,
                       ]}
                     >
-                      {cfg.label}
+                      Todo o Rio
                     </AppText>
+                  </Pressable>
+
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: areaOnly }}
+                    onPress={() => {
+                      void Haptics.impactAsync(
+                        Haptics.ImpactFeedbackStyle.Light,
+                      );
+                      onAreaOnlyChange(true);
+                    }}
+                    style={[
+                      styles.segmentButton,
+                      areaOnly && styles.segmentButtonActive,
+                    ]}
+                  >
+                    <Ionicons
+                      name="scan-outline"
+                      size={14}
+                      color={areaOnly ? colors.surface : colors.ink}
+                      style={{ marginRight: 6 }}
+                    />
+                    <AppText
+                      variant="caption"
+                      style={[
+                        styles.segmentText,
+                        areaOnly && styles.segmentTextActive,
+                      ]}
+                    >
+                      Área no mapa
+                    </AppText>
+                  </Pressable>
+                </View>
+              </View>
+
+              {radiusMeters && onRadiusChange ? (
+                <View style={styles.filterSubfield}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 4,
+                    }}
+                  >
                     <AppText
                       variant="caption"
                       color="muted"
-                      style={styles.layerCardDesc}
-                      numberOfLines={1}
+                      style={styles.fieldSubLabel}
                     >
-                      {cfg.id === 'official' && totalCalls > 0
-                        ? `${callsLabel} chamados`
-                        : cfg.sublabel}
+                      Raio de busca no entorno
                     </AppText>
+                    {radiusLabel ? (
+                      <AppText
+                        variant="caption"
+                        color="muted"
+                        style={{ fontSize: 11 }}
+                      >
+                        ({radiusLabel})
+                      </AppText>
+                    ) : null}
                   </View>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Seção 2: Localização e Território */}
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionTitleRow}>
-            <Ionicons name="location" size={14} color={colors.accent} />
-            <AppText variant="caption" style={styles.sectionTitle}>
-              Localização e Recorte
-            </AppText>
-          </View>
-
-          <View style={styles.filterSubfield}>
-            <AppText variant="caption" color="muted" style={styles.fieldSubLabel}>
-              Bairro
-            </AppText>
-            <NeighborhoodPicker
-              options={bairroOptions}
-              value={neighborhood}
-              onChange={onNeighborhoodChange}
-            />
-            {neighborhood ? (
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => onNeighborhoodChange('')}
-                style={styles.clearLink}
-              >
-                <Ionicons name="close-circle-outline" size={13} color={colors.accent} />
-                <AppText variant="caption" style={styles.clearLinkText}>
-                  Ver município inteiro (limpar bairro)
-                </AppText>
-              </Pressable>
-            ) : null}
-          </View>
-
-          <View style={styles.filterSubfield}>
-            <AppText variant="caption" color="muted" style={styles.fieldSubLabel}>
-              Abrangência territorial
-            </AppText>
-            <View style={styles.segmentContainer}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ selected: !areaOnly }}
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  onAreaOnlyChange(false);
-                }}
-                style={[styles.segmentButton, !areaOnly && styles.segmentButtonActive]}
-              >
-                <Ionicons
-                  name="globe-outline"
-                  size={14}
-                  color={!areaOnly ? colors.surface : colors.ink}
-                  style={{ marginRight: 6 }}
-                />
-                <AppText
-                  variant="caption"
-                  style={[styles.segmentText, !areaOnly && styles.segmentTextActive]}
-                >
-                  Todo o Rio
-                </AppText>
-              </Pressable>
-
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ selected: areaOnly }}
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  onAreaOnlyChange(true);
-                }}
-                style={[styles.segmentButton, areaOnly && styles.segmentButtonActive]}
-              >
-                <Ionicons
-                  name="scan-outline"
-                  size={14}
-                  color={areaOnly ? colors.surface : colors.ink}
-                  style={{ marginRight: 6 }}
-                />
-                <AppText
-                  variant="caption"
-                  style={[styles.segmentText, areaOnly && styles.segmentTextActive]}
-                >
-                  Área no mapa
-                </AppText>
-              </Pressable>
+                  <RadiusControl
+                    value={radiusMeters}
+                    onChange={onRadiusChange}
+                    compact
+                  />
+                </View>
+              ) : null}
             </View>
-          </View>
+          </>
+        )}
 
-          {radiusMeters && onRadiusChange ? (
-            <View style={styles.filterSubfield}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <AppText variant="caption" color="muted" style={styles.fieldSubLabel}>
-                  Raio de busca no entorno
+        {/* CONTEÚDO DA ABA: SERVIÇOS PÚBLICOS */}
+        {territoryDomain === 'facilities' && (
+          <>
+            {/* Card: Equipamentos Municipais */}
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionTitleRow}>
+                <Ionicons name="business" size={14} color={colors.accent} />
+                <AppText variant="caption" style={styles.sectionTitle}>
+                  Equipamentos Públicos no Mapa
                 </AppText>
-                {radiusLabel ? (
-                  <AppText variant="caption" color="muted" style={{ fontSize: 11 }}>
-                    ({radiusLabel})
-                  </AppText>
+              </View>
+              <AppText
+                variant="caption"
+                color="muted"
+                style={styles.sectionDesc}
+              >
+                Selecione quais serviços você deseja visualizar:
+              </AppText>
+
+              <View style={styles.facilityCardsContainer}>
+                {FACILITY_CONFIGS.map((cfg) => {
+                  const isSelected = savedFacilityLayers.includes(cfg.id);
+                  return (
+                    <Pressable
+                      key={cfg.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Equipamento ${cfg.label}`}
+                      accessibilityState={{ selected: isSelected }}
+                      onPress={() => toggleFacility(cfg.id)}
+                      style={({ pressed }) => [
+                        styles.facilityCardRow,
+                        isSelected && styles.facilityCardRowSelected,
+                        pressed && { opacity: 0.8 },
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.facilityIconBadge,
+                          {
+                            backgroundColor: isSelected
+                              ? cfg.activeColor
+                              : colors.border,
+                          },
+                        ]}
+                      >
+                        <Ionicons
+                          name={cfg.icon}
+                          size={18}
+                          color={isSelected ? '#FFFFFF' : colors.muted}
+                        />
+                      </View>
+                      <View style={{ flex: 1, gap: 1 }}>
+                        <AppText
+                          variant="caption"
+                          style={[
+                            styles.facilityCardTitle,
+                            isSelected && {
+                              color: colors.ink,
+                              fontWeight: '700',
+                            },
+                          ]}
+                        >
+                          {cfg.label}
+                        </AppText>
+                        <AppText
+                          variant="caption"
+                          color="muted"
+                          style={styles.facilityCardDesc}
+                        >
+                          {cfg.sublabel}
+                        </AppText>
+                      </View>
+                      <Ionicons
+                        name={
+                          isSelected ? 'checkmark-circle' : 'ellipse-outline'
+                        }
+                        size={22}
+                        color={isSelected ? cfg.activeColor : colors.muted}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* Card: Localização para Serviços Públicos */}
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionTitleRow}>
+                <Ionicons name="location" size={14} color={colors.accent} />
+                <AppText variant="caption" style={styles.sectionTitle}>
+                  Localização e Recorte
+                </AppText>
+              </View>
+
+              <View style={styles.filterSubfield}>
+                <AppText
+                  variant="caption"
+                  color="muted"
+                  style={styles.fieldSubLabel}
+                >
+                  Bairro
+                </AppText>
+                <NeighborhoodPicker
+                  options={bairroOptions}
+                  value={neighborhood}
+                  onChange={onNeighborhoodChange}
+                />
+                {neighborhood ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => onNeighborhoodChange('')}
+                    style={styles.clearLink}
+                  >
+                    <Ionicons
+                      name="close-circle-outline"
+                      size={13}
+                      color={colors.accent}
+                    />
+                    <AppText variant="caption" style={styles.clearLinkText}>
+                      Ver município inteiro (limpar bairro)
+                    </AppText>
+                  </Pressable>
                 ) : null}
               </View>
-              <RadiusControl
-                value={radiusMeters}
-                onChange={onRadiusChange}
-                compact
-              />
-            </View>
-          ) : null}
-        </View>
 
-        {/* Seção 3: Filtros de Chamados 1746 */}
-        {layers.includes('official') && (
-          <View style={styles.sectionCard}>
-            <View style={styles.sectionTitleRow}>
-              <Ionicons name="construct" size={14} color={colors.accent} />
-              <AppText variant="caption" style={styles.sectionTitle}>
-                Filtros dos Chamados 1746
-              </AppText>
-            </View>
-
-            <View style={styles.filterSubfield}>
-              <AppText variant="caption" color="muted" style={styles.fieldSubLabel}>
-                Tipo de serviço
-              </AppText>
-              <AppSelect
-                label="Tipo de serviço 1746"
-                placeholder="Buscar tipo de serviço..."
-                icon="construct-outline"
-                defaultValue="all"
-                options={serviceTypeOptions}
-                value={serviceType}
-                onChange={onServiceTypeChange}
-              />
-            </View>
-
-            <View style={styles.filterSubfield}>
-              <AppText variant="caption" color="muted" style={styles.fieldSubLabel}>
-                Situação do chamado
-              </AppText>
-              <View style={styles.segmentContainer}>
-                {[
-                  { value: 'all', label: 'Todas' },
-                  { value: 'Não Encerrado', label: 'Abertos' },
-                  { value: 'Encerrado', label: 'Encerrados' },
-                ].map((opt) => {
-                  const isSelected = status === opt.value;
-                  return (
-                    <Pressable
-                      key={opt.value}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: isSelected }}
-                      onPress={() => {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        onStatusChange(opt.value);
-                      }}
+              <View style={styles.filterSubfield}>
+                <AppText
+                  variant="caption"
+                  color="muted"
+                  style={styles.fieldSubLabel}
+                >
+                  Abrangência territorial
+                </AppText>
+                <View style={styles.segmentContainer}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: !areaOnly }}
+                    onPress={() => {
+                      void Haptics.impactAsync(
+                        Haptics.ImpactFeedbackStyle.Light,
+                      );
+                      onAreaOnlyChange(false);
+                    }}
+                    style={[
+                      styles.segmentButton,
+                      !areaOnly && styles.segmentButtonActive,
+                    ]}
+                  >
+                    <Ionicons
+                      name="globe-outline"
+                      size={14}
+                      color={!areaOnly ? colors.surface : colors.ink}
+                      style={{ marginRight: 6 }}
+                    />
+                    <AppText
+                      variant="caption"
                       style={[
-                        styles.segmentButton,
-                        isSelected && styles.segmentButtonActive,
+                        styles.segmentText,
+                        !areaOnly && styles.segmentTextActive,
                       ]}
                     >
-                      <AppText
-                        variant="caption"
-                        style={[
-                          styles.segmentText,
-                          isSelected && styles.segmentTextActive,
-                        ]}
-                      >
-                        {opt.label}
-                      </AppText>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
+                      Todo o Rio
+                    </AppText>
+                  </Pressable>
 
-            <View style={styles.filterSubfield}>
-              <AppText variant="caption" color="muted" style={styles.fieldSubLabel}>
-                Período
-              </AppText>
-              <View style={styles.wrapChipsRow}>
-                {periodOptions.map((opt) => {
-                  const isSelected = period === opt.value;
-                  return (
-                    <Pressable
-                      key={opt.value}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: isSelected }}
-                      onPress={() => {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        onPeriodChange(opt.value);
-                      }}
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: areaOnly }}
+                    onPress={() => {
+                      void Haptics.impactAsync(
+                        Haptics.ImpactFeedbackStyle.Light,
+                      );
+                      onAreaOnlyChange(true);
+                    }}
+                    style={[
+                      styles.segmentButton,
+                      areaOnly && styles.segmentButtonActive,
+                    ]}
+                  >
+                    <Ionicons
+                      name="scan-outline"
+                      size={14}
+                      color={areaOnly ? colors.surface : colors.ink}
+                      style={{ marginRight: 6 }}
+                    />
+                    <AppText
+                      variant="caption"
                       style={[
-                        styles.periodChip,
-                        isSelected && styles.periodChipActive,
+                        styles.segmentText,
+                        areaOnly && styles.segmentTextActive,
                       ]}
                     >
-                      <AppText
-                        variant="caption"
-                        style={[
-                          styles.periodChipText,
-                          isSelected && styles.periodChipTextActive,
-                        ]}
-                      >
-                        {opt.label}
-                      </AppText>
-                    </Pressable>
-                  );
-                })}
+                      Área no mapa
+                    </AppText>
+                  </Pressable>
+                </View>
               </View>
             </View>
-          </View>
+          </>
         )}
 
         {/* Rodapé Fixo de Ações */}
@@ -578,7 +901,7 @@ function TerritoryFilterModalComponent({
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Aplicar filtros e ver ${totalCalls} chamados`}
+            accessibilityLabel="Aplicar filtros e ver resultados"
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               onClose();
@@ -589,7 +912,9 @@ function TerritoryFilterModalComponent({
             ]}
           >
             <AppText variant="caption" style={styles.applyButtonText}>
-              Ver {totalCalls > 0 ? `${totalCalls.toLocaleString('pt-BR')} chamados` : 'resultados'}
+              {territoryDomain === 'calls'
+                ? `Ver ${totalCalls > 0 ? totalCalls.toLocaleString('pt-BR') : ''} chamados`
+                : 'Ver equipamentos'}
             </AppText>
             <Ionicons name="arrow-forward" size={16} color={colors.onAccent} />
           </Pressable>
@@ -621,17 +946,54 @@ const createStyles = (colors: ThemeColors) =>
       shadowRadius: 8,
       elevation: 4,
     },
-    activeBadgeWrapper: {
-      paddingHorizontal: spacing.sm,
+    topSwitcherRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingHorizontal: spacing.xs,
       marginTop: -2,
+    },
+    domainPillTrack: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: layout.radius.pill,
+      padding: 3,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 3,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    domainPillButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      borderRadius: layout.radius.pill,
+    },
+    domainPillButtonActive: {
+      backgroundColor: colors.ink,
+    },
+    domainPillText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.ink,
+    },
+    domainPillTextActive: {
+      color: colors.surface,
+      fontWeight: '700',
     },
     activeFilterPill: {
       flexDirection: 'row',
       alignItems: 'center',
-      alignSelf: 'flex-start',
-      gap: 6,
+      gap: 4,
       paddingVertical: 6,
-      paddingHorizontal: 12,
+      paddingHorizontal: 10,
       borderRadius: layout.radius.pill,
       backgroundColor: colors.surface,
       borderWidth: 1,
@@ -642,17 +1004,10 @@ const createStyles = (colors: ThemeColors) =>
       shadowRadius: 4,
       elevation: 2,
     },
-    activeFilterPillPressed: {
-      opacity: 0.8,
-      transform: [{ scale: 0.97 }],
-    },
     activeFilterText: {
       fontWeight: '700',
-      fontSize: 12,
-      color: colors.ink,
-    },
-    activeFilterSubtext: {
       fontSize: 11,
+      color: colors.ink,
     },
     filterModalScroll: {
       flex: 1,
@@ -660,8 +1015,42 @@ const createStyles = (colors: ThemeColors) =>
     filterModalBody: {
       paddingHorizontal: spacing.md,
       paddingTop: spacing.xs,
-      paddingBottom: spacing.xl,
       gap: spacing.md,
+    },
+    domainTabsTrack: {
+      flexDirection: 'row',
+      backgroundColor: colors.canvas,
+      borderRadius: layout.radius.pill,
+      padding: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 4,
+    },
+    domainTabButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: 10,
+      borderRadius: layout.radius.pill,
+    },
+    domainTabButtonActive: {
+      backgroundColor: colors.ink,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.12,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    domainTabButtonText: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.ink,
+    },
+    domainTabButtonTextActive: {
+      color: colors.surface,
+      fontWeight: '800',
     },
     sectionCard: {
       backgroundColor: colors.surface,
@@ -688,52 +1077,36 @@ const createStyles = (colors: ThemeColors) =>
       marginTop: -2,
       marginBottom: 2,
     },
-    layerCardsGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
+    facilityCardsContainer: {
       gap: 8,
     },
-    layerCard: {
-      flexBasis: '48%',
-      flexGrow: 1,
-      minHeight: 84,
-      padding: 10,
+    facilityCardRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      padding: 12,
       borderRadius: layout.radius.sm,
       backgroundColor: colors.canvas,
       borderWidth: 1.5,
       borderColor: colors.border,
-      justifyContent: 'space-between',
     },
-    layerCardSelected: {
+    facilityCardRowSelected: {
       borderColor: colors.ink,
       backgroundColor: colors.surface,
     },
-    layerCardPressed: {
-      opacity: 0.85,
-      transform: [{ scale: 0.98 }],
-    },
-    layerCardHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 6,
-    },
-    layerIconBadge: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
+    facilityIconBadge: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    layerCardContent: {
-      gap: 1,
-    },
-    layerCardTitle: {
+    facilityCardTitle: {
       fontSize: 13,
       fontWeight: '600',
       color: colors.ink,
     },
-    layerCardDesc: {
+    facilityCardDesc: {
       fontSize: 11,
     },
     filterSubfield: {

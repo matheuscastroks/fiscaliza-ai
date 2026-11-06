@@ -30,6 +30,7 @@ import {
   useTerritorySelection,
   useTerritoryViewMode,
   useTerritoryFiltersModal,
+  useTerritoryDomain,
 } from '@/stores/territoryStore';
 import { MapboxMapView, type MapMarker } from '@/components/ui/MapboxMapView';
 import {
@@ -133,6 +134,7 @@ function TerritoryContent() {
   const debouncedSearch = useDebouncedValue(search, 300);
   const appliedSearch = search.trim() ? debouncedSearch.trim() : '';
   const { isListView, setIsListView } = useTerritoryViewMode();
+  const { setTerritoryDomain, setFacilityLayers } = useTerritoryDomain();
   const { mapVisited, interactionsComplete, visitTrace } = useMapPerformance(isFocused, isListView);
 
   const facilityParams = { neighborhoodId, search: appliedSearch || undefined, ...(areaOnly && appliedBounds ? appliedBounds : {}) };
@@ -192,8 +194,11 @@ function TerritoryContent() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setAreaOnly(false);
     setAppliedBounds(null);
-    if (['official', 'school', 'health', 'square'].includes(routeLayer || ''))
-      setLayers([routeLayer as 'official']);
+    if (routeLayer === 'official') setTerritoryDomain('calls');
+    else if (['school', 'health', 'square'].includes(routeLayer || '')) {
+      setTerritoryDomain('facilities');
+      setFacilityLayers([routeLayer as 'school']);
+    }
   }, [
     routeNeighborhoodId,
     routeLayer,
@@ -801,11 +806,7 @@ function TerritoryContent() {
         onReset={resetFilters}
         bairroOptions={bairroOptions}
         neighborhood={neighborhood}
-        onNeighborhoodChange={(value) => {
-          setNeighborhood(value);
-          router.setParams({ neighborhoodId: undefined, layer: undefined });
-          setSelectedId(null);
-        }}
+        onNeighborhoodChange={handleNeighborhoodChange}
         serviceType={serviceType}
         serviceTypeOptions={serviceTypeOptions}
         onServiceTypeChange={(value) => { setServiceType(value); setSelectedId(null); }}
@@ -817,8 +818,6 @@ function TerritoryContent() {
         areaOnly={areaOnly}
         onAreaOnlyChange={(nextArea) => { setAreaOnly(nextArea); setAppliedBounds(nextArea ? computeRegionBounds(viewportRef.current) : null); setSelectedId(null); }}
         totalCalls={totalCalls}
-        layers={layers}
-        onLayersChange={setLayers}
         radiusMeters={!areaOnly && !routeNeighborhoodId && selection.kind === 'radius' ? selection.radiusMeters : undefined}
         onRadiusChange={(value) => { void usePlacesStore.getState().setRadius(value); }}
         radiusLabel={!areaOnly && !routeNeighborhoodId && selection.kind === 'radius' ? layers.some((layer) => layer !== 'official') ? 'Raio só no 1746' : 'Entorno 1746' : undefined}
