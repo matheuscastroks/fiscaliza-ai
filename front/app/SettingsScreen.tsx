@@ -9,7 +9,6 @@ import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
-import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore, isThemePreference } from '@/stores/themeStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { useFollowStore } from '@/stores/followStore';
@@ -26,7 +25,6 @@ const appearanceOptions = [
 export default function SettingsScreen() {
   const { colors } = useTheme();
   const { width } = useWindowDimensions();
-  const user = useAuthStore((s) => s.user);
   const {
     preference,
     setPreference,
@@ -57,6 +55,7 @@ export default function SettingsScreen() {
       >
         <View style={{ gap: spacing.md }}>
           <AppText variant="sectionTitle">Minha região</AppText>
+          <AppButton title="Gerenciar meus lugares" variant="secondary" onPress={() => router.push('/PlacesScreen')} />
           <AppText color="muted">
             Rio de Janeiro. Escolha um bairro para ter um atalho na Home.
           </AppText>
@@ -91,18 +90,17 @@ export default function SettingsScreen() {
           )}
         </View>
         <View style={{ gap: spacing.md }}>
-          <AppText variant="sectionTitle">Chamados salvos na conta</AppText>
+          <AppText variant="sectionTitle">Chamados salvos neste aparelho</AppText>
           <AppText color="muted">
-            Seus chamados acompanhados ficam vinculados à sua conta (
-            {user?.email || 'usuário conectado'}) neste município.
+            Seus chamados acompanhados ficam neste aparelho, separados por sessão e município, sem sincronização entre dispositivos.
           </AppText>
           <AppText variant="caption" color="muted">
             {hydrated
-              ? `${savedCalls.length} chamados salvos na sua conta`
+              ? `${savedCalls.length} chamados salvos neste aparelho`
               : 'Carregando salvos…'}
           </AppText>
           <AppButton
-            title="Limpar salvos da minha conta"
+            title="Limpar salvos neste aparelho"
             variant="destructive"
             disabled={!hydrated || !savedCalls.length || busy}
             onPress={() => setConfirm(true)}
@@ -159,11 +157,10 @@ export default function SettingsScreen() {
             }}
           >
             <AppText variant="sectionTitle">
-              Limpar salvos da sua conta?
+              Limpar salvos neste aparelho?
             </AppText>
             <AppText color="muted">
-              Os chamados serão removidos da lista de acompanhamento da sua
-              conta. Sua região e aparência serão mantidas.
+              Os chamados serão removidos da lista de acompanhamento desta sessão no aparelho. Sua região e aparência serão mantidas.
             </AppText>
             {savedError && (
               <AppText color="risk" accessibilityRole="alert">

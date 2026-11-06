@@ -8,6 +8,10 @@ import {
 } from 'react-native';
 import Constants from 'expo-constants';
 import { mapPerformanceEvent } from '@/features/territory/mapPerformance';
+import { circleFeature, pointFeature, type MapSearchArea } from '@/features/territory/mapArea';
+import { useMapCamera } from '@/features/territory/useMapCamera';
+import type { CapturedDeviceLocation } from '@/features/places/types';
+import { MapAreaLayers, MapPositionLayers } from '@/components/territory/MapAreaLayers';
 
 export type MarkerKind =
   | 'occurrence'
@@ -44,6 +48,9 @@ export interface MapboxMapViewProps {
   region: MapboxRegion;
   markers?: MapMarker[];
   boundary?: unknown;
+  searchArea?: MapSearchArea | null;
+  deviceLocation?: CapturedDeviceLocation | null;
+  fitSearchArea?: boolean;
   selectedId?: string | null;
   selectedClusterIds?: string[] | null;
   onMapClick?: (coords: { latitude: number; longitude: number }) => void;
@@ -213,6 +220,9 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
   region,
   markers = [],
   boundary,
+  searchArea,
+  deviceLocation,
+  fitSearchArea = false,
   selectedId,
   selectedClusterIds,
   onMapClick,
@@ -247,11 +257,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
   const cameraRef = useRef<any>(null);
   const shapeSourceRef = useRef<any>(null);
   const zoom = useMemo(() => computeMapboxZoom(region), [region]);
-  const lastCenterRef = useRef({
-    latitude: region.latitude,
-    longitude: region.longitude,
-    zoom,
-  });
+
 
   const nonDraggableMarkers = useMemo(
     () => markers.filter((m) => !m.draggable),
@@ -292,25 +298,23 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
     () => normalizeBoundaryFeatureCollection(boundary),
     [boundary],
   );
+  const areaLatitude = searchArea?.latitude;
+  const areaLongitude = searchArea?.longitude;
+  const areaRadius = searchArea?.radiusMeters;
+  const searchCircle = useMemo(() => areaLatitude !== undefined && areaLongitude !== undefined && areaRadius !== undefined
+    ? circleFeature({ latitude: areaLatitude, longitude: areaLongitude, radiusMeters: areaRadius }) : null,
+  [areaLatitude, areaLongitude, areaRadius]);
+  const accuracyCircle = useMemo(() => deviceLocation?.accuracyMeters != null
+    ? circleFeature({ ...deviceLocation, radiusMeters: deviceLocation.accuracyMeters }) : null, [deviceLocation]);
+  const devicePoint = useMemo(() => pointFeature(deviceLocation), [deviceLocation]);
+  const centerPoint = useMemo(() => {
+    if (!searchArea || !searchCircle) return null;
+    const matchesDevice = deviceLocation?.latitude === searchArea.latitude && deviceLocation?.longitude === searchArea.longitude;
+    return searchArea.source === 'place' || !matchesDevice ? pointFeature(searchArea) : null;
+  }, [searchArea, searchCircle, deviceLocation]);
 
-  useEffect(() => {
-    const last = lastCenterRef.current;
-    const isSameLat = Math.abs(region.latitude - last.latitude) < 0.0001;
-    const isSameLng = Math.abs(region.longitude - last.longitude) < 0.0001;
-    const isSameZoom = Math.abs(zoom - last.zoom) < 0.2;
-    if (isSameLat && isSameLng && isSameZoom) return;
-
-    lastCenterRef.current = {
-      latitude: region.latitude,
-      longitude: region.longitude,
-      zoom,
-    };
-    cameraRef.current?.setCamera({
-      centerCoordinate: [region.longitude, region.latitude],
-      zoomLevel: zoom,
-      animationDuration: 350,
-    });
-  }, [region.latitude, region.longitude, zoom]);
+  useMapCamera(cameraRef, { latitude: region.latitude, longitude: region.longitude, zoom }, searchCircle, fitSearchArea,
+    searchArea?.capturedAt);
 
   const handleShapePress = useCallback(
     async (event: any) => {
@@ -442,6 +446,8 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
           </Mapbox.ShapeSource>
         )}
 
+        <MapAreaLayers Mapbox={Mapbox} searchCircle={searchCircle} accuracyCircle={accuracyCircle} isDark={isDark} />
+
         <Mapbox.ShapeSource
           ref={shapeSourceRef}
           id="markers-source"
@@ -508,6 +514,8 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
             />
           </Mapbox.ShapeSource>
         )}
+
+        <MapPositionLayers Mapbox={Mapbox} centerPoint={centerPoint} devicePoint={devicePoint} isDark={isDark} />
 
         {draggableMarkers.map((m) => (
           <Mapbox.PointAnnotation

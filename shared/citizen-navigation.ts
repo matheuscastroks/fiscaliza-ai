@@ -4,7 +4,15 @@ const PUBLIC = new Set([
   'AboutScreen',
   'HelpScreen',
   'OnboardingScreen',
+  'SettingsScreen',
+  'PlacesScreen',
+  'OfficialCallDetailsScreen',
+  'FacilityDetailsScreen',
+  'NeighborhoodScreen',
+  'ResultsScreen',
 ]);
 export function isPublicCitizenRoute(segments: readonly string[]): boolean {
-  return segments[0] ? PUBLIC.has(segments[0]) : false;
+  if (!segments[0]) return true;
+  if (segments[0] === '(tabs)') return !segments[1] || ['index', 'TerritoryScreen', 'FollowScreen', 'ParticipateScreen'].includes(segments[1]);
+  return PUBLIC.has(segments[0]);
 }

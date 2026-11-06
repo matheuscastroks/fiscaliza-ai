@@ -19,6 +19,9 @@ function loadMapboxHelpers() {
 
   const mod = { exports: {} };
   const mocks = {
+    '@/features/territory/useMapCamera': {},
+    '@/features/territory/mapArea': {},
+    '@/components/territory/MapAreaLayers': {},
     '@/features/territory/mapPerformance': { mapPerformanceEvent() {} },
     react: {
       useCallback: (fn) => fn,

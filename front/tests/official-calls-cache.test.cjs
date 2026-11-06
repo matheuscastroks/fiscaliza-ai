@@ -108,6 +108,15 @@ test('returning to a screen reuses fresh query data and fetches after invalidati
     focus();
     await flush();
     assert.equal(calls, 3, 'disabled screen must not fetch');
+    mod.exports.useOfficialCalls({ centerLatitude: -22.9, centerLongitude: -43.2, radiusMeters: 500 }, true, 'a:3304557');
+    focus(); await flush();
+    assert.equal(calls, 4, 'a new radius is a new query');
+    mod.exports.useOfficialCalls({ centerLatitude: -22.9, centerLongitude: -43.2, radiusMeters: 1000 }, true, 'a:3304557');
+    focus(); await flush();
+    assert.equal(calls, 5, 'different radii never reuse the old response');
+    mod.exports.useOfficialCalls({ centerLatitude: -22.9, centerLongitude: -43.2, radiusMeters: 1000 }, true, 'b:3304557');
+    focus(); await flush();
+    assert.equal(calls, 6, 'user scopes never share a list query');
     mod.exports.useOfficialOverview();
     focus();
     await flush();

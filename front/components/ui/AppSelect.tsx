@@ -32,6 +32,7 @@ interface AppSelectProps {
   icon?: keyof typeof Ionicons.glyphMap;
   compact?: boolean;
   defaultValue?: string;
+  clearable?: boolean;
 }
 
 function normalizeText(text: string): string {
@@ -51,6 +52,7 @@ export function AppSelect({
   icon,
   compact = false,
   defaultValue = '',
+  clearable = true,
 }: AppSelectProps) {
   const { colors, mode } = useTheme();
   const styles = useThemedStyles(createStyles);
@@ -176,7 +178,7 @@ export function AppSelect({
         </View>
 
         <View style={styles.triggerRight}>
-          {isFiltered ? (
+          {isFiltered && clearable ? (
             <Pressable
               hitSlop={10}
               accessibilityRole="button"
@@ -305,7 +307,7 @@ export function AppSelect({
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     trigger: {
-      minHeight: 46,
+      minHeight: 48,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.xs,
       borderRadius: layout.radius.panel,
@@ -321,7 +323,7 @@ const createStyles = (colors: ThemeColors) =>
       borderColor: colors.ink,
     },
     compactTrigger: {
-      height: 36,
+      minHeight: 48,
       paddingHorizontal: spacing.sm + 2,
       borderRadius: layout.radius.pill,
       backgroundColor: colors.surface,

@@ -20,6 +20,7 @@ import { mapPerformanceEvent, mapTraceId } from '@/features/territory/mapPerform
 function useFreshCallsOnFocus(
   params: OfficialCallsQueryParams,
   enabled: boolean,
+  scope?: string,
 ) {
   const client = useQueryClient();
   const key = JSON.stringify(params);
@@ -29,28 +30,29 @@ function useFreshCallsOnFocus(
       const filters: OfficialCallsQueryParams = JSON.parse(key);
       void client
         .fetchQuery({
-          queryKey: ['officialCalls', filters],
+          queryKey: scope ? ['officialCalls', filters, scope] : ['officialCalls', filters],
           queryFn: ({ signal }) => fetchOfficialCalls(filters, signal),
           staleTime: 30_000,
         })
         .catch(() => {
           /* useQuery exposes the error and retry state. */
         });
-    }, [client, enabled, key]),
+    }, [client, enabled, key, scope]),
   );
 }
 
 export function useOfficialCalls(
   params: OfficialCallsQueryParams = {},
   enabled = true,
+  scope?: string,
 ) {
   const query = useQuery({
-    queryKey: ['officialCalls', params],
+    queryKey: scope ? ['officialCalls', params, scope] : ['officialCalls', params],
     queryFn: ({ signal }) => fetchOfficialCalls(params, signal),
     enabled,
     staleTime: 30 * 1000,
   });
-  useFreshCallsOnFocus(params, enabled);
+  useFreshCallsOnFocus(params, enabled, scope);
   return query;
 }
 
@@ -58,11 +60,12 @@ export function useInfiniteOfficialCalls(
   params: OfficialCallsQueryParams,
   enabled = true,
   performanceDiagnostics = false,
+  scope?: string,
 ) {
   const client = useQueryClient();
   const filtersKey = JSON.stringify(params);
   const query = useInfiniteQuery({
-    queryKey: ['officialCallsPages', params],
+    queryKey: scope ? ['officialCallsPages', params, scope] : ['officialCallsPages', params],
     initialPageParam: undefined as string | undefined,
     queryFn: async ({ pageParam, signal }) => {
       const trace = mapTraceId();
@@ -93,11 +96,11 @@ export function useInfiniteOfficialCalls(
   });
   const { refetch } = query;
   useFocusEffect(useCallback(() => {
-    const state = client.getQueryState(['officialCallsPages', JSON.parse(filtersKey)]);
+    const state = client.getQueryState(scope ? ['officialCallsPages', JSON.parse(filtersKey), scope] : ['officialCallsPages', JSON.parse(filtersKey)]);
     if (enabled && state && (state.isInvalidated || Date.now() - state.dataUpdatedAt >= 30_000)) {
       void refetch();
     }
-  }, [client, enabled, filtersKey, refetch]));
+  }, [client, enabled, filtersKey, refetch, scope]));
   const data = useMemo(() => {
     if (!query.data) return undefined;
     const pages = query.data.pages;

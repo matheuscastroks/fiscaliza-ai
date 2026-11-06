@@ -99,8 +99,7 @@ export const TERRITORY_STATUS_OPTIONS = [
 
 export const TERRITORY_PERIOD_OPTIONS = [
   { value: '30', label: '30 dias da base' },
-  { value: '7', label: '7 dias da base' },
-  { value: '1', label: '1 dia da base' },
+  { value: '90', label: '90 dias da base' },
   { value: 'all', label: 'Todo o período' },
 ];
 

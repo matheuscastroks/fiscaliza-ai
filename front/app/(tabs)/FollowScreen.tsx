@@ -40,7 +40,7 @@ export default function FollowScreen() {
         context={
           user?.name
             ? `Conta de ${user.name.split(' ')[0]} · Chamados salvos`
-            : 'Chamados salvos na sua conta'
+            : 'Chamados salvos neste aparelho'
         }
       />
       <FlatList
@@ -103,7 +103,7 @@ export default function FollowScreen() {
               description={
                 savedCalls.length
                   ? 'Escolha Todos para consultar seus outros chamados.'
-                  : 'Selecione chamados de seu interesse no mapa ou na lista e salve na sua conta para acompanhar atualizações do 1746.'
+                  : 'Selecione chamados de seu interesse no mapa ou na lista e salve neste aparelho para acompanhar atualizações do 1746.'
               }
               action={{
                 title: savedCalls.length

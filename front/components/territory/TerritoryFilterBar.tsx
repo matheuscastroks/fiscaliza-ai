@@ -23,6 +23,8 @@ import {
   type SourceCoverage,
 } from '@/shared/public-data';
 import { layout, spacing } from '@/theme';
+import { RadiusControl } from '@/features/places/RadiusControl';
+import type { RadiusMeters } from '@/features/places/types';
 
 export type TerritoryLayer = 'official' | 'school' | 'health' | 'square';
 
@@ -76,6 +78,9 @@ export interface TerritoryFilterBarProps {
   facilityQueries: Record<FacilityCategory, FacilityLayerQuerySummary>;
   facilitiesConfirmed: boolean;
   padded?: boolean;
+  radiusMeters?: RadiusMeters;
+  onRadiusChange?: (radius: RadiusMeters) => void;
+  radiusLabel?: string;
 }
 
 function TerritoryFilterBarComponent({
@@ -93,6 +98,9 @@ function TerritoryFilterBarComponent({
   totalCalls,
   officialCallsStatus,
   padded = false,
+  radiusMeters,
+  onRadiusChange,
+  radiusLabel,
 }: TerritoryFilterBarProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
@@ -132,13 +140,15 @@ function TerritoryFilterBarComponent({
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.quickChipsStrip}
         >
+          {radiusMeters && onRadiusChange ? <RadiusControl value={radiusMeters} onChange={onRadiusChange} /> : null}
+          {radiusLabel ? <AppText variant="caption" color="muted">{radiusLabel}</AppText> : null}
           {/* Chip de Bairro */}
-          <NeighborhoodPicker
+          {!radiusMeters && <NeighborhoodPicker
             compact
             options={bairroOptions}
             value={neighborhood}
             onChange={onNeighborhoodChange}
-          />
+          />}
 
           {/* Chip Chamados 1746 */}
           <Pressable

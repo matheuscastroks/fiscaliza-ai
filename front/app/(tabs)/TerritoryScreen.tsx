@@ -34,7 +34,10 @@ import React, {
 import { Pressable, FlatList, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams, useIsFocused } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Location from 'expo-location';
+import { useDeviceLocation } from '@/features/places/useDeviceLocation';
+import { useTerritoryFilters } from '@/features/places/useTerritoryFilters';
+import { usePlacesStore } from '@/stores/placesStore';
+import { mapOverlayContext, mapLocationDescription } from '@/features/territory/mapArea';
 import { AppText } from '@/components/ui/AppText';
 import {
   useInfiniteOfficialCalls,
@@ -90,11 +93,11 @@ function TerritoryContent() {
 
   const {
     neighborhoodId: routeNeighborhoodId, layer: routeLayer,
-    startDate, endDate, filters, focusId, lat, lng,
+    startDate, endDate, filters, focusId, lat, lng, fromHome,
     neighborhood: paramNeighborhood,
   } = useLocalSearchParams<{
     neighborhoodId?: string; layer?: string; startDate?: string; endDate?: string;
-    filters?: string; focusId?: string; lat?: string; lng?: string; neighborhood?: string;
+    filters?: string; focusId?: string; lat?: string; lng?: string; neighborhood?: string; fromHome?: string;
   }>();
   const {
     neighborhood,
@@ -127,12 +130,26 @@ function TerritoryContent() {
   const [appliedBounds, setAppliedBounds] = useState<{
     north: number; south: number; east: number; west: number;
   } | null>(null);
-  const [serviceType, setServiceType] = useState<string>('all');
-  const [period, setPeriod] = useState<string>('30');
-  const [search, setSearch] = useState('');
+  const activeSelection = usePlacesStore((s) => s.selection);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setAreaOnly(false);
+    setAppliedBounds(null);
+  }, [activeSelection, routeNeighborhoodId, focusId]);
+  useEffect(() => {
+    if (!fromHome) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setAreaOnly(false); setAppliedBounds(null);
+    router.setParams({ fromHome: undefined, neighborhoodId: undefined, layer: undefined, startDate: undefined, endDate: undefined, focusId: undefined, lat: undefined, lng: undefined, neighborhood: undefined });
+  }, [fromHome]);
+  const territorialFilters = useTerritoryFilters();
+  const { serviceType, period, search, status, selection, setFilter } = territorialFilters;
+  const setServiceType = useCallback((value: string) => setFilter('serviceType', value), [setFilter]);
+  const setPeriod = useCallback((value: string) => setFilter('period', value), [setFilter]);
+  const setSearch = useCallback((value: string) => setFilter('search', value), [setFilter]);
+  const setStatus = useCallback((value: string) => setFilter('status', value), [setFilter]);
   const debouncedSearch = useDebouncedValue(search, 300);
   const appliedSearch = search.trim() ? debouncedSearch.trim() : '';
-  const [status, setStatus] = useState<string>('Não Encerrado');
   const { isListView, setIsListView } = useTerritoryViewMode();
   const { mapVisited, interactionsComplete, visitTrace } = useMapPerformance(isFocused, isListView);
 
@@ -149,18 +166,17 @@ function TerritoryContent() {
   const officialTime = { startDate, endDate, periodDays: startDate || endDate || period === 'all' ? undefined : Number(period) };
   const officialCalls = useInfiniteOfficialCalls(
     {
-      neighborhoodId,
-      bairro: neighborhoodId ? undefined : neighborhood || undefined,
+      ...(areaOnly && appliedBounds ? appliedBounds : routeNeighborhoodId ? { neighborhoodId: routeNeighborhoodId } : territorialFilters.params),
       tipo: serviceType === 'all' ? undefined : serviceType,
       situacao: status === 'all' ? undefined : status,
       ...officialTime,
       search: appliedSearch || undefined,
       limit: 50,
       hasCoordinates: isListView ? undefined : true,
-      ...(areaOnly && appliedBounds ? appliedBounds : {}),
     },
-    isFocused && layers.includes('official'),
+    isFocused && layers.includes('official') && territorialFilters.hydrated && !fromHome,
     mapPerformanceEnabled,
+    territorialFilters.cacheScope,
   );
 
   const bairroOptions = useMemo(
@@ -195,10 +211,11 @@ function TerritoryContent() {
       (n) => n.id === routeNeighborhoodId,
     );
     if (target) setNeighborhood(target.name);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatus('Não Encerrado');
     setServiceType('all');
     setSearch('');
+    // An explicit route change replaces the previous viewport override.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAreaOnly(false);
     setAppliedBounds(null);
     if (['official', 'school', 'health', 'square'].includes(routeLayer || ''))
@@ -209,14 +226,19 @@ function TerritoryContent() {
     neighborhoods.data,
     setNeighborhood,
     setLayers,
+    setSearch, setServiceType, setStatus,
   ]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<{
     ids: string[]; latitude: number; longitude: number;
   } | null>(null);
-  const [locationMessage, setLocationMessage] = useState('');
-  const [locating, setLocating] = useState(false);
+  const { captureLocation, busy: locating, error: locationError } = useDeviceLocation();
+  const capturedLocation = usePlacesStore((s) => s.deviceLocation);
+  const mapOverlay = useMemo(() => mapOverlayContext(selection, capturedLocation, areaOnly || Boolean(routeNeighborhoodId)),
+    [selection, capturedLocation, areaOnly, routeNeighborhoodId]);
+  const locationMessage = locationError || '';
+  const locationContext = mapLocationDescription(selection, capturedLocation);
 
   useEffect(() => {
     if (!focusId) return;
@@ -256,6 +278,7 @@ function TerritoryContent() {
     setIsListView,
     setNeighborhood,
     updateCameraRegion,
+    setSearch, setServiceType, setStatus,
   ]);
 
   const entries = useMemo<Entry[]>(() => {
@@ -320,7 +343,7 @@ function TerritoryContent() {
     Number(Boolean(neighborhood)) +
     Number(status !== 'all') +
     Number(serviceType !== 'all') +
-    Number(period !== '30') +
+    Number(period !== 'all') + Number(selection.kind === 'radius') +
     Number(areaOnly);
 
   const totalCalls = officialCalls.data?.total ?? listed.length;
@@ -329,7 +352,7 @@ function TerritoryContent() {
 
   const lastFittedNeighborhoodRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!neighborhood || areaOnly || focusId) return;
+    if (!neighborhood || areaOnly || focusId || activeSelection.kind === 'radius') return;
     if (lastFittedNeighborhoodRef.current === neighborhood) return;
     if (entries.some((entry) => Boolean(entryLocation(entry)))) {
       lastFittedNeighborhoodRef.current = neighborhood;
@@ -341,6 +364,7 @@ function TerritoryContent() {
     focusId,
     entries,
     municipalOverviewRegion,
+    activeSelection.kind,
     updateCameraRegion,
   ]);
 
@@ -406,7 +430,7 @@ function TerritoryContent() {
   const resetFilters = useCallback(() => {
     setSearch('');
     setServiceType('all');
-    setPeriod('30');
+    setPeriod('all');
     router.setParams({
       neighborhoodId: undefined,
       layer: undefined,
@@ -419,33 +443,14 @@ function TerritoryContent() {
     setNeighborhood('');
     setAreaOnly(false);
     setAppliedBounds(null);
-  }, [setNeighborhood]);
+  }, [setNeighborhood, setSearch, setServiceType, setPeriod, setStatus]);
 
   const locate = async () => {
-    setLocating(true);
-    try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (!permission.granted) {
-        setLocationMessage(
-          'Localização não autorizada. Explore os bairros pelo mapa ou pela lista.',
-        );
-        return;
-      }
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-      updateCameraRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.018,
-        longitudeDelta: 0.018,
-        zoom: 15,
-      });
-      setLocationMessage('');
-    } catch {
-      setLocationMessage('Não foi possível obter a localização atual.');
-    } finally {
-      setLocating(false);
+    const location = await captureLocation();
+    if (location) {
+      router.setParams({ neighborhoodId: undefined, layer: undefined, lat: undefined, lng: undefined, focusId: undefined });
+      setAreaOnly(false); setAppliedBounds(null);
+
     }
   };
 
@@ -493,6 +498,9 @@ function TerritoryContent() {
   }, [setNeighborhood]);
 
   const filterBarProps: TerritoryFilterBarProps = useMemo(() => ({
+    radiusMeters: !areaOnly && !routeNeighborhoodId && selection.kind === 'radius' ? selection.radiusMeters : undefined,
+    onRadiusChange: (value) => { void usePlacesStore.getState().setRadius(value); },
+    radiusLabel: !areaOnly && !routeNeighborhoodId && selection.kind === 'radius' ? layers.some((layer) => layer !== 'official') ? 'Raio só no 1746' : 'Entorno 1746' : undefined,
     search,
     onSearchChange: setSearch,
     onOpenFilters: () => setFiltersOpen(true),
@@ -532,6 +540,8 @@ function TerritoryContent() {
     facilityQueries,
     facilitiesConfirmed,
   }), [
+    selection, areaOnly, routeNeighborhoodId,
+    setSearch, setServiceType, setPeriod, setStatus,
     search,
     setFiltersOpen,
     filtersOpen,
@@ -561,11 +571,11 @@ function TerritoryContent() {
 
   return (
     <View style={[styles.container, !isFocused && mapPerformanceVariant !== 'visible-surface' && { display: 'none' }]}>
-      {locationMessage !== '' && (
+      {(locationMessage !== '' || locationContext !== '') && (
         <View
           style={[
             styles.messageBanner,
-            { top: insets.top + 100, backgroundColor: colors.surface },
+            { top: insets.top + 100, right: 76, backgroundColor: colors.surface },
           ]}
         >
           <AppText
@@ -573,7 +583,7 @@ function TerritoryContent() {
             color="muted"
             accessibilityLiveRegion="polite"
           >
-            {locationMessage}
+              {locationMessage || locationContext}
           </AppText>
         </View>
       )}
@@ -585,6 +595,9 @@ function TerritoryContent() {
             region={region}
             markers={allMapMarkers}
             boundary={boundary.data?.geometry}
+            searchArea={mapOverlay.searchArea}
+            deviceLocation={mapOverlay.deviceLocation}
+            fitSearchArea={!focusId}
             selectedId={selectedId}
             selectedClusterIds={selectedCluster?.ids || null}
             isDark={mode === 'dark'}
@@ -707,7 +720,7 @@ function TerritoryContent() {
               color={colors.ink}
             />
             <AppText variant="caption" style={{ fontWeight: '700' }}>
-              {areaOnly ? 'Mostrar todo o município' : 'Buscar nesta área'}
+              {areaOnly ? 'Voltar ao recorte selecionado' : 'Buscar nesta área'}
             </AppText>
           </Pressable>
         </View>

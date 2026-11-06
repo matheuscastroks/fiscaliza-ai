@@ -26,6 +26,7 @@ import { AppDrawer } from '@/components/ui/AppDrawer';
 import { SignOutSheet } from '@/components/ui/SignOutSheet';
 import { useFollowStore } from '@/stores/followStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
+import { usePlacesStore } from '@/stores/placesStore';
 
 import {
   useFonts,
@@ -60,6 +61,7 @@ export default function RootLayout() {
     const userId = isAuthenticated && user?.id ? user.id : null;
     const municipalityId = user?.municipality?.id || '3304557';
     void useFollowStore.getState().setScope(userId, municipalityId);
+    void usePlacesStore.getState().setScope(userId, municipalityId, user?.neighborhood || '');
     void useTerritoryStore
       .getState()
       .setScope(userId, municipalityId, user?.neighborhood || '');

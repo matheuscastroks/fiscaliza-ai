@@ -17,7 +17,7 @@ function setup(storage) {
       module,
       exports: module.exports,
       require: (name) =>
-        name === '@react-native-async-storage/async-storage'
+        name === './placesStore' ? { usePlacesStore: { getState: () => ({ userId: null, municipalityId: '3304557', selectNeighborhood: async () => true }) } } : name === '@react-native-async-storage/async-storage'
           ? storage
           : name.startsWith('@/')
             ? {}
