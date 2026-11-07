@@ -95,7 +95,7 @@ export function CategoryChips({
             <Ionicons
               name={item.icon}
               size={15}
-              color={isSelected ? colors.canvas : colors.muted}
+              color={isSelected ? colors.onAccentBrand : colors.muted}
             />
             <AppText
               variant="caption"

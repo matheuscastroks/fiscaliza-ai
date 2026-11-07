@@ -61,9 +61,14 @@ export function AuthScreenLayout({
           />
           <View style={[styles.topBar, { paddingTop: topPadding }]}>
             <View style={styles.brandPill}>
-              <AppBrandGlyph size={18} color={colors.white} active />
+              <AppBrandGlyph size={24} variant="onDark" active />
               <AppText style={[styles.brandTitle, { color: colors.white }]}>
-                Fiscaliza aí
+                Fiscaliza{' '}
+                <AppText
+                  style={[styles.brandTitle, { color: colors.brandYellow }]}
+                >
+                  aí
+                </AppText>
               </AppText>
             </View>
             <ThemeToggleButton />

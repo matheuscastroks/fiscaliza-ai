@@ -119,9 +119,15 @@ export function SideMenu({
     >
       <View style={styles.header}>
         <View style={styles.brand}>
-          <AppBrandGlyph size={32} color={colors.ink} active={visible} />
+          <AppBrandGlyph size={32} active={visible} />
           <AppText variant="sectionTitle" style={styles.brandName}>
-            Fiscaliza aí
+            Fiscaliza{' '}
+            <AppText
+              variant="sectionTitle"
+              style={[styles.brandName, { color: colors.onSurfaceBrand }]}
+            >
+              aí
+            </AppText>
           </AppText>
         </View>
         <Pressable
@@ -223,10 +229,18 @@ export function SideMenu({
                     pressed && { opacity: 0.65 },
                   ]}
                 >
-                  <Ionicons name={item.icon} size={21} color={colors.ink} />
+                  <Ionicons
+                    name={item.icon}
+                    size={21}
+                    color={selected ? colors.onSurfaceBrand : colors.ink}
+                  />
                   <AppText style={styles.flex}>{item.label}</AppText>
                   {selected && (
-                    <Ionicons name="checkmark" size={18} color={colors.ink} />
+                    <Ionicons
+                      name="checkmark"
+                      size={18}
+                      color={colors.onSurfaceBrand}
+                    />
                   )}
                 </Pressable>
               );

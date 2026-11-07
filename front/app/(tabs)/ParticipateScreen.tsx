@@ -50,7 +50,7 @@ export default function ParticipateScreen() {
               gap: spacing.sm,
             }}
           >
-            <Ionicons name={service.icon} size={28} color={colors.ink} />
+            <Ionicons name={service.icon} size={28} color={colors.onSurfaceBrand} />
             <AppText variant="sectionTitle">{service.title}</AppText>
             <AppText color="muted">{service.description}</AppText>
             <OfficialChannel url={service.url} title="Ver serviço no 1746" />
@@ -60,7 +60,7 @@ export default function ParticipateScreen() {
           <AppText variant="sectionTitle">Outro assunto?</AppText>
           <OfficialChannel title="Buscar outros serviços no 1746" />
           <AppText variant="caption" color="muted">
-            Você sairá do Fiscaliza Aí. A solicitação e o atendimento acontecem
+            Você sairá do Fiscaliza aí. A solicitação e o atendimento acontecem
             no canal oficial; seus salvos não são enviados.
           </AppText>
         </View>

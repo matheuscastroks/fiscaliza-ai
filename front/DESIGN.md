@@ -3,6 +3,7 @@ name: Fiscaliza aí — aplicativo cidadão
 description: Sistema visual territorial baseado nas referências aprovadas em 18/10/2026.
 colors:
   primary: "#16576C"
+  brandYellow: "#F4B400"
   ink: "#192D35"
   canvas: "#F3F7F8"
   surface: "#FFFFFF"
@@ -166,11 +167,18 @@ Preferir rótulos de tarefa, como “Explorar no mapa”, “Salvar chamado” e
 
 ## Colors
 
-A paleta adota a identidade **Azul-Petróleo Urbana** (`#16576C`), separando estruturalmente os papéis de marca, texto, navegação, seleção e estados cívicos.
+A paleta adota a identidade **Azul-Petróleo Urbana** (`#16576C`) combinada ao amarelo secundário de identidade (`#F4B400`), separando estruturalmente os papéis de marca, texto, navegação, seleção e estados cívicos.
 
-### Identidade de Marca e Ações (`primary` / `accent`)
+### Marca e Logotipo (`AppBrandGlyph` e `AppBrandLockup`)
+
+- **Grafia oficial**: **Fiscaliza aí**, sempre com espaço e acento, sem hífen. Assinatura institucional opcional: *"Seu bairro, em acompanhamento."*
+- **Composição do símbolo**: marcador territorial azul-petróleo (`#16576C` no claro / `#79CBD5` ou `#FFFFFF` no escuro) abrigando as silhuetas dos morros, casas/bairros e o Cristo Redentor, com ponta inferior separada por faixa curva e três raios superiores em amarelo de marca (`#F4B400`).
+- **Preservação bicolor**: `AppBrandGlyph` renderiza o pin (`brand-pin.svg` / `brand-pin-dark.svg` / `brand-pin-on-dark.svg`) e os três raios (`brand-sparkle.svg`) sem aplicar `tintColor` destrutivo, mantendo as duas cores da marca tanto em fundos claros quanto escuros.
+
+### Identidade de Marca e Ações (`primary` / `accent` / `brandYellow`)
 
 - **Azul-Petróleo** (`primary` / `accent`): `#16576C` (modo escuro: `#79CBD5`). Botões primários, links, seleção e destaques interativos.
+- **Amarelo de Marca** (`brandYellow`): `#F4B400` (`onBrandYellow`: `#192D35`, contraste 7,92:1 WCAG AAA). Cor secundária de identidade para elementos da marca, detalhes pontuais e realce do logotipo sobre fundos escuros (9,32:1 a 10,25:1). Nunca usar indiscriminadamente em botões ou fundos amplos, nem confundir com o estado semântico `attention`.
 - **Pills e Seleção Ativa** (`darkPill` e `borderActive`): `#16576C` (modo escuro: `#79CBD5`). A borda ativa de foco e as pílulas de filtros selecionados assumem a cor de marca.
 - **Texto sobre Ações** (`onAccent` / `onPrimary`): `#FFFFFF` no tema claro; `#0E2A33` no tema escuro (garantindo legibilidade e alto contraste sobre os botões preenchidos).
 - **Recipiente Suave** (`primaryContainer` / `surfaceSubdued` / `accentSoft`): `#E0EFF2` (modo escuro: `#1A2C34`). Destaques leves, apoio e filtros secundários.

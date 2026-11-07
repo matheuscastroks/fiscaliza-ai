@@ -43,7 +43,7 @@ export default function HelpScreen() {
           <AppText variant="sectionTitle">Preciso de atendimento</AppText>
           <AppText>
             Na aba Agir, escolha um serviço ou abra o portal oficial do 1746. A
-            solicitação acontece fora do Fiscaliza Aí, no atendimento da
+            solicitação acontece fora do Fiscaliza aí, no atendimento da
             prefeitura. Salvar um registro aqui não gera um protocolo municipal.
           </AppText>
           <AppText variant="sectionTitle">Acompanhar e atualizar</AppText>

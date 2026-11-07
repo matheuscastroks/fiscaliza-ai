@@ -94,7 +94,7 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
           <Ionicons
             name={iconName}
             size={22}
-            color={colors.ink}
+            color={colors.onSurfaceBrand}
             style={{ marginRight: 2 }}
           />
 

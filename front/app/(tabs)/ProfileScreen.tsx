@@ -194,7 +194,7 @@ export default function ProfileScreen() {
               <Ionicons
                 name="camera"
                 size={14}
-                color={colors.onAccent}
+                color={colors.onAccentBrand}
               />
             </View>
           </Pressable>
@@ -207,7 +207,7 @@ export default function ProfileScreen() {
               {user?.email || 'Acesso local'}
             </AppText>
             <View style={styles.statusPill}>
-              <Ionicons name="shield-checkmark" size={13} color={colors.accent} />
+              <Ionicons name="shield-checkmark" size={13} color={colors.onSurfaceBrand} />
               <AppText variant="meta" style={styles.statusPillText}>
                 Cidadão Conectado
               </AppText>
@@ -240,7 +240,7 @@ export default function ProfileScreen() {
             ]}
           >
             <View style={styles.metricHeader}>
-              <Ionicons name="bookmark-outline" size={20} color={colors.accent} />
+              <Ionicons name="bookmark-outline" size={20} color={colors.onSurfaceBrand} />
               <Ionicons name="chevron-forward" size={16} color={colors.muted} />
             </View>
             <AppText variant="screenTitle" style={styles.metricValue}>
@@ -267,7 +267,7 @@ export default function ProfileScreen() {
             ]}
           >
             <View style={styles.metricHeader}>
-              <Ionicons name="navigate-outline" size={20} color={colors.ink} />
+              <Ionicons name="navigate-outline" size={20} color={colors.onSurfaceBrand} />
               <Ionicons name="chevron-forward" size={16} color={colors.muted} />
             </View>
             <AppText variant="screenTitle" style={styles.metricValue}>
@@ -391,7 +391,7 @@ export default function ProfileScreen() {
           />
 
           <AppText variant="meta" color="muted" style={styles.versionFooter}>
-            Fiscaliza.ai · Versão 1.0.0 · Dados Abertos PCRJ
+            Fiscaliza aí · Versão 1.0.0 · Dados Abertos PCRJ
           </AppText>
         </View>
       </ScrollView>

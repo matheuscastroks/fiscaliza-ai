@@ -1,5 +1,5 @@
 import type { circleFeature, pointFeature } from '@/features/territory/mapArea';
-import { lightColors, darkColors } from '@/theme/colors';
+import { lightColors } from '@/theme/colors';
 
 type Circle = ReturnType<typeof circleFeature>;
 type Point = ReturnType<typeof pointFeature>;

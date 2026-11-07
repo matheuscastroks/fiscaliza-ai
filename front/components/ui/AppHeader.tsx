@@ -75,7 +75,19 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             numberOfLines={1}
             style={onBack ? { textAlign: 'center' } : undefined}
           >
-            {title}
+            {title === 'Fiscaliza aí' ? (
+              <>
+                Fiscaliza{' '}
+                <AppText
+                  variant="sectionTitle"
+                  style={{ color: colors.onSurfaceBrand }}
+                >
+                  aí
+                </AppText>
+              </>
+            ) : (
+              title
+            )}
           </AppText>
           {context ? (
             <AppText variant="caption" color="muted" numberOfLines={1}>

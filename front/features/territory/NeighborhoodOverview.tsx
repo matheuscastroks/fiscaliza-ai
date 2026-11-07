@@ -161,7 +161,7 @@ export function NeighborhoodOverview({
       </View>
       <AppText variant="caption" color="muted">
         Fontes: IPP / Prefeitura da Cidade do Rio de Janeiro (SIURB) e DATA.RIO
-        (1746). Fiscaliza Aí é independente. Proximidade não estabelece
+        (1746). Fiscaliza aí é independente. Proximidade não estabelece
         responsabilidade, área de atendimento ou relação causal.
       </AppText>
     </View>

@@ -1,4 +1,4 @@
-# Fiscaliza Aí — Descobrir, fiscalizar e agir no Rio
+# Fiscaliza aí — Descobrir, fiscalizar e agir no Rio
 
 Aplicativo independente que ajuda moradores do Rio de Janeiro (IBGE 3304557) a descobrir o que acontece no bairro, acompanhar a atuação da prefeitura e encontrar como agir. Utiliza demandas do 1746 e cadastros de serviços públicos como apoio à fiscalização e à participação cidadã, com origem e cobertura explícitas. Não representa a prefeitura nem abre chamados no 1746.
 
@@ -22,7 +22,7 @@ CI, merge automático das suas branches e ativação das proteções: [.github/R
 
 ## Integração DATA.RIO & Central 1746 (BigQuery)
 
-O Fiscaliza Aí conecta-se diretamente ao repositório público do DATA.RIO no Google BigQuery:
+O Fiscaliza aí conecta-se diretamente ao repositório público do DATA.RIO no Google BigQuery:
 - **Tabela de chamados**: `datario.adm_central_atendimento_1746.chamado`
 - **Tabela de bairros**: `datario.dados_mestres.bairro`
 

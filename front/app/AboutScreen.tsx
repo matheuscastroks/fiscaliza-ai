@@ -1,5 +1,6 @@
 import { useThemedStyles } from '@/theme/useTheme';
 import { goBack } from '@/utils/navigation';
+import { AppBrandLockup } from '@/components/ui/AppBrandGlyph';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppScreen } from '@/components/ui/AppScreen';
@@ -18,9 +19,10 @@ export default function AboutScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ gap: 20 }}>
+          <AppBrandLockup size="lg" showTagline />
           <AppText variant="sectionTitle">Descobrir, fiscalizar e agir</AppText>
           <AppText>
-            Fiscaliza Aí ajuda você a descobrir o que acontece na sua região,
+            Fiscaliza aí ajuda você a descobrir o que acontece na sua região,
             acompanhar chamados e encontrar atendimento oficial. É uma
             plataforma independente, sem vínculo institucional com a Prefeitura
             do Rio.

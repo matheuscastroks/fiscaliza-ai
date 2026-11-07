@@ -110,8 +110,8 @@ export default function HomeScreen() {
           <View style={styles.heroHeader}>
             <View style={styles.heroText}>
               <View style={styles.badgeRow}>
-                <View style={[styles.pulseDot, { backgroundColor: colors.accent || '#0072BB' }]} />
-                <AppText variant="meta" style={{ color: colors.accent || '#0072BB', fontWeight: '700' }}>
+                <View style={[styles.pulseDot, { backgroundColor: colors.brandYellow }]} />
+                <AppText variant="meta" style={{ color: colors.accent, fontWeight: '700' }}>
                   {totalCount > 0 ? `${totalCount} ocorrências recentes` : 'Exploração territorial'}
                 </AppText>
               </View>

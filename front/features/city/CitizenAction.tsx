@@ -33,7 +33,11 @@ export function CitizenAction({
         minHeight: 100,
       })}
     >
-      <Ionicons name={icon} size={26} color={color} />
+      <Ionicons
+        name={icon}
+        size={26}
+        color={primary ? colors.onAccentBrand : colors.onSurfaceBrand}
+      />
       <View style={{ flex: 1, gap: spacing.xxs }}>
         <AppText variant="label" style={{ color }}>
           {title}

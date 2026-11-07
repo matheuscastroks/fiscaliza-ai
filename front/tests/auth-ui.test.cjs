@@ -85,3 +85,63 @@ test('auth ui: LoginScreen integrates civic hero backdrop and GovBrButton', () =
     'LoginScreen must maintain email/password submit function',
   );
 });
+
+test('brand identity: two-color SVG/PNG assets, AppBrandGlyph variants, and Fiscaliza aí spelling', () => {
+  const brandFiles = [
+    'brand-glyph.svg',
+    'brand-glyph-dark.svg',
+    'brand-glyph-negative.svg',
+    'brand-pin.svg',
+    'brand-pin-dark.svg',
+    'brand-pin-on-dark.svg',
+    'brand-sparkle.svg',
+    'brand-horizontal.svg',
+    'brand-horizontal-dark.svg',
+  ];
+  for (const file of brandFiles) {
+    const p = path.join(ROOT_DIR, 'assets', 'brand', file);
+    assert.ok(fs.existsSync(p), `Brand asset ${file} must exist`);
+  }
+
+  const glyphSvg = fs.readFileSync(
+    path.join(ROOT_DIR, 'assets', 'brand', 'brand-glyph.svg'),
+    'utf8',
+  );
+  assert.ok(glyphSvg.includes('#16576C'), 'Light glyph must contain primary #16576C');
+  assert.ok(glyphSvg.includes('#F4B400'), 'Light glyph must contain brandYellow #F4B400');
+
+  const darkGlyphSvg = fs.readFileSync(
+    path.join(ROOT_DIR, 'assets', 'brand', 'brand-glyph-dark.svg'),
+    'utf8',
+  );
+  assert.ok(darkGlyphSvg.includes('#79CBD5'), 'Dark glyph must contain darkPrimary #79CBD5');
+  assert.ok(darkGlyphSvg.includes('#F4B400'), 'Dark glyph must contain brandYellow #F4B400');
+
+  const glyphComp = fs.readFileSync(
+    path.join(ROOT_DIR, 'components', 'ui', 'AppBrandGlyph.tsx'),
+    'utf8',
+  );
+  assert.ok(
+    !glyphComp.includes('tintColor='),
+    'AppBrandGlyph must not override two-color brand SVGs with tintColor',
+  );
+  assert.ok(
+    glyphComp.includes('export function AppBrandLockup'),
+    'AppBrandGlyph module must export horizontal AppBrandLockup',
+  );
+
+  const appJson = JSON.parse(
+    fs.readFileSync(path.join(ROOT_DIR, 'app.json'), 'utf8'),
+  );
+  assert.equal(appJson.expo.name, 'Fiscaliza aí');
+  assert.equal(appJson.expo.slug, 'fiscaliza-ai');
+
+  const colorsContent = fs.readFileSync(
+    path.join(ROOT_DIR, 'theme', 'colors.ts'),
+    'utf8',
+  );
+  assert.ok(
+    colorsContent.includes("brandYellow: '#F4B400'"),
+    'colors.ts must define brandYellow #F4B400',
+  );
+});

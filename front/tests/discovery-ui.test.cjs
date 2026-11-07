@@ -80,7 +80,10 @@ function component(file, mocks = {}) {
       if (name.endsWith('/AppText')) return { AppText: 'AppText' };
       if (name.endsWith('/AppButton')) return { AppButton: 'AppButton' };
       if (name.endsWith('/AppBrandGlyph'))
-        return { AppBrandGlyph: 'AppBrandGlyph' };
+        return {
+          AppBrandGlyph: 'AppBrandGlyph',
+          AppBrandLockup: 'AppBrandLockup',
+        };
       if (name.endsWith('/ThemeToggleButton'))
         return { ThemeToggleButton: 'ThemeToggleButton' };
       if (name.endsWith('/UserAvatar')) return { UserAvatar: 'UserAvatar' };

@@ -155,7 +155,7 @@ function TerritoryFilterBarComponent({
                 name="warning"
                 size={13}
                 color={
-                  territoryDomain === 'calls' ? colors.onAccent : colors.ink
+                  territoryDomain === 'calls' ? colors.onAccentBrand : colors.ink
                 }
               />
               <AppText
@@ -187,7 +187,7 @@ function TerritoryFilterBarComponent({
                 name="business"
                 size={13}
                 color={
-                  territoryDomain === 'facilities' ? colors.onAccent : colors.ink
+                  territoryDomain === 'facilities' ? colors.onAccentBrand : colors.ink
                 }
               />
               <AppText
@@ -217,7 +217,7 @@ function TerritoryFilterBarComponent({
                 pressed && { opacity: 0.8 },
               ]}
             >
-              <Ionicons name="options" size={12} color={colors.accent} />
+              <Ionicons name="options" size={12} color={colors.onSurfaceBrand} />
               <AppText variant="caption" numberOfLines={1} style={styles.activeFilterText}>
                 {neighborhood ? neighborhood : 'Filtros'}
                 {filterCount > 0 ? ` (${filterCount})` : ''}
@@ -370,7 +370,7 @@ function TerritoryFilterModalComponent({
               name="warning"
               size={15}
               color={
-                territoryDomain === 'calls' ? colors.onAccent : colors.ink
+                territoryDomain === 'calls' ? colors.onAccentBrand : colors.ink
               }
             />
             <AppText
@@ -401,7 +401,9 @@ function TerritoryFilterModalComponent({
               name="business"
               size={15}
               color={
-                territoryDomain === 'facilities' ? colors.onAccent : colors.ink
+                territoryDomain === 'facilities'
+                  ? colors.onAccentBrand
+                  : colors.ink
               }
             />
             <AppText

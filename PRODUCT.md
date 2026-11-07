@@ -1,10 +1,10 @@
-# Fiscaliza Aí — Produto
+# Fiscaliza aí — Produto
 
 ## Posicionamento
 
-Fiscaliza Aí ajuda moradores do Rio a descobrir o que está acontecendo no seu bairro, acompanhar a atuação da prefeitura e saber como agir para melhorar sua região.
+Fiscaliza aí ajuda moradores do Rio a descobrir o que está acontecendo no seu bairro, acompanhar a atuação da prefeitura e saber como agir para melhorar sua região.
 
-**Regra de produto:** o Fiscaliza Aí utiliza dados públicos para tornar a fiscalização e a participação cidadã mais acessíveis. Cada funcionalidade deve ajudar o morador a descobrir, fiscalizar ou agir. A disponibilidade de um dataset, sozinha, não justifica uma funcionalidade.
+**Regra de produto:** o Fiscaliza aí utiliza dados públicos para tornar a fiscalização e a participação cidadã mais acessíveis. Cada funcionalidade deve ajudar o morador a descobrir, fiscalizar ou agir. A disponibilidade de um dataset, sozinha, não justifica uma funcionalidade.
 
 O território organiza a experiência. Demandas do 1746 e equipamentos públicos dão contexto às necessidades dos moradores. A aplicação é independente, não representa a prefeitura e não encaminha contribuições ao 1746.
 

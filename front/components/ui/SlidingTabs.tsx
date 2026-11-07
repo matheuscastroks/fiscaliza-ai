@@ -179,7 +179,7 @@ export function SlidingTabs({
               <Ionicons
                 name={option.icon}
                 size={20}
-                color={active ? colors.onSelection : colors.ink}
+                color={active ? colors.onAccentBrand : colors.ink}
               />
             )}
             <AppText variant="label" color={active ? 'onSelection' : 'ink'}>
