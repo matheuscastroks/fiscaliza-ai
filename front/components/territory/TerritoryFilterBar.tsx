@@ -3,6 +3,7 @@ import type { ThemeColors } from '@/theme/colors';
 import React, { memo, useMemo } from 'react';
 import {
   View,
+  ScrollView,
   StyleSheet,
   Pressable,
   Platform,
@@ -130,92 +131,100 @@ function TerritoryFilterBarComponent({
       </View>
 
       {/* Barra de alternância rápida entre Chamados 1746 e Serviços Públicos */}
-      <View style={padded ? styles.paddedSection : styles.topSwitcherRow}>
-        <View style={styles.domainPillTrack}>
-          <Pressable
-            accessibilityRole="tab"
-            accessibilityLabel="Exibir chamados 1746"
-            accessibilityState={{ selected: territoryDomain === 'calls' }}
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setTerritoryDomain('calls');
-            }}
-            style={[
-              styles.domainPillButton,
-              territoryDomain === 'calls' && styles.domainPillButtonActive,
-            ]}
-          >
-            <Ionicons
-              name="warning"
-              size={13}
-              color={
-                territoryDomain === 'calls' ? colors.onAccent : colors.ink
-              }
-            />
-            <AppText
-              variant="caption"
+      <View style={padded ? styles.paddedSection : undefined}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.topSwitcherScroll}
+        >
+          <View style={styles.domainPillTrack}>
+            <Pressable
+              accessibilityRole="tab"
+              accessibilityLabel="Exibir chamados 1746"
+              accessibilityState={{ selected: territoryDomain === 'calls' }}
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setTerritoryDomain('calls');
+              }}
               style={[
-                styles.domainPillText,
-                territoryDomain === 'calls' && styles.domainPillTextActive,
+                styles.domainPillButton,
+                territoryDomain === 'calls' && styles.domainPillButtonActive,
               ]}
             >
-              1746 · {callsLabel}
-            </AppText>
-          </Pressable>
+              <Ionicons
+                name="warning"
+                size={13}
+                color={
+                  territoryDomain === 'calls' ? colors.onAccent : colors.ink
+                }
+              />
+              <AppText
+                variant="caption"
+                numberOfLines={1}
+                style={[
+                  styles.domainPillText,
+                  territoryDomain === 'calls' && styles.domainPillTextActive,
+                ]}
+              >
+                1746 · {callsLabel}
+              </AppText>
+            </Pressable>
 
-          <Pressable
-            accessibilityRole="tab"
-            accessibilityLabel="Exibir serviços públicos"
-            accessibilityState={{ selected: territoryDomain === 'facilities' }}
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setTerritoryDomain('facilities');
-            }}
-            style={[
-              styles.domainPillButton,
-              territoryDomain === 'facilities' && styles.domainPillButtonActive,
-            ]}
-          >
-            <Ionicons
-              name="business"
-              size={13}
-              color={
-                territoryDomain === 'facilities' ? colors.onAccent : colors.ink
-              }
-            />
-            <AppText
-              variant="caption"
+            <Pressable
+              accessibilityRole="tab"
+              accessibilityLabel="Exibir serviços públicos"
+              accessibilityState={{ selected: territoryDomain === 'facilities' }}
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setTerritoryDomain('facilities');
+              }}
               style={[
-                styles.domainPillText,
-                territoryDomain === 'facilities' && styles.domainPillTextActive,
+                styles.domainPillButton,
+                territoryDomain === 'facilities' && styles.domainPillButtonActive,
               ]}
             >
-              Serviços Públicos
-            </AppText>
-          </Pressable>
-        </View>
+              <Ionicons
+                name="business"
+                size={13}
+                color={
+                  territoryDomain === 'facilities' ? colors.onAccent : colors.ink
+                }
+              />
+              <AppText
+                variant="caption"
+                numberOfLines={1}
+                style={[
+                  styles.domainPillText,
+                  territoryDomain === 'facilities' && styles.domainPillTextActive,
+                ]}
+              >
+                Serviços Públicos
+              </AppText>
+            </Pressable>
+          </View>
 
-        {/* Atalho sutil para filtros específicos */}
-        {hasSpecificActiveFilters && (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Ver filtros aplicados"
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              onOpenFilters();
-            }}
-            style={({ pressed }) => [
-              styles.activeFilterPill,
-              pressed && { opacity: 0.8 },
-            ]}
-          >
-            <Ionicons name="options" size={12} color={colors.accent} />
-            <AppText variant="caption" style={styles.activeFilterText}>
-              {neighborhood ? neighborhood : 'Filtros'}
-              {filterCount > 0 ? ` (${filterCount})` : ''}
-            </AppText>
-          </Pressable>
-        )}
+          {/* Atalho sutil para filtros específicos */}
+          {hasSpecificActiveFilters && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Ver filtros aplicados"
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onOpenFilters();
+              }}
+              style={({ pressed }) => [
+                styles.activeFilterPill,
+                pressed && { opacity: 0.8 },
+              ]}
+            >
+              <Ionicons name="options" size={12} color={colors.accent} />
+              <AppText variant="caption" numberOfLines={1} style={styles.activeFilterText}>
+                {neighborhood ? neighborhood : 'Filtros'}
+                {filterCount > 0 ? ` (${filterCount})` : ''}
+              </AppText>
+            </Pressable>
+          )}
+        </ScrollView>
       </View>
     </View>
   );
@@ -397,6 +406,7 @@ function TerritoryFilterModalComponent({
             />
             <AppText
               variant="caption"
+              numberOfLines={1}
               style={[
                 styles.domainTabButtonText,
                 territoryDomain === 'facilities' &&
@@ -946,7 +956,7 @@ const createStyles = (colors: ThemeColors) =>
       shadowRadius: 8,
       elevation: 4,
     },
-    topSwitcherRow: {
+    topSwitcherScroll: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
@@ -956,6 +966,7 @@ const createStyles = (colors: ThemeColors) =>
     domainPillTrack: {
       flexDirection: 'row',
       alignItems: 'center',
+      flexShrink: 0,
       backgroundColor: colors.surface,
       borderRadius: layout.radius.pill,
       padding: 3,
@@ -971,13 +982,14 @@ const createStyles = (colors: ThemeColors) =>
     domainPillButton: {
       flexDirection: 'row',
       alignItems: 'center',
+      flexShrink: 0,
       gap: 5,
       paddingVertical: 5,
       paddingHorizontal: 10,
       borderRadius: layout.radius.pill,
     },
     domainPillButtonActive: {
-      backgroundColor: colors.ink,
+      backgroundColor: colors.accent,
     },
     domainPillText: {
       fontSize: 12,
@@ -985,12 +997,13 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.ink,
     },
     domainPillTextActive: {
-      color: colors.surface,
+      color: colors.onAccent,
       fontWeight: '700',
     },
     activeFilterPill: {
       flexDirection: 'row',
       alignItems: 'center',
+      flexShrink: 0,
       gap: 4,
       paddingVertical: 6,
       paddingHorizontal: 10,
