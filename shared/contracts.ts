@@ -64,9 +64,13 @@ export interface OfficialCall {
   openedAt: string;
   closedAt?: string | null;
   targetDate?: string | null;
+  diagnosisTargetDate?: string | null;
   withinDeadline?: string | null;
   timeRemaining?: number | null;
   timeUnit?: string | null;
+  deadlineType?: string | null;
+  complaintsCount?: number | null;
+  streetName?: string | null;
   neighborhoodId?: string | null;
   neighborhoodName?: string | null;
   subprefecture?: string | null;

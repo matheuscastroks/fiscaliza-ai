@@ -117,6 +117,9 @@ export async function importPartition(
         openedAt: new Date(c.openedAt),
         closedAt: c.closedAt ? new Date(c.closedAt) : null,
         targetDate: c.targetDate ? new Date(c.targetDate) : null,
+        diagnosisTargetDate: c.diagnosisTargetDate
+          ? new Date(c.diagnosisTargetDate)
+          : null,
         sourcePartitionDate: c.sourcePartitionDate || null,
         importedAt: new Date(),
         updatedAt: new Date(),
@@ -138,9 +141,13 @@ export async function importPartition(
             statusJustification: sql`excluded.status_justification`,
             closedAt: sql`excluded.closed_at`,
             targetDate: sql`excluded.target_date`,
+            diagnosisTargetDate: sql`excluded.diagnosis_target_date`,
             withinDeadline: sql`excluded.within_deadline`,
             timeRemaining: sql`excluded.time_remaining`,
             timeUnit: sql`excluded.time_unit`,
+            deadlineType: sql`excluded.deadline_type`,
+            complaintsCount: sql`excluded.complaints_count`,
+            streetName: sql`excluded.street_name`,
             neighborhoodId: sql`excluded.neighborhood_id`,
             neighborhoodName: sql`excluded.neighborhood_name`,
             subprefecture: sql`excluded.subprefecture`,

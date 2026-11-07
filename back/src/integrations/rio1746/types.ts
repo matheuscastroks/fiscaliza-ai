@@ -6,6 +6,7 @@ export interface RawBigQuery1746Row {
   nome_bairro?: string | null;
   subprefeitura?: string | null;
   id_logradouro?: string | null;
+  nome_logradouro?: string | null;
   numero_logradouro?: number | null;
   nome_unidade_organizacional?: string | null;
   categoria?: string | null;
@@ -16,9 +17,12 @@ export interface RawBigQuery1746Row {
   tipo_situacao?: string | null;
   justificativa_status?: string | null;
   data_alvo_finalizacao?: { value: string } | string | null;
+  data_alvo_diagnostico?: { value: string } | string | null;
   tempo_prazo?: number | null;
   prazo_unidade?: string | null;
+  prazo_tipo?: string | null;
   dentro_prazo?: string | null;
+  reclamacoes?: number | null;
   latitude?: number | null;
   longitude?: number | null;
   data_particao?: { value: string } | string | null;

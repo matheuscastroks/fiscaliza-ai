@@ -80,6 +80,7 @@ export function buildPartitionCallsQuery(
         c.id_bairro,
         b.nome as nome_bairro,
         b.subprefeitura,
+        l.nome_logradouro,
         c.nome_unidade_organizacional,
         c.categoria,
         c.tipo,
@@ -89,15 +90,23 @@ export function buildPartitionCallsQuery(
         c.tipo_situacao,
         c.justificativa_status,
         c.data_alvo_finalizacao,
+        c.data_alvo_diagnostico,
         c.tempo_prazo,
         c.prazo_unidade,
+        c.prazo_tipo,
         c.dentro_prazo,
+        c.reclamacoes,
         c.latitude,
         c.longitude,
         c.data_particao,
         c.updated_at
       FROM \`datario.adm_central_atendimento_1746.chamado\` c
       LEFT JOIN \`datario.dados_mestres.bairro\` b ON c.id_bairro = b.id_bairro
+      LEFT JOIN (
+        SELECT id_logradouro, ANY_VALUE(completo) as nome_logradouro
+        FROM \`datario.dados_mestres.logradouro\`
+        GROUP BY id_logradouro
+      ) l ON c.id_logradouro = l.id_logradouro
       WHERE c.data_particao = DATE(@partitionDate)
       ORDER BY c.id_chamado ASC
       LIMIT @limit

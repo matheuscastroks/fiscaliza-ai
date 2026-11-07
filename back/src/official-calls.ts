@@ -51,9 +51,15 @@ function formatOfficialCall(
     openedAt: row.openedAt.toISOString(),
     closedAt: row.closedAt ? row.closedAt.toISOString() : null,
     targetDate: row.targetDate ? row.targetDate.toISOString() : null,
+    diagnosisTargetDate: row.diagnosisTargetDate
+      ? row.diagnosisTargetDate.toISOString()
+      : null,
     withinDeadline: row.withinDeadline,
     timeRemaining: row.timeRemaining,
     timeUnit: row.timeUnit,
+    deadlineType: row.deadlineType,
+    complaintsCount: row.complaintsCount,
+    streetName: row.streetName,
     neighborhoodId: row.neighborhoodId,
     neighborhoodName: row.neighborhoodName,
     subprefecture: row.subprefecture,

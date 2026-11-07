@@ -53,6 +53,7 @@ export function mapRawRowToOfficialCall(row: RawBigQuery1746Row) {
   const openedAt = extractDateValue(row.data_inicio) || new Date().toISOString();
   const closedAt = extractDateValue(row.data_fim);
   const targetDate = extractDateValue(row.data_alvo_finalizacao);
+  const diagnosisTargetDate = extractDateValue(row.data_alvo_diagnostico);
   const partitionDate = extractDateString(row.data_particao);
 
   return {
@@ -71,9 +72,14 @@ export function mapRawRowToOfficialCall(row: RawBigQuery1746Row) {
     openedAt,
     closedAt,
     targetDate,
+    diagnosisTargetDate,
     withinDeadline: row.dentro_prazo || null,
     timeRemaining: typeof row.tempo_prazo === 'number' ? row.tempo_prazo : null,
     timeUnit: row.prazo_unidade || null,
+    deadlineType: row.prazo_tipo || null,
+    complaintsCount:
+      typeof row.reclamacoes === 'number' ? row.reclamacoes : null,
+    streetName: row.nome_logradouro || null,
     neighborhoodId: row.id_bairro ? String(row.id_bairro) : null,
     neighborhoodName: row.nome_bairro || null,
     subprefecture: row.subprefeitura || null,
