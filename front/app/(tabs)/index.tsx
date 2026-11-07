@@ -1,5 +1,11 @@
-import React from 'react';
-import { ScrollView, View, StyleSheet, RefreshControl } from 'react-native';
+import React, { useState } from 'react';
+import {
+  ScrollView,
+  View,
+  Pressable,
+  StyleSheet,
+  RefreshControl,
+} from 'react-native';
 import { router, useIsFocused } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -12,7 +18,6 @@ import { QueryState } from '@/features/city/CityUI';
 import {
   useOfficialCalls,
   useOfficialFilters,
-  useOfficialOverview,
   useSyncStatus,
 } from '@/features/city/useOfficialCalls';
 import { useFollowStore } from '@/stores/followStore';
@@ -27,13 +32,21 @@ import {
 } from '@/features/territory/selectors';
 import { CitizenAction } from '@/features/city/CitizenAction';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import { layout, spacing, useTheme } from '@/theme';
+import { spacing, useTheme } from '@/theme';
 
 export default function HomeScreen() {
   const active = useIsFocused();
   const { colors, isDark } = useTheme();
   const filters = useTerritoryFilters();
   const search = useDebouncedValue(filters.search, 300);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const hasExtraFilters = Boolean(
+    filters.search.trim() ||
+      filters.status !== 'all' ||
+      filters.period !== 'all',
+  );
+  const showFilterDrawer = filtersOpen || hasExtraFilters;
 
   const calls = useOfficialCalls(
     {
@@ -47,7 +60,6 @@ export default function HomeScreen() {
 
   const options = useOfficialFilters(active);
   const sync = useSyncStatus(active);
-  const overview = useOfficialOverview(undefined, active && filters.period !== 'all');
   const saved = useFollowStore((s) => s.savedCalls);
   const savedReady = useFollowStore((s) => s.hydrated);
 
@@ -63,13 +75,12 @@ export default function HomeScreen() {
   const sectionHeading =
     filters.selection.kind === 'radius' ||
     filters.selection.kind === 'pending-current'
-      ? 'Ocorrências no seu entorno'
+      ? 'Chamados próximos'
       : filters.selection.kind === 'neighborhood'
-      ? `Ocorrências em ${filters.selection.name}`
-      : 'Ocorrências no Rio de Janeiro';
+      ? `Chamados em ${filters.selection.name}`
+      : 'Chamados recentes';
 
   const callsList = calls.data?.calls || [];
-  const totalCount = callsList.length;
 
   return (
     <AppScreen>
@@ -94,97 +105,118 @@ export default function HomeScreen() {
           />
         }
       >
-        {/* Seletor de Lugar Moderno */}
-        <PlaceSelector prompt />
+        {/* 1. Contexto Territorial + Ações de Exploração */}
+        <View style={styles.topTerritoryGroup}>
+          <PlaceSelector prompt />
 
-        {/* Hero Card de Descoberta / Mapa */}
-        <View
-          style={[
-            styles.heroCard,
-            {
-              backgroundColor: isDark ? colors.surfaceSubdued : colors.surface,
-              borderColor: colors.border,
-            },
-          ]}
-        >
-          <View style={styles.heroHeader}>
-            <View style={styles.heroText}>
-              <View style={styles.badgeRow}>
-                <View style={[styles.pulseDot, { backgroundColor: colors.brandYellow }]} />
-                <AppText variant="meta" style={{ color: colors.accent, fontWeight: '700' }}>
-                  {totalCount > 0 ? `${totalCount} ocorrências recentes` : 'Exploração territorial'}
-                </AppText>
-              </View>
-              <AppText variant="sectionTitle" style={styles.heroTitle}>
-                Mapa da sua região
-              </AppText>
-              <AppText variant="caption" color="muted" style={styles.heroSubtitle}>
-                Visualize os pontos georreferenciados no mapa colorido ou veja a listagem detalhada.
-              </AppText>
+          <View style={styles.quickExploreRow}>
+            <View style={styles.quickExploreBtn}>
+              <AppButton
+                title="Explorar no mapa"
+                icon={
+                  <Ionicons
+                    name="map-outline"
+                    size={18}
+                    color={colors.onAccent}
+                  />
+                }
+                onPress={() => explore(false)}
+              />
             </View>
-          </View>
-
-          <View style={styles.heroActions}>
-            <AppButton
-              title="Explorar no mapa"
-              icon={<Ionicons name="map-outline" size={18} color={colors.canvas} />}
-              onPress={() => explore(false)}
-            />
-            <AppButton
-              title="Ver lista"
-              variant="secondary"
-              icon={<Ionicons name="list-outline" size={18} color={colors.ink} />}
-              onPress={() => explore(true)}
-            />
+            <View style={styles.quickExploreBtn}>
+              <AppButton
+                title="Ver lista"
+                variant="secondary"
+                icon={
+                  <Ionicons name="list-outline" size={18} color={colors.ink} />
+                }
+                onPress={() => explore(true)}
+              />
+            </View>
           </View>
         </View>
 
-        {/* Bloco de Busca e Filtros Rápidos */}
-        <View style={{ gap: spacing.sm }}>
-          <View style={styles.feedHeaderCol}>
-            <AppText variant="sectionTitle">{sectionHeading}</AppText>
-            {totalCount > 0 && (
-              <AppText variant="caption" color="muted">
-                Exibindo até 5 mais recentes
+        {/* 2. Chamados Recentes no Entorno */}
+        <View style={styles.feedSection}>
+          <View style={styles.feedHeaderRow}>
+            <AppText variant="sectionTitle" style={styles.feedTitle}>
+              {sectionHeading}
+            </AppText>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ selected: showFilterDrawer }}
+              accessibilityLabel={
+                showFilterDrawer
+                  ? 'Ocultar busca e filtros'
+                  : 'Buscar ou filtrar chamados'
+              }
+              onPress={() => setFiltersOpen((prev) => !prev)}
+              style={({ pressed }) => [
+                styles.filterTogglePill,
+                {
+                  backgroundColor: showFilterDrawer
+                    ? colors.ink
+                    : isDark
+                    ? colors.surfaceSubdued
+                    : colors.surface,
+                  borderColor: showFilterDrawer ? colors.ink : colors.border,
+                  opacity: pressed ? 0.75 : 1,
+                },
+              ]}
+            >
+              <Ionicons
+                name="options-outline"
+                size={15}
+                color={showFilterDrawer ? colors.canvas : colors.ink}
+              />
+              <AppText
+                variant="caption"
+                style={{
+                  fontWeight: '600',
+                  color: showFilterDrawer ? colors.canvas : colors.ink,
+                }}
+              >
+                {showFilterDrawer ? 'Fechar busca' : 'Buscar / Filtrar'}
               </AppText>
-            )}
+            </Pressable>
           </View>
 
-          <AppInput
-            label="Buscar chamados"
-            placeholder="Buscar por serviço, rua ou protocolo..."
-            value={filters.search}
-            onChangeText={(value) => filters.setFilter('search', value)}
-          />
-
-          {/* Chips Visuais de Categoria */}
           <CategoryChips
             value={filters.serviceType}
             onChange={(type) => filters.setFilter('serviceType', type)}
             dynamicTypes={options.data?.tipos}
           />
 
-          {/* Filtros Secundários de Situação e Período */}
-          <View style={styles.secondaryFiltersRow}>
-            <AppSelect
-              compact
-              defaultValue="all"
-              label="Situação"
-              value={filters.status}
-              options={TERRITORY_STATUS_OPTIONS}
-              onChange={(v) => filters.setFilter('status', v)}
-            />
-            <AppSelect
-              compact
-              defaultValue="all"
-              label="Período"
-              value={filters.period}
-              options={TERRITORY_PERIOD_OPTIONS}
-              onChange={(v) => filters.setFilter('period', v)}
-            />
-          </View>
+          {showFilterDrawer && (
+            <View style={styles.filterDrawer}>
+              <AppInput
+                label="Buscar chamados"
+                placeholder="Buscar por serviço, rua ou protocolo..."
+                value={filters.search}
+                onChangeText={(value) => filters.setFilter('search', value)}
+              />
+              <View style={styles.secondaryFiltersRow}>
+                <AppSelect
+                  compact
+                  defaultValue="all"
+                  label="Situação"
+                  value={filters.status}
+                  options={TERRITORY_STATUS_OPTIONS}
+                  onChange={(v) => filters.setFilter('status', v)}
+                />
+                <AppSelect
+                  compact
+                  defaultValue="all"
+                  label="Período"
+                  value={filters.period}
+                  options={TERRITORY_PERIOD_OPTIONS}
+                  onChange={(v) => filters.setFilter('period', v)}
+                />
+              </View>
+            </View>
+          )}
 
-          {/* Mensagens de Estado e Conexão */}
           <QueryState
             loading={calls.isLoading}
             error={calls.error}
@@ -209,7 +241,6 @@ export default function HomeScreen() {
             </View>
           )}
 
-          {/* Empty State Amigável */}
           {calls.data && calls.data.calls.length === 0 && (
             <View
               style={[
@@ -222,46 +253,42 @@ export default function HomeScreen() {
             >
               <Ionicons
                 name="checkmark-done-circle-outline"
-                size={40}
+                size={36}
                 color={colors.ink}
-                style={{ marginBottom: 4 }}
+                style={{ marginBottom: 2 }}
               />
               <AppText variant="sectionTitle" style={styles.emptyTitle}>
-                Tudo tranquilo por aqui
+                Nenhum chamado neste recorte
               </AppText>
               <AppText variant="caption" color="muted" style={styles.emptySubtitle}>
-                Nenhum chamado aberto encontrado nesta área com os filtros atuais.
-                Você pode ampliar o raio no seletor acima ou explorar outras categorias.
+                Não encontramos registros com os filtros atuais. Você pode ampliar o raio acima, trocar a categoria ou abrir o mapa completo.
               </AppText>
             </View>
           )}
 
-          {/* Lista de Chamados com Novos Cards */}
           <NearbyCalls
             calls={callsList}
             selection={filters.selection}
           />
 
-          {/* Rodapé sutil de transparência de dados */}
           <View style={styles.transparencyFooter}>
             <Ionicons name="information-circle-outline" size={14} color={colors.muted} />
             <AppText variant="meta" color="muted" style={styles.transparencyText}>
-              Dados públicos oficiais integrados à Central 1746 da Prefeitura do Rio.
+              Dados públicos oficiais da Central 1746 (Prefeitura do Rio).
               {sync.data?.lastSyncAt
-                ? ` Sincronizado em ${new Date(sync.data.lastSyncAt).toLocaleDateString('pt-BR')}.`
+                ? ` Atualizado em ${new Date(sync.data.lastSyncAt).toLocaleDateString('pt-BR')}.`
                 : ''}
             </AppText>
           </View>
         </View>
 
-        {/* Chamados Salvos / Acompanhados */}
+        {/* 3. Chamados Salvos / Acompanhados */}
         {savedReady && saved.length > 0 && (
-          <View style={{ gap: spacing.sm }}>
+          <View style={styles.savedSection}>
             <View style={styles.feedHeaderRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Ionicons name="heart" size={18} color={colors.risk} />
-                <AppText variant="sectionTitle">Acompanhados por você</AppText>
-              </View>
+              <AppText variant="sectionTitle" style={styles.feedTitle}>
+                Salvos por você
+              </AppText>
               <AppText variant="caption" color="muted">
                 {saved.length} {saved.length === 1 ? 'salvo' : 'salvos'}
               </AppText>
@@ -273,17 +300,17 @@ export default function HomeScreen() {
             />
 
             <AppButton
-              title="Ver meus salvos"
+              title="Ver todos os salvos"
               variant="secondary"
               onPress={() => router.push('/(tabs)/FollowScreen')}
             />
           </View>
         )}
 
-        {/* Ação Cidadã - 1746 */}
+        {/* 4. Ação Cidadã - 1746 */}
         <CitizenAction
-          title="Precisa solicitar um serviço?"
-          description="Acesse o canal oficial de atendimento da Prefeitura do Rio"
+          title="Precisa abrir um protocolo no 1746?"
+          description="Veja como registrar uma demanda e acesse os canais oficiais da prefeitura"
           icon="open-outline"
           onPress={() => router.push('/(tabs)/ParticipateScreen')}
         />
@@ -295,44 +322,26 @@ export default function HomeScreen() {
 const createStyleSheet = StyleSheet?.create || ((s: any) => s);
 
 const styles = createStyleSheet({
-  heroCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: spacing.md || 16,
-    gap: spacing.md || 16,
+  topTerritoryGroup: {
+    gap: spacing.xs || 8,
   },
-  heroHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm || 12,
-  },
-  heroText: {
-    flex: 1,
-    gap: 4,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  pulseDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  heroTitle: {
-    fontSize: 18,
-    lineHeight: 24,
-    fontWeight: '700',
-  },
-  heroSubtitle: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  heroActions: {
+  quickExploreRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: spacing.xs || 8,
+  },
+  quickExploreBtn: {
+    flex: 1,
+    minWidth: 148,
+  },
+  feedSection: {
     gap: spacing.sm || 12,
+  },
+  savedSection: {
+    gap: spacing.sm || 12,
+  },
+  feedTitle: {
+    flex: 1,
   },
   feedHeaderRow: {
     flexDirection: 'row',
@@ -340,8 +349,18 @@ const styles = createStyleSheet({
     justifyContent: 'space-between',
     gap: spacing.xs || 8,
   },
-  feedHeaderCol: {
-    gap: 3,
+  filterTogglePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 38,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  filterDrawer: {
+    gap: spacing.xs || 8,
   },
   secondaryFiltersRow: {
     flexDirection: 'row',
@@ -358,7 +377,7 @@ const styles = createStyleSheet({
     borderRadius: 999,
   },
   emptyCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     padding: spacing.lg || 24,
     alignItems: 'center',
@@ -369,7 +388,7 @@ const styles = createStyleSheet({
   emptyTitle: {
     fontSize: 16,
     lineHeight: 22,
-    fontWeight: '700',
+    fontWeight: '600',
     textAlign: 'center',
   },
   emptySubtitle: {

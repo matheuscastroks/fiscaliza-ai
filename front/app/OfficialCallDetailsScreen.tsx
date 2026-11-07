@@ -1,7 +1,11 @@
 import { OfficialChannel } from '@/features/city/OfficialChannel';
 import { isOfficialCallClosed } from '@/shared/official-call-state';
 import React, { useEffect, useState } from 'react';
-import { officialCallStatus } from '@/features/city/officialCallStatus';
+import {
+  officialCallStatus,
+  resolveOfficialCallDeadline,
+} from '@/features/city/officialCallStatus';
+import { resolveServiceCategoryTheme } from '@/features/city/officialCategoryThemes';
 import {
   View,
   StyleSheet,
@@ -31,7 +35,8 @@ export default function OfficialCallDetailsScreen() {
   const [saveFailed, setSaveFailed] = useState(false);
   const styles = useThemedStyles(createStyles);
 
-  const { data, isLoading, isError, refetch, isRefetching } = useOfficialCall(id);
+  const { data, isLoading, isError, refetch, isRefetching } =
+    useOfficialCall(id);
   const savedCalls = useFollowStore((s) => s.savedCalls);
   const toggleSavedCall = useFollowStore((s) => s.toggleSavedCall);
   const { busy, hydrated, persistenceError, updateSnapshots } =
@@ -80,8 +85,13 @@ export default function OfficialCallDetailsScreen() {
   }
 
   const isClosed = isOfficialCallClosed(item);
-
   const status = officialCallStatus(item, colors, isDark);
+  const deadlineInfo = resolveOfficialCallDeadline(item, isClosed);
+  const categoryTheme = resolveServiceCategoryTheme(
+    item.serviceType,
+    item.serviceSubtype,
+  );
+
   const save = async () => {
     setSaveFailed(false);
     try {
@@ -108,12 +118,47 @@ export default function OfficialCallDetailsScreen() {
     }
   };
 
+  const formatSla = () => {
+    if (item.timeRemaining == null || item.timeRemaining <= 0) return null;
+    const rawUnit = (item.timeUnit || '').trim().toUpperCase();
+    const unitLabel =
+      rawUnit === 'D' || rawUnit.startsWith('DIA')
+        ? item.timeRemaining === 1
+          ? 'dia'
+          : 'dias'
+        : rawUnit === 'H' || rawUnit.startsWith('HORA')
+        ? item.timeRemaining === 1
+          ? 'hora'
+          : 'horas'
+        : rawUnit === 'M' ||
+          rawUnit.startsWith('MES') ||
+          rawUnit.startsWith('MÊS')
+        ? item.timeRemaining === 1
+          ? 'mês'
+          : 'meses'
+        : item.timeUnit || 'dias';
+    const typeSuffix =
+      item.deadlineType === 'D'
+        ? ' (diagnóstico)'
+        : item.deadlineType === 'F'
+        ? ' (finalização)'
+        : '';
+    return `${item.timeRemaining} ${unitLabel}${typeSuffix}`;
+  };
+
+  const slaLabel = formatSla();
+  const fullLocationLabel = [
+    item.streetName,
+    item.neighborhoodName,
+    item.subprefecture,
+    'Rio de Janeiro',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
   return (
     <AppScreen>
-      <AppHeader
-        title="Chamado 1746"
-        onBack={() => goBack()}
-      />
+      <AppHeader title="Chamado 1746" onBack={() => goBack()} />
 
       <ScrollView
         refreshControl={
@@ -143,38 +188,60 @@ export default function OfficialCallDetailsScreen() {
           </AppText>
         )}
         {(persistenceError || saveFailed) && (
-          <AppText color="risk" accessibilityRole="alert" accessibilityLiveRegion="polite">
-            {persistenceError || 'Não foi possível salvar. Toque no coração para tentar novamente.'}
+          <AppText
+            color="risk"
+            accessibilityRole="alert"
+            accessibilityLiveRegion="polite"
+          >
+            {persistenceError ||
+              'Não foi possível salvar. Toque no coração para tentar novamente.'}
           </AppText>
         )}
-        {/* Attribution Badge + Save Action */}
+
+        {/* Cabeçalho editorial do chamado (sem card aninhado) */}
         <View style={styles.officialHeaderBadge}>
-          <View style={{ flex: 1, gap: spacing.xxs }}>
-            <AppText variant="caption" color="muted">
-              Central 1746 · {item.serviceType}
-            </AppText>
+          <View style={styles.headerTextCol}>
+            <View style={styles.categoryLine}>
+              <Ionicons
+                name={
+                  categoryTheme.icon as React.ComponentProps<
+                    typeof Ionicons
+                  >['name']
+                }
+                size={15}
+                color={colors.muted}
+              />
+              <AppText variant="caption" color="muted" numberOfLines={1}>
+                Central 1746 · {item.serviceType}
+              </AppText>
+            </View>
             <AppText variant="screenTitle" style={styles.mainTitle}>
               {item.serviceSubtype || item.serviceType}
             </AppText>
-            <AppText variant="caption" color="muted" selectable>
+            <AppText variant="protocol" color="muted" selectable>
               Protocolo {item.externalId}
             </AppText>
           </View>
+
           <Pressable
             disabled={!hydrated || busy}
             onPress={() => {
               void save();
             }}
             accessibilityRole="checkbox"
-            accessibilityState={{ checked: isSaved, disabled: !hydrated || busy, busy }}
+            accessibilityState={{
+              checked: isSaved,
+              disabled: !hydrated || busy,
+              busy,
+            }}
             accessibilityLabel={
               isSaved
                 ? 'Remover dos chamados salvos neste aparelho'
                 : 'Salvar chamado neste aparelho para acompanhar'
             }
-            style={[
+            style={({ pressed }) => [
               styles.saveButton,
-              { opacity: !hydrated || busy ? 0.5 : 1 },
+              { opacity: !hydrated || busy ? 0.5 : pressed ? 0.75 : 1 },
             ]}
           >
             <Ionicons
@@ -189,31 +256,62 @@ export default function OfficialCallDetailsScreen() {
           <View style={styles.neighborhood}>
             <Ionicons name="location-outline" size={16} color={colors.muted} />
             <AppText variant="meta" color="muted" style={{ flex: 1 }}>
-              {item.neighborhoodName || 'Bairro não informado'}
+              {[item.streetName, item.neighborhoodName || 'Bairro não informado']
+                .filter(Boolean)
+                .join(' · ')}
             </AppText>
           </View>
           <View style={styles.statusRow}>
-            <View style={[styles.statusIndicator, { backgroundColor: status.color }]} />
-            <AppText variant="meta" style={{ color: status.color, flexShrink: 1 }}>
+            <View
+              style={[
+                styles.statusIndicator,
+                { backgroundColor: status.color },
+              ]}
+            />
+            <AppText
+              variant="meta"
+              style={{ color: status.color, flexShrink: 1 }}
+            >
               {status.label}
             </AppText>
           </View>
         </View>
 
-        {/* Status / Situation Card */}
+        {/* Seção: Atendimento */}
         <View style={styles.sectionCard}>
           <AppText variant="sectionTitle" style={styles.sectionHeading}>
             Atendimento
           </AppText>
 
-          {item.organizationName && (
+          {item.organizationName ? (
             <AppText variant="body">{item.organizationName}</AppText>
+          ) : (
+            <AppText variant="body" color="muted">
+              Órgão municipal não informado
+            </AppText>
           )}
-          {item.officialSituationType ? (
+
+          {item.serviceCategory || item.officialSituationType ? (
             <AppText variant="caption" color="muted">
-              Tipo: {item.officialSituationType}
+              {[
+                item.serviceCategory,
+                item.officialSituationType
+                  ? `Tipo: ${item.officialSituationType}`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </AppText>
           ) : null}
+
+          {item.complaintsCount != null && item.complaintsCount > 0 ? (
+            <AppText variant="caption" color="muted">
+              {item.complaintsCount === 1
+                ? '1 reclamação registrada neste protocolo'
+                : `${item.complaintsCount} reclamações registradas neste protocolo`}
+            </AppText>
+          ) : null}
+
           {isClosed && (
             <AppText color="muted" variant="caption">
               Encerrado no 1746. Esse estado administrativo não confirma a
@@ -223,11 +321,7 @@ export default function OfficialCallDetailsScreen() {
 
           {item.statusJustification ? (
             <View style={styles.justificationBox}>
-              <AppText
-                variant="caption"
-                color="muted"
-                style={{ fontWeight: '700' }}
-              >
+              <AppText variant="caption" color="muted">
                 Justificativa oficial
               </AppText>
               <AppText variant="body" color="ink">
@@ -237,7 +331,7 @@ export default function OfficialCallDetailsScreen() {
           ) : null}
         </View>
 
-        {/* Timelines and Deadlines */}
+        {/* Seção: Prazos e datas */}
         <View style={styles.sectionCard}>
           <AppText variant="sectionTitle" style={styles.sectionHeading}>
             Prazos e datas
@@ -262,6 +356,28 @@ export default function OfficialCallDetailsScreen() {
               </AppText>
             </View>
 
+            {slaLabel ? (
+              <View style={styles.gridItem}>
+                <AppText variant="caption" color="muted">
+                  Prazo da Carta de Serviços
+                </AppText>
+                <AppText variant="label" color="ink">
+                  {slaLabel}
+                </AppText>
+              </View>
+            ) : null}
+
+            {item.diagnosisTargetDate ? (
+              <View style={styles.gridItem}>
+                <AppText variant="caption" color="muted">
+                  Previsão de diagnóstico
+                </AppText>
+                <AppText variant="label" color="ink">
+                  {formatDate(item.diagnosisTargetDate)}
+                </AppText>
+              </View>
+            ) : null}
+
             {item.closedAt ? (
               <View style={styles.gridItem}>
                 <AppText variant="caption" color="muted">
@@ -273,43 +389,47 @@ export default function OfficialCallDetailsScreen() {
               </View>
             ) : null}
 
-            {item.withinDeadline ? (
+            {deadlineInfo ? (
               <View style={styles.gridItem}>
                 <AppText variant="caption" color="muted">
                   Conformidade de prazo
                 </AppText>
-                <AppText variant="label">
-                  {item.withinDeadline}
+                <AppText
+                  variant="label"
+                  color={deadlineInfo.isOverdue ? 'risk' : 'ink'}
+                >
+                  {deadlineInfo.label}
                 </AppText>
               </View>
             ) : null}
           </View>
         </View>
 
-        {/* Territory & Map */}
+        {/* Seção: Localização */}
         <View style={styles.sectionCard}>
           <AppText variant="sectionTitle" style={styles.sectionHeading}>
             Localização
           </AppText>
           <View style={styles.locationSummary}>
             <Ionicons name="location-outline" size={18} color={colors.ink} />
-            <AppText variant="body" color="ink" style={{ flex: 1 }}>
-              {[item.neighborhoodName, item.subprefecture, 'Rio de Janeiro']
-                .filter(Boolean)
-                .join(' · ')}
+            <AppText variant="body" color="ink" style={{ flex: 1 }} selectable>
+              {fullLocationLabel}
             </AppText>
           </View>
 
-          {item.latitude != null && item.longitude != null &&
-          Number.isFinite(item.latitude) && Number.isFinite(item.longitude) &&
-          Math.abs(item.latitude) <= 90 && Math.abs(item.longitude) <= 180 ? (
+          {item.latitude != null &&
+          item.longitude != null &&
+          Number.isFinite(item.latitude) &&
+          Number.isFinite(item.longitude) &&
+          Math.abs(item.latitude) <= 90 &&
+          Math.abs(item.longitude) <= 180 ? (
             <View style={styles.mapContainer}>
               <ItemLocationMap
                 id={item.id}
                 latitude={item.latitude}
                 longitude={item.longitude}
                 neighborhood={item.neighborhoodName || undefined}
-                address={item.neighborhoodName || 'Rio de Janeiro'}
+                address={fullLocationLabel}
                 title={item.serviceSubtype}
                 color={status.color}
                 height={200}
@@ -328,24 +448,14 @@ export default function OfficialCallDetailsScreen() {
           )}
         </View>
 
-        {/* Citizen Information & 1746 Channels */}
+        {/* Seção: Fonte e atendimento oficial */}
         <View style={[styles.sectionCard, styles.infoCard]}>
-          <View style={styles.infoCardHeader}>
-            <Ionicons
-              name="information-circle"
-              size={20}
-              color={colors.accent}
-            />
-            <AppText
-              variant="sectionTitle"
-              color="ink"
-              style={{ fontSize: 16 }}
-            >
-              Fonte e atendimento oficial
-            </AppText>
-          </View>
+          <AppText variant="sectionTitle" style={styles.sectionHeading}>
+            Fonte e atendimento oficial
+          </AppText>
           <AppText variant="caption" color="muted" style={{ lineHeight: 18 }}>
-            Fonte: DATA.RIO, da Prefeitura do Rio de Janeiro. O Fiscaliza aí é independente da prefeitura.
+            Fonte: DATA.RIO, da Prefeitura do Rio de Janeiro. O Fiscaliza aí é
+            independente da prefeitura.
           </AppText>
           <AppText variant="caption" color="muted">
             O atendimento acontece no canal oficial da prefeitura.
@@ -376,6 +486,15 @@ function createStyles(colors: ThemeColors) {
       justifyContent: 'space-between',
       paddingVertical: spacing.xs,
       gap: spacing.sm,
+    },
+    headerTextCol: {
+      flex: 1,
+      gap: spacing.xxs,
+    },
+    categoryLine: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xxs,
     },
     saveButton: {
       width: 48,
@@ -409,7 +528,7 @@ function createStyles(colors: ThemeColors) {
     },
     sectionHeading: {
       fontSize: 16,
-      marginBottom: spacing.xs,
+      marginBottom: spacing.xxs,
     },
     statusRow: {
       flexDirection: 'row',
@@ -452,11 +571,6 @@ function createStyles(colors: ThemeColors) {
     },
     infoCard: {
       gap: spacing.sm,
-    },
-    infoCardHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.xs,
     },
   });
 }

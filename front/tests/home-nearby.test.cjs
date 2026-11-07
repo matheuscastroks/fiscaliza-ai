@@ -10,8 +10,9 @@ function setup(ready = true) {
   const code = ts.transpileModule(fs.readFileSync('app/(tabs)/index.tsx', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
   const mod = { exports: {} };
   vm.runInThisContext('(function(require,module,exports){' + code + '\n})')((name) => {
+    if (name === 'react') return { useState: (init) => [init, () => {}] };
     if (name === 'react/jsx-runtime') return { jsx, jsxs: jsx };
-    if (name === 'react-native') return { View: 'View', ScrollView: 'ScrollView', RefreshControl: 'RefreshControl' };
+    if (name === 'react-native') return { View: 'View', ScrollView: 'ScrollView', Pressable: 'Pressable', RefreshControl: 'RefreshControl' };
     if (name === 'expo-router') return { router: { push: value => { destination = value; } }, useIsFocused: () => true };
     if (name === '@/theme') return { spacing: {}, useTheme: () => ({ colors: {} }) };
     if (name === '@/features/city/useOfficialCalls') return {

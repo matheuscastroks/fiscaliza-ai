@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import { View, Pressable, StyleSheet, LayoutAnimation } from 'react-native';
+import { View, Pressable, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppSelect } from '@/components/ui/AppSelect';
+import {
+  AppBottomSheetModal,
+  BottomSheetView,
+} from '@/components/ui/AppBottomSheetModal';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { usePlacesStore } from '@/stores/placesStore';
 import { useDeviceLocation } from './useDeviceLocation';
@@ -15,13 +20,15 @@ import type { TerritorySelection } from './types';
 
 export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
   const { colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
   const state = usePlacesStore();
   const { selection, places, setRadius } = state;
   const device = useDeviceLocation();
-  const [expandedSelection, setExpandedSelection] = useState<TerritorySelection | null>(null);
+  const [expandedSelection, setExpandedSelection] =
+    useState<TerritorySelection | null>(null);
 
-  const expanded = expandedSelection === selection;
-  const setExpanded = (value: boolean) =>
+  const sheetOpen = expandedSelection === selection;
+  const setSheetOpen = (value: boolean) =>
     setExpandedSelection(value ? selection : null);
 
   if (!state.hydrated) {
@@ -44,7 +51,11 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
 
   const subtitle =
     selection.kind === 'radius'
-      ? `${selection.radiusMeters >= 1000 ? `${selection.radiusMeters / 1000} km` : `${selection.radiusMeters} m`} de raio${
+      ? `${
+          selection.radiusMeters >= 1000
+            ? `${selection.radiusMeters / 1000} km`
+            : `${selection.radiusMeters} m`
+        } de raio${
           selection.neighborhood?.name ? ` · ${selection.neighborhood.name}` : ''
         }`
       : selection.kind === 'neighborhood'
@@ -65,7 +76,7 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
       {prompt && (
         <LocationEntryPrompt
           busy={device.busy}
-          onChoose={() => setExpanded(true)}
+          onChoose={() => setSheetOpen(true)}
           onLocate={() => {
             void device.captureLocation();
           }}
@@ -83,29 +94,32 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
         ]}
       >
         <Pressable
-          onPress={() => {
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-            setExpanded(!expanded);
-          }}
+          onPress={() => setSheetOpen(true)}
           accessibilityRole="button"
-          accessibilityLabel={`Local atual: ${title}, ${subtitle}. Toque para alterar.`}
-          style={styles.cardHeader}
+          accessibilityLabel={`Local atual: ${title}, ${subtitle}. Toque para trocar local.`}
+          style={({ pressed }) => [
+            styles.cardHeader,
+            pressed && { opacity: 0.8 },
+          ]}
         >
-          <Ionicons
-            name={iconName}
-            size={22}
-            color={colors.onSurfaceBrand}
-            style={{ marginRight: 2 }}
-          />
+          <View
+            style={[
+              styles.iconCircle,
+              {
+                backgroundColor: isDark
+                  ? colors.surface
+                  : colors.surfaceSubdued,
+              },
+            ]}
+          >
+            <Ionicons name={iconName} size={18} color={colors.ink} />
+          </View>
 
           <View style={styles.headerInfo}>
-            <AppText variant="meta" color="muted" style={styles.microLabel}>
-              LOCAL DE FISCALIZAÇÃO
-            </AppText>
-            <AppText variant="sectionTitle" numberOfLines={1} style={styles.locationTitle}>
+            <AppText variant="label" numberOfLines={1}>
               {title}
             </AppText>
-            <AppText variant="caption" color="muted" numberOfLines={1} style={styles.locationSubtitle}>
+            <AppText variant="caption" color="muted" numberOfLines={1}>
               {subtitle}
             </AppText>
           </View>
@@ -113,24 +127,25 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
           <View
             style={[
               styles.changeBadge,
-              { backgroundColor: isDark ? colors.surface : '#F1F5F9' },
+              {
+                backgroundColor: isDark
+                  ? colors.surface
+                  : colors.surfaceSubdued,
+              },
             ]}
           >
-            <AppText variant="caption" style={[styles.changeText, { color: colors.ink }]}>
-              {expanded ? 'Fechar' : 'Alterar'}
+            <AppText variant="caption" style={styles.changeText}>
+              Trocar local
             </AppText>
-            <Ionicons
-              name={expanded ? 'chevron-up' : 'chevron-down'}
-              size={14}
-              color={colors.ink}
-            />
+            <Ionicons name="chevron-down" size={14} color={colors.ink} />
           </View>
         </Pressable>
 
-        {/* Inline Radius Control when in radius mode (quick 1-tap change!) */}
-        {selection.kind === 'radius' && !expanded && (
+        {/* Raio sempre visível quando em modo raio */}
+        {selection.kind === 'radius' && (
           <View style={styles.inlineRadius}>
             <RadiusControl
+              compact
               value={selection.radiusMeters}
               onChange={(radius) => {
                 void setRadius(radius);
@@ -139,11 +154,12 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
           </View>
         )}
 
-        {/* State for pending current location */}
+        {/* Estado pendente de localização atual */}
         {selection.kind === 'pending-current' && (
           <View style={styles.pendingArea}>
             <AppText variant="caption" color="muted">
-              Sua posição anterior não foi salva. Atualize o GPS para consultar o entorno.
+              Sua posição anterior não foi salva. Atualize o GPS para consultar
+              o entorno.
             </AppText>
             <AppButton
               title="Atualizar localização"
@@ -154,91 +170,104 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
             />
           </View>
         )}
+      </View>
 
-        {/* Expanded Options Drawer */}
-        {expanded && (
-          <View style={[styles.drawer, { borderTopColor: colors.border }]}>
-            {selection.kind === 'radius' && (
-              <View style={{ gap: spacing.xs }}>
-                <RadiusControl
-                  value={selection.radiusMeters}
-                  onChange={(radius) => {
-                    void setRadius(radius);
+      {/* Bottom Sheet de Troca de Local */}
+      <AppBottomSheetModal
+        visible={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title="Trocar local"
+        enableDynamicSizing
+      >
+        <BottomSheetView
+          style={[
+            styles.sheetContent,
+            { paddingBottom: Math.max(insets.bottom + spacing.md, spacing.xxl) },
+          ]}
+        >
+          {selection.kind === 'radius' && (
+            <View style={{ gap: spacing.xs }}>
+              <RadiusControl
+                value={selection.radiusMeters}
+                onChange={(radius) => {
+                  void setRadius(radius);
+                }}
+              />
+              {selection.neighborhood && (
+                <AppButton
+                  title={`Ver todo o bairro ${selection.neighborhood.name}`}
+                  variant="secondary"
+                  onPress={() => {
+                    if (selection.neighborhood) {
+                      void state.selectNeighborhood(
+                        selection.neighborhood.name,
+                        selection.neighborhood.id,
+                      );
+                      setSheetOpen(false);
+                    }
                   }}
                 />
-                {selection.neighborhood && (
-                  <AppButton
-                    title={`Ver todo o bairro ${selection.neighborhood.name}`}
-                    variant="secondary"
-                    onPress={() => {
-                      if (selection.neighborhood) {
-                        void state.selectNeighborhood(
-                          selection.neighborhood.name,
-                          selection.neighborhood.id,
-                        );
-                        setExpanded(false);
-                      }
-                    }}
-                  />
-                )}
-              </View>
-            )}
-
-            {places.length > 0 && (
-              <AppSelect
-                clearable={false}
-                label="Lugares salvos"
-                value={activePlace?.id || ''}
-                options={[
-                  { value: '', label: 'Selecione um lugar salvo...' },
-                  ...places.map((p) => ({ value: p.id, label: p.name })),
-                ]}
-                onChange={(id) => {
-                  if (id) {
-                    void state.selectPlace(id);
-                    setExpanded(false);
-                  }
-                }}
-              />
-            )}
-
-            <View style={{ gap: spacing.xs }}>
-              <AppText variant="caption" color="muted" style={{ fontWeight: '600' }}>
-                Consultar por bairro:
-              </AppText>
-              <NeighborhoodPicker
-                options={[]}
-                value={selection.kind === 'neighborhood' ? selection.name : ''}
-                onChange={(name) => {
-                  void state.dismissPrompt();
-                  void state.selectNeighborhood(name);
-                  setExpanded(false);
-                }}
-              />
+              )}
             </View>
+          )}
 
-            <View style={styles.drawerActions}>
-              <AppButton
-                title={
-                  selection.kind === 'radius' && selection.source === 'current'
-                    ? 'Atualizar GPS'
-                    : 'Usar minha localização'
+          {places.length > 0 && (
+            <AppSelect
+              clearable={false}
+              label="Lugares salvos"
+              value={activePlace?.id || ''}
+              options={[
+                { value: '', label: 'Selecione um lugar salvo...' },
+                ...places.map((p) => ({ value: p.id, label: p.name })),
+              ]}
+              onChange={(id) => {
+                if (id) {
+                  void state.selectPlace(id);
+                  setSheetOpen(false);
                 }
-                variant="secondary"
-                loading={device.busy}
-                onPress={() => {
-                  void device.captureLocation();
-                }}
-              />
-              <AppButton
-                title="Meus lugares salvos"
-                variant="secondary"
-                onPress={() => router.push('/PlacesScreen')}
-              />
-            </View>
+              }}
+            />
+          )}
+
+          <View style={{ gap: spacing.xs }}>
+            <AppText variant="caption" color="muted">
+              Consultar por bairro
+            </AppText>
+            <NeighborhoodPicker
+              options={[]}
+              value={selection.kind === 'neighborhood' ? selection.name : ''}
+              onChange={(name) => {
+                void state.dismissPrompt();
+                void state.selectNeighborhood(name);
+                setSheetOpen(false);
+              }}
+            />
           </View>
-        )}
-      </View>
+
+          <View style={styles.sheetActions}>
+            <AppButton
+              title={
+                selection.kind === 'radius' && selection.source === 'current'
+                  ? 'Atualizar GPS'
+                  : 'Usar minha localização'
+              }
+              variant="secondary"
+              loading={device.busy}
+              onPress={() => {
+                void device.captureLocation();
+              }}
+            />
+            <AppButton
+              title="Meus lugares salvos"
+              variant="secondary"
+              onPress={() => {
+                setSheetOpen(false);
+                router.push('/PlacesScreen');
+              }}
+            />
+          </View>
+        </BottomSheetView>
+      </AppBottomSheetModal>
 
       {(device.error || state.error) && (
         <AppText color="risk" accessibilityRole="alert" style={styles.errorText}>
@@ -247,7 +276,11 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
       )}
 
       {state.notice && (
-        <AppText color="muted" accessibilityLiveRegion="polite" style={styles.noticeText}>
+        <AppText
+          color="muted"
+          accessibilityLiveRegion="polite"
+          style={styles.noticeText}
+        >
           {state.notice}
         </AppText>
       )}
@@ -260,33 +293,27 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   locationCard: {
-    borderRadius: layout.radius.card,
+    borderRadius: layout.radius.panel,
     borderWidth: 1,
     overflow: 'hidden',
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     gap: spacing.sm,
+  },
+  iconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerInfo: {
     flex: 1,
     gap: 1,
-  },
-  microLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-  },
-  locationTitle: {
-    fontSize: 17,
-    lineHeight: 22,
-    fontWeight: '700',
-  },
-  locationSubtitle: {
-    fontSize: 13,
-    lineHeight: 17,
   },
   changeBadge: {
     flexDirection: 'row',
@@ -309,14 +336,12 @@ const styles = StyleSheet.create({
     paddingTop: 0,
     gap: spacing.xs,
   },
-  drawer: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    padding: spacing.md,
+  sheetContent: {
+    paddingHorizontal: spacing.contentPadding,
+    paddingTop: spacing.xs,
     gap: spacing.md,
   },
-  drawerActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  sheetActions: {
     gap: spacing.xs,
   },
   errorText: {

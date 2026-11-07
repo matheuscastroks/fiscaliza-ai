@@ -50,6 +50,19 @@ export const OfficialCallRow = memo(function OfficialCallRow({
         month: '2-digit',
         year: 'numeric',
       });
+
+  const locationText = [
+    call.streetName,
+    call.neighborhoodName || 'Bairro não informado',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  const slaShort =
+    call.timeRemaining != null && call.timeRemaining > 0
+      ? `${call.timeRemaining}${(call.timeUnit || '').toUpperCase().startsWith('H') ? 'h' : 'd'}`
+      : null;
+
   const toggle = async () => {
     setSaveError('');
     try {
@@ -68,7 +81,7 @@ export const OfficialCallRow = memo(function OfficialCallRow({
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={`${title}. ${call.neighborhoodName || 'Bairro não informado'}. ${situation}. ${openedLabel}. Protocolo ${call.externalId}. Ver detalhes do chamado.`}
+        accessibilityLabel={`${title}. ${locationText}. ${situation}. ${openedLabel}. Protocolo ${call.externalId}. Ver detalhes do chamado.`}
         style={({ pressed }) => [styles.pressable, pressed && { opacity: 0.85 }]}
       >
         {/* Header: Categoria e Ações */}
@@ -92,10 +105,16 @@ export const OfficialCallRow = memo(function OfficialCallRow({
             <View
               style={[
                 styles.statusBadge,
-                { backgroundColor: isDark ? statusColor + '25' : statusColor + '18' },
+                {
+                  backgroundColor: isDark
+                    ? statusColor + '25'
+                    : statusColor + '18',
+                },
               ]}
             >
-              <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+              <View
+                style={[styles.statusDot, { backgroundColor: statusColor }]}
+              />
               <AppText
                 variant="caption"
                 style={[styles.statusText, { color: statusColor }]}
@@ -137,30 +156,33 @@ export const OfficialCallRow = memo(function OfficialCallRow({
         </View>
 
         {/* Título */}
-        <AppText
-          variant="sectionTitle"
-          numberOfLines={2}
-          style={styles.title}
-        >
+        <AppText variant="sectionTitle" numberOfLines={2} style={styles.title}>
           {title}
         </AppText>
 
         {/* Localização */}
         <View style={styles.locationRow}>
-          <Ionicons
-            name="location-outline"
-            size={16}
-            color={colors.muted}
-          />
-          <AppText color="muted" variant="caption" style={styles.flex} numberOfLines={1}>
-            {call.neighborhoodName || 'Bairro não informado'}
+          <Ionicons name="location-outline" size={16} color={colors.muted} />
+          <AppText
+            color="muted"
+            variant="caption"
+            style={styles.flex}
+            numberOfLines={1}
+          >
+            {locationText}
           </AppText>
         </View>
 
         {/* Rodapé: Metadados e seta de ação */}
         <View style={styles.footerRow}>
-          <AppText variant="caption" color="muted" numberOfLines={1} style={styles.flex}>
+          <AppText
+            variant="caption"
+            color="muted"
+            numberOfLines={1}
+            style={styles.flex}
+          >
             {openedLabel} · Central 1746 #{call.externalId}
+            {slaShort ? ` · Prazo ${slaShort}` : ''}
           </AppText>
           <Ionicons name="chevron-forward" size={16} color={colors.muted} />
         </View>

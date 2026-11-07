@@ -26,24 +26,32 @@ export function LocationEntryPrompt({
         styles.card,
         {
           backgroundColor: isDark ? colors.surfaceSubdued : colors.surface,
-          borderColor: isDark ? colors.border : '#E2E8F0',
+          borderColor: colors.border,
         },
       ]}
     >
       <View style={styles.header}>
-        <Ionicons
-          name="navigate-outline"
-          size={24}
-          color={colors.ink}
-          style={{ marginTop: 2 }}
-        />
+        <View
+          style={[
+            styles.iconBadge,
+            {
+              backgroundColor: isDark ? colors.surface : colors.surfaceSubdued,
+            },
+          ]}
+        >
+          <Ionicons
+            name="navigate-outline"
+            size={20}
+            color={colors.ink}
+          />
+        </View>
 
         <View style={styles.headerText}>
-          <AppText variant="sectionTitle" style={styles.title}>
-            O que acontece ao seu redor?
+          <AppText variant="label" style={styles.title}>
+            Quer ver o que acontece perto de você?
           </AppText>
           <AppText variant="caption" color="muted" style={styles.subtitle}>
-            Descubra ocorrências de asfalto, luz e limpeza na sua rua ou no seu bairro.
+            Ative o GPS para consultar sua rua ou escolha um bairro manualmente.
           </AppText>
         </View>
 
@@ -56,27 +64,31 @@ export function LocationEntryPrompt({
           accessibilityRole="button"
           accessibilityLabel="Fechar aviso de localização"
         >
-          <Ionicons name="close" size={20} color={colors.muted} />
+          <Ionicons name="close" size={18} color={colors.muted} />
         </Pressable>
       </View>
 
       <View style={styles.actions}>
-        <AppButton
-          title="Usar minha localização"
-          loading={busy}
-          onPress={() => {
-            void dismissPrompt();
-            onLocate();
-          }}
-        />
-        <AppButton
-          title="Escolher bairro"
-          variant="secondary"
-          onPress={() => {
-            void dismissPrompt();
-            onChoose();
-          }}
-        />
+        <View style={styles.actionItem}>
+          <AppButton
+            title="Usar meu GPS"
+            loading={busy}
+            onPress={() => {
+              void dismissPrompt();
+              onLocate();
+            }}
+          />
+        </View>
+        <View style={styles.actionItem}>
+          <AppButton
+            title="Escolher bairro"
+            variant="secondary"
+            onPress={() => {
+              void dismissPrompt();
+              onChoose();
+            }}
+          />
+        </View>
       </View>
     </View>
   );
@@ -85,39 +97,43 @@ export function LocationEntryPrompt({
 const styles = StyleSheet.create({
   card: {
     padding: spacing.md,
-    borderRadius: layout.radius.card,
+    borderRadius: layout.radius.panel,
     borderWidth: 1,
-    gap: spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
+    gap: spacing.sm,
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: spacing.sm,
+  },
+  iconBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerText: {
     flex: 1,
     gap: 2,
   },
   title: {
-    fontSize: 16,
-    lineHeight: 22,
     fontWeight: '700',
   },
   subtitle: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 12,
+    lineHeight: 17,
   },
   closeBtn: {
-    padding: 2,
+    padding: 4,
   },
   actions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.xs,
+  },
+  actionItem: {
+    flex: 1,
+    minWidth: 140,
   },
 });
