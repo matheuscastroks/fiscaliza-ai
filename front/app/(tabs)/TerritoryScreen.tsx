@@ -220,6 +220,7 @@ function TerritoryContent() {
 
   useEffect(() => {
     if (locationError) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setToastMessage(locationError);
     }
   }, [locationError]);
