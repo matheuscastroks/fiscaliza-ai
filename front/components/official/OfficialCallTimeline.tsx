@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { AppText } from '@/components/ui/AppText';
-import { spacing, layout } from '@/theme';
+import { spacing } from '@/theme';
 import type { OfficialCall } from '@/shared/contracts';
 import { isOfficialCallClosed } from '@/shared/official-call-state';
 
@@ -30,6 +30,7 @@ function formatDate(dateStr?: string | null): string | null {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
+      ...(/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? { timeZone: 'UTC' } : {}),
     });
   } catch {
     return null;
@@ -38,9 +39,7 @@ function formatDate(dateStr?: string | null): string | null {
 
 function buildTimelineSteps(call: OfficialCall, isClosed: boolean): TimelineStep[] {
   const openedDate = formatDate(call.openedAt);
-  const targetDate = formatDate(call.targetDate);
   const closedDate = formatDate(call.closedAt);
-  const diagnosisDate = formatDate(call.diagnosisTargetDate);
 
   const steps: TimelineStep[] = [];
 
@@ -54,36 +53,14 @@ function buildTimelineSteps(call: OfficialCall, isClosed: boolean): TimelineStep
     icon: 'document-text-outline',
   });
 
-  // 2. Vistoria / Encaminhamento para órgão
-  const orgName = call.organizationName || call.serviceCategory;
-  steps.push({
-    id: 'routing',
-    title: 'Encaminhamento e análise técnica',
-    subtitle: orgName ? `Órgão responsável: ${orgName}` : 'Em análise pela secretaria competente',
-    date: diagnosisDate || openedDate,
-    state: isClosed ? 'done' : 'active',
-    icon: 'search-outline',
-  });
-
-  // 3. Programação e execução
-  steps.push({
-    id: 'execution',
-    title: 'Execução do serviço',
-    subtitle: targetDate
-      ? `Prazo estimado pela Prefeitura: ${targetDate}`
-      : 'Programação da equipe em campo',
-    date: targetDate,
-    state: isClosed ? 'done' : 'pending',
-    icon: 'construct-outline',
-  });
-
-  // 4. Encerramento oficial
+  // A publicação informa abertura e encerramento, sem histórico de execução.
+  // Prazos estimados não comprovam vistoria nem realização do serviço.
   steps.push({
     id: 'closed',
-    title: isClosed ? 'Encerramento no 1746' : 'Conclusão oficial',
+    title: isClosed ? 'Encerramento no 1746' : 'Sem encerramento publicado',
     subtitle: isClosed
-      ? call.statusJustification || 'Processamento administrativo concluído pelo órgão'
-      : 'Aguardando confirmação de término pela Prefeitura',
+      ? [!closedDate && 'Data de encerramento não publicada.', call.statusJustification || 'O encerramento administrativo não comprova a execução do serviço.'].filter(Boolean).join(' ')
+      : call.officialSituation || call.officialStatus || 'A fonte ainda não publicou um encerramento.',
     date: closedDate,
     state: isClosed ? 'done' : 'pending',
     icon: isClosed ? 'checkmark-circle' : 'flag-outline',

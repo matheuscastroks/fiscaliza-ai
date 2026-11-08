@@ -14,6 +14,7 @@ import {
   RefreshControl,
   Share,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -237,9 +238,26 @@ export default function OfficialCallDetailsScreen() {
             <AppText variant="screenTitle" style={styles.mainTitle}>
               {item.serviceSubtype || item.serviceType}
             </AppText>
-            <AppText variant="protocol" color="muted" selectable>
-              Protocolo {item.externalId}
-            </AppText>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Compartilhar ou copiar protocolo ${item.externalId}`}
+              onPress={async () => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                await Share.share({
+                  message: item.externalId,
+                  title: `Protocolo 1746 nº ${item.externalId}`,
+                });
+              }}
+              style={({ pressed }) => [
+                styles.protocolPill,
+                pressed && { opacity: 0.7 },
+              ]}
+            >
+              <Ionicons name="copy-outline" size={13} color={colors.muted} />
+              <AppText variant="protocol" color="muted" selectable>
+                Protocolo {item.externalId}
+              </AppText>
+            </Pressable>
           </View>
 
           <View style={styles.headerActions}>
@@ -582,6 +600,13 @@ function createStyles(colors: ThemeColors) {
       justifyContent: 'center',
       borderRadius: layout.radius.pill,
       backgroundColor: colors.surfaceSubdued,
+    },
+    protocolPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      alignSelf: 'flex-start',
+      marginTop: 2,
     },
     slaPill: {
       flexDirection: 'row',

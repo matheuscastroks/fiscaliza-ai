@@ -129,9 +129,9 @@ export default function FollowScreen() {
               label="Filtrar meus salvos"
               value={statusFilter === 'saved' ? 'all' : statusFilter}
               options={[
-                { value: 'all', label: 'Todos' },
-                { value: 'open', label: 'Em aberto' },
-                { value: 'resolved', label: 'Encerrados no 1746' },
+                { value: 'all', label: `Todos (${savedCalls.length})` },
+                { value: 'open', label: `Em aberto (${openCount})` },
+                { value: 'resolved', label: `Encerrados (${closedCount})` },
               ]}
               onChange={(v) => setStatusFilter(v as FollowStatusFilter)}
             />
@@ -164,7 +164,7 @@ export default function FollowScreen() {
               description={
                 savedCalls.length
                   ? 'Altere o filtro acima para Todos e veja os outros registros salvos neste aparelho.'
-                  : 'Ao explorar o mapa ou a tela inicial, toque no coração em qualquer chamado para acompanhar o andamento publicado pelo 1746.'
+                  : 'Ao explorar o mapa ou os filtros da cidade, toque no coração em qualquer chamado para acompanhar o andamento publicado pelo 1746.'
               }
               action={{
                 title: savedCalls.length

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Linking } from 'react-native';
+import { View, Linking, Platform } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { DetailSheet, DetailSection } from '@/components/ui/DetailSheet';
 import { AppText } from '@/components/ui/AppText';
@@ -25,6 +26,41 @@ export function FacilityDetails({
   const query = usePublicFacility(id);
   const { colors, isDark } = useTheme();
   const item = query.data;
+
+  const handleOpenDirections = async () => {
+    if (!item?.location) return;
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const { latitude, longitude } = item.location;
+    const label = encodeURIComponent(facilityTitle(item));
+    const url =
+      Platform.OS === 'ios'
+        ? `maps:0,0?q=${label}@${latitude},${longitude}`
+        : `geo:${latitude},${longitude}?q=${latitude},${longitude}(${label})`;
+    const fallbackUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        await Linking.openURL(fallbackUrl);
+      }
+    } catch {
+      await Linking.openURL(fallbackUrl);
+    }
+  };
+
+  const handleCall = async () => {
+    if (!item?.phone) return;
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const cleaned = item.phone.replace(/[^0-9+]/g, '');
+    const url = `tel:${cleaned}`;
+    try {
+      await Linking.openURL(url);
+    } catch {
+      // Ignora erro se discador indisponível
+    }
+  };
+
   return (
     <DetailSheet
       title={item ? facilityLabels[item.category] : 'Equipamento público'}
@@ -57,6 +93,13 @@ export function FacilityDetails({
               {item.address || 'Endereço não informado'}
             </AppText>
             <AppText color="muted">{facilityNeighborhoodLabel(item)}</AppText>
+            {item.location && (
+              <AppButton
+                title="Como chegar (abrir rota no GPS)"
+                variant="secondary"
+                onPress={handleOpenDirections}
+              />
+            )}
           </DetailSection>
           {item.location && (
             <View style={{ height: 230, borderRadius: 24, overflow: 'hidden' }}>
@@ -87,6 +130,13 @@ export function FacilityDetails({
             <AppText selectable>
               {item.phone || 'Telefone não informado'}
             </AppText>
+            {Boolean(item.phone) && (
+              <AppButton
+                title={`Ligar para a unidade (${item.phone})`}
+                variant="secondary"
+                onPress={handleCall}
+              />
+            )}
             <AppText selectable>
               {item.openingHours || 'Horário não informado'}
             </AppText>

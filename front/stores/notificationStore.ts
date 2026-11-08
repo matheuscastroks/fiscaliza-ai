@@ -46,7 +46,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     try {
       const { status } = await Notifications.getPermissionsAsync();
       const granted = status === 'granted';
-      set({ permissionGranted: granted });
+      set({ permissionGranted: granted, ...(granted ? {} : { pushToken: null, error: null }) });
 
       if (granted && !get().pushToken) {
         const token = await registerForPushNotificationsAsync(municipalityId);
@@ -71,14 +71,26 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       }
       const { status } = await Notifications.getPermissionsAsync();
       const granted = status === 'granted';
-      set({ permissionGranted: granted, isLoading: false });
-      return granted;
-    } catch (err) {
       set({
-        isLoading: false,
-        error: err instanceof Error ? err.message : 'Erro ao solicitar permissões',
+        pushToken: null,
+        permissionGranted: granted,
+        error: granted ? 'A permissão foi concedida, mas não foi possível ativar os alertas. Tente novamente.' : null,
       });
       return false;
+    } catch {
+      set({
+        pushToken: null,
+        error: 'Não foi possível ativar os alertas. Tente novamente.',
+      });
+      try {
+        const { status } = await Notifications.getPermissionsAsync();
+        set({ permissionGranted: status === 'granted' });
+      } catch {
+        set({ permissionGranted: false });
+      }
+      return false;
+    } finally {
+      set({ isLoading: false });
     }
   },
 

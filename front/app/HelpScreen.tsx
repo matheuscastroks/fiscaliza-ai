@@ -19,10 +19,10 @@ export default function HelpScreen() {
         <View style={{ gap: 20 }}>
           <AppText variant="sectionTitle">Escolher meu bairro</AppText>
           <AppText>
-            Em Preferências, escolha um bairro para ter um atalho na Home. Em
-            Explorar, você pode consultar outros bairros sem mudar essa
-            preferência. Todo o município continua disponível, sem conta, CEP ou
-            GPS obrigatório.
+            Em Preferências, escolha um bairro de referência para abrir direto no
+            mapa. Em Explorar, você pode consultar outros bairros livremente sem
+            mudar essa preferência. Todo o município continua disponível, sem
+            conta, CEP ou GPS obrigatório.
           </AppText>
           <AppText variant="sectionTitle">Combinar camadas</AppText>
           <AppText>

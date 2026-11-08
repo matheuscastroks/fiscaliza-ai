@@ -18,7 +18,7 @@ import { useTerritoryStore } from '@/stores/territoryStore';
 import { useFollowStore } from '@/stores/followStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { AppToast } from '@/components/ui/AppToast';
-import { spacing, useTheme } from '@/theme';
+import { spacing } from '@/theme';
 const appearanceOptions = [
   {
     value: 'system',
@@ -30,7 +30,6 @@ const appearanceOptions = [
 ];
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
-  const { colors } = useTheme();
   const {
     preference,
     setPreference,
@@ -56,6 +55,7 @@ export default function SettingsScreen() {
     pushToken,
     permissionGranted,
     isLoading: notificationLoading,
+    error: notificationError,
     requestPermissions,
     sendTestPush,
   } = useNotificationStore();
@@ -73,7 +73,7 @@ export default function SettingsScreen() {
           <AppText variant="sectionTitle">Minha região</AppText>
           <AppButton title="Gerenciar meus lugares" variant="secondary" onPress={() => router.push('/PlacesScreen')} />
           <AppText color="muted">
-            Rio de Janeiro. Escolha um bairro para ter um atalho na Home.
+            Rio de Janeiro. Escolha um bairro de referência para focar o mapa automaticamente.
           </AppText>
           <NeighborhoodPicker
             options={[]}
@@ -143,18 +143,25 @@ export default function SettingsScreen() {
             <View style={{ flex: 1, paddingRight: spacing.sm }}>
               <AppText variant="label">Status das notificações</AppText>
               <AppText variant="caption" color="muted">
-                {permissionGranted
-                  ? 'Permissão ativa neste aparelho'
+                {pushToken && permissionGranted
+                  ? 'Alertas ativados neste aparelho'
+                  : permissionGranted
+                    ? 'Permissão concedida. Alertas ainda não ativados.'
                   : 'Desativadas no momento'}
               </AppText>
             </View>
             <AppButton
-              title={permissionGranted ? 'Ativadas' : 'Ativar'}
-              variant={permissionGranted ? 'secondary' : 'primary'}
-              disabled={notificationLoading || permissionGranted}
+              title={pushToken && permissionGranted ? 'Ativadas' : permissionGranted ? 'Tentar novamente' : 'Ativar'}
+              variant={pushToken && permissionGranted ? 'secondary' : 'primary'}
+              disabled={notificationLoading || Boolean(pushToken && permissionGranted)}
               onPress={() => void requestPermissions()}
             />
           </View>
+          {notificationError && (
+            <AppText color="risk" accessibilityRole="alert">
+              {notificationError}
+            </AppText>
+          )}
           {permissionGranted && (
             <AppButton
               title="Testar notificação no aparelho"

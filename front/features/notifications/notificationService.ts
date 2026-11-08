@@ -69,17 +69,13 @@ export async function registerForPushNotificationsAsync(
     return null;
   }
 
-  try {
-    const tokenData = await Notifications.getExpoPushTokenAsync();
-    const token = tokenData.data;
-
-    // Registra o token no backend
-    await registerTokenWithBackend(token, municipalityId);
-    return token;
-  } catch (error) {
-    // Falha silenciosa em ambientes sem Play Services ou offline
-    return null;
+  const tokenData = await Notifications.getExpoPushTokenAsync();
+  const token = tokenData.data;
+  const registered = await registerTokenWithBackend(token, municipalityId);
+  if (!registered) {
+    throw new Error('Não foi possível registrar os alertas no servidor. Tente novamente.');
   }
+  return token;
 }
 
 /**
