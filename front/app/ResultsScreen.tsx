@@ -9,6 +9,7 @@ import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { QueryState, createCityStyles } from '@/features/city/CityUI';
+import { breakdownShare } from '@/features/city/resultBreakdown';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useTerritorySelection } from '@/stores/territoryStore';
 import {
@@ -129,7 +130,7 @@ export default function ResultsScreen() {
                 <View style={{ gap: spacing.xs }}>
                   {statusBreakdown.slice(0, 6).map((item) => {
                     const base = closedOverview?.totalCalls || overview.totalCalls || 1;
-                    const pct = Math.min(100, Math.max(2, Math.round((item.count / base) * 100)));
+                    const { label: pctLabel, barWidth } = breakdownShare(item.count, base);
                     return (
                       <View key={item.status} style={styles.breakdownRow}>
                         <View style={styles.breakdownLabelRow}>
@@ -137,7 +138,7 @@ export default function ResultsScreen() {
                             {item.status}
                           </AppText>
                           <AppText variant="caption" color="muted">
-                            {item.count.toLocaleString('pt-BR')} ({pct}%)
+                            {item.count.toLocaleString('pt-BR')} ({pctLabel}%)
                           </AppText>
                         </View>
                         <View style={styles.barTrack}>
@@ -145,7 +146,7 @@ export default function ResultsScreen() {
                             style={[
                               styles.barFill,
                               {
-                                width: `${pct}%`,
+                                width: `${barWidth}%`,
                                 backgroundColor: colors.completed,
                               },
                             ]}
