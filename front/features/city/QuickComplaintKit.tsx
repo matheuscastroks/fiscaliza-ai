@@ -77,7 +77,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
   };
 
   return (
-    <View style={styles.card} accessibilityRole="region" accessibilityLabel="Assistente de solicitação rápida 1746">
+    <View style={styles.card} accessibilityLabel="Assistente de solicitação rápida 1746">
       <View style={styles.cardHeader}>
         <View style={styles.badgeRow}>
           <Ionicons name="flash" size={14} color={colors.accent} />
