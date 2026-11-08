@@ -28,7 +28,6 @@ import { RadiusControl } from '@/features/places/RadiusControl';
 import { PlaceSelector } from '@/features/places/PlaceSelector';
 import type { RadiusMeters } from '@/features/places/types';
 import {
-  useTerritoryViewMode,
   useTerritoryDomain,
 } from '@/stores/territoryStore';
 
@@ -109,7 +108,6 @@ function TerritoryFilterBarComponent({
 }: TerritoryFilterBarProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
-  const { isListView, toggleViewMode } = useTerritoryViewMode();
   const { territoryDomain, setTerritoryDomain } = useTerritoryDomain();
 
   const callsLabel = officialCallsStatus.isLoading
@@ -123,45 +121,13 @@ function TerritoryFilterBarComponent({
 
   return (
     <View style={[styles.wrapper, padded && styles.paddedWrapper]}>
-      {/* Linha 1: Seletor de recorte territorial compacto + alternância explícita Mapa/Lista */}
+      {/* Linha 1: Seletor de recorte territorial compacto */}
       <View style={padded ? styles.paddedSection : undefined}>
         <PlaceSelector
           compactHeader
           prompt
           areaOnly={areaOnly}
           onClearAreaOnly={onClearAreaOnly}
-          rightAction={
-            mapAvailable ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={isListView ? 'Ver no mapa' : 'Ver em lista'}
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  toggleViewMode();
-                }}
-                style={({ pressed }) => [
-                  styles.viewModePill,
-                  isListView && styles.viewModePillActive,
-                  pressed && { opacity: 0.85 },
-                ]}
-              >
-                <Ionicons
-                  name={isListView ? 'map-outline' : 'list-outline'}
-                  size={16}
-                  color={isListView ? colors.onAccent : colors.ink}
-                />
-                <AppText
-                  variant="caption"
-                  style={[
-                    styles.viewModeText,
-                    isListView && styles.viewModeTextActive,
-                  ]}
-                >
-                  {isListView ? 'Mapa' : 'Lista'}
-                </AppText>
-              </Pressable>
-            ) : null
-          }
         />
       </View>
 
@@ -940,6 +906,16 @@ function TerritoryFilterModalComponent({
           </>
         )}
 
+        {/* Aviso preventivo de filtro vazio no recorte */}
+        {territoryDomain === 'calls' && totalCalls === 0 && (
+          <View style={styles.emptyWarningHint}>
+            <Ionicons name="information-circle-outline" size={16} color={colors.risk} />
+            <AppText variant="caption" color="muted" style={{ flex: 1 }}>
+              Nenhum chamado encontrado para este filtro no recorte. Experimente ampliar o período ou o raio.
+            </AppText>
+          </View>
+        )}
+
         {/* Rodapé Fixo de Ações */}
         <View style={styles.modalFooter}>
           <Pressable
@@ -974,7 +950,9 @@ function TerritoryFilterModalComponent({
           >
             <AppText variant="caption" style={styles.applyButtonText}>
               {territoryDomain === 'calls'
-                ? `Ver ${totalCalls > 0 ? totalCalls.toLocaleString('pt-BR') : ''} chamados`
+                ? totalCalls === 0
+                  ? 'Ver resultados (0 chamados)'
+                  : `Ver ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`
                 : 'Ver equipamentos'}
             </AppText>
             <Ionicons name="arrow-forward" size={16} color={colors.onAccent} />
@@ -1295,6 +1273,17 @@ const createStyles = (colors: ThemeColors) =>
       paddingTop: spacing.md,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: colors.divider,
+    },
+    emptyWarningHint: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      padding: spacing.sm,
+      borderRadius: layout.radius.card,
+      backgroundColor: colors.surfaceSubdued,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: spacing.xs,
     },
     resetButton: {
       flexDirection: 'row',

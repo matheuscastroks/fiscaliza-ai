@@ -58,8 +58,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="ParticipateScreen"
         options={{
-          title: '1746',
-          tabBarLabel: '1746',
+          title: 'Agir',
+          tabBarLabel: 'Agir',
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
               name={focused ? 'megaphone' : 'megaphone-outline'}

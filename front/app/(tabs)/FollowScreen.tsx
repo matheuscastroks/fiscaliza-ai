@@ -6,6 +6,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useMemo } from 'react';
+import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppScreen } from '@/components/ui/AppScreen';
@@ -102,6 +103,7 @@ export default function FollowScreen() {
                   accessibilityLabel="Atualizar situação dos chamados salvos"
                   disabled={refreshing}
                   onPress={() => {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     void refresh();
                   }}
                   style={({ pressed }) => [
