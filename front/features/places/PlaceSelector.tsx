@@ -18,7 +18,19 @@ import { LocationEntryPrompt } from './LocationEntryPrompt';
 import { layout, spacing, useTheme } from '@/theme';
 import type { TerritorySelection } from './types';
 
-export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
+export function PlaceSelector({
+  prompt = false,
+  compactHeader = false,
+  areaOnly = false,
+  onClearAreaOnly,
+  rightAction,
+}: {
+  prompt?: boolean;
+  compactHeader?: boolean;
+  areaOnly?: boolean;
+  onClearAreaOnly?: () => void;
+  rightAction?: React.ReactNode;
+}) {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const state = usePlacesStore();
@@ -32,6 +44,7 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
     setExpandedSelection(value ? selection : null);
 
   if (!state.hydrated) {
+    if (compactHeader) return null;
     return <AppText color="muted">Carregando localização…</AppText>;
   }
 
@@ -40,36 +53,277 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
       ? places.find((p) => p.id === selection.placeId)
       : undefined;
 
-  const title =
-    selection.kind === 'pending-current'
+  const radiusShort =
+    selection.kind === 'radius' || selection.kind === 'pending-current'
+      ? selection.radiusMeters >= 1000
+        ? `${selection.radiusMeters / 1000} km`
+        : `${selection.radiusMeters} m`
+      : '';
+
+  const title = areaOnly
+    ? 'Área visível no mapa'
+    : selection.kind === 'pending-current'
       ? 'Localização atual'
       : selection.kind === 'radius'
-      ? activePlace?.name || selection.neighborhood?.name || 'Ao seu redor'
-      : selection.kind === 'neighborhood'
-      ? selection.name
-      : 'Rio de Janeiro (Geral)';
+        ? activePlace?.name || selection.neighborhood?.name || 'Ao seu redor'
+        : selection.kind === 'neighborhood'
+          ? selection.name
+          : 'Rio de Janeiro (Geral)';
 
-  const subtitle =
-    selection.kind === 'radius'
-      ? `${
-          selection.radiusMeters >= 1000
-            ? `${selection.radiusMeters / 1000} km`
-            : `${selection.radiusMeters} m`
-        } de raio${
+  const subtitle = areaOnly
+    ? 'Recorte definido pelo movimento do mapa'
+    : selection.kind === 'radius'
+      ? `${radiusShort} de raio${
           selection.neighborhood?.name ? ` · ${selection.neighborhood.name}` : ''
         }`
       : selection.kind === 'neighborhood'
-      ? 'Bairro completo'
-      : 'Toda a cidade do Rio';
+        ? 'Bairro completo'
+        : 'Toda a cidade do Rio';
 
-  const iconName: keyof typeof Ionicons.glyphMap =
-    selection.kind === 'radius' && selection.source === 'current'
+  const compactSummary = areaOnly
+    ? 'Área visível no mapa'
+    : selection.kind === 'pending-current'
+      ? `Localização atual · ${radiusShort}`
+      : selection.kind === 'radius'
+        ? `${
+            activePlace?.name || selection.neighborhood?.name || 'Ao seu redor'
+          } · ${radiusShort}`
+        : selection.kind === 'neighborhood'
+          ? selection.name
+          : 'Rio de Janeiro (Geral)';
+
+  const iconName: keyof typeof Ionicons.glyphMap = areaOnly
+    ? 'scan-outline'
+    : selection.kind === 'radius' && selection.source === 'current'
       ? 'navigate'
       : selection.kind === 'radius' && selection.source === 'place'
-      ? 'bookmark'
-      : selection.kind === 'neighborhood'
-      ? 'business'
-      : 'map';
+        ? 'bookmark'
+        : selection.kind === 'neighborhood'
+          ? 'business'
+          : 'location';
+
+  const renderBottomSheet = () => (
+    <AppBottomSheetModal
+      visible={sheetOpen}
+      onClose={() => setSheetOpen(false)}
+      title="Trocar local"
+      enableDynamicSizing
+    >
+      <BottomSheetView
+        style={[
+          styles.sheetContent,
+          { paddingBottom: Math.max(insets.bottom + spacing.md, spacing.xxl) },
+        ]}
+      >
+        {areaOnly && onClearAreaOnly && (
+          <AppButton
+            title="Voltar ao recorte salvo"
+            variant="secondary"
+            onPress={() => {
+              onClearAreaOnly();
+              setSheetOpen(false);
+            }}
+          />
+        )}
+
+        {selection.kind === 'radius' && (
+          <View style={{ gap: spacing.xs }}>
+            <RadiusControl
+              value={selection.radiusMeters}
+              onChange={(radius) => {
+                onClearAreaOnly?.();
+                void setRadius(radius);
+              }}
+            />
+            {selection.neighborhood && (
+              <AppButton
+                title={`Ver todo o bairro ${selection.neighborhood.name}`}
+                variant="secondary"
+                onPress={() => {
+                  if (selection.neighborhood) {
+                    onClearAreaOnly?.();
+                    void state.selectNeighborhood(
+                      selection.neighborhood.name,
+                      selection.neighborhood.id,
+                    );
+                    setSheetOpen(false);
+                  }
+                }}
+              />
+            )}
+          </View>
+        )}
+
+        {selection.kind === 'pending-current' && (
+          <View style={{ gap: spacing.xs }}>
+            <AppText variant="caption" color="muted">
+              Sua posição anterior não fica gravada. Atualize o GPS para
+              consultar o entorno.
+            </AppText>
+            <RadiusControl
+              value={selection.radiusMeters}
+              onChange={(radius) => {
+                onClearAreaOnly?.();
+                void setRadius(radius);
+              }}
+            />
+          </View>
+        )}
+
+        {places.length > 0 && (
+          <AppSelect
+            clearable={false}
+            label="Lugares salvos"
+            value={activePlace?.id || ''}
+            options={[
+              { value: '', label: 'Selecione um lugar salvo...' },
+              ...places.map((p) => ({ value: p.id, label: p.name })),
+            ]}
+            onChange={(id) => {
+              if (id) {
+                onClearAreaOnly?.();
+                void state.selectPlace(id);
+                setSheetOpen(false);
+              }
+            }}
+          />
+        )}
+
+        <View style={{ gap: spacing.xs }}>
+          <AppText variant="caption" color="muted">
+            Consultar por bairro
+          </AppText>
+          <NeighborhoodPicker
+            options={[]}
+            value={selection.kind === 'neighborhood' ? selection.name : ''}
+            onChange={(name) => {
+              onClearAreaOnly?.();
+              void state.dismissPrompt();
+              void state.selectNeighborhood(name);
+              setSheetOpen(false);
+            }}
+          />
+        </View>
+
+        {(selection.kind !== 'municipality' || areaOnly) && (
+          <AppButton
+            title="Ver todo o município do Rio de Janeiro"
+            variant="secondary"
+            onPress={() => {
+              onClearAreaOnly?.();
+              void state.selectNeighborhood('');
+              setSheetOpen(false);
+            }}
+          />
+        )}
+
+        <View style={styles.sheetActions}>
+          <AppButton
+            title={
+              selection.kind === 'radius' && selection.source === 'current'
+                ? 'Atualizar GPS'
+                : 'Usar minha localização'
+            }
+            variant="secondary"
+            loading={device.busy}
+            onPress={() => {
+              onClearAreaOnly?.();
+              void device.captureLocation().then((loc) => {
+                if (loc) setSheetOpen(false);
+              });
+            }}
+          />
+          <AppButton
+            title="Meus lugares salvos"
+            variant="secondary"
+            onPress={() => {
+              setSheetOpen(false);
+              router.push('/PlacesScreen');
+            }}
+          />
+        </View>
+      </BottomSheetView>
+    </AppBottomSheetModal>
+  );
+
+  if (compactHeader) {
+    return (
+      <View style={styles.compactContainer}>
+        <View style={styles.compactTopRow}>
+          <Pressable
+            onPress={() => setSheetOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={`Recorte territorial: ${compactSummary}. Toque para trocar local.`}
+            style={({ pressed }) => [
+              styles.compactPill,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+              },
+              pressed && { opacity: 0.85 },
+            ]}
+          >
+            <View
+              style={[
+                styles.compactIconBadge,
+                {
+                  backgroundColor: isDark
+                    ? colors.surfaceSubdued
+                    : colors.canvas,
+                },
+              ]}
+            >
+              <Ionicons
+                name={iconName}
+                size={15}
+                color={colors.onSurfaceBrand}
+              />
+            </View>
+
+            <AppText
+              variant="label"
+              numberOfLines={1}
+              style={styles.compactTitle}
+            >
+              {compactSummary}
+            </AppText>
+
+            <View
+              style={[
+                styles.compactChangeChip,
+                {
+                  backgroundColor: isDark
+                    ? colors.surfaceSubdued
+                    : colors.canvas,
+                },
+              ]}
+            >
+              <AppText variant="caption" style={styles.compactChangeText}>
+                Trocar
+              </AppText>
+              <Ionicons name="chevron-down" size={12} color={colors.ink} />
+            </View>
+          </Pressable>
+
+          {rightAction}
+        </View>
+
+        {prompt && (
+          <LocationEntryPrompt
+            compact
+            busy={device.busy}
+            onChoose={() => setSheetOpen(true)}
+            onLocate={() => {
+              onClearAreaOnly?.();
+              void device.captureLocation();
+            }}
+          />
+        )}
+
+        {renderBottomSheet()}
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -172,102 +426,7 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
         )}
       </View>
 
-      {/* Bottom Sheet de Troca de Local */}
-      <AppBottomSheetModal
-        visible={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        title="Trocar local"
-        enableDynamicSizing
-      >
-        <BottomSheetView
-          style={[
-            styles.sheetContent,
-            { paddingBottom: Math.max(insets.bottom + spacing.md, spacing.xxl) },
-          ]}
-        >
-          {selection.kind === 'radius' && (
-            <View style={{ gap: spacing.xs }}>
-              <RadiusControl
-                value={selection.radiusMeters}
-                onChange={(radius) => {
-                  void setRadius(radius);
-                }}
-              />
-              {selection.neighborhood && (
-                <AppButton
-                  title={`Ver todo o bairro ${selection.neighborhood.name}`}
-                  variant="secondary"
-                  onPress={() => {
-                    if (selection.neighborhood) {
-                      void state.selectNeighborhood(
-                        selection.neighborhood.name,
-                        selection.neighborhood.id,
-                      );
-                      setSheetOpen(false);
-                    }
-                  }}
-                />
-              )}
-            </View>
-          )}
-
-          {places.length > 0 && (
-            <AppSelect
-              clearable={false}
-              label="Lugares salvos"
-              value={activePlace?.id || ''}
-              options={[
-                { value: '', label: 'Selecione um lugar salvo...' },
-                ...places.map((p) => ({ value: p.id, label: p.name })),
-              ]}
-              onChange={(id) => {
-                if (id) {
-                  void state.selectPlace(id);
-                  setSheetOpen(false);
-                }
-              }}
-            />
-          )}
-
-          <View style={{ gap: spacing.xs }}>
-            <AppText variant="caption" color="muted">
-              Consultar por bairro
-            </AppText>
-            <NeighborhoodPicker
-              options={[]}
-              value={selection.kind === 'neighborhood' ? selection.name : ''}
-              onChange={(name) => {
-                void state.dismissPrompt();
-                void state.selectNeighborhood(name);
-                setSheetOpen(false);
-              }}
-            />
-          </View>
-
-          <View style={styles.sheetActions}>
-            <AppButton
-              title={
-                selection.kind === 'radius' && selection.source === 'current'
-                  ? 'Atualizar GPS'
-                  : 'Usar minha localização'
-              }
-              variant="secondary"
-              loading={device.busy}
-              onPress={() => {
-                void device.captureLocation();
-              }}
-            />
-            <AppButton
-              title="Meus lugares salvos"
-              variant="secondary"
-              onPress={() => {
-                setSheetOpen(false);
-                router.push('/PlacesScreen');
-              }}
-            />
-          </View>
-        </BottomSheetView>
-      </AppBottomSheetModal>
+      {renderBottomSheet()}
 
       {(device.error || state.error) && (
         <AppText color="risk" accessibilityRole="alert" style={styles.errorText}>
@@ -291,6 +450,55 @@ export function PlaceSelector({ prompt = false }: { prompt?: boolean }) {
 const styles = StyleSheet.create({
   container: {
     gap: spacing.xs,
+  },
+  compactContainer: {
+    gap: 6,
+  },
+  compactTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  compactPill: {
+    flex: 1,
+    minHeight: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingLeft: 6,
+    paddingRight: 6,
+    paddingVertical: 4,
+    borderRadius: layout.radius.pill,
+    borderWidth: 1,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.09,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  compactIconBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compactTitle: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  compactChangeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: layout.radius.pill,
+  },
+  compactChangeText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   locationCard: {
     borderRadius: layout.radius.panel,

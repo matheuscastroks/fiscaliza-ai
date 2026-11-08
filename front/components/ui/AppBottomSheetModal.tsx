@@ -33,6 +33,7 @@ export interface AppBottomSheetModalProps {
   contentContainerStyle?: StyleProp<ViewStyle>;
   headerRight?: React.ReactNode;
   showHeader?: boolean;
+  backdropOpacity?: number;
 }
 
 export {
@@ -56,6 +57,7 @@ export const AppBottomSheetModal = forwardRef<BottomSheet, AppBottomSheetModalPr
       contentContainerStyle,
       headerRight,
       showHeader = true,
+      backdropOpacity = 0.45,
     },
     ref,
   ) => {
@@ -84,11 +86,11 @@ export const AppBottomSheetModal = forwardRef<BottomSheet, AppBottomSheetModalPr
           {...props}
           appearsOnIndex={0}
           disappearsOnIndex={-1}
-          opacity={0.45}
+          opacity={backdropOpacity}
           pressBehavior="close"
         />
       ),
-      [],
+      [backdropOpacity],
     );
 
     if (!visible) return null;

@@ -39,7 +39,7 @@ export function AppDrawer({ children }: { children: ReactNode }) {
   const styles = useThemedStyles(createStyles);
 
   const drawer = useRef<DrawerLayoutMethods>(null);
-  const menuView = useRef<View>(null);
+  const menuView = useRef<React.ComponentRef<typeof View>>(null);
   const actualOpen = useRef(false);
   const afterClose = useRef<(() => void) | undefined>(undefined);
   const [visible, setVisible] = useState(false);
@@ -49,6 +49,13 @@ export function AppDrawer({ children }: { children: ReactNode }) {
   const enabled = Boolean(
     segments[0] === '(tabs)' && MAIN_TABS.has(segments[1] || 'index'),
   );
+  const isMapTab = Boolean(
+    segments[0] === '(tabs)' &&
+      (!segments[1] ||
+        segments[1] === 'index' ||
+        segments[1] === 'TerritoryScreen'),
+  );
+  const canSwipeOpen = enabled && (!isMapTab || open);
 
   const close = useCallback((action?: () => void) => {
     afterClose.current = action;
@@ -86,7 +93,7 @@ export function AppDrawer({ children }: { children: ReactNode }) {
         drawerType={DrawerType.FRONT}
         drawerWidth={Math.min(Math.round(width * 0.9), 480)}
         drawerLockMode={
-          enabled ? DrawerLockMode.UNLOCKED : DrawerLockMode.LOCKED_CLOSED
+          canSwipeOpen ? DrawerLockMode.UNLOCKED : DrawerLockMode.LOCKED_CLOSED
         }
         edgeWidth={DRAWER_EDGE_WIDTH}
         minSwipeDistance={DRAWER_MIN_SWIPE_DISTANCE}

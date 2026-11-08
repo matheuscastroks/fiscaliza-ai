@@ -145,9 +145,9 @@ Este documento registra tokens e componentes do aplicativo cidadão presentes no
 
 ## Hierarquia orientada à jornada cidadã
 
-### Home e lugares próximos
+### Entrada Map-First e lugares próximos
 
-A Home usa uma lista curta de até cinco chamados do lugar selecionado, com acesso ao mapa e à lista antes dos resultados. Categorias, situação e período ficam em controles explícitos. O seletor de lugar se recolhe após mudar a seleção; o raio permanece visível em 500 m, 1 km, 2 km ou 5 km. Distâncias são aproximadas, em linha reta, e só aparecem quando os pontos existem.
+A entrada principal do aplicativo é Map-First (`TerritoryScreen`), com barra superior reunindo seletor compacto de território, alternância explícita Mapa/Lista, busca e botão de filtros com badge de ativos, além de barra contextual de resultados na base do mapa com contagem de chamados e indicação de registros sem ponto no mapa. A navegação inferior consolida quatro abas com ícone e rótulo visível (`Explorar`, `Salvos`, `1746`, `Perfil`). Categorias, situação e período ficam em controles explícitos. O seletor de lugar abre em bottom sheet e se recolhe após mudar a seleção; o raio permanece visível em 500 m, 1 km, 2 km ou 5 km. Distâncias são aproximadas, em linha reta, e só aparecem quando os pontos existem.
 
 A apresentação de localização antecede a permissão do sistema e oferece escolher bairro ou continuar. Mostrar horário e precisão da captura, inclusive aviso quando a precisão excede o raio. Após reiniciar, pedir nova captura por ação explícita. O editor de lugares tem nome, endereço/referência opcional e ponto confirmado, com alternativa por coordenadas; digitar endereço não move o marcador. Falhas preservam os campos. Salvos e lugares são descritos como dados deste aparelho, sem promessa de sincronização. Controles compactos de seleção têm alvo mínimo de 48, e o raio não oferece uma ação de limpar para valor inválido.
 
@@ -157,7 +157,7 @@ Validação Android desta entrega e limites estão em `../plan/evidence/2026-11-
 
 Direção aplicada à jornada pública descrita em PRODUCT.md. Validação de código, navegador e aparelho são evidências distintas.
 
-- **Home:** explorar o entorno é a ação principal. Salvos, demandas recentes e acesso ao atendimento dão continuidade. Contagens, rankings territoriais e gráficos não ocupam o protagonismo.
+- **Entrada Map-First (Explorar):** explorar o território em mapa e lista sincronizados é a superfície principal desde a abertura. Salvos, canais oficiais 1746 e Perfil dão continuidade na barra inferior de quatro abas. Contagens competitivas, rankings territoriais e gráficos não ocupam o protagonismo.
 - **Território:** mapa e lista são duas formas de realizar a mesma descoberta. Camadas de serviços são opcionais, com seleção legível e recorte preservado. Nunca apresentar um equipamento como responsável por demandas próximas.
 - **Chamado:** problema e localização orientam a leitura; situação, protocolo, prazo disponível e datas permitem fiscalizar. Salvar e acessar o atendimento oficial são ações distintas. Não aplicar linguagem de resolução confirmada a um simples encerramento administrativo.
 - **Equipamento:** endereço, tipo e formas de contato dão utilidade à ficha. Não reutilizar apoio, avaliação de atendimento ou estados de chamados como se fossem propriedades do cadastro.

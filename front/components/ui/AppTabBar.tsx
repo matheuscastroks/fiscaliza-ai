@@ -1,6 +1,6 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Pressable,
@@ -10,18 +10,17 @@ import {
   Keyboard,
   Animated,
   AccessibilityInfo,
-  Easing,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { type Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { AppText } from './AppText';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { beginMapTrace } from '@/features/territory/mapPerformance';
 
-const TAB_SIZE = 48;
-const TAB_PADDING = 8;
-const TAB_GAP = 8;
+const TAB_HEIGHT = 48;
+const TAB_PADDING = 6;
+const TAB_GAP = 6;
 
 export type AppTabBarProps = Parameters<
   NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>
@@ -30,7 +29,6 @@ export type AppTabBarProps = Parameters<
 export type FloatingGlassTabBarProps = AppTabBarProps;
 
 const VISIBLE = new Set([
-  'index',
   'TerritoryScreen',
   'FollowScreen',
   'ParticipateScreen',
@@ -38,9 +36,14 @@ const VISIBLE = new Set([
 ]);
 
 /**
- * Barra de abas principal com cápsula sólida, navegação tátil e indicador com física de mola.
+ * Barra de abas principal com cápsula sólida, ícone + rótulo visível e indicador com física de mola.
  */
-export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
+export function AppTabBar({
+  state,
+  descriptors,
+  emitter,
+  navigateToTab,
+}: AppTabBarProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
@@ -48,50 +51,29 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
   const { width } = useWindowDimensions();
 
   const visibleRoutes = state.routes.filter((route) => VISIBLE.has(route.name));
-  const isTerritory = state.routes[state.index]?.name === 'TerritoryScreen';
+  const currentRouteName = state.routes[state.index]?.name || 'TerritoryScreen';
+  const effectiveRouteName =
+    currentRouteName === 'index' ? 'TerritoryScreen' : currentRouteName;
+
   const tabCount = Math.max(1, visibleRoutes.length);
-  const extraSpace = TAB_SIZE + TAB_GAP;
-  // Reserve room for the contextual button on every route so navigation never
-  // changes the capsule's dimensions or its touch targets.
-  const availableWidth = width - insets.left - insets.right - 16 - extraSpace;
-  const horizontalPadding = Math.min(TAB_PADDING, Math.max(0, (availableWidth - tabCount * TAB_SIZE) / 2));
-  const barWidth = Math.min(
-    tabCount * TAB_SIZE +
-      (tabCount - 1) * TAB_GAP +
-      2 * horizontalPadding,
-    availableWidth,
+  const maxBarWidth = Math.min(width - insets.left - insets.right - 24, 388);
+  const tabWidth = Math.max(
+    64,
+    Math.floor(
+      (maxBarWidth - 2 * TAB_PADDING - (tabCount - 1) * TAB_GAP) / tabCount,
+    ),
   );
+  const barWidth =
+    tabCount * tabWidth + (tabCount - 1) * TAB_GAP + 2 * TAB_PADDING;
 
   const selectedIndex = Math.max(
     0,
-    visibleRoutes.findIndex(
-      (route) => route.key === state.routes[state.index]?.key,
-    ),
+    visibleRoutes.findIndex((route) => route.name === effectiveRouteName),
   );
 
-  const target =
-    tabCount > 1
-      ? (selectedIndex * (barWidth - 2 * horizontalPadding - TAB_SIZE)) /
-        (tabCount - 1)
-      : 0;
-  const selectionAnim = useRef(new Animated.Value(target)).current;
+  const target = selectedIndex * (tabWidth + TAB_GAP);
+  const [selectionAnim] = useState(() => new Animated.Value(target));
   const [reducedMotion, setReducedMotion] = useState(false);
-  const territoryAnim = useRef(new Animated.Value(isTerritory ? 1 : 0)).current;
-
-  useEffect(() => {
-    if (reducedMotion) {
-      territoryAnim.setValue(isTerritory ? 1 : 0);
-      return;
-    }
-    const transition = Animated.timing(territoryAnim, {
-      toValue: isTerritory ? 1 : 0,
-      duration: 480,
-      easing: Easing.inOut(Easing.cubic),
-      useNativeDriver: true,
-    });
-    transition.start();
-    return () => transition.stop();
-  }, [isTerritory, reducedMotion, territoryAnim]);
 
   useEffect(() => {
     let active = true;
@@ -139,10 +121,8 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
   }, []);
 
   const isListView = useTerritoryStore((s) => s.isListView);
-  const filtersOpen = useTerritoryStore((s) => s.filtersOpen);
-  const setFiltersOpen = useTerritoryStore((s) => s.setFiltersOpen);
 
-  if (keyboardVisible || !VISIBLE.has(state.routes[state.index]?.name)) {
+  if (keyboardVisible || !VISIBLE.has(effectiveRouteName)) {
     return null;
   }
 
@@ -152,37 +132,16 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
       style={[
         styles.barContainer,
         {
-          bottom: insets.bottom + 16,
+          bottom: insets.bottom + 14,
           left: insets.left,
           right: insets.right,
         },
       ]}
     >
-      {/* The neck stretches out of the capsule, then pinches closed as the
-          contextual button separates. It never receives touches. */}
-      <Animated.View
-        pointerEvents="none"
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-        style={{
-          position: 'absolute',
-          left: '50%',
-          marginLeft: barWidth / 2 - 44,
-          width: 40,
-          height: 24,
-          borderRadius: 12,
-          backgroundColor: colors.navigationSurface,
-          transform: [
-            { scaleX: territoryAnim.interpolate({ inputRange: [0, 0.18, 0.45, 0.65, 0.82, 1], outputRange: [0, 0.4, 1, 0.7, 0, 0] }) },
-            { scaleY: territoryAnim.interpolate({ inputRange: [0, 0.18, 0.45, 0.65, 0.82, 1], outputRange: [0, 1, 0.65, 0.25, 0, 0] }) },
-          ],
-        }}
-      />
-      <Animated.View
+      <View
         style={[
           styles.bar,
-          { width: barWidth, paddingHorizontal: horizontalPadding, zIndex: 2 },
-          { transform: [{ translateX: territoryAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -extraSpace / 2] }) }] },
+          { width: barWidth, paddingHorizontal: TAB_PADDING },
         ]}
       >
         <Animated.View
@@ -192,103 +151,79 @@ export function AppTabBar({ state, descriptors, navigation }: AppTabBarProps) {
           style={[
             styles.selected,
             {
+              width: tabWidth,
               top: TAB_PADDING,
-              left: horizontalPadding,
+              left: TAB_PADDING,
               transform: [{ translateX: selectionAnim }],
             },
           ]}
         />
-        {state.routes
-          .filter((route) => VISIBLE.has(route.name))
-          .map((route) => {
-            const focused = state.routes[state.index]?.key === route.key;
-            const { options } = descriptors[route.key];
-            const label =
-              typeof options.tabBarLabel === 'string'
-                ? options.tabBarLabel
-                : options.title || route.name;
+        {visibleRoutes.map((route) => {
+          const focused = route.name === effectiveRouteName;
+          const { options } = descriptors[route.key];
+          const label =
+            typeof options.tabBarLabel === 'string'
+              ? options.tabBarLabel
+              : options.title || route.name;
+          const itemColor = focused
+            ? colors.navigationOnSelection
+            : colors.navigationIcon;
 
-            return (
-              <Pressable
-                key={route.key}
-                accessibilityRole="tab"
-                accessibilityLabel={label}
-                accessibilityState={{ selected: focused }}
-                onPress={() => {
-                  const event = navigation.emit({
-                    type: 'tabPress',
-                    target: route.key,
-                    canPreventDefault: true,
-                  });
-                  if (!focused && !event.defaultPrevented) {
-                    if (route.name === 'TerritoryScreen' && !isListView) beginMapTrace('tab');
-                    navigation.navigate(route.name);
-                  }
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }}
-                onLongPress={() =>
-                  navigation.emit({ type: 'tabLongPress', target: route.key })
+          return (
+            <Pressable
+              key={route.key}
+              accessibilityRole="tab"
+              accessibilityLabel={label}
+              accessibilityState={{ selected: focused }}
+              onPress={() => {
+                const event = emitter.emit({
+                  type: 'tabPress',
+                  target: route.key,
+                  canPreventDefault: true,
+                });
+                if (!focused && !event.defaultPrevented) {
+                  if (route.name === 'TerritoryScreen' && !isListView)
+                    beginMapTrace('tab');
+                  navigateToTab(route.key);
                 }
-                style={({ pressed }) => [
-                  styles.tab,
-                  pressed && {
-                    opacity: 0.75,
-                    transform: [{ scale: 0.92 }],
-                  },
-                ]}
-              >
-                <View collapsable={false} style={styles.icon}>
-                  {options.tabBarIcon?.({
-                    focused,
-                    color: focused
-                      ? colors.navigationOnSelection
-                      : colors.navigationIcon,
-                    size: 24,
-                  })}
-                </View>
-              </Pressable>
-            );
-          })}
-      </Animated.View>
-
-      <Animated.View
-        pointerEvents={isTerritory ? 'auto' : 'none'}
-        accessibilityElementsHidden={!isTerritory}
-        importantForAccessibility={isTerritory ? 'auto' : 'no-hide-descendants'}
-        style={{
-          position: 'absolute',
-          left: '50%',
-          marginLeft: barWidth / 2 + TAB_GAP - extraSpace / 2,
-          zIndex: 1,
-          transform: [
-            { translateX: territoryAnim.interpolate({ inputRange: [0, 0.25, 0.6, 0.85, 1], outputRange: [-64, -42, -12, 3, 0] }) },
-            { scaleX: territoryAnim.interpolate({ inputRange: [0, 0.4, 0.75, 1], outputRange: [1, 1.14, 0.94, 1] }) },
-            { scaleY: territoryAnim.interpolate({ inputRange: [0, 0.4, 0.75, 1], outputRange: [1, 0.84, 1.06, 1] }) },
-          ],
-        }}
-      >
-        <Pressable
-          disabled={!isTerritory}
-          accessibilityRole="button"
-          accessibilityLabel="Filtros do território"
-          accessibilityState={{ expanded: filtersOpen }}
-          onPress={() => {
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setFiltersOpen(!filtersOpen);
-          }}
-          style={({ pressed }) => [
-            styles.extraButton,
-            filtersOpen && { backgroundColor: colors.accent },
-            pressed && { opacity: 0.75, transform: [{ scale: 0.92 }] },
-          ]}
-        >
-          <Ionicons
-            name="options-outline"
-            size={22}
-            color={filtersOpen ? colors.onAccent : colors.navigationIcon}
-          />
-        </Pressable>
-      </Animated.View>
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+              onLongPress={() =>
+                emitter.emit({ type: 'tabLongPress', target: route.key })
+              }
+              style={({ pressed }) => [
+                styles.tab,
+                { width: tabWidth },
+                pressed && {
+                  opacity: 0.75,
+                  transform: [{ scale: 0.94 }],
+                },
+              ]}
+            >
+              <View collapsable={false} style={styles.tabContent}>
+                {options.tabBarIcon?.({
+                  focused,
+                  color: itemColor,
+                  size: 20,
+                })}
+                <AppText
+                  variant="meta"
+                  numberOfLines={1}
+                  style={[
+                    styles.tabLabel,
+                    {
+                      color: itemColor,
+                      fontWeight: focused ? '700' : '600',
+                    },
+                  ]}
+                >
+                  {label}
+                </AppText>
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -302,19 +237,17 @@ const createStyles = (colors: ThemeColors) =>
       position: 'absolute',
       left: 0,
       right: 0,
-      height: TAB_SIZE + 2 * TAB_PADDING,
+      height: TAB_HEIGHT + 2 * TAB_PADDING,
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      gap: 8,
       zIndex: 99,
     },
     bar: {
-      height: TAB_SIZE + 2 * TAB_PADDING,
-      borderRadius: (TAB_SIZE + 2 * TAB_PADDING) / 2,
+      height: TAB_HEIGHT + 2 * TAB_PADDING,
+      borderRadius: (TAB_HEIGHT + 2 * TAB_PADDING) / 2,
       backgroundColor: colors.navigationSurface,
       flexDirection: 'row',
-      paddingHorizontal: TAB_PADDING,
       justifyContent: 'space-between',
       alignItems: 'center',
       ...Platform.select({
@@ -327,45 +260,25 @@ const createStyles = (colors: ThemeColors) =>
         android: { elevation: 6 },
       }),
     },
-    extraButton: {
-      width: TAB_SIZE,
-      height: TAB_SIZE,
-      borderRadius: TAB_SIZE / 2,
-      backgroundColor: colors.navigationSurface,
-      alignItems: 'center',
-      justifyContent: 'center',
-      ...Platform.select({
-        ios: {
-          shadowColor: colors.black,
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.14,
-          shadowRadius: 14,
-        },
-        android: { elevation: 6 },
-      }),
-    },
     tab: {
-      width: TAB_SIZE,
-      minHeight: TAB_SIZE,
+      height: TAB_HEIGHT,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    icon: {
-      width: TAB_SIZE,
-      height: TAB_SIZE,
-      borderRadius: 9999,
-      overflow: 'hidden',
-      flexShrink: 0,
+    tabContent: {
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
+      gap: 2,
+    },
+    tabLabel: {
+      fontSize: 10,
+      lineHeight: 12,
     },
     selected: {
       position: 'absolute',
-      top: 0,
-      left: 0,
-      width: TAB_SIZE,
-      height: TAB_SIZE,
-      borderRadius: 9999,
+      height: TAB_HEIGHT,
+      borderRadius: TAB_HEIGHT / 2,
       backgroundColor: colors.navigationSelection,
     },
   });

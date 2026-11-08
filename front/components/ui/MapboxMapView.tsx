@@ -213,6 +213,10 @@ function getRnMapbox(): any {
   }
 }
 
+export function isMapboxAvailable(): boolean {
+  return Boolean(getRnMapbox());
+}
+
 const memoComponent = memo || ((c: any) => c);
 
 export const MapboxMapView = memoComponent(function MapboxMapView({

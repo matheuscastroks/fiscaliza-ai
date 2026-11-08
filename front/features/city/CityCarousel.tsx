@@ -35,7 +35,7 @@ function CityCarouselComponent<T extends { id: string }>({
   const [viewport, setViewport] = useState(initialViewport);
   const [index, setIndex] = useState(0);
   const [scrollX] = useState(() => new Animated.Value(0));
-  const list = useRef<ScrollView>(null);
+  const list = useRef<React.ComponentRef<typeof ScrollView>>(null);
 
   const displayItems = items.length > 8 ? items.slice(0, 8) : items;
   const available = viewport - (edgeToEdge ? spacing.contentPadding * 2 : 0);

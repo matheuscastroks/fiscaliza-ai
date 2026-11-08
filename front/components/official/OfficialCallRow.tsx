@@ -13,12 +13,14 @@ import { officialCallStatus } from '@/features/city/officialCallStatus';
 export interface OfficialCallRowProps {
   call: OfficialCall;
   onPress: () => void;
+  onLocateOnMap?: () => void;
   width?: ViewStyle['width'];
 }
 
 export const OfficialCallRow = memo(function OfficialCallRow({
   call,
   onPress,
+  onLocateOnMap,
   width,
 }: OfficialCallRowProps) {
   const { colors, isDark } = useTheme();
@@ -183,8 +185,37 @@ export const OfficialCallRow = memo(function OfficialCallRow({
           >
             {openedLabel} · Central 1746 #{call.externalId}
             {slaShort ? ` · Prazo ${slaShort}` : ''}
+            {call.latitude == null || call.longitude == null
+              ? ' · Sem ponto no mapa'
+              : ''}
           </AppText>
-          <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+          {onLocateOnMap &&
+          call.latitude != null &&
+          call.longitude != null &&
+          Number.isFinite(call.latitude) &&
+          Number.isFinite(call.longitude) ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Localizar chamado ${call.externalId} no mapa`}
+              hitSlop={6}
+              onPress={onLocateOnMap}
+              style={({ pressed }) => [
+                styles.locatePill,
+                pressed && { opacity: 0.75 },
+              ]}
+            >
+              <Ionicons
+                name="map-outline"
+                size={13}
+                color={colors.onSurfaceBrand}
+              />
+              <AppText variant="caption" style={styles.locatePillText}>
+                No mapa
+              </AppText>
+            </Pressable>
+          ) : (
+            <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+          )}
         </View>
       </Pressable>
 
@@ -281,10 +312,27 @@ function createStyles(colors: ThemeColors) {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
+      gap: spacing.xs,
       paddingTop: spacing.xs,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: colors.border,
       marginTop: 2,
+    },
+    locatePill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surfaceSubdued,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    locatePillText: {
+      fontSize: 11,
+      fontWeight: '700',
+      color: colors.onSurfaceBrand,
     },
     flex: {
       flex: 1,

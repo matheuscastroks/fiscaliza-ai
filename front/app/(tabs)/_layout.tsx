@@ -4,9 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppTabBar } from '@/components/ui/AppTabBar';
 import { mapPerformanceVariant } from '@/features/territory/mapPerformance';
 
+export const unstable_settings = {
+  // initialRouteName="TerritoryScreen"
+  anchor: 'TerritoryScreen',
+};
+
 export default function TabLayout() {
   return (
     <Tabs
+      backBehavior="initialRoute"
       tabBar={(props) => <AppTabBar {...props} />}
       detachInactiveScreens={false}
       screenOptions={{
@@ -17,25 +23,20 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Início',
-          tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons
-              name={focused ? 'home' : 'home-outline'}
-              color={color}
-              size={size}
-            />
-          ),
+          href: null,
+          title: 'Explorar',
         }}
       />
       <Tabs.Screen
         name="TerritoryScreen"
         options={{
           title: 'Explorar',
+          tabBarLabel: 'Explorar',
           freezeOnBlur: mapPerformanceVariant !== 'unfrozen',
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
               name={focused ? 'map' : 'map-outline'}
-              color={color}
+              color={typeof color === 'string' ? color : undefined}
               size={size}
             />
           ),
@@ -44,11 +45,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="FollowScreen"
         options={{
-          title: 'Acompanhar',
+          title: 'Salvos',
+          tabBarLabel: 'Salvos',
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
               name={focused ? 'bookmark' : 'bookmark-outline'}
-              color={color}
+              color={typeof color === 'string' ? color : undefined}
               size={size}
             />
           ),
@@ -57,11 +59,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="ParticipateScreen"
         options={{
-          title: 'Agir',
+          title: '1746',
+          tabBarLabel: '1746',
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
-              name={focused ? 'hand-left' : 'hand-left-outline'}
-              color={color}
+              name={focused ? 'megaphone' : 'megaphone-outline'}
+              color={typeof color === 'string' ? color : undefined}
               size={size}
             />
           ),
@@ -71,10 +74,11 @@ export default function TabLayout() {
         name="ProfileScreen"
         options={{
           title: 'Perfil',
+          tabBarLabel: 'Perfil',
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
               name={focused ? 'person' : 'person-outline'}
-              color={color}
+              color={typeof color === 'string' ? color : undefined}
               size={size}
             />
           ),

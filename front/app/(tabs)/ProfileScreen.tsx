@@ -178,11 +178,14 @@ export default function ProfileScreen() {
         <View style={styles.heroCard}>
           <Pressable
             onPress={() => {
-              void selectPhoto();
+              if (user) void selectPhoto();
+              else router.push('/LoginScreen');
             }}
             disabled={picking}
             accessibilityRole="button"
-            accessibilityLabel="Alterar foto de perfil"
+            accessibilityLabel={
+              user ? 'Alterar foto de perfil' : 'Entrar na minha conta'
+            }
             accessibilityState={{ busy: picking, disabled: picking }}
             style={({ pressed }) => [
               styles.avatarContainer,
@@ -190,30 +193,54 @@ export default function ProfileScreen() {
             ]}
           >
             <UserAvatar size={76} />
-            <View style={styles.cameraBadge}>
-              <Ionicons
-                name="camera"
-                size={14}
-                color={colors.onAccentBrand}
-              />
-            </View>
+            {user && (
+              <View style={styles.cameraBadge}>
+                <Ionicons
+                  name="camera"
+                  size={14}
+                  color={colors.onAccentBrand}
+                />
+              </View>
+            )}
           </Pressable>
 
           <View style={styles.heroDetails}>
             <AppText variant="screenTitle" numberOfLines={1} style={styles.heroName}>
-              {user?.name || 'Cidadão'}
+              {user?.name || 'Acesso sem conta'}
             </AppText>
-            <AppText variant="body" color="muted" numberOfLines={1} selectable>
-              {user?.email || 'Acesso local'}
+            <AppText variant="body" color="muted" numberOfLines={2} selectable>
+              {user?.email || 'Seus salvos e lugares ficam guardados neste aparelho.'}
             </AppText>
             <View style={styles.statusPill}>
-              <Ionicons name="shield-checkmark" size={13} color={colors.onSurfaceBrand} />
+              <Ionicons
+                name={user ? 'shield-checkmark' : 'phone-portrait-outline'}
+                size={13}
+                color={colors.onSurfaceBrand}
+              />
               <AppText variant="meta" style={styles.statusPillText}>
-                Cidadão Conectado
+                {user ? 'Cidadão Conectado' : 'Consulta Pública Local'}
               </AppText>
             </View>
           </View>
         </View>
+
+        {!user && (
+          <View style={styles.authPromptRow}>
+            <View style={styles.flex}>
+              <AppButton
+                title="Entrar na conta"
+                onPress={() => router.push('/LoginScreen')}
+              />
+            </View>
+            <View style={styles.flex}>
+              <AppButton
+                title="Criar conta"
+                variant="secondary"
+                onPress={() => router.push('/RegisterScreen')}
+              />
+            </View>
+          </View>
+        )}
 
         {/* Alerta de erro de foto */}
         {photoError !== '' && (
@@ -305,9 +332,13 @@ export default function ProfileScreen() {
             </View>
           </View>
           <AppButton
-            title="Atualizar CEP e município"
+            title={
+              user ? 'Atualizar CEP e município' : 'Gerenciar lugares salvos'
+            }
             variant="secondary"
-            onPress={() => router.push('/MunicipalityScreen')}
+            onPress={() =>
+              router.push(user ? '/MunicipalityScreen' : '/PlacesScreen')
+            }
           />
         </View>
 
@@ -371,24 +402,28 @@ export default function ProfileScreen() {
 
         {/* Ações de Conta: Sair e Apagar Conta */}
         <View style={styles.accountActionsContainer}>
-          <AppButton
-            title="Sair da conta"
-            variant="quiet"
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              useSignOutSheet.getState().setOpen(true);
-            }}
-          />
+          {user && (
+            <>
+              <AppButton
+                title="Sair da conta"
+                variant="quiet"
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  useSignOutSheet.getState().setOpen(true);
+                }}
+              />
 
-          <AppButton
-            title="Apagar minha conta"
-            variant="destructive"
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setDeleteError('');
-              setConfirmDelete(true);
-            }}
-          />
+              <AppButton
+                title="Apagar minha conta"
+                variant="destructive"
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  setDeleteError('');
+                  setConfirmDelete(true);
+                }}
+              />
+            </>
+          )}
 
           <AppText variant="meta" color="muted" style={styles.versionFooter}>
             Fiscaliza aí · Versão 1.0.0 · Dados Abertos PCRJ
@@ -465,6 +500,10 @@ const createStyles = (colors: ThemeColors) =>
       borderWidth: 1,
       borderColor: colors.border,
       gap: spacing.md,
+    },
+    authPromptRow: {
+      flexDirection: 'row',
+      gap: spacing.sm,
     },
     avatarContainer: {
       position: 'relative',

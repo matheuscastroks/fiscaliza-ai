@@ -15,8 +15,8 @@ import {
 } from 'react-native-keyboard-controller';
 
 type FocusedInput = {
-  focus: (input: TextInput) => void;
-  blur: (input: TextInput) => void;
+  focus: (input: React.ComponentRef<typeof TextInput>) => void;
+  blur: (input: React.ComponentRef<typeof TextInput>) => void;
 };
 
 const KeyboardScrollContext = createContext<FocusedInput | null>(null);
@@ -39,7 +39,10 @@ const NOOP_FOCUSED_INPUT: FocusedInput = {
  * Modern keyboard-aware scroll container powered by react-native-keyboard-controller.
  * Synchronizes with native keyboard transitions at 60/120 FPS on iOS and Android.
  */
-export const KeyboardAwareScrollView = forwardRef<ScrollView, KeyboardAwareScrollViewProps>(
+export const KeyboardAwareScrollView = forwardRef<
+  React.ComponentRef<typeof ScrollView>,
+  KeyboardAwareScrollViewProps
+>(
   function KeyboardAwareScrollView(
     {
       children,
@@ -50,7 +53,7 @@ export const KeyboardAwareScrollView = forwardRef<ScrollView, KeyboardAwareScrol
     },
     forwardedRef,
   ) {
-    const scrollRef = useRef<ScrollView>(null);
+    const scrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
     useImperativeHandle(forwardedRef, () => scrollRef.current!, []);
 
     return (

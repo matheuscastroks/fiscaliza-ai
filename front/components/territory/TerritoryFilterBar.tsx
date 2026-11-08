@@ -25,6 +25,7 @@ import {
 } from '@/shared/public-data';
 import { layout, spacing } from '@/theme';
 import { RadiusControl } from '@/features/places/RadiusControl';
+import { PlaceSelector } from '@/features/places/PlaceSelector';
 import type { RadiusMeters } from '@/features/places/types';
 import {
   useTerritoryViewMode,
@@ -86,18 +87,25 @@ export interface TerritoryFilterBarProps {
   radiusMeters?: RadiusMeters;
   onRadiusChange?: (radius: RadiusMeters) => void;
   radiusLabel?: string;
+  areaOnly?: boolean;
+  onClearAreaOnly?: () => void;
+  mapAvailable?: boolean;
 }
 
 function TerritoryFilterBarComponent({
   search,
   onSearchChange,
   onOpenFilters,
+  filtersOpen,
   filterCount,
   neighborhood,
   radiusLabel,
   totalCalls,
   officialCallsStatus,
   padded = false,
+  areaOnly = false,
+  onClearAreaOnly,
+  mapAvailable = true,
 }: TerritoryFilterBarProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
@@ -115,18 +123,59 @@ function TerritoryFilterBarComponent({
 
   return (
     <View style={[styles.wrapper, padded && styles.paddedWrapper]}>
-      {/* Barra de busca com alternância Lista / Mapa */}
+      {/* Linha 1: Seletor de recorte territorial compacto + alternância explícita Mapa/Lista */}
+      <View style={padded ? styles.paddedSection : undefined}>
+        <PlaceSelector
+          compactHeader
+          prompt
+          areaOnly={areaOnly}
+          onClearAreaOnly={onClearAreaOnly}
+          rightAction={
+            mapAvailable ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={isListView ? 'Ver no mapa' : 'Ver em lista'}
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  toggleViewMode();
+                }}
+                style={({ pressed }) => [
+                  styles.viewModePill,
+                  isListView && styles.viewModePillActive,
+                  pressed && { opacity: 0.85 },
+                ]}
+              >
+                <Ionicons
+                  name={isListView ? 'map-outline' : 'list-outline'}
+                  size={16}
+                  color={isListView ? colors.onAccent : colors.ink}
+                />
+                <AppText
+                  variant="caption"
+                  style={[
+                    styles.viewModeText,
+                    isListView && styles.viewModeTextActive,
+                  ]}
+                >
+                  {isListView ? 'Mapa' : 'Lista'}
+                </AppText>
+              </Pressable>
+            ) : null
+          }
+        />
+      </View>
+
+      {/* Linha 2: Barra de busca com gatilho integrado de Filtros */}
       <View style={padded ? styles.paddedSection : styles.searchContainer}>
         <CitySearch
           value={search}
           onChangeText={onSearchChange}
-          onAction={() => {
+          onFilters={() => {
             void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            toggleViewMode();
+            onOpenFilters();
           }}
-          actionIcon={isListView ? 'map-outline' : 'list-outline'}
-          actionLabel={isListView ? 'Ver no mapa' : 'Ver em lista'}
-          actionActive={isListView}
+          filterCount={filterCount}
+          expanded={filtersOpen}
         />
       </View>
 
@@ -950,6 +999,36 @@ const createStyles = (colors: ThemeColors) =>
     },
     paddedSection: {
       paddingHorizontal: spacing.md,
+    },
+    viewModePill: {
+      minHeight: 40,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.09,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    viewModePillActive: {
+      backgroundColor: colors.accent,
+      borderColor: colors.accent,
+    },
+    viewModeText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.ink,
+    },
+    viewModeTextActive: {
+      color: colors.onAccent,
+      fontWeight: '800',
     },
     searchContainer: {
       shadowColor: '#000000',

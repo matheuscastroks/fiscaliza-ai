@@ -10,7 +10,7 @@ import type { ThemeColors } from '@/theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { layout } from '@/theme/layout';
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
-import { Pressable, FlatList, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { BackHandler, Platform, Pressable, FlatList, StyleSheet, View, ActivityIndicator } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams, useIsFocused } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,7 +32,7 @@ import {
   useTerritoryFiltersModal,
   useTerritoryDomain,
 } from '@/stores/territoryStore';
-import { MapboxMapView, type MapMarker } from '@/components/ui/MapboxMapView';
+import { MapboxMapView, isMapboxAvailable, type MapMarker } from '@/components/ui/MapboxMapView';
 import {
   TerritoryPreviewCard,
   entryLocation,
@@ -61,11 +61,12 @@ export default function TerritoryScreen() {
   return <TerritoryContent />;
 }
 
-function TerritoryContent() {
+export function TerritoryContent() {
   const isFocused = useIsFocused();
   const { colors, mode } = useTheme();
   const insets = useSafeAreaInsets();
   const styles = useThemedStyles(createStyles);
+  const mapAvailable = isMapboxAvailable();
 
   const listOffsetRef = useRef(0);
   const listRef = useRef<FlatList<Entry>>(null);
@@ -76,11 +77,11 @@ function TerritoryContent() {
 
   const {
     neighborhoodId: routeNeighborhoodId, layer: routeLayer,
-    startDate, endDate, filters, focusId, lat, lng, fromHome,
+    startDate, endDate, filters, focusId, lat, lng,
     neighborhood: paramNeighborhood,
   } = useLocalSearchParams<{
     neighborhoodId?: string; layer?: string; startDate?: string; endDate?: string;
-    filters?: string; focusId?: string; lat?: string; lng?: string; neighborhood?: string; fromHome?: string;
+    filters?: string; focusId?: string; lat?: string; lng?: string; neighborhood?: string;
   }>();
   const {
     neighborhood,
@@ -119,12 +120,7 @@ function TerritoryContent() {
     setAreaOnly(false);
     setAppliedBounds(null);
   }, [activeSelection, routeNeighborhoodId, focusId]);
-  useEffect(() => {
-    if (!fromHome) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setAreaOnly(false); setAppliedBounds(null);
-    router.setParams({ fromHome: undefined, neighborhoodId: undefined, layer: undefined, startDate: undefined, endDate: undefined, focusId: undefined, lat: undefined, lng: undefined, neighborhood: undefined });
-  }, [fromHome]);
+
   const territorialFilters = useTerritoryFilters();
   const { serviceType, period, search, status, selection, setFilter } = territorialFilters;
   const setServiceType = useCallback((value: string) => setFilter('serviceType', value), [setFilter]);
@@ -134,8 +130,9 @@ function TerritoryContent() {
   const debouncedSearch = useDebouncedValue(search, 300);
   const appliedSearch = search.trim() ? debouncedSearch.trim() : '';
   const { isListView, setIsListView } = useTerritoryViewMode();
-  const { setTerritoryDomain, setFacilityLayers } = useTerritoryDomain();
-  const { mapVisited, interactionsComplete, visitTrace } = useMapPerformance(isFocused, isListView);
+  const effectiveListView = isListView || !mapAvailable;
+  const { territoryDomain, setTerritoryDomain, setFacilityLayers } = useTerritoryDomain();
+  const { interactionsComplete, visitTrace } = useMapPerformance(isFocused, effectiveListView);
 
   const facilityParams = { neighborhoodId, search: appliedSearch || undefined, ...(areaOnly && appliedBounds ? appliedBounds : {}) };
   const facilitiesConfirmed = !neighborhood || Boolean(neighborhoodId);
@@ -156,9 +153,9 @@ function TerritoryContent() {
       ...officialTime,
       search: appliedSearch || undefined,
       limit: 50,
-      hasCoordinates: isListView ? undefined : true,
+      hasCoordinates: areaOnly ? true : undefined,
     },
-    isFocused && layers.includes('official') && territorialFilters.hydrated && !fromHome,
+    isFocused && layers.includes('official') && territorialFilters.hydrated,
     mapPerformanceEnabled,
     territorialFilters.cacheScope,
   );
@@ -183,14 +180,11 @@ function TerritoryContent() {
 
   useEffect(() => {
     if (!routeNeighborhoodId && !routeLayer) return;
-    const target = neighborhoods.data?.find(
-      (n) => n.id === routeNeighborhoodId,
-    );
+    const target = neighborhoods.data?.find((n) => n.id === routeNeighborhoodId);
     if (target) setNeighborhood(target.name);
     setStatus('Não Encerrado');
     setServiceType('all');
     setSearch('');
-    // An explicit route change replaces the previous viewport override.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setAreaOnly(false);
     setAppliedBounds(null);
@@ -200,12 +194,8 @@ function TerritoryContent() {
       setFacilityLayers([routeLayer as 'school']);
     }
   }, [
-    routeNeighborhoodId,
-    routeLayer,
-    neighborhoods.data,
-    setNeighborhood,
-    setLayers,
-    setSearch, setServiceType, setStatus,
+    routeNeighborhoodId, routeLayer, neighborhoods.data, setNeighborhood,
+    setLayers, setSearch, setServiceType, setStatus, setTerritoryDomain, setFacilityLayers,
   ]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -219,10 +209,31 @@ function TerritoryContent() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (locationError) {
-      setToastMessage(locationError);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (locationError) setToastMessage(locationError);
   }, [locationError]);
+
+  useEffect(() => {
+    if (!isFocused || Platform.OS !== 'android') return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (selectedId !== null || selectedCluster !== null) {
+        setSelectedId(null);
+        setSelectedCluster(null);
+        return true;
+      }
+      if (isListView && mapAvailable) {
+        setIsListView(false);
+        return true;
+      }
+      if (areaOnly) {
+        setAreaOnly(false);
+        setAppliedBounds(null);
+        return true;
+      }
+      return false;
+    });
+    return () => sub.remove();
+  }, [isFocused, selectedId, selectedCluster, isListView, mapAvailable, areaOnly, setIsListView]);
 
   useEffect(() => {
     if (!focusId) return;
@@ -254,15 +265,8 @@ function TerritoryContent() {
       }));
     }
   }, [
-    focusId,
-    lat,
-    lng,
-    paramNeighborhood,
-    officialCalls.data?.calls,
-    setIsListView,
-    setNeighborhood,
-    updateCameraRegion,
-    setSearch, setServiceType, setStatus,
+    focusId, lat, lng, paramNeighborhood, officialCalls.data?.calls,
+    setIsListView, setNeighborhood, updateCameraRegion, setSearch, setServiceType, setStatus,
   ]);
 
   const entries = useMemo<Entry[]>(() => {
@@ -275,32 +279,19 @@ function TerritoryContent() {
       neighborhoodId,
     });
   }, [
-    officialCalls.data?.calls,
-    schools.data,
-    health.data,
-    squares.data,
-    layers,
-    neighborhood,
-    neighborhoodId,
+    officialCalls.data?.calls, schools.data, health.data, squares.data,
+    layers, neighborhood, neighborhoodId,
   ]);
 
-  const unlocated = useMemo(
-    () => entries.filter((entry) => !entryLocation(entry)),
-    [entries],
-  );
-  const located = useMemo(
-    () => entries.filter((entry) => Boolean(entryLocation(entry))),
-    [entries],
-  );
+  const unlocated = useMemo(() => entries.filter((entry) => !entryLocation(entry)), [entries]);
+  const located = useMemo(() => entries.filter((entry) => Boolean(entryLocation(entry))), [entries]);
   const listed = areaOnly ? located : entries;
 
   const selectedEntry = useMemo<Entry | null>(() => {
     if (!selectedId) return null;
     const fromEntries = entries.find((entry) => entry.item.id === selectedId);
     if (fromEntries) return fromEntries;
-    const off = officialCalls.data?.calls?.find(
-      (item) => item.id === selectedId,
-    );
+    const off = officialCalls.data?.calls?.find((item) => item.id === selectedId);
     return off ? { type: 'official' as const, item: off } : null;
   }, [selectedId, entries, officialCalls.data?.calls]);
 
@@ -313,14 +304,9 @@ function TerritoryContent() {
   const municipalOverviewRegion = useMemo(() => {
     const points = entries
       .map((entry) => entryLocation(entry))
-      .filter((pt): pt is { latitude: number; longitude: number } =>
-        Boolean(pt),
-      );
+      .filter((pt): pt is { latitude: number; longitude: number } => Boolean(pt));
     const calculated = computeOverviewRegion(points, INITIAL_REGION);
-    return {
-      ...calculated,
-      zoom: calculated.zoom ?? 12,
-    };
+    return { ...calculated, zoom: calculated.zoom ?? 12 };
   }, [entries]);
 
   const filterCount =
@@ -342,37 +328,40 @@ function TerritoryContent() {
       lastFittedNeighborhoodRef.current = neighborhood;
       updateCameraRegion(municipalOverviewRegion);
     }
-  }, [
-    neighborhood,
-    areaOnly,
-    focusId,
-    entries,
-    municipalOverviewRegion,
-    activeSelection.kind,
-    updateCameraRegion,
-  ]);
+  }, [neighborhood, areaOnly, focusId, entries, municipalOverviewRegion, activeSelection.kind, updateCameraRegion]);
 
   const openEntry = useCallback((entry: Entry) => {
     router.push({
-      pathname:
-        entry.type === 'facility'
-          ? '/FacilityDetailsScreen'
-          : '/OfficialCallDetailsScreen',
+      pathname: entry.type === 'facility' ? '/FacilityDetailsScreen' : '/OfficialCallDetailsScreen',
       params: { id: entry.item.id },
     });
   }, []);
 
+  const handleLocateEntry = useCallback(
+    (entry: Entry) => {
+      if (!mapAvailable) return;
+      const point = entryLocation(entry);
+      setSelectedId(entry.item.id);
+      setSelectedCluster(null);
+      setIsListView(false);
+      if (point) {
+        updateCameraRegion((prev) => ({
+          ...prev,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          zoom: 16.5,
+        }));
+      }
+    },
+    [mapAvailable, setIsListView, updateCameraRegion],
+  );
+
   const mapMarkers: MapMarker[] = useMemo(() => {
-    return located
-      .map(entryToMarker)
-      .filter((m): m is MapMarker => m !== null);
+    return located.map(entryToMarker).filter((m): m is MapMarker => m !== null);
   }, [located]);
 
   const allMapMarkers = useMemo(() => {
-    if (
-      !selectedEntry ||
-      mapMarkers.some((m) => m.id === selectedEntry.item.id)
-    ) {
+    if (!selectedEntry || mapMarkers.some((m) => m.id === selectedEntry.item.id)) {
       return mapMarkers;
     }
     const extra = entryToMarker(selectedEntry);
@@ -415,12 +404,7 @@ function TerritoryContent() {
     setSearch('');
     setServiceType('all');
     setPeriod('all');
-    router.setParams({
-      neighborhoodId: undefined,
-      layer: undefined,
-      startDate: undefined,
-      endDate: undefined,
-    });
+    router.setParams({ neighborhoodId: undefined, layer: undefined, startDate: undefined, endDate: undefined });
     setSelectedId(null);
     setSelectedCluster(null);
     setStatus('Não Encerrado');
@@ -472,9 +456,7 @@ function TerritoryContent() {
         ...(layers.includes('official') ? [officialCalls.refetch()] : []),
         ...(neighborhoodId ? [boundary.refetch()] : []),
         ...Object.entries(facilityQueries)
-          .filter(
-            ([k]) => facilitiesConfirmed && layers.includes(k as 'school'),
-          )
+          .filter(([k]) => facilitiesConfirmed && layers.includes(k as 'school'))
           .map(([, q]) => q.refetch()),
       ]);
     } finally {
@@ -488,15 +470,7 @@ function TerritoryContent() {
     setSelectedCluster(null);
     listOffsetRef.current = 0;
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [
-    neighborhoodId,
-    neighborhood,
-    layers,
-    search,
-    status,
-    serviceType,
-    period,
-  ]);
+  }, [neighborhoodId, neighborhood, layers, search, status, serviceType, period]);
 
   const handleNeighborhoodChange = useCallback((value: string) => {
     setNeighborhood(value);
@@ -507,10 +481,18 @@ function TerritoryContent() {
     setSelectedCluster(null);
   }, [setNeighborhood]);
 
+  const handleClearAreaOnly = useCallback(() => {
+    setAreaOnly(false);
+    setAppliedBounds(null);
+  }, []);
+
   const filterBarProps: TerritoryFilterBarProps = useMemo(() => ({
     radiusMeters: !areaOnly && !routeNeighborhoodId && selection.kind === 'radius' ? selection.radiusMeters : undefined,
     onRadiusChange: (value) => { void usePlacesStore.getState().setRadius(value); },
     radiusLabel: !areaOnly && !routeNeighborhoodId && selection.kind === 'radius' ? layers.some((layer) => layer !== 'official') ? 'Raio só no 1746' : 'Entorno 1746' : undefined,
+    areaOnly,
+    onClearAreaOnly: handleClearAreaOnly,
+    mapAvailable,
     search,
     onSearchChange: setSearch,
     onOpenFilters: () => setFiltersOpen(true),
@@ -550,46 +532,38 @@ function TerritoryContent() {
     facilityQueries,
     facilitiesConfirmed,
   }), [
-    selection, areaOnly, routeNeighborhoodId,
-    setSearch, setServiceType, setPeriod, setStatus,
-    search,
-    setFiltersOpen,
-    filtersOpen,
-    filterCount,
-    bairroOptions,
-    neighborhood,
-    neighborhoodId,
-    handleNeighborhoodChange,
-    serviceType,
-    serviceTypeOptions,
-    period,
-    status,
-    layers,
-    setLayers,
-    startDate,
-    endDate,
-    totalCalls,
-    officialCalls.isLoading,
-    officialCalls.error,
-    officialCalls.data?.calls.length,
-    officialCalls.data?.total,
-    officialCalls.data?.territoryConfirmed,
-    officialSource?.state,
-    facilityQueries,
-    facilitiesConfirmed,
+    selection, areaOnly, handleClearAreaOnly, mapAvailable, routeNeighborhoodId,
+    setSearch, setServiceType, setPeriod, setStatus, search, setFiltersOpen, filtersOpen,
+    filterCount, bairroOptions, neighborhood, neighborhoodId, handleNeighborhoodChange,
+    serviceType, serviceTypeOptions, period, status, layers, setLayers, startDate, endDate,
+    totalCalls, officialCalls.isLoading, officialCalls.error, officialCalls.data?.calls.length,
+    officialCalls.data?.total, officialCalls.data?.territoryConfirmed, officialSource?.state,
+    facilityQueries, facilitiesConfirmed,
   ]);
+
+  const summaryLabel =
+    territoryDomain === 'facilities'
+      ? `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')})`
+      : officialCalls.isLoading
+        ? 'Consultando chamados neste recorte...'
+        : `Ver em lista · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
+
+  const summarySubLabel =
+    territoryDomain === 'calls' && unlocated.length > 0
+      ? `+${unlocated.length} sem ponto no mapa · Toque para abrir a lista`
+      : 'Toque em um ponto no mapa ou abra a lista completa';
 
   return (
     <View style={[styles.container, !isFocused && mapPerformanceVariant !== 'visible-surface' && { display: 'none' }]}>
       <AppToast
         message={toastMessage}
         onDismiss={() => setToastMessage(null)}
-        topOffset={insets.top + 104}
+        topOffset={insets.top + 130}
         type={locationError ? 'warning' : 'info'}
       />
 
-      {(!isListView || (mapPerformanceVariant === 'retained-map' && mapVisited)) && (
-        <View accessibilityElementsHidden={isListView} importantForAccessibility={isListView ? 'no-hide-descendants' : 'auto'} pointerEvents={isListView ? 'none' : 'auto'} style={[StyleSheet.absoluteFill, isListView && { opacity: 0 }]}>
+      {mapAvailable && (
+        <View style={StyleSheet.absoluteFill}>
           <MapboxMapView
             style={StyleSheet.absoluteFill}
             region={region}
@@ -610,31 +584,9 @@ function TerritoryContent() {
           />
 
           {officialCalls.isLoading && (
-            <View
-              style={{
-                position: 'absolute',
-                top: insets.top + 115,
-                alignSelf: 'center',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-                backgroundColor: 'rgba(15, 23, 42, 0.85)',
-                paddingHorizontal: 14,
-                paddingVertical: 8,
-                borderRadius: layout.radius.pill,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.25,
-                shadowRadius: 4,
-                elevation: 5,
-                zIndex: 40,
-              }}
-            >
+            <View style={[styles.loadingPill, { top: insets.top + 148 }]}>
               <ActivityIndicator size="small" color="#FFFFFF" />
-              <AppText
-                variant="caption"
-                style={{ color: '#FFFFFF', fontWeight: '600' }}
-              >
+              <AppText variant="caption" style={{ color: '#FFFFFF', fontWeight: '600' }}>
                 Carregando chamados...
               </AppText>
             </View>
@@ -642,99 +594,118 @@ function TerritoryContent() {
         </View>
       )}
 
-      {!isListView && (
-        <View
-          style={[
-            styles.topFloatingHeader,
-            { paddingTop: insets.top + spacing.xs },
-          ]}
-        >
+      {mapAvailable && (
+        <View style={[styles.topFloatingHeader, { paddingTop: insets.top + spacing.xs }]}>
           <TerritoryFilterBar {...filterBarProps} />
         </View>
       )}
 
-      {!isListView && !selectedEntry && selectedClusterEntries.length === 0 && (
-        <View
-          style={[styles.bottomFloatingDock, { bottom: insets.bottom + 104 }]}
-        >
-          {/* Centralizar localização */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Minha posição"
-            accessibilityState={{ disabled: locating, busy: locating }}
-            disabled={locating}
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              void locate();
-            }}
-            style={({ pressed }) => [
-              styles.dockCircleButton,
-              { backgroundColor: colors.surface },
-              pressed && styles.buttonPressed,
-            ]}
-          >
-            <Ionicons
-              name="locate"
-              size={20}
-              color={locating ? colors.accent : colors.ink}
-            />
-          </Pressable>
+      {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
+        <View style={[styles.bottomFloatingContainer, { bottom: insets.bottom + 90 }]}>
+          {/* Linha de controles espaciais do mapa */}
+          <View style={styles.mapActionsRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Minha posição"
+              accessibilityState={{ disabled: locating, busy: locating }}
+              disabled={locating}
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                void locate();
+              }}
+              style={({ pressed }) => [
+                styles.dockCircleButton,
+                { backgroundColor: colors.surface },
+                pressed && styles.buttonPressed,
+              ]}
+            >
+              <Ionicons
+                name="locate"
+                size={20}
+                color={locating ? colors.accent : colors.ink}
+              />
+            </Pressable>
 
-          {/* Buscar nesta área */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              areaOnly ? 'Voltar ao recorte selecionado' : 'Buscar nesta área'
-            }
-            style={({ pressed }) => [
-              styles.areaPillButton,
-              { backgroundColor: colors.surface },
-              pressed && styles.buttonPressed,
-            ]}
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              if (areaOnly) {
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={areaOnly ? 'Voltar ao recorte selecionado' : 'Buscar nesta área'}
+              style={({ pressed }) => [
+                styles.areaPillButton,
+                { backgroundColor: colors.surface },
+                pressed && styles.buttonPressed,
+              ]}
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                if (areaOnly) {
+                  setAreaOnly(false);
+                  setAppliedBounds(null);
+                } else {
+                  setAppliedBounds(computeRegionBounds(viewportRef.current));
+                  setAreaOnly(true);
+                }
+              }}
+            >
+              <Ionicons
+                name={areaOnly ? 'globe-outline' : 'scan-outline'}
+                size={16}
+                color={colors.ink}
+              />
+              <AppText variant="caption" style={{ fontWeight: '700' }}>
+                {areaOnly ? 'Voltar ao recorte' : 'Buscar nesta área'}
+              </AppText>
+            </Pressable>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Enquadrar recorte"
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                updateCameraRegion(municipalOverviewRegion);
                 setAreaOnly(false);
-                setAppliedBounds(null);
-              } else {
-                setAppliedBounds(computeRegionBounds(viewportRef.current));
-                setAreaOnly(true);
-              }
-            }}
-          >
-            <Ionicons
-              name={areaOnly ? 'globe-outline' : 'scan-outline'}
-              size={16}
-              color={colors.ink}
-            />
-            <AppText variant="caption" style={{ fontWeight: '700' }}>
-              {areaOnly ? 'Voltar ao recorte' : 'Buscar nesta área'}
-            </AppText>
-          </Pressable>
+                setSelectedId(null);
+                setSelectedCluster(null);
+              }}
+              style={({ pressed }) => [
+                styles.dockCircleButton,
+                { backgroundColor: colors.surface },
+                pressed && styles.buttonPressed,
+              ]}
+            >
+              <Ionicons name="expand-outline" size={20} color={colors.ink} />
+            </Pressable>
+          </View>
 
-          {/* Expandir / Voltar ao município */}
+          {/* Barra Contextual de Resultados e Acesso à Lista */}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Voltar ao município"
+            accessibilityLabel={`${summaryLabel}. ${summarySubLabel}`}
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              updateCameraRegion(municipalOverviewRegion);
-              setAreaOnly(false);
-              setSelectedId(null);
-              setSelectedCluster(null);
+              setIsListView(true);
             }}
             style={({ pressed }) => [
-              styles.dockCircleButton,
+              styles.summaryBarButton,
               { backgroundColor: colors.surface },
               pressed && styles.buttonPressed,
             ]}
           >
-            <Ionicons name="expand-outline" size={20} color={colors.ink} />
+            <View style={[styles.summaryIconCircle, { backgroundColor: colors.surfaceSubdued }]}>
+              <Ionicons name="list-outline" size={18} color={colors.onSurfaceBrand} />
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <AppText variant="label" numberOfLines={1} style={styles.summaryTitle}>
+                {summaryLabel}
+              </AppText>
+              <AppText variant="caption" color="muted" numberOfLines={1} style={styles.summarySubtitle}>
+                {summarySubLabel}
+              </AppText>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.muted} />
           </Pressable>
         </View>
       )}
 
-      {!isListView && selectedClusterEntries.length > 1 && (
+      {!effectiveListView && selectedClusterEntries.length > 1 && (
         <TerritoryClusterCarousel
           entries={selectedClusterEntries}
           onOpen={openEntry}
@@ -752,30 +723,33 @@ function TerritoryContent() {
               }));
             }
           }}
-          bottomOffset={insets.bottom + 96}
+          bottomOffset={insets.bottom + 92}
         />
       )}
 
-      {!isListView && selectedClusterEntries.length === 1 && (
+      {!effectiveListView && selectedClusterEntries.length === 1 && (
         <TerritoryPreviewCard
           entry={selectedClusterEntries[0]}
           onOpen={openEntry}
           onClose={() => setSelectedCluster(null)}
-          bottomOffset={insets.bottom + 96}
+          bottomOffset={insets.bottom + 92}
         />
       )}
 
-      {!isListView && selectedClusterEntries.length === 0 && selectedEntry && (
+      {!effectiveListView && selectedClusterEntries.length === 0 && selectedEntry && (
         <TerritoryPreviewCard
           entry={selectedEntry}
           onOpen={openEntry}
           onClose={() => setSelectedId(null)}
-          bottomOffset={insets.bottom + 96}
+          bottomOffset={insets.bottom + 92}
         />
       )}
 
-      {isListView && (
+      {effectiveListView && (
         <TerritoryListView
+          visible={effectiveListView && isFocused}
+          asSheet={mapAvailable}
+          onClose={() => setIsListView(false)}
           listRef={listRef}
           listOffsetRef={listOffsetRef}
           restoreListOffsetRef={restoreListOffsetRef}
@@ -789,6 +763,7 @@ function TerritoryContent() {
           refreshing={refreshing}
           onRefresh={() => { void refreshAll(); }}
           onOpenEntry={openEntry}
+          onLocateEntry={mapAvailable ? handleLocateEntry : undefined}
           onResetFilters={resetFilters}
           officialQuery={{
             isLoading: officialCalls.isLoading, isFetching: officialCalls.isFetching,
@@ -828,58 +803,41 @@ function TerritoryContent() {
 
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.canvas,
+    container: { flex: 1, backgroundColor: colors.canvas },
+    loadingPill: {
+      position: 'absolute', alignSelf: 'center', flexDirection: 'row', alignItems: 'center',
+      gap: 8, backgroundColor: 'rgba(15, 23, 42, 0.85)', paddingHorizontal: 14, paddingVertical: 8,
+      borderRadius: layout.radius.pill, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25, shadowRadius: 4, elevation: 5, zIndex: 40,
     },
     topFloatingHeader: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      zIndex: 50,
-      paddingHorizontal: spacing.md,
-      gap: 8,
+      position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50, paddingHorizontal: spacing.md, gap: 8,
     },
-    bottomFloatingDock: {
-      position: 'absolute',
-      alignSelf: 'center',
-      zIndex: 40,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
+    bottomFloatingContainer: {
+      position: 'absolute', left: spacing.md, right: spacing.md, zIndex: 40, gap: 8,
+    },
+    mapActionsRow: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     },
     dockCircleButton: {
-      width: 42,
-      height: 42,
-      borderRadius: 21,
-      alignItems: 'center',
-      justifyContent: 'center',
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.14,
-      shadowRadius: 6,
-      elevation: 4,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
+      width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center',
+      shadowColor: '#000000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.14, shadowRadius: 6,
+      elevation: 4, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
     },
     areaPillButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      height: 42,
-      paddingHorizontal: spacing.md,
-      borderRadius: layout.radius.pill,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.14,
-      shadowRadius: 8,
-      elevation: 5,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
+      flexDirection: 'row', alignItems: 'center', gap: 6, height: 42, paddingHorizontal: spacing.md,
+      borderRadius: layout.radius.pill, shadowColor: '#000000', shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.14, shadowRadius: 8, elevation: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
     },
-    buttonPressed: {
-      opacity: 0.82,
-      transform: [{ scale: 0.94 }],
+    summaryBarButton: {
+      flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.sm + 4,
+      paddingVertical: 10, borderRadius: layout.radius.card, borderWidth: 1, borderColor: colors.border,
+      shadowColor: '#000000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 5,
     },
+    summaryIconCircle: {
+      width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center',
+    },
+    summaryTitle: { fontSize: 13, fontWeight: '700' },
+    summarySubtitle: { fontSize: 11 },
+    buttonPressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },
   });

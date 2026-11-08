@@ -36,7 +36,7 @@ export const AppText: React.FC<AppTextProps> = ({
         { color: textColor },
         style,
         {
-          fontFamily: fontForWeight(flattened.fontWeight),
+          fontFamily: fontForWeight(flattened?.fontWeight),
           fontWeight: 'normal',
         },
       ]}

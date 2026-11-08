@@ -32,6 +32,7 @@ test('territorial discovery and local places remain accessible without authentic
     ['(tabs)', 'TerritoryScreen'],
     ['(tabs)', 'FollowScreen'],
     ['(tabs)', 'ParticipateScreen'],
+    ['(tabs)', 'ProfileScreen'],
     ['SettingsScreen'],
     ['PlacesScreen'],
     ['OfficialCallDetailsScreen'],
@@ -41,7 +42,6 @@ test('territorial discovery and local places remain accessible without authentic
     assert.equal(publicRoute(segments), true);
   for (const segments of [
     ['(tabs)', 'ReportScreen'],
-    ['(tabs)', 'ProfileScreen'],
     ['ProposalScreen'],
     ['PresentationScreen'],
     ['MunicipalityScreen'],
@@ -72,4 +72,3 @@ test('legacy gamified routes and redundant stores are removed', () => {
   assert.equal(layout.includes('RankingScreen'), false);
   assert.equal(layout.includes('PointsGuideScreen'), false);
 });
-

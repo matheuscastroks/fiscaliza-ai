@@ -121,7 +121,10 @@ export function TerritoryCardContent({
     official.serviceType,
     official.serviceSubtype,
   );
-  const address = official.neighborhoodName || 'Bairro não informado';
+  const address =
+    [official.streetName, official.neighborhoodName]
+      .filter(Boolean)
+      .join(' · ') || 'Bairro não informado';
   const status = officialCallStatus(official, colors, isDark);
   const date = new Date(official.openedAt);
   const dateLabel = Number.isNaN(date.getTime())

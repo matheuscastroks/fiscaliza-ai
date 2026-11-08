@@ -129,6 +129,29 @@ test('brand identity: two-color SVG/PNG assets, AppBrandGlyph variants, and Fisc
     glyphComp.includes('export function AppBrandLockup'),
     'AppBrandGlyph module must export horizontal AppBrandLockup',
   );
+  assert.ok(
+    glyphComp.includes('pinTranslateY') && glyphComp.includes('withDelay'),
+    'AppBrandGlyph must animate pin landing and delayed sparkle rays',
+  );
+
+  const animatedSplash = fs.readFileSync(
+    path.join(ROOT_DIR, 'components', 'ui', 'AnimatedBrandSplash.tsx'),
+    'utf8',
+  );
+  assert.ok(
+    animatedSplash.includes('export function AnimatedBrandSplash') &&
+      animatedSplash.includes('AppBrandGlyph'),
+    'AnimatedBrandSplash must render AppBrandGlyph on startup',
+  );
+
+  const rootLayout = fs.readFileSync(
+    path.join(ROOT_DIR, 'app', '_layout.tsx'),
+    'utf8',
+  );
+  assert.ok(
+    rootLayout.includes('<AnimatedBrandSplash />'),
+    'RootLayout must mount AnimatedBrandSplash on startup',
+  );
 
   const appJson = JSON.parse(
     fs.readFileSync(path.join(ROOT_DIR, 'app.json'), 'utf8'),

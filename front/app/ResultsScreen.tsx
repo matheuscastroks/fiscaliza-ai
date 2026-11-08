@@ -198,7 +198,7 @@ export default function ResultsScreen() {
           disabled={closedCallsQuery.isFetchingNextPage}
           variant="secondary"
           onPress={() => { void closedCallsQuery.fetchNextPage(); }}
-        /> : null}
+        /> : undefined}
       />
     </AppScreen>
   );

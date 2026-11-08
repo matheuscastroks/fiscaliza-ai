@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
@@ -10,15 +10,109 @@ export function LocationEntryPrompt({
   onLocate,
   onChoose,
   busy,
+  compact = false,
 }: {
   onLocate: () => void;
   onChoose: () => void;
   busy: boolean;
+  compact?: boolean;
 }) {
   const { colors, isDark } = useTheme();
   const { hydrated, promptSeen, dismissPrompt } = usePlacesStore();
 
   if (!hydrated || promptSeen) return null;
+
+  if (compact) {
+    return (
+      <View
+        style={[
+          styles.compactBanner,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+          },
+        ]}
+      >
+        <Ionicons
+          name="navigate-outline"
+          size={16}
+          color={colors.onSurfaceBrand}
+        />
+        <AppText
+          variant="caption"
+          numberOfLines={1}
+          style={styles.compactLabel}
+        >
+          Focar na sua região?
+        </AppText>
+
+        <View style={styles.compactActions}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Usar meu GPS"
+            disabled={busy}
+            onPress={() => {
+              void dismissPrompt();
+              onLocate();
+            }}
+            style={({ pressed }) => [
+              styles.compactPrimaryPill,
+              {
+                backgroundColor: colors.accent,
+                opacity: busy ? 0.6 : pressed ? 0.85 : 1,
+              },
+            ]}
+          >
+            {busy ? (
+              <ActivityIndicator size="small" color={colors.onAccent} />
+            ) : (
+              <AppText
+                variant="caption"
+                style={[styles.compactPillText, { color: colors.onAccent }]}
+              >
+                Usar GPS
+              </AppText>
+            )}
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Escolher bairro"
+            onPress={() => {
+              void dismissPrompt();
+              onChoose();
+            }}
+            style={({ pressed }) => [
+              styles.compactSecondaryPill,
+              {
+                backgroundColor: isDark
+                  ? colors.surfaceSubdued
+                  : colors.canvas,
+                borderColor: colors.border,
+                opacity: pressed ? 0.8 : 1,
+              },
+            ]}
+          >
+            <AppText variant="caption" style={styles.compactPillText}>
+              Bairro
+            </AppText>
+          </Pressable>
+
+          <Pressable
+            onPress={() => {
+              void dismissPrompt();
+            }}
+            hitSlop={10}
+            style={styles.compactCloseBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Fechar aviso de localização"
+          >
+            <Ionicons name="close" size={16} color={colors.muted} />
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -135,5 +229,54 @@ const styles = StyleSheet.create({
   actionItem: {
     flex: 1,
     minWidth: 140,
+  },
+  compactBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingLeft: spacing.sm + 2,
+    paddingRight: spacing.xs,
+    paddingVertical: 6,
+    borderRadius: layout.radius.pill,
+    borderWidth: 1,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  compactLabel: {
+    flex: 1,
+    fontWeight: '600',
+    fontSize: 12,
+  },
+  compactActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  compactPrimaryPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: layout.radius.pill,
+    minHeight: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compactSecondaryPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: layout.radius.pill,
+    borderWidth: 1,
+    minHeight: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compactPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  compactCloseBtn: {
+    padding: 4,
   },
 });

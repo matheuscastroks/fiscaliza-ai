@@ -4,6 +4,7 @@ import {
   useOnboardingInitialization,
 } from '@/features/onboarding/OnboardingGate';
 import { useTheme, useThemeInitialization } from '@/theme/useTheme';
+import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
 import React, { useEffect } from 'react';
 import {
@@ -24,6 +25,7 @@ import 'react-native-reanimated';
 import { useAuthStore } from '@/stores/authStore';
 import { queryClient } from '@/services/http';
 import { AppDrawer } from '@/components/ui/AppDrawer';
+import { AnimatedBrandSplash } from '@/components/ui/AnimatedBrandSplash';
 import { SignOutSheet } from '@/components/ui/SignOutSheet';
 import { useFollowStore } from '@/stores/followStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
@@ -36,7 +38,9 @@ import {
   InstrumentSans_600SemiBold,
   InstrumentSans_700Bold,
 } from '@expo-google-fonts/instrument-sans';
-export const unstable_settings = { initialRouteName: '(tabs)' };
+export const unstable_settings = { anchor: '(tabs)' };
+
+void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function RootLayout() {
   const { colors, isDark } = useTheme();
@@ -93,7 +97,14 @@ export default function RootLayout() {
       router.replace(user?.municipality ? '/(tabs)' : '/MunicipalityScreen');
     }
   }, [isReady, isAuthenticated, segments, user?.municipality]);
-  if (!themeReady || !onboardingReady || !isReady || (!fontsLoaded && !fontError))
+  const appReady =
+    themeReady && onboardingReady && isReady && (fontsLoaded || Boolean(fontError));
+  useEffect(() => {
+    if (appReady) {
+      void SplashScreen.hideAsync().catch(() => undefined);
+    }
+  }, [appReady]);
+  if (!appReady)
     return null;
   const base = isDark ? DarkTheme : DefaultTheme;
   const navigationTheme = {
@@ -130,6 +141,7 @@ export default function RootLayout() {
                 </AppDrawer>
                 <SignOutSheet />
                 <OnboardingGate enabled={segments[0] !== 'OnboardingScreen'} />
+                <AnimatedBrandSplash />
               </QueryClientProvider>
             </BottomSheetModalProvider>
           </ThemeProvider>

@@ -7,8 +7,10 @@ import {
 } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
@@ -25,7 +27,11 @@ const PIN_SOURCES = {
   negative: require('@/assets/brand/brand-glyph-negative.svg'),
 } as const;
 
-const SPARKLE_SOURCE = require('@/assets/brand/brand-sparkle.svg');
+const SPARKLE_SOURCES = [
+  require('@/assets/brand/brand-sparkle-1.svg'),
+  require('@/assets/brand/brand-sparkle-2.svg'),
+  require('@/assets/brand/brand-sparkle-3.svg'),
+] as const;
 
 export function resolveBrandVariant(
   variant: BrandVariant,
@@ -69,62 +75,204 @@ export function AppBrandGlyph({
     };
   }, []);
 
+  const dropOffset = Math.max(8, Math.round(size * 0.22));
+
+  // Pin de localização: descida sólida e firme (sem repiques desordenados)
   const pinScale = useSharedValue(reducedMotion ? 1 : 0.88);
-  const pinOpacity = useSharedValue(reducedMotion ? 1 : 0.6);
-  const sparkleScale = useSharedValue(reducedMotion ? 1 : 0.72);
-  const sparkleRotate = useSharedValue(reducedMotion ? 0 : -10);
-  const sparkleOpacity = useSharedValue(reducedMotion ? 1 : 0);
+  const pinTranslateY = useSharedValue(reducedMotion ? 0 : -dropOffset);
+  const pinOpacity = useSharedValue(reducedMotion ? 1 : 0);
+
+  // 3 traços superiores: surgem um a um (sequencial / staggered)
+  // Traço 1 (superior vertical)
+  const ray1Opacity = useSharedValue(reducedMotion ? 1 : 0);
+  const ray1Scale = useSharedValue(reducedMotion ? 1 : 0.4);
+  const ray1TranslateX = useSharedValue(reducedMotion ? 0 : -3);
+  const ray1TranslateY = useSharedValue(reducedMotion ? 0 : 4);
+
+  // Traço 2 (diagonal intermediário)
+  const ray2Opacity = useSharedValue(reducedMotion ? 1 : 0);
+  const ray2Scale = useSharedValue(reducedMotion ? 1 : 0.4);
+  const ray2TranslateX = useSharedValue(reducedMotion ? 0 : -4);
+  const ray2TranslateY = useSharedValue(reducedMotion ? 0 : 4);
+
+  // Traço 3 (lateral direito)
+  const ray3Opacity = useSharedValue(reducedMotion ? 1 : 0);
+  const ray3Scale = useSharedValue(reducedMotion ? 1 : 0.4);
+  const ray3TranslateX = useSharedValue(reducedMotion ? 0 : -4);
+  const ray3TranslateY = useSharedValue(reducedMotion ? 0 : 1);
 
   useEffect(() => {
     if (reducedMotion) {
       pinScale.value = 1;
+      pinTranslateY.value = 0;
       pinOpacity.value = 1;
-      sparkleScale.value = 1;
-      sparkleRotate.value = 0;
-      sparkleOpacity.value = 1;
+
+      ray1Opacity.value = 1;
+      ray1Scale.value = 1;
+      ray1TranslateX.value = 0;
+      ray1TranslateY.value = 0;
+
+      ray2Opacity.value = 1;
+      ray2Scale.value = 1;
+      ray2TranslateX.value = 0;
+      ray2TranslateY.value = 0;
+
+      ray3Opacity.value = 1;
+      ray3Scale.value = 1;
+      ray3TranslateX.value = 0;
+      ray3TranslateY.value = 0;
       return;
     }
 
     if (active) {
+      // Estado inicial limpo
       pinScale.value = 0.88;
-      pinOpacity.value = 0.6;
-      sparkleScale.value = 0.72;
-      sparkleRotate.value = -10;
-      sparkleOpacity.value = 0;
+      pinTranslateY.value = -dropOffset;
+      pinOpacity.value = 0;
 
-      pinScale.value = withSpring(1, { damping: 14, stiffness: 120 });
-      pinOpacity.value = withTiming(1, { duration: 250 });
+      ray1Opacity.value = 0;
+      ray1Scale.value = 0.4;
+      ray1TranslateX.value = -3;
+      ray1TranslateY.value = 4;
 
-      sparkleScale.value = withSpring(1, { damping: 10, stiffness: 130 });
-      sparkleRotate.value = withSpring(0, { damping: 12, stiffness: 120 });
-      sparkleOpacity.value = withTiming(1, { duration: 200 });
+      ray2Opacity.value = 0;
+      ray2Scale.value = 0.4;
+      ray2TranslateX.value = -4;
+      ray2TranslateY.value = 4;
+
+      ray3Opacity.value = 0;
+      ray3Scale.value = 0.4;
+      ray3TranslateX.value = -4;
+      ray3TranslateY.value = 1;
+
+      // 1. O pin aterrissa com desaceleração precisa e firme
+      pinTranslateY.value = withTiming(0, {
+        duration: 260,
+        easing: Easing.out(Easing.cubic),
+      });
+      pinScale.value = withTiming(1, {
+        duration: 260,
+        easing: Easing.out(Easing.cubic),
+      });
+      pinOpacity.value = withTiming(1, { duration: 200 });
+
+      // 2. Traço 1 entra aos 280ms (logo que o pin aterrissa)
+      ray1Opacity.value = withDelay(280, withTiming(1, { duration: 180 }));
+      ray1Scale.value = withDelay(
+        280,
+        withSpring(1, { damping: 14, stiffness: 160 }),
+      );
+      ray1TranslateX.value = withDelay(
+        280,
+        withSpring(0, { damping: 14, stiffness: 160 }),
+      );
+      ray1TranslateY.value = withDelay(
+        280,
+        withSpring(0, { damping: 14, stiffness: 160 }),
+      );
+
+      // 3. Traço 2 entra aos 400ms (120ms depois)
+      ray2Opacity.value = withDelay(400, withTiming(1, { duration: 180 }));
+      ray2Scale.value = withDelay(
+        400,
+        withSpring(1, { damping: 14, stiffness: 160 }),
+      );
+      ray2TranslateX.value = withDelay(
+        400,
+        withSpring(0, { damping: 14, stiffness: 160 }),
+      );
+      ray2TranslateY.value = withDelay(
+        400,
+        withSpring(0, { damping: 14, stiffness: 160 }),
+      );
+
+      // 4. Traço 3 entra aos 520ms (mais 120ms depois)
+      ray3Opacity.value = withDelay(520, withTiming(1, { duration: 180 }));
+      ray3Scale.value = withDelay(
+        520,
+        withSpring(1, { damping: 14, stiffness: 160 }),
+      );
+      ray3TranslateX.value = withDelay(
+        520,
+        withSpring(0, { damping: 14, stiffness: 160 }),
+      );
+      ray3TranslateY.value = withDelay(
+        520,
+        withSpring(0, { damping: 14, stiffness: 160 }),
+      );
     } else {
-      pinScale.value = 0.88;
-      pinOpacity.value = 0.6;
-      sparkleScale.value = 0.72;
-      sparkleRotate.value = -10;
-      sparkleOpacity.value = 0;
+      pinScale.value = 1;
+      pinTranslateY.value = 0;
+      pinOpacity.value = 1;
+
+      ray1Opacity.value = 1;
+      ray1Scale.value = 1;
+      ray1TranslateX.value = 0;
+      ray1TranslateY.value = 0;
+
+      ray2Opacity.value = 1;
+      ray2Scale.value = 1;
+      ray2TranslateX.value = 0;
+      ray2TranslateY.value = 0;
+
+      ray3Opacity.value = 1;
+      ray3Scale.value = 1;
+      ray3TranslateX.value = 0;
+      ray3TranslateY.value = 0;
     }
   }, [
     active,
-    reducedMotion,
+    dropOffset,
     pinOpacity,
     pinScale,
-    sparkleOpacity,
-    sparkleRotate,
-    sparkleScale,
+    pinTranslateY,
+    ray1Opacity,
+    ray1Scale,
+    ray1TranslateX,
+    ray1TranslateY,
+    ray2Opacity,
+    ray2Scale,
+    ray2TranslateX,
+    ray2TranslateY,
+    ray3Opacity,
+    ray3Scale,
+    ray3TranslateX,
+    ray3TranslateY,
+    reducedMotion,
   ]);
 
   const animatedPinStyle = useAnimatedStyle(() => ({
     opacity: pinOpacity.value,
-    transform: [{ scale: pinScale.value }],
+    transform: [
+      { translateY: pinTranslateY.value },
+      { scale: pinScale.value },
+    ],
   }));
 
-  const animatedSparkleStyle = useAnimatedStyle(() => ({
-    opacity: sparkleOpacity.value,
+  const ray1AnimatedStyle = useAnimatedStyle(() => ({
+    opacity: ray1Opacity.value,
     transform: [
-      { scale: sparkleScale.value },
-      { rotate: `${sparkleRotate.value}deg` },
+      { translateX: ray1TranslateX.value },
+      { translateY: ray1TranslateY.value },
+      { scale: ray1Scale.value },
+    ],
+  }));
+
+  const ray2AnimatedStyle = useAnimatedStyle(() => ({
+    opacity: ray2Opacity.value,
+    transform: [
+      { translateX: ray2TranslateX.value },
+      { translateY: ray2TranslateY.value },
+      { scale: ray2Scale.value },
+    ],
+  }));
+
+  const ray3AnimatedStyle = useAnimatedStyle(() => ({
+    opacity: ray3Opacity.value,
+    transform: [
+      { translateX: ray3TranslateX.value },
+      { translateY: ray3TranslateY.value },
+      { scale: ray3Scale.value },
     ],
   }));
 
@@ -153,13 +301,29 @@ export function AppBrandGlyph({
         />
       </Animated.View>
       {resolvedVariant !== 'negative' && (
-        <Animated.View style={[StyleSheet.absoluteFill, animatedSparkleStyle]}>
-          <Image
-            source={SPARKLE_SOURCE}
-            contentFit="contain"
-            style={{ width: size, height: size }}
-          />
-        </Animated.View>
+        <>
+          <Animated.View style={[StyleSheet.absoluteFill, ray1AnimatedStyle]}>
+            <Image
+              source={SPARKLE_SOURCES[0]}
+              contentFit="contain"
+              style={{ width: size, height: size }}
+            />
+          </Animated.View>
+          <Animated.View style={[StyleSheet.absoluteFill, ray2AnimatedStyle]}>
+            <Image
+              source={SPARKLE_SOURCES[1]}
+              contentFit="contain"
+              style={{ width: size, height: size }}
+            />
+          </Animated.View>
+          <Animated.View style={[StyleSheet.absoluteFill, ray3AnimatedStyle]}>
+            <Image
+              source={SPARKLE_SOURCES[2]}
+              contentFit="contain"
+              style={{ width: size, height: size }}
+            />
+          </Animated.View>
+        </>
       )}
     </View>
   );

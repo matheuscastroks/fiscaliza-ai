@@ -174,7 +174,7 @@ export default function FollowScreen() {
                     : router.push('/(tabs)/TerritoryScreen'),
               }}
             />
-          ) : null
+          ) : undefined
         }
         renderItem={({ item }) => (
           <OfficialCallRow

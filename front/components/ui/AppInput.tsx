@@ -44,7 +44,7 @@ export const AppInput: React.FC<AppInputProps> = ({
 
   const [isFocused, setIsFocused] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const input = useRef<TextInput>(null);
+  const input = useRef<React.ComponentRef<typeof TextInput>>(null);
   const keyboardScroll = useKeyboardAwareInput();
 
   const handleFocus: NonNullable<TextInputProps['onFocus']> = (e) => {

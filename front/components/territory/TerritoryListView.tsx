@@ -5,10 +5,14 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
+import {
+  AppBottomSheetModal,
+  BottomSheetFlatList,
+} from '@/components/ui/AppBottomSheetModal';
 import { TerritoryListRow } from '@/components/territory/TerritoryListRow';
 import type { Entry } from '@/components/territory/TerritoryPreviewCard';
 import {
@@ -19,6 +23,7 @@ import { QueryState, createCityStyles } from '@/features/city/CityUI';
 import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
 import type { TerritoryLayer } from '@/features/territory/selectors';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
+import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 const entryKey = (entry: Entry) => entry.type + ':' + entry.item.id;
@@ -28,6 +33,9 @@ function TerritoryRowSeparator() {
 }
 
 export interface TerritoryListViewProps {
+  visible?: boolean;
+  asSheet?: boolean;
+  onClose?: () => void;
   listRef: React.RefObject<FlatList<Entry> | null>;
   listOffsetRef: React.MutableRefObject<number>;
   restoreListOffsetRef: React.MutableRefObject<boolean>;
@@ -41,6 +49,7 @@ export interface TerritoryListViewProps {
   refreshing: boolean;
   onRefresh: () => void;
   onOpenEntry: (entry: Entry) => void;
+  onLocateEntry?: (entry: Entry) => void;
   onResetFilters: () => void;
   officialQuery: {
     isLoading: boolean;
@@ -55,6 +64,9 @@ export interface TerritoryListViewProps {
 }
 
 function TerritoryListViewComponent({
+  visible = true,
+  asSheet = true,
+  onClose,
   listRef,
   listOffsetRef,
   restoreListOffsetRef,
@@ -68,33 +80,162 @@ function TerritoryListViewComponent({
   refreshing,
   onRefresh,
   onOpenEntry,
+  onLocateEntry,
   onResetFilters,
   officialQuery,
   filterBarProps,
 }: TerritoryListViewProps) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const cityStyles = useThemedStyles(createCityStyles);
 
   const renderEntry = useCallback(
     ({ item }: { item: Entry }) => (
-      <TerritoryListRow entry={item} onOpen={onOpenEntry} />
+      <TerritoryListRow
+        entry={item}
+        onOpen={onOpenEntry}
+        onLocate={onLocateEntry}
+      />
     ),
-    [onOpenEntry],
+    [onOpenEntry, onLocateEntry],
   );
+
+  const countLabel =
+    layers.length === 1 &&
+    layers[0] === 'official' &&
+    listed.length < totalCalls
+      ? `${listed.length} de ${totalCalls.toLocaleString('pt-BR')}`
+      : listed.length.toLocaleString('pt-BR');
+
+  const sectionHeading = `${
+    areaOnly ? 'Registros na área visível' : 'Registros no território'
+  } (${countLabel})`;
+
+  const headerNotice = (
+    <View style={{ gap: spacing.sm, marginBottom: spacing.md }}>
+      {(officialQuery.isLoading ||
+        officialQuery.error ||
+        officialQuery.fetchStatus === 'paused') && (
+        <View style={{ gap: spacing.xs }}>
+          <QueryState
+            loading={officialQuery.isLoading}
+            error={officialQuery.error}
+            retry={officialQuery.refetch}
+          />
+        </View>
+      )}
+      {(!asSheet || unlocatedCount > 0) && (
+        <View style={cityStyles.section}>
+          {!asSheet && (
+            <AppText variant="sectionTitle">{sectionHeading}</AppText>
+          )}
+          {unlocatedCount > 0 && (
+            <View
+              style={[
+                styles.unlocatedNotice,
+                {
+                  backgroundColor: isDark
+                    ? colors.surfaceSubdued
+                    : colors.surfaceSubdued,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <Ionicons
+                name="information-circle-outline"
+                size={16}
+                color={colors.onSurfaceBrand}
+              />
+              <AppText variant="caption" color="muted" style={{ flex: 1 }}>
+                Inclui {unlocatedCount}{' '}
+                {unlocatedCount === 1
+                  ? 'chamado oficial sem coordenadas publicadas no mapa.'
+                  : 'chamados oficiais sem coordenadas publicadas no mapa.'}
+              </AppText>
+            </View>
+          )}
+        </View>
+      )}
+    </View>
+  );
+
+  const footerContent = (
+    <View style={{ gap: spacing.md, marginTop: spacing.md }}>
+      {layers.includes('official') && hasMoreCalls && (
+        <AppButton
+          title={`Carregar mais chamados (${listed.length} de ${totalCalls.toLocaleString('pt-BR')})`}
+          variant="secondary"
+          disabled={officialQuery.isFetchingNextPage}
+          onPress={() => {
+            if (!officialQuery.isFetching) {
+              officialQuery.fetchNextPage();
+            }
+          }}
+        />
+      )}
+      {dataReady &&
+        listed.length === 0 &&
+        layers.length === 1 &&
+        layers[0] === 'official' && (
+          <IllustratedEmptyState
+            kind="territory"
+            title="Nenhum chamado 1746 neste recorte"
+            description="Nenhum chamado oficial encontrado com os filtros atuais."
+            action={{
+              title: 'Limpar filtros',
+              onPress: onResetFilters,
+            }}
+          />
+        )}
+    </View>
+  );
+
+  if (asSheet) {
+    return (
+      <AppBottomSheetModal
+        visible={visible}
+        onClose={() => onClose?.()}
+        title={sectionHeading}
+        snapPoints={['62%', '92%']}
+        backdropOpacity={0.22}
+      >
+        <BottomSheetFlatList<Entry>
+          data={listed}
+          keyExtractor={entryKey}
+          renderItem={renderEntry}
+          initialNumToRender={10}
+          maxToRenderPerBatch={8}
+          windowSize={7}
+          ItemSeparatorComponent={TerritoryRowSeparator}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          contentContainerStyle={[
+            cityStyles.content,
+            {
+              gap: 0,
+              paddingTop: spacing.xs,
+              paddingBottom: insets.bottom + spacing.xl,
+            },
+          ]}
+          ListHeaderComponent={headerNotice}
+          ListFooterComponent={footerContent}
+        />
+      </AppBottomSheetModal>
+    );
+  }
+
+  if (!visible) return null;
 
   return (
     <View
       style={[
         styles.fullListOverlay,
-        { backgroundColor: colors.canvas, paddingTop: insets.top },
+        {
+          backgroundColor: colors.canvas,
+          paddingTop: insets.top + spacing.xs,
+        },
       ]}
     >
-      <AppHeader
-        title="Território"
-        context="Rio de Janeiro · Serviços e demandas"
-      />
-
       <TerritoryFilterBar {...filterBarProps} padded />
 
       <FlatList<Entry>
@@ -129,72 +270,10 @@ function TerritoryListViewComponent({
         }
         contentContainerStyle={[
           cityStyles.content,
-          { gap: 0, paddingBottom: insets.bottom + 100 },
+          { gap: 0, paddingBottom: insets.bottom + 110 },
         ]}
-        ListHeaderComponent={
-          <View style={{ gap: spacing.md, marginBottom: spacing.md }}>
-            {(officialQuery.isLoading ||
-              officialQuery.error ||
-              officialQuery.fetchStatus === 'paused') && (
-              <View style={{ gap: spacing.xs }}>
-                <QueryState
-                  loading={officialQuery.isLoading}
-                  error={officialQuery.error}
-                  retry={officialQuery.refetch}
-                />
-              </View>
-            )}
-            <View style={cityStyles.section}>
-              <AppText variant="sectionTitle">
-                {areaOnly
-                  ? 'Registros na área visível'
-                  : 'Registros no território'}{' '}
-                (
-                {layers.length === 1 &&
-                layers[0] === 'official' &&
-                listed.length < totalCalls
-                  ? `${listed.length} de ${totalCalls.toLocaleString('pt-BR')}`
-                  : listed.length.toLocaleString('pt-BR')}
-                )
-              </AppText>
-            </View>
-          </View>
-        }
-        ListFooterComponent={
-          <View style={{ gap: spacing.md, marginTop: spacing.md }}>
-            {layers.includes('official') && hasMoreCalls && (
-              <AppButton
-                title={`Carregar mais chamados (${listed.length} de ${totalCalls.toLocaleString('pt-BR')})`}
-                variant="secondary"
-                disabled={officialQuery.isFetchingNextPage}
-                onPress={() => {
-                  if (!officialQuery.isFetching) {
-                    officialQuery.fetchNextPage();
-                  }
-                }}
-              />
-            )}
-            {dataReady &&
-              listed.length === 0 &&
-              layers.length === 1 &&
-              layers[0] === 'official' && (
-                <IllustratedEmptyState
-                  kind="territory"
-                  title="Nenhum chamado 1746 neste recorte"
-                  description="Nenhum chamado oficial encontrado com os filtros atuais."
-                  action={{
-                    title: 'Limpar filtros',
-                    onPress: onResetFilters,
-                  }}
-                />
-              )}
-            {unlocatedCount > 0 && (
-              <AppText variant="caption" color="muted">
-                Esta lista inclui {unlocatedCount} registros sem ponto no mapa.
-              </AppText>
-            )}
-          </View>
-        }
+        ListHeaderComponent={headerNotice}
+        ListFooterComponent={footerContent}
       />
     </View>
   );
@@ -210,5 +289,15 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     zIndex: 60,
+  },
+  unlocatedNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: layout.radius.panel,
+    borderWidth: 1,
+    marginTop: 4,
   },
 });
