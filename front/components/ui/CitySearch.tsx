@@ -18,6 +18,7 @@ export interface CitySearchProps {
   /** @deprecated use actionActive */
   expanded?: boolean;
   filterCount?: number;
+  leftElement?: React.ReactNode;
 }
 
 export function CitySearch({
@@ -31,6 +32,7 @@ export function CitySearch({
   onFilters,
   expanded = false,
   filterCount = 0,
+  leftElement,
 }: CitySearchProps) {
   const { colors, mode } = useTheme();
 
@@ -48,7 +50,7 @@ export function CitySearch({
         minHeight: 48,
         backgroundColor: colors.surface,
         borderRadius: 24,
-        paddingLeft: spacing.md,
+        paddingLeft: leftElement ? 6 : spacing.md,
         paddingRight: 5,
         flexDirection: 'row',
         alignItems: 'center',
@@ -57,12 +59,13 @@ export function CitySearch({
         borderColor: colors.border,
       }}
     >
-      <Ionicons name="search-outline" size={20} color={colors.muted} />
+      {leftElement}
+      {!leftElement && <Ionicons name="search-outline" size={20} color={colors.muted} />}
       {onChangeText ? (
         <TextInput
           accessibilityLabel="Buscar no território"
           keyboardAppearance={mode}
-          placeholder="Buscar protocolo, serviço ou bairro..."
+          placeholder={leftElement ? 'Buscar chamado ou serviço...' : 'Buscar protocolo, serviço ou bairro...'}
           value={value}
           onChangeText={onChangeText}
           placeholderTextColor={colors.muted}
@@ -70,7 +73,7 @@ export function CitySearch({
           style={{
             flex: 1,
             minHeight: 44,
-            fontSize: 15,
+            fontSize: leftElement ? 14 : 15,
             fontFamily: fontFamilies.regular,
             color: colors.ink,
           }}

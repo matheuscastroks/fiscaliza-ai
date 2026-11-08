@@ -24,12 +24,19 @@ export function PlaceSelector({
   areaOnly = false,
   onClearAreaOnly,
   rightAction,
+  renderTrigger,
 }: {
   prompt?: boolean;
   compactHeader?: boolean;
   areaOnly?: boolean;
   onClearAreaOnly?: () => void;
   rightAction?: React.ReactNode;
+  renderTrigger?: (props: {
+    onPress: () => void;
+    summary: string;
+    shortSummary: string;
+    iconName: keyof typeof Ionicons.glyphMap;
+  }) => React.ReactNode;
 }) {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -44,7 +51,7 @@ export function PlaceSelector({
     setExpandedSelection(value ? selection : null);
 
   if (!state.hydrated) {
-    if (compactHeader) return null;
+    if (compactHeader || renderTrigger) return null;
     return <AppText color="muted">Carregando localização…</AppText>;
   }
 
@@ -245,6 +252,30 @@ export function PlaceSelector({
       </BottomSheetView>
     </AppBottomSheetModal>
   );
+
+  const shortSummary = areaOnly
+    ? 'Área no mapa'
+    : selection.kind === 'pending-current'
+      ? 'GPS'
+      : selection.kind === 'radius'
+        ? activePlace?.name || selection.neighborhood?.name || 'Entorno'
+        : selection.kind === 'neighborhood'
+          ? selection.name
+          : 'Rio';
+
+  if (renderTrigger) {
+    return (
+      <>
+        {renderTrigger({
+          onPress: () => setSheetOpen(true),
+          summary: compactSummary,
+          shortSummary,
+          iconName,
+        })}
+        {renderBottomSheet()}
+      </>
+    );
+  }
 
   if (compactHeader) {
     return (

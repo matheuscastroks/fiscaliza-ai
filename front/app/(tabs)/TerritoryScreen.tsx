@@ -591,6 +591,9 @@ export function TerritoryContent() {
       sourceState: officialSource?.state,
     },
     facilityQueries, facilitiesConfirmed,
+    macroTheme,
+    onMacroThemeChange: (value: string) => { setMacroTheme(value); setSelectedId(null); setSelectedCluster(null); },
+    onResetFilters: resetFilters,
   }), [
     selection, areaOnly, handleClearAreaOnly, mapAvailable, routeNeighborhoodId,
     setSearch, setServiceType, setPeriod, setStatus, search, setFiltersOpen, filtersOpen,
@@ -598,7 +601,7 @@ export function TerritoryContent() {
     serviceType, serviceTypeOptions, period, status, layers, setLayers, startDate, endDate,
     totalCalls, officialCalls.isLoading, officialCalls.error, officialCalls.data?.calls.length,
     officialCalls.data?.total, officialCalls.data?.territoryConfirmed, officialSource?.state,
-    facilityQueries, facilitiesConfirmed,
+    facilityQueries, facilitiesConfirmed, macroTheme, setMacroTheme, resetFilters,
   ]);
 
   const summaryLabel =
@@ -824,19 +827,19 @@ export function TerritoryContent() {
         visible={filtersOpen}
         onClose={() => setFiltersOpen(false)}
         onReset={resetFilters}
-        bairroOptions={bairroOptions}
-        neighborhood={neighborhood} onNeighborhoodChange={handleNeighborhoodChange}
-        macroTheme={macroTheme} onMacroThemeChange={(value) => { setMacroTheme(value); setSelectedId(null); }}
-        serviceType={serviceType} serviceTypeOptions={serviceTypeOptions} onServiceTypeChange={(value) => { setServiceType(value); setSelectedId(null); }}
-        status={status} onStatusChange={(value) => { setStatus(value); setSelectedId(null); }}
-        period={period} periodOptions={TERRITORY_PERIOD_OPTIONS}
+        neighborhood={neighborhood}
+        macroTheme={macroTheme}
+        onMacroThemeChange={(value) => { setMacroTheme(value); setSelectedId(null); }}
+        serviceType={serviceType}
+        serviceTypeOptions={serviceTypeOptions}
+        onServiceTypeChange={(value) => { setServiceType(value); setSelectedId(null); }}
+        status={status}
+        onStatusChange={(value) => { setStatus(value); setSelectedId(null); }}
+        period={period}
+        periodOptions={TERRITORY_PERIOD_OPTIONS}
         onPeriodChange={(value) => { setPeriod(value); router.setParams({ startDate: undefined, endDate: undefined }); setSelectedId(null); }}
         areaOnly={areaOnly}
-        onAreaOnlyChange={(nextArea) => { setAreaOnly(nextArea); setAppliedBounds(nextArea ? computeRegionBounds(viewportRef.current) : null); setSelectedId(null); }}
         totalCalls={totalCalls}
-        radiusMeters={!areaOnly && !routeNeighborhoodId && selection.kind === 'radius' ? selection.radiusMeters : undefined}
-        onRadiusChange={(value) => { void usePlacesStore.getState().setRadius(value); }}
-        radiusLabel={!areaOnly && !routeNeighborhoodId && selection.kind === 'radius' ? layers.some((layer) => layer !== 'official') ? 'Raio só no 1746' : 'Entorno 1746' : undefined}
       />
     </View>
   );
