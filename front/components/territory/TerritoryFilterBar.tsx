@@ -737,9 +737,9 @@ function TerritoryFilterModalComponent({
                 </AppText>
                 <View style={styles.segmentContainer}>
                   {[
-                    { value: 'all', label: 'Todas' },
-                    { value: 'Não Encerrado', label: 'Abertos' },
-                    { value: 'Encerrado', label: 'Encerrados' },
+                    { value: 'all', label: 'Todas', dotColor: null },
+                    { value: 'Não Encerrado', label: 'Abertos', dotColor: '#10B981' },
+                    { value: 'Encerrado', label: 'Encerrados', dotColor: '#6B7280' },
                   ].map((opt) => {
                     const isSelected = status === opt.value;
                     return (
@@ -758,6 +758,17 @@ function TerritoryFilterModalComponent({
                           isSelected && styles.segmentButtonActive,
                         ]}
                       >
+                        {opt.dotColor && (
+                          <View
+                            style={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: 3,
+                              backgroundColor: opt.dotColor,
+                              marginRight: 6,
+                            }}
+                          />
+                        )}
                         <AppText
                           variant="caption"
                           style={[
@@ -1082,28 +1093,29 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       gap: spacing.sm,
       padding: spacing.md,
-      borderRadius: layout.radius.sm,
-      backgroundColor: colors.surfaceSubdued,
+      borderRadius: layout.radius.panel,
+      backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
       marginBottom: spacing.xs,
     },
     scopeContextIconCircle: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: colors.surface,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.surfaceSubdued,
       alignItems: 'center',
       justifyContent: 'center',
     },
     scopeContextSub: {
-      fontSize: 11,
-      fontWeight: '600',
+      fontSize: 10,
+      fontWeight: '800',
+      letterSpacing: 0.5,
       textTransform: 'uppercase',
     },
     scopeContextTitle: {
-      fontSize: 14,
-      fontWeight: '700',
+      fontSize: 15,
+      fontWeight: '800',
       color: colors.ink,
     },
     topSwitcherScroll: {
@@ -1199,20 +1211,22 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: layout.radius.pill,
     },
     domainTabButtonActive: {
-      backgroundColor: colors.ink,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
       shadowColor: '#000000',
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.12,
+      shadowOpacity: 0.1,
       shadowRadius: 4,
-      elevation: 3,
+      elevation: 2,
     },
     domainTabButtonText: {
       fontSize: 13,
       fontWeight: '600',
-      color: colors.ink,
+      color: colors.muted,
     },
     domainTabButtonTextActive: {
-      color: colors.surface,
+      color: colors.ink,
       fontWeight: '800',
     },
     sectionCard: {
@@ -1247,30 +1261,31 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
-      padding: 12,
-      borderRadius: layout.radius.sm,
-      backgroundColor: colors.canvas,
-      borderWidth: 1.5,
+      padding: 14,
+      borderRadius: layout.radius.panel,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
       borderColor: colors.border,
     },
     facilityCardRowSelected: {
-      borderColor: colors.ink,
-      backgroundColor: colors.surface,
+      borderColor: colors.onSurfaceBrand,
+      backgroundColor: colors.surfaceSubdued,
     },
     facilityIconBadge: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
       alignItems: 'center',
       justifyContent: 'center',
     },
     facilityCardTitle: {
-      fontSize: 13,
-      fontWeight: '600',
+      fontSize: 14,
+      fontWeight: '700',
       color: colors.ink,
     },
     facilityCardDesc: {
-      fontSize: 11,
+      fontSize: 12,
+      color: colors.muted,
     },
     filterSubfield: {
       gap: 6,
@@ -1323,12 +1338,13 @@ const createStyles = (colors: ThemeColors) =>
       gap: 8,
     },
     periodChip: {
-      paddingVertical: 8,
+      height: 34,
+      justifyContent: 'center',
       paddingHorizontal: 14,
-      borderRadius: layout.radius.pill,
+      borderRadius: 17,
       borderWidth: 1,
       borderColor: colors.border,
-      backgroundColor: colors.canvas,
+      backgroundColor: colors.surface,
     },
     periodChipActive: {
       backgroundColor: colors.ink,
@@ -1353,16 +1369,16 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
-      paddingVertical: 7,
+      height: 36,
       paddingHorizontal: 12,
-      borderRadius: layout.radius.pill,
+      borderRadius: 18,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.surface,
     },
     macroThemeChipSelected: {
-      backgroundColor: colors.onSurfaceBrand,
-      borderColor: colors.onSurfaceBrand,
+      backgroundColor: colors.accent,
+      borderColor: colors.accent,
     },
     macroThemeChipText: {
       fontSize: 12,
@@ -1370,7 +1386,7 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.ink,
     },
     macroThemeChipTextSelected: {
-      color: colors.surface,
+      color: colors.onAccent,
       fontWeight: '700',
     },
     clearLink: {
@@ -1391,7 +1407,7 @@ const createStyles = (colors: ThemeColors) =>
       justifyContent: 'space-between',
       gap: spacing.md,
       paddingHorizontal: spacing.md,
-      paddingTop: spacing.sm,
+      paddingTop: spacing.md,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: colors.divider,
       backgroundColor: colors.surface,
@@ -1411,9 +1427,9 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
-      paddingVertical: 12,
+      height: 48,
       paddingHorizontal: 16,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.panel,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.surface,
@@ -1429,9 +1445,9 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       justifyContent: 'center',
       gap: 8,
-      paddingVertical: 13,
+      height: 48,
       paddingHorizontal: 20,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.panel,
       backgroundColor: colors.accent,
       ...Platform.select({
         ios: {

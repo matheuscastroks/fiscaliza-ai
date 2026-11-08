@@ -109,6 +109,28 @@ test('decluttered filter modal: removes duplicate geographical selectors and foc
   );
 });
 
+test('place selector bottom sheet: adopts Apple Inset-Grouped table design and smooth scroll', () => {
+  const placeSelectorPath = path.join(ROOT_DIR, 'features', 'places', 'PlaceSelector.tsx');
+  const content = fs.readFileSync(placeSelectorPath, 'utf8');
+
+  assert.ok(
+    content.includes('BottomSheetScrollView'),
+    'PlaceSelector bottom sheet must use BottomSheetScrollView for smooth scrolling',
+  );
+  assert.ok(
+    content.includes('heroScopeCard'),
+    'Must render heroScopeCard showing active scope and undo area trigger',
+  );
+  assert.ok(
+    content.includes('insetGroupCard'),
+    'Must group actions in Apple-style insetGroupCard containers',
+  );
+  assert.ok(
+    content.includes('insetRow'),
+    'Must format items as interactive insetRow elements with icons and descriptions',
+  );
+});
+
 test('territory screen: respects architecture constraints and line ceiling', () => {
   const screenPath = path.join(ROOT_DIR, 'app', '(tabs)', 'TerritoryScreen.tsx');
   const content = fs.readFileSync(screenPath, 'utf8');
