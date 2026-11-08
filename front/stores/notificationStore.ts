@@ -46,7 +46,11 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     try {
       const { status } = await Notifications.getPermissionsAsync();
       const granted = status === 'granted';
-      set({ permissionGranted: granted, ...(granted ? {} : { pushToken: null, error: null }) });
+      if (!granted) {
+        set({ permissionGranted: false, pushToken: null, error: null });
+        return;
+      }
+      set({ permissionGranted: true });
 
       if (granted && !get().pushToken) {
         const token = await registerForPushNotificationsAsync(municipalityId);
@@ -65,7 +69,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     try {
       const token = await registerForPushNotificationsAsync(municipalityId);
       if (token) {
-        set({ pushToken: token, permissionGranted: true, isLoading: false });
+        set({ pushToken: token, permissionGranted: true });
         syncSavedCalls(token);
         return true;
       }

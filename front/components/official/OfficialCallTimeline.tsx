@@ -59,7 +59,10 @@ function buildTimelineSteps(call: OfficialCall, isClosed: boolean): TimelineStep
     id: 'closed',
     title: isClosed ? 'Encerramento no 1746' : 'Sem encerramento publicado',
     subtitle: isClosed
-      ? [!closedDate && 'Data de encerramento não publicada.', call.statusJustification || 'O encerramento administrativo não comprova a execução do serviço.'].filter(Boolean).join(' ')
+      ? [
+          !closedDate && 'Data de encerramento não publicada.',
+          call.statusJustification || 'O encerramento administrativo não comprova a execução do serviço.',
+        ].filter(Boolean).join(' ')
       : call.officialSituation || call.officialStatus || 'A fonte ainda não publicou um encerramento.',
     date: closedDate,
     state: isClosed ? 'done' : 'pending',

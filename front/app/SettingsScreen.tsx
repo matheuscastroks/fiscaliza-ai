@@ -59,6 +59,7 @@ export default function SettingsScreen() {
     requestPermissions,
     sendTestPush,
   } = useNotificationStore();
+  const notificationsActive = permissionGranted && Boolean(pushToken);
   return (
     <AppScreen>
       <AppHeader title="Preferências" onBack={() => goBack()} />
@@ -143,17 +144,17 @@ export default function SettingsScreen() {
             <View style={{ flex: 1, paddingRight: spacing.sm }}>
               <AppText variant="label">Status das notificações</AppText>
               <AppText variant="caption" color="muted">
-                {pushToken && permissionGranted
+                {notificationsActive
                   ? 'Alertas ativados neste aparelho'
                   : permissionGranted
                     ? 'Permissão concedida. Alertas ainda não ativados.'
-                  : 'Desativadas no momento'}
+                    : 'Desativadas no momento'}
               </AppText>
             </View>
             <AppButton
-              title={pushToken && permissionGranted ? 'Ativadas' : permissionGranted ? 'Tentar novamente' : 'Ativar'}
-              variant={pushToken && permissionGranted ? 'secondary' : 'primary'}
-              disabled={notificationLoading || Boolean(pushToken && permissionGranted)}
+              title={notificationsActive ? 'Ativadas' : permissionGranted ? 'Tentar novamente' : 'Ativar'}
+              variant={notificationsActive ? 'secondary' : 'primary'}
+              disabled={notificationLoading || notificationsActive}
               onPress={() => void requestPermissions()}
             />
           </View>
