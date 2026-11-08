@@ -127,266 +127,279 @@ export function PlaceSelector({
         showsVerticalScrollIndicator={true}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Card de Destaque: Recorte Atual */}
-        <View
-          style={[
-            styles.heroScopeCard,
-            {
-              backgroundColor: isDark ? colors.surfaceSubdued : colors.surface,
-              borderColor: colors.border,
-            },
-          ]}
-        >
+        <View style={styles.filterFormContainer}>
+          {/* Card de Destaque: Recorte Atual */}
           <View
             style={[
-              styles.heroScopeIconBadge,
-              { backgroundColor: isDark ? colors.surface : colors.canvas },
+              styles.heroScopeCard,
+              {
+                backgroundColor: isDark ? colors.surfaceSubdued : colors.surface,
+                borderColor: colors.border,
+              },
             ]}
           >
-            <Ionicons name={iconName} size={20} color={colors.onSurfaceBrand} />
-          </View>
-          <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-            <AppText variant="caption" color="muted" style={styles.heroScopeLabel}>
-              Recorte Ativo
-            </AppText>
-            <AppText variant="label" numberOfLines={1} style={styles.heroScopeTitle}>
-              {title}
-            </AppText>
-            <AppText variant="caption" color="muted" numberOfLines={1}>
-              {subtitle}
-            </AppText>
-          </View>
-          {areaOnly && onClearAreaOnly && (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Voltar ao recorte salvo"
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                onClearAreaOnly();
-                setSheetOpen(false);
-              }}
-              style={({ pressed }) => [
-                styles.undoAreaButton,
-                { backgroundColor: colors.accent },
-                pressed && { opacity: 0.8 },
+            <View
+              style={[
+                styles.heroScopeIconBadge,
+                { backgroundColor: isDark ? colors.surface : colors.canvas },
               ]}
             >
-              <Ionicons name="arrow-undo" size={14} color={colors.onAccent} />
-              <AppText variant="caption" style={{ color: colors.onAccent, fontWeight: '700' }}>
-                Voltar
+              <Ionicons name={iconName} size={18} color={colors.onSurfaceBrand} />
+            </View>
+            <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+              <AppText variant="caption" color="muted" style={styles.heroScopeLabel}>
+                Recorte Ativo
               </AppText>
-            </Pressable>
-          )}
-        </View>
-
-        {/* Grupo 1: Ações Rápidas (Estilo Apple Inset Grouped) */}
-        <View style={styles.groupContainer}>
-          <AppText variant="caption" color="muted" style={styles.groupHeaderLabel}>
-            Ações Rápidas
-          </AppText>
-          <View style={[styles.insetGroupCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            {/* Linha GPS */}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={
-                selection.kind === 'radius' && selection.source === 'current'
-                  ? 'Atualizar GPS'
-                  : 'Usar minha localização'
-              }
-              disabled={device.busy}
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                onClearAreaOnly?.();
-                void device.captureLocation().then((loc) => {
-                  if (loc) setSheetOpen(false);
-                });
-              }}
-              style={({ pressed }) => [
-                styles.insetRow,
-                pressed && { backgroundColor: colors.surfaceSubdued },
-              ]}
-            >
-              <View style={[styles.rowIconBadge, { backgroundColor: '#2563EB18' }]}>
-                <Ionicons name="navigate" size={17} color="#2563EB" />
-              </View>
-              <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-                <AppText variant="caption" style={styles.rowTitle}>
-                  {selection.kind === 'radius' && selection.source === 'current'
-                    ? 'Atualizar GPS'
-                    : 'Usar minha localização'}
+              <AppText variant="label" numberOfLines={1} style={styles.heroScopeTitle}>
+                {title}
+              </AppText>
+              <AppText variant="caption" color="muted" numberOfLines={1}>
+                {subtitle}
+              </AppText>
+            </View>
+            {areaOnly && onClearAreaOnly && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Voltar ao recorte salvo"
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  onClearAreaOnly();
+                  setSheetOpen(false);
+                }}
+                style={({ pressed }) => [
+                  styles.undoAreaButton,
+                  { backgroundColor: colors.accent },
+                  pressed && { opacity: 0.8 },
+                ]}
+              >
+                <Ionicons name="arrow-undo" size={13} color={colors.onAccent} />
+                <AppText variant="caption" style={{ color: colors.onAccent, fontWeight: '700' }}>
+                  Voltar
                 </AppText>
-                <AppText variant="caption" color="muted" style={styles.rowDesc}>
-                  Capturar coordenadas do dispositivo
-                </AppText>
-              </View>
-              {device.busy ? (
-                <AppText variant="caption" color="muted">Buscando...</AppText>
-              ) : selection.kind === 'radius' && selection.source === 'current' ? (
-                <Ionicons name="checkmark-circle" size={18} color="#2563EB" />
-              ) : (
-                <Ionicons name="chevron-forward" size={16} color={colors.muted} />
-              )}
-            </Pressable>
-
-            <View style={[styles.insetDivider, { backgroundColor: colors.divider }]} />
-
-            {/* Linha Todo o Município */}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ver todo o município do Rio de Janeiro"
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                onClearAreaOnly?.();
-                void state.selectNeighborhood('');
-                setSheetOpen(false);
-              }}
-              style={({ pressed }) => [
-                styles.insetRow,
-                pressed && { backgroundColor: colors.surfaceSubdued },
-              ]}
-            >
-              <View style={[styles.rowIconBadge, { backgroundColor: '#10B98118' }]}>
-                <Ionicons name="globe-outline" size={17} color="#10B981" />
-              </View>
-              <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-                <AppText variant="caption" style={styles.rowTitle}>
-                  Todo o município do Rio
-                </AppText>
-                <AppText variant="caption" color="muted" style={styles.rowDesc}>
-                  Visualizar toda a cidade do Rio de Janeiro
-                </AppText>
-              </View>
-              {selection.kind === 'municipality' && !areaOnly ? (
-                <Ionicons name="checkmark-circle" size={18} color="#10B981" />
-              ) : (
-                <Ionicons name="chevron-forward" size={16} color={colors.muted} />
-              )}
-            </Pressable>
-
-            {/* Linha Ver Bairro Inteiro (se estiver em modo raio com bairro identificado) */}
-            {selection.kind === 'radius' && selection.neighborhood && (
-              <>
-                <View style={[styles.insetDivider, { backgroundColor: colors.divider }]} />
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`Ver todo o bairro ${selection.neighborhood.name}`}
-                  onPress={() => {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    if (selection.neighborhood) {
-                      onClearAreaOnly?.();
-                      void state.selectNeighborhood(
-                        selection.neighborhood.name,
-                        selection.neighborhood.id,
-                      );
-                      setSheetOpen(false);
-                    }
-                  }}
-                  style={({ pressed }) => [
-                    styles.insetRow,
-                    pressed && { backgroundColor: colors.surfaceSubdued },
-                  ]}
-                >
-                  <View style={[styles.rowIconBadge, { backgroundColor: '#F59E0B18' }]}>
-                    <Ionicons name="business" size={17} color="#F59E0B" />
-                  </View>
-                  <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-                    <AppText variant="caption" style={styles.rowTitle}>
-                      Ver todo o bairro {selection.neighborhood.name}
-                    </AppText>
-                    <AppText variant="caption" color="muted" style={styles.rowDesc}>
-                      Expandir a busca para o bairro completo
-                    </AppText>
-                  </View>
-                  <Ionicons name="chevron-forward" size={16} color={colors.muted} />
-                </Pressable>
-              </>
+              </Pressable>
             )}
           </View>
-        </View>
 
-        {/* Grupo 2: Lugares Salvos */}
-        <View style={styles.groupContainer}>
-          <View style={styles.groupHeaderRow}>
-            <AppText variant="caption" color="muted" style={styles.groupHeaderLabel}>
-              Meus Lugares Salvos
-            </AppText>
-            <Pressable
-              onPress={() => {
-                setSheetOpen(false);
-                router.push('/PlacesScreen');
-              }}
-              hitSlop={8}
-            >
-              <AppText variant="caption" style={{ color: colors.accent, fontWeight: '700' }}>
-                Gerenciar
+          {/* Seção 1: Ações Rápidas */}
+          <View style={styles.filterSection}>
+            <View style={styles.sectionHeaderRow}>
+              <Ionicons name="flash-outline" size={14} color={colors.accent} />
+              <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
+                Ações Rápidas
               </AppText>
-            </Pressable>
+            </View>
+            <View style={[styles.insetGroupCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              {/* Linha GPS */}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  selection.kind === 'radius' && selection.source === 'current'
+                    ? 'Atualizar GPS'
+                    : 'Usar minha localização'
+                }
+                disabled={device.busy}
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  onClearAreaOnly?.();
+                  void device.captureLocation().then((loc) => {
+                    if (loc) setSheetOpen(false);
+                  });
+                }}
+                style={({ pressed }) => [
+                  styles.insetRow,
+                  pressed && { backgroundColor: colors.surfaceSubdued },
+                ]}
+              >
+                <View style={[styles.rowIconBadge, { backgroundColor: '#2563EB18' }]}>
+                  <Ionicons name="navigate" size={16} color="#2563EB" />
+                </View>
+                <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                  <AppText variant="caption" style={styles.rowTitle}>
+                    {selection.kind === 'radius' && selection.source === 'current'
+                      ? 'Atualizar GPS'
+                      : 'Usar minha localização'}
+                  </AppText>
+                  <AppText variant="caption" color="muted" style={styles.rowDesc}>
+                    Capturar coordenadas do dispositivo
+                  </AppText>
+                </View>
+                {device.busy ? (
+                  <AppText variant="caption" color="muted">Buscando...</AppText>
+                ) : selection.kind === 'radius' && selection.source === 'current' ? (
+                  <Ionicons name="checkmark-circle" size={18} color="#2563EB" />
+                ) : (
+                  <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+                )}
+              </Pressable>
+
+              <View style={[styles.insetDivider, { backgroundColor: colors.divider }]} />
+
+              {/* Linha Todo o Município */}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Ver todo o município do Rio de Janeiro"
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  onClearAreaOnly?.();
+                  void state.selectNeighborhood('');
+                  setSheetOpen(false);
+                }}
+                style={({ pressed }) => [
+                  styles.insetRow,
+                  pressed && { backgroundColor: colors.surfaceSubdued },
+                ]}
+              >
+                <View style={[styles.rowIconBadge, { backgroundColor: '#10B98118' }]}>
+                  <Ionicons name="globe-outline" size={16} color="#10B981" />
+                </View>
+                <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                  <AppText variant="caption" style={styles.rowTitle}>
+                    Todo o município do Rio
+                  </AppText>
+                  <AppText variant="caption" color="muted" style={styles.rowDesc}>
+                    Visualizar toda a cidade do Rio de Janeiro
+                  </AppText>
+                </View>
+                {selection.kind === 'municipality' && !areaOnly ? (
+                  <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+                ) : (
+                  <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+                )}
+              </Pressable>
+
+              {/* Linha Ver Bairro Inteiro (se estiver em modo raio com bairro identificado) */}
+              {selection.kind === 'radius' && selection.neighborhood && (
+                <>
+                  <View style={[styles.insetDivider, { backgroundColor: colors.divider }]} />
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Ver todo o bairro ${selection.neighborhood.name}`}
+                    onPress={() => {
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      if (selection.neighborhood) {
+                        onClearAreaOnly?.();
+                        void state.selectNeighborhood(
+                          selection.neighborhood.name,
+                          selection.neighborhood.id,
+                        );
+                        setSheetOpen(false);
+                      }
+                    }}
+                    style={({ pressed }) => [
+                      styles.insetRow,
+                      pressed && { backgroundColor: colors.surfaceSubdued },
+                    ]}
+                  >
+                    <View style={[styles.rowIconBadge, { backgroundColor: '#F59E0B18' }]}>
+                      <Ionicons name="business" size={16} color="#F59E0B" />
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                      <AppText variant="caption" style={styles.rowTitle}>
+                        Ver todo o bairro {selection.neighborhood.name}
+                      </AppText>
+                      <AppText variant="caption" color="muted" style={styles.rowDesc}>
+                        Expandir a busca para o bairro completo
+                      </AppText>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+                  </Pressable>
+                </>
+              )}
+            </View>
           </View>
 
-          {places.length > 0 ? (
-            <View style={[styles.insetGroupCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              {places.map((p, idx) => {
-                const isSelected = activePlace?.id === p.id;
-                return (
-                  <React.Fragment key={p.id}>
-                    {idx > 0 && <View style={[styles.insetDivider, { backgroundColor: colors.divider }]} />}
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel={`Selecionar lugar ${p.name}`}
-                      onPress={() => {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        onClearAreaOnly?.();
-                        void state.selectPlace(p.id);
-                        setSheetOpen(false);
-                      }}
-                      style={({ pressed }) => [
-                        styles.insetRow,
-                        pressed && { backgroundColor: colors.surfaceSubdued },
-                      ]}
-                    >
-                      <View style={[styles.rowIconBadge, { backgroundColor: colors.surfaceSubdued }]}>
-                        <Ionicons name="bookmark" size={16} color={isSelected ? colors.onSurfaceBrand : colors.muted} />
-                      </View>
-                      <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-                        <AppText variant="caption" style={[styles.rowTitle, isSelected && { fontWeight: '800' }]}>
-                          {p.name}
-                        </AppText>
-                        <AppText variant="caption" color="muted" style={styles.rowDesc}>
-                          {p.radiusMeters >= 1000 ? `${p.radiusMeters / 1000} km` : `${p.radiusMeters} m`} de raio
-                        </AppText>
-                      </View>
-                      {isSelected ? (
-                        <Ionicons name="checkmark-circle" size={18} color={colors.onSurfaceBrand} />
-                      ) : (
-                        <Ionicons name="chevron-forward" size={16} color={colors.muted} />
-                      )}
-                    </Pressable>
-                  </React.Fragment>
-                );
-              })}
-            </View>
-          ) : (
-            <Pressable
-              onPress={() => {
-                setSheetOpen(false);
-                router.push('/PlacesScreen');
-              }}
-              style={[styles.emptyPlacesButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
-            >
-              <Ionicons name="add-circle-outline" size={18} color={colors.accent} />
-              <AppText variant="caption" style={{ color: colors.ink, fontWeight: '600' }}>
-                Cadastrar Casa, Trabalho ou ponto de interesse
-              </AppText>
-            </Pressable>
-          )}
-        </View>
+          <View style={[styles.sectionDivider, { backgroundColor: colors.divider }]} />
 
-        {/* Grupo 3: Consultar por Bairro Oficial */}
-        <View style={styles.groupContainer}>
-          <AppText variant="caption" color="muted" style={styles.groupHeaderLabel}>
-            Consultar por Bairro Oficial
-          </AppText>
-          <View style={[styles.insetGroupCard, { backgroundColor: colors.surface, borderColor: colors.border, padding: spacing.sm }]}>
+          {/* Seção 2: Meus Lugares Salvos */}
+          <View style={styles.filterSection}>
+            <View style={styles.sectionHeaderRowBetween}>
+              <View style={styles.sectionHeaderRow}>
+                <Ionicons name="bookmark-outline" size={14} color={colors.accent} />
+                <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
+                  Lugares Salvos
+                </AppText>
+              </View>
+              <Pressable
+                onPress={() => {
+                  setSheetOpen(false);
+                  router.push('/PlacesScreen');
+                }}
+                hitSlop={8}
+              >
+                <AppText variant="caption" style={{ color: colors.accent, fontWeight: '700' }}>
+                  Gerenciar
+                </AppText>
+              </Pressable>
+            </View>
+
+            {places.length > 0 ? (
+              <View style={[styles.insetGroupCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                {places.map((p, idx) => {
+                  const isSelected = activePlace?.id === p.id;
+                  return (
+                    <React.Fragment key={p.id}>
+                      {idx > 0 && <View style={[styles.insetDivider, { backgroundColor: colors.divider }]} />}
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Selecionar lugar ${p.name}`}
+                        onPress={() => {
+                          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          onClearAreaOnly?.();
+                          void state.selectPlace(p.id);
+                          setSheetOpen(false);
+                        }}
+                        style={({ pressed }) => [
+                          styles.insetRow,
+                          pressed && { backgroundColor: colors.surfaceSubdued },
+                        ]}
+                      >
+                        <View style={[styles.rowIconBadge, { backgroundColor: colors.surfaceSubdued }]}>
+                          <Ionicons name="bookmark" size={15} color={isSelected ? colors.onSurfaceBrand : colors.muted} />
+                        </View>
+                        <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                          <AppText variant="caption" style={[styles.rowTitle, isSelected && { fontWeight: '800' }]}>
+                            {p.name}
+                          </AppText>
+                          <AppText variant="caption" color="muted" style={styles.rowDesc}>
+                            {p.radiusMeters >= 1000 ? `${p.radiusMeters / 1000} km` : `${p.radiusMeters} m`} de raio
+                          </AppText>
+                        </View>
+                        {isSelected ? (
+                          <Ionicons name="checkmark-circle" size={18} color={colors.onSurfaceBrand} />
+                        ) : (
+                          <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+                        )}
+                      </Pressable>
+                    </React.Fragment>
+                  );
+                })}
+              </View>
+            ) : (
+              <Pressable
+                onPress={() => {
+                  setSheetOpen(false);
+                  router.push('/PlacesScreen');
+                }}
+                style={[styles.emptyPlacesButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              >
+                <Ionicons name="add-circle-outline" size={16} color={colors.accent} />
+                <AppText variant="caption" style={{ color: colors.ink, fontWeight: '600' }}>
+                  Cadastrar Casa, Trabalho ou ponto de interesse
+                </AppText>
+              </Pressable>
+            )}
+          </View>
+
+          <View style={[styles.sectionDivider, { backgroundColor: colors.divider }]} />
+
+          {/* Seção 3: Consultar por Bairro Oficial */}
+          <View style={styles.filterSection}>
+            <View style={styles.sectionHeaderRow}>
+              <Ionicons name="business-outline" size={14} color={colors.accent} />
+              <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
+                Consultar por Bairro Oficial
+              </AppText>
+            </View>
             <NeighborhoodPicker
               options={[]}
               value={selection.kind === 'neighborhood' ? selection.name : ''}
@@ -399,31 +412,35 @@ export function PlaceSelector({
               }}
             />
           </View>
-        </View>
 
-        {/* Grupo 4: Ajuste de Raio (se em modo raio ou GPS) */}
-        {(selection.kind === 'radius' || selection.kind === 'pending-current') && (
-          <View style={styles.groupContainer}>
-            <AppText variant="caption" color="muted" style={styles.groupHeaderLabel}>
-              Raio de Proximidade no Entorno
-            </AppText>
-            <View style={[styles.insetGroupCard, { backgroundColor: colors.surface, borderColor: colors.border, padding: spacing.md }]}>
-              {selection.kind === 'pending-current' && (
-                <AppText variant="caption" color="muted" style={{ marginBottom: spacing.xs }}>
-                  Sua posição anterior não fica gravada. Atualize o GPS para consultar o entorno.
-                </AppText>
-              )}
-              <RadiusControl
-                value={selection.radiusMeters}
-                onChange={(radius) => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  onClearAreaOnly?.();
-                  void setRadius(radius);
-                }}
-              />
-            </View>
-          </View>
-        )}
+          {/* Seção 4: Ajuste de Raio (se em modo raio ou GPS) */}
+          {(selection.kind === 'radius' || selection.kind === 'pending-current') && (
+            <>
+              <View style={[styles.sectionDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.filterSection}>
+                <View style={styles.sectionHeaderRow}>
+                  <Ionicons name="radio-outline" size={14} color={colors.accent} />
+                  <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
+                    Raio de Proximidade no Entorno
+                  </AppText>
+                </View>
+                {selection.kind === 'pending-current' && (
+                  <AppText variant="caption" color="muted" style={{ marginBottom: spacing.xs }}>
+                    Sua posição anterior não fica gravada. Atualize o GPS para consultar o entorno.
+                  </AppText>
+                )}
+                <RadiusControl
+                  value={selection.radiusMeters}
+                  onChange={(radius) => {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    onClearAreaOnly?.();
+                    void setRadius(radius);
+                  }}
+                />
+              </View>
+            </>
+          )}
+        </View>
       </BottomSheetScrollView>
     </AppBottomSheetModal>
   );
@@ -767,26 +784,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: layout.radius.panel,
+    paddingVertical: 10,
+    paddingHorizontal: spacing.md,
+    borderRadius: layout.radius.card,
     borderWidth: 1,
   },
   heroScopeIconBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
   },
   heroScopeLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.4,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   heroScopeTitle: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '700',
   },
   undoAreaButton: {
     flexDirection: 'row',
@@ -795,6 +813,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: layout.radius.pill,
+  },
+  filterFormContainer: {
+    gap: spacing.md,
+  },
+  filterSection: {
+    gap: spacing.xs + 2,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 2,
+  },
+  sectionHeaderRowBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  sectionHeaderTitle: {
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    fontSize: 11,
+    textTransform: 'uppercase',
+  },
+  sectionDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: spacing.xxs,
   },
   groupContainer: {
     gap: 6,
@@ -812,7 +858,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   insetGroupCard: {
-    borderRadius: layout.radius.panel,
+    borderRadius: layout.radius.card,
     borderWidth: 1,
     overflow: 'hidden',
   },
@@ -828,9 +874,9 @@ const styles = StyleSheet.create({
     marginLeft: 52,
   },
   rowIconBadge: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -846,9 +892,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: spacing.md,
-    borderRadius: layout.radius.panel,
+    borderRadius: layout.radius.card,
     borderWidth: 1,
     borderStyle: 'dashed',
   },

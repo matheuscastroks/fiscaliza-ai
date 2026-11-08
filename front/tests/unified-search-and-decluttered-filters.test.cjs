@@ -137,6 +137,18 @@ test('place selector bottom sheet: adopts Apple Inset-Grouped table design and s
     content.includes('insetRow'),
     'Must format items as interactive insetRow elements with icons and descriptions',
   );
+  assert.ok(
+    content.includes('filterFormContainer'),
+    'PlaceSelector must use filterFormContainer matching TerritoryFilterBar architecture',
+  );
+  assert.ok(
+    content.includes('sectionHeaderRow'),
+    'PlaceSelector must use sectionHeaderRow with icon and uppercase label',
+  );
+  assert.ok(
+    content.includes('sectionDivider'),
+    'PlaceSelector must use sectionDivider between logical sections',
+  );
 });
 
 test('territory screen: respects architecture constraints and line ceiling', () => {
@@ -150,7 +162,7 @@ test('territory screen: respects architecture constraints and line ceiling', () 
   );
 
   assert.ok(
-    content.includes('top: insets.top + 100'),
-    'Contextual search pill must be placed right below top search bar (top: insets.top + 100)',
+    content.includes('top: insets.top + 108'),
+    'Contextual search pill must be placed right below top search bar (top: insets.top + 108)',
   );
 });
