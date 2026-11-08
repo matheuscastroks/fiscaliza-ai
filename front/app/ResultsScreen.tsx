@@ -1,31 +1,30 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { goBack } from '@/utils/navigation';
-import React, { useState, useMemo } from 'react';
-import { FlatList, StyleSheet, View, Pressable } from 'react-native';
+import React from 'react';
+import { ScrollView, StyleSheet, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
-import { AppButton } from '@/components/ui/AppButton';
-import { SlidingTabs } from '@/components/ui/SlidingTabs';
 import { QueryState, createCityStyles } from '@/features/city/CityUI';
 import { breakdownShare } from '@/features/city/resultBreakdown';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useTerritorySelection } from '@/stores/territoryStore';
 import {
-  useInfiniteOfficialCalls,
   useOfficialFilters,
   useOfficialOverview,
 } from '@/features/city/useOfficialCalls';
-import { OfficialCallRow } from '@/components/official/OfficialCallRow';
-import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
-import { resolveOfficialCallDeadline } from '@/features/city/officialCallStatus';
+import {
+  MIN_RANKING_VOLUME,
+  fastestResolution,
+  formatDays,
+  slowestResolution,
+  topByDeadlineRate,
+  topByVolume,
+} from '@/features/city/resultRankings';
 import { layout, spacing } from '@/theme';
-
-type SlaFilter = 'all' | 'on_time' | 'overdue';
 
 function getStatusSemanticColor(status: string, colors: ThemeColors): string {
   const normalized = status
@@ -67,8 +66,6 @@ export default function ResultsScreen() {
   const styles = useThemedStyles(createStyles);
   const { neighborhood, setNeighborhood } = useTerritorySelection();
 
-  const [slaFilter, setSlaFilter] = useState<SlaFilter>('all');
-
   const officialFilters = useOfficialFilters();
   const overviewQuery = useOfficialOverview({
     bairro: neighborhood || undefined,
@@ -77,21 +74,10 @@ export default function ResultsScreen() {
     bairro: neighborhood || undefined,
     situacao: 'Encerrado',
   });
-  const cityOverviewQuery = useOfficialOverview(
-    undefined,
-    Boolean(neighborhood),
-  );
-
-  const closedCallsQuery = useInfiniteOfficialCalls({
-    bairro: neighborhood || undefined,
-    situacao: 'Encerrado',
-    limit: 50,
-  });
+  // Rankings territoriais sempre comparam o município inteiro.
+  const cityOverviewQuery = useOfficialOverview(undefined);
 
   const bairroOptions = officialFilters.data?.bairros || [];
-  const closedCalls = closedCallsQuery.data?.calls || [];
-  const totalClosed = closedCallsQuery.data?.total ?? 0;
-  const hasMore = Boolean(closedCallsQuery.hasNextPage);
 
   const overview = overviewQuery.data;
   const closedOverview = closedOverviewQuery.data;
@@ -110,29 +96,22 @@ export default function ResultsScreen() {
       ? slaRate - citySlaRate
       : null;
 
-  // Filtragem dos chamados de acordo com o SLA selecionado
-  const filteredCalls = useMemo(() => {
-    if (slaFilter === 'all') return closedCalls;
-    return closedCalls.filter((call) => {
-      const deadline = resolveOfficialCallDeadline(call, true);
-      if (slaFilter === 'on_time') {
-        return deadline ? !deadline.isOverdue : true;
-      }
-      return deadline ? deadline.isOverdue : false;
-    });
-  }, [closedCalls, slaFilter]);
+  const ranking = cityOverviewQuery.data?.neighborhoodRanking || [];
+  const mostProblems = topByVolume(ranking);
+  const bestDeadline = topByDeadlineRate(ranking);
+  const fastest = fastestResolution(ranking);
+  const slowest = slowestResolution(ranking);
+  const topServices = (overview?.topServices || []).slice(0, 6);
+  const speedByService = new Map(
+    (overview?.serviceSpeed || []).map((s) => [s.type, s.avgResolutionDays]),
+  );
+  const cityAvgDays = cityOverviewQuery.data?.avgResolutionDays ?? null;
+  const avgDays = overview?.avgResolutionDays ?? null;
 
-  const slaTabOptions = [
-    { value: 'all', label: `Todos (${totalClosed.toLocaleString('pt-BR')})` },
-    {
-      value: 'on_time',
-      label: `No prazo (${withinDeadlineCount > 0 ? withinDeadlineCount.toLocaleString('pt-BR') : '—'})`,
-    },
-    {
-      value: 'overdue',
-      label: `Com atraso (${overdueCount > 0 ? overdueCount.toLocaleString('pt-BR') : '—'})`,
-    },
-  ];
+  const openNeighborhood = (name: string) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setNeighborhood(name);
+  };
 
   return (
     <AppScreen>
@@ -142,25 +121,10 @@ export default function ResultsScreen() {
         onBack={() => goBack()}
       />
 
-      <FlatList
-        data={filteredCalls}
-        keyExtractor={(call) => call.id}
-        initialNumToRender={6}
-        maxToRenderPerBatch={6}
-        windowSize={5}
+      <ScrollView
         contentContainerStyle={cityStyles.content}
-        renderItem={({ item: call }) => (
-          <OfficialCallRow
-            call={call}
-            onPress={() =>
-              router.push({
-                pathname: '/OfficialCallDetailsScreen',
-                params: { id: call.id },
-              })
-            }
-          />
-        )}
-        ListHeaderComponent={
+        showsVerticalScrollIndicator={false}
+      >
           <View style={styles.headerContainer}>
             {/* Cápsula Territorial Inteligente */}
             <View
@@ -483,96 +447,146 @@ export default function ResultsScreen() {
               </View>
             )}
 
-            {/* Seção da Lista de Chamados com Filtro Segmentado de SLA */}
-            <View style={styles.listSectionHeader}>
-              <View style={styles.sectionHeaderRow}>
-                <Ionicons name="list-outline" size={13} color={colors.muted} />
-                <AppText variant="caption" style={styles.sectionHeaderText}>
-                  HISTÓRICO DE ATENDIMENTOS ENCERRADOS
-                </AppText>
-              </View>
-
-              {/* Filtro Segmentado por Cumprimento de Prazo */}
-              <SlidingTabs
-                options={slaTabOptions}
-                value={slaFilter}
-                label="Filtrar por cumprimento de prazo"
-                onChange={(val) => {
-                  if (val === 'all' || val === 'on_time' || val === 'overdue') {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setSlaFilter(val);
-                  }
-                }}
-              />
-            </View>
-
             <QueryState
-              loading={closedCallsQuery.isPending}
-              error={closedCallsQuery.error}
+              loading={overviewQuery.isPending || cityOverviewQuery.isPending}
+              error={overviewQuery.error || cityOverviewQuery.error}
               retry={() => {
-                void closedCallsQuery.refetch();
                 void overviewQuery.refetch();
                 void closedOverviewQuery.refetch();
                 void cityOverviewQuery.refetch();
               }}
             />
 
-            {!closedCallsQuery.isPending &&
-              !closedCallsQuery.error &&
-              filteredCalls.length === 0 && (
-                <IllustratedEmptyState
-                  kind="target"
-                  title="Nenhum chamado neste recorte"
-                  description={
-                    slaFilter === 'overdue'
-                      ? 'Nenhum chamado encerrado com atraso sincronizado para este filtro.'
-                      : slaFilter === 'on_time'
-                        ? 'Nenhum chamado encerrado dentro do prazo sincronizado neste recorte.'
-                        : neighborhood
-                          ? 'Não há chamados encerrados sincronizados para este bairro no momento.'
-                          : 'Chamados encerrados pela prefeitura aparecerão aqui.'
-                  }
-                  action={
-                    slaFilter !== 'all'
-                      ? {
-                          title: 'Ver todos os chamados',
-                          onPress: () => {
-                            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            setSlaFilter('all');
-                          },
-                        }
-                      : neighborhood
-                        ? {
-                            title: 'Ver todo o município',
-                            onPress: () => {
-                              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                              setNeighborhood('');
-                            },
-                          }
-                        : undefined
-                  }
-                />
-              )}
-          </View>
-        }
-        ListFooterComponent={
-          <View style={styles.footerContainer}>
-            {hasMore && (
-              <AppButton
-                title={
-                  closedCallsQuery.isFetchingNextPage
-                    ? 'Carregando mais atendimentos...'
-                    : `Carregar mais (${filteredCalls.length} de ${totalClosed.toLocaleString('pt-BR')})`
-                }
-                disabled={closedCallsQuery.isFetchingNextPage}
-                variant="secondary"
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  void closedCallsQuery.fetchNextPage();
-                }}
+            {/* Velocidade de resolução */}
+            {avgDays != null && (
+              <View style={styles.dashboardBlock}>
+                <View style={styles.sectionHeaderRow}>
+                  <Ionicons name="hourglass-outline" size={13} color={colors.muted} />
+                  <AppText variant="caption" style={styles.sectionHeaderText}>
+                    VELOCIDADE DE RESOLUÇÃO
+                  </AppText>
+                </View>
+                <View
+                  style={[
+                    styles.heroKpiCard,
+                    { backgroundColor: colors.surface, borderColor: colors.divider },
+                  ]}
+                >
+                  <View style={styles.heroKpiValueRow}>
+                    <AppText style={[styles.heroKpiNumber, { color: colors.ink }]}>
+                      {formatDays(avgDays)}
+                    </AppText>
+                    <View style={styles.heroKpiDetailCol}>
+                      <AppText variant="label" style={{ fontWeight: '700' }}>
+                        Tempo médio até o encerramento
+                      </AppText>
+                      {neighborhood && cityAvgDays != null ? (
+                        <AppText variant="caption" color="muted">
+                          Média do Rio: {formatDays(cityAvgDays)}
+                        </AppText>
+                      ) : (
+                        <AppText variant="caption" color="muted">
+                          Entre a abertura e o encerramento publicados
+                        </AppText>
+                      )}
+                    </View>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* Tipos de problema mais frequentes */}
+            {topServices.length > 0 && (
+              <RankingSection
+                icon="construct-outline"
+                title={neighborhood ? `PROBLEMAS MAIS REGISTRADOS · ${neighborhood.toUpperCase()}` : 'PROBLEMAS MAIS REGISTRADOS'}
+                rows={topServices.map((service) => {
+                  const days = speedByService.get(service.type);
+                  return {
+                    key: service.type,
+                    label: service.type,
+                    detail: days != null ? `Encerra em média em ${formatDays(days)}` : undefined,
+                    value: service.count.toLocaleString('pt-BR'),
+                    share: totalCalls > 0 ? service.count / totalCalls : 0,
+                    tone: colors.primary,
+                  };
+                })}
               />
             )}
 
+            {/* Rankings territoriais (município inteiro) */}
+            {mostProblems.length > 0 && (
+              <RankingSection
+                icon="alert-circle-outline"
+                title="BAIRROS COM MAIS CHAMADOS"
+                rows={mostProblems.map((row) => ({
+                  key: row.neighborhood,
+                  label: row.neighborhood,
+                  detail: row.overdueCount > 0 ? `${row.overdueCount.toLocaleString('pt-BR')} fora do prazo` : undefined,
+                  value: row.count.toLocaleString('pt-BR'),
+                  share: row.count / (mostProblems[0]?.count || 1),
+                  tone: colors.risk,
+                  onPress: () => openNeighborhood(row.neighborhood),
+                }))}
+              />
+            )}
+
+            {bestDeadline.length > 0 && (
+              <RankingSection
+                icon="ribbon-outline"
+                title="BAIRROS QUE MAIS CUMPREM O PRAZO"
+                rows={bestDeadline.map((row) => ({
+                  key: row.neighborhood,
+                  label: row.neighborhood,
+                  detail: `${row.count.toLocaleString('pt-BR')} chamados analisados`,
+                  value: `${row.withinDeadlineRate}%`,
+                  share: (row.withinDeadlineRate ?? 0) / 100,
+                  tone: colors.completed,
+                  onPress: () => openNeighborhood(row.neighborhood),
+                }))}
+              />
+            )}
+
+            {fastest.length > 0 && (
+              <RankingSection
+                icon="flash-outline"
+                title="RESOLUÇÃO MAIS RÁPIDA"
+                rows={fastest.map((row) => ({
+                  key: row.neighborhood,
+                  label: row.neighborhood,
+                  detail: `${row.closedCount.toLocaleString('pt-BR')} encerrados`,
+                  value: formatDays(row.avgResolutionDays),
+                  share: (fastest[0]?.avgResolutionDays ?? 0) / Math.max(row.avgResolutionDays ?? 1, 0.1),
+                  tone: colors.completed,
+                  onPress: () => openNeighborhood(row.neighborhood),
+                }))}
+              />
+            )}
+
+            {slowest.length > 0 && (
+              <RankingSection
+                icon="time-outline"
+                title="RESOLUÇÃO MAIS LENTA"
+                rows={slowest.map((row) => ({
+                  key: row.neighborhood,
+                  label: row.neighborhood,
+                  detail: `${row.closedCount.toLocaleString('pt-BR')} encerrados`,
+                  value: formatDays(row.avgResolutionDays),
+                  share: (row.avgResolutionDays ?? 0) / Math.max(slowest[0]?.avgResolutionDays ?? 1, 0.1),
+                  tone: colors.attention,
+                  onPress: () => openNeighborhood(row.neighborhood),
+                }))}
+              />
+            )}
+
+            {ranking.length > 0 && (
+              <AppText variant="caption" color="muted" style={styles.rankingNote}>
+                Rankings de prazo e velocidade consideram bairros com pelo menos {MIN_RANKING_VOLUME} chamados. Toque em um bairro para ver seus indicadores.
+              </AppText>
+            )}
+          </View>
+
+          <View style={styles.footerContainer}>
             {/* Card de Transparência e Marco Regulatório (Apple Inset Table) */}
             <View style={styles.transparencyBlock}>
               <View style={styles.sectionHeaderRow}>
@@ -638,9 +652,99 @@ export default function ResultsScreen() {
               </View>
             </View>
           </View>
-        }
-      />
+      </ScrollView>
     </AppScreen>
+  );
+}
+
+interface RankingRow {
+  key: string;
+  label: string;
+  detail?: string;
+  value: string;
+  /** Fração 0–1 usada apenas para a barra visual. */
+  share: number;
+  tone: string;
+  onPress?: () => void;
+}
+
+function RankingSection({
+  icon,
+  title,
+  rows,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  rows: RankingRow[];
+}) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  return (
+    <View style={styles.dashboardBlock}>
+      <View style={styles.sectionHeaderRow}>
+        <Ionicons name={icon} size={13} color={colors.muted} />
+        <AppText variant="caption" style={styles.sectionHeaderText} numberOfLines={1}>
+          {title}
+        </AppText>
+      </View>
+      <View
+        style={[
+          styles.breakdownTable,
+          { backgroundColor: colors.surface, borderColor: colors.divider },
+        ]}
+      >
+        {rows.map((row, idx) => (
+          <View key={row.key}>
+            {idx > 0 && (
+              <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
+            )}
+            <Pressable
+              disabled={!row.onPress}
+              onPress={row.onPress}
+              accessibilityRole={row.onPress ? 'button' : undefined}
+              accessibilityLabel={`${idx + 1}º ${row.label}: ${row.value}`}
+              style={({ pressed }) => [
+                styles.rankingRow,
+                pressed && { backgroundColor: colors.surfaceSubdued },
+              ]}
+            >
+              <AppText variant="label" style={[styles.rankPosition, { color: row.tone }]}>
+                {idx + 1}
+              </AppText>
+              <View style={styles.rankingContent}>
+                <View style={styles.breakdownLabelRow}>
+                  <AppText variant="label" numberOfLines={1} style={styles.rankingLabel}>
+                    {row.label}
+                  </AppText>
+                  <AppText variant="label" style={[styles.rankingValue, { color: row.tone }]}>
+                    {row.value}
+                  </AppText>
+                </View>
+                {row.detail ? (
+                  <AppText variant="caption" color="muted" numberOfLines={1}>
+                    {row.detail}
+                  </AppText>
+                ) : null}
+                <View style={[styles.barTrack, { backgroundColor: colors.surfaceSubdued }]}>
+                  <View
+                    style={[
+                      styles.barFill,
+                      {
+                        width: `${Math.max(2, Math.min(100, row.share * 100))}%`,
+                        backgroundColor: row.tone,
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
+              {row.onPress ? (
+                <Ionicons name="chevron-forward" size={15} color={colors.subtle} />
+              ) : null}
+            </Pressable>
+          </View>
+        ))}
+      </View>
+    </View>
   );
 }
 
@@ -649,6 +753,34 @@ const createStyles = (colors: ThemeColors) =>
     headerContainer: {
       gap: spacing.lg,
       paddingBottom: spacing.sm,
+    },
+    rankingRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+    },
+    rankPosition: {
+      width: 18,
+      textAlign: 'center',
+      fontWeight: '900',
+    },
+    rankingContent: {
+      flex: 1,
+      gap: 4,
+    },
+    rankingLabel: {
+      flex: 1,
+      fontWeight: '700',
+      paddingRight: 8,
+    },
+    rankingValue: {
+      fontWeight: '800',
+    },
+    rankingNote: {
+      paddingHorizontal: 6,
+      lineHeight: 17,
     },
     territoryCapsule: {
       flexDirection: 'row',

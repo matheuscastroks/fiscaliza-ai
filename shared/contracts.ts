@@ -137,6 +137,17 @@ export interface OfficialCallsOverview {
   topNeighborhoods: { neighborhood: string; count: number }[];
   situationBreakdown: { situation: string; count: number }[];
   statusBreakdown?: { status: string; count: number }[];
+  /** Média de dias entre abertura e encerramento publicados; null sem base. */
+  avgResolutionDays?: number | null;
+  neighborhoodRanking?: {
+    neighborhood: string;
+    count: number;
+    closedCount: number;
+    overdueCount: number;
+    withinDeadlineRate: number | null;
+    avgResolutionDays: number | null;
+  }[];
+  serviceSpeed?: { type: string; count: number; avgResolutionDays: number | null }[];
   minOpenedAt?: string | null;
   maxOpenedAt?: string | null;
   lastPartitionDate: string | null;
