@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
@@ -21,6 +22,7 @@ export interface AppHeaderProps {
   onBack?: () => void;
   rightElement?: React.ReactNode;
   overlay?: boolean;
+  hideUserAvatar?: boolean;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -29,6 +31,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onBack,
   rightElement,
   overlay = false,
+  hideUserAvatar = false,
 }) => {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
@@ -43,11 +46,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         {!onBack && (
           <TouchableOpacity
             style={styles.circleButton}
-            onPress={() => useMenu.getState().setOpen(true)}
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              useMenu.getState().setOpen(true);
+            }}
             accessibilityRole="button"
             accessibilityLabel="Abrir menu"
           >
-            {user ? (
+            {user && !hideUserAvatar ? (
               <UserAvatar size={48} />
             ) : (
               <Ionicons name="menu-outline" size={24} color={colors.ink} />
@@ -57,7 +63,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         {onBack && (
           <TouchableOpacity
             style={styles.circleButton}
-            onPress={onBack}
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onBack();
+            }}
             accessibilityRole="button"
             accessibilityLabel="Voltar"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}

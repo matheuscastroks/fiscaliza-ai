@@ -175,6 +175,24 @@ export default function ProfileScreen() {
       <AppHeader
         title="Meu perfil"
         context="Identidade cidadã e configurações"
+        hideUserAvatar
+        rightElement={
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Preferências do aplicativo"
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/SettingsScreen');
+            }}
+            style={({ pressed }) => [
+              styles.headerActionBtn,
+              { backgroundColor: colors.surface, borderColor: colors.divider },
+              pressed && { opacity: 0.75 },
+            ]}
+          >
+            <Ionicons name="options-outline" size={20} color={colors.ink} />
+          </Pressable>
+        }
       />
 
       <ScrollView
@@ -691,6 +709,14 @@ const createStyles = (colors: ThemeColors) =>
       paddingTop: spacing.xs,
       paddingBottom: 140,
       gap: spacing.lg,
+    },
+    headerActionBtn: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      borderWidth: StyleSheet.hairlineWidth,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     heroCard: {
       flexDirection: 'row',
