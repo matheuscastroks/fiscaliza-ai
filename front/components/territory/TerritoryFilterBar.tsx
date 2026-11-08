@@ -1,6 +1,6 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -27,6 +27,10 @@ import { layout, spacing } from '@/theme';
 import { RadiusControl } from '@/features/places/RadiusControl';
 import { PlaceSelector } from '@/features/places/PlaceSelector';
 import type { RadiusMeters } from '@/features/places/types';
+import {
+  CIVIC_MACRO_THEMES,
+  matchesMacroTheme,
+} from '@/features/city/officialCategoryThemes';
 import {
   useTerritoryDomain,
 } from '@/stores/territoryStore';
@@ -299,6 +303,20 @@ function TerritoryFilterModalComponent({
   const insets = useSafeAreaInsets();
   const snapPoints = useMemo(() => ['78%', '94%'], []);
 
+  const [macroTheme, setMacroTheme] = useState<string>('all');
+
+  const filteredServiceOptions = useMemo(() => {
+    if (macroTheme === 'all') return serviceTypeOptions;
+    const matches = serviceTypeOptions.filter(
+      (opt) => opt.value !== 'all' && matchesMacroTheme(opt.value, null, macroTheme),
+    );
+    const themeLabel = CIVIC_MACRO_THEMES.find((t) => t.id === macroTheme)?.label || 'este tema';
+    return [
+      { value: 'all', label: `Todos de ${themeLabel}` },
+      ...matches,
+    ];
+  }, [macroTheme, serviceTypeOptions]);
+
   const {
     territoryDomain,
     setTerritoryDomain,
@@ -453,14 +471,67 @@ function TerritoryFilterModalComponent({
                   color="muted"
                   style={styles.fieldSubLabel}
                 >
-                  Tipo de serviço
+                  Macro-temas cívicos
+                </AppText>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.macroThemesTrack}
+                >
+                  {CIVIC_MACRO_THEMES.map((theme) => {
+                    const isSelected = macroTheme === theme.id;
+                    return (
+                      <Pressable
+                        key={theme.id}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Filtrar por ${theme.label}`}
+                        accessibilityState={{ selected: isSelected }}
+                        onPress={() => {
+                          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          setMacroTheme(theme.id);
+                          if (theme.id !== 'all' && !matchesMacroTheme(serviceType, null, theme.id)) {
+                            onServiceTypeChange('all');
+                          }
+                        }}
+                        style={[
+                          styles.macroThemeChip,
+                          isSelected && styles.macroThemeChipSelected,
+                        ]}
+                      >
+                        <Ionicons
+                          name={theme.icon as React.ComponentProps<typeof Ionicons>['name']}
+                          size={14}
+                          color={isSelected ? colors.onAccentBrand : colors.ink}
+                        />
+                        <AppText
+                          variant="caption"
+                          style={[
+                            styles.macroThemeChipText,
+                            isSelected && styles.macroThemeChipTextSelected,
+                          ]}
+                        >
+                          {theme.label}
+                        </AppText>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+
+              <View style={styles.filterSubfield}>
+                <AppText
+                  variant="caption"
+                  color="muted"
+                  style={styles.fieldSubLabel}
+                >
+                  Subtipo específico
                 </AppText>
                 <AppSelect
                   label="Tipo de serviço 1746"
                   placeholder="Buscar tipo de serviço..."
                   icon="construct-outline"
                   defaultValue="all"
-                  options={serviceTypeOptions}
+                  options={filteredServiceOptions}
                   value={serviceType}
                   onChange={onServiceTypeChange}
                 />
@@ -923,6 +994,7 @@ function TerritoryFilterModalComponent({
             accessibilityLabel="Limpar todos os filtros"
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setMacroTheme('all');
               onReset();
             }}
             style={({ pressed }) => [
@@ -1249,6 +1321,36 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.ink,
     },
     periodChipTextActive: {
+      color: colors.surface,
+      fontWeight: '700',
+    },
+    macroThemesTrack: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      paddingVertical: spacing.xxs,
+    },
+    macroThemeChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingVertical: 7,
+      paddingHorizontal: 12,
+      borderRadius: layout.radius.pill,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    macroThemeChipSelected: {
+      backgroundColor: colors.onSurfaceBrand,
+      borderColor: colors.onSurfaceBrand,
+    },
+    macroThemeChipText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.ink,
+    },
+    macroThemeChipTextSelected: {
       color: colors.surface,
       fontWeight: '700',
     },

@@ -102,6 +102,63 @@ export const OFFICIAL_CATEGORIES_THEMES: Record<string, ServiceCategoryTheme> = 
   },
 };
 
+export interface CivicMacroTheme {
+  id: string;
+  label: string;
+  icon: string;
+  keywords: string[];
+}
+
+export const CIVIC_MACRO_THEMES: CivicMacroTheme[] = [
+  { id: 'all', label: 'Todos', icon: 'grid-outline', keywords: [] },
+  {
+    id: 'road',
+    label: 'Vias e Asfalto',
+    icon: 'car-outline',
+    keywords: ['buraco', 'asfalto', 'paviment', 'calçada', 'tapa-buraco', 'via pública'],
+  },
+  {
+    id: 'lighting',
+    label: 'Iluminação',
+    icon: 'bulb-outline',
+    keywords: ['luz', 'poste', 'ilumina', 'lâmpada', 'apagada'],
+  },
+  {
+    id: 'cleaning',
+    label: 'Limpeza e Lixo',
+    icon: 'trash-outline',
+    keywords: ['lixo', 'entulho', 'limpeza', 'comlurb', 'caçamba', 'coleta'],
+  },
+  {
+    id: 'nature',
+    label: 'Árvores e Praças',
+    icon: 'leaf-outline',
+    keywords: ['árvore', 'poda', 'praça', 'mato', 'arbóreo'],
+  },
+  {
+    id: 'drainage',
+    label: 'Drenagem e Esgoto',
+    icon: 'water-outline',
+    keywords: ['bueiro', 'esgoto', 'drenagem', 'alagamento', 'galeria'],
+  },
+  {
+    id: 'traffic',
+    label: 'Trânsito e Sinais',
+    icon: 'navigate-outline',
+    keywords: ['semáforo', 'sinal', 'trânsito', 'faixa', 'sinalização'],
+  },
+];
+
+export function matchesMacroTheme(
+  serviceType?: string | null,
+  serviceSubtype?: string | null,
+  macroThemeId?: string | null,
+): boolean {
+  if (!macroThemeId || macroThemeId === 'all') return true;
+  const theme = resolveServiceCategoryTheme(serviceType, serviceSubtype);
+  return theme.id === macroThemeId;
+}
+
 export function resolveServiceCategoryTheme(
   serviceType?: string | null,
   serviceSubtype?: string | null,
