@@ -149,11 +149,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     );
   },
   deleteAccount: async () => {
+    if (get().isLoading) return { success: false };
     set({ isLoading: true });
-    const result = await authApi.deleteAccount();
-    await get().logout();
-    set({ isLoading: false, user: null, isAuthenticated: false });
-    return result;
+    try {
+      const result = await authApi.deleteAccount();
+      // A conta continua existindo no servidor: preserva a sessão para
+      // permitir nova tentativa.
+      if (!result.success) return result;
+      try {
+        await get().logout();
+      } catch {
+        // A conta já foi removida; o encerramento local ocorre no finally de logout.
+      }
+      set({ user: null, isAuthenticated: false });
+      return result;
+    } finally {
+      set({ isLoading: false });
+    }
   },
 }));
 onSessionExpired(() => {

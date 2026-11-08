@@ -14,7 +14,7 @@ const sample = {
   importedAt: '2026-10-20',
   updatedAt: '2026-10-20',
 };
-function setup(storage) {
+function setupExports(storage) {
   const module = { exports: {} };
   const source = ts.transpileModule(
     fs.readFileSync('stores/followStore.ts', 'utf8'),
@@ -36,7 +36,10 @@ function setup(storage) {
         ? storage
         : require(name),
   });
-  return module.exports.useFollowStore;
+  return module.exports;
+}
+function setup(storage) {
+  return setupExports(storage).useFollowStore;
 }
 test('saved calls survive restart and rapid toggles are serialized', async () => {
   let value = null;
@@ -157,4 +160,76 @@ test('saved calls are isolated per user account and municipality scope', async (
   await store.getState().setScope('user-1', '3304557');
   assert.equal(store.getState().savedCalls.length, 1);
   assert.equal(store.getState().savedCalls[0].id, 'a');
+});
+test('a delayed write cannot reach the next account scope', async () => {
+  let release;
+  let started;
+  const writeStarted = new Promise((resolve) => {
+    started = resolve;
+  });
+  const pendingWrite = new Promise((resolve) => {
+    release = resolve;
+  });
+  const entries = new Map();
+  let writes = 0;
+  const storage = {
+    getItem: async (key) => entries.get(key) ?? null,
+    setItem: async (key, next) => {
+      writes += 1;
+      if (writes === 1) {
+        started();
+        await pendingWrite;
+      }
+      entries.set(key, next);
+    },
+  };
+  const store = setup(storage);
+  await store.getState().setScope('user-1', '3304557');
+  const saving = store.getState().toggleSavedCall(sample);
+  await writeStarted;
+  await store.getState().setScope('user-2', '3304557');
+  release();
+  assert.equal(await saving, false);
+  assert.equal(store.getState().userId, 'user-2');
+  assert.equal(store.getState().savedCalls.length, 0);
+  assert.equal(
+    entries.has('fiscaliza-ai:saved:rio1746:user-2:3304557:v1'),
+    false,
+  );
+});
+test('follow notifications only fire after the write is confirmed', async () => {
+  let fail = false;
+  const exports = setupExports({
+    getItem: async () => null,
+    setItem: async () => {
+      if (fail) throw Error('storage unavailable');
+    },
+  });
+  const store = exports.useFollowStore;
+  const events = [];
+  exports.setFollowNotificationListener((call, saved) => {
+    events.push({ id: call.id, saved });
+  });
+
+  fail = true;
+  assert.equal(await store.getState().toggleSavedCall(sample), false);
+  assert.equal(store.getState().savedCalls.length, 0);
+  assert.deepEqual(events, []);
+  assert.ok(store.getState().persistenceError);
+
+  fail = false;
+  assert.equal(await store.getState().toggleSavedCall(sample), true);
+  assert.deepEqual(events, [{ id: 'a', saved: true }]);
+
+  fail = true;
+  assert.equal(await store.getState().clearSavedCalls(), false);
+  assert.equal(store.getState().savedCalls.length, 1);
+  assert.deepEqual(events, [{ id: 'a', saved: true }]);
+
+  fail = false;
+  assert.equal(await store.getState().clearSavedCalls(), true);
+  assert.deepEqual(events, [
+    { id: 'a', saved: true },
+    { id: 'a', saved: false },
+  ]);
 });

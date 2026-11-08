@@ -131,18 +131,30 @@ function snapshot(call: OfficialCall): OfficialCall {
     sourcePartitionDate,
   };
 }
+interface PersistChange {
+  savedCalls: OfficialCall[];
+  metadata: Record<string, SavedMeta>;
+  /** Alertas aplicados somente depois de a gravação ser confirmada. */
+  effects?: { call: OfficialCall; saved: boolean }[];
+}
 let initialization: Promise<void> | undefined;
 let queue = Promise.resolve();
+/** Incrementa a cada troca de escopo; operações de outra geração são descartadas. */
+let scopeGeneration = 0;
 export const useFollowStore = create<FollowStore>((set, get) => {
-  const persist = (
-    change: () => {
-      savedCalls: OfficialCall[];
-      metadata: Record<string, SavedMeta>;
-    },
-  ) => {
+  const persist = (change: () => PersistChange) => {
+    const generation = scopeGeneration;
+    const scopeUserId = get().userId;
+    const scopeMunicipalityId = get().municipalityId;
+    const inScope = () =>
+      generation === scopeGeneration &&
+      get().userId === scopeUserId &&
+      get().municipalityId === scopeMunicipalityId;
     const result = queue.then(async () => {
+      if (!inScope()) return false;
       await get().initialize();
-      const key = followStorageKey(get().userId, get().municipalityId);
+      if (!inScope()) return false;
+      const key = followStorageKey(scopeUserId, scopeMunicipalityId);
       set({ busy: true });
       try {
         const next = change();
@@ -156,13 +168,25 @@ export const useFollowStore = create<FollowStore>((set, get) => {
             })),
           }),
         );
-        set({ ...next, persistenceError: null });
+        // A conta ou o município mudou durante a gravação: o resultado
+        // pertence ao escopo anterior e não pode alterar o estado atual.
+        if (!inScope()) return false;
+        set({
+          savedCalls: next.savedCalls,
+          metadata: next.metadata,
+          persistenceError: null,
+        });
+        for (const effect of next.effects ?? []) {
+          onFollowChanged?.(effect.call, effect.saved);
+        }
         return true;
       } catch {
-        set({
-          persistenceError:
-            'Não foi possível gravar os chamados salvos na sua conta. Tente novamente.',
-        });
+        if (inScope()) {
+          set({
+            persistenceError:
+              'Não foi possível gravar os chamados salvos na sua conta. Tente novamente.',
+          });
+        }
         return false;
       } finally {
         set({ busy: false });
@@ -245,6 +269,7 @@ export const useFollowStore = create<FollowStore>((set, get) => {
         return initialization;
       }
       initialization = undefined;
+      scopeGeneration += 1;
       set({
         userId,
         municipalityId: nextMunicipalityId,
@@ -264,7 +289,6 @@ export const useFollowStore = create<FollowStore>((set, get) => {
       if (!validCall(call, get().municipalityId)) return Promise.resolve(false);
       return persist(() => {
         const exists = get().isCallSaved(call.id);
-        onFollowChanged?.(call, !exists);
         const metadata = { ...get().metadata };
         if (exists) delete metadata[call.id];
         else
@@ -277,16 +301,16 @@ export const useFollowStore = create<FollowStore>((set, get) => {
             ? get().savedCalls.filter((c) => c.id !== call.id)
             : [snapshot(call), ...get().savedCalls],
           metadata,
+          effects: [{ call, saved: !exists }],
         };
       });
     },
-    clearSavedCalls: () => {
-      const current = get().savedCalls;
-      for (const call of current) {
-        onFollowChanged?.(call, false);
-      }
-      return persist(() => ({ savedCalls: [], metadata: {} }));
-    },
+    clearSavedCalls: () =>
+      persist(() => ({
+        savedCalls: [],
+        metadata: {},
+        effects: get().savedCalls.map((call) => ({ call, saved: false })),
+      })),
     updateSnapshots: (calls) =>
       persist(() => {
         const municipalityId = get().municipalityId;
