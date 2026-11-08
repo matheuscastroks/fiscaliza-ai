@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
   FlatList,
@@ -9,65 +9,99 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppBrandGlyph } from '@/components/ui/AppBrandGlyph';
 import { ThemeToggleButton } from '@/components/ui/ThemeToggleButton';
 import { layout, spacing, useTheme } from '@/theme';
-import { Illustration, type IllustrationKind } from './Illustration';
 
-const slides: {
-  id: IllustrationKind;
-  kicker: string;
+interface OnboardingBenefit {
+  icon: keyof typeof Ionicons.glyphMap;
   title: string;
   description: string;
-  imageLabel: string;
-  highlights: { icon: keyof typeof Ionicons.glyphMap; label: string }[];
-  noteIcon: keyof typeof Ionicons.glyphMap;
-  note: string;
-}[] = [
+}
+
+interface OnboardingSlide {
+  id: string;
+  badge: string;
+  badgeIcon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  description: string;
+  image: any;
+  imageAlt: string;
+  benefits: OnboardingBenefit[];
+}
+
+const slides: OnboardingSlide[] = [
   {
     id: 'territory',
-    kicker: 'Exploração territorial',
-    title: 'Descubra sua região',
+    badge: 'Rio no seu mapa',
+    badgeIcon: 'map-outline',
+    title: 'O Rio no seu mapa',
     description:
-      'Explore demandas urbanas do 1746 e encontre escolas, unidades de saúde e praças no mapa colorido ou na lista.',
-    imageLabel: 'Pessoas explorando um território',
-    highlights: [
-      { icon: 'map-outline', label: 'Mapa e lista' },
-      { icon: 'locate-outline', label: 'Raio ou bairro' },
+      'Veja os chamados do 1746 da sua rua e encontre escolas, postos de saúde e praças ao seu redor com transparência total.',
+    image: require('@/assets/images/onboarding-territory.jpg'),
+    imageAlt: 'Vista da cidade do Rio de Janeiro com montanhas e ruas ensolaradas',
+    benefits: [
+      {
+        icon: 'locate-outline',
+        title: 'Demandas geolocalizadas',
+        description: 'Buracos, iluminação, podas e obras mapeados no seu bairro.',
+      },
+      {
+        icon: 'business-outline',
+        title: 'Equipamentos públicos',
+        description: 'Consulte serviços essenciais próximos de você em poucos toques.',
+      },
     ],
-    noteIcon: 'lock-closed-outline',
-    note: 'Escolher um bairro é opcional. Não precisa de conta ou GPS para explorar.',
   },
   {
-    id: 'results',
-    kicker: 'Acompanhamento cidadão',
-    title: 'Salve e acompanhe',
+    id: 'follow',
+    badge: 'Fiscalização ativa',
+    badgeIcon: 'checkmark-circle-outline',
+    title: 'Fiscalize prazos e soluções',
     description:
-      'Guarde os chamados do seu interesse e volte quando quiser para consultar a situação oficial publicada.',
-    imageLabel: 'Pessoas acompanhando um trabalho',
-    highlights: [
-      { icon: 'bookmark-outline', label: 'Salvos no aparelho' },
-      { icon: 'time-outline', label: 'Histórico e situação' },
+      'Guarde protocolos importantes para acompanhar se a Prefeitura está cumprindo os prazos oficiais de atendimento.',
+    image: require('@/assets/images/onboarding-follow.jpg'),
+    imageAlt: 'Espaço urbano no Rio de Janeiro com calçada de pedras portuguesas e arborização',
+    benefits: [
+      {
+        icon: 'time-outline',
+        title: 'Prazos reais de atendimento',
+        description: 'Acompanhe os prazos previstos (SLA) e a situação de cada chamado.',
+      },
+      {
+        icon: 'notifications-outline',
+        title: 'Alertas no seu aparelho',
+        description: 'Receba avisos automáticos quando houver novidades no protocolo.',
+      },
     ],
-    noteIcon: 'information-circle-outline',
-    note: 'Seus salvos ficam neste aparelho. Encerrado no 1746 não significa resolução confirmada.',
   },
   {
-    id: 'participation',
-    kicker: 'Canais oficiais',
-    title: 'Encontre como agir',
+    id: 'action',
+    badge: 'Ação descomplicada',
+    badgeIcon: 'flash-outline',
+    title: 'Cobre melhorias com 1 toque',
     description:
-      'Consulte as orientações de cada serviço público e acesse diretamente o atendimento oficial para abrir solicitações.',
-    imageLabel: 'Acesso aos canais oficiais representado por um avião de papel',
-    highlights: [
-      { icon: 'megaphone-outline', label: 'Central 1746' },
-      { icon: 'open-outline', label: 'Acesso direto' },
+      'Encontrou um problema na sua rua? Gere mensagens estruturadas para o WhatsApp do 1746 com fotos, endereço e detalhes prontos.',
+    image: require('@/assets/images/onboarding-action.jpg'),
+    imageAlt: 'Cidadãos cariocas em movimento em espaço público no Rio de Janeiro',
+    benefits: [
+      {
+        icon: 'logo-whatsapp',
+        title: 'Assistente rápido para o 1746',
+        description: 'Texto formatado com precisão para enviar à Central 1746 em segundos.',
+      },
+      {
+        icon: 'shield-checkmark-outline',
+        title: 'Canais oficiais reunidos',
+        description: 'Telefone 1746, portal da Prefeitura e canais oficiais ao seu alcance.',
+      },
     ],
-    noteIcon: 'shield-checkmark-outline',
-    note: 'O Fiscaliza aí é independente. Solicitações são feitas no canal oficial da prefeitura.',
   },
 ];
 
@@ -84,7 +118,7 @@ export function OnboardingFlow({
   const [page, setPage] = useState(0);
   const [busy, setBusy] = useState(false);
   const [reduced, setReduced] = useState(false);
-  const list = useRef<FlatList<(typeof slides)[number]>>(null);
+  const list = useRef<FlatList<OnboardingSlide>>(null);
   const wide = viewport >= 850;
   const pageRef = useRef(page);
 
@@ -103,7 +137,6 @@ export function OnboardingFlow({
     };
   }, []);
 
-  // Keep the current slide after rotation or resizing, without resetting progress.
   useEffect(() => {
     pageRef.current = page;
   }, [page]);
@@ -117,6 +150,7 @@ export function OnboardingFlow({
 
   const finish = async () => {
     if (busy) return;
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setBusy(true);
     try {
       await onFinish();
@@ -127,6 +161,7 @@ export function OnboardingFlow({
 
   const goToPage = (target: number) => {
     const clamped = Math.max(0, Math.min(slides.length - 1, target));
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setPage(clamped);
     list.current?.scrollToOffset({
       offset: clamped * viewport,
@@ -154,7 +189,7 @@ export function OnboardingFlow({
         onLayout={(event) => setViewport(event.nativeEvent.layout.width)}
         style={styles.root}
       >
-        {/* Top Bar */}
+        {/* Top Header Bar */}
         <View style={styles.header}>
           <View style={styles.brandRow}>
             <AppBrandGlyph size={32} active />
@@ -191,7 +226,7 @@ export function OnboardingFlow({
                 styles.skipPill,
                 {
                   backgroundColor: colors.surface,
-                  borderColor: colors.border,
+                  borderColor: colors.divider,
                   opacity: busy ? 0.5 : pressed ? 0.75 : 1,
                 },
               ]}
@@ -203,7 +238,7 @@ export function OnboardingFlow({
           </View>
         </View>
 
-        {/* Slides Carousel */}
+        {/* Carousel Slides */}
         <FlatList
           ref={list}
           data={slides}
@@ -249,91 +284,55 @@ export function OnboardingFlow({
                   },
                 ]}
               >
-                {/* Stage Card with Kicker, Illustration & Feature Chips */}
+                {/* Hero Photographic Stage */}
                 <View
                   style={[
-                    styles.stageCard,
+                    styles.heroCard,
                     {
-                      flex: wide ? 1 : undefined,
-                      backgroundColor: isDark
-                        ? colors.surfaceSubdued
-                        : colors.surface,
-                      borderColor: colors.border,
+                      flex: wide ? 1.1 : undefined,
+                      backgroundColor: colors.surfaceSubdued,
+                      borderColor: colors.divider,
                     },
                   ]}
                 >
-                  <View style={styles.stageTopRow}>
-                    <View
-                      style={[
-                        styles.kickerPill,
-                        {
-                          backgroundColor: isDark
-                            ? colors.surface
-                            : colors.surfaceSubdued,
-                        },
-                      ]}
-                    >
-                      <View
-                        style={[
-                          styles.kickerDot,
-                          { backgroundColor: colors.brandYellow },
-                        ]}
-                      />
-                      <AppText
-                        variant="meta"
-                        style={[
-                          styles.kickerText,
-                          { color: colors.onSurfaceBrand },
-                        ]}
-                      >
-                        {item.kicker}
-                      </AppText>
-                    </View>
+                  <Image
+                    source={item.image}
+                    contentFit="cover"
+                    transition={250}
+                    style={[
+                      styles.heroImage,
+                      {
+                        height: wide
+                          ? 360
+                          : Math.max(170, Math.min(240, Math.round(height * 0.27))),
+                      },
+                    ]}
+                    accessibilityLabel={item.imageAlt}
+                  />
 
-                    <AppText variant="protocol" color="muted">
-                      0{index + 1} / 0{slides.length}
+                  {/* Gradient Overlay for Edge Depth */}
+                  <LinearGradient
+                    colors={['transparent', 'rgba(0,0,0,0.45)']}
+                    style={styles.heroGradient}
+                  />
+
+                  {/* Top-Left Floating Feature Badge */}
+                  <View style={styles.floatingPill}>
+                    <Ionicons name={item.badgeIcon} size={13} color="#FFFFFF" />
+                    <AppText variant="caption" style={styles.floatingPillText}>
+                      {item.badge}
                     </AppText>
                   </View>
 
-                  <Illustration
-                    kind={item.id}
-                    height={
-                      wide ? 280 : Math.max(135, Math.min(200, height * 0.22))
-                    }
-                    label={item.imageLabel}
-                  />
-
-                  <View style={styles.highlightsRow}>
-                    {item.highlights.map((chip) => (
-                      <View
-                        key={chip.label}
-                        style={[
-                          styles.highlightChip,
-                          {
-                            backgroundColor: isDark
-                              ? colors.surface
-                              : colors.canvas,
-                            borderColor: colors.border,
-                          },
-                        ]}
-                      >
-                        <Ionicons
-                          name={chip.icon}
-                          size={14}
-                          color={colors.onSurfaceBrand}
-                        />
-                        <AppText
-                          variant="caption"
-                          style={styles.highlightChipText}
-                        >
-                          {chip.label}
-                        </AppText>
-                      </View>
-                    ))}
+                  {/* Top-Right Step Counter */}
+                  <View style={styles.stepBadge}>
+                    <AppText variant="meta" style={styles.stepBadgeText}>
+                      0{index + 1} / 0{slides.length}
+                    </AppText>
                   </View>
                 </View>
 
-                {/* Copy & Transparency Callout */}
+                {/* Copy & Value Inset Table */}
                 <View
                   style={[
                     styles.copyBlock,
@@ -344,43 +343,59 @@ export function OnboardingFlow({
                     <AppText variant="screenTitle" accessibilityRole="header">
                       {item.title}
                     </AppText>
-                    <AppText color="muted">{item.description}</AppText>
+                    <AppText color="muted" style={styles.descriptionText}>
+                      {item.description}
+                    </AppText>
                   </View>
 
+                  {/* Benefits Inset Table (Apple HIG) */}
                   <View
                     style={[
-                      styles.noteCard,
+                      styles.benefitsInsetTable,
                       {
-                        backgroundColor: isDark
-                          ? colors.surface
-                          : colors.surfaceSubdued,
-                        borderColor: colors.border,
+                        backgroundColor: isDark ? colors.surface : colors.surfaceSubdued,
+                        borderColor: colors.divider,
                       },
                     ]}
                   >
-                    <View
-                      style={[
-                        styles.noteIconCircle,
-                        {
-                          backgroundColor: isDark
-                            ? colors.surfaceSubdued
-                            : colors.surface,
-                        },
-                      ]}
-                    >
-                      <Ionicons
-                        name={item.noteIcon}
-                        size={16}
-                        color={colors.onSurfaceBrand}
-                      />
-                    </View>
-                    <AppText
-                      variant="caption"
-                      color="muted"
-                      style={styles.noteText}
-                    >
-                      {item.note}
-                    </AppText>
+                    {item.benefits.map((benefit, bIdx) => (
+                      <View key={benefit.title}>
+                        {bIdx > 0 && (
+                          <View
+                            style={[
+                              styles.benefitDivider,
+                              { backgroundColor: colors.divider },
+                            ]}
+                          />
+                        )}
+                        <View style={styles.benefitRow}>
+                          <View
+                            style={[
+                              styles.benefitIconSquircle,
+                              {
+                                backgroundColor: isDark
+                                  ? colors.surfaceSubdued
+                                  : colors.primaryContainer,
+                              },
+                            ]}
+                          >
+                            <Ionicons
+                              name={benefit.icon}
+                              size={18}
+                              color={colors.primary}
+                            />
+                          </View>
+                          <View style={styles.benefitTextCol}>
+                            <AppText variant="label" style={styles.benefitTitle}>
+                              {benefit.title}
+                            </AppText>
+                            <AppText variant="caption" color="muted">
+                              {benefit.description}
+                            </AppText>
+                          </View>
+                        </View>
+                      </View>
+                    ))}
                   </View>
                 </View>
               </View>
@@ -405,7 +420,7 @@ export function OnboardingFlow({
                     {
                       width: index === page ? 28 : 8,
                       backgroundColor:
-                        index === page ? colors.onSurfaceBrand : colors.border,
+                        index === page ? colors.primary : colors.divider,
                     },
                   ]}
                 />
@@ -431,7 +446,7 @@ export function OnboardingFlow({
                   styles.backCircle,
                   {
                     backgroundColor: colors.surface,
-                    borderColor: colors.border,
+                    borderColor: colors.divider,
                     opacity: busy ? 0.5 : pressed ? 0.75 : 1,
                   },
                 ]}
@@ -446,7 +461,7 @@ export function OnboardingFlow({
                     ? replay
                       ? 'Voltar ao app'
                       : 'Começar a explorar'
-                    : 'Próximo'
+                    : 'Continuar'
                 }
                 loading={busy}
                 onPress={next}
@@ -454,7 +469,9 @@ export function OnboardingFlow({
                   <Ionicons
                     name={
                       page === slides.length - 1
-                        ? 'compass-outline'
+                        ? replay
+                          ? 'checkmark-outline'
+                          : 'compass-outline'
                         : 'arrow-forward'
                     }
                     size={20}
@@ -505,7 +522,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
     paddingHorizontal: spacing.md,
     borderRadius: layout.radius.pill,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -516,7 +533,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: spacing.contentPadding,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
   },
   slideLayout: {
     justifyContent: 'center',
@@ -524,54 +541,55 @@ const styles = StyleSheet.create({
     maxWidth: 920,
     alignSelf: 'center',
   },
-  stageCard: {
+  heroCard: {
     width: '100%',
     maxWidth: 460,
     alignSelf: 'center',
-    borderRadius: layout.radius.card,
-    borderWidth: 1,
-    padding: spacing.lg,
-    gap: spacing.sm,
+    borderRadius: layout.radius.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    overflow: 'hidden',
+    position: 'relative',
   },
-  stageTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
+  heroImage: {
+    width: '100%',
   },
-  kickerPill: {
+  heroGradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 70,
+  },
+  floatingPill: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: layout.radius.pill,
+    backgroundColor: 'rgba(0, 0, 0, 0.58)',
   },
-  kickerDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-  },
-  kickerText: {
+  floatingPillText: {
+    color: '#FFFFFF',
     fontWeight: '700',
+    fontSize: 12,
   },
-  highlightsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-    paddingTop: spacing.xxs,
-  },
-  highlightChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
+  stepBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
     borderRadius: layout.radius.pill,
-    borderWidth: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.58)',
   },
-  highlightChipText: {
-    fontWeight: '600',
+  stepBadgeText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 11,
   },
   copyBlock: {
     width: '100%',
@@ -582,24 +600,39 @@ const styles = StyleSheet.create({
   headingGroup: {
     gap: spacing.xs,
   },
-  noteCard: {
+  descriptionText: {
+    lineHeight: 21,
+  },
+  benefitsInsetTable: {
+    borderRadius: layout.radius.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    overflow: 'hidden',
+  },
+  benefitRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: layout.radius.panel,
-    borderWidth: 1,
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
   },
-  noteIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  benefitDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginLeft: 62,
+  },
+  benefitIconSquircle: {
+    width: 36,
+    height: 36,
+    borderRadius: layout.radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  noteText: {
+  benefitTextCol: {
     flex: 1,
+    gap: 2,
+  },
+  benefitTitle: {
+    fontSize: 14,
+    fontWeight: '700',
   },
   footer: {
     paddingHorizontal: spacing.contentPadding,
@@ -633,7 +666,7 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
     justifyContent: 'center',
   },
