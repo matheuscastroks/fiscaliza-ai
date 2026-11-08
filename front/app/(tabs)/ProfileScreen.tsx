@@ -1,6 +1,6 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -38,10 +38,12 @@ type MenuItem = {
 
 const navigationSections: {
   title: string;
+  icon: keyof typeof Ionicons.glyphMap;
   items: MenuItem[];
 }[] = [
   {
-    title: 'Configurações',
+    title: 'CONFIGURAÇÕES',
+    icon: 'settings-outline',
     items: [
       {
         label: 'Meus lugares',
@@ -49,32 +51,33 @@ const navigationSections: {
         icon: 'navigate-outline',
       },
       {
-        label: 'Preferências',
+        label: 'Preferências do aplicativo',
         path: '/SettingsScreen',
-        icon: 'settings-outline',
+        icon: 'options-outline',
       },
     ],
   },
   {
-    title: 'Informações',
+    title: 'INFORMAÇÕES E TRANSPARÊNCIA',
+    icon: 'information-circle-outline',
     items: [
       {
-        label: 'Como funciona',
+        label: 'Como funciona o Fiscaliza aí',
         path: '/OnboardingScreen',
         icon: 'book-outline',
       },
       {
-        label: 'Ajuda',
+        label: 'Central de ajuda e dúvidas',
         path: '/HelpScreen',
         icon: 'help-circle-outline',
       },
       {
-        label: 'Sobre e fontes',
+        label: 'Sobre e fontes oficiais (1746 / Data.Rio)',
         path: '/AboutScreen',
         icon: 'information-circle-outline',
       },
       {
-        label: 'Aprofundar nos dados',
+        label: 'Estatísticas e dados da cidade',
         path: '/ResultsScreen',
         icon: 'stats-chart-outline',
       },
@@ -174,8 +177,13 @@ export default function ProfileScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Identidade Cidadã (Flat, suave e sem sombras) */}
-        <View style={styles.heroCard}>
+        {/* Identidade Cidadã (Apple Inset Card) */}
+        <View
+          style={[
+            styles.heroCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
           <Pressable
             onPress={() => {
               if (user) void selectPhoto();
@@ -192,12 +200,17 @@ export default function ProfileScreen() {
               pressed && { opacity: 0.8 },
             ]}
           >
-            <UserAvatar size={76} />
+            <UserAvatar size={74} />
             {user && (
-              <View style={styles.cameraBadge}>
+              <View
+                style={[
+                  styles.cameraBadge,
+                  { backgroundColor: colors.ink, borderColor: colors.surface },
+                ]}
+              >
                 <Ionicons
                   name="camera"
-                  size={14}
+                  size={13}
                   color={colors.onAccentBrand}
                 />
               </View>
@@ -208,16 +221,30 @@ export default function ProfileScreen() {
             <AppText variant="screenTitle" numberOfLines={1} style={styles.heroName}>
               {user?.name || 'Acesso sem conta'}
             </AppText>
-            <AppText variant="body" color="muted" numberOfLines={2} selectable>
+            <AppText variant="caption" color="muted" numberOfLines={1} selectable>
               {user?.email || 'Seus salvos e lugares ficam guardados neste aparelho.'}
             </AppText>
-            <View style={styles.statusPill}>
+            <View
+              style={[
+                styles.statusPill,
+                {
+                  backgroundColor: user ? colors.primaryContainer : colors.canvas,
+                  borderColor: user ? colors.primaryContainer : colors.border,
+                },
+              ]}
+            >
               <Ionicons
                 name={user ? 'shield-checkmark' : 'phone-portrait-outline'}
-                size={13}
-                color={colors.onSurfaceBrand}
+                size={12}
+                color={user ? colors.primary : colors.muted}
               />
-              <AppText variant="meta" style={styles.statusPillText}>
+              <AppText
+                variant="meta"
+                style={[
+                  styles.statusPillText,
+                  { color: user ? colors.primary : colors.muted },
+                ]}
+              >
                 {user ? 'Cidadão Conectado' : 'Consulta Pública Local'}
               </AppText>
             </View>
@@ -252,7 +279,7 @@ export default function ProfileScreen() {
           </View>
         )}
 
-        {/* Métricas Cívicas (Cards suaves sem sombras) */}
+        {/* Métricas Cívicas (KPIs Cívicos com Squircles e Haptics) */}
         <View style={styles.metricsRow}>
           <Pressable
             accessibilityRole="button"
@@ -263,12 +290,20 @@ export default function ProfileScreen() {
             }}
             style={({ pressed }) => [
               styles.metricCard,
-              pressed && styles.cardPressed,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+              pressed && { opacity: 0.8 },
             ]}
           >
             <View style={styles.metricHeader}>
-              <Ionicons name="bookmark-outline" size={20} color={colors.onSurfaceBrand} />
-              <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+              <View
+                style={[
+                  styles.metricIconSquircle,
+                  { backgroundColor: colors.primaryContainer },
+                ]}
+              >
+                <Ionicons name="bookmark" size={15} color={colors.primary} />
+              </View>
+              <Ionicons name="chevron-forward" size={14} color={colors.subtle} />
             </View>
             <AppText variant="screenTitle" style={styles.metricValue}>
               {savedCalls.length}
@@ -283,19 +318,27 @@ export default function ProfileScreen() {
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Locais salvos: ${places.length}`}
+            accessibilityLabel={`Meus lugares salvos: ${places.length}`}
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               router.push('/PlacesScreen');
             }}
             style={({ pressed }) => [
               styles.metricCard,
-              pressed && styles.cardPressed,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+              pressed && { opacity: 0.8 },
             ]}
           >
             <View style={styles.metricHeader}>
-              <Ionicons name="navigate-outline" size={20} color={colors.onSurfaceBrand} />
-              <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+              <View
+                style={[
+                  styles.metricIconSquircle,
+                  { backgroundColor: colors.primaryContainer },
+                ]}
+              >
+                <Ionicons name="navigate" size={15} color={colors.primary} />
+              </View>
+              <Ionicons name="chevron-forward" size={14} color={colors.subtle} />
             </View>
             <AppText variant="screenTitle" style={styles.metricValue}>
               {places.length}
@@ -309,43 +352,98 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
 
-        {/* Seção: Minha Região de Referência (Flat, sem sombras) */}
-        <View style={styles.regionCard}>
-          <View style={styles.regionHeader}>
-            <Ionicons name="location-outline" size={22} color={colors.ink} />
-            <View style={styles.flex}>
-              <AppText variant="label">
-                {user?.municipality
-                  ? `${user.municipality.name} · ${user.municipality.state}`
-                  : 'Rio de Janeiro · RJ'}
-              </AppText>
-              {user?.neighborhood ? (
-                <AppText variant="meta" color="muted">
-                  {user.neighborhood}
-                </AppText>
-              ) : null}
-              {formattedCep ? (
-                <AppText variant="meta" color="muted">
-                  CEP {formattedCep}
-                </AppText>
-              ) : null}
-            </View>
+        {/* Seção: Domicílio Cívico (Apple Inset-Grouped Table) */}
+        <View style={styles.sectionBlock}>
+          <View style={styles.sectionHeaderRow}>
+            <Ionicons name="location-outline" size={13} color={colors.muted} />
+            <AppText variant="caption" style={styles.sectionHeaderText}>
+              DOMICÍLIO CÍVICO
+            </AppText>
           </View>
-          <AppButton
-            title={
-              user ? 'Atualizar CEP e município' : 'Gerenciar lugares salvos'
-            }
-            variant="secondary"
-            onPress={() =>
-              router.push(user ? '/MunicipalityScreen' : '/PlacesScreen')
-            }
-          />
+
+          <View
+            style={[
+              styles.insetTable,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+          >
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Município e Bairro: ${
+                user?.municipality?.name || 'Rio de Janeiro'
+              }`}
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push(user ? '/MunicipalityScreen' : '/PlacesScreen');
+              }}
+              style={({ pressed }) => [
+                styles.tableRow,
+                pressed && { backgroundColor: colors.surfaceSubdued },
+              ]}
+            >
+              <View
+                style={[
+                  styles.iconSquircle,
+                  { backgroundColor: colors.surfaceSubdued },
+                ]}
+              >
+                <Ionicons name="business-outline" size={18} color={colors.primary} />
+              </View>
+              <View style={styles.tableRowContent}>
+                <AppText variant="label">Município e Bairro</AppText>
+                <AppText variant="caption" color="muted">
+                  {user?.municipality
+                    ? `${user.municipality.name} · ${user.neighborhood || 'Rio de Janeiro'}`
+                    : user?.neighborhood
+                      ? `Rio de Janeiro · ${user.neighborhood}`
+                      : 'Rio de Janeiro · RJ'}
+                </AppText>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+            </Pressable>
+
+            <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`CEP de Referência: ${formattedCep || 'Não informado'}`}
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push(user ? '/MunicipalityScreen' : '/PlacesScreen');
+              }}
+              style={({ pressed }) => [
+                styles.tableRow,
+                pressed && { backgroundColor: colors.surfaceSubdued },
+              ]}
+            >
+              <View
+                style={[
+                  styles.iconSquircle,
+                  { backgroundColor: colors.surfaceSubdued },
+                ]}
+              >
+                <Ionicons name="mail-outline" size={18} color={colors.primary} />
+              </View>
+              <View style={styles.tableRowContent}>
+                <AppText variant="label">CEP de Referência</AppText>
+                <AppText variant="caption" color="muted">
+                  {formattedCep ? `CEP ${formattedCep}` : 'Toque para cadastrar seu CEP'}
+                </AppText>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+            </Pressable>
+          </View>
         </View>
 
         {/* Prévia de Chamados Salvos (se houver) */}
         {savedCalls.length > 0 && (
-          <View style={styles.savedCallsSection}>
-            <AppText variant="sectionTitle">Chamados salvos neste aparelho</AppText>
+          <View style={styles.sectionBlock}>
+            <View style={styles.sectionHeaderRow}>
+              <Ionicons name="bookmark-outline" size={13} color={colors.muted} />
+              <AppText variant="caption" style={styles.sectionHeaderText}>
+                ÚLTIMOS ACOMPANHAMENTOS
+              </AppText>
+            </View>
             <View style={styles.callsList}>
               {savedCalls.slice(0, 2).map((call) => (
                 <OfficialCallRow
@@ -362,73 +460,184 @@ export default function ProfileScreen() {
             </View>
             <AppButton
               title={`Ver todos os ${savedCalls.length} acompanhamentos`}
-              onPress={() => router.push('/(tabs)/FollowScreen')}
+              variant="secondary"
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/(tabs)/FollowScreen');
+              }}
             />
           </View>
         )}
 
-        {/* Opções de Configuração e Informações (Idêntico ao layout do SideMenu) */}
+        {/* Opções de Configuração e Informações (Apple Inset-Grouped Tables) */}
         {navigationSections.map((section) => (
-          <View key={section.title} style={styles.menuSection}>
-            <AppText
-              variant="label"
-              color="muted"
-              accessibilityRole="header"
-              style={styles.menuSectionTitle}
+          <View key={section.title} style={styles.sectionBlock}>
+            <View style={styles.sectionHeaderRow}>
+              <Ionicons name={section.icon} size={13} color={colors.muted} />
+              <AppText variant="caption" style={styles.sectionHeaderText}>
+                {section.title}
+              </AppText>
+            </View>
+
+            <View
+              style={[
+                styles.insetTable,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
             >
-              {section.title}
-            </AppText>
-            {section.items.map((item) => (
-              <Pressable
-                key={item.label}
-                accessibilityRole="button"
-                accessibilityLabel={item.label}
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push(item.path);
-                }}
-                style={({ pressed }) => [
-                  styles.destination,
-                  pressed && styles.destinationPressed,
-                ]}
-              >
-                <Ionicons name={item.icon} size={21} color={colors.ink} />
-                <AppText style={styles.flex}>{item.label}</AppText>
-                <Ionicons name="chevron-forward" size={18} color={colors.muted} />
-              </Pressable>
-            ))}
+              {section.items.map((item, idx) => (
+                <React.Fragment key={item.label}>
+                  {idx > 0 && (
+                    <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
+                  )}
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={item.label}
+                    onPress={() => {
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      router.push(item.path);
+                    }}
+                    style={({ pressed }) => [
+                      styles.tableRow,
+                      pressed && { backgroundColor: colors.surfaceSubdued },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.iconSquircle,
+                        { backgroundColor: colors.surfaceSubdued },
+                      ]}
+                    >
+                      <Ionicons name={item.icon} size={18} color={colors.primary} />
+                    </View>
+                    <View style={styles.tableRowContent}>
+                      <AppText variant="label">{item.label}</AppText>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+                  </Pressable>
+                </React.Fragment>
+              ))}
+            </View>
           </View>
         ))}
 
-        {/* Ações de Conta: Sair e Apagar Conta */}
-        <View style={styles.accountActionsContainer}>
-          {user && (
-            <>
-              <AppButton
-                title="Sair da conta"
-                variant="quiet"
+        {/* Seção: Privacidade e Conta (Apple Inset-Grouped Table) */}
+        <View style={styles.sectionBlock}>
+          <View style={styles.sectionHeaderRow}>
+            <Ionicons name="shield-outline" size={13} color={colors.muted} />
+            <AppText variant="caption" style={styles.sectionHeaderText}>
+              PRIVACIDADE E CONTA
+            </AppText>
+          </View>
+
+          <View
+            style={[
+              styles.insetTable,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+          >
+            {user ? (
+              <>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Sair da conta"
+                  onPress={() => {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    useSignOutSheet.getState().setOpen(true);
+                  }}
+                  style={({ pressed }) => [
+                    styles.tableRow,
+                    pressed && { backgroundColor: colors.surfaceSubdued },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.iconSquircle,
+                      { backgroundColor: colors.surfaceSubdued },
+                    ]}
+                  >
+                    <Ionicons name="log-out-outline" size={18} color={colors.ink} />
+                  </View>
+                  <View style={styles.tableRowContent}>
+                    <AppText variant="label">Sair da conta</AppText>
+                    <AppText variant="caption" color="muted">
+                      Encerrar sessão ativa neste dispositivo
+                    </AppText>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+                </Pressable>
+
+                <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
+
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Apagar minha conta"
+                  onPress={() => {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setDeleteError('');
+                    setConfirmDelete(true);
+                  }}
+                  style={({ pressed }) => [
+                    styles.tableRow,
+                    pressed && { backgroundColor: colors.riskSurface },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.iconSquircle,
+                      { backgroundColor: colors.riskSurface },
+                    ]}
+                  >
+                    <Ionicons name="trash-outline" size={18} color={colors.risk} />
+                  </View>
+                  <View style={styles.tableRowContent}>
+                    <AppText variant="label" style={{ color: colors.risk }}>
+                      Apagar minha conta
+                    </AppText>
+                    <AppText variant="caption" color="muted">
+                      Remoção permanente de dados e preferências
+                    </AppText>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={colors.risk} />
+                </Pressable>
+              </>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Entrar ou criar conta"
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  useSignOutSheet.getState().setOpen(true);
+                  router.push('/LoginScreen');
                 }}
-              />
-
-              <AppButton
-                title="Apagar minha conta"
-                variant="destructive"
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  setDeleteError('');
-                  setConfirmDelete(true);
-                }}
-              />
-            </>
-          )}
-
-          <AppText variant="meta" color="muted" style={styles.versionFooter}>
-            Fiscaliza aí · Versão 1.0.0 · Dados Abertos PCRJ
-          </AppText>
+                style={({ pressed }) => [
+                  styles.tableRow,
+                  pressed && { backgroundColor: colors.surfaceSubdued },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.iconSquircle,
+                    { backgroundColor: colors.primaryContainer },
+                  ]}
+                >
+                  <Ionicons name="person-add-outline" size={18} color={colors.primary} />
+                </View>
+                <View style={styles.tableRowContent}>
+                  <AppText variant="label">Entrar ou criar conta</AppText>
+                  <AppText variant="caption" color="muted">
+                    Sincronize seus lugares e acompanhamentos oficiais
+                  </AppText>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+              </Pressable>
+            )}
+          </View>
         </View>
+
+        {/* Rodapé de Versão e Dados Abertos */}
+        <AppText variant="meta" color="muted" style={styles.versionFooter}>
+          Fiscaliza aí · Versão 1.0.0 · Dados Abertos PCRJ
+        </AppText>
       </ScrollView>
 
       {/* Modal de Confirmação para Apagar Conta */}
@@ -488,17 +697,15 @@ const createStyles = (colors: ThemeColors) =>
     scrollContent: {
       paddingHorizontal: spacing.contentPadding,
       paddingTop: spacing.xs,
-      paddingBottom: 120,
+      paddingBottom: 140,
       gap: spacing.lg,
     },
     heroCard: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.surface,
-      borderRadius: layout.radius.card,
+      borderRadius: layout.radius.panel,
       padding: spacing.md,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderWidth: StyleSheet.hairlineWidth,
       gap: spacing.md,
     },
     authPromptRow: {
@@ -512,14 +719,12 @@ const createStyles = (colors: ThemeColors) =>
       position: 'absolute',
       right: -2,
       bottom: -2,
-      width: 26,
-      height: 26,
-      borderRadius: 13,
-      backgroundColor: colors.ink,
+      width: 24,
+      height: 24,
+      borderRadius: 12,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 2,
-      borderColor: colors.surface,
     },
     heroDetails: {
       flex: 1,
@@ -534,19 +739,16 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       alignSelf: 'flex-start',
-      gap: 4,
-      paddingVertical: 2,
+      gap: 5,
+      paddingVertical: 3,
       paddingHorizontal: 8,
       borderRadius: layout.radius.pill,
-      backgroundColor: colors.canvas,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderWidth: StyleSheet.hairlineWidth,
       marginTop: 4,
     },
     statusPillText: {
       fontSize: 11,
       fontWeight: '700',
-      color: colors.ink,
     },
     errorAlert: {
       flexDirection: 'row',
@@ -560,25 +762,27 @@ const createStyles = (colors: ThemeColors) =>
     },
     metricsRow: {
       flexDirection: 'row',
-      gap: spacing.md,
+      gap: spacing.sm,
     },
     metricCard: {
       flex: 1,
-      backgroundColor: colors.surface,
       borderRadius: layout.radius.panel,
       padding: spacing.md,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderWidth: StyleSheet.hairlineWidth,
       gap: 2,
-    },
-    cardPressed: {
-      opacity: 0.75,
     },
     metricHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: 6,
+    },
+    metricIconSquircle: {
+      width: 30,
+      height: 30,
+      borderRadius: layout.radius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     metricValue: {
       fontSize: 24,
@@ -591,57 +795,61 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: 13,
       marginTop: 2,
     },
-    regionCard: {
-      padding: spacing.lg,
-      gap: spacing.lg,
-      backgroundColor: colors.surface,
-      borderRadius: layout.radius.card,
-      borderWidth: 1,
-      borderColor: colors.border,
+    sectionBlock: {
+      gap: 8,
     },
-    regionHeader: {
+    sectionHeaderRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: spacing.sm,
+      gap: 6,
+      paddingHorizontal: 4,
     },
-    savedCallsSection: {
-      gap: spacing.sm,
+    sectionHeaderText: {
+      fontSize: 11,
+      fontWeight: '800',
+      letterSpacing: 0.6,
+      color: colors.muted,
+    },
+    insetTable: {
+      borderRadius: layout.radius.panel,
+      borderWidth: StyleSheet.hairlineWidth,
+      overflow: 'hidden',
+    },
+    tableRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      minHeight: 54,
+    },
+    tableDivider: {
+      height: StyleSheet.hairlineWidth,
+      marginLeft: 54,
+    },
+    iconSquircle: {
+      width: 32,
+      height: 32,
+      borderRadius: layout.radius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    tableRowContent: {
+      flex: 1,
+      gap: 2,
     },
     callsList: {
       gap: spacing.xs,
-    },
-    menuSection: {
-      gap: spacing.xxs,
-    },
-    menuSectionTitle: {
-      paddingHorizontal: spacing.sm,
-      marginBottom: spacing.xs,
-    },
-    destination: {
-      minHeight: 52,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: spacing.xs,
-      borderRadius: layout.radius.sm,
-    },
-    destinationPressed: {
-      backgroundColor: colors.surfaceSubdued,
-      opacity: 0.75,
     },
     flex: {
       flex: 1,
       minWidth: 0,
     },
-    accountActionsContainer: {
-      gap: spacing.sm,
-      paddingTop: spacing.xs,
-    },
     versionFooter: {
       textAlign: 'center',
       fontSize: 11,
       marginTop: spacing.xs,
+      paddingBottom: spacing.md,
     },
     deleteModalContent: {
       paddingHorizontal: spacing.contentPadding,
