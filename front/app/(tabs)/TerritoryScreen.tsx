@@ -117,11 +117,13 @@ export function TerritoryContent() {
   const [appliedBounds, setAppliedBounds] = useState<{
     north: number; south: number; east: number; west: number;
   } | null>(null);
+  const [hasMovedCamera, setHasMovedCamera] = useState(false);
   const activeSelection = usePlacesStore((s) => s.selection);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setAreaOnly(false);
     setAppliedBounds(null);
+    setHasMovedCamera(false);
   }, [activeSelection, routeNeighborhoodId, focusId]);
 
   const territorialFilters = useTerritoryFilters();
@@ -452,6 +454,7 @@ export function TerritoryContent() {
         longitudeDelta: newRegion.longitudeDelta,
         zoom: newRegion.zoom ?? viewportRef.current.zoom,
       };
+      setHasMovedCamera(true);
     },
     [],
   );
@@ -468,9 +471,11 @@ export function TerritoryContent() {
     setNeighborhood('');
     setAreaOnly(false);
     setAppliedBounds(null);
+    setHasMovedCamera(false);
   }, [setNeighborhood, setSearch, setMacroTheme, setServiceType, setPeriod, setStatus]);
 
   const locate = async () => {
+    setHasMovedCamera(false);
     if (capturedLocation && Number.isFinite(capturedLocation.latitude)) {
       updateCameraRegion({
         latitude: capturedLocation.latitude,
@@ -536,11 +541,13 @@ export function TerritoryContent() {
     setAppliedBounds(null);
     setSelectedId(null);
     setSelectedCluster(null);
+    setHasMovedCamera(false);
   }, [setNeighborhood]);
 
   const handleClearAreaOnly = useCallback(() => {
     setAreaOnly(false);
     setAppliedBounds(null);
+    setHasMovedCamera(false);
   }, []);
 
   const filterBarProps: TerritoryFilterBarProps = useMemo(() => ({
@@ -655,81 +662,65 @@ export function TerritoryContent() {
         </View>
       )}
 
+      {/* Botão Contextual Flutuante: Buscar Nesta Área (só aparece se moveu a câmera ou se área estiver ativa) */}
+      {!effectiveListView && (hasMovedCamera || areaOnly) && (
+        <View style={[styles.contextualAreaPillContainer, { top: insets.top + 148 }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={areaOnly ? 'Voltar ao recorte selecionado' : 'Buscar nesta área'}
+            style={({ pressed }) => [styles.areaPillButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              if (areaOnly) { setAreaOnly(false); setAppliedBounds(null); setHasMovedCamera(false); }
+              else { setAppliedBounds(computeRegionBounds(viewportRef.current)); setAreaOnly(true); }
+            }}
+          >
+            <Ionicons name={areaOnly ? 'globe-outline' : 'scan-outline'} size={15} color={colors.ink} />
+            <AppText variant="caption" style={{ fontWeight: '700' }}>
+              {areaOnly ? 'Voltar ao recorte' : 'Buscar nesta área'}
+            </AppText>
+          </Pressable>
+        </View>
+      )}
+
+      {/* Dock Vertical Direita: Controles Rápidos do Mapa (Posição e Enquadrar) */}
+      {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
+        <View style={[styles.rightMapDock, { bottom: insets.bottom + 160 }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Minha posição"
+            accessibilityState={{ disabled: locating, busy: locating }}
+            disabled={locating}
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setHasMovedCamera(false);
+              void locate();
+            }}
+            style={({ pressed }) => [styles.dockCircleButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
+          >
+            <Ionicons name="locate" size={20} color={locating ? colors.accent : colors.ink} />
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Enquadrar recorte"
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              updateCameraRegion(municipalOverviewRegion);
+              setAreaOnly(false);
+              setSelectedId(null);
+              setSelectedCluster(null);
+              setHasMovedCamera(false);
+            }}
+            style={({ pressed }) => [styles.dockCircleButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
+          >
+            <Ionicons name="expand-outline" size={20} color={colors.ink} />
+          </Pressable>
+        </View>
+      )}
+
       {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
         <View style={[styles.bottomFloatingContainer, { bottom: insets.bottom + 90 }]}>
-          {/* Linha de controles espaciais do mapa */}
-          <View style={styles.mapActionsRow}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Minha posição"
-              accessibilityState={{ disabled: locating, busy: locating }}
-              disabled={locating}
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                void locate();
-              }}
-              style={({ pressed }) => [
-                styles.dockCircleButton,
-                { backgroundColor: colors.surface },
-                pressed && styles.buttonPressed,
-              ]}
-            >
-              <Ionicons
-                name="locate"
-                size={20}
-                color={locating ? colors.accent : colors.ink}
-              />
-            </Pressable>
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={areaOnly ? 'Voltar ao recorte selecionado' : 'Buscar nesta área'}
-              style={({ pressed }) => [
-                styles.areaPillButton,
-                { backgroundColor: colors.surface },
-                pressed && styles.buttonPressed,
-              ]}
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                if (areaOnly) {
-                  setAreaOnly(false);
-                  setAppliedBounds(null);
-                } else {
-                  setAppliedBounds(computeRegionBounds(viewportRef.current));
-                  setAreaOnly(true);
-                }
-              }}
-            >
-              <Ionicons
-                name={areaOnly ? 'globe-outline' : 'scan-outline'}
-                size={16}
-                color={colors.ink}
-              />
-              <AppText variant="caption" style={{ fontWeight: '700' }}>
-                {areaOnly ? 'Voltar ao recorte' : 'Buscar nesta área'}
-              </AppText>
-            </Pressable>
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Enquadrar recorte"
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                updateCameraRegion(municipalOverviewRegion);
-                setAreaOnly(false);
-                setSelectedId(null);
-                setSelectedCluster(null);
-              }}
-              style={({ pressed }) => [
-                styles.dockCircleButton,
-                { backgroundColor: colors.surface },
-                pressed && styles.buttonPressed,
-              ]}
-            >
-              <Ionicons name="expand-outline" size={20} color={colors.ink} />
-            </Pressable>
-          </View>
-
           {/* Barra Contextual de Resultados e Acesso à Lista */}
           <Pressable
             accessibilityRole="button"
@@ -738,22 +729,14 @@ export function TerritoryContent() {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setIsListView(true);
             }}
-            style={({ pressed }) => [
-              styles.summaryBarButton,
-              { backgroundColor: colors.surface },
-              pressed && styles.buttonPressed,
-            ]}
+            style={({ pressed }) => [styles.summaryBarButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
           >
             <View style={[styles.summaryIconCircle, { backgroundColor: colors.surfaceSubdued }]}>
               <Ionicons name="list-outline" size={18} color={colors.onSurfaceBrand} />
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <AppText variant="label" numberOfLines={1} style={styles.summaryTitle}>
-                {summaryLabel}
-              </AppText>
-              <AppText variant="caption" color="muted" numberOfLines={1} style={styles.summarySubtitle}>
-                {summarySubLabel}
-              </AppText>
+              <AppText variant="label" numberOfLines={1} style={styles.summaryTitle}>{summaryLabel}</AppText>
+              <AppText variant="caption" color="muted" numberOfLines={1} style={styles.summarySubtitle}>{summarySubLabel}</AppText>
             </View>
             <Ionicons name="chevron-forward" size={18} color={colors.muted} />
           </Pressable>
@@ -869,8 +852,9 @@ const createStyles = (colors: ThemeColors) =>
       shadowOpacity: 0.25, shadowRadius: 4, elevation: 5, zIndex: 40,
     },
     topFloatingHeader: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50, paddingHorizontal: spacing.md, gap: 8 },
+    contextualAreaPillContainer: { position: 'absolute', alignSelf: 'center', zIndex: 45 },
+    rightMapDock: { position: 'absolute', right: spacing.md, zIndex: 40, gap: 10 },
     bottomFloatingContainer: { position: 'absolute', left: spacing.md, right: spacing.md, zIndex: 40, gap: 8 },
-    mapActionsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
     dockCircleButton: {
       width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center',
       shadowColor: '#000000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.14, shadowRadius: 6,

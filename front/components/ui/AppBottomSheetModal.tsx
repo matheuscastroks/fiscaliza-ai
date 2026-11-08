@@ -127,7 +127,6 @@ export const AppBottomSheetModal = forwardRef<BottomSheet, AppBottomSheetModalPr
             <View
               style={[
                 styles.container,
-                { paddingBottom: Math.max(insets.bottom, spacing.md) },
                 contentContainerStyle,
               ]}
             >

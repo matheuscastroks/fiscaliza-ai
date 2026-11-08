@@ -379,10 +379,8 @@ function TerritoryFilterModalComponent({
         style={styles.filterModalScroll}
         contentContainerStyle={[
           styles.filterModalBody,
-          { paddingBottom: Math.max(insets.bottom + 80, 110) },
+          { paddingBottom: spacing.xl },
         ]}
-        nestedScrollEnabled={true}
-        bounces={false}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={true}
       >
@@ -989,8 +987,10 @@ function TerritoryFilterModalComponent({
           </View>
         )}
 
-        {/* Rodapé Fixo de Ações */}
-        <View style={styles.modalFooter}>
+      </BottomSheetScrollView>
+
+      {/* Rodapé Fixo de Ações */}
+      <View style={[styles.modalFooter, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Limpar todos os filtros"
@@ -1031,7 +1031,6 @@ function TerritoryFilterModalComponent({
             <Ionicons name="arrow-forward" size={16} color={colors.onAccent} />
           </Pressable>
         </View>
-      </BottomSheetScrollView>
     </AppBottomSheetModal>
   );
 }
@@ -1372,10 +1371,11 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: spacing.md,
-      marginTop: spacing.xs,
-      paddingTop: spacing.md,
+      paddingHorizontal: spacing.md,
+      paddingTop: spacing.sm,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: colors.divider,
+      backgroundColor: colors.surface,
     },
     emptyWarningHint: {
       flexDirection: 'row',
