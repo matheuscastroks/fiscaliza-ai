@@ -267,12 +267,20 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
 
       {/* Ações Diretas */}
       <View style={styles.actionsBlock}>
-        <AppButton
-          title="Enviar no WhatsApp do 1746"
-          variant="primary"
-          icon={<Ionicons name="logo-whatsapp" size={18} color={colors.onAccent} />}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Enviar no WhatsApp do 1746"
           onPress={handleOpenWhatsApp}
-        />
+          style={({ pressed }) => [
+            styles.whatsAppButton,
+            pressed && styles.whatsAppButtonPressed,
+          ]}
+        >
+          <Ionicons name="logo-whatsapp" size={19} color="#FFFFFF" />
+          <AppText variant="label" style={styles.whatsAppButtonText}>
+            Enviar no WhatsApp do 1746
+          </AppText>
+        </Pressable>
         <AppButton
           title="Compartilhar texto da solicitação"
           variant="secondary"
@@ -421,5 +429,30 @@ const createStyles = (colors: ThemeColors) =>
     actionsBlock: {
       gap: spacing.xs,
       marginTop: 2,
+    },
+    whatsAppButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      minHeight: layout.touchTarget.minHeight,
+      borderRadius: layout.radius.button,
+      backgroundColor: '#25D366',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      shadowColor: '#25D366',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    whatsAppButtonPressed: {
+      backgroundColor: '#1EBE5D',
+      opacity: 0.9,
+    },
+    whatsAppButtonText: {
+      color: '#FFFFFF',
+      fontWeight: '700',
+      fontSize: 15,
     },
   });

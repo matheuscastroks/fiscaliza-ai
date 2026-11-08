@@ -25,12 +25,15 @@ test('quick complaint kit: incorporates progressive disclosure, smart location p
   assert.ok(content.includes('detailsTextarea'), 'Details field must apply detailsTextarea style');
   assert.ok(content.includes('borderRadius: 12'), 'Must use soft 12px corner radius instead of full pill to prevent clipping');
 
+  // WhatsApp brand color
+  assert.ok(content.includes('#25D366'), 'Must use official WhatsApp green for the send button');
+
   const appInputPath = path.join(ROOT_DIR, 'components', 'ui', 'AppInput.tsx');
   const appInputContent = fs.readFileSync(appInputPath, 'utf8');
   assert.ok(appInputContent.includes('borderRadius: 12'), 'AppInput multiline style must also adopt safe 12px border radius');
 });
 
-test('participate screen: adopts Apple Inset-Grouped tables for official channels and services', () => {
+test('participate screen: adopts Apple Inset-Grouped tables and KeyboardAwareScrollView', () => {
   const screenPath = path.join(ROOT_DIR, 'app', '(tabs)', 'ParticipateScreen.tsx');
   assert.ok(fs.existsSync(screenPath), 'ParticipateScreen.tsx must exist');
 
@@ -43,6 +46,8 @@ test('participate screen: adopts Apple Inset-Grouped tables for official channel
   assert.ok(content.includes('agencyBadge'), 'Must display agency tags on popular services');
   assert.ok(content.includes('civicTipCard'), 'Must include map pre-check civic tip');
   assert.ok(content.includes('footerPortalButton'), 'Must include clean portal search link in footer');
+  assert.ok(content.includes('KeyboardAwareScrollView'), 'Must wrap screen in KeyboardAwareScrollView to prevent inputs from being covered by keyboard');
+  assert.ok(content.includes('bottomOffset'), 'Must provide bottomOffset for comfortable input clearance');
 
   // Verify elimination of old nested-card anti-patterns
   assert.ok(!content.includes('accountCard'), 'Must eliminate legacy accountCard');

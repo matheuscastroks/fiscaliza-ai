@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View, StyleSheet, Pressable, Linking } from 'react-native';
+import { View, StyleSheet, Pressable, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -7,6 +7,7 @@ import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
+import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { QuickComplaintKit } from '@/features/city/QuickComplaintKit';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import {
@@ -72,12 +73,15 @@ export default function ParticipateScreen() {
         title="Agir no 1746"
         context="Canais oficiais da Prefeitura do Rio para abrir e acompanhar protocolos"
       />
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={{
           padding: spacing.contentPadding,
-          paddingBottom: 120,
+          paddingBottom: 140,
           gap: spacing.lg,
         }}
+        bottomOffset={48}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
         {/* Bloco Hero: Assistente Rápido de Solicitação */}
         <QuickComplaintKit
@@ -99,38 +103,45 @@ export default function ParticipateScreen() {
               { backgroundColor: colors.surface, borderColor: colors.border },
             ]}
           >
-            {OFFICIAL_CHANNELS.map((channel, idx) => (
-              <React.Fragment key={channel.id}>
-                {idx > 0 && (
-                  <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
-                )}
-                <Pressable
-                  accessibilityRole="link"
-                  accessibilityLabel={`${channel.title} - ${channel.subtitle}`}
-                  onPress={() => handleOpenLink(channel.url)}
-                  style={({ pressed }) => [
-                    styles.tableRow,
-                    pressed && { backgroundColor: colors.surfaceSubdued },
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.iconSquircle,
-                      { backgroundColor: colors.surfaceSubdued },
+            {OFFICIAL_CHANNELS.map((channel, idx) => {
+              const isWhatsApp = channel.id === 'whatsapp';
+              return (
+                <React.Fragment key={channel.id}>
+                  {idx > 0 && (
+                    <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
+                  )}
+                  <Pressable
+                    accessibilityRole="link"
+                    accessibilityLabel={`${channel.title} - ${channel.subtitle}`}
+                    onPress={() => handleOpenLink(channel.url)}
+                    style={({ pressed }) => [
+                      styles.tableRow,
+                      pressed && { backgroundColor: colors.surfaceSubdued },
                     ]}
                   >
-                    <Ionicons name={channel.icon} size={18} color={colors.primary} />
-                  </View>
-                  <View style={styles.tableRowContent}>
-                    <AppText variant="label">{channel.title}</AppText>
-                    <AppText variant="caption" color="muted">
-                      {channel.subtitle}
-                    </AppText>
-                  </View>
-                  <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
-                </Pressable>
-              </React.Fragment>
-            ))}
+                    <View
+                      style={[
+                        styles.iconSquircle,
+                        { backgroundColor: isWhatsApp ? '#E7FCEB' : colors.surfaceSubdued },
+                      ]}
+                    >
+                      <Ionicons
+                        name={channel.icon}
+                        size={18}
+                        color={isWhatsApp ? '#25D366' : colors.primary}
+                      />
+                    </View>
+                    <View style={styles.tableRowContent}>
+                      <AppText variant="label">{channel.title}</AppText>
+                      <AppText variant="caption" color="muted">
+                        {channel.subtitle}
+                      </AppText>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+                  </Pressable>
+                </React.Fragment>
+              );
+            })}
           </View>
         </View>
 
@@ -255,7 +266,7 @@ export default function ParticipateScreen() {
             O Fiscaliza aí é uma ferramenta cívica e independente. O registro oficial, a execução dos serviços e os prazos são de responsabilidade exclusiva dos órgãos da Prefeitura da Cidade do Rio de Janeiro.
           </AppText>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </AppScreen>
   );
 }
