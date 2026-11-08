@@ -12,6 +12,7 @@ import {
   ScrollView,
   Pressable,
   RefreshControl,
+  Share,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
@@ -26,6 +27,7 @@ import { AppButton } from '@/components/ui/AppButton';
 import { ItemLocationMap } from '@/components/ui/ItemLocationMap';
 import { useOfficialCall } from '@/features/city/useOfficialCalls';
 import { useFollowStore } from '@/stores/followStore';
+import { OfficialCallTimeline } from '@/components/official/OfficialCallTimeline';
 import { goBack } from '@/utils/navigation';
 
 export default function OfficialCallDetailsScreen() {
@@ -156,6 +158,23 @@ export default function OfficialCallDetailsScreen() {
     .filter(Boolean)
     .join(' · ');
 
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message:
+          `Chamado 1746: ${item.serviceSubtype || item.serviceType}\n` +
+          `Protocolo: ${item.externalId}\n` +
+          `Situação: ${status.label}\n` +
+          (deadlineInfo ? `Prazo: ${deadlineInfo.label}\n` : '') +
+          `Local: ${fullLocationLabel}\n` +
+          `Acompanhe este chamado pelo Fiscaliza aí`,
+        title: `Protocolo 1746 nº ${item.externalId}`,
+      });
+    } catch {
+      // Ignora cancelamentos de compartilhamento
+    }
+  };
+
   return (
     <AppScreen>
       <AppHeader title="Chamado 1746" onBack={() => goBack()} />
@@ -223,34 +242,73 @@ export default function OfficialCallDetailsScreen() {
             </AppText>
           </View>
 
-          <Pressable
-            disabled={!hydrated || busy}
-            onPress={() => {
-              void save();
-            }}
-            accessibilityRole="checkbox"
-            accessibilityState={{
-              checked: isSaved,
-              disabled: !hydrated || busy,
-              busy,
-            }}
-            accessibilityLabel={
-              isSaved
-                ? 'Remover dos chamados salvos neste aparelho'
-                : 'Salvar chamado neste aparelho para acompanhar'
-            }
-            style={({ pressed }) => [
-              styles.saveButton,
-              { opacity: !hydrated || busy ? 0.5 : pressed ? 0.75 : 1 },
+          <View style={styles.headerActions}>
+            <Pressable
+              onPress={handleShare}
+              accessibilityRole="button"
+              accessibilityLabel="Compartilhar chamado"
+              style={({ pressed }) => [
+                styles.actionButton,
+                pressed && { opacity: 0.75, transform: [{ scale: 0.96 }] },
+              ]}
+            >
+              <Ionicons name="share-social-outline" size={20} color={colors.ink} />
+            </Pressable>
+
+            <Pressable
+              disabled={!hydrated || busy}
+              onPress={() => {
+                void save();
+              }}
+              accessibilityRole="checkbox"
+              accessibilityState={{
+                checked: isSaved,
+                disabled: !hydrated || busy,
+                busy,
+              }}
+              accessibilityLabel={
+                isSaved
+                  ? 'Remover dos chamados salvos neste aparelho'
+                  : 'Salvar chamado neste aparelho para acompanhar'
+              }
+              style={({ pressed }) => [
+                styles.saveButton,
+                { opacity: !hydrated || busy ? 0.5 : pressed ? 0.75 : 1 },
+              ]}
+            >
+              <Ionicons
+                name={isSaved ? 'heart' : 'heart-outline'}
+                size={22}
+                color={isSaved ? colors.risk : colors.ink}
+              />
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Badge de Prazo Oficial (SLA) em Destaque */}
+        {deadlineInfo && (
+          <View
+            style={[
+              styles.slaPill,
+              deadlineInfo.isOverdue ? styles.slaPillOverdue : styles.slaPillNormal,
             ]}
           >
             <Ionicons
-              name={isSaved ? 'heart' : 'heart-outline'}
-              size={24}
-              color={isSaved ? colors.risk : colors.ink}
+              name={deadlineInfo.isOverdue ? 'alert-circle' : 'time-outline'}
+              size={15}
+              color={deadlineInfo.isOverdue ? colors.risk : colors.onSurfaceBrand}
             />
-          </Pressable>
-        </View>
+            <AppText
+              variant="caption"
+              style={[
+                styles.slaPillText,
+                { color: deadlineInfo.isOverdue ? colors.risk : colors.onSurfaceBrand },
+              ]}
+            >
+              {deadlineInfo.label}
+            </AppText>
+          </View>
+        )}
 
         <View style={styles.summaryRow}>
           <View style={styles.neighborhood}>
@@ -329,6 +387,14 @@ export default function OfficialCallDetailsScreen() {
               </AppText>
             </View>
           ) : null}
+        </View>
+
+        {/* Seção: Linha do Tempo Oficial */}
+        <View style={styles.sectionCard}>
+          <AppText variant="sectionTitle" style={styles.sectionHeading}>
+            Linha do tempo oficial
+          </AppText>
+          <OfficialCallTimeline call={item} />
         </View>
 
         {/* Seção: Prazos e datas */}
@@ -497,12 +563,49 @@ function createStyles(colors: ThemeColors) {
       gap: spacing.xxs,
     },
     saveButton: {
-      width: 48,
-      height: 48,
+      width: 44,
+      height: 44,
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: layout.radius.pill,
       backgroundColor: colors.surfaceSubdued,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    actionButton: {
+      width: 44,
+      height: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: layout.radius.pill,
+      backgroundColor: colors.surfaceSubdued,
+    },
+    slaPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      alignSelf: 'flex-start',
+      paddingVertical: 5,
+      paddingHorizontal: 12,
+      borderRadius: layout.radius.pill,
+      borderWidth: 1,
+      marginTop: -spacing.xs,
+      marginBottom: spacing.xs,
+    },
+    slaPillOverdue: {
+      backgroundColor: 'rgba(239, 68, 68, 0.08)',
+      borderColor: 'rgba(239, 68, 68, 0.25)',
+    },
+    slaPillNormal: {
+      backgroundColor: colors.surfaceSubdued,
+      borderColor: colors.border,
+    },
+    slaPillText: {
+      fontWeight: '600',
+      fontSize: 12,
     },
     summaryRow: {
       flexDirection: 'row',
