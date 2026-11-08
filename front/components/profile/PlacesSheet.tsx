@@ -66,7 +66,7 @@ export function PlacesSheet({ visible, onClose }: PlacesSheetProps) {
 
   const handleRemovePlace = async (placeId: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    await state.removePlace(placeId);
+    await state.deletePlace(placeId);
     setRemovingId(null);
   };
 

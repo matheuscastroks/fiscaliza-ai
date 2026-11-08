@@ -1,24 +1,21 @@
-import { useState } from 'react';
-import { View, ScrollView } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  AppBottomSheetModal,
-  BottomSheetView,
-} from '@/components/ui/AppBottomSheetModal';
-import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { View, StyleSheet, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { goBack } from '@/utils/navigation';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
+import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useThemeStore, isThemePreference } from '@/stores/themeStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
-import { useFollowStore } from '@/stores/followStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { AppToast } from '@/components/ui/AppToast';
-import { spacing } from '@/theme';
+import { useTheme, spacing, layout } from '@/theme';
+
 const appearanceOptions = [
   {
     value: 'system',
@@ -28,28 +25,21 @@ const appearanceOptions = [
   { value: 'light', label: 'Claro', icon: 'sunny-outline' as const },
   { value: 'dark', label: 'Escuro', icon: 'moon-outline' as const },
 ];
+
 export default function SettingsScreen() {
-  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+
   const {
     preference,
     setPreference,
     persistenceError: themeError,
   } = useThemeStore();
+
   const {
     preferredNeighborhood,
     setPreferredNeighborhood,
     persistenceError: regionError,
   } = useTerritoryStore();
-  const {
-    savedCalls,
-    clearSavedCalls,
-    persistenceError: savedError,
-    busy,
-    hydrated,
-  } = useFollowStore();
-  const [confirm, setConfirm] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [testSending, setTestSending] = useState(false);
 
   const {
     pushToken,
@@ -59,199 +49,272 @@ export default function SettingsScreen() {
     requestPermissions,
     sendTestPush,
   } = useNotificationStore();
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [testSending, setTestSending] = useState(false);
+
   const notificationsActive = permissionGranted && Boolean(pushToken);
+
+  const handleTestPush = async () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setTestSending(true);
+    const success = await sendTestPush();
+    setTestSending(false);
+    setToastMessage(
+      success
+        ? 'Notificação de teste enviada com sucesso!'
+        : 'Não foi possível enviar a notificação de teste.',
+    );
+  };
+
   return (
     <AppScreen>
       <AppHeader title="Preferências" onBack={() => goBack()} />
-      <ScrollView
-        contentContainerStyle={{
-          padding: spacing.contentPadding,
-          paddingBottom: 120,
-          gap: spacing.xl,
-        }}
+
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <View style={{ gap: spacing.md }}>
-          <AppText variant="sectionTitle">Minha região</AppText>
-          <AppButton title="Gerenciar meus lugares" variant="secondary" onPress={() => router.push('/PlacesScreen')} />
-          <AppText color="muted">
-            Rio de Janeiro. Escolha um bairro de referência para focar o mapa automaticamente.
-          </AppText>
-          <NeighborhoodPicker
-            options={[]}
-            value={preferredNeighborhood}
-            onChange={(name) => {
-              void setPreferredNeighborhood(name);
-            }}
-          />
-          {regionError && (
-            <AppText color="risk" accessibilityRole="alert">
-              {regionError}
+        {/* Seção 1: Aparência do Aplicativo (Apple Segmented HIG) */}
+        <View style={styles.sectionBlock}>
+          <View style={styles.sectionHeaderRow}>
+            <Ionicons name="color-palette-outline" size={13} color={colors.muted} />
+            <AppText variant="caption" style={styles.sectionHeaderText}>
+              APARÊNCIA DO APLICATIVO
             </AppText>
-          )}
-        </View>
-        <View style={{ gap: spacing.md }}>
-          <AppText variant="sectionTitle">Aparência</AppText>
-          <SlidingTabs
-            options={appearanceOptions}
-            value={preference}
-            label="Aparência do aplicativo"
-            edgeToEdge={false}
-            onChange={(value) => {
-              if (isThemePreference(value)) void setPreference(value);
-            }}
-          />
+          </View>
+
+          <View
+            style={[
+              styles.insetContainer,
+              { backgroundColor: colors.surface, borderColor: colors.divider },
+            ]}
+          >
+            <SlidingTabs
+              options={appearanceOptions}
+              value={preference}
+              label="Aparência do aplicativo"
+              edgeToEdge={false}
+              onChange={(value) => {
+                if (isThemePreference(value)) {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void setPreference(value);
+                }
+              }}
+            />
+          </View>
+
+          <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
+            O Fiscaliza aí adapta automaticamente o contraste para modo diurno e noturno.
+          </AppText>
+
           {themeError && (
             <AppText color="risk" accessibilityRole="alert">
               {themeError}
             </AppText>
           )}
         </View>
-        <View style={{ gap: spacing.md }}>
-          <AppText variant="sectionTitle">Chamados salvos neste aparelho</AppText>
-          <AppText color="muted">
-            Seus chamados acompanhados ficam neste aparelho, separados por sessão e município, sem sincronização entre dispositivos.
+
+        {/* Seção 2: Bairro de Referência no Mapa */}
+        <View style={styles.sectionBlock}>
+          <View style={styles.sectionHeaderRow}>
+            <Ionicons name="map-outline" size={13} color={colors.muted} />
+            <AppText variant="caption" style={styles.sectionHeaderText}>
+              BAIRRO DE REFERÊNCIA NO MAPA
+            </AppText>
+          </View>
+
+          <View
+            style={[
+              styles.insetContainer,
+              { backgroundColor: colors.surface, borderColor: colors.divider },
+            ]}
+          >
+            <NeighborhoodPicker
+              options={[]}
+              value={preferredNeighborhood}
+              onChange={(name) => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                void setPreferredNeighborhood(name);
+              }}
+            />
+          </View>
+
+          <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
+            Escolha um bairro carioca para focar o mapa automaticamente ao abrir a exploração territorial.
           </AppText>
-          <AppText variant="caption" color="muted">
-            {hydrated
-              ? `${savedCalls.length} chamados salvos neste aparelho`
-              : 'Carregando salvos…'}
-          </AppText>
-          <AppButton
-            title="Limpar salvos neste aparelho"
-            variant="destructive"
-            disabled={!hydrated || !savedCalls.length || busy}
-            onPress={() => setConfirm(true)}
-          />
-          {savedError && (
+
+          {regionError && (
             <AppText color="risk" accessibilityRole="alert">
-              {savedError}
+              {regionError}
             </AppText>
           )}
         </View>
-        <View style={{ gap: spacing.md }}>
-          <AppText variant="sectionTitle">Notificações e alertas</AppText>
-          <AppText color="muted">
-            Receba alertas quando os chamados que você salvou no 1746 tiverem atualização de status ou desfecho pela Prefeitura.
-          </AppText>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingVertical: spacing.xs,
-            }}
-          >
-            <View style={{ flex: 1, paddingRight: spacing.sm }}>
-              <AppText variant="label">Status das notificações</AppText>
-              <AppText variant="caption" color="muted">
-                {notificationsActive
-                  ? 'Alertas ativados neste aparelho'
-                  : permissionGranted
-                    ? 'Permissão concedida. Alertas ainda não ativados.'
-                    : 'Desativadas no momento'}
-              </AppText>
-            </View>
-            <AppButton
-              title={notificationsActive ? 'Ativadas' : permissionGranted ? 'Tentar novamente' : 'Ativar'}
-              variant={notificationsActive ? 'secondary' : 'primary'}
-              disabled={notificationLoading || notificationsActive}
-              onPress={() => void requestPermissions()}
-            />
+
+        {/* Seção 3: Notificações e Alertas do 1746 */}
+        <View style={styles.sectionBlock}>
+          <View style={styles.sectionHeaderRow}>
+            <Ionicons name="notifications-outline" size={13} color={colors.muted} />
+            <AppText variant="caption" style={styles.sectionHeaderText} accessibilityLabel="Notificações e alertas">
+              NOTIFICAÇÕES E ALERTAS
+            </AppText>
           </View>
+
+          <View
+            style={[
+              styles.insetTable,
+              { backgroundColor: colors.surface, borderColor: colors.divider },
+            ]}
+          >
+            {/* Linha 1: Status das Notificações */}
+            <View style={styles.tableRow}>
+              <View
+                style={[
+                  styles.iconSquircle,
+                  {
+                    backgroundColor: notificationsActive
+                      ? colors.completedSurface
+                      : colors.surfaceSubdued,
+                  },
+                ]}
+              >
+                <Ionicons
+                  name={notificationsActive ? 'notifications' : 'notifications-off-outline'}
+                  size={18}
+                  color={notificationsActive ? colors.completed : colors.primary}
+                />
+              </View>
+
+              <View style={styles.tableRowContent}>
+                <AppText variant="label">Alertas no aparelho</AppText>
+                <AppText variant="caption" color="muted">
+                  {notificationsActive
+                    ? 'Alertas ativados para seus chamados salvos'
+                    : permissionGranted
+                      ? 'Permissão concedida. Toque para conectar.'
+                      : 'Notificações desativadas neste aparelho'}
+                </AppText>
+              </View>
+
+              <AppButton
+                title={notificationsActive ? 'Ativadas' : permissionGranted ? 'Reconectar' : 'Ativar'}
+                variant={notificationsActive ? 'secondary' : 'primary'}
+                disabled={notificationLoading || notificationsActive}
+                loading={notificationLoading}
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void requestPermissions();
+                }}
+              />
+            </View>
+
+            {/* Linha 2: Disparo de Notificação de Teste (quando permitido) */}
+            {permissionGranted && (
+              <>
+                <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Testar notificação no aparelho"
+                  disabled={testSending || !pushToken}
+                  onPress={handleTestPush}
+                  style={({ pressed }) => [
+                    styles.tableRow,
+                    pressed && { backgroundColor: colors.surfaceSubdued },
+                    (testSending || !pushToken) && { opacity: 0.6 },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.iconSquircle,
+                      { backgroundColor: colors.primaryContainer },
+                    ]}
+                  >
+                    <Ionicons name="paper-plane-outline" size={17} color={colors.primary} />
+                  </View>
+
+                  <View style={styles.tableRowContent}>
+                    <AppText variant="label">Testar notificação no aparelho</AppText>
+                    <AppText variant="caption" color="muted">
+                      Simula um alerta de mudança de status no 1746
+                    </AppText>
+                  </View>
+
+                  <Ionicons name="send-outline" size={16} color={colors.primary} />
+                </Pressable>
+              </>
+            )}
+          </View>
+
+          <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
+            Você recebe alertas automáticos sempre que a Prefeitura atualizar o andamento de um protocolo que você acompanha.
+          </AppText>
+
           {notificationError && (
             <AppText color="risk" accessibilityRole="alert">
               {notificationError}
             </AppText>
           )}
-          {permissionGranted && (
-            <AppButton
-              title="Testar notificação no aparelho"
-              variant="secondary"
-              disabled={testSending || !pushToken}
-              onPress={async () => {
-                setTestSending(true);
-                const success = await sendTestPush();
-                setTestSending(false);
-                setToastMessage(
-                  success
-                    ? 'Notificação de teste enviada com sucesso!'
-                    : 'Não foi possível enviar a notificação de teste.',
-                );
-              }}
-            />
-          )}
         </View>
-        <View style={{ gap: spacing.md }}>
-          <AppText variant="sectionTitle">Ajuda e acessibilidade</AppText>
-          <AppText color="muted">
-            O texto acompanha o tamanho definido no aparelho. Fonte e leitor de
-            tela podem ser ajustados no sistema.
-          </AppText>
-          <AppButton
-            title="Rever introdução ao app"
-            variant="secondary"
-            onPress={() => router.push('/OnboardingScreen')}
-          />
-          <AppButton
-            title="Ajuda"
-            variant="secondary"
-            onPress={() => router.push('/HelpScreen')}
-          />
-          <AppButton
-            title="Sobre e fontes"
-            variant="secondary"
-            onPress={() => router.push('/AboutScreen')}
-          />
-        </View>
-      </ScrollView>
-      <AppBottomSheetModal
-        visible={confirm}
-        onClose={() => {
-          if (!busy) setConfirm(false);
-        }}
-        enableDynamicSizing
-        enablePanDownToClose={!busy}
-        showHeader={false}
-      >
-        <BottomSheetView
-          style={{
-            paddingHorizontal: spacing.contentPadding,
-            paddingTop: spacing.md,
-            paddingBottom: Math.max(insets.bottom + spacing.md, spacing.xxl),
-            gap: spacing.md,
-          }}
-        >
-          <View style={{ gap: spacing.xs }}>
-            <AppText variant="sectionTitle">
-              Limpar salvos neste aparelho?
-            </AppText>
-            <AppText color="muted">
-              Os chamados serão removidos da lista de acompanhamento desta sessão no aparelho. Sua região e aparência serão mantidas.
+
+        {/* Seção 4: Acessibilidade do Sistema */}
+        <View style={styles.sectionBlock}>
+          <View style={styles.sectionHeaderRow}>
+            <Ionicons name="accessibility-outline" size={13} color={colors.muted} />
+            <AppText variant="caption" style={styles.sectionHeaderText}>
+              ACESSIBILIDADE E SISTEMA
             </AppText>
           </View>
-          {savedError && (
-            <AppText color="risk" accessibilityRole="alert">
-              {savedError}
-            </AppText>
-          )}
-          <AppButton
-            title="Apagar salvos"
-            variant="destructive"
-            loading={busy}
-            onPress={() => {
-              void clearSavedCalls().then((ok) => {
-                if (ok) setConfirm(false);
-              });
-            }}
-          />
-          <AppButton
-            title="Manter salvos"
-            variant="secondary"
-            disabled={busy}
-            onPress={() => setConfirm(false)}
-          />
-        </BottomSheetView>
-      </AppBottomSheetModal>
+
+          <View
+            style={[
+              styles.insetTable,
+              { backgroundColor: colors.surface, borderColor: colors.divider },
+            ]}
+          >
+            <View style={styles.tableRow}>
+              <View
+                style={[
+                  styles.iconSquircle,
+                  { backgroundColor: colors.surfaceSubdued },
+                ]}
+              >
+                <Ionicons name="text-outline" size={18} color={colors.primary} />
+              </View>
+              <View style={styles.tableRowContent}>
+                <AppText variant="label">Escala tipográfica</AppText>
+                <AppText variant="caption" color="muted">
+                  O tamanho dos textos acompanha a configuração do seu aparelho
+                </AppText>
+              </View>
+            </View>
+
+            <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
+
+            <View style={styles.tableRow}>
+              <View
+                style={[
+                  styles.iconSquircle,
+                  { backgroundColor: colors.surfaceSubdued },
+                ]}
+              >
+                <Ionicons name="eye-outline" size={18} color={colors.primary} />
+              </View>
+              <View style={styles.tableRowContent}>
+                <AppText variant="label">Leitores de tela</AppText>
+                <AppText variant="caption" color="muted">
+                  Controles rotulados para suporte a TalkBack e VoiceOver
+                </AppText>
+              </View>
+            </View>
+          </View>
+
+          <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
+            O Fiscaliza aí adere às diretrizes de acessibilidade e alto contraste para todos os cariocas.
+          </AppText>
+        </View>
+      </KeyboardAwareScrollView>
+
       <AppToast
         message={toastMessage}
         onDismiss={() => setToastMessage(null)}
@@ -259,3 +322,64 @@ export default function SettingsScreen() {
     </AppScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    paddingHorizontal: spacing.contentPadding,
+    paddingTop: spacing.xs,
+    paddingBottom: 140,
+    gap: spacing.lg,
+  },
+  sectionBlock: {
+    gap: 8,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 4,
+  },
+  sectionHeaderText: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+  },
+  insetContainer: {
+    borderRadius: layout.radius.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: spacing.sm,
+  },
+  insetTable: {
+    borderRadius: layout.radius.panel,
+    borderWidth: StyleSheet.hairlineWidth,
+    overflow: 'hidden',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    minHeight: 56,
+  },
+  tableDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginLeft: 54,
+  },
+  iconSquircle: {
+    width: 34,
+    height: 34,
+    borderRadius: layout.radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tableRowContent: {
+    flex: 1,
+    gap: 2,
+    paddingRight: 6,
+  },
+  sectionFooterText: {
+    paddingHorizontal: 6,
+    lineHeight: 17,
+  },
+});
