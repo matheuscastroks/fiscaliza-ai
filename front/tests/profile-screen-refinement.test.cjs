@@ -36,10 +36,12 @@ test('profile screen: adopts Apple Inset-Grouped tables and modern civic metrics
   assert.ok(content.includes('savedCalls.length'), 'Must display saved calls count');
   assert.ok(content.includes('places.length'), 'Must display saved places count');
 
-  // Postal code bottom sheet integration
+  // Postal code and places bottom sheet integration
   assert.ok(content.includes('PostalCodeSheet'), 'Must integrate PostalCodeSheet component');
   assert.ok(content.includes('<PostalCodeSheet'), 'Must mount PostalCodeSheet bottom sheet');
   assert.ok(!content.includes("'/MunicipalityScreen'"), 'Must replace full-screen navigation with bottom sheet');
+  assert.ok(content.includes('PlacesSheet'), 'Must integrate PlacesSheet component');
+  assert.ok(content.includes('<PlacesSheet'), 'Must mount PlacesSheet bottom sheet');
 
   // Account actions & modal
   assert.ok(content.includes('useSignOutSheet'), 'Must preserve sign out sheet');
@@ -62,4 +64,21 @@ test('postal code bottom sheet: provides smooth in-place CEP lookup and confirma
   assert.ok(content.includes('/profile/municipality'), 'Must update municipality/postalCode profile');
   assert.ok(content.includes('acceptProfile'), 'Must update auth store with accepted profile');
   assert.ok(content.includes('Haptics'), 'Must provide sensory feedback on search and confirm');
+
+  // Subtle border validation
+  assert.ok(content.includes('borderWidth: StyleSheet.hairlineWidth'), 'PostalCodeSheet resultCard must have subtle hairline border');
+  assert.ok(!content.includes('borderWidth: 1.5'), 'Must eliminate thick 1.5px border from result card');
+});
+
+test('places bottom sheet: manages saved places and inline editor via bottom sheet', () => {
+  const sheetPath = path.join(ROOT_DIR, 'components', 'profile', 'PlacesSheet.tsx');
+  assert.ok(fs.existsSync(sheetPath), 'PlacesSheet.tsx must exist');
+
+  const content = fs.readFileSync(sheetPath, 'utf8');
+  assert.ok(content.includes('export function PlacesSheet'), 'Must export PlacesSheet component');
+  assert.ok(content.includes('AppBottomSheetModal'), 'Must use AppBottomSheetModal');
+  assert.ok(content.includes('PlaceEditor'), 'Must integrate PlaceEditor inside bottom sheet');
+  assert.ok(content.includes('usePlacesStore'), 'Must bind places store');
+  assert.ok(content.includes('selectPlace'), 'Must support map selection');
+  assert.ok(content.includes('removePlace'), 'Must support place removal');
 });

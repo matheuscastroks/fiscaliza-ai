@@ -248,8 +248,8 @@ export function PostalCodeSheet({
                 style={[
                   styles.resultCard,
                   {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.primary,
+                    backgroundColor: colors.surfaceSubdued,
+                    borderColor: colors.divider,
                   },
                 ]}
               >
@@ -381,14 +381,10 @@ const createStyles = (colors: ThemeColors) =>
     },
     resultCard: {
       borderRadius: layout.radius.panel,
-      borderWidth: 1.5,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.divider,
       padding: spacing.md,
       gap: spacing.sm,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 6,
-      elevation: 2,
     },
     resultBadgeRow: {
       flexDirection: 'row',

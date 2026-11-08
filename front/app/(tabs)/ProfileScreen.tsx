@@ -29,6 +29,7 @@ import { useFollowStore } from '@/stores/followStore';
 import { usePlacesStore } from '@/stores/placesStore';
 import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { PostalCodeSheet } from '@/components/profile/PostalCodeSheet';
+import { PlacesSheet } from '@/components/profile/PlacesSheet';
 import { layout, spacing } from '@/theme';
 
 type MenuItem = {
@@ -103,6 +104,7 @@ export default function ProfileScreen() {
   const [deleteError, setDeleteError] = useState('');
 
   const [cepSheetOpen, setCepSheetOpen] = useState(false);
+  const [placesSheetOpen, setPlacesSheetOpen] = useState(false);
 
   const selectPhoto = async () => {
     if (!user || picking) return;
@@ -324,11 +326,11 @@ export default function ProfileScreen() {
             accessibilityLabel={`Meus lugares salvos: ${places.length}`}
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/PlacesScreen');
+              setPlacesSheetOpen(true);
             }}
             style={({ pressed }) => [
               styles.metricCard,
-              { backgroundColor: colors.surface, borderColor: colors.border },
+              { backgroundColor: colors.surface, borderColor: colors.divider },
               pressed && { opacity: 0.8 },
             ]}
           >
@@ -367,7 +369,7 @@ export default function ProfileScreen() {
           <View
             style={[
               styles.insetTable,
-              { backgroundColor: colors.surface, borderColor: colors.border },
+              { backgroundColor: colors.surface, borderColor: colors.divider },
             ]}
           >
             <Pressable
@@ -467,7 +469,11 @@ export default function ProfileScreen() {
                     accessibilityLabel={item.label}
                     onPress={() => {
                       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      router.push(item.path);
+                      if (item.path === '/PlacesScreen') {
+                        setPlacesSheetOpen(true);
+                      } else {
+                        router.push(item.path);
+                      }
                     }}
                     style={({ pressed }) => [
                       styles.tableRow,
@@ -505,7 +511,7 @@ export default function ProfileScreen() {
           <View
             style={[
               styles.insetTable,
-              { backgroundColor: colors.surface, borderColor: colors.border },
+              { backgroundColor: colors.surface, borderColor: colors.divider },
             ]}
           >
             {user ? (
@@ -667,6 +673,12 @@ export default function ProfileScreen() {
         onClose={() => setCepSheetOpen(false)}
         currentPostalCode={user?.postalCode}
         currentNeighborhood={user?.neighborhood}
+      />
+
+      {/* Modal Bottom Sheet de Gestão de Lugares Salvos */}
+      <PlacesSheet
+        visible={placesSheetOpen}
+        onClose={() => setPlacesSheetOpen(false)}
       />
     </AppScreen>
   );
