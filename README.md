@@ -67,7 +67,7 @@ ou município arbitrários no cadastro. O acesso com gov.br permanece desabilita
 
 O encerramento de conta é garantido em conformidade com a LGPD: o morador pode apagar
 sua conta pelo aplicativo em `Meu Perfil` com confirmação em painel seguro, ou via
-`DELETE /api/profile`. A exclusão remove os registros do usuário, revoga sessões em
+`DELETE /api/auth/profile`. A exclusão remove os registros do usuário, revoga sessões em
 cascata e exclui lugares e foto de perfil nos servidores.
 
 Não há conta de teste pré-criada. O cadastro cria exclusivamente contas cidadãs.

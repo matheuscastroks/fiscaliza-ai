@@ -168,7 +168,7 @@ export function registerAuthRoutes(
     },
   );
 
-  app.delete('/api/profile', async (req, reply) => {
+  const deleteProfile = async (req: FastifyRequest, reply: FastifyReply) => {
     if (!req.user) throw fail(401, 'Entre para continuar.');
     await db.delete(users).where(eq(users.id, req.user.id));
     if (req.sessionToken)
@@ -177,7 +177,9 @@ export function registerAuthRoutes(
         .where(eq(sessions.tokenHash, tokenHash(req.sessionToken)));
     reply.clearCookie(sessionCookie(req), { path: '/api' });
     return ok(null);
-  });
+  };
+  app.delete('/api/auth/profile', deleteProfile);
+  app.delete('/api/profile', deleteProfile);
 
   app.post('/api/auth/logout', async (req, reply) => {
     if (req.sessionToken)
