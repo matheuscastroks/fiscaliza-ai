@@ -5,7 +5,6 @@ import { AppTabBar } from '@/components/ui/AppTabBar';
 import { mapPerformanceVariant } from '@/features/territory/mapPerformance';
 
 export const unstable_settings = {
-  // initialRouteName="TerritoryScreen"
   anchor: 'TerritoryScreen',
 };
 
