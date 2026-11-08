@@ -36,6 +36,11 @@ test('profile screen: adopts Apple Inset-Grouped tables and modern civic metrics
   assert.ok(content.includes('savedCalls.length'), 'Must display saved calls count');
   assert.ok(content.includes('places.length'), 'Must display saved places count');
 
+  // Postal code bottom sheet integration
+  assert.ok(content.includes('PostalCodeSheet'), 'Must integrate PostalCodeSheet component');
+  assert.ok(content.includes('<PostalCodeSheet'), 'Must mount PostalCodeSheet bottom sheet');
+  assert.ok(!content.includes("'/MunicipalityScreen'"), 'Must replace full-screen navigation with bottom sheet');
+
   // Account actions & modal
   assert.ok(content.includes('useSignOutSheet'), 'Must preserve sign out sheet');
   assert.ok(content.includes('deleteAccount'), 'Must preserve account deletion');
@@ -43,4 +48,18 @@ test('profile screen: adopts Apple Inset-Grouped tables and modern civic metrics
 
   // Legacy removal guard (ensures test legacy-removal.test.cjs continues to pass)
   assert.ok(!content.includes('/activity'), 'Must not reference legacy /activity route');
+});
+
+test('postal code bottom sheet: provides smooth in-place CEP lookup and confirmation for Rio citizens', () => {
+  const sheetPath = path.join(ROOT_DIR, 'components', 'profile', 'PostalCodeSheet.tsx');
+  assert.ok(fs.existsSync(sheetPath), 'PostalCodeSheet.tsx must exist');
+
+  const content = fs.readFileSync(sheetPath, 'utf8');
+  assert.ok(content.includes('export function PostalCodeSheet'), 'Must export PostalCodeSheet component');
+  assert.ok(content.includes('AppBottomSheetModal'), 'Must use AppBottomSheetModal');
+  assert.ok(content.includes('BottomSheetTextInput'), 'Must use BottomSheetTextInput for native keyboard handling');
+  assert.ok(content.includes('/profile/postal-code/'), 'Must query postal-code lookup endpoint');
+  assert.ok(content.includes('/profile/municipality'), 'Must update municipality/postalCode profile');
+  assert.ok(content.includes('acceptProfile'), 'Must update auth store with accepted profile');
+  assert.ok(content.includes('Haptics'), 'Must provide sensory feedback on search and confirm');
 });

@@ -28,6 +28,7 @@ import { useAvatarStore } from '@/stores/avatarStore';
 import { useFollowStore } from '@/stores/followStore';
 import { usePlacesStore } from '@/stores/placesStore';
 import { OfficialCallRow } from '@/components/official/OfficialCallRow';
+import { PostalCodeSheet } from '@/components/profile/PostalCodeSheet';
 import { layout, spacing } from '@/theme';
 
 type MenuItem = {
@@ -100,6 +101,8 @@ export default function ProfileScreen() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+
+  const [cepSheetOpen, setCepSheetOpen] = useState(false);
 
   const selectPhoto = async () => {
     if (!user || picking) return;
@@ -374,7 +377,7 @@ export default function ProfileScreen() {
               }`}
               onPress={() => {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push(user ? '/MunicipalityScreen' : '/PlacesScreen');
+                setCepSheetOpen(true);
               }}
               style={({ pressed }) => [
                 styles.tableRow,
@@ -657,6 +660,14 @@ export default function ProfileScreen() {
           </View>
         </BottomSheetView>
       </AppBottomSheetModal>
+
+      {/* Modal Bottom Sheet de Gestão de CEP Residencial */}
+      <PostalCodeSheet
+        visible={cepSheetOpen}
+        onClose={() => setCepSheetOpen(false)}
+        currentPostalCode={user?.postalCode}
+        currentNeighborhood={user?.neighborhood}
+      />
     </AppScreen>
   );
 }
