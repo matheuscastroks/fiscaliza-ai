@@ -5,6 +5,7 @@ import { TerritoryFilterBar, TerritoryFilterModal, type TerritoryFilterBarProps 
 import { TerritoryListView } from '@/components/territory/TerritoryListView';
 import { usePublicSources, usePublicFacilities, useNeighborhoods, useNeighborhoodBoundary } from '@/features/territory/usePublicData';
 import { chooseTerritorialEntries, computeOverviewRegion, computeRegionBounds, TERRITORY_PERIOD_OPTIONS, TERRITORY_STATUS_OPTIONS } from '@/features/territory/selectors';
+import { summarizeFacilityPagination } from '@/features/territory/facilityPagination';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,6 +23,7 @@ import { AppText } from '@/components/ui/AppText';
 import { AppToast } from '@/components/ui/AppToast';
 import {
   useInfiniteOfficialCalls,
+  useOfficialCall,
   useOfficialFilters,
 } from '@/features/city/useOfficialCalls';
 import { spacing } from '@/theme/spacing';
@@ -40,6 +42,7 @@ import {
   type Entry,
 } from '@/components/territory/TerritoryPreviewCard';
 import { TerritoryClusterCarousel } from '@/components/territory/TerritoryClusterCarousel';
+import { FacilityLoadMoreButton } from '@/components/territory/FacilityLoadMoreButton';
 
 type TerritoryMapRegion = {
   latitude: number;
@@ -122,8 +125,9 @@ export function TerritoryContent() {
   }, [activeSelection, routeNeighborhoodId, focusId]);
 
   const territorialFilters = useTerritoryFilters();
-  const { serviceType, period, search, status, selection, setFilter } = territorialFilters;
+  const { serviceType, macroTheme, period, search, status, selection, setFilter } = territorialFilters;
   const setServiceType = useCallback((value: string) => setFilter('serviceType', value), [setFilter]);
+  const setMacroTheme = useCallback((value: string) => setFilter('macroTheme', value), [setFilter]);
   const setPeriod = useCallback((value: string) => setFilter('period', value), [setFilter]);
   const setSearch = useCallback((value: string) => setFilter('search', value), [setFilter]);
   const setStatus = useCallback((value: string) => setFilter('status', value), [setFilter]);
@@ -134,9 +138,14 @@ export function TerritoryContent() {
   const { territoryDomain, setTerritoryDomain, setFacilityLayers } = useTerritoryDomain();
   const { interactionsComplete, visitTrace } = useMapPerformance(isFocused, effectiveListView);
 
-  const facilityParams = { neighborhoodId, search: appliedSearch || undefined, ...(areaOnly && appliedBounds ? appliedBounds : {}) };
-  const facilitiesConfirmed = !neighborhood || Boolean(neighborhoodId);
-  const facilityScope = neighborhoodId || neighborhood || 'municipality';
+  const facilityParams = {
+    search: appliedSearch || undefined,
+    ...(areaOnly && appliedBounds ? appliedBounds : { neighborhoodId }),
+  };
+  const facilitiesConfirmed = areaOnly || !neighborhood || Boolean(neighborhoodId);
+  const facilityScope = areaOnly
+    ? 'area'
+    : neighborhoodId || neighborhood || 'municipality';
   const schools = usePublicFacilities({ ...facilityParams, categories: ['school'] }, isFocused && interactionsComplete && layers.includes('school') && facilitiesConfirmed, facilityScope);
   const health = usePublicFacilities({ ...facilityParams, categories: ['health'] }, isFocused && interactionsComplete && layers.includes('health') && facilitiesConfirmed, facilityScope);
   const squares = usePublicFacilities({ ...facilityParams, categories: ['square'] }, isFocused && interactionsComplete && layers.includes('square') && facilitiesConfirmed, facilityScope);
@@ -149,6 +158,7 @@ export function TerritoryContent() {
     {
       ...(areaOnly && appliedBounds ? appliedBounds : routeNeighborhoodId ? { neighborhoodId: routeNeighborhoodId } : territorialFilters.params),
       tipo: serviceType === 'all' ? undefined : serviceType,
+      tema: macroTheme === 'all' ? undefined : macroTheme,
       situacao: status === 'all' ? undefined : status,
       ...officialTime,
       search: appliedSearch || undefined,
@@ -183,6 +193,7 @@ export function TerritoryContent() {
     const target = neighborhoods.data?.find((n) => n.id === routeNeighborhoodId);
     if (target) setNeighborhood(target.name);
     setStatus('Não Encerrado');
+    setMacroTheme('all');
     setServiceType('all');
     setSearch('');
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -195,7 +206,7 @@ export function TerritoryContent() {
     }
   }, [
     routeNeighborhoodId, routeLayer, neighborhoods.data, setNeighborhood,
-    setLayers, setSearch, setServiceType, setStatus, setTerritoryDomain, setFacilityLayers,
+    setLayers, setSearch, setMacroTheme, setServiceType, setStatus, setTerritoryDomain, setFacilityLayers,
   ]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -235,39 +246,43 @@ export function TerritoryContent() {
     return () => sub.remove();
   }, [isFocused, selectedId, selectedCluster, isListView, mapAvailable, areaOnly, setIsListView]);
 
+  const focusedCallQuery = useOfficialCall(focusId, isFocused && Boolean(focusId));
+
   useEffect(() => {
     if (!focusId) return;
+    setTerritoryDomain('calls');
+    if (!layers.includes('official')) setLayers(['official']);
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedId(focusId);
     setSelectedCluster(null);
     setIsListView(false);
     setAreaOnly(false);
     setStatus('all');
+    setMacroTheme('all');
     setServiceType('all');
     setSearch('');
     if (paramNeighborhood) setNeighborhood(paramNeighborhood);
+  }, [focusId, paramNeighborhood, setTerritoryDomain, layers, setLayers, setIsListView, setNeighborhood, setSearch, setMacroTheme, setServiceType, setStatus]);
 
-    let targetLat = lat ? Number(lat) : NaN;
-    let targetLng = lng ? Number(lng) : NaN;
-    if (!Number.isFinite(targetLat) || !Number.isFinite(targetLng)) {
-      const off = officialCalls.data?.calls?.find((i) => i.id === focusId);
-      if (off && off.latitude != null && off.longitude != null) {
-        targetLat = off.latitude;
-        targetLng = off.longitude;
-      }
-    }
+  useEffect(() => {
+    if (!focusId) return;
+    const off = officialCalls.data?.calls?.find((i) => i.id === focusId) || focusedCallQuery.data;
+    const targetLat = lat ? Number(lat) : (off?.latitude ?? NaN);
+    const targetLng = lng ? Number(lng) : (off?.longitude ?? NaN);
     if (Number.isFinite(targetLat) && Number.isFinite(targetLng)) {
-      updateCameraRegion((prev) => ({
-        ...prev,
-        latitude: targetLat,
-        longitude: targetLng,
-        zoom: 17,
-      }));
+      updateCameraRegion((prev) => ({ ...prev, latitude: targetLat, longitude: targetLng, zoom: 17 }));
     }
-  }, [
-    focusId, lat, lng, paramNeighborhood, officialCalls.data?.calls,
-    setIsListView, setNeighborhood, updateCameraRegion, setSearch, setServiceType, setStatus,
-  ]);
+  }, [focusId, lat, lng, officialCalls.data?.calls, focusedCallQuery.data, updateCameraRegion]);
+
+  useEffect(() => {
+    if (!focusId) return;
+    if (focusedCallQuery.isError) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setToastMessage('Não foi possível localizar o chamado da notificação.');
+    } else if (focusedCallQuery.data && (focusedCallQuery.data.latitude == null || focusedCallQuery.data.longitude == null)) {
+      setToastMessage('Este chamado não possui coordenadas registradas no mapa.');
+    }
+  }, [focusId, focusedCallQuery.isError, focusedCallQuery.data]);
 
   const entries = useMemo<Entry[]>(() => {
     const calls = officialCalls.data?.calls || [];
@@ -275,12 +290,12 @@ export function TerritoryContent() {
       (data) => data?.pages.flatMap((p) => p.items) || [],
     );
     return chooseTerritorialEntries(calls, facilities, layers, {
-      neighborhood,
-      neighborhoodId,
+      neighborhood: areaOnly ? undefined : neighborhood,
+      neighborhoodId: areaOnly ? undefined : neighborhoodId,
     });
   }, [
     officialCalls.data?.calls, schools.data, health.data, squares.data,
-    layers, neighborhood, neighborhoodId,
+    layers, neighborhood, neighborhoodId, areaOnly,
   ]);
 
   const unlocated = useMemo(() => entries.filter((entry) => !entryLocation(entry)), [entries]);
@@ -292,8 +307,41 @@ export function TerritoryContent() {
     const fromEntries = entries.find((entry) => entry.item.id === selectedId);
     if (fromEntries) return fromEntries;
     const off = officialCalls.data?.calls?.find((item) => item.id === selectedId);
-    return off ? { type: 'official' as const, item: off } : null;
-  }, [selectedId, entries, officialCalls.data?.calls]);
+    if (off) return { type: 'official' as const, item: off };
+    if (
+      focusedCallQuery.data &&
+      (focusedCallQuery.data.id === selectedId ||
+        focusedCallQuery.data.externalId === selectedId)
+    ) {
+      return { type: 'official' as const, item: focusedCallQuery.data };
+    }
+    return null;
+  }, [selectedId, entries, officialCalls.data?.calls, focusedCallQuery.data]);
+
+  const activeFacilityQueries = useMemo(() => {
+    const labels = { school: 'escolas', health: 'serviços de saúde', square: 'praças' } as const;
+    return (['school', 'health', 'square'] as const)
+      .filter((cat) => layers.includes(cat))
+      .map((cat) => {
+        const query = facilityQueries[cat];
+        return {
+          category: cat,
+          query,
+          label: labels[cat],
+          loaded: query.data?.pages.flatMap((p) => p.items).length ?? 0,
+          total: query.data?.pages[0]?.total ?? null,
+          hasNextPage: Boolean(query.hasNextPage),
+          isFetchingNextPage: Boolean(query.isFetchingNextPage),
+          fetchNextPage: () => { void query.fetchNextPage(); },
+        };
+      });
+  }, [layers, facilityQueries]);
+
+  const facilityPagination = useMemo(
+    () => summarizeFacilityPagination(activeFacilityQueries),
+    [activeFacilityQueries],
+  );
+  const totalFacilitiesKnown = facilityPagination?.totalKnown ?? null;
 
   const selectedClusterEntries = useMemo<Entry[]>(() => {
     if (!selectedCluster || selectedCluster.ids.length === 0) return [];
@@ -313,12 +361,18 @@ export function TerritoryContent() {
     Number(Boolean(neighborhood)) +
     Number(status !== 'all') +
     Number(serviceType !== 'all') +
+    Number(macroTheme !== 'all') +
     Number(period !== 'all') + Number(selection.kind === 'radius') +
     Number(areaOnly);
 
   const totalCalls = officialCalls.data?.total ?? listed.length;
   const hasMoreCalls = Boolean(officialCalls.hasNextPage);
-  const dataReady = officialCalls.data !== undefined;
+  const dataReady = layers.includes('official')
+    ? officialCalls.data !== undefined
+    : activeFacilityQueries.length > 0 &&
+      activeFacilityQueries.every(
+        (query) => query.query.data !== undefined || query.query.isError,
+      );
 
   const lastFittedNeighborhoodRef = useRef<string | null>(null);
   useEffect(() => {
@@ -385,7 +439,8 @@ export function TerritoryContent() {
   const handleMapClick = useCallback(() => {
     setSelectedId(null);
     setSelectedCluster(null);
-  }, []);
+    if (focusId) router.setParams({ focusId: undefined });
+  }, [focusId]);
 
   const handleRegionChange = useCallback(
     (newRegion: { latitude: number; longitude: number; latitudeDelta: number; longitudeDelta: number; zoom?: number }) => {
@@ -403,6 +458,7 @@ export function TerritoryContent() {
 
   const resetFilters = useCallback(() => {
     setSearch('');
+    setMacroTheme('all');
     setServiceType('all');
     setPeriod('all');
     router.setParams({ neighborhoodId: undefined, layer: undefined, startDate: undefined, endDate: undefined });
@@ -412,7 +468,7 @@ export function TerritoryContent() {
     setNeighborhood('');
     setAreaOnly(false);
     setAppliedBounds(null);
-  }, [setNeighborhood, setSearch, setServiceType, setPeriod, setStatus]);
+  }, [setNeighborhood, setSearch, setMacroTheme, setServiceType, setPeriod, setStatus]);
 
   const locate = async () => {
     if (capturedLocation && Number.isFinite(capturedLocation.latitude)) {
@@ -471,7 +527,7 @@ export function TerritoryContent() {
     setSelectedCluster(null);
     listOffsetRef.current = 0;
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [neighborhoodId, neighborhood, layers, search, status, serviceType, period]);
+  }, [neighborhoodId, neighborhood, layers, search, status, macroTheme, serviceType, period]);
 
   const handleNeighborhoodChange = useCallback((value: string) => {
     setNeighborhood(value);
@@ -509,10 +565,8 @@ export function TerritoryContent() {
     period,
     periodOptions: TERRITORY_PERIOD_OPTIONS,
     onPeriodChange: (value) => {
-      setPeriod(value);
-      router.setParams({ startDate: undefined, endDate: undefined });
-      setSelectedId(null);
-      setSelectedCluster(null);
+      setPeriod(value); router.setParams({ startDate: undefined, endDate: undefined });
+      setSelectedId(null); setSelectedCluster(null);
     },
     status,
     statusOptions: TERRITORY_STATUS_OPTIONS,
@@ -523,15 +577,13 @@ export function TerritoryContent() {
     endDate,
     totalCalls,
     officialCallsStatus: {
-      isLoading: officialCalls.isLoading,
-      error: officialCalls.error,
+      isLoading: officialCalls.isLoading, error: officialCalls.error,
       displayedCount: officialCalls.data?.calls.length || 0,
       total: officialCalls.data?.total ?? null,
       territoryConfirmed: officialCalls.data?.territoryConfirmed,
       sourceState: officialSource?.state,
     },
-    facilityQueries,
-    facilitiesConfirmed,
+    facilityQueries, facilitiesConfirmed,
   }), [
     selection, areaOnly, handleClearAreaOnly, mapAvailable, routeNeighborhoodId,
     setSearch, setServiceType, setPeriod, setStatus, search, setFiltersOpen, filtersOpen,
@@ -544,7 +596,9 @@ export function TerritoryContent() {
 
   const summaryLabel =
     territoryDomain === 'facilities'
-      ? `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')})`
+      ? totalFacilitiesKnown !== null && listed.length < totalFacilitiesKnown
+        ? `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')} de ${totalFacilitiesKnown.toLocaleString('pt-BR')})`
+        : `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')})`
       : officialCalls.isLoading
         ? 'Consultando chamados neste recorte...'
         : `Ver em lista · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
@@ -703,6 +757,16 @@ export function TerritoryContent() {
             </View>
             <Ionicons name="chevron-forward" size={18} color={colors.muted} />
           </Pressable>
+
+          {facilityPagination?.hasMore && (
+            <FacilityLoadMoreButton
+              label={facilityPagination.label}
+              loadedCount={facilityPagination.loadedCount}
+              totalKnown={facilityPagination.totalKnown}
+              isFetching={facilityPagination.isFetchingNextPage}
+              onPress={facilityPagination.fetchNextPage}
+            />
+          )}
         </View>
       )}
 
@@ -741,7 +805,10 @@ export function TerritoryContent() {
         <TerritoryPreviewCard
           entry={selectedEntry}
           onOpen={openEntry}
-          onClose={() => setSelectedId(null)}
+          onClose={() => {
+            setSelectedId(null);
+            if (focusId) router.setParams({ focusId: undefined });
+          }}
           bottomOffset={insets.bottom + 92}
         />
       )}
@@ -754,24 +821,18 @@ export function TerritoryContent() {
           listRef={listRef}
           listOffsetRef={listOffsetRef}
           restoreListOffsetRef={restoreListOffsetRef}
-          listed={listed}
-          unlocatedCount={unlocated.length}
-          areaOnly={areaOnly}
-          layers={layers}
-          totalCalls={totalCalls}
-          hasMoreCalls={hasMoreCalls}
-          dataReady={dataReady}
-          refreshing={refreshing}
-          onRefresh={() => { void refreshAll(); }}
-          onOpenEntry={openEntry}
-          onLocateEntry={mapAvailable ? handleLocateEntry : undefined}
-          onResetFilters={resetFilters}
+          listed={listed} unlocatedCount={unlocated.length} areaOnly={areaOnly}
+          layers={layers} totalCalls={totalCalls} hasMoreCalls={hasMoreCalls}
+          dataReady={dataReady} refreshing={refreshing}
+          onRefresh={() => { void refreshAll(); }} onOpenEntry={openEntry}
+          onLocateEntry={mapAvailable ? handleLocateEntry : undefined} onResetFilters={resetFilters}
           officialQuery={{
             isLoading: officialCalls.isLoading, isFetching: officialCalls.isFetching,
             isFetchingNextPage: officialCalls.isFetchingNextPage, error: officialCalls.error,
             fetchStatus: officialCalls.fetchStatus, refetch: () => { void officialCalls.refetch(); },
             fetchNextPage: () => { void officialCalls.fetchNextPage(); },
           }}
+          facilityPagination={facilityPagination}
           filterBarProps={filterBarProps}
         />
       )}
@@ -781,15 +842,11 @@ export function TerritoryContent() {
         onClose={() => setFiltersOpen(false)}
         onReset={resetFilters}
         bairroOptions={bairroOptions}
-        neighborhood={neighborhood}
-        onNeighborhoodChange={handleNeighborhoodChange}
-        serviceType={serviceType}
-        serviceTypeOptions={serviceTypeOptions}
-        onServiceTypeChange={(value) => { setServiceType(value); setSelectedId(null); }}
-        status={status}
-        onStatusChange={(value) => { setStatus(value); setSelectedId(null); }}
-        period={period}
-        periodOptions={TERRITORY_PERIOD_OPTIONS}
+        neighborhood={neighborhood} onNeighborhoodChange={handleNeighborhoodChange}
+        macroTheme={macroTheme} onMacroThemeChange={(value) => { setMacroTheme(value); setSelectedId(null); }}
+        serviceType={serviceType} serviceTypeOptions={serviceTypeOptions} onServiceTypeChange={(value) => { setServiceType(value); setSelectedId(null); }}
+        status={status} onStatusChange={(value) => { setStatus(value); setSelectedId(null); }}
+        period={period} periodOptions={TERRITORY_PERIOD_OPTIONS}
         onPeriodChange={(value) => { setPeriod(value); router.setParams({ startDate: undefined, endDate: undefined }); setSelectedId(null); }}
         areaOnly={areaOnly}
         onAreaOnlyChange={(nextArea) => { setAreaOnly(nextArea); setAppliedBounds(nextArea ? computeRegionBounds(viewportRef.current) : null); setSelectedId(null); }}
@@ -811,15 +868,9 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: layout.radius.pill, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25, shadowRadius: 4, elevation: 5, zIndex: 40,
     },
-    topFloatingHeader: {
-      position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50, paddingHorizontal: spacing.md, gap: 8,
-    },
-    bottomFloatingContainer: {
-      position: 'absolute', left: spacing.md, right: spacing.md, zIndex: 40, gap: 8,
-    },
-    mapActionsRow: {
-      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    },
+    topFloatingHeader: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50, paddingHorizontal: spacing.md, gap: 8 },
+    bottomFloatingContainer: { position: 'absolute', left: spacing.md, right: spacing.md, zIndex: 40, gap: 8 },
+    mapActionsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
     dockCircleButton: {
       width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center',
       shadowColor: '#000000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.14, shadowRadius: 6,
@@ -835,9 +886,7 @@ const createStyles = (colors: ThemeColors) =>
       paddingVertical: 10, borderRadius: layout.radius.card, borderWidth: 1, borderColor: colors.border,
       shadowColor: '#000000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 5,
     },
-    summaryIconCircle: {
-      width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center',
-    },
+    summaryIconCircle: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
     summaryTitle: { fontSize: 13, fontWeight: '700' },
     summarySubtitle: { fontSize: 11 },
     buttonPressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },

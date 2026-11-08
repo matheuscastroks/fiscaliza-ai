@@ -1,4 +1,4 @@
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, useMemo, memo } from 'react';
 import {
   FlatList,
   RefreshControl,
@@ -61,6 +61,14 @@ export interface TerritoryListViewProps {
     fetchNextPage: () => void;
   };
   filterBarProps: TerritoryFilterBarProps;
+  facilityPagination?: {
+    hasMore: boolean;
+    isFetchingNextPage: boolean;
+    loadedCount: number;
+    totalKnown: number | null;
+    label?: string;
+    fetchNextPage: () => void;
+  };
 }
 
 function TerritoryListViewComponent({
@@ -84,6 +92,7 @@ function TerritoryListViewComponent({
   onResetFilters,
   officialQuery,
   filterBarProps,
+  facilityPagination,
 }: TerritoryListViewProps) {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -100,12 +109,20 @@ function TerritoryListViewComponent({
     [onOpenEntry, onLocateEntry],
   );
 
-  const countLabel =
-    layers.length === 1 &&
-    layers[0] === 'official' &&
-    listed.length < totalCalls
-      ? `${listed.length} de ${totalCalls.toLocaleString('pt-BR')}`
-      : listed.length.toLocaleString('pt-BR');
+  const facilityLoaded = facilityPagination?.loadedCount ?? 0;
+  const facilityTotal = facilityPagination?.totalKnown ?? null;
+
+  const countLabel = useMemo(() => {
+    if (layers.length === 1 && layers[0] === 'official') {
+      return listed.length < totalCalls
+        ? `${listed.length} de ${totalCalls.toLocaleString('pt-BR')}`
+        : listed.length.toLocaleString('pt-BR');
+    }
+    if (!layers.includes('official') && facilityTotal !== null && facilityLoaded < facilityTotal) {
+      return `${facilityLoaded} de ${facilityTotal.toLocaleString('pt-BR')}`;
+    }
+    return listed.length.toLocaleString('pt-BR');
+  }, [layers, listed.length, totalCalls, facilityLoaded, facilityTotal]);
 
   const sectionHeading = `${
     areaOnly ? 'Registros na área visível' : 'Registros no território'
@@ -173,6 +190,18 @@ function TerritoryListViewComponent({
           }}
         />
       )}
+      {facilityPagination?.hasMore && (
+        <AppButton
+          title={
+            facilityTotal !== null
+              ? `Carregar mais ${facilityPagination.label || 'equipamentos'} (${facilityLoaded} de ${facilityTotal.toLocaleString('pt-BR')})`
+              : `Carregar mais ${facilityPagination.label || 'equipamentos'}`
+          }
+          variant="secondary"
+          disabled={facilityPagination.isFetchingNextPage}
+          onPress={facilityPagination.fetchNextPage}
+        />
+      )}
       {dataReady &&
         listed.length === 0 &&
         layers.length === 1 &&
@@ -181,6 +210,19 @@ function TerritoryListViewComponent({
             kind="territory"
             title="Nenhum chamado 1746 neste recorte"
             description="Nenhum chamado oficial encontrado com os filtros atuais."
+            action={{
+              title: 'Limpar filtros',
+              onPress: onResetFilters,
+            }}
+          />
+        )}
+      {dataReady &&
+        listed.length === 0 &&
+        !layers.includes('official') && (
+          <IllustratedEmptyState
+            kind="territory"
+            title="Nenhum equipamento neste recorte"
+            description="Nenhum equipamento público encontrado com os filtros atuais."
             action={{
               title: 'Limpar filtros',
               onPress: onResetFilters,

@@ -260,7 +260,8 @@ export async function listPublicFacilities(
     activeFacilities()!,
     inArray(publicFacilities.sourceId, sourceIds),
   ];
-  if (params.neighborhoodId) {
+  const hasAreaBounds = params.north !== undefined;
+  if (params.neighborhoodId && !hasAreaBounds) {
     try {
       await getBoundaryRecord(db, params.neighborhoodId);
     } catch (error) {
