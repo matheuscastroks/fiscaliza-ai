@@ -25,6 +25,8 @@ test('profile screen: adopts Apple Inset-Grouped tables and modern civic metrics
 
   // Sections
   assert.ok(content.includes('DOMICÍLIO CÍVICO'), 'Must group citizen locality under Domicílio Cívico');
+  assert.ok(content.includes('Cadastrar meu CEP'), 'Domicílio Cívico must feature single streamlined CEP registration for Rio citizens');
+  assert.ok(!content.includes('Município e Bairro'), 'Must eliminate redundant municipality selector as app is exclusively for Rio');
   assert.ok(content.includes('CONFIGURAÇÕES'), 'Must group settings in Apple Inset Table');
   assert.ok(content.includes('INFORMAÇÕES E TRANSPARÊNCIA'), 'Must group transparency links in Apple Inset Table');
   assert.ok(content.includes('PRIVACIDADE E CONTA'), 'Must group privacy and account actions');

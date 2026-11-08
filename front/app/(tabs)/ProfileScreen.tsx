@@ -352,7 +352,7 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
 
-        {/* Seção: Domicílio Cívico (Apple Inset-Grouped Table) */}
+        {/* Seção: Domicílio Cívico (Cadastro único de CEP Carioca) */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
             <Ionicons name="location-outline" size={13} color={colors.muted} />
@@ -369,8 +369,8 @@ export default function ProfileScreen() {
           >
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`Município e Bairro: ${
-                user?.municipality?.name || 'Rio de Janeiro'
+              accessibilityLabel={`CEP Residencial no Rio: ${
+                formattedCep || 'Cadastrar CEP'
               }`}
               onPress={() => {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -384,50 +384,19 @@ export default function ProfileScreen() {
               <View
                 style={[
                   styles.iconSquircle,
-                  { backgroundColor: colors.surfaceSubdued },
+                  { backgroundColor: colors.primaryContainer },
                 ]}
               >
-                <Ionicons name="business-outline" size={18} color={colors.primary} />
+                <Ionicons name="location" size={18} color={colors.primary} />
               </View>
               <View style={styles.tableRowContent}>
-                <AppText variant="label">Município e Bairro</AppText>
-                <AppText variant="caption" color="muted">
-                  {user?.municipality
-                    ? `${user.municipality.name} · ${user.neighborhood || 'Rio de Janeiro'}`
-                    : user?.neighborhood
-                      ? `Rio de Janeiro · ${user.neighborhood}`
-                      : 'Rio de Janeiro · RJ'}
+                <AppText variant="label">
+                  {formattedCep ? `CEP ${formattedCep}` : 'Cadastrar meu CEP'}
                 </AppText>
-              </View>
-              <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
-            </Pressable>
-
-            <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`CEP de Referência: ${formattedCep || 'Não informado'}`}
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push(user ? '/MunicipalityScreen' : '/PlacesScreen');
-              }}
-              style={({ pressed }) => [
-                styles.tableRow,
-                pressed && { backgroundColor: colors.surfaceSubdued },
-              ]}
-            >
-              <View
-                style={[
-                  styles.iconSquircle,
-                  { backgroundColor: colors.surfaceSubdued },
-                ]}
-              >
-                <Ionicons name="mail-outline" size={18} color={colors.primary} />
-              </View>
-              <View style={styles.tableRowContent}>
-                <AppText variant="label">CEP de Referência</AppText>
                 <AppText variant="caption" color="muted">
-                  {formattedCep ? `CEP ${formattedCep}` : 'Toque para cadastrar seu CEP'}
+                  {formattedCep
+                    ? `${user?.neighborhood ? `${user.neighborhood} · ` : ''}Rio de Janeiro, RJ`
+                    : 'Defina seu endereço residencial na cidade do Rio'}
                 </AppText>
               </View>
               <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
