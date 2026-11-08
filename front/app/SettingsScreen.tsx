@@ -16,6 +16,8 @@ import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useThemeStore, isThemePreference } from '@/stores/themeStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { useFollowStore } from '@/stores/followStore';
+import { useNotificationStore } from '@/stores/notificationStore';
+import { AppToast } from '@/components/ui/AppToast';
 import { spacing, useTheme } from '@/theme';
 const appearanceOptions = [
   {
@@ -47,6 +49,16 @@ export default function SettingsScreen() {
     hydrated,
   } = useFollowStore();
   const [confirm, setConfirm] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [testSending, setTestSending] = useState(false);
+
+  const {
+    pushToken,
+    permissionGranted,
+    isLoading: notificationLoading,
+    requestPermissions,
+    sendTestPush,
+  } = useNotificationStore();
   return (
     <AppScreen>
       <AppHeader title="Preferências" onBack={() => goBack()} />
@@ -113,6 +125,52 @@ export default function SettingsScreen() {
             <AppText color="risk" accessibilityRole="alert">
               {savedError}
             </AppText>
+          )}
+        </View>
+        <View style={{ gap: spacing.md }}>
+          <AppText variant="sectionTitle">Notificações e alertas</AppText>
+          <AppText color="muted">
+            Receba alertas quando os chamados que você salvou no 1746 tiverem atualização de status ou desfecho pela Prefeitura.
+          </AppText>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingVertical: spacing.xs,
+            }}
+          >
+            <View style={{ flex: 1, paddingRight: spacing.sm }}>
+              <AppText variant="label">Status das notificações</AppText>
+              <AppText variant="caption" color="muted">
+                {permissionGranted
+                  ? 'Permissão ativa neste aparelho'
+                  : 'Desativadas no momento'}
+              </AppText>
+            </View>
+            <AppButton
+              title={permissionGranted ? 'Ativadas' : 'Ativar'}
+              variant={permissionGranted ? 'secondary' : 'primary'}
+              disabled={notificationLoading || permissionGranted}
+              onPress={() => void requestPermissions()}
+            />
+          </View>
+          {permissionGranted && (
+            <AppButton
+              title="Testar notificação no aparelho"
+              variant="secondary"
+              disabled={testSending || !pushToken}
+              onPress={async () => {
+                setTestSending(true);
+                const success = await sendTestPush();
+                setTestSending(false);
+                setToastMessage(
+                  success
+                    ? 'Notificação de teste enviada com sucesso!'
+                    : 'Não foi possível enviar a notificação de teste.',
+                );
+              }}
+            />
           )}
         </View>
         <View style={{ gap: spacing.md }}>
@@ -186,6 +244,10 @@ export default function SettingsScreen() {
           />
         </BottomSheetView>
       </AppBottomSheetModal>
+      <AppToast
+        message={toastMessage}
+        onDismiss={() => setToastMessage(null)}
+      />
     </AppScreen>
   );
 }

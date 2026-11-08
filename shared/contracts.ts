@@ -140,3 +140,31 @@ export interface OfficialCallsOverview {
   lastPartitionDate: string | null;
   lastSyncedAt: string | null;
 }
+
+export interface PushTokenRegistrationPayload {
+  token: string;
+  platform: 'android' | 'ios' | 'web';
+  municipalityId?: string;
+}
+
+export interface FollowCallNotificationPayload {
+  callId: string;
+  token: string;
+}
+
+export interface UnfollowCallNotificationPayload {
+  callId: string;
+  token: string;
+}
+
+export interface TestNotificationPayload {
+  token: string;
+  title?: string;
+  body?: string;
+}
+
+export interface PushNotificationResult {
+  success: boolean;
+  ticketId?: string;
+  error?: string;
+}

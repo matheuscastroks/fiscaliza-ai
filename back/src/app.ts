@@ -16,6 +16,7 @@ import { registerOfficialCallsRoutes } from './official-calls.js';
 import { registerPublicDataRoutes } from './public-data.js';
 import { registerAuthRoutes } from './auth-routes.js';
 import { registerAttachmentsRoutes } from './attachments-routes.js';
+import { registerNotificationRoutes } from './notifications.js';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -340,6 +341,10 @@ export async function buildApp(
     ok,
     fail,
     municipalityId,
+  });
+
+  registerNotificationRoutes(app, {
+    customFetch: options.fetch,
   });
 
   return app;

@@ -2,6 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import type { OfficialCall } from '@/shared/contracts';
 
+let onFollowChanged: ((call: OfficialCall, saved: boolean) => void) | undefined;
+export function setFollowNotificationListener(
+  listener?: (call: OfficialCall, saved: boolean) => void,
+) {
+  onFollowChanged = listener;
+}
+
 export const FOLLOW_STORAGE_KEY = 'fiscaliza-ai:saved:rio1746:3304557:v1';
 export function followStorageKey(
   userId?: string | null,
@@ -257,6 +264,7 @@ export const useFollowStore = create<FollowStore>((set, get) => {
       if (!validCall(call, get().municipalityId)) return Promise.resolve(false);
       return persist(() => {
         const exists = get().isCallSaved(call.id);
+        onFollowChanged?.(call, !exists);
         const metadata = { ...get().metadata };
         if (exists) delete metadata[call.id];
         else
@@ -272,7 +280,13 @@ export const useFollowStore = create<FollowStore>((set, get) => {
         };
       });
     },
-    clearSavedCalls: () => persist(() => ({ savedCalls: [], metadata: {} })),
+    clearSavedCalls: () => {
+      const current = get().savedCalls;
+      for (const call of current) {
+        onFollowChanged?.(call, false);
+      }
+      return persist(() => ({ savedCalls: [], metadata: {} }));
+    },
     updateSnapshots: (calls) =>
       persist(() => {
         const municipalityId = get().municipalityId;

@@ -30,6 +30,8 @@ import { SignOutSheet } from '@/components/ui/SignOutSheet';
 import { useFollowStore } from '@/stores/followStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { usePlacesStore } from '@/stores/placesStore';
+import { useNotificationStore } from '@/stores/notificationStore';
+import * as Notifications from 'expo-notifications';
 
 import {
   useFonts,
@@ -61,6 +63,18 @@ export default function RootLayout() {
   useEffect(() => {
     void initialize();
   }, [initialize]);
+  useEffect(() => {
+    void useNotificationStore.getState().initialize(user?.municipality?.id || '3304557');
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const callId = response.notification.request.content.data?.callId;
+      if (typeof callId === 'string' && callId) {
+        router.push({ pathname: '/(tabs)/TerritoryScreen', params: { focusId: callId } });
+      }
+    });
+    return () => {
+      sub.remove();
+    };
+  }, [user?.municipality?.id]);
   useEffect(() => {
     if (!isReady) return;
     const userId = isAuthenticated && user?.id ? user.id : null;

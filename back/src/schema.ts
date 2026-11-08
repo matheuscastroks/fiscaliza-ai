@@ -183,3 +183,37 @@ export const sourceSyncRuns = pgTable('source_sync_runs', {
   rejectedCount: integer('rejected_count').notNull().default(0),
   details: jsonb('details').notNull().default({}),
 });
+
+export const userPushTokens = pgTable('user_push_tokens', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  pushToken: text('push_token').notNull().unique(),
+  platform: text('platform').notNull(),
+  municipalityId: text('municipality_id')
+    .notNull()
+    .references(() => municipalities.id),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const callNotificationFollowers = pgTable(
+  'call_notification_followers',
+  {
+    id: text('id').primaryKey(),
+    callId: text('call_id')
+      .notNull()
+      .references(() => officialCalls.id, { onDelete: 'cascade' }),
+    pushToken: text('push_token')
+      .notNull()
+      .references(() => userPushTokens.pushToken, { onDelete: 'cascade' }),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+    lastNotifiedStatus: text('last_notified_status'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+);
