@@ -548,32 +548,6 @@ function TerritoryFilterModalComponent({
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={true}
       >
-        {/* Banner Informativo de Recorte Geográfico Ativo (Single Source of Truth) */}
-        <View style={styles.scopeContextCard}>
-          <View style={styles.scopeContextIconCircle}>
-            <Ionicons
-              name={areaOnly ? 'scan-outline' : neighborhood ? 'business-outline' : 'globe-outline'}
-              size={18}
-              color={colors.onSurfaceBrand}
-            />
-          </View>
-          <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-            <AppText variant="caption" color="muted" style={styles.scopeContextSub}>
-              Recorte territorial em exibição
-            </AppText>
-            <AppText variant="label" numberOfLines={1} style={styles.scopeContextTitle}>
-              {areaOnly
-                ? 'Área visível no mapa'
-                : neighborhood
-                  ? `Bairro ${neighborhood}`
-                  : 'Todo o município do Rio de Janeiro'}
-            </AppText>
-            <AppText variant="caption" color="muted" style={{ fontSize: 11 }}>
-              Definido diretamente no mapa e na barra de busca
-            </AppText>
-          </View>
-        </View>
-
         {/* Seletor Principal de Domínio: Chamados 1746 vs. Serviços Públicos */}
         <View style={styles.domainTabsTrack}>
           <Pressable
@@ -645,198 +619,188 @@ function TerritoryFilterModalComponent({
 
         {/* CONTEÚDO DA ABA: CHAMADOS 1746 */}
         {territoryDomain === 'calls' && (
-          <>
-            {/* Card: Filtros dos Chamados 1746 */}
-            <View style={styles.sectionCard}>
-              <View style={styles.sectionTitleRow}>
-                <Ionicons name="construct" size={14} color={colors.accent} />
-                <AppText variant="caption" style={styles.sectionTitle}>
-                  Demandas e Zeladoria (1746)
+          <View style={styles.filterFormContainer}>
+            {/* Seção 1: Macro-temas Cívicos */}
+            <View style={styles.filterSection}>
+              <View style={styles.sectionHeaderRow}>
+                <Ionicons name="apps-outline" size={14} color={colors.accent} />
+                <AppText variant="caption" style={styles.sectionHeaderTitle}>
+                  Tema Cívico
                 </AppText>
               </View>
 
-              <View style={styles.filterSubfield}>
-                <AppText
-                  variant="caption"
-                  color="muted"
-                  style={styles.fieldSubLabel}
-                >
-                  Macro-temas cívicos
-                </AppText>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.macroThemesTrack}
-                >
-                  {CIVIC_MACRO_THEMES.map((theme) => {
-                    const isSelected = macroTheme === theme.id;
-                    return (
-                      <Pressable
-                        key={theme.id}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Filtrar por ${theme.label}`}
-                        accessibilityState={{ selected: isSelected }}
-                        onPress={() => {
-                          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          onMacroThemeChange(theme.id);
-                          if (theme.id !== 'all' && !matchesMacroTheme(serviceType, null, theme.id)) {
-                            onServiceTypeChange('all');
-                          }
-                        }}
+              <View style={styles.macroThemesTrack}>
+                {CIVIC_MACRO_THEMES.map((theme) => {
+                  const isSelected = macroTheme === theme.id;
+                  return (
+                    <Pressable
+                      key={theme.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Filtrar por ${theme.label}`}
+                      accessibilityState={{ selected: isSelected }}
+                      onPress={() => {
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        onMacroThemeChange(theme.id);
+                        if (theme.id !== 'all' && !matchesMacroTheme(serviceType, null, theme.id)) {
+                          onServiceTypeChange('all');
+                        }
+                      }}
+                      style={[
+                        styles.macroThemeChip,
+                        isSelected && styles.macroThemeChipSelected,
+                      ]}
+                    >
+                      <Ionicons
+                        name={theme.icon as React.ComponentProps<typeof Ionicons>['name']}
+                        size={14}
+                        color={isSelected ? colors.onAccentBrand : colors.ink}
+                      />
+                      <AppText
+                        variant="caption"
                         style={[
-                          styles.macroThemeChip,
-                          isSelected && styles.macroThemeChipSelected,
+                          styles.macroThemeChipText,
+                          isSelected && styles.macroThemeChipTextSelected,
                         ]}
                       >
-                        <Ionicons
-                          name={theme.icon as React.ComponentProps<typeof Ionicons>['name']}
-                          size={14}
-                          color={isSelected ? colors.onAccentBrand : colors.ink}
-                        />
-                        <AppText
-                          variant="caption"
-                          style={[
-                            styles.macroThemeChipText,
-                            isSelected && styles.macroThemeChipTextSelected,
-                          ]}
-                        >
-                          {theme.label}
-                        </AppText>
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-
-              <View style={styles.filterSubfield}>
-                <AppText
-                  variant="caption"
-                  color="muted"
-                  style={styles.fieldSubLabel}
-                >
-                  Subtipo específico
-                </AppText>
-                <AppSelect
-                  label="Tipo de serviço 1746"
-                  placeholder="Buscar tipo de serviço..."
-                  icon="construct-outline"
-                  defaultValue="all"
-                  options={filteredServiceOptions}
-                  value={serviceType}
-                  onChange={onServiceTypeChange}
-                />
-              </View>
-
-              <View style={styles.filterSubfield}>
-                <AppText
-                  variant="caption"
-                  color="muted"
-                  style={styles.fieldSubLabel}
-                >
-                  Situação
-                </AppText>
-                <View style={styles.segmentContainer}>
-                  {[
-                    { value: 'all', label: 'Todas', dotColor: null },
-                    { value: 'Não Encerrado', label: 'Abertos', dotColor: '#10B981' },
-                    { value: 'Encerrado', label: 'Encerrados', dotColor: '#6B7280' },
-                  ].map((opt) => {
-                    const isSelected = status === opt.value;
-                    return (
-                      <Pressable
-                        key={opt.value}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: isSelected }}
-                        onPress={() => {
-                          void Haptics.impactAsync(
-                            Haptics.ImpactFeedbackStyle.Light,
-                          );
-                          onStatusChange(opt.value);
-                        }}
-                        style={[
-                          styles.segmentButton,
-                          isSelected && styles.segmentButtonActive,
-                        ]}
-                      >
-                        {opt.dotColor && (
-                          <View
-                            style={{
-                              width: 6,
-                              height: 6,
-                              borderRadius: 3,
-                              backgroundColor: opt.dotColor,
-                              marginRight: 6,
-                            }}
-                          />
-                        )}
-                        <AppText
-                          variant="caption"
-                          style={[
-                            styles.segmentText,
-                            isSelected && styles.segmentTextActive,
-                          ]}
-                        >
-                          {opt.label}
-                        </AppText>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
-
-              <View style={styles.filterSubfield}>
-                <AppText
-                  variant="caption"
-                  color="muted"
-                  style={styles.fieldSubLabel}
-                >
-                  Período
-                </AppText>
-                <View style={styles.wrapChipsRow}>
-                  {periodOptions.map((opt) => {
-                    const isSelected = period === opt.value;
-                    return (
-                      <Pressable
-                        key={opt.value}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: isSelected }}
-                        onPress={() => {
-                          void Haptics.impactAsync(
-                            Haptics.ImpactFeedbackStyle.Light,
-                          );
-                          onPeriodChange(opt.value);
-                        }}
-                        style={[
-                          styles.periodChip,
-                          isSelected && styles.periodChipActive,
-                        ]}
-                      >
-                        <AppText
-                          variant="caption"
-                          style={[
-                            styles.periodChipText,
-                            isSelected && styles.periodChipTextActive,
-                          ]}
-                        >
-                          {opt.label}
-                        </AppText>
-                      </Pressable>
-                    );
-                  })}
-                </View>
+                        {theme.label}
+                      </AppText>
+                    </Pressable>
+                  );
+                })}
               </View>
             </View>
-          </>
+
+            {/* Seção 2: Subtipo Específico */}
+            <View style={styles.filterSection}>
+              <View style={styles.sectionHeaderRow}>
+                <Ionicons name="construct-outline" size={14} color={colors.accent} />
+                <AppText variant="caption" style={styles.sectionHeaderTitle}>
+                  Subtipo Específico (1746)
+                </AppText>
+              </View>
+              <AppSelect
+                label="Tipo de serviço 1746"
+                placeholder="Buscar tipo de serviço..."
+                icon="construct-outline"
+                defaultValue="all"
+                options={filteredServiceOptions}
+                value={serviceType}
+                onChange={onServiceTypeChange}
+              />
+            </View>
+
+            <View style={styles.sectionDivider} />
+
+            {/* Seção 3: Situação */}
+            <View style={styles.filterSection}>
+              <View style={styles.sectionHeaderRow}>
+                <Ionicons name="filter-circle-outline" size={14} color={colors.accent} />
+                <AppText variant="caption" style={styles.sectionHeaderTitle}>
+                  Situação do Chamado
+                </AppText>
+              </View>
+              <View style={styles.segmentContainer}>
+                {[
+                  { value: 'all', label: 'Todas', dotColor: null },
+                  { value: 'Não Encerrado', label: 'Abertos', dotColor: '#10B981' },
+                  { value: 'Encerrado', label: 'Encerrados', dotColor: '#6B7280' },
+                ].map((opt) => {
+                  const isSelected = status === opt.value;
+                  return (
+                    <Pressable
+                      key={opt.value}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: isSelected }}
+                      onPress={() => {
+                        void Haptics.impactAsync(
+                          Haptics.ImpactFeedbackStyle.Light,
+                        );
+                        onStatusChange(opt.value);
+                      }}
+                      style={[
+                        styles.segmentButton,
+                        isSelected && styles.segmentButtonActive,
+                      ]}
+                    >
+                      {opt.dotColor && (
+                        <View
+                          style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: 3,
+                            backgroundColor: opt.dotColor,
+                            marginRight: 6,
+                          }}
+                        />
+                      )}
+                      <AppText
+                        variant="caption"
+                        style={[
+                          styles.segmentText,
+                          isSelected && styles.segmentTextActive,
+                        ]}
+                      >
+                        {opt.label}
+                      </AppText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
+            <View style={styles.sectionDivider} />
+
+            {/* Seção 4: Período */}
+            <View style={styles.filterSection}>
+              <View style={styles.sectionHeaderRow}>
+                <Ionicons name="calendar-outline" size={14} color={colors.accent} />
+                <AppText variant="caption" style={styles.sectionHeaderTitle}>
+                  Período de Abertura
+                </AppText>
+              </View>
+              <View style={styles.wrapChipsRow}>
+                {periodOptions.map((opt) => {
+                  const isSelected = period === opt.value;
+                  return (
+                    <Pressable
+                      key={opt.value}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: isSelected }}
+                      onPress={() => {
+                        void Haptics.impactAsync(
+                          Haptics.ImpactFeedbackStyle.Light,
+                        );
+                        onPeriodChange(opt.value);
+                      }}
+                      style={[
+                        styles.periodChip,
+                        isSelected && styles.periodChipActive,
+                      ]}
+                    >
+                      <AppText
+                        variant="caption"
+                        style={[
+                          styles.periodChipText,
+                          isSelected && styles.periodChipTextActive,
+                        ]}
+                      >
+                        {opt.label}
+                      </AppText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          </View>
         )}
 
         {/* CONTEÚDO DA ABA: SERVIÇOS PÚBLICOS */}
         {territoryDomain === 'facilities' && (
-          <>
-            {/* Card: Equipamentos Municipais */}
-            <View style={styles.sectionCard}>
-              <View style={styles.sectionTitleRow}>
+          <View style={styles.filterFormContainer}>
+            <View style={styles.filterSection}>
+              <View style={styles.sectionHeaderRow}>
                 <Ionicons name="business" size={14} color={colors.accent} />
-                <AppText variant="caption" style={styles.sectionTitle}>
+                <AppText variant="caption" style={styles.sectionHeaderTitle}>
                   Equipamentos Públicos no Mapa
                 </AppText>
               </View>
@@ -849,8 +813,9 @@ function TerritoryFilterModalComponent({
               </AppText>
 
               <View style={styles.facilityCardsContainer}>
-                {FACILITY_CONFIGS.map((cfg) => {
+                {FACILITY_CONFIGS.map((cfg, index) => {
                   const isSelected = savedFacilityLayers.includes(cfg.id);
+                  const isLast = index === FACILITY_CONFIGS.length - 1;
                   return (
                     <Pressable
                       key={cfg.id}
@@ -860,6 +825,7 @@ function TerritoryFilterModalComponent({
                       onPress={() => toggleFacility(cfg.id)}
                       style={({ pressed }) => [
                         styles.facilityCardRow,
+                        !isLast && styles.facilityCardRowDivider,
                         isSelected && styles.facilityCardRowSelected,
                         pressed && { opacity: 0.8 },
                       ]}
@@ -913,7 +879,7 @@ function TerritoryFilterModalComponent({
                 })}
               </View>
             </View>
-          </>
+          </View>
         )}
 
         {/* Aviso preventivo de filtro vazio no recorte */}
@@ -1229,6 +1195,30 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.ink,
       fontWeight: '800',
     },
+    filterFormContainer: {
+      gap: spacing.md,
+    },
+    filterSection: {
+      gap: spacing.xs + 2,
+    },
+    sectionHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginBottom: 2,
+    },
+    sectionHeaderTitle: {
+      fontWeight: '800',
+      letterSpacing: 0.6,
+      fontSize: 11,
+      color: colors.muted,
+      textTransform: 'uppercase',
+    },
+    sectionDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.divider,
+      marginVertical: spacing.xxs,
+    },
     sectionCard: {
       backgroundColor: colors.surface,
       borderRadius: layout.radius.panel,
@@ -1255,26 +1245,31 @@ const createStyles = (colors: ThemeColors) =>
       marginBottom: 2,
     },
     facilityCardsContainer: {
-      gap: 8,
+      borderRadius: layout.radius.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      overflow: 'hidden',
     },
     facilityCardRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
-      padding: 14,
-      borderRadius: layout.radius.panel,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
       backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
+    },
+    facilityCardRowDivider: {
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.divider,
     },
     facilityCardRowSelected: {
-      borderColor: colors.onSurfaceBrand,
       backgroundColor: colors.surfaceSubdued,
     },
     facilityIconBadge: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: 38,
+      height: 38,
+      borderRadius: 19,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -1361,9 +1356,9 @@ const createStyles = (colors: ThemeColors) =>
     },
     macroThemesTrack: {
       flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.xs,
-      paddingVertical: spacing.xxs,
+      flexWrap: 'wrap',
+      gap: 8,
+      paddingVertical: 2,
     },
     macroThemeChip: {
       flexDirection: 'row',

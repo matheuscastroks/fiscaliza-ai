@@ -66,18 +66,26 @@ test('territory filter bar: integrates unified search island and 1-tap quick fil
   );
 });
 
-test('decluttered filter modal: removes duplicate geographical selectors and focuses on civic attributes', () => {
+test('decluttered filter modal: removes duplicate geographical selectors and adopts frameless civic sections', () => {
   const filterBarPath = path.join(ROOT_DIR, 'components', 'territory', 'TerritoryFilterBar.tsx');
   const content = fs.readFileSync(filterBarPath, 'utf8');
 
-  // Scope context banner
+  // Declutter: removed redundant scope banner from modal body
   assert.ok(
-    content.includes('scopeContextCard'),
-    'Filter modal must show informative scopeContextCard at top',
+    !content.includes('Recorte territorial em exibição'),
+    'Filter modal must NOT render redundant scope banner inside sheet body',
   );
   assert.ok(
-    content.includes('Recorte territorial em exibição'),
-    'Must inform active territorial scope without redundant interactive pickers',
+    content.includes('filterFormContainer'),
+    'Filter modal must use frameless filterFormContainer instead of nested cards',
+  );
+  assert.ok(
+    content.includes('macroThemesTrack'),
+    'Filter modal must preserve macroThemesTrack',
+  );
+  assert.ok(
+    content.includes("flexWrap: 'wrap'"),
+    'macroThemesTrack must use wrap layout to avoid horizontal scroll deadlock in bottom sheet',
   );
 
   // No duplicate pickers in modal
@@ -139,5 +147,10 @@ test('territory screen: respects architecture constraints and line ceiling', () 
   assert.ok(
     lines < 900,
     `TerritoryScreen should stay below 900 lines, currently at ${lines}`,
+  );
+
+  assert.ok(
+    content.includes('top: insets.top + 100'),
+    'Contextual search pill must be placed right below top search bar (top: insets.top + 100)',
   );
 });

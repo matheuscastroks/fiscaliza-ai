@@ -667,7 +667,7 @@ export function TerritoryContent() {
 
       {/* Botão Contextual Flutuante: Buscar Nesta Área (só aparece se moveu a câmera ou se área estiver ativa) */}
       {!effectiveListView && (hasMovedCamera || areaOnly) && (
-        <View style={[styles.contextualAreaPillContainer, { top: insets.top + 148 }]}>
+        <View style={[styles.contextualAreaPillContainer, { top: insets.top + 100 }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={areaOnly ? 'Voltar ao recorte selecionado' : 'Buscar nesta área'}
