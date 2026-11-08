@@ -340,6 +340,7 @@ export function TerritoryContent() {
   const handleLocateEntry = useCallback(
     (entry: Entry) => {
       if (!mapAvailable) return;
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       const point = entryLocation(entry);
       setSelectedId(entry.item.id);
       setSelectedCluster(null);

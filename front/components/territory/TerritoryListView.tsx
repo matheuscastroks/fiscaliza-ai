@@ -196,8 +196,8 @@ function TerritoryListViewComponent({
         visible={visible}
         onClose={() => onClose?.()}
         title={sectionHeading}
-        snapPoints={['62%', '92%']}
-        backdropOpacity={0.22}
+        snapPoints={['48%', '75%', '92%']}
+        backdropOpacity={0.16}
       >
         <BottomSheetFlatList<Entry>
           data={listed}
