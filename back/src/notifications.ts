@@ -44,11 +44,11 @@ export async function sendExpoPushNotification(
 
   const messages = validTokens.map((token) => ({
     to: token,
-    sound: payload.sound ?? 'default',
+    ...(payload.sound ? { sound: payload.sound } : {}),
     title: payload.title,
     body: payload.body,
     data: payload.data ?? {},
-    channelId: payload.channelId ?? 'fiscaliza-calls',
+    channelId: payload.channelId ?? 'fiscaliza-calls-v2',
   }));
 
   try {

@@ -22,7 +22,7 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export const NOTIFICATION_CHANNEL_ID = 'fiscaliza-calls';
+export const NOTIFICATION_CHANNEL_ID = 'fiscaliza-calls-v2';
 
 /**
  * Cria o canal de notificações no Android (necessário a partir do Android 8+)
@@ -34,7 +34,6 @@ export async function setupNotificationChannels(): Promise<void> {
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#16576C',
-      sound: 'default',
       enableVibrate: true,
     });
   }

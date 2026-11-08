@@ -56,5 +56,6 @@ test('notifications: sendExpoPushNotification posts to Expo Push API with correc
   assert.equal(parsed[0].title, 'Chamado Atualizado');
   assert.equal(parsed[0].body, 'O chamado 1746 foi resolvido');
   assert.equal(parsed[0].data.callId, 'call-abc-123');
-  assert.equal(parsed[0].channelId, 'fiscaliza-calls');
+  assert.equal(parsed[0].sound, undefined);
+  assert.equal(parsed[0].channelId, 'fiscaliza-calls-v2');
 });

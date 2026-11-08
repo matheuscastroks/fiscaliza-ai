@@ -15,7 +15,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.anonymous.fiscalizaai"
+      "package": "com.anonymous.fiscalizaai",
+      "googleServicesFile": "./google-services.json"
     },
     "androidStatusBar": {
       "barStyle": "dark-content",
