@@ -5,6 +5,8 @@ import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { CitizenAction } from '@/features/city/CitizenAction';
+import { QuickComplaintKit } from '@/features/city/QuickComplaintKit';
+import { useTerritoryStore } from '@/stores/territoryStore';
 import {
   OfficialChannel,
   OFFICIAL_PORTAL,
@@ -43,6 +45,8 @@ const PREPARATION_STEPS: {
 
 export default function ParticipateScreen() {
   const { colors } = useTheme();
+  const neighborhood = useTerritoryStore((s) => s.neighborhood);
+
   return (
     <AppScreen>
       <AppHeader
@@ -56,6 +60,11 @@ export default function ParticipateScreen() {
           gap: spacing.xl,
         }}
       >
+        {/* Assistente Prático: Monte e Envie sua Solicitação */}
+        <QuickComplaintKit
+          defaultLocation={neighborhood ? `${neighborhood}, Rio de Janeiro` : 'Rio de Janeiro'}
+        />
+
         {/* Bloco 1: Cadastro, Login e Acompanhamento Direto no 1746.rio */}
         <View style={[styles.accountCard, { backgroundColor: colors.surface }]}>
           <AppText variant="caption" color="muted">
