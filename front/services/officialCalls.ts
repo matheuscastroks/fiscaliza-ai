@@ -23,6 +23,7 @@ export async function fetchOfficialCalls(
   if (params.neighborhoodId) query.set('neighborhoodId', params.neighborhoodId);
   else if (params.bairro) query.set('bairro', params.bairro);
   if (params.tipo) query.set('tipo', params.tipo);
+  if (params.tema) query.set('tema', params.tema);
   if (params.subtipo) query.set('subtipo', params.subtipo);
   if (params.situacao) query.set('situacao', params.situacao);
   if (params.hasCoordinates !== undefined) {

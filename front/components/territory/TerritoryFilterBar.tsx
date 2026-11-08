@@ -1,6 +1,6 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   View,
   ScrollView,
@@ -258,6 +258,8 @@ export interface TerritoryFilterModalProps {
   bairroOptions: string[];
   neighborhood: string;
   onNeighborhoodChange: (value: string) => void;
+  macroTheme: string;
+  onMacroThemeChange: (value: string) => void;
   serviceType: string;
   serviceTypeOptions: { value: string; label: string }[];
   onServiceTypeChange: (value: string) => void;
@@ -283,6 +285,8 @@ function TerritoryFilterModalComponent({
   bairroOptions,
   neighborhood,
   onNeighborhoodChange,
+  macroTheme,
+  onMacroThemeChange,
   serviceType,
   serviceTypeOptions,
   onServiceTypeChange,
@@ -302,8 +306,6 @@ function TerritoryFilterModalComponent({
   const styles = useThemedStyles(createStyles);
   const insets = useSafeAreaInsets();
   const snapPoints = useMemo(() => ['78%', '94%'], []);
-
-  const [macroTheme, setMacroTheme] = useState<string>('all');
 
   const filteredServiceOptions = useMemo(() => {
     if (macroTheme === 'all') return serviceTypeOptions;
@@ -488,7 +490,7 @@ function TerritoryFilterModalComponent({
                         accessibilityState={{ selected: isSelected }}
                         onPress={() => {
                           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          setMacroTheme(theme.id);
+                          onMacroThemeChange(theme.id);
                           if (theme.id !== 'all' && !matchesMacroTheme(serviceType, null, theme.id)) {
                             onServiceTypeChange('all');
                           }
@@ -994,7 +996,6 @@ function TerritoryFilterModalComponent({
             accessibilityLabel="Limpar todos os filtros"
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setMacroTheme('all');
               onReset();
             }}
             style={({ pressed }) => [

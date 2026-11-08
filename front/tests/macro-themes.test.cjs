@@ -27,3 +27,59 @@ test('macro-themes: filter modal renders quick civic chips and filters subservic
   assert.ok(content.includes('macroThemesTrack'), 'Filter modal must render horizontal macro themes track');
   assert.ok(content.includes('filteredServiceOptions'), 'Must dynamically filter specific subservices by selected macro theme');
 });
+
+function loadSharedThemes() {
+  const ts = require('typescript');
+  const vm = require('node:vm');
+  const module = { exports: {} };
+  const file = path.resolve(ROOT_DIR, '..', 'shared', 'service-themes.ts');
+  const source = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  vm.runInNewContext(source, {
+    module,
+    exports: module.exports,
+    Error,
+  });
+  return module.exports;
+}
+
+test('macro-themes: shared classifier matches the server filter', () => {
+  const {
+    MACRO_THEME_IDS,
+    isMacroThemeId,
+    resolveServiceThemeId,
+    serviceTypesForTheme,
+  } = loadSharedThemes();
+
+  assert.deepEqual(Array.from(MACRO_THEME_IDS), [
+    'road',
+    'lighting',
+    'cleaning',
+    'nature',
+    'drainage',
+    'traffic',
+  ]);
+  assert.equal(isMacroThemeId('lighting'), true);
+  assert.equal(isMacroThemeId('all'), false);
+  assert.equal(isMacroThemeId(undefined), false);
+
+  assert.equal(resolveServiceThemeId('Iluminação Pública', null), 'lighting');
+  assert.equal(resolveServiceThemeId('Tapa-buraco', null), 'road');
+  assert.equal(resolveServiceThemeId('Coleta de lixo', null), 'cleaning');
+  assert.equal(resolveServiceThemeId('Poda de árvore', null), 'nature');
+  assert.equal(resolveServiceThemeId('Desobstrução de bueiro', null), 'drainage');
+  assert.equal(resolveServiceThemeId('Semáforo apagado', null), 'traffic');
+  assert.equal(resolveServiceThemeId('Serviço genérico', null), 'general');
+  assert.equal(resolveServiceThemeId('Serviço genérico', 'poste apagado'), 'lighting');
+
+  assert.deepEqual(
+    Array.from(
+      serviceTypesForTheme(
+        ['Iluminação Pública', 'Tapa-buraco', 'Coleta de lixo', 'Semáforo'],
+        'lighting',
+      ),
+    ),
+    ['Iluminação Pública'],
+  );
+});

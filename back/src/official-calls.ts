@@ -18,6 +18,7 @@ import {
   gte,
   getTableColumns,
   ilike,
+  inArray,
   isNotNull,
   lte,
   or,
@@ -31,6 +32,28 @@ import {
   getPublicSyncStatus,
 } from './integrations/rio1746/sync.js';
 import type { OfficialCall } from '../../shared/contracts.js';
+import {
+  isMacroThemeId,
+  serviceTypesForTheme,
+} from '../../shared/service-themes.js';
+
+const SERVICE_TYPES_TTL_MS = 5 * 60 * 1000;
+const serviceTypesCache = new WeakMap<Database, { at: number; types: string[] }>();
+
+/** Tipos distintos do 1746, usados para resolver o filtro de macrotema. */
+async function distinctServiceTypes(db: Database): Promise<string[]> {
+  const cached = serviceTypesCache.get(db);
+  if (cached && Date.now() - cached.at < SERVICE_TYPES_TTL_MS) {
+    return cached.types;
+  }
+  const rows = await db
+    .selectDistinct({ type: officialCalls.serviceType })
+    .from(officialCalls)
+    .where(eq(officialCalls.municipalityId, '3304557'));
+  const types = rows.map((r) => r.type).filter(Boolean) as string[];
+  serviceTypesCache.set(db, { at: Date.now(), types });
+  return types;
+}
 
 function formatOfficialCall(
   row: typeof officialCalls.$inferSelect,
@@ -102,6 +125,7 @@ export function registerOfficialCallsRoutes(
       neighborhoodId?: string;
       bairro?: string;
       tipo?: string;
+      tema?: string;
       subtipo?: string;
       situacao?: string;
       hasCoordinates?: string;
@@ -154,6 +178,14 @@ export function registerOfficialCallsRoutes(
     }
     if (req.query.tipo) {
       conditions.push(eq(officialCalls.serviceType, req.query.tipo.trim()));
+    }
+    if (req.query.tema) {
+      const tema = req.query.tema.trim();
+      if (!isMacroThemeId(tema)) throw fail(400, 'Tema de serviço inválido.');
+      const types = serviceTypesForTheme(await distinctServiceTypes(db), tema);
+      conditions.push(
+        types.length > 0 ? inArray(officialCalls.serviceType, types) : sql`false`,
+      );
     }
     if (req.query.subtipo) {
       conditions.push(
@@ -327,6 +359,7 @@ export function registerOfficialCallsRoutes(
       neighborhoodId?: string;
       bairro?: string;
       tipo?: string;
+      tema?: string;
       situacao?: string;
       periodDays?: string;
       startDate?: string;
@@ -347,6 +380,14 @@ export function registerOfficialCallsRoutes(
     }
     if (req.query.tipo) {
       conditions.push(eq(officialCalls.serviceType, req.query.tipo.trim()));
+    }
+    if (req.query.tema) {
+      const tema = req.query.tema.trim();
+      if (!isMacroThemeId(tema)) throw fail(400, 'Tema de serviço inválido.');
+      const types = serviceTypesForTheme(await distinctServiceTypes(db), tema);
+      conditions.push(
+        types.length > 0 ? inArray(officialCalls.serviceType, types) : sql`false`,
+      );
     }
     if (req.query.situacao) {
       conditions.push(

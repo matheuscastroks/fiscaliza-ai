@@ -3,6 +3,8 @@
  * com imagens de alta resolução (Unsplash) e gradientes otimizados.
  */
 
+import { resolveServiceThemeId } from '@/shared/service-themes';
+
 export interface ServiceCategoryTheme {
   id: string;
   label: string;
@@ -163,97 +165,7 @@ export function resolveServiceCategoryTheme(
   serviceType?: string | null,
   serviceSubtype?: string | null,
 ): ServiceCategoryTheme {
-  const combined = `${serviceType || ''} ${serviceSubtype || ''}`.toLowerCase();
-
-  if (
-    combined.includes('ilumina') ||
-    combined.includes('poste') ||
-    combined.includes('lâmpada')
-  ) {
-    return OFFICIAL_CATEGORIES_THEMES.lighting;
-  }
-  if (
-    combined.includes('estacionamento') ||
-    combined.includes('veículo') ||
-    combined.includes('paviment') ||
-    combined.includes('buraco') ||
-    combined.includes('asfalto') ||
-    combined.includes('vias públicas')
-  ) {
-    return OFFICIAL_CATEGORIES_THEMES.road;
-  }
-  if (
-    combined.includes('limpeza') ||
-    combined.includes('lixo') ||
-    combined.includes('remoção') ||
-    combined.includes('entulho') ||
-    combined.includes('coleta') ||
-    combined.includes('contêiner') ||
-    combined.includes('caçamba')
-  ) {
-    return OFFICIAL_CATEGORIES_THEMES.cleaning;
-  }
-  if (
-    combined.includes('semáforo') ||
-    combined.includes('sinal') ||
-    combined.includes('trânsito') ||
-    combined.includes('multa')
-  ) {
-    return OFFICIAL_CATEGORIES_THEMES.traffic;
-  }
-  if (
-    combined.includes('árvore') ||
-    combined.includes('arbóreo') ||
-    combined.includes('ambiente') ||
-    combined.includes('mata')
-  ) {
-    return OFFICIAL_CATEGORIES_THEMES.nature;
-  }
-  if (
-    combined.includes('drenagem') ||
-    combined.includes('esgoto') ||
-    combined.includes('saneamento') ||
-    combined.includes('alagamento') ||
-    combined.includes('bueiro')
-  ) {
-    return OFFICIAL_CATEGORIES_THEMES.drainage;
-  }
-  if (
-    combined.includes('saúde') ||
-    combined.includes('clínica') ||
-    combined.includes('hospital') ||
-    combined.includes('sisreg') ||
-    combined.includes('remédio')
-  ) {
-    return OFFICIAL_CATEGORIES_THEMES.health;
-  }
-  if (
-    combined.includes('animal') ||
-    combined.includes('cão') ||
-    combined.includes('gato') ||
-    combined.includes('roedor') ||
-    combined.includes('caramujo')
-  ) {
-    return OFFICIAL_CATEGORIES_THEMES.animals;
-  }
-  if (
-    combined.includes('ônibus') ||
-    combined.includes('brt') ||
-    combined.includes('transporte')
-  ) {
-    return OFFICIAL_CATEGORIES_THEMES.transit;
-  }
-  if (
-    combined.includes('cadastro único') ||
-    combined.includes('social') ||
-    combined.includes('cidadão') ||
-    combined.includes('sossego') ||
-    combined.includes('alvará') ||
-    combined.includes('iptu') ||
-    combined.includes('obra')
-  ) {
-    return OFFICIAL_CATEGORIES_THEMES.social;
-  }
-
-  return OFFICIAL_CATEGORIES_THEMES.general;
+  return OFFICIAL_CATEGORIES_THEMES[
+    resolveServiceThemeId(serviceType, serviceSubtype)
+  ];
 }

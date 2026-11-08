@@ -99,6 +99,8 @@ export interface OfficialCallsQueryParams {
   limit?: number;
   bairro?: string;
   tipo?: string;
+  /** Macrotema (ver shared/service-themes.ts); resolvido no servidor. */
+  tema?: string;
   subtipo?: string;
   situacao?: string;
   hasCoordinates?: boolean;
