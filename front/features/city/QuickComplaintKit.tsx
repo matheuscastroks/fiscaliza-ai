@@ -29,6 +29,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
   const [selectedTopic, setSelectedTopic] = useState<string>('buraco');
   const [address, setAddress] = useState(defaultLocation);
   const [description, setDescription] = useState('');
+  const [detailsHeight, setDetailsHeight] = useState(80);
   const [showPreview, setShowPreview] = useState(false);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
 
@@ -38,6 +39,13 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
       setAddress(defaultLocation);
     }
   }, [defaultLocation, address]);
+
+  // Reseta altura mínima se o texto for limpo
+  useEffect(() => {
+    if (!description) {
+      setDetailsHeight(80);
+    }
+  }, [description]);
 
   const topicLabel = useMemo(
     () => COMPLAINT_TOPICS.find((t) => t.id === selectedTopic)?.label || 'Demanda urbana',
@@ -188,10 +196,11 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
           value={address}
           onChangeText={setAddress}
           returnKeyType="next"
+          containerStyle={{ marginBottom: 0 }}
         />
       </View>
 
-      {/* 3. Detalhes Adicionais (Opcional) */}
+      {/* 3. Detalhes Adicionais (Textarea auto-expansível com cantos suaves) */}
       <View style={styles.fieldBlock}>
         <View style={styles.fieldLabelRow}>
           <Ionicons name="document-text-outline" size={13} color={colors.muted} />
@@ -200,10 +209,19 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
           </AppText>
         </View>
         <AppInput
-          placeholder="Ex: Buraco profundo na faixa da direita / Luz piscando à noite"
+          placeholder="Ex: Buraco profundo na faixa da direita / Luz piscando à noite / Galhos caídos bloqueando a calçada"
           value={description}
           onChangeText={setDescription}
-          returnKeyType="done"
+          multiline
+          numberOfLines={3}
+          onContentSizeChange={(e) => {
+            const h = e.nativeEvent?.contentSize?.height;
+            if (h && typeof h === 'number' && h > 0) {
+              setDetailsHeight(Math.max(80, Math.min(180, Math.ceil(h + 24))));
+            }
+          }}
+          containerStyle={{ marginBottom: 0 }}
+          style={[styles.detailsTextarea, { height: detailsHeight }]}
         />
       </View>
 
@@ -360,6 +378,15 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.primary,
       fontSize: 11,
       fontWeight: '700',
+    },
+    detailsTextarea: {
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingTop: 12,
+      paddingBottom: 12,
+      textAlignVertical: 'top',
+      fontSize: 14,
+      lineHeight: 20,
     },
     previewToggle: {
       flexDirection: 'row',

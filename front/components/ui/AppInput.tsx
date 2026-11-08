@@ -168,11 +168,13 @@ const createStyles = (colors: ThemeColors) =>
       fontFamily: fontFamilies.regular,
     },
     multiline: {
-      minHeight: 120,
+      minHeight: 80,
       maxHeight: 192,
-      borderRadius: layout.radius.panel,
+      borderRadius: 12,
       textAlignVertical: 'top',
-      paddingTop: spacing.md,
+      paddingTop: spacing.sm + 4,
+      paddingHorizontal: spacing.md,
+      paddingBottom: spacing.sm + 4,
     },
     inputFocused: {
       borderColor: colors.borderActive,

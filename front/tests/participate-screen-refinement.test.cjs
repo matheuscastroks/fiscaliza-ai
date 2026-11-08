@@ -5,7 +5,7 @@ const path = require('node:path');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 
-test('quick complaint kit: incorporates progressive disclosure, smart location pill and topics grid', () => {
+test('quick complaint kit: incorporates progressive disclosure, smart location pill, auto-growing textarea and topics grid', () => {
   const kitPath = path.join(ROOT_DIR, 'features', 'city', 'QuickComplaintKit.tsx');
   assert.ok(fs.existsSync(kitPath), 'QuickComplaintKit.tsx must exist');
 
@@ -18,6 +18,16 @@ test('quick complaint kit: incorporates progressive disclosure, smart location p
   assert.ok(content.includes('showPreview'), 'Must support progressive disclosure with preview toggle');
   assert.ok(content.includes('suggestedLocationPill'), 'Must offer 1-tap suggested location pill');
   assert.ok(content.includes('Haptics'), 'Must provide haptic feedback on user actions');
+
+  // Textarea auto-expansível sem corte de texto nos cantos
+  assert.ok(content.includes('multiline'), 'Details field must be multiline');
+  assert.ok(content.includes('onContentSizeChange'), 'Details field must track content size for auto-growth');
+  assert.ok(content.includes('detailsTextarea'), 'Details field must apply detailsTextarea style');
+  assert.ok(content.includes('borderRadius: 12'), 'Must use soft 12px corner radius instead of full pill to prevent clipping');
+
+  const appInputPath = path.join(ROOT_DIR, 'components', 'ui', 'AppInput.tsx');
+  const appInputContent = fs.readFileSync(appInputPath, 'utf8');
+  assert.ok(appInputContent.includes('borderRadius: 12'), 'AppInput multiline style must also adopt safe 12px border radius');
 });
 
 test('participate screen: adopts Apple Inset-Grouped tables for official channels and services', () => {
