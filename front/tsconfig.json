@@ -21,6 +21,7 @@
   ],
   "exclude": [
     "tests/**/*.test.ts",
+    "tests/components/**",
     "dist/**",
     "web-dist/**",
     "android/**",
