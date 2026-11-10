@@ -3,6 +3,7 @@ import { useNeighborhoods } from '@/features/territory/usePublicData';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { normalizeNeighborhood } from '@/shared/neighborhood';
+import { useOfficialFilters } from '@/features/city/useOfficialCalls';
 
 // Reuse ICU's Portuguese collation rules instead of constructing them per comparison.
 const neighborhoodCollator = new Intl.Collator('pt-BR');
@@ -22,7 +23,20 @@ export function NeighborhoodPicker({
   const home = useTerritoryStore((s) => s.preferredNeighborhood);
   const boundaryNames = boundaries.data;
   const boundaryLabels = useMemo(() => boundaryNames?.map(x => x.name), [boundaryNames]);
-  const canonical = boundaryLabels?.length ? boundaryLabels : fallbackOptions;
+  // Nem todo bairro tem limite cadastrado; os nomes dos filtros do 1746 completam a lista.
+  const officialNames = useOfficialFilters().data?.bairros;
+  const canonical = useMemo(() => {
+    const seen = new Set<string>();
+    const merged: string[] = [];
+    for (const name of [...(boundaryLabels ?? []), ...(officialNames ?? []), ...fallbackOptions]) {
+      const key = normalizeNeighborhood(name);
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        merged.push(name);
+      }
+    }
+    return merged;
+  }, [boundaryLabels, officialNames, fallbackOptions]);
 
   const { currentValue, selectOptions } = useMemo(() => {
     const normalizedHome = normalizeNeighborhood(home || '');
