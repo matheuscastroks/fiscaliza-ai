@@ -237,9 +237,7 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.screenTitle,
     lineHeight: 34,
     fontWeight: '600',
-    letterSpacing: -0.5,
   },
   tagline: {
-    letterSpacing: 0.1,
   },
 });

@@ -9,6 +9,7 @@ import type { OfficialCall } from '@/shared/contracts';
 import { isOfficialCallClosed } from '@/shared/official-call-state';
 import { formatCallDate } from '@/features/city/formatDates';
 import { fontSizes } from '@/theme/typography';
+import { layout } from '@/theme/layout';
 
 export interface OfficialCallTimelineProps {
   call: OfficialCall;
@@ -89,7 +90,7 @@ function OfficialCallTimelineComponent({ call }: OfficialCallTimelineProps) {
               >
                 <Ionicons
                   name={isDone ? 'checkmark' : step.icon}
-                  size={14}
+                  size={layout.iconSize.sm}
                   color={
                     isDone
                       ? colors.onAccent
@@ -160,7 +161,7 @@ const createStyles = (colors: ThemeColors) =>
     nodeCircle: {
       width: 26,
       height: 26,
-      borderRadius: 13,
+      borderRadius: layout.radius.sm,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 2,

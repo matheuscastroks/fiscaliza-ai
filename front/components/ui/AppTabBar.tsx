@@ -18,6 +18,7 @@ import { AppText } from './AppText';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { beginMapTrace } from '@/features/territory/mapPerformance';
 import { fontSizes } from '@/theme/typography';
+import { elevation } from '@/theme/elevation';
 
 const TAB_HEIGHT = 48;
 const TAB_PADDING = 6;
@@ -251,15 +252,7 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      ...Platform.select({
-        ios: {
-          shadowColor: colors.black,
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.14,
-          shadowRadius: 14,
-        },
-        android: { elevation: 6 },
-      }),
+      ...elevation.floating,
     },
     tab: {
       height: TAB_HEIGHT,

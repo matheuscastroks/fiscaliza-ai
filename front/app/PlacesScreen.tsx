@@ -73,7 +73,7 @@ export default function PlacesScreen() {
                   { backgroundColor: colors.surface, borderColor: colors.border },
                 ]}
               >
-                <Ionicons name="location-outline" size={32} color={colors.muted} />
+                <Ionicons name="location-outline" size={layout.iconSize.lg} color={colors.muted} />
                 <AppText variant="sectionTitle" style={{ textAlign: 'center' }}>
                   Nenhum lugar cadastrado
                 </AppText>
@@ -104,7 +104,7 @@ export default function PlacesScreen() {
                         { backgroundColor: isDark ? colors.surfaceSubdued : colors.surfaceSubdued },
                       ]}
                     >
-                      <Ionicons name={icon} size={20} color={colors.onSurfaceBrand} />
+                      <Ionicons name={icon} size={layout.iconSize.md} color={colors.onSurfaceBrand} />
                     </View>
                     <View style={styles.headerInfo}>
                       <AppText variant="sectionTitle" numberOfLines={1}>
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   iconCircle: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: layout.radius.panel,
     alignItems: 'center',
     justifyContent: 'center',
   },

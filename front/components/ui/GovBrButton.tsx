@@ -69,7 +69,7 @@ export const GovBrButton: React.FC<GovBrButtonProps> = ({
         ) : (
           <View style={styles.contentRow}>
             <View style={styles.iconCircle}>
-              <Ionicons name={disabled ? 'lock-closed' : 'person'} size={14} color={partnerBrand.govBr} />
+              <Ionicons name={disabled ? 'lock-closed' : 'person'} size={layout.iconSize.sm} color={partnerBrand.govBr} />
             </View>
             <AppText style={styles.label}>
               Entrar com{' '}
@@ -96,7 +96,7 @@ export const GovBrButton: React.FC<GovBrButtonProps> = ({
           >
             <View style={styles.modalHeader}>
               <View style={styles.modalGovBadge}>
-                <Ionicons name="shield-checkmark" size={20} color={partnerBrand.govBr} />
+                <Ionicons name="shield-checkmark" size={layout.iconSize.md} color={partnerBrand.govBr} />
                 <AppText style={styles.modalGovBadgeText}>gov.br</AppText>
               </View>
               <TouchableOpacity
@@ -105,7 +105,7 @@ export const GovBrButton: React.FC<GovBrButtonProps> = ({
                 accessibilityLabel="Fechar"
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons name="close" size={22} color={colors.subtle} />
+                <Ionicons name="close" size={layout.iconSize.md} color={colors.subtle} />
               </TouchableOpacity>
             </View>
 
@@ -144,11 +144,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    shadowColor: partnerBrand.govBrShadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.16,
-    shadowRadius: 4,
-    elevation: 3,
   },
   disabled: {
     opacity: 0.5,
@@ -162,7 +157,7 @@ const styles = StyleSheet.create({
   iconCircle: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: layout.radius.sm,
     backgroundColor: lightColors.white,
     alignItems: 'center',
     justifyContent: 'center',
@@ -191,11 +186,6 @@ const styles = StyleSheet.create({
     maxWidth: 440,
     borderRadius: layout.radius.sheet,
     padding: spacing.lg,
-    shadowColor: lightColors.black,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    elevation: 8,
   },
   modalHeader: {
     flexDirection: 'row',

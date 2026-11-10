@@ -37,7 +37,7 @@ export function LocationEntryPrompt({
       >
         <Ionicons
           name="navigate-outline"
-          size={16}
+          size={layout.iconSize.sm}
           color={colors.onSurfaceBrand}
         />
         <AppText
@@ -109,7 +109,7 @@ export function LocationEntryPrompt({
             accessibilityRole="button"
             accessibilityLabel="Fechar aviso de localização"
           >
-            <Ionicons name="close" size={16} color={colors.muted} />
+            <Ionicons name="close" size={layout.iconSize.sm} color={colors.muted} />
           </Pressable>
         </View>
       </View>
@@ -137,7 +137,7 @@ export function LocationEntryPrompt({
         >
           <Ionicons
             name="navigate-outline"
-            size={20}
+            size={layout.iconSize.md}
             color={colors.ink}
           />
         </View>
@@ -160,7 +160,7 @@ export function LocationEntryPrompt({
           accessibilityRole="button"
           accessibilityLabel="Fechar aviso de localização"
         >
-          <Ionicons name="close" size={18} color={colors.muted} />
+          <Ionicons name="close" size={layout.iconSize.md} color={colors.muted} />
         </Pressable>
       </View>
 
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   iconBadge: {
     width: 38,
     height: 38,
-    borderRadius: 19,
+    borderRadius: layout.radius.panel,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -241,11 +241,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: layout.radius.pill,
     borderWidth: 1,
-    shadowColor: lightColors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
   },
   compactLabel: {
     flex: 1,

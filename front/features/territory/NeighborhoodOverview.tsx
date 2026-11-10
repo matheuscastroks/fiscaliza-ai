@@ -15,6 +15,7 @@ import {
   dayLabel,
 } from './evidence';
 import { Provenance } from './Provenance';
+import { layout } from '@/theme/layout';
 export function NeighborhoodOverview({
   data,
   onDates,
@@ -65,7 +66,7 @@ export function NeighborhoodOverview({
               style={{
                 padding: 18,
                 gap: 10,
-                borderRadius: 24,
+                borderRadius: layout.radius.card,
                 backgroundColor: colors.surface,
               }}
             >

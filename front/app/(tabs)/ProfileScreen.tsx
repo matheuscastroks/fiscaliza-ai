@@ -189,7 +189,7 @@ export default function ProfileScreen() {
               pressed && { opacity: 0.75 },
             ]}
           >
-            <Ionicons name="options-outline" size={20} color={colors.ink} />
+            <Ionicons name="options-outline" size={layout.iconSize.md} color={colors.ink} />
           </Pressable>
         }
       />
@@ -232,7 +232,7 @@ export default function ProfileScreen() {
               >
                 <Ionicons
                   name="camera"
-                  size={13}
+                  size={layout.iconSize.sm}
                   color={colors.onAccentBrand}
                 />
               </View>
@@ -257,7 +257,7 @@ export default function ProfileScreen() {
             >
               <Ionicons
                 name={user ? 'shield-checkmark' : 'phone-portrait-outline'}
-                size={12}
+                size={layout.iconSize.sm}
                 color={user ? colors.primary : colors.muted}
               />
               <AppText
@@ -294,7 +294,7 @@ export default function ProfileScreen() {
         {/* Alerta de erro de foto */}
         {photoError !== '' && (
           <View style={styles.errorAlert} accessibilityRole="alert">
-            <Ionicons name="alert-circle" size={18} color={colors.risk} />
+            <Ionicons name="alert-circle" size={layout.iconSize.md} color={colors.risk} />
             <AppText variant="caption" color="risk" style={styles.flex}>
               {photoError}
             </AppText>
@@ -323,9 +323,9 @@ export default function ProfileScreen() {
                   { backgroundColor: colors.primaryContainer },
                 ]}
               >
-                <Ionicons name="bookmark" size={15} color={colors.primary} />
+                <Ionicons name="bookmark" size={layout.iconSize.sm} color={colors.primary} />
               </View>
-              <Ionicons name="chevron-forward" size={14} color={colors.subtle} />
+              <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
             </View>
             <AppText variant="screenTitle" style={styles.metricValue}>
               {savedCalls.length}
@@ -358,9 +358,9 @@ export default function ProfileScreen() {
                   { backgroundColor: colors.primaryContainer },
                 ]}
               >
-                <Ionicons name="navigate" size={15} color={colors.primary} />
+                <Ionicons name="navigate" size={layout.iconSize.sm} color={colors.primary} />
               </View>
-              <Ionicons name="chevron-forward" size={14} color={colors.subtle} />
+              <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
             </View>
             <AppText variant="screenTitle" style={styles.metricValue}>
               {places.length}
@@ -377,9 +377,9 @@ export default function ProfileScreen() {
         {/* Seção: Domicílio Cívico (Cadastro único de CEP Carioca) */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
-            <Ionicons name="location-outline" size={13} color={colors.muted} />
+            <Ionicons name="location-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
-              DOMICÍLIO CÍVICO
+              Domicílio
             </AppText>
           </View>
 
@@ -409,7 +409,7 @@ export default function ProfileScreen() {
                   { backgroundColor: colors.primaryContainer },
                 ]}
               >
-                <Ionicons name="location" size={18} color={colors.primary} />
+                <Ionicons name="location" size={layout.iconSize.md} color={colors.primary} />
               </View>
               <View style={styles.tableRowContent}>
                 <AppText variant="label">
@@ -421,7 +421,7 @@ export default function ProfileScreen() {
                     : 'Defina seu endereço residencial na cidade do Rio'}
                 </AppText>
               </View>
-              <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+              <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
             </Pressable>
           </View>
         </View>
@@ -430,9 +430,9 @@ export default function ProfileScreen() {
         {savedCalls.length > 0 && (
           <View style={styles.sectionBlock}>
             <View style={styles.sectionHeaderRow}>
-              <Ionicons name="bookmark-outline" size={13} color={colors.muted} />
+              <Ionicons name="bookmark-outline" size={layout.iconSize.sm} color={colors.muted} />
               <AppText variant="caption" style={styles.sectionHeaderText}>
-                ÚLTIMOS ACOMPANHAMENTOS
+                Últimos chamados salvos
               </AppText>
             </View>
             <View style={styles.callsList}>
@@ -464,7 +464,7 @@ export default function ProfileScreen() {
         {navigationSections.map((section) => (
           <View key={section.title} style={styles.sectionBlock}>
             <View style={styles.sectionHeaderRow}>
-              <Ionicons name={section.icon} size={13} color={colors.muted} />
+              <Ionicons name={section.icon} size={layout.iconSize.sm} color={colors.muted} />
               <AppText variant="caption" style={styles.sectionHeaderText}>
                 {section.title}
               </AppText>
@@ -499,12 +499,12 @@ export default function ProfileScreen() {
                         { backgroundColor: colors.surfaceSubdued },
                       ]}
                     >
-                      <Ionicons name={item.icon} size={18} color={colors.primary} />
+                      <Ionicons name={item.icon} size={layout.iconSize.md} color={colors.primary} />
                     </View>
                     <View style={styles.tableRowContent}>
                       <AppText variant="label">{item.label}</AppText>
                     </View>
-                    <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+                    <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
                   </Pressable>
                 </React.Fragment>
               ))}
@@ -515,9 +515,9 @@ export default function ProfileScreen() {
         {/* Seção: Privacidade e Conta (Apple Inset-Grouped Table) */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
-            <Ionicons name="shield-outline" size={13} color={colors.muted} />
+            <Ionicons name="shield-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
-              PRIVACIDADE E CONTA
+              Privacidade e conta
             </AppText>
           </View>
 
@@ -547,7 +547,7 @@ export default function ProfileScreen() {
                       { backgroundColor: colors.surfaceSubdued },
                     ]}
                   >
-                    <Ionicons name="log-out-outline" size={18} color={colors.ink} />
+                    <Ionicons name="log-out-outline" size={layout.iconSize.md} color={colors.ink} />
                   </View>
                   <View style={styles.tableRowContent}>
                     <AppText variant="label">Sair da conta</AppText>
@@ -555,7 +555,7 @@ export default function ProfileScreen() {
                       Encerrar sessão ativa neste dispositivo
                     </AppText>
                   </View>
-                  <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+                  <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
                 </Pressable>
 
                 <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
@@ -579,7 +579,7 @@ export default function ProfileScreen() {
                       { backgroundColor: colors.riskSurface },
                     ]}
                   >
-                    <Ionicons name="trash-outline" size={18} color={colors.risk} />
+                    <Ionicons name="trash-outline" size={layout.iconSize.md} color={colors.risk} />
                   </View>
                   <View style={styles.tableRowContent}>
                     <AppText variant="label" style={{ color: colors.risk }}>
@@ -589,7 +589,7 @@ export default function ProfileScreen() {
                       Remoção permanente de dados e preferências
                     </AppText>
                   </View>
-                  <Ionicons name="chevron-forward" size={16} color={colors.risk} />
+                  <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.risk} />
                 </Pressable>
               </>
             ) : (
@@ -611,7 +611,7 @@ export default function ProfileScreen() {
                     { backgroundColor: colors.primaryContainer },
                   ]}
                 >
-                  <Ionicons name="person-add-outline" size={18} color={colors.primary} />
+                  <Ionicons name="person-add-outline" size={layout.iconSize.md} color={colors.primary} />
                 </View>
                 <View style={styles.tableRowContent}>
                   <AppText variant="label">Entrar ou criar conta</AppText>
@@ -619,7 +619,7 @@ export default function ProfileScreen() {
                     Sincronize seus lugares e acompanhamentos oficiais
                   </AppText>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+                <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
               </Pressable>
             )}
           </View>
@@ -656,7 +656,7 @@ export default function ProfileScreen() {
 
           {deleteError !== '' && (
             <View style={styles.errorAlert} accessibilityRole="alert">
-              <Ionicons name="alert-circle" size={16} color={colors.risk} />
+              <Ionicons name="alert-circle" size={layout.iconSize.sm} color={colors.risk} />
               <AppText variant="caption" color="risk" style={styles.flex}>
                 {deleteError}
               </AppText>
@@ -703,7 +703,7 @@ const createStyles = (colors: ThemeColors) =>
     headerActionBtn: {
       width: 44,
       height: 44,
-      borderRadius: 22,
+      borderRadius: layout.radius.panel,
       borderWidth: StyleSheet.hairlineWidth,
       alignItems: 'center',
       justifyContent: 'center',
@@ -729,7 +729,7 @@ const createStyles = (colors: ThemeColors) =>
       bottom: -2,
       width: 24,
       height: 24,
-      borderRadius: 12,
+      borderRadius: layout.radius.sm,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 2,
@@ -815,7 +815,6 @@ const createStyles = (colors: ThemeColors) =>
     sectionHeaderText: {
       fontSize: fontSizes.caption,
       fontWeight: '600',
-      letterSpacing: 0.6,
       color: colors.muted,
     },
     insetTable: {

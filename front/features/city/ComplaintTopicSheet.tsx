@@ -152,7 +152,7 @@ export function ComplaintTopicSheet({
                   >
                     <Ionicons
                       name={topic.icon}
-                      size={20}
+                      size={layout.iconSize.md}
                       color={isSelected ? colors.primary : colors.ink}
                     />
                   </View>
@@ -175,7 +175,7 @@ export function ComplaintTopicSheet({
                   {isSelected && (
                     <Ionicons
                       name="checkmark-circle"
-                      size={20}
+                      size={layout.iconSize.md}
                       color={colors.primary}
                     />
                   )}
@@ -221,7 +221,7 @@ const createStyles = (colors: ThemeColors) =>
     iconSquircle: {
       width: 38,
       height: 38,
-      borderRadius: 10,
+      borderRadius: layout.radius.sm,
       alignItems: 'center',
       justifyContent: 'center',
     },

@@ -137,7 +137,7 @@ export function SideMenu({
           onPress={() => onClose()}
           style={styles.iconButton}
         >
-          <Ionicons name="close" size={24} color={colors.ink} />
+          <Ionicons name="close" size={layout.iconSize.lg} color={colors.ink} />
         </Pressable>
       </View>
       <ScrollView
@@ -176,7 +176,7 @@ export function SideMenu({
               </AppText>
             )}
           </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+          <Ionicons name="chevron-forward" size={layout.iconSize.md} color={colors.muted} />
         </Pressable>
         {citizenNavigationSections.map((section) => (
           <View key={section.title} style={styles.section}>
@@ -198,7 +198,7 @@ export function SideMenu({
               >
                 <Ionicons
                   name="location-outline"
-                  size={18}
+                  size={layout.iconSize.md}
                   color={colors.muted}
                 />
                 <AppText variant="caption" color="muted" style={styles.flex}>
@@ -208,7 +208,7 @@ export function SideMenu({
                 </AppText>
                 <Ionicons
                   name="chevron-forward"
-                  size={14}
+                  size={layout.iconSize.sm}
                   color={colors.muted}
                 />
               </Pressable>
@@ -231,14 +231,14 @@ export function SideMenu({
                 >
                   <Ionicons
                     name={item.icon}
-                    size={21}
+                    size={layout.iconSize.md}
                     color={selected ? colors.onSurfaceBrand : colors.ink}
                   />
                   <AppText style={styles.flex}>{item.label}</AppText>
                   {selected && (
                     <Ionicons
                       name="checkmark"
-                      size={18}
+                      size={layout.iconSize.md}
                       color={colors.onSurfaceBrand}
                     />
                   )}

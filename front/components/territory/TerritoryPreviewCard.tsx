@@ -127,7 +127,7 @@ export function TerritoryCardContent({
         hitSlop={8}
         style={styles.close}
       >
-        <Ionicons name="close" size={20} color={colors.muted} />
+        <Ionicons name="close" size={layout.iconSize.md} color={colors.muted} />
       </Pressable>
     ) : null;
 
@@ -237,7 +237,7 @@ export function TerritoryCardContent({
 
         {/* Location */}
         <View style={styles.location}>
-          <Ionicons name="location-outline" size={15} color={colors.muted} />
+          <Ionicons name="location-outline" size={layout.iconSize.sm} color={colors.muted} />
           <AppText
             variant="caption"
             color="muted"
@@ -252,7 +252,7 @@ export function TerritoryCardContent({
         <View style={styles.metadataRow}>
           {relativeTime && (
             <View style={styles.metaChip}>
-              <Ionicons name="time-outline" size={12} color={colors.muted} />
+              <Ionicons name="time-outline" size={layout.iconSize.sm} color={colors.muted} />
               <AppText variant="caption" color="muted" style={styles.metaChipText}>
                 {relativeTime}
               </AppText>
@@ -270,7 +270,7 @@ export function TerritoryCardContent({
             >
               <Ionicons
                 name={isOverdue ? 'alert-circle' : 'hourglass-outline'}
-                size={11}
+                size={layout.iconSize.sm}
                 color={isOverdue ? colors.risk : colors.onSurfaceBrand}
               />
               <AppText
@@ -302,7 +302,7 @@ export function TerritoryCardContent({
           style={styles.details}
         >
           <AppText variant="label" style={{ color: colors.ink }}>Ver detalhes</AppText>
-          <Ionicons name="arrow-forward" size={16} color={colors.ink} />
+          <Ionicons name="arrow-forward" size={layout.iconSize.sm} color={colors.ink} />
         </Pressable>
         {official && (
           <Pressable
@@ -329,7 +329,7 @@ export function TerritoryCardContent({
           >
             <Ionicons
               name={saved ? 'bookmark' : 'bookmark-outline'}
-              size={22}
+              size={layout.iconSize.md}
               color={saved ? colors.accent : colors.muted}
             />
           </Pressable>
@@ -421,7 +421,6 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: fontSizes.caption,
       fontWeight: '600',
       color: colors.muted,
-      textTransform: 'uppercase',
     },
     metadataRow: {
       flexDirection: 'row',
@@ -455,7 +454,7 @@ const createStyles = (colors: ThemeColors) =>
     protocolChip: {
       paddingHorizontal: 5,
       paddingVertical: 1,
-      borderRadius: 4,
+      borderRadius: layout.radius.xs,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
     },
@@ -472,7 +471,7 @@ const createStyles = (colors: ThemeColors) =>
       paddingVertical: 3,
       borderRadius: layout.radius.pill,
     },
-    dot: { width: 6, height: 6, borderRadius: 3 },
+    dot: { width: 6, height: 6, borderRadius: layout.radius.xs },
     statusText: {
       fontWeight: '600',
       fontSize: fontSizes.caption,

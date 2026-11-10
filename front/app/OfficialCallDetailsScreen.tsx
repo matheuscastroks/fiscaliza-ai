@@ -58,7 +58,7 @@ export default function OfficialCallDetailsScreen() {
       <AppScreen>
         <AppHeader title="Chamado 1746" onBack={() => goBack()} />
         <View style={styles.centerContainer}>
-          <Ionicons name="sync" size={32} color={colors.muted} />
+          <Ionicons name="sync" size={layout.iconSize.lg} color={colors.muted} />
           <AppText variant="body" color="muted">
             Carregando dados oficiais do chamado...
           </AppText>
@@ -72,7 +72,7 @@ export default function OfficialCallDetailsScreen() {
       <AppScreen>
         <AppHeader title="Chamado 1746" onBack={() => goBack()} />
         <View style={styles.centerContainer}>
-          <Ionicons name="alert-circle-outline" size={40} color={colors.risk} />
+          <Ionicons name="alert-circle-outline" size={layout.iconSize.lg} color={colors.risk} />
           <AppText variant="sectionTitle" style={{ textAlign: 'center' }}>
             Chamado indisponível
           </AppText>
@@ -232,7 +232,7 @@ export default function OfficialCallDetailsScreen() {
                 pressed && { opacity: 0.7 },
               ]}
             >
-              <Ionicons name="copy-outline" size={13} color={colors.muted} />
+              <Ionicons name="copy-outline" size={layout.iconSize.sm} color={colors.muted} />
               <AppText variant="protocol" color="muted" selectable>
                 Protocolo {item.externalId}
               </AppText>
@@ -249,7 +249,7 @@ export default function OfficialCallDetailsScreen() {
                 pressed && { opacity: 0.75, transform: [{ scale: 0.96 }] },
               ]}
             >
-              <Ionicons name="share-social-outline" size={20} color={colors.ink} />
+              <Ionicons name="share-social-outline" size={layout.iconSize.md} color={colors.ink} />
             </Pressable>
 
             <Pressable
@@ -275,7 +275,7 @@ export default function OfficialCallDetailsScreen() {
             >
               <Ionicons
                 name={isSaved ? 'bookmark' : 'bookmark-outline'}
-                size={22}
+                size={layout.iconSize.md}
                 color={isSaved ? colors.accent : colors.ink}
               />
             </Pressable>
@@ -292,7 +292,7 @@ export default function OfficialCallDetailsScreen() {
           >
             <Ionicons
               name={deadlineInfo.isOverdue ? 'alert-circle' : 'time-outline'}
-              size={15}
+              size={layout.iconSize.sm}
               color={deadlineInfo.isOverdue ? colors.risk : colors.onSurfaceBrand}
             />
             <AppText
@@ -309,7 +309,7 @@ export default function OfficialCallDetailsScreen() {
 
         <View style={styles.summaryRow}>
           <View style={styles.neighborhood}>
-            <Ionicons name="location-outline" size={16} color={colors.muted} />
+            <Ionicons name="location-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="meta" color="muted" style={{ flex: 1 }}>
               {[item.streetName, item.neighborhoodName || 'Bairro não informado']
                 .filter(Boolean)
@@ -474,7 +474,7 @@ export default function OfficialCallDetailsScreen() {
             Localização
           </AppText>
           <View style={styles.locationSummary}>
-            <Ionicons name="location-outline" size={18} color={colors.ink} />
+            <Ionicons name="location-outline" size={layout.iconSize.md} color={colors.ink} />
             <AppText variant="body" color="ink" style={{ flex: 1 }} selectable>
               {fullLocationLabel}
             </AppText>
@@ -661,7 +661,7 @@ function createStyles(colors: ThemeColors) {
     statusIndicator: {
       width: 7,
       height: 7,
-      borderRadius: 4,
+      borderRadius: layout.radius.xs,
     },
     justificationBox: {
       backgroundColor: colors.surfaceSubdued,

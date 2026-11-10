@@ -5,6 +5,7 @@ import { AppText } from '@/components/ui/AppText';
 import { layout, spacing, useTheme } from '@/theme';
 import { fontSizes } from '@/theme/typography';
 import { lightColors } from '@/theme/colors';
+import { elevation } from '@/theme/elevation';
 
 export interface AppToastProps {
   message: string | null;
@@ -127,7 +128,7 @@ export function AppToast({
           },
         ]}
       >
-        <Ionicons name={iconName} size={15} color={iconColor} />
+        <Ionicons name={iconName} size={layout.iconSize.sm} color={iconColor} />
         <AppText
           variant="caption"
           style={[styles.messageText, { color: colors.ink }]}
@@ -135,7 +136,7 @@ export function AppToast({
         >
           {message}
         </AppText>
-        <Ionicons name="close" size={13} color={colors.muted} />
+        <Ionicons name="close" size={layout.iconSize.sm} color={colors.muted} />
       </Pressable>
     </Animated.View>
   );
@@ -152,6 +153,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toastCard: {
+      ...elevation.floating,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -159,11 +161,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: pillRadius,
     borderWidth: StyleSheet.hairlineWidth,
-    shadowColor: lightColors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.14,
-    shadowRadius: 8,
-    elevation: 6,
     maxWidth: '92%',
   },
   messageText: {

@@ -129,7 +129,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
           ]}
         >
           <View style={[styles.iconSquircle, { backgroundColor: colors.surfaceSubdued }]}>
-            <Ionicons name={currentTopic.icon} size={18} color={colors.primary} />
+            <Ionicons name={currentTopic.icon} size={layout.iconSize.md} color={colors.primary} />
           </View>
           <View style={styles.tableRowContent}>
             <AppText variant="caption" color="muted">
@@ -143,7 +143,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
             <AppText variant="caption" color="muted" style={styles.changeActionText}>
               Alterar
             </AppText>
-            <Ionicons name="chevron-forward" size={15} color={colors.subtle} />
+            <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
           </View>
         </Pressable>
 
@@ -152,7 +152,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
         {/* Linha 2: Endereço e Localização ("Onde é o problema?") */}
         <View style={styles.tableInputRow}>
           <View style={[styles.iconSquircle, { backgroundColor: colors.surfaceSubdued }]}>
-            <Ionicons name="location-outline" size={18} color={colors.primary} />
+            <Ionicons name="location-outline" size={layout.iconSize.md} color={colors.primary} />
           </View>
           <View style={styles.tableInputContent}>
             <View style={styles.inputHeaderRow}>
@@ -169,7 +169,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
                     pressed && { opacity: 0.75 },
                   ]}
                 >
-                  <Ionicons name="navigate-outline" size={11} color={colors.primary} />
+                  <Ionicons name="navigate-outline" size={layout.iconSize.sm} color={colors.primary} />
                   <AppText variant="caption" style={styles.suggestedLocationText} numberOfLines={1}>
                     Usar {defaultLocation}
                   </AppText>
@@ -192,7 +192,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
         {/* Linha 3: Detalhes Adicionais (Textarea auto-expansível) */}
         <View style={styles.tableInputRow}>
           <View style={[styles.iconSquircle, { backgroundColor: colors.surfaceSubdued }]}>
-            <Ionicons name="document-text-outline" size={18} color={colors.primary} />
+            <Ionicons name="document-text-outline" size={layout.iconSize.md} color={colors.primary} />
           </View>
           <View style={styles.tableInputContent}>
             <AppText variant="caption" color="muted">
@@ -212,7 +212,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
               }}
               style={[
                 styles.detailsTextarea,
-                { height: detailsHeight, color: colors.ink, borderRadius: 12 },
+                { height: detailsHeight, color: colors.ink, borderRadius: layout.radius.sm },
               ]}
             />
           </View>
@@ -226,7 +226,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
           { backgroundColor: colors.surfaceSubdued, borderColor: colors.divider },
         ]}
       >
-        <Ionicons name="camera-outline" size={18} color={colors.primary} />
+        <Ionicons name="camera-outline" size={layout.iconSize.md} color={colors.primary} />
         <View style={styles.photoTipTextCol}>
           <AppText variant="caption" style={styles.photoTipTitle}>
             Fotos e evidências no WhatsApp
@@ -249,7 +249,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
       >
         <Ionicons
           name={showPreview ? 'chevron-up-circle-outline' : 'chevron-down-circle-outline'}
-          size={16}
+          size={layout.iconSize.sm}
           color={colors.primary}
         />
         <AppText variant="caption" style={styles.previewToggleText}>
@@ -260,7 +260,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
       {showPreview && (
         <View style={[styles.previewBox, { backgroundColor: colors.surfaceSubdued, borderColor: colors.border }]}>
           <View style={styles.previewHeader}>
-            <Ionicons name="chatbubble-ellipses-outline" size={13} color={colors.muted} />
+            <Ionicons name="chatbubble-ellipses-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" color="muted" style={{ fontWeight: '600' }}>
               Texto para você enviar à Central 1746:
             </AppText>
@@ -288,7 +288,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
             pressed && styles.whatsAppButtonPressed,
           ]}
         >
-          <Ionicons name="logo-whatsapp" size={19} color={lightColors.white} />
+          <Ionicons name="logo-whatsapp" size={layout.iconSize.md} color={lightColors.white} />
           <AppText variant="label" style={styles.whatsAppButtonText}>
             Abrir WhatsApp do 1746
           </AppText>
@@ -296,7 +296,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
         <AppButton
           title="Compartilhar texto"
           variant="secondary"
-          icon={<Ionicons name="share-outline" size={16} color={colors.ink} />}
+          icon={<Ionicons name="share-outline" size={layout.iconSize.sm} color={colors.ink} />}
           onPress={handleShare}
         />
       </View>
@@ -327,7 +327,6 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.muted,
       fontWeight: '600',
       fontSize: fontSizes.caption,
-      letterSpacing: 0.5,
     },
     titleBlock: {
       gap: 3,
@@ -370,7 +369,7 @@ const createStyles = (colors: ThemeColors) =>
     iconSquircle: {
       width: 36,
       height: 36,
-      borderRadius: 10,
+      borderRadius: layout.radius.sm,
       alignItems: 'center',
       justifyContent: 'center',
       marginTop: 2,
@@ -479,7 +478,6 @@ const createStyles = (colors: ThemeColors) =>
     previewText: {
       fontSize: fontSizes.caption,
       lineHeight: 17,
-      fontFamily: 'monospace',
     },
     actionsBlock: {
       gap: spacing.xs,
@@ -495,11 +493,6 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: partnerBrand.whatsapp,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
-      shadowColor: partnerBrand.whatsapp,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-      elevation: 2,
     },
     whatsAppButtonPressed: {
       backgroundColor: partnerBrand.whatsappPressed,

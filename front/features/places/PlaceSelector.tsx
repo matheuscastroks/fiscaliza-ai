@@ -146,7 +146,7 @@ export function PlaceSelector({
                 { backgroundColor: isDark ? colors.surface : colors.canvas },
               ]}
             >
-              <Ionicons name={iconName} size={18} color={colors.onSurfaceBrand} />
+              <Ionicons name={iconName} size={layout.iconSize.md} color={colors.onSurfaceBrand} />
             </View>
             <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
               <AppText variant="caption" color="muted" style={styles.heroScopeLabel}>
@@ -174,7 +174,7 @@ export function PlaceSelector({
                   pressed && { opacity: 0.8 },
                 ]}
               >
-                <Ionicons name="arrow-undo" size={13} color={colors.onAccent} />
+                <Ionicons name="arrow-undo" size={layout.iconSize.sm} color={colors.onAccent} />
                 <AppText variant="caption" style={{ color: colors.onAccent, fontWeight: '600' }}>
                   Voltar
                 </AppText>
@@ -185,7 +185,7 @@ export function PlaceSelector({
           {/* Seção 1: Ações Rápidas */}
           <View style={styles.filterSection}>
             <View style={styles.sectionHeaderRow}>
-              <Ionicons name="flash-outline" size={14} color={colors.accent} />
+              <Ionicons name="flash-outline" size={layout.iconSize.sm} color={colors.accent} />
               <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
                 Ações Rápidas
               </AppText>
@@ -213,7 +213,7 @@ export function PlaceSelector({
                 ]}
               >
                 <View style={[styles.rowIconBadge, { backgroundColor: colors.infoSurface }]}>
-                  <Ionicons name="navigate" size={16} color={colors.info} />
+                  <Ionicons name="navigate" size={layout.iconSize.sm} color={colors.info} />
                 </View>
                 <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
                   <AppText variant="caption" style={styles.rowTitle}>
@@ -228,9 +228,9 @@ export function PlaceSelector({
                 {device.busy ? (
                   <AppText variant="caption" color="muted">Buscando...</AppText>
                 ) : selection.kind === 'radius' && selection.source === 'current' ? (
-                  <Ionicons name="checkmark-circle" size={18} color={colors.info} />
+                  <Ionicons name="checkmark-circle" size={layout.iconSize.md} color={colors.info} />
                 ) : (
-                  <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+                  <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.muted} />
                 )}
               </Pressable>
 
@@ -252,7 +252,7 @@ export function PlaceSelector({
                 ]}
               >
                 <View style={[styles.rowIconBadge, { backgroundColor: colors.completedSurface }]}>
-                  <Ionicons name="globe-outline" size={16} color={colors.completed} />
+                  <Ionicons name="globe-outline" size={layout.iconSize.sm} color={colors.completed} />
                 </View>
                 <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
                   <AppText variant="caption" style={styles.rowTitle}>
@@ -263,9 +263,9 @@ export function PlaceSelector({
                   </AppText>
                 </View>
                 {selection.kind === 'municipality' && !areaOnly ? (
-                  <Ionicons name="checkmark-circle" size={18} color={colors.completed} />
+                  <Ionicons name="checkmark-circle" size={layout.iconSize.md} color={colors.completed} />
                 ) : (
-                  <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+                  <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.muted} />
                 )}
               </Pressable>
 
@@ -293,7 +293,7 @@ export function PlaceSelector({
                     ]}
                   >
                     <View style={[styles.rowIconBadge, { backgroundColor: colors.attentionSurface }]}>
-                      <Ionicons name="business" size={16} color={colors.attention} />
+                      <Ionicons name="business" size={layout.iconSize.sm} color={colors.attention} />
                     </View>
                     <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
                       <AppText variant="caption" style={styles.rowTitle}>
@@ -303,7 +303,7 @@ export function PlaceSelector({
                         Expandir a busca para o bairro completo
                       </AppText>
                     </View>
-                    <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+                    <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.muted} />
                   </Pressable>
                 </>
               )}
@@ -316,7 +316,7 @@ export function PlaceSelector({
           <View style={styles.filterSection}>
             <View style={styles.sectionHeaderRowBetween}>
               <View style={styles.sectionHeaderRow}>
-                <Ionicons name="bookmark-outline" size={14} color={colors.accent} />
+                <Ionicons name="bookmark-outline" size={layout.iconSize.sm} color={colors.accent} />
                 <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
                   Lugares Salvos
                 </AppText>
@@ -356,7 +356,7 @@ export function PlaceSelector({
                         ]}
                       >
                         <View style={[styles.rowIconBadge, { backgroundColor: colors.surfaceSubdued }]}>
-                          <Ionicons name="bookmark" size={15} color={isSelected ? colors.onSurfaceBrand : colors.muted} />
+                          <Ionicons name="bookmark" size={layout.iconSize.sm} color={isSelected ? colors.onSurfaceBrand : colors.muted} />
                         </View>
                         <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
                           <AppText variant="caption" style={[styles.rowTitle, isSelected && { fontWeight: '600' }]}>
@@ -367,9 +367,9 @@ export function PlaceSelector({
                           </AppText>
                         </View>
                         {isSelected ? (
-                          <Ionicons name="checkmark-circle" size={18} color={colors.onSurfaceBrand} />
+                          <Ionicons name="checkmark-circle" size={layout.iconSize.md} color={colors.onSurfaceBrand} />
                         ) : (
-                          <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+                          <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.muted} />
                         )}
                       </Pressable>
                     </React.Fragment>
@@ -384,7 +384,7 @@ export function PlaceSelector({
                 }}
                 style={[styles.emptyPlacesButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
               >
-                <Ionicons name="add-circle-outline" size={16} color={colors.accent} />
+                <Ionicons name="add-circle-outline" size={layout.iconSize.sm} color={colors.accent} />
                 <AppText variant="caption" style={{ color: colors.ink, fontWeight: '600' }}>
                   Cadastrar Casa, Trabalho ou ponto de interesse
                 </AppText>
@@ -397,7 +397,7 @@ export function PlaceSelector({
           {/* Seção 3: Consultar por Bairro Oficial */}
           <View style={styles.filterSection}>
             <View style={styles.sectionHeaderRow}>
-              <Ionicons name="business-outline" size={14} color={colors.accent} />
+              <Ionicons name="business-outline" size={layout.iconSize.sm} color={colors.accent} />
               <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
                 Consultar por Bairro Oficial
               </AppText>
@@ -421,7 +421,7 @@ export function PlaceSelector({
               <View style={[styles.sectionDivider, { backgroundColor: colors.divider }]} />
               <View style={styles.filterSection}>
                 <View style={styles.sectionHeaderRow}>
-                  <Ionicons name="radio-outline" size={14} color={colors.accent} />
+                  <Ionicons name="radio-outline" size={layout.iconSize.sm} color={colors.accent} />
                   <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
                     Raio de Proximidade no Entorno
                   </AppText>
@@ -500,7 +500,7 @@ export function PlaceSelector({
             >
               <Ionicons
                 name={iconName}
-                size={15}
+                size={layout.iconSize.sm}
                 color={colors.onSurfaceBrand}
               />
             </View>
@@ -526,7 +526,7 @@ export function PlaceSelector({
               <AppText variant="caption" style={styles.compactChangeText}>
                 Trocar
               </AppText>
-              <Ionicons name="chevron-down" size={12} color={colors.ink} />
+              <Ionicons name="chevron-down" size={layout.iconSize.sm} color={colors.ink} />
             </View>
           </Pressable>
 
@@ -591,7 +591,7 @@ export function PlaceSelector({
               },
             ]}
           >
-            <Ionicons name={iconName} size={18} color={colors.ink} />
+            <Ionicons name={iconName} size={layout.iconSize.md} color={colors.ink} />
           </View>
 
           <View style={styles.headerInfo}>
@@ -616,7 +616,7 @@ export function PlaceSelector({
             <AppText variant="caption" style={styles.changeText}>
               Trocar local
             </AppText>
-            <Ionicons name="chevron-down" size={14} color={colors.ink} />
+            <Ionicons name="chevron-down" size={layout.iconSize.sm} color={colors.ink} />
           </View>
         </Pressable>
 
@@ -695,16 +695,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: layout.radius.pill,
     borderWidth: 1,
-    shadowColor: lightColors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.09,
-    shadowRadius: 6,
-    elevation: 3,
   },
   compactIconBadge: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: layout.radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -740,7 +735,7 @@ const styles = StyleSheet.create({
   iconCircle: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: layout.radius.panel,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -794,15 +789,13 @@ const styles = StyleSheet.create({
   heroScopeIconBadge: {
     width: 34,
     height: 34,
-    borderRadius: 17,
+    borderRadius: layout.radius.panel,
     alignItems: 'center',
     justifyContent: 'center',
   },
   heroScopeLabel: {
     fontSize: fontSizes.caption,
     fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
   },
   heroScopeTitle: {
     fontSize: fontSizes.meta,
@@ -836,9 +829,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderTitle: {
     fontWeight: '600',
-    letterSpacing: 0.6,
     fontSize: fontSizes.caption,
-    textTransform: 'uppercase',
   },
   sectionDivider: {
     height: StyleSheet.hairlineWidth,
@@ -856,8 +847,6 @@ const styles = StyleSheet.create({
   groupHeaderLabel: {
     fontSize: fontSizes.caption,
     fontWeight: '600',
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
   },
   insetGroupCard: {
     borderRadius: layout.radius.card,
@@ -878,7 +867,7 @@ const styles = StyleSheet.create({
   rowIconBadge: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: layout.radius.panel,
     alignItems: 'center',
     justifyContent: 'center',
   },

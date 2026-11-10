@@ -110,7 +110,7 @@ export default function ParticipateScreen() {
         {/* Bloco 2: Canais Oficiais de Atendimento (Apple Inset-Grouped Table) */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
-            <Ionicons name="shield-checkmark-outline" size={13} color={colors.muted} />
+            <Ionicons name="shield-checkmark-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
               Canais oficiais de atendimento
             </AppText>
@@ -146,7 +146,7 @@ export default function ParticipateScreen() {
                     >
                       <Ionicons
                         name={channel.icon}
-                        size={18}
+                        size={layout.iconSize.md}
                         color={isWhatsApp ? partnerBrand.whatsapp : colors.primary}
                       />
                     </View>
@@ -156,7 +156,7 @@ export default function ParticipateScreen() {
                         {channel.subtitle}
                       </AppText>
                     </View>
-                    <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+                    <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
                   </Pressable>
                 </React.Fragment>
               );
@@ -182,7 +182,7 @@ export default function ParticipateScreen() {
         {/* Bloco 3: Serviços Mais Solicitados (Apple Inset-Grouped Table com Chevrons) */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
-            <Ionicons name="apps-outline" size={13} color={colors.muted} />
+            <Ionicons name="apps-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
               Serviços mais solicitados no Rio
             </AppText>
@@ -214,7 +214,7 @@ export default function ParticipateScreen() {
                       { backgroundColor: colors.surfaceSubdued },
                     ]}
                   >
-                    <Ionicons name={service.icon} size={18} color={colors.primary} />
+                    <Ionicons name={service.icon} size={layout.iconSize.md} color={colors.primary} />
                   </View>
                   <View style={styles.tableRowContent}>
                     <View style={styles.serviceTitleRow}>
@@ -236,7 +236,7 @@ export default function ParticipateScreen() {
                       {service.description}
                     </AppText>
                   </View>
-                  <Ionicons name="chevron-forward" size={16} color={colors.subtle} />
+                  <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
                 </Pressable>
               </React.Fragment>
             ))}
@@ -257,7 +257,7 @@ export default function ParticipateScreen() {
                 { backgroundColor: colors.primaryContainer },
               ]}
             >
-              <Ionicons name="map-outline" size={18} color={colors.primary} />
+              <Ionicons name="map-outline" size={layout.iconSize.md} color={colors.primary} />
             </View>
             <View style={styles.civicTipTextCol}>
               <AppText variant="label">Verifique o mapa antes de abrir chamado</AppText>
@@ -269,7 +269,7 @@ export default function ParticipateScreen() {
           <AppButton
             title="Conferir chamados no mapa"
             variant="secondary"
-            icon={<Ionicons name="map" size={16} color={colors.ink} />}
+            icon={<Ionicons name="map" size={layout.iconSize.sm} color={colors.ink} />}
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               router.push('/(tabs)/TerritoryScreen');
@@ -289,11 +289,11 @@ export default function ParticipateScreen() {
               pressed && { backgroundColor: colors.surfaceSubdued },
             ]}
           >
-            <Ionicons name="search-outline" size={15} color={colors.ink} />
+            <Ionicons name="search-outline" size={layout.iconSize.sm} color={colors.ink} />
             <AppText variant="label" style={styles.footerPortalText}>
               Buscar outros serviços no 1746.rio
             </AppText>
-            <Ionicons name="open-outline" size={14} color={colors.muted} />
+            <Ionicons name="open-outline" size={layout.iconSize.sm} color={colors.muted} />
           </Pressable>
 
           <AppText variant="caption" color="muted" style={styles.disclaimerText}>

@@ -46,6 +46,7 @@ import { TerritoryClusterCarousel } from '@/components/territory/TerritoryCluste
 import { FacilityLoadMoreButton } from '@/components/territory/FacilityLoadMoreButton';
 import { fontSizes } from '@/theme/typography';
 import { lightColors } from '@/theme/colors';
+import { elevation } from '@/theme/elevation';
 
 type TerritoryMapRegion = {
   latitude: number;
@@ -710,7 +711,7 @@ export function TerritoryContent() {
               else { setAppliedBounds(computeRegionBounds(viewportRef.current)); setAreaOnly(true); }
             }}
           >
-            <Ionicons name={areaOnly ? 'globe-outline' : 'scan-outline'} size={15} color={colors.ink} />
+            <Ionicons name={areaOnly ? 'globe-outline' : 'scan-outline'} size={layout.iconSize.sm} color={colors.ink} />
             <AppText variant="caption" style={{ fontWeight: '600' }}>
               {areaOnly ? 'Voltar ao recorte' : 'Buscar nesta área'}
             </AppText>
@@ -733,7 +734,7 @@ export function TerritoryContent() {
             }}
             style={({ pressed }) => [styles.dockCircleButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
           >
-            <Ionicons name="locate" size={20} color={locating ? colors.accent : colors.ink} />
+            <Ionicons name="locate" size={layout.iconSize.md} color={locating ? colors.accent : colors.ink} />
           </Pressable>
 
           <Pressable
@@ -749,7 +750,7 @@ export function TerritoryContent() {
             }}
             style={({ pressed }) => [styles.dockCircleButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
           >
-            <Ionicons name="expand-outline" size={20} color={colors.ink} />
+            <Ionicons name="expand-outline" size={layout.iconSize.md} color={colors.ink} />
           </Pressable>
         </View>
       )}
@@ -867,31 +868,29 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.canvas },
     loadingPill: {
+      ...elevation.floating,
       position: 'absolute', alignSelf: 'center', flexDirection: 'row', alignItems: 'center',
       gap: 8, backgroundColor: 'rgba(15, 23, 42, 0.85)', paddingHorizontal: 14, paddingVertical: 8,
-      borderRadius: layout.radius.pill, shadowColor: lightColors.black, shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25, shadowRadius: 4, elevation: 5, zIndex: 40,
+      borderRadius: layout.radius.pill, zIndex: 40,
     },
     topFloatingHeader: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50, paddingHorizontal: spacing.md, gap: 8 },
     contextualAreaPillContainer: { position: 'absolute', alignSelf: 'center', zIndex: 45 },
     rightMapDock: { position: 'absolute', right: spacing.md, zIndex: 40, gap: 10 },
     bottomFloatingContainer: { position: 'absolute', left: spacing.md, right: spacing.md, zIndex: 40, gap: 8 },
     dockCircleButton: {
-      width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center',
-      shadowColor: lightColors.black, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.14, shadowRadius: 6,
-      elevation: 4, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
+      ...elevation.floating,
+      width: 42, height: 42, borderRadius: layout.radius.panel, alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
     },
     areaPillButton: {
+      ...elevation.floating,
       flexDirection: 'row', alignItems: 'center', gap: 6, height: 42, paddingHorizontal: spacing.md,
-      borderRadius: layout.radius.pill, shadowColor: lightColors.black, shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.14, shadowRadius: 8, elevation: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
+      borderRadius: layout.radius.pill, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
     },
     summaryBarButton: {
       flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.sm + 4,
       paddingVertical: 10, borderRadius: layout.radius.card, borderWidth: 1, borderColor: colors.border,
-      shadowColor: lightColors.black, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 5,
     },
-    summaryIconCircle: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+    summaryIconCircle: { width: 36, height: 36, borderRadius: layout.radius.panel, alignItems: 'center', justifyContent: 'center' },
     summaryTitle: { fontSize: fontSizes.meta, fontWeight: '600' },
     summarySubtitle: { fontSize: fontSizes.caption },
     buttonPressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },

@@ -112,7 +112,7 @@ export const AppInput: React.FC<AppInputProps> = ({
           >
             <Ionicons
               name={passwordVisible ? 'eye-off-outline' : 'eye-outline'}
-              size={22}
+              size={layout.iconSize.md}
               color={colors.muted}
             />
           </Pressable>
@@ -171,7 +171,7 @@ const createStyles = (colors: ThemeColors) =>
     multiline: {
       minHeight: 80,
       maxHeight: 192,
-      borderRadius: 12,
+      borderRadius: layout.radius.sm,
       textAlignVertical: 'top',
       paddingTop: spacing.sm + 4,
       paddingHorizontal: spacing.md,

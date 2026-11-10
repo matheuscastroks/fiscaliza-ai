@@ -22,6 +22,7 @@ import { useTheme } from '@/theme/useTheme';
 import { AppText } from './AppText';
 import { spacing } from '@/theme';
 import { fontSizes } from '@/theme/typography';
+import { layout } from '@/theme/layout';
 
 export interface AppBottomSheetModalProps {
   visible: boolean;
@@ -148,7 +149,7 @@ export const AppBottomSheetModal = forwardRef<BottomSheet, AppBottomSheetModalPr
                       accessibilityRole="button"
                       accessibilityLabel="Fechar painel"
                     >
-                      <Ionicons name="close" size={18} color={colors.ink} />
+                      <Ionicons name="close" size={layout.iconSize.md} color={colors.ink} />
                     </Pressable>
                   </View>
                 </View>
@@ -166,13 +167,13 @@ AppBottomSheetModal.displayName = 'AppBottomSheetModal';
 
 const styles = StyleSheet.create({
   sheetBackground: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: layout.radius.card,
+    borderTopRightRadius: layout.radius.card,
   },
   handleIndicator: {
     width: 38,
     height: 4,
-    borderRadius: 2,
+    borderRadius: layout.radius.xs,
     marginTop: 6,
   },
   container: {
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
   closeButton: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: layout.radius.panel,
     alignItems: 'center',
     justifyContent: 'center',
   },

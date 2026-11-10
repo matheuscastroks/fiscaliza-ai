@@ -7,6 +7,7 @@ import { useTheme } from '@/theme/useTheme';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { lightColors } from '@/theme/colors';
+import { elevation } from '@/theme/elevation';
 
 export interface FacilityLoadMoreButtonProps {
   label: string;
@@ -47,7 +48,7 @@ export function FacilityLoadMoreButton({
     >
       <Ionicons
         name="add-circle-outline"
-        size={18}
+        size={layout.iconSize.md}
         color={colors.onSurfaceBrand}
       />
       <AppText variant="caption" style={styles.text}>
@@ -61,6 +62,7 @@ export function FacilityLoadMoreButton({
 
 const styles = StyleSheet.create({
   button: {
+      ...elevation.floating,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -69,11 +71,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: layout.radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
-    shadowColor: lightColors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.14,
-    shadowRadius: 8,
-    elevation: 5,
   },
   pressed: { opacity: 0.85 },
   text: { fontWeight: '600' },

@@ -298,7 +298,7 @@ export function OnboardingFlow({
 
                   {/* Top-Left Floating Feature Badge */}
                   <View style={styles.floatingPill}>
-                    <Ionicons name={item.badgeIcon} size={13} color={lightColors.white} />
+                    <Ionicons name={item.badgeIcon} size={layout.iconSize.sm} color={lightColors.white} />
                     <AppText variant="caption" style={styles.floatingPillText}>
                       {item.badge}
                     </AppText>
@@ -361,7 +361,7 @@ export function OnboardingFlow({
                           >
                             <Ionicons
                               name={benefit.icon}
-                              size={18}
+                              size={layout.iconSize.md}
                               color={colors.primary}
                             />
                           </View>
@@ -431,7 +431,7 @@ export function OnboardingFlow({
                   },
                 ]}
               >
-                <Ionicons name="arrow-back" size={20} color={colors.ink} />
+                <Ionicons name="arrow-back" size={layout.iconSize.md} color={colors.ink} />
               </Pressable>
             )}
             <View style={styles.primaryBtnWrapper}>
@@ -454,7 +454,7 @@ export function OnboardingFlow({
                           : 'compass-outline'
                         : 'arrow-forward'
                     }
-                    size={20}
+                    size={layout.iconSize.md}
                     color={colors.onAccentBrand}
                   />
                 }
@@ -635,7 +635,7 @@ const styles = StyleSheet.create({
   },
   dot: {
     height: 8,
-    borderRadius: 4,
+    borderRadius: layout.radius.xs,
   },
   actionRow: {
     flexDirection: 'row',
@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
   backCircle: {
     width: 54,
     height: 54,
-    borderRadius: 27,
+    borderRadius: layout.radius.card,
     borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
     justifyContent: 'center',

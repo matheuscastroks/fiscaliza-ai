@@ -33,7 +33,7 @@ export function ThemeToggleButton({
     >
       <Ionicons
         name={isDark ? 'sunny-outline' : 'moon-outline'}
-        size={22}
+        size={layout.iconSize.md}
         color={colors.ink}
       />
     </Pressable>

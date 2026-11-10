@@ -13,6 +13,7 @@ import { AppText } from './AppText';
 import { AppSelect } from './AppSelect';
 import { spacing } from '@/theme';
 import { lightColors } from '@/theme/colors';
+import { layout } from '@/theme/layout';
 
 export interface SlidingOption {
   value: string;
@@ -112,7 +113,7 @@ export function SlidingTabs({
           : {
               backgroundColor: colors.surface,
               padding: spacing.xxs,
-              borderRadius: 32,
+              borderRadius: layout.radius.sheet,
             }),
       }}
     >
@@ -127,7 +128,7 @@ export function SlidingTabs({
             bottom: scroll ? 0 : spacing.xxs,
             left,
             width,
-            borderRadius: 28,
+            borderRadius: layout.radius.card,
             backgroundColor: colors.darkPill,
           }}
         />
@@ -155,7 +156,7 @@ export function SlidingTabs({
               minHeight: 38,
               paddingHorizontal: spacing.md,
               paddingVertical: 6,
-              borderRadius: 24,
+              borderRadius: layout.radius.card,
               flexDirection: 'row',
               gap: spacing.xs,
               alignItems: 'center',
@@ -168,18 +169,12 @@ export function SlidingTabs({
                 : colors.surface,
               borderWidth: 1,
               borderColor: active ? 'transparent' : colors.border,
-              elevation: scroll && !active ? 1 : 0,
-              shadowColor: scroll && !active ? lightColors.black : undefined,
-              shadowOffset:
-                scroll && !active ? { width: 0, height: 1 } : undefined,
-              shadowOpacity: scroll && !active ? 0.08 : undefined,
-              shadowRadius: scroll && !active ? 3 : undefined,
             }}
           >
             {option.icon && (
               <Ionicons
                 name={option.icon}
-                size={20}
+                size={layout.iconSize.md}
                 color={active ? colors.onAccentBrand : colors.ink}
               />
             )}

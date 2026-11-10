@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppText } from '@/components/ui/AppText';
 import { spacing, useTheme } from '@/theme';
+import { layout } from '@/theme/layout';
 
 export const OFFICIAL_PORTAL = 'https://www.1746.rio/hc/pt-br';
 export const OFFICIAL_SIGNIN_URL = 'https://www.1746.rio/hc/pt-br/signin';
@@ -87,7 +88,7 @@ export function OfficialChannel({
           icon ? (
             <Ionicons
               name={icon}
-              size={18}
+              size={layout.iconSize.md}
               color={variant === 'primary' ? colors.onAccent : colors.ink}
             />
           ) : undefined

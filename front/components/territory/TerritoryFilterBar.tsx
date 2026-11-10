@@ -36,6 +36,7 @@ import {
 } from '@/stores/territoryStore';
 import { fontSizes } from '@/theme/typography';
 import { lightColors } from '@/theme/colors';
+import { elevation } from '@/theme/elevation';
 
 export type TerritoryLayer = 'official' | 'school' | 'health' | 'square';
 
@@ -164,7 +165,7 @@ function TerritoryFilterBarComponent({
               { backgroundColor: isDark ? colors.surfaceSubdued : colors.canvas },
             ]}
           >
-            <Ionicons name={iconName} size={13} color={colors.onSurfaceBrand} />
+            <Ionicons name={iconName} size={layout.iconSize.sm} color={colors.onSurfaceBrand} />
           </View>
           <AppText
             variant="caption"
@@ -173,7 +174,7 @@ function TerritoryFilterBarComponent({
           >
             {shortSummary}
           </AppText>
-          <Ionicons name="chevron-down" size={11} color={colors.muted} />
+          <Ionicons name="chevron-down" size={layout.iconSize.sm} color={colors.muted} />
           <View
             style={[styles.unifiedDivider, { backgroundColor: colors.border }]}
           />
@@ -234,7 +235,7 @@ function TerritoryFilterBarComponent({
             >
               <Ionicons
                 name="warning"
-                size={13}
+                size={layout.iconSize.sm}
                 color={
                   territoryDomain === 'calls' ? colors.onAccentBrand : colors.ink
                 }
@@ -266,7 +267,7 @@ function TerritoryFilterBarComponent({
             >
               <Ionicons
                 name="business"
-                size={13}
+                size={layout.iconSize.sm}
                 color={
                   territoryDomain === 'facilities' ? colors.onAccentBrand : colors.ink
                 }
@@ -314,7 +315,7 @@ function TerritoryFilterBarComponent({
                         ? 'checkmark-circle'
                         : 'funnel-outline'
                   }
-                  size={12}
+                  size={layout.iconSize.sm}
                   color={status !== 'all' ? colors.onAccentBrand : colors.muted}
                 />
                 <AppText
@@ -343,11 +344,11 @@ function TerritoryFilterBarComponent({
                   }}
                   style={[styles.quickChip, styles.quickChipActive]}
                 >
-                  <Ionicons name="pricetag" size={12} color={colors.onAccentBrand} />
+                  <Ionicons name="pricetag" size={layout.iconSize.sm} color={colors.onAccentBrand} />
                   <AppText variant="caption" style={[styles.quickChipText, styles.quickChipTextActive]}>
                     {CIVIC_MACRO_THEMES.find((t) => t.id === macroTheme)?.label || macroTheme}
                   </AppText>
-                  <Ionicons name="close" size={12} color={colors.onAccentBrand} />
+                  <Ionicons name="close" size={layout.iconSize.sm} color={colors.onAccentBrand} />
                 </Pressable>
               )}
             </>
@@ -384,7 +385,7 @@ function TerritoryFilterBarComponent({
                   >
                     <Ionicons
                       name={f.icon}
-                      size={12}
+                      size={layout.iconSize.sm}
                       color={isSelected ? colors.onAccentBrand : colors.muted}
                     />
                     <AppText
@@ -416,7 +417,7 @@ function TerritoryFilterBarComponent({
                 pressed && { opacity: 0.8 },
               ]}
             >
-              <Ionicons name="options" size={12} color={colors.onSurfaceBrand} />
+              <Ionicons name="options" size={layout.iconSize.sm} color={colors.onSurfaceBrand} />
               <AppText variant="caption" numberOfLines={1} style={styles.activeFilterText}>
                 Filtros{filterCount > 0 ? ` (${filterCount})` : ''}
               </AppText>
@@ -580,7 +581,7 @@ function TerritoryFilterModalComponent({
           >
             <Ionicons
               name="warning"
-              size={15}
+              size={layout.iconSize.sm}
               color={
                 territoryDomain === 'calls' ? colors.onAccentBrand : colors.ink
               }
@@ -611,7 +612,7 @@ function TerritoryFilterModalComponent({
           >
             <Ionicons
               name="business"
-              size={15}
+              size={layout.iconSize.sm}
               color={
                 territoryDomain === 'facilities'
                   ? colors.onAccentBrand
@@ -638,7 +639,7 @@ function TerritoryFilterModalComponent({
             {/* Seção 1: Macro-temas Cívicos */}
             <View style={styles.filterSection}>
               <View style={styles.sectionHeaderRow}>
-                <Ionicons name="apps-outline" size={14} color={colors.accent} />
+                <Ionicons name="apps-outline" size={layout.iconSize.sm} color={colors.accent} />
                 <AppText variant="caption" style={styles.sectionHeaderTitle}>
                   Tema Cívico
                 </AppText>
@@ -688,7 +689,7 @@ function TerritoryFilterModalComponent({
             {/* Seção 2: Subtipo Específico */}
             <View style={styles.filterSection}>
               <View style={styles.sectionHeaderRow}>
-                <Ionicons name="construct-outline" size={14} color={colors.accent} />
+                <Ionicons name="construct-outline" size={layout.iconSize.sm} color={colors.accent} />
                 <AppText variant="caption" style={styles.sectionHeaderTitle}>
                   Subtipo Específico (1746)
                 </AppText>
@@ -709,7 +710,7 @@ function TerritoryFilterModalComponent({
             {/* Seção 3: Situação */}
             <View style={styles.filterSection}>
               <View style={styles.sectionHeaderRow}>
-                <Ionicons name="filter-circle-outline" size={14} color={colors.accent} />
+                <Ionicons name="filter-circle-outline" size={layout.iconSize.sm} color={colors.accent} />
                 <AppText variant="caption" style={styles.sectionHeaderTitle}>
                   Situação do Chamado
                 </AppText>
@@ -742,7 +743,7 @@ function TerritoryFilterModalComponent({
                           style={{
                             width: 6,
                             height: 6,
-                            borderRadius: 3,
+                            borderRadius: layout.radius.xs,
                             backgroundColor: opt.dotColor,
                             marginRight: 6,
                           }}
@@ -768,7 +769,7 @@ function TerritoryFilterModalComponent({
             {/* Seção 4: Período */}
             <View style={styles.filterSection}>
               <View style={styles.sectionHeaderRow}>
-                <Ionicons name="calendar-outline" size={14} color={colors.accent} />
+                <Ionicons name="calendar-outline" size={layout.iconSize.sm} color={colors.accent} />
                 <AppText variant="caption" style={styles.sectionHeaderTitle}>
                   Período de Abertura
                 </AppText>
@@ -814,7 +815,7 @@ function TerritoryFilterModalComponent({
           <View style={styles.filterFormContainer}>
             <View style={styles.filterSection}>
               <View style={styles.sectionHeaderRow}>
-                <Ionicons name="business" size={14} color={colors.accent} />
+                <Ionicons name="business" size={layout.iconSize.sm} color={colors.accent} />
                 <AppText variant="caption" style={styles.sectionHeaderTitle}>
                   Equipamentos Públicos no Mapa
                 </AppText>
@@ -857,7 +858,7 @@ function TerritoryFilterModalComponent({
                       >
                         <Ionicons
                           name={cfg.icon}
-                          size={18}
+                          size={layout.iconSize.md}
                           color={isSelected ? lightColors.white : colors.muted}
                         />
                       </View>
@@ -886,7 +887,7 @@ function TerritoryFilterModalComponent({
                         name={
                           isSelected ? 'checkmark-circle' : 'ellipse-outline'
                         }
-                        size={22}
+                        size={layout.iconSize.md}
                         color={isSelected ? cfg.activeColor : colors.muted}
                       />
                     </Pressable>
@@ -900,7 +901,7 @@ function TerritoryFilterModalComponent({
         {/* Aviso preventivo de filtro vazio no recorte */}
         {territoryDomain === 'calls' && totalCalls === 0 && (
           <View style={styles.emptyWarningHint}>
-            <Ionicons name="information-circle-outline" size={16} color={colors.risk} />
+            <Ionicons name="information-circle-outline" size={layout.iconSize.sm} color={colors.risk} />
             <AppText variant="caption" color="muted" style={{ flex: 1 }}>
               Nenhum chamado encontrado para este filtro no recorte. Experimente ampliar o período ou o raio.
             </AppText>
@@ -923,7 +924,7 @@ function TerritoryFilterModalComponent({
               pressed && { opacity: 0.7 },
             ]}
           >
-            <Ionicons name="refresh-outline" size={16} color={colors.ink} />
+            <Ionicons name="refresh-outline" size={layout.iconSize.sm} color={colors.ink} />
             <AppText variant="caption" style={styles.resetButtonText}>
               Limpar tudo
             </AppText>
@@ -948,7 +949,7 @@ function TerritoryFilterModalComponent({
                   : `Ver ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`
                 : 'Ver equipamentos'}
             </AppText>
-            <Ionicons name="arrow-forward" size={16} color={colors.onAccent} />
+            <Ionicons name="arrow-forward" size={layout.iconSize.sm} color={colors.onAccent} />
           </Pressable>
         </View>
     </AppBottomSheetModal>
@@ -983,11 +984,6 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      shadowColor: lightColors.black,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.09,
-      shadowRadius: 6,
-      elevation: 3,
     },
     viewModePillActive: {
       backgroundColor: colors.accent,
@@ -1003,11 +999,7 @@ const createStyles = (colors: ThemeColors) =>
       fontWeight: '600',
     },
     searchContainer: {
-      shadowColor: lightColors.black,
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 4,
+      ...elevation.floating,
     },
     unifiedLocationPill: {
       flexDirection: 'row',
@@ -1021,7 +1013,7 @@ const createStyles = (colors: ThemeColors) =>
     unifiedLocationIconBadge: {
       width: 24,
       height: 24,
-      borderRadius: 12,
+      borderRadius: layout.radius.sm,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -1048,15 +1040,10 @@ const createStyles = (colors: ThemeColors) =>
       gap: 5,
       height: 30,
       paddingHorizontal: 10,
-      borderRadius: 15,
+      borderRadius: layout.radius.panel,
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      shadowColor: lightColors.black,
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.06,
-      shadowRadius: 3,
-      elevation: 1,
     },
     quickChipActive: {
       backgroundColor: colors.surfaceSubdued,
@@ -1085,7 +1072,7 @@ const createStyles = (colors: ThemeColors) =>
     scopeContextIconCircle: {
       width: 40,
       height: 40,
-      borderRadius: 20,
+      borderRadius: layout.radius.panel,
       backgroundColor: colors.surfaceSubdued,
       alignItems: 'center',
       justifyContent: 'center',
@@ -1093,8 +1080,6 @@ const createStyles = (colors: ThemeColors) =>
     scopeContextSub: {
       fontSize: fontSizes.caption,
       fontWeight: '600',
-      letterSpacing: 0.5,
-      textTransform: 'uppercase',
     },
     scopeContextTitle: {
       fontSize: fontSizes.label,
@@ -1118,11 +1103,6 @@ const createStyles = (colors: ThemeColors) =>
       borderWidth: 1,
       borderColor: colors.border,
       gap: 3,
-      shadowColor: lightColors.black,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.08,
-      shadowRadius: 4,
-      elevation: 2,
     },
     domainPillButton: {
       flexDirection: 'row',
@@ -1156,11 +1136,6 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      shadowColor: lightColors.black,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.08,
-      shadowRadius: 4,
-      elevation: 2,
     },
     activeFilterText: {
       fontWeight: '600',
@@ -1197,11 +1172,6 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      shadowColor: lightColors.black,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 2,
     },
     domainTabButtonText: {
       fontSize: fontSizes.meta,
@@ -1226,10 +1196,8 @@ const createStyles = (colors: ThemeColors) =>
     },
     sectionHeaderTitle: {
       fontWeight: '600',
-      letterSpacing: 0.6,
       fontSize: fontSizes.caption,
       color: colors.muted,
-      textTransform: 'uppercase',
     },
     sectionDivider: {
       height: StyleSheet.hairlineWidth,
@@ -1251,10 +1219,8 @@ const createStyles = (colors: ThemeColors) =>
     },
     sectionTitle: {
       fontWeight: '600',
-      letterSpacing: 0.5,
       fontSize: fontSizes.caption,
       color: colors.muted,
-      textTransform: 'uppercase',
     },
     sectionDesc: {
       fontSize: fontSizes.caption,
@@ -1286,7 +1252,7 @@ const createStyles = (colors: ThemeColors) =>
     facilityIconBadge: {
       width: 38,
       height: 38,
-      borderRadius: 19,
+      borderRadius: layout.radius.panel,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -1306,8 +1272,6 @@ const createStyles = (colors: ThemeColors) =>
     fieldSubLabel: {
       fontWeight: '600',
       fontSize: fontSizes.caption,
-      letterSpacing: 0.3,
-      textTransform: 'uppercase',
     },
     segmentContainer: {
       flexDirection: 'row',
@@ -1329,11 +1293,6 @@ const createStyles = (colors: ThemeColors) =>
     },
     segmentButtonActive: {
       backgroundColor: colors.ink,
-      shadowColor: lightColors.black,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.12,
-      shadowRadius: 3,
-      elevation: 2,
     },
     segmentText: {
       fontWeight: '600',
@@ -1353,7 +1312,7 @@ const createStyles = (colors: ThemeColors) =>
       height: 34,
       justifyContent: 'center',
       paddingHorizontal: 14,
-      borderRadius: 17,
+      borderRadius: layout.radius.panel,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.surface,
@@ -1383,7 +1342,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: 6,
       height: 36,
       paddingHorizontal: 12,
-      borderRadius: 18,
+      borderRadius: layout.radius.panel,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.surface,
@@ -1463,12 +1422,8 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.accent,
       ...Platform.select({
         ios: {
-          shadowColor: colors.accent,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
         },
-        android: { elevation: 4 },
+        android: { },
       }),
     },
     applyButtonText: {

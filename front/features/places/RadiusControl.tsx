@@ -181,11 +181,6 @@ const styles = StyleSheet.create({
     bottom: 3,
     left: 3,
     borderRadius: pillRadiusVal,
-    shadowColor: lightColors.black,
-    shadowOffset: { width: 0, height: 1.5 },
-    shadowOpacity: 0.18,
-    shadowRadius: 2.5,
-    elevation: 2,
   },
   pill: {
     flex: 1,

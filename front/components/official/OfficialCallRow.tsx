@@ -197,7 +197,7 @@ export const OfficialCallRow = memo(function OfficialCallRow({
             >
               <Ionicons
                 name={isSaved ? 'bookmark' : 'bookmark-outline'}
-                size={18}
+                size={layout.iconSize.md}
                 color={isSaved ? colors.accent : colors.muted}
               />
             </Pressable>
@@ -211,7 +211,7 @@ export const OfficialCallRow = memo(function OfficialCallRow({
 
         {/* Localização */}
         <View style={styles.locationRow}>
-          <Ionicons name="location-outline" size={15} color={colors.muted} />
+          <Ionicons name="location-outline" size={layout.iconSize.sm} color={colors.muted} />
           <AppText
             color="muted"
             variant="caption"
@@ -227,7 +227,7 @@ export const OfficialCallRow = memo(function OfficialCallRow({
           <View style={styles.footerLeft}>
             {relativeTime && (
               <View style={styles.metaChip}>
-                <Ionicons name="time-outline" size={13} color={colors.muted} />
+                <Ionicons name="time-outline" size={layout.iconSize.sm} color={colors.muted} />
                 <AppText variant="caption" color="muted" style={styles.metaChipText}>
                   {relativeTime}
                 </AppText>
@@ -245,7 +245,7 @@ export const OfficialCallRow = memo(function OfficialCallRow({
               >
                 <Ionicons
                   name={isOverdue ? 'alert-circle' : 'hourglass-outline'}
-                  size={12}
+                  size={layout.iconSize.sm}
                   color={isOverdue ? colors.risk : colors.onSurfaceBrand}
                 />
                 <AppText
@@ -288,7 +288,7 @@ export const OfficialCallRow = memo(function OfficialCallRow({
               >
                 <Ionicons
                   name="map-outline"
-                  size={13}
+                  size={layout.iconSize.sm}
                   color={colors.onSurfaceBrand}
                 />
                 <AppText variant="caption" style={styles.locatePillText}>
@@ -296,7 +296,7 @@ export const OfficialCallRow = memo(function OfficialCallRow({
                 </AppText>
               </Pressable>
             ) : (
-              <Ionicons name="chevron-forward" size={16} color={colors.muted} />
+              <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.muted} />
             )}
           </View>
         </View>
@@ -326,11 +326,6 @@ function createStyles(colors: ThemeColors) {
       borderWidth: 1,
       borderColor: colors.border,
       overflow: 'hidden',
-      elevation: 1,
-      shadowColor: lightColors.black,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
     },
     pressable: {
       padding: spacing.md,
@@ -373,7 +368,6 @@ function createStyles(colors: ThemeColors) {
       fontSize: fontSizes.caption,
       fontWeight: '600',
       color: colors.muted,
-      textTransform: 'uppercase',
     },
     headerRight: {
       flexDirection: 'row',
@@ -391,7 +385,7 @@ function createStyles(colors: ThemeColors) {
     statusDot: {
       width: 6,
       height: 6,
-      borderRadius: 3,
+      borderRadius: layout.radius.xs,
     },
     statusText: {
       fontWeight: '600',
@@ -401,7 +395,7 @@ function createStyles(colors: ThemeColors) {
     heart: {
       width: 32,
       height: 32,
-      borderRadius: 16,
+      borderRadius: layout.radius.panel,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: StyleSheet.hairlineWidth,
@@ -466,7 +460,7 @@ function createStyles(colors: ThemeColors) {
     protocolChip: {
       paddingHorizontal: 6,
       paddingVertical: 2,
-      borderRadius: 4,
+      borderRadius: layout.radius.xs,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
     },

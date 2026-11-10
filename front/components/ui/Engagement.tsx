@@ -31,7 +31,7 @@ export function SupportButton({
     >
       <Ionicons
         name={supported ? 'heart' : 'heart-outline'}
-        size={24}
+        size={layout.iconSize.lg}
         color={supported ? colors.risk : colors.ink}
       />
     </Pressable>
@@ -57,7 +57,7 @@ export function EngagementStats({
         style={styles.metric}
         accessibilityLabel={`${views} ${views === 1 ? 'visualização única' : 'visualizações únicas'}`}
       >
-        <Ionicons name="eye-outline" size={18} color={color} />
+        <Ionicons name="eye-outline" size={layout.iconSize.md} color={color} />
         <AppText variant="meta" style={{ color }}>
           {views} {views === 1 ? 'visualização' : 'visualizações'}
         </AppText>
@@ -66,7 +66,7 @@ export function EngagementStats({
         style={styles.metric}
         accessibilityLabel={`${supports} ${supports === 1 ? 'apoio' : 'apoios'}`}
       >
-        <Ionicons name="heart-outline" size={18} color={color} />
+        <Ionicons name="heart-outline" size={layout.iconSize.md} color={color} />
         <AppText variant="meta" style={{ color }}>
           {supports} {supports === 1 ? 'apoio' : 'apoios'}
         </AppText>

@@ -10,7 +10,7 @@ function component(file, mocks = {}) {
   const jsx = (type, props) => ({ type, props });
   const theme = { colors: {}, isDark: false };
   const spacing = {};
-  const layout = { radius: {} };
+  const layout = { radius: {}, iconSize: {} };
   const hooks = {
     memo: (fn) => fn,
     useState(initial) {

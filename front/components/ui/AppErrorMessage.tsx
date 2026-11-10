@@ -25,7 +25,7 @@ export function AppErrorMessage({
       <View style={styles.row}>
         <Ionicons
           name="alert-circle-outline"
-          size={24}
+          size={layout.iconSize.lg}
           color={colors.risk}
           accessible={false}
         />

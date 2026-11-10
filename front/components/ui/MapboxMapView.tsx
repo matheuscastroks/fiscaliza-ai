@@ -13,6 +13,8 @@ import { useMapCamera } from '@/features/territory/useMapCamera';
 import type { CapturedDeviceLocation } from '@/features/places/types';
 import { MapAreaLayers, MapPositionLayers } from '@/components/territory/MapAreaLayers';
 import { lightColors } from '@/theme/colors';
+import { elevation } from '@/theme/elevation';
+import { layout } from '@/theme/layout';
 
 export type MarkerKind =
   | 'occurrence'
@@ -561,15 +563,11 @@ const styles = StyleSheet.create({
     backgroundColor: lightColors.surfaceSubdued,
   },
   draggablePin: {
+      ...elevation.floating,
     width: 22,
     height: 22,
-    borderRadius: 11,
+    borderRadius: layout.radius.sm,
     borderWidth: 3,
     borderColor: lightColors.white,
-    shadowColor: lightColors.black,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.32,
-    shadowRadius: 5,
-    elevation: 4,
   },
 });

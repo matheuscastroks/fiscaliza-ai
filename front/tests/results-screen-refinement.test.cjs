@@ -18,7 +18,7 @@ test('results screen: replaces closed-call history with territorial and service 
   const content = read();
   assert.ok(!content.includes('useInfiniteOfficialCalls'), 'History list must be removed');
   assert.ok(!content.includes('HISTÓRICO DE ATENDIMENTOS'), 'History section must be removed');
-  for (const title of ['Bairros com mais chamados registrados', 'Problemas mais registrados', 'VELOCIDADE DE RESOLUÇÃO']) {
+  for (const title of ['Bairros com mais chamados registrados', 'Problemas mais registrados', 'Velocidade de resolução']) {
     assert.ok(content.includes(title), `Must render ${title}`);
   }
   // Sem ranking competitivo: nada de bairros que "mais cumprem prazo" nem resolução mais rápida/lenta.

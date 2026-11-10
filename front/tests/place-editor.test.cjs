@@ -19,6 +19,7 @@ function setup() {
       };
       if (name === 'react/jsx-runtime') return { jsx, jsxs: jsx };
       if (name === 'react-native') return { View: 'View' };
+      if (name === '@/theme/layout') return require(name);
       if (name === '@/theme') return { spacing: { md: 16 }, useTheme: () => ({ colors: { surface: '#fff' }, isDark: false }) };
       if (name === '@/services/publicData') return { fetchTerritoryLocation: () => new Promise(r => { resolve = r; }) };
       if (name === '@/stores/placesStore') return { usePlacesStore: { getState: () => current } };

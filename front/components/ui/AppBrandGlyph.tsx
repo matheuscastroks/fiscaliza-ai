@@ -435,6 +435,5 @@ const styles = StyleSheet.create({
   },
   wordmark: {
     fontWeight: '600',
-    letterSpacing: -0.3,
   },
 });

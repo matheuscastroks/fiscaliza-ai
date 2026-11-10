@@ -161,7 +161,7 @@ function CityCarouselComponent<T extends { id: string }>({
               onPress={() => go(current - 1)}
               style={[styles.arrow, current <= 0 && styles.disabled]}
             >
-              <Ionicons name="arrow-back" size={20} color={colors.ink} />
+              <Ionicons name="arrow-back" size={layout.iconSize.md} color={colors.ink} />
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -173,7 +173,7 @@ function CityCarouselComponent<T extends { id: string }>({
                 current >= displayItems.length - 1 && styles.disabled,
               ]}
             >
-              <Ionicons name="arrow-forward" size={20} color={colors.ink} />
+              <Ionicons name="arrow-forward" size={layout.iconSize.md} color={colors.ink} />
             </Pressable>
           </View>
         </View>

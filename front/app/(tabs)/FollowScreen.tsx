@@ -117,7 +117,7 @@ export default function FollowScreen() {
                     },
                   ]}
                 >
-                  <Ionicons name="refresh" size={14} color={colors.ink} />
+                  <Ionicons name="refresh" size={layout.iconSize.sm} color={colors.ink} />
                   <AppText variant="caption" style={{ fontWeight: '600' }}>
                     {refreshing ? 'Atualizando…' : 'Atualizar'}
                   </AppText>

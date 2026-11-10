@@ -118,7 +118,7 @@ export function AppSelect({
             {item.icon && (
               <Ionicons
                 name={item.icon}
-                size={18}
+                size={layout.iconSize.md}
                 color={active ? colors.accent : colors.muted}
               />
             )}
@@ -135,7 +135,7 @@ export function AppSelect({
           {active && (
             <Ionicons
               name="checkmark-circle"
-              size={20}
+              size={layout.iconSize.md}
               color={colors.accent}
             />
           )}
@@ -229,7 +229,7 @@ export function AppSelect({
               },
             ]}
           >
-            <Ionicons name="search-outline" size={18} color={colors.muted} />
+            <Ionicons name="search-outline" size={layout.iconSize.md} color={colors.muted} />
             <BottomSheetTextInput
               value={search}
               onChangeText={setSearch}
@@ -241,7 +241,7 @@ export function AppSelect({
             />
             {search.length > 0 && (
               <Pressable onPress={() => setSearch('')} hitSlop={8}>
-                <Ionicons name="close-circle" size={18} color={colors.muted} />
+                <Ionicons name="close-circle" size={layout.iconSize.md} color={colors.muted} />
               </Pressable>
             )}
           </View>
