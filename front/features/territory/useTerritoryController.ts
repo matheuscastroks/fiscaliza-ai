@@ -642,10 +642,14 @@ export function useTerritoryController() {
         : `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')})`
       : officialCalls.isLoading
         ? 'Consultando chamados neste recorte...'
-        : `Ver em lista · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
+        : officialCalls.error && listed.length === 0
+          ? 'Não foi possível carregar os chamados'
+          : `Ver em lista · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
 
   const summarySubLabel =
-    territoryDomain === 'calls' && unlocated.length > 0
+    territoryDomain === 'calls' && officialCalls.error && listed.length === 0
+      ? 'Verifique a conexão. Toque para ver o motivo e tentar de novo'
+      : territoryDomain === 'calls' && unlocated.length > 0
       ? `+${unlocated.length} sem ponto no mapa · Toque para abrir a lista`
       : 'Toque em um ponto no mapa ou abra a lista completa';
 

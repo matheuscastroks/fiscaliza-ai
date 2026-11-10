@@ -15,6 +15,13 @@ export class NetworkError extends Error {
     this.name = 'NetworkError';
   }
 }
+/** Resposta recebida do servidor (inclusive 401/500): distinta de falta de rede. */
+export class ApiError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
 let sessionToken: string | null = null;
 let onExpired: (() => void) | undefined;
 async function expireUnauthorizedSession(path: string, status: number) {
@@ -34,11 +41,11 @@ async function readResult<T>(
     typeof result !== 'object' ||
     typeof result.success !== 'boolean'
   )
-    throw new Error(
+    throw new ApiError(
       'O serviço retornou uma resposta inválida. Tente novamente.',
     );
   if (status < 200 || status >= 300 || !result.success)
-    throw new Error(
+    throw new ApiError(
       result.error || 'Não foi possível concluir. Tente novamente.',
     );
   return result.data as T;
@@ -97,7 +104,7 @@ export async function request<T>(
       result = (await response.json()) as ApiResult<T>;
     } catch {
       await expireUnauthorizedSession(path, response.status);
-      throw new Error(
+      throw new ApiError(
         response.status >= 500
           ? 'O serviço está temporariamente indisponível. Tente novamente em instantes.'
           : 'O serviço retornou uma resposta inválida. Tente novamente.',
@@ -107,14 +114,11 @@ export async function request<T>(
   } catch (error) {
     // A superseded query is cancellation, not an offline error to show to users.
     if (signal?.aborted) throw error;
-    if (
-      error instanceof TypeError ||
-      (error instanceof Error && error.name === 'AbortError')
-    )
-      throw new NetworkError(
-        'Sem conexão com o serviço. Verifique a rede e tente novamente.',
-      );
-    throw error;
+    // Tudo que não veio do servidor (TypeError, timeout, falha nativa de rede) é falta de conexão.
+    if (error instanceof ApiError) throw error;
+    throw new NetworkError(
+      'Sem conexão com o serviço. Verifique a rede e tente novamente.',
+    );
   } finally {
     clearTimeout(timer);
     signal?.removeEventListener('abort', cancel);

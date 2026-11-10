@@ -89,3 +89,25 @@ test('unauthorized protected responses expire the session even with a malformed 
     assert.equal(expired, 1);
   }
 });
+
+test('any non-server failure is a NetworkError, so an offline start can keep the cached session', async () => {
+  const module = { exports: {} };
+  const source = ts.transpileModule(fs.readFileSync('services/http.ts', 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  vm.runInNewContext(source, {
+    module, exports: module.exports, process: { env: {} }, AbortController, FormData, Error, TypeError, setTimeout, clearTimeout,
+    require(name) {
+      if (name === 'expo/fetch') return { fetch: async () => { throw new Error('java.net.UnknownHostException'); } };
+      if (name === 'expo-secure-store') return { deleteItemAsync: async () => {} };
+      if (name === '@tanstack/react-query') return { QueryClient: class {} };
+      throw new Error(name);
+    },
+  });
+  await assert.rejects(module.exports.request('/auth/me'), (error) => error.name === 'NetworkError');
+});
+
+test('a server error response stays an ApiError and never looks like a lost connection', async () => {
+  const request = transport({ status: 500, json: async () => ({ success: false, error: 'Falha interna' }) });
+  await assert.rejects(request('/auth/me'), (error) => error.name === 'ApiError' && /Falha interna/.test(error.message));
+});

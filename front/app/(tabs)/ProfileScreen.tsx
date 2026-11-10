@@ -46,7 +46,7 @@ const navigationSections: {
   items: MenuItem[];
 }[] = [
   {
-    title: 'CONFIGURAÇÕES',
+    title: 'Configurações',
     icon: 'settings-outline',
     items: [
       {
