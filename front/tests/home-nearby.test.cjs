@@ -44,7 +44,7 @@ test('TabLayout starts on TerritoryScreen and TerritoryScreen falls back to list
   );
 
   const territorySource = fs.readFileSync('app/(tabs)/TerritoryScreen.tsx', 'utf8') +
-    fs.readFileSync('features/territory/useTerritoryController.ts', 'utf8');
+    ['useTerritoryController', 'useTerritoryQueries', 'useTerritoryView'].map((n) => fs.readFileSync(`features/territory/${n}.ts`, 'utf8')).join(String.fromCharCode(10));
   assert.ok(
     territorySource.includes('const mapAvailable = isMapboxAvailable();'),
     'TerritoryScreen must check isMapboxAvailable()',

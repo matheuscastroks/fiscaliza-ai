@@ -112,7 +112,7 @@ test('normalizeBoundaryFeatureCollection normalizes raw Polygon, Feature and Fea
 });
 
 test('TerritoryScreen updates viewportRef on pan without triggering state re-renders and delegates list/filters', () => {
-  const source = fs.readFileSync('app/(tabs)/TerritoryScreen.tsx', 'utf8') + fs.readFileSync('features/territory/useTerritoryController.ts', 'utf8');
+  const source = fs.readFileSync('app/(tabs)/TerritoryScreen.tsx', 'utf8') + ['useTerritoryController', 'useTerritoryQueries', 'useTerritoryView'].map((n) => fs.readFileSync(`features/territory/${n}.ts`, 'utf8')).join(String.fromCharCode(10));
   assert.ok(
     source.includes('viewportRef.current = {'),
     'onRegionChange should update viewportRef.current without calling setRegion on every frame',
@@ -131,9 +131,8 @@ test('TerritoryScreen updates viewportRef on pan without triggering state re-ren
       source.includes('TerritoryFilterModal'),
     'TerritoryScreen should delegate list and filter controls to dedicated components',
   );
-  assert.ok(
-    fs.readFileSync('app/(tabs)/TerritoryScreen.tsx', 'utf8').split('\n').length < 600 &&
-      fs.readFileSync('features/territory/useTerritoryController.ts', 'utf8').split('\n').length < 900,
-    'Screen (<600) and controller (<900) should stay small after modular extraction',
-  );
+  for (const file of ['app/(tabs)/TerritoryScreen.tsx', 'features/territory/useTerritoryController.ts', 'features/territory/useTerritoryQueries.ts', 'features/territory/useTerritoryView.ts']) {
+    const lines = fs.readFileSync(file, 'utf8').split(String.fromCharCode(10)).length;
+    assert.ok(lines < 600, `${file} should stay below 600 lines, currently ${lines}`);
+  }
 });

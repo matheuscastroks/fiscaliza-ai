@@ -19,7 +19,7 @@ test('app header: supports hideUserAvatar to prevent duplicate avatars', () => {
   );
 });
 
-test('profile screen: configures clean header without duplicate avatar and provides quick settings action', () => {
+test('profile screen: configures clean header without duplicate avatar and reaches settings from the menu', () => {
   const profileFile = path.join(ROOT_DIR, 'app', '(tabs)', 'ProfileScreen.tsx');
   const content = fs.readFileSync(profileFile, 'utf8');
 
@@ -28,7 +28,7 @@ test('profile screen: configures clean header without duplicate avatar and provi
     'ProfileScreen must pass hideUserAvatar to AppHeader',
   );
   assert.ok(
-    content.includes('rightElement=') && content.includes('/SettingsScreen'),
-    'ProfileScreen must provide rightElement with settings/preferences shortcut',
+    content.includes('/SettingsScreen') && !content.includes('rightElement='),
+    'ProfileScreen reaches Preferências from the menu, without a duplicate header action',
   );
 });

@@ -11,14 +11,6 @@ export const createStyles = (colors: ThemeColors) =>
       paddingBottom: 140,
       gap: spacing.lg,
     },
-    headerActionBtn: {
-      width: 44,
-      height: 44,
-      borderRadius: layout.radius.panel,
-      borderWidth: StyleSheet.hairlineWidth,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     heroCard: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -141,23 +133,9 @@ export const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: 14,
       minHeight: 54,
     },
-    tableDivider: {
-      height: StyleSheet.hairlineWidth,
-      marginLeft: 54,
-    },
-    iconSquircle: {
-      width: 32,
-      height: 32,
-      borderRadius: layout.radius.sm,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     tableRowContent: {
       flex: 1,
       gap: 2,
-    },
-    callsList: {
-      gap: spacing.xs,
     },
     flex: {
       flex: 1,
@@ -168,14 +146,5 @@ export const createStyles = (colors: ThemeColors) =>
       fontSize: fontSizes.caption,
       marginTop: spacing.xs,
       paddingBottom: spacing.md,
-    },
-    deleteModalContent: {
-      paddingHorizontal: spacing.contentPadding,
-      paddingTop: spacing.md,
-      gap: spacing.md,
-    },
-    deleteModalActions: {
-      gap: spacing.xs,
-      marginTop: spacing.xs,
     },
   });

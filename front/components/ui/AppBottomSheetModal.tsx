@@ -1,4 +1,5 @@
 import React, { forwardRef, useCallback, useMemo, useRef } from 'react';
+
 import {
   Modal,
   StyleProp,
@@ -7,6 +8,7 @@ import {
   ViewStyle,
   Pressable,
 } from 'react-native';
+
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
@@ -15,14 +17,21 @@ import BottomSheet, {
   BottomSheetScrollView,
   BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
+
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { useTheme } from '@/theme/useTheme';
+
 import { AppText } from './AppText';
+
 import { spacing } from '@/theme';
+
 import { fontSizes } from '@/theme/typography';
+
 import { layout } from '@/theme/layout';
+
 
 export interface AppBottomSheetModalProps {
   visible: boolean;
@@ -64,7 +73,6 @@ export const AppBottomSheetModal = forwardRef<BottomSheet, AppBottomSheetModalPr
     ref,
   ) => {
     const { colors } = useTheme();
-    const insets = useSafeAreaInsets();
     const sheetRef = useRef<BottomSheet>(null);
 
     const snapPoints = useMemo(

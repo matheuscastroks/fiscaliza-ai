@@ -5,51 +5,31 @@ const path = require('node:path');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 
-test('profile screen: adopts Apple Inset-Grouped tables and modern civic metrics', () => {
-  const screenPath = path.join(ROOT_DIR, 'app', '(tabs)', 'ProfileScreen.tsx');
-  assert.ok(fs.existsSync(screenPath), 'ProfileScreen.tsx must exist');
+test('profile screen: lean identity, metrics, domicile and a short menu; account actions live in AccountScreen', () => {
+  const profile = fs.readFileSync(path.join(ROOT_DIR, 'app', '(tabs)', 'ProfileScreen.tsx'), 'utf8');
+  const styles = fs.readFileSync(path.join(ROOT_DIR, 'features', 'profile', 'profileScreenStyles.ts'), 'utf8');
+  const account = fs.readFileSync(path.join(ROOT_DIR, 'app', 'AccountScreen.tsx'), 'utf8');
+  const content = profile + styles;
 
-  const content = fs.readFileSync(screenPath, 'utf8') + fs.readFileSync(path.join(ROOT_DIR, 'features', 'profile', 'profileScreenStyles.ts'), 'utf8');
+  assert.ok(content.includes('UserAvatar') && content.includes('useAuthStore'), 'identity bound to the session');
+  assert.ok(content.includes('useFollowStore') && content.includes('usePlacesStore'), 'metrics bound to saved calls and places');
+  assert.ok(content.includes('metricCard') && content.includes('savedCalls.length') && content.includes('places.length'), 'two civic metrics');
+  assert.ok(content.includes('Domicílio') && content.includes('Cadastrar meu CEP') && content.includes('<PostalCodeSheet'), 'single CEP registration in a sheet');
+  assert.ok(content.includes("'/PlacesScreen'") && !content.includes('PlacesSheet'), 'places have a single screen');
+  assert.ok(!content.includes('Município e Bairro'), 'no redundant municipality selector');
 
-  // Core stores & avatar
-  assert.ok(content.includes('UserAvatar'), 'Must integrate UserAvatar');
-  assert.ok(content.includes('useAuthStore'), 'Must bind user authentication state');
-  assert.ok(content.includes('useFollowStore'), 'Must bind saved calls store');
-  assert.ok(content.includes('usePlacesStore'), 'Must bind places store');
+  // Menu curto com componentes compartilhados
+  assert.ok(profile.includes('InsetGroup') && profile.includes('ListRow'), 'menu uses shared InsetGroup/ListRow');
+  for (const path_ of ['/SettingsScreen', '/ResultsScreen', '/HelpScreen', '/AboutScreen', '/AccountScreen']) {
+    assert.ok(profile.includes(path_), `menu links to ${path_}`);
+  }
+  assert.ok(!profile.includes('OfficialCallRow'), 'saved calls live in the Salvos tab, not in the profile');
+  assert.ok(!profile.includes('deleteAccount'), 'destructive account actions are not on the profile');
 
-  // Apple Inset-Grouped Tables
-  assert.ok(content.includes('insetTable'), 'Must adopt Apple Inset-Grouped table containers');
-  assert.ok(content.includes('tableRow'), 'Must style rows with standard tableRow');
-  assert.ok(content.includes('tableDivider'), 'Must separate rows with hairline table dividers');
-  assert.ok(content.includes('iconSquircle'), 'Must style section icons with squircles');
-
-  // Sections
-  assert.ok(content.includes('Domicílio'), 'Must group citizen locality under Domicílio');
-  assert.ok(content.includes('Cadastrar meu CEP'), 'Domicílio Cívico must feature single streamlined CEP registration for Rio citizens');
-  assert.ok(!content.includes('Município e Bairro'), 'Must eliminate redundant municipality selector as app is exclusively for Rio');
-  assert.ok(content.includes('Configurações'), 'Must group settings in Apple Inset Table');
-  assert.ok(content.includes('INFORMAÇÕES E TRANSPARÊNCIA'), 'Must group transparency links in Apple Inset Table');
-  assert.ok(content.includes('Privacidade e conta'), 'Must group privacy and account actions');
-
-  // Dual Metric KPIs
-  assert.ok(content.includes('metricCard'), 'Must render structured metric cards');
-  assert.ok(content.includes('savedCalls.length'), 'Must display saved calls count');
-  assert.ok(content.includes('places.length'), 'Must display saved places count');
-
-  // Postal code and places bottom sheet integration
-  assert.ok(content.includes('PostalCodeSheet'), 'Must integrate PostalCodeSheet component');
-  assert.ok(content.includes('<PostalCodeSheet'), 'Must mount PostalCodeSheet bottom sheet');
-  assert.ok(!content.includes("'/MunicipalityScreen'"), 'Must replace full-screen navigation with bottom sheet');
-  assert.ok(!content.includes('PlacesSheet'), 'Lugares têm uma única tela: PlacesScreen');
-  assert.ok(content.includes("'/PlacesScreen'"), 'Must navigate to PlacesScreen');
-
-  // Account actions & modal
-  assert.ok(content.includes('useSignOutSheet'), 'Must preserve sign out sheet');
-  assert.ok(content.includes('deleteAccount'), 'Must preserve account deletion');
-  assert.ok(content.includes('AppBottomSheetModal'), 'Must preserve account deletion bottom sheet modal');
-
-  // Legacy removal guard (ensures test legacy-removal.test.cjs continues to pass)
-  assert.ok(!content.includes('/activity'), 'Must not reference legacy /activity route');
+  // Conta e privacidade
+  assert.ok(account.includes('deleteAccount') && account.includes('useSignOutSheet'), 'AccountScreen owns sign out and deletion');
+  assert.ok(account.includes('AppBottomSheetModal'), 'deletion is confirmed in a bottom sheet');
+  assert.ok(!(profile + account).includes('/activity'), 'no legacy /activity route');
 });
 
 test('postal code: sheet and municipality screen share one flow and service', () => {
