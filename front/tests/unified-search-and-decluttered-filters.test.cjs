@@ -157,8 +157,8 @@ test('territory screen: respects architecture constraints and line ceiling', () 
 
   const lines = content.split('\n').length;
   assert.ok(
-    lines < 900,
-    `TerritoryScreen should stay below 900 lines, currently at ${lines}`,
+    lines < 600,
+    `TerritoryScreen should stay below 600 lines, currently at ${lines}`,
   );
 
   assert.ok(

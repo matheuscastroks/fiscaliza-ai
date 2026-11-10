@@ -5,9 +5,9 @@
 
 import type { Ionicons } from '@expo/vector-icons';
 import { resolveServiceThemeId } from '@/shared/service-themes';
+import { categoryPalette } from '@/theme/palette';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
-import { categoryPalette } from '@/theme/palette';
 
 export interface ServiceCategoryTheme {
   id: string;

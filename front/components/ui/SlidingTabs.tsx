@@ -1,5 +1,7 @@
 import { useTheme } from '@/theme/useTheme';
+
 import { useEffect, useRef, useState } from 'react';
+
 import {
   AccessibilityInfo,
   Animated,
@@ -8,12 +10,17 @@ import {
   ScrollView,
   View,
 } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
+
 import { AppText } from './AppText';
+
 import { AppSelect } from './AppSelect';
+
 import { spacing } from '@/theme';
-import { lightColors } from '@/theme/colors';
+
 import { layout } from '@/theme/layout';
+
 
 export interface SlidingOption {
   value: string;

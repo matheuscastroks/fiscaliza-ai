@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+
 import {
   View,
   StyleSheet,
@@ -8,17 +9,24 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
+
 import { AppText } from '@/components/ui/AppText';
+
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
+
 import type { ThemeColors } from '@/theme/colors';
+
 import { layout, spacing } from '@/theme';
+
 import {
   TerritoryCardContent,
   type Entry,
 } from '@/components/territory/TerritoryPreviewCard';
-import { lightColors } from '@/theme/colors';
+
 import { elevation } from '@/theme/elevation';
+
 
 interface TerritoryClusterCarouselProps {
   entries: Entry[];

@@ -1,24 +1,41 @@
 import { IconButton } from '@/components/ui/IconButton';
+
 import { useMenu } from '@/components/ui/SideMenu';
+
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
+
 import type { ThemeColors } from '@/theme/colors';
+
 import { memo } from 'react';
-import { View, ScrollView, StyleSheet, Pressable, Platform } from 'react-native';
+
+import { View, ScrollView, StyleSheet, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
+
 import { Ionicons } from '@expo/vector-icons';
+
 import { AppText } from '@/components/ui/AppText';
-import { AppBottomSheetModal, BottomSheetScrollView } from '@/components/ui/AppBottomSheetModal';
+
 import { CitySearch } from '@/components/ui/CitySearch';
+
 import { type FacilityCategory, type SourceCoverage } from '@/shared/public-data';
+
 import { layout, spacing } from '@/theme';
+
 import { PlaceSelector } from '@/features/places/PlaceSelector';
+
 import type { RadiusMeters } from '@/features/places/types';
-import { CIVIC_MACRO_THEMES, matchesMacroTheme } from '@/features/city/officialCategoryThemes';
+
+import { CIVIC_MACRO_THEMES } from '@/features/city/officialCategoryThemes';
 import { useTerritoryDomain } from '@/stores/territoryStore';
+
 import { fontSizes } from '@/theme/typography';
+
 import { elevation } from '@/theme/elevation';
+
 import { CLOSED_STATUS, OPEN_STATUS } from '@/features/city/callStatus';
+
 import type { TerritoryLayer } from '@/features/territory/selectors';
+
 
 export type { TerritoryLayer };
 

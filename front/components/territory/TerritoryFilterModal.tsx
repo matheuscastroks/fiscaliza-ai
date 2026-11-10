@@ -1,22 +1,39 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
+
 import type { ThemeColors } from '@/theme/colors';
+
 import React, { memo, useMemo } from 'react';
-import { View, ScrollView, StyleSheet, Pressable, Platform } from 'react-native';
+
+import { View, StyleSheet, Pressable, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
+
 import { Ionicons } from '@expo/vector-icons';
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { AppText } from '@/components/ui/AppText';
+
 import { AppSelect } from '@/components/ui/AppSelect';
+
 import { AppBottomSheetModal, BottomSheetScrollView } from '@/components/ui/AppBottomSheetModal';
-import { type FacilityCategory, type SourceCoverage } from '@/shared/public-data';
+
+import { type FacilityCategory } from '@/shared/public-data';
 import { layout, spacing } from '@/theme';
+
 import type { RadiusMeters } from '@/features/places/types';
+
 import { CIVIC_MACRO_THEMES, matchesMacroTheme } from '@/features/city/officialCategoryThemes';
+
 import { useTerritoryDomain } from '@/stores/territoryStore';
+
 import { fontSizes } from '@/theme/typography';
+
 import { lightColors } from '@/theme/colors';
+
 import { CLOSED_STATUS, OPEN_STATUS } from '@/features/city/callStatus';
+
 import type { TerritoryLayer } from '@/features/territory/selectors';
+
 
 
 export interface TerritoryFilterModalProps {

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+
 import {
   View,
   Pressable,
@@ -7,12 +8,17 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+
 import * as Haptics from 'expo-haptics';
+
 import { AppText } from '@/components/ui/AppText';
+
 import { layout, useTheme } from '@/theme';
+
 import type { RadiusMeters } from './types';
+
 import { fontSizes } from '@/theme/typography';
-import { lightColors } from '@/theme/colors';
+
 
 export const RADIUS_OPTIONS: { value: RadiusMeters; label: string }[] = [
   { value: 500, label: '500 m' },

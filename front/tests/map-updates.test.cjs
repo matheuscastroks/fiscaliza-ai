@@ -112,7 +112,7 @@ test('normalizeBoundaryFeatureCollection normalizes raw Polygon, Feature and Fea
 });
 
 test('TerritoryScreen updates viewportRef on pan without triggering state re-renders and delegates list/filters', () => {
-  const source = fs.readFileSync('app/(tabs)/TerritoryScreen.tsx', 'utf8');
+  const source = fs.readFileSync('app/(tabs)/TerritoryScreen.tsx', 'utf8') + fs.readFileSync('features/territory/useTerritoryController.ts', 'utf8');
   assert.ok(
     source.includes('viewportRef.current = {'),
     'onRegionChange should update viewportRef.current without calling setRegion on every frame',
@@ -132,7 +132,8 @@ test('TerritoryScreen updates viewportRef on pan without triggering state re-ren
     'TerritoryScreen should delegate list and filter controls to dedicated components',
   );
   assert.ok(
-    source.split('\n').length < 900,
-    'TerritoryScreen should stay below 900 lines after modular extraction',
+    fs.readFileSync('app/(tabs)/TerritoryScreen.tsx', 'utf8').split('\n').length < 600 &&
+      fs.readFileSync('features/territory/useTerritoryController.ts', 'utf8').split('\n').length < 900,
+    'Screen (<600) and controller (<900) should stay small after modular extraction',
   );
 });

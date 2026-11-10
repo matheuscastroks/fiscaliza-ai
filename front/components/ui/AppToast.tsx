@@ -1,11 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
+
 import { Animated, Pressable, StyleSheet } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
+
 import { AppText } from '@/components/ui/AppText';
+
 import { layout, spacing, useTheme } from '@/theme';
+
 import { fontSizes } from '@/theme/typography';
-import { lightColors } from '@/theme/colors';
+
 import { elevation } from '@/theme/elevation';
+
 
 export interface AppToastProps {
   message: string | null;

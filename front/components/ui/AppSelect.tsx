@@ -8,14 +8,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
-import { fontFamilies } from '@/theme/typography';
+import { fontFamilies , fontSizes } from '@/theme/typography';
 import { AppText } from './AppText';
 import {
   AppBottomSheetModal,
   BottomSheetFlatList,
   BottomSheetTextInput,
 } from './AppBottomSheetModal';
-import { fontSizes } from '@/theme/typography';
+
 
 export interface SelectOption {
   value: string;

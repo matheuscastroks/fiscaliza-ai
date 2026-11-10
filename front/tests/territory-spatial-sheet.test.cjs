@@ -20,7 +20,7 @@ test('territory screen: bridges list item to map camera and preview card with ha
   const screenPath = path.join(ROOT_DIR, 'app', '(tabs)', 'TerritoryScreen.tsx');
   assert.ok(fs.existsSync(screenPath), 'TerritoryScreen.tsx must exist');
 
-  const content = fs.readFileSync(screenPath, 'utf8');
+  const content = fs.readFileSync(screenPath, 'utf8') + fs.readFileSync(path.join(ROOT_DIR, 'features', 'territory', 'useTerritoryController.ts'), 'utf8');
   assert.ok(content.includes('handleLocateEntry'), 'Must implement handleLocateEntry');
   assert.ok(content.includes('Haptics.impactAsync'), 'Must trigger tactile feedback on locate');
   assert.ok(content.includes('zoom: 16.5'), 'Must focus camera closely on located coordinate');

@@ -43,10 +43,8 @@ test('TabLayout starts on TerritoryScreen and TerritoryScreen falls back to list
     'index route must be hidden from the tab bar',
   );
 
-  const territorySource = fs.readFileSync(
-    'app/(tabs)/TerritoryScreen.tsx',
-    'utf8',
-  );
+  const territorySource = fs.readFileSync('app/(tabs)/TerritoryScreen.tsx', 'utf8') +
+    fs.readFileSync('features/territory/useTerritoryController.ts', 'utf8');
   assert.ok(
     territorySource.includes('const mapAvailable = isMapboxAvailable();'),
     'TerritoryScreen must check isMapboxAvailable()',
