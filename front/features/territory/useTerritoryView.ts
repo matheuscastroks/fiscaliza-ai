@@ -12,12 +12,15 @@ import { type TerritoryFilterBarProps } from '@/components/territory/TerritoryFi
 
 
 
+
 import { chooseTerritorialEntries, computeOverviewRegion, TERRITORY_PERIOD_OPTIONS, TERRITORY_STATUS_OPTIONS } from '@/features/territory/selectors';
 
 
 
 
+
 import { summarizeFacilityPagination } from '@/features/territory/facilityPagination';
+
 
 
 
@@ -30,12 +33,15 @@ import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
 
 
+
 import * as Haptics from 'expo-haptics';
 
 
 
 
+
 import { router } from 'expo-router';
+
 
 
 
@@ -57,7 +63,9 @@ import { usePlacesStore } from '@/stores/placesStore';
 
 
 
+
 import { type MapMarker } from '@/components/ui/MapboxMapView';
+
 
 
 
@@ -66,7 +74,9 @@ import { entryLocation, entryToMarker, type Entry } from '@/components/territory
 
 
 
+
 import { OPEN_STATUS } from '@/features/city/callStatus';
+
 
 
 
@@ -81,6 +91,7 @@ type TerritoryMapRegion = {
 };
 
 import { INITIAL_REGION, type useTerritoryQueries } from './useTerritoryQueries';
+
 
 
 

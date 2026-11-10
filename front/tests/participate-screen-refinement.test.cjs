@@ -47,11 +47,11 @@ test('participate screen: adopts Apple Inset-Grouped tables and KeyboardAwareScr
   assert.ok(content.includes('QuickComplaintKit'), 'Must render QuickComplaintKit as hero');
   assert.ok(content.includes('usePlacesStore'), 'Must bind neighborhood from the active places selection');
   assert.ok(content.includes('OFFICIAL_CHANNELS'), 'Must define unified official channels list');
-  assert.ok(content.includes('insetTable'), 'Must use Apple Inset-Grouped table style');
+  assert.ok(content.includes('InsetGroup') && content.includes('ListRow'), 'Must use the shared InsetGroup/ListRow');
   assert.ok(content.includes('OFFICIAL_SERVICES'), 'Must render official services catalog');
-  assert.ok(content.includes('agencyBadge'), 'Must display agency tags on popular services');
-  assert.ok(content.includes('civicTipCard'), 'Must include map pre-check civic tip');
-  assert.ok(content.includes('footerPortalButton'), 'Must include clean portal search link in footer');
+  assert.ok(content.includes('service.agency'), 'Must show the agency on popular services');
+  assert.ok(content.includes('/(tabs)/TerritoryScreen'), 'Must offer the map shortcut before opening a new request');
+  assert.ok(!content.includes('civicTipCard'), 'The map tip is the top shortcut now, not a second card');
   assert.ok(content.includes('KeyboardAwareScrollView'), 'Must wrap screen in KeyboardAwareScrollView to prevent inputs from being covered by keyboard');
   assert.ok(content.includes('bottomOffset'), 'Must provide bottomOffset for comfortable input clearance');
 
