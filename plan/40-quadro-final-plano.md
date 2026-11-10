@@ -37,7 +37,7 @@ Data: 2026-11-10. Cada linha cita o que existe no código e o tipo de evidência
 ## Fase 3 — migração visual
 - Cores, fontes, pesos, raios, ícones, sombras e caixa alta em tokens — C.
 - `CallSummary` único; `IconTile`; `InsetGroup` em Perfil, Agir, Preferências, Conta — C + A.
-- Blocos próprios `tableRow`/`insetTable` não existem mais em nenhuma tela (a última, a linha de avisos de Preferências, migrou). O KPI principal de Dados do bairro continua grande, agora com pergunta e fonte.
+- Blocos próprios `tableRow`/`insetTable` não existem mais em nenhuma tela (a última, a linha de avisos de Preferências, migrou). O KPI de prazo de Dados do bairro usa o tamanho do token `screenTitle` (26, peso 600), com pergunta, base e fonte; não há número fora da escala.
 
 ## Fase 4 — estrutura e testes
 - Código morto e 5 dependências sem uso removidos — C (bundle Android exporta).
@@ -45,7 +45,7 @@ Data: 2026-11-10. Cada linha cita o que existe no código e o tipo de evidência
 - `scopedPersistence` (fila serial, geração de escopo) usado por `territoryStore`, `placesStore`, `followStore` e `themeStore`; o formato das chaves já gravadas foi mantido — C (testes de concorrência).
 - `useShallow`, `OPEN_STATUS`, `formatRadius`, `officialStatusColor`, `mutation()` restrito — C.
 - Imagens do onboarding em WebP (~2,3 MB para ~540 KB) — C (peso medido; abertura não medida).
-- Testes de render: renderizador mínimo para `node --test` (8 testes). **`@testing-library/react-native` não foi adotado** (exige Babel/Jest) — decisão de infraestrutura pendente.
+- Testes de render: Jest (`jest-expo`) com `@testing-library/react-native` em `tests/components/` (6 testes: `Chip`, `IconButton`, `StatusBadge`, `ListRow`/`InsetGroup`, `CallSummary`), rodando no `npm test` junto com o `node --test`; o renderizador mínimo anterior segue cobrindo os mesmos componentes com mocks — C.
 
 ## Extras pedidos depois do plano
 - Diretriz de carga cognitiva e justificativa por tela (`plan/38`).
@@ -68,8 +68,7 @@ Data: 2026-11-10. Cada linha cita o que existe no código e o tipo de evidência
 - Editor de lugar: rótulo e texto de exemplo do endereço eram idênticos.
 
 ## Pendências reais
-1. Decidir se adota um executor de testes de componentes (Jest + `@testing-library/react-native`).
-2. Cadastrar no servidor os contornos dos demais bairros (a API devolve 1).
-3. Rodar `eas init` na sua conta e commitar o `projectId` para os avisos funcionarem.
-4. Testar os textos com moradores e aferir contraste/desempenho em aparelhos de entrada.
-5. O `projectId` do EAS não pôde ser criado daqui (não há `eas.json` nem login na conta); sem ele os avisos ficam desligados e o app diz isso.
+1. Cadastrar no servidor os contornos dos demais bairros (a API devolve 1).
+2. Rodar `eas init` na sua conta e commitar o `projectId` para os avisos funcionarem.
+3. Testar os textos com moradores e aferir contraste/desempenho em aparelhos de entrada.
+4. O `projectId` do EAS não pôde ser criado daqui (não há `eas.json` nem login na conta); sem ele os avisos ficam desligados e o app diz isso.

@@ -1,28 +1,36 @@
 import { useCallback, useState } from 'react';
 
+
 import { StyleSheet, View } from 'react-native';
+
 
 import { router, useFocusEffect } from 'expo-router';
 
+
 import { AuthScreenLayout } from '@/components/ui/AuthScreenLayout';
+
 
 import { AppErrorMessage } from '@/components/ui/AppErrorMessage';
 
+
 import { AppButton } from '@/components/ui/AppButton';
+
 
 import { AppInput } from '@/components/ui/AppInput';
 
+
 import { useAuthStore } from '@/stores/authStore';
+
 
 import { spacing } from '@/theme/spacing';
 
-import { useTheme } from '@/theme/useTheme';
+
 
 import { useShallow } from 'zustand/react/shallow';
 
 
+
 export default function LoginScreen() {
-  const { colors } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error } = useAuthStore(useShallow((s) => ({ login: s.login, isLoading: s.isLoading, error: s.error })));
