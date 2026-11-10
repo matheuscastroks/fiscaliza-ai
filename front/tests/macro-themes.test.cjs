@@ -21,7 +21,7 @@ test('macro-themes: definition and semantic category matching', () => {
 
 test('macro-themes: filter modal renders quick civic chips and filters subservices', () => {
   const filterBarPath = path.join(ROOT_DIR, 'components', 'territory', 'TerritoryFilterBar.tsx');
-  const content = fs.readFileSync(filterBarPath, 'utf8');
+  const content = (fs.readFileSync(filterBarPath, 'utf8') + fs.readFileSync(filterBarPath.replace('TerritoryFilterBar', 'TerritoryFilterModal'), 'utf8'));
 
   assert.ok(content.includes('CIVIC_MACRO_THEMES'), 'Filter modal must use CIVIC_MACRO_THEMES');
   assert.ok(content.includes('macroThemesTrack'), 'Filter modal must render horizontal macro themes track');

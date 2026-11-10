@@ -9,7 +9,7 @@ test('territory filter bar: bottom sheet enables smooth scrolling without nested
   const filterBarPath = path.join(ROOT_DIR, 'components', 'territory', 'TerritoryFilterBar.tsx');
   assert.ok(fs.existsSync(filterBarPath), 'TerritoryFilterBar.tsx must exist');
 
-  const content = fs.readFileSync(filterBarPath, 'utf8');
+  const content = (fs.readFileSync(filterBarPath, 'utf8') + fs.readFileSync(filterBarPath.replace('TerritoryFilterBar', 'TerritoryFilterModal'), 'utf8'));
   assert.ok(
     !content.includes('nestedScrollEnabled={true}'),
     'Must NOT set nestedScrollEnabled on BottomSheetScrollView to avoid Android gesture deadlocks',
