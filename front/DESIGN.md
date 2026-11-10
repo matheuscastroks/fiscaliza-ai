@@ -184,7 +184,7 @@ Sem CAIXA ALTA espaçada. Preserve o escalonamento de texto do sistema.
 
 ## Componentes
 
-Cada componente tem variantes fechadas e estados acessíveis. Os marcados "planejado" ainda serão criados e substituem cópias locais.
+Cada componente tem variantes fechadas e estados acessíveis.
 
 - `AppButton`: `primary` (cor de ação), `secondary` (branco com borda), `quiet` (transparente, texto `ink`), `destructive` (`risk`). Altura mínima 54; um botão primário por tela; carregamento e bloqueio declarados; confirmação visual só após a resposta da API.
 - `AppInput`: placeholder no lugar de rótulo persistente, altura mínima 56; foco muda a borda; erro usa `risk` com mensagem anunciada; preserva texto em falhas.
@@ -192,7 +192,7 @@ Cada componente tem variantes fechadas e estados acessíveis. Os marcados "plane
 - `AppTabBar`: cápsula sólida de tinta, altura 64, quatro alvos de 48, ativo em círculo branco; some em rotas internas e com teclado aberto.
 - `SideMenu`/`AppDrawer`: destinos reais, sem pontuação fictícia nem selo institucional; o botão de menu existe em todas as abas principais.
 - `DetailSheet`, `AppBottomSheetModal`: espaçamento declarado no `BottomSheetView` (`paddingHorizontal: contentPadding`, `paddingTop: md`, `paddingBottom: max(insets.bottom + md, xxl)`).
-- (planejado) `IconButton`, `Chip` (claro em repouso, escuro selecionado), `StatusBadge`, `MetaLabel`, `IconTile`, `ListRow`/`InsetGroup`, `Surface` (plano, proibido aninhar), `SectionHeader`, `ScreenState` (carregando, erro com nova tentativa, vazio com ação), `CallSummary` (miolo único do chamado, usado na lista e no sheet).
+- Base compartilhada: `IconButton`, `Chip` (claro em repouso, escuro selecionado), `StatusBadge`, `IconTile`, `ListRow`/`InsetGroup`, `Surface` (plano, proibido aninhar), `SectionHeader`, `ScreenState` (carregando, erro com nova tentativa, vazio com ação) e `CallSummary` (miolo único do chamado, usado na lista e no sheet). Telas antigas ainda têm blocos próprios que devem migrar para esses componentes.
 
 Estados remotos: toda leitura tem carregando, erro recuperável, vazio e conteúdo; falha de atualização preserva o conteúdo anterior.
 
