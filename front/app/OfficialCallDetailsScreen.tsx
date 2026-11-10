@@ -32,6 +32,7 @@ import { OfficialCallTimeline } from '@/components/official/OfficialCallTimeline
 import { goBack } from '@/utils/navigation';
 import { formatTimeRemaining, isDateOnly, parseCallDate } from '@/features/city/formatDates';
 import { fontSizes } from '@/theme/typography';
+import { useShallow } from 'zustand/react/shallow';
 
 export default function OfficialCallDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,8 +45,7 @@ export default function OfficialCallDetailsScreen() {
     useOfficialCall(id);
   const savedCalls = useFollowStore((s) => s.savedCalls);
   const toggleSavedCall = useFollowStore((s) => s.toggleSavedCall);
-  const { busy, hydrated, persistenceError, updateSnapshots } =
-    useFollowStore();
+  const { busy, hydrated, persistenceError, updateSnapshots } = useFollowStore(useShallow((s) => ({ busy: s.busy, hydrated: s.hydrated, persistenceError: s.persistenceError, updateSnapshots: s.updateSnapshots })));
   const item = data || savedCalls.find((c) => c.id === id);
   useEffect(() => {
     if (data && useFollowStore.getState().isCallSaved(data.id))

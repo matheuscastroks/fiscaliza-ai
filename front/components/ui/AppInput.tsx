@@ -15,8 +15,8 @@ import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { AppText } from './AppText';
 import { useKeyboardAwareInput } from './KeyboardAwareScrollView';
-import { fontFamilies } from '@/theme/typography';
-import { fontSizes } from '@/theme/typography';
+import { fontFamilies , fontSizes } from '@/theme/typography';
+
 
 export interface AppInputProps extends TextInputProps {
   label?: string;

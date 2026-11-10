@@ -8,6 +8,7 @@ import { AppButton } from '@/components/ui/AppButton';
 import { useAuthStore } from '@/stores/authStore';
 import { registrationError } from '@/shared/registration';
 import { spacing } from '@/theme/spacing';
+import { useShallow } from 'zustand/react/shallow';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -15,7 +16,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
-  const { register, isLoading, error, clearError } = useAuthStore();
+  const { register, isLoading, error, clearError } = useAuthStore(useShallow((s) => ({ register: s.register, isLoading: s.isLoading, error: s.error, clearError: s.clearError })));
   useFocusEffect(
     useCallback(() => {
       clearError();

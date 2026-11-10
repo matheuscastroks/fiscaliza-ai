@@ -20,6 +20,7 @@ import { AppToast } from '@/components/ui/AppToast';
 import { useTheme, spacing, layout } from '@/theme';
 import { fontSizes } from '@/theme/typography';
 import { IconTile } from '@/components/ui/IconTile';
+import { useShallow } from 'zustand/react/shallow';
 
 const appearanceOptions = [
   {
@@ -38,13 +39,13 @@ export default function SettingsScreen() {
     preference,
     setPreference,
     persistenceError: themeError,
-  } = useThemeStore();
+  } = useThemeStore(useShallow((s) => ({ preference: s.preference, setPreference: s.setPreference, persistenceError: s.persistenceError })));
 
   const {
     preferredNeighborhood,
     setPreferredNeighborhood,
     persistenceError: regionError,
-  } = useTerritoryStore();
+  } = useTerritoryStore(useShallow((s) => ({ preferredNeighborhood: s.preferredNeighborhood, setPreferredNeighborhood: s.setPreferredNeighborhood, persistenceError: s.persistenceError })));
 
   const {
     pushToken,
@@ -53,7 +54,7 @@ export default function SettingsScreen() {
     error: notificationError,
     requestPermissions,
     sendTestPush,
-  } = useNotificationStore();
+  } = useNotificationStore(useShallow((s) => ({ pushToken: s.pushToken, permissionGranted: s.permissionGranted, isLoading: s.isLoading, error: s.error, requestPermissions: s.requestPermissions, sendTestPush: s.sendTestPush })));
 
   const municipalityId = useMunicipalityId();
   const savedCount = useFollowStore((s) => s.savedCalls.length);

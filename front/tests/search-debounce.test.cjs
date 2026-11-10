@@ -1,4 +1,4 @@
-﻿const test = require('node:test'),
+const test = require('node:test'),
   assert = require('node:assert/strict'),
   fs = require('node:fs'),
   vm = require('node:vm'),

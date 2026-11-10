@@ -1,24 +1,26 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
+
 import type { ThemeColors } from '@/theme/colors';
+
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Pressable,
-  StyleSheet,
-  Platform,
-  useWindowDimensions,
-  Keyboard,
-  Animated,
-  AccessibilityInfo,
-} from 'react-native';
+
+import { View, Pressable, StyleSheet, useWindowDimensions, Keyboard, Animated, AccessibilityInfo } from 'react-native';
 import * as Haptics from 'expo-haptics';
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { type Tabs } from 'expo-router';
+
 import { AppText } from './AppText';
+
 import { useTerritoryStore } from '@/stores/territoryStore';
+
 import { beginMapTrace } from '@/features/territory/mapPerformance';
+
 import { fontSizes } from '@/theme/typography';
+
 import { elevation } from '@/theme/elevation';
+
 
 const TAB_HEIGHT = 48;
 const TAB_PADDING = 6;

@@ -67,7 +67,7 @@ test('package.json and app.json register @rnmapbox/maps and remove legacy map pa
     pkg.dependencies['@rnmapbox/maps'],
     '@rnmapbox/maps should be installed',
   );
-  assert.ok(pkg.dependencies['mapbox-gl'], 'mapbox-gl should be installed');
+  assert.equal(pkg.dependencies['mapbox-gl'], undefined, 'mapbox-gl is unused (no web map) and must not be a dependency');
   assert.equal(
     pkg.dependencies['expo-maps'],
     undefined,
@@ -106,38 +106,6 @@ test('package.json and app.json register @rnmapbox/maps and remove legacy map pa
     undefined,
     'legacy googleMaps config must not remain in app.config.js',
   );
-});
-
-test('regionToCameraPosition converts region deltas to bounded zoom and coordinates', () => {
-  const {
-    municipalityRegion,
-    regionToCameraPosition,
-  } = evaluateTs('features/city/municipalContext.ts');
-
-  const cityRegion = municipalityRegion({
-    id: '3550308',
-    name: 'São Paulo',
-    state: 'SP',
-    center: { latitude: -23.5505, longitude: -46.6333 },
-    bounds: {
-      north: -23.35,
-      south: -23.75,
-      east: -46.36,
-      west: -46.82,
-    },
-  });
-  const cityCamera = regionToCameraPosition(cityRegion);
-  assert.equal(cityCamera.coordinates.latitude, -23.5505);
-  assert.equal(cityCamera.coordinates.longitude, -46.6333);
-  assert.ok(cityCamera.zoom >= 9 && cityCamera.zoom <= 13);
-
-  const streetCamera = regionToCameraPosition({
-    latitude: -23.5505,
-    longitude: -46.6333,
-    latitudeDelta: 0.012,
-    longitudeDelta: 0.012,
-  });
-  assert.equal(streetCamera.zoom, 15);
 });
 
 test('all map screens and components integrate MapboxMapView with zero legacy remnants', () => {

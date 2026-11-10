@@ -1,6 +1,6 @@
 import { fetch } from 'expo/fetch';
 import * as SecureStore from 'expo-secure-store';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, type QueryKey } from '@tanstack/react-query';
 import type { ApiResult } from '@/shared/contracts';
 export const API_URL = (
   process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api'
@@ -120,13 +120,15 @@ export async function request<T>(
     signal?.removeEventListener('abort', cancel);
   }
 }
+/** Grava e invalida só as consultas afetadas (nenhuma por padrão); nunca o cache inteiro. */
 export async function mutation<T>(
   path: string,
   method: string,
   body?: unknown,
+  invalidate: readonly QueryKey[] = [],
 ) {
   const result = await request<T>(path, method, body);
-  await queryClient.invalidateQueries();
+  await Promise.all(invalidate.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
   return result;
 }
 export function assetUrl(url: string) {

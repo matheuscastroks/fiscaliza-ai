@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { restoreSelection, validatePlace } from '../features/places/selection';
 import type { CapturedDeviceLocation, Neighborhood, RadiusMeters, SavedPlace, TerritorySelection } from '../features/places/types';
 import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
+import { createWriteQueue } from './scopedPersistence';
 
 export const placesStorageKey = (userId: string | null, municipalityId: string) =>
   `fiscaliza-ai:places:${userId || 'anonymous'}:${municipalityId}:v1`;
@@ -25,7 +26,7 @@ interface PlacesState extends Snapshot {
 const empty = (): Snapshot => ({ places: [], selection: { kind: 'municipality' }, currentRadius: 1000, promptSeen: false });
 let generation = 0;
 let initialization: Promise<void> | undefined;
-let writes = Promise.resolve();
+const enqueueWrite = createWriteQueue();
 const normalizeCapture = (point: CapturedDeviceLocation): CapturedDeviceLocation => ({ ...point,
   accuracyMeters: point.accuracyMeters != null && Number.isFinite(point.accuracyMeters) && point.accuracyMeters >= 0 ? point.accuracyMeters : null,
 });
@@ -37,7 +38,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => {
   const save = (change: (state: PlacesState) => Snapshot): Promise<boolean> => {
     const scope = generation;
     const key = placesStorageKey(get().userId, get().municipalityId);
-    const operation = writes.then(async () => {
+    return enqueueWrite(async () => {
       if (scope !== generation) return false;
       // Nunca grava antes de ler o armazenamento: evita apagar lugares salvos.
       if (initialization) await initialization;
@@ -60,8 +61,6 @@ export const usePlacesStore = create<PlacesState>((set, get) => {
         return false;
       }
     });
-    writes = operation.then(() => undefined, () => undefined);
-    return operation;
   };
   const edit = (id: string | undefined, draft: DraftPlace) => save((state) => {
     const error = validatePlace(draft);

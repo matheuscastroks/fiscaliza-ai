@@ -21,40 +21,7 @@ import {
 import { formatDays, topByVolume } from '@/features/city/resultRankings';
 import { layout, spacing } from '@/theme';
 import { fontSizes } from '@/theme/typography';
-
-function getStatusSemanticColor(status: string, colors: ThemeColors): string {
-  const normalized = status
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
-
-  if (
-    normalized.includes('atendido') ||
-    normalized.includes('fechado com solucao') ||
-    normalized.includes('procedente') ||
-    normalized.includes('concluido') ||
-    normalized.includes('executado')
-  ) {
-    return colors.completed;
-  }
-  if (
-    normalized.includes('vistoriado') ||
-    normalized.includes('em analise') ||
-    normalized.includes('orientado') ||
-    normalized.includes('encaminhado')
-  ) {
-    return colors.primary;
-  }
-  if (
-    normalized.includes('cancelado') ||
-    normalized.includes('improcedente') ||
-    normalized.includes('sem possibilidade') ||
-    normalized.includes('indeferido')
-  ) {
-    return colors.risk;
-  }
-  return colors.attention;
-}
+import { officialStatusColor } from '@/features/city/officialCallStatus';
 
 export default function ResultsScreen() {
   const { colors } = useTheme();
@@ -351,7 +318,7 @@ export default function ResultsScreen() {
                           item.count,
                           base,
                         );
-                        const statusColor = getStatusSemanticColor(item.status, colors);
+                        const statusColor = officialStatusColor(item.status, colors);
 
                         return (
                           <View key={item.status}>

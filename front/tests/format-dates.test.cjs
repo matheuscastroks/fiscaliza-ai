@@ -28,3 +28,33 @@ test('postal code helper keeps only digits and masks them', () => {
   assert.equal(formatPostalCode('20a04-0020999'), '20040-020');
   assert.equal(onlyDigits('20040-020'), '20040020');
 });
+
+test('territory filters reset to the open-calls default', () => {
+  const { useTerritoryFilterStore } = require('@/stores/territoryFilterStore');
+  const store = useTerritoryFilterStore;
+  store.getState().setFilter('search', 'buraco');
+  store.getState().setFilter('status', 'all');
+  store.getState().reset();
+  assert.equal(store.getState().search, '');
+  assert.equal(store.getState().status, 'Não Encerrado');
+});
+
+test('write queue runs tasks in order and survives a failing task', async () => {
+  const { createWriteQueue, createScopeGeneration, scopedStorageKey } = require('@/stores/scopedPersistence');
+  const enqueue = createWriteQueue();
+  const order = [];
+  const first = enqueue(async () => { await new Promise((r) => setTimeout(r, 15)); order.push('first'); });
+  const failing = enqueue(async () => { order.push('failing'); throw new Error('disk'); });
+  const last = enqueue(async () => { order.push('last'); return 'ok'; });
+  await first;
+  await assert.rejects(failing, /disk/);
+  assert.equal(await last, 'ok');
+  assert.deepEqual(order, ['first', 'failing', 'last']);
+
+  const scope = createScopeGeneration();
+  const before = scope.current();
+  scope.next();
+  assert.equal(scope.isCurrent(before), false);
+  assert.equal(scopedStorageKey('places', null, '3304557'), 'fiscaliza-ai:places:anonymous:3304557:v1');
+  assert.equal(scopedStorageKey('places', 'u1', '3304557'), 'fiscaliza-ai:places:u1:3304557:v1');
+});

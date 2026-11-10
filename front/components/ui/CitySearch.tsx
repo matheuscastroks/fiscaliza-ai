@@ -3,8 +3,8 @@ import { Pressable, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
 import { spacing } from '@/theme';
-import { fontFamilies } from '@/theme/typography';
-import { fontSizes } from '@/theme/typography';
+import { fontFamilies , fontSizes } from '@/theme/typography';
+
 import { layout } from '@/theme/layout';
 
 export interface CitySearchProps {

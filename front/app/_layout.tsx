@@ -29,6 +29,7 @@ import { AnimatedBrandSplash } from '@/components/ui/AnimatedBrandSplash';
 import { SignOutSheet } from '@/components/ui/SignOutSheet';
 import { useFollowStore } from '@/stores/followStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
+import { useTerritoryFilterStore } from '@/stores/territoryFilterStore';
 import { usePlacesStore } from '@/stores/placesStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import * as Notifications from 'expo-notifications';
@@ -41,6 +42,7 @@ import {
   InstrumentSans_600SemiBold,
   InstrumentSans_700Bold,
 } from '@expo-google-fonts/instrument-sans';
+import { useShallow } from 'zustand/react/shallow';
 export const unstable_settings = { anchor: '(tabs)' };
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -59,7 +61,7 @@ export default function RootLayout() {
     InstrumentSans_600SemiBold,
     InstrumentSans_700Bold,
   });
-  const { isReady, isAuthenticated, initialize, user } = useAuthStore();
+  const { isReady, isAuthenticated, initialize, user } = useAuthStore(useShallow((s) => ({ isReady: s.isReady, isAuthenticated: s.isAuthenticated, initialize: s.initialize, user: s.user })));
   const segments: readonly string[] = useSegments();
   useEffect(() => {
     void initialize();
@@ -77,6 +79,10 @@ export default function RootLayout() {
     return () => {
       sub.remove();
     };
+  }, [user?.id, user?.municipality?.id]);
+  useEffect(() => {
+    // Filtros da exploração nunca atravessam usuário ou município.
+    useTerritoryFilterStore.getState().reset();
   }, [user?.id, user?.municipality?.id]);
   useEffect(() => {
     if (!isReady) return;

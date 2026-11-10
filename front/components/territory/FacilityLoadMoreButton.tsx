@@ -1,13 +1,21 @@
 import React from 'react';
+
 import { Pressable, StyleSheet } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
+
 import * as Haptics from 'expo-haptics';
+
 import { AppText } from '@/components/ui/AppText';
+
 import { useTheme } from '@/theme/useTheme';
+
 import { layout } from '@/theme/layout';
+
 import { spacing } from '@/theme/spacing';
-import { lightColors } from '@/theme/colors';
+
 import { elevation } from '@/theme/elevation';
+
 
 export interface FacilityLoadMoreButtonProps {
   label: string;
