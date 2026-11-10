@@ -177,6 +177,7 @@ export function OnboardingFlow({
               <AppText
                 variant="sectionTitle"
                 numberOfLines={1}
+                maxFontSizeMultiplier={1.1}
                 style={styles.brandTitle}
               >
                 Fiscaliza{' '}
@@ -187,7 +188,7 @@ export function OnboardingFlow({
                   aí
                 </AppText>
               </AppText>
-              <AppText variant="caption" color="muted" numberOfLines={1}>
+              <AppText variant="caption" color="muted" numberOfLines={2} maxFontSizeMultiplier={1.1}>
                 Seu bairro, em acompanhamento.
               </AppText>
             </View>
@@ -211,7 +212,7 @@ export function OnboardingFlow({
                 },
               ]}
             >
-              <AppText variant="label" style={styles.skipText}>
+              <AppText variant="label" maxFontSizeMultiplier={1.2} style={styles.skipText}>
                 {replay ? 'Fechar' : 'Pular'}
               </AppText>
             </Pressable>
@@ -284,7 +285,7 @@ export function OnboardingFlow({
                       {
                         height: wide
                           ? 360
-                          : Math.max(170, Math.min(240, Math.round(height * 0.27))),
+                          : Math.max(130, Math.min(220, Math.round(height * 0.2))),
                       },
                     ]}
                     accessibilityLabel={item.imageAlt}
