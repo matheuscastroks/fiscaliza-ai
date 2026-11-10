@@ -139,7 +139,7 @@ Este documento é a fonte única dos tokens e componentes. A fonte de verdade do
 ## Estrutura da informação
 
 - **Navegação:** quatro abas fixas com ícone e rótulo — `Explorar` (mapa), `Salvos`, `Agir`, `Perfil`. O menu lateral repete os mesmos nomes e ícones e abre por gesto só nas abas principais.
-- **Explorar (entrada):** mapa do recorte atual com sheet persistente (recolhido, médio, alto). Recolhido mostra "Perto de você · N chamados · atualizado em …"; puxado mostra a lista equivalente e o atalho para salvos; tocar num marcador mostra o resumo do chamado no mesmo sheet. Sem Mapbox (Expo Go/web) o sheet fica expandido como lista.
+- **Explorar (entrada):** mapa do recorte atual com um botão de resultados na base ("Ver em lista · N chamados") que abre a lista equivalente num bottom sheet; tocar num marcador mostra a prévia do chamado. Sem Mapbox a lista ocupa a tela.
 - **Domínios exclusivos do território:** **Chamados 1746** e **Serviços Públicos** (escolas, saúde, praças). Nunca sobrepostos no mesmo mapa; o recorte (bairro, ou lugar com raio de 500 m, 1 km, 2 km ou 5 km) é compartilhado.
 - **Chamado:** problema, local, situação publicada, protocolo, datas e prazo, nessa ordem. "Salvar chamado" e "Acessar atendimento oficial" são ações distintas, sem rolagem para a segunda.
 - **Agir:** 1) "Já existe chamado? Veja no mapa"; 2) canais oficiais (telefone, WhatsApp, portal, Meus Protocolos); 3) preparar mensagem para o WhatsApp do 1746, recolhido. O texto deixa claro que quem envia é o morador, pelo canal oficial; o app não registra nem acompanha o envio.

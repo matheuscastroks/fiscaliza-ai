@@ -55,10 +55,11 @@ export function TerritoryContent() {
     mode,
     insets,
     mapAvailable,
-    windowHeight,
     listOffsetRef,
     listRef,
-    restoreListOffsetRef,
+    restoreListOffsetRef,
+
+
     focusId,
     neighborhood,
     layers,
@@ -79,7 +80,6 @@ export function TerritoryContent() {
     setMacroTheme,
     setPeriod,
     setStatus,
-    isListView,
     setIsListView,
     effectiveListView,
     visitTrace,
@@ -95,7 +95,8 @@ export function TerritoryContent() {
     locationError,
     mapOverlay,
     toastMessage,
-    setToastMessage,
+    setToastMessage,
+
     unlocated,
     listed,
     selectedEntry,
@@ -190,8 +191,8 @@ export function TerritoryContent() {
       )}
 
       {/* Dock Vertical Direita: Controles Rápidos do Mapa (Posição e Enquadrar) */}
-      {!effectiveListView && !isListView && !selectedEntry && selectedClusterEntries.length === 0 && (
-        <View style={[styles.rightMapDock, { bottom: insets.bottom + 88 + windowHeight * 0.22 + spacing.sm }]}>
+      {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
+        <View style={[styles.rightMapDock, { bottom: insets.bottom + 160 }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Minha posição"
@@ -226,7 +227,27 @@ export function TerritoryContent() {
       )}
 
       {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
-        <View style={[styles.bottomFloatingContainer, { bottom: insets.bottom + 88 + windowHeight * 0.22 + spacing.sm }]}>
+        <View style={[styles.bottomFloatingContainer, { bottom: insets.bottom + 90 }]}>
+          {/* Barra Contextual de Resultados e Acesso à Lista */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${summaryLabel}. ${summarySubLabel}`}
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setIsListView(true);
+            }}
+            style={({ pressed }) => [styles.summaryBarButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
+          >
+            <View style={[styles.summaryIconCircle, { backgroundColor: colors.surfaceSubdued }]}>
+              <Ionicons name="list-outline" size={layout.iconSize.md} color={colors.onSurfaceBrand} />
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <AppText variant="label" numberOfLines={1} style={styles.summaryTitle}>{summaryLabel}</AppText>
+              <AppText variant="caption" color="muted" numberOfLines={1} style={styles.summarySubtitle}>{summarySubLabel}</AppText>
+            </View>
+            <Ionicons name="chevron-forward" size={layout.iconSize.md} color={colors.muted} />
+          </Pressable>
+
           {facilityPagination?.hasMore && (
             <FacilityLoadMoreButton
               label={facilityPagination.label}
@@ -282,16 +303,10 @@ export function TerritoryContent() {
         />
       )}
 
-      {(effectiveListView || (mapAvailable && !selectedEntry && selectedClusterEntries.length === 0)) && (
+      {effectiveListView && (
         <TerritoryListView
           visible={isFocused}
           asSheet={mapAvailable}
-          persistent={mapAvailable}
-          expanded={isListView}
-          onExpandedChange={setIsListView}
-          bottomInset={insets.bottom + 88}
-          summaryTitle={summaryLabel}
-          summarySubtitle={summarySubLabel}
           onClose={() => setIsListView(false)}
           listRef={listRef}
           listOffsetRef={listOffsetRef}
