@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { mapPerformanceEnabled, mapPerformanceVariant } from '@/features/territory/mapPerformance';
 
 import { TerritoryFilterBar, TerritoryFilterModal } from '@/components/territory/TerritoryFilterBar';
@@ -49,6 +50,8 @@ export default function TerritoryScreen() {
 
 export function TerritoryContent() {
   const styles = useThemedStyles(createStyles);
+  // Altura real do cartão de resultados: os controles do mapa ficam sempre acima dele.
+  const [summaryHeight, setSummaryHeight] = useState(110);
   const {
     isFocused,
     colors,
@@ -193,7 +196,7 @@ export function TerritoryContent() {
 
       {/* Dock Vertical Direita: Controles Rápidos do Mapa (Posição e Enquadrar) */}
       {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
-        <View style={[styles.rightMapDock, { bottom: insets.bottom + 160 }]}>
+        <View style={[styles.rightMapDock, { bottom: insets.bottom + 90 + summaryHeight + spacing.sm }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Minha posição"
@@ -228,7 +231,10 @@ export function TerritoryContent() {
       )}
 
       {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
-        <View style={[styles.bottomFloatingContainer, { bottom: insets.bottom + 90 }]}>
+        <View
+          onLayout={(event) => setSummaryHeight(event.nativeEvent.layout.height)}
+          style={[styles.bottomFloatingContainer, { bottom: insets.bottom + 90 }]}
+        >
           {/* Barra Contextual de Resultados e Acesso à Lista */}
           <Pressable
             accessibilityRole="button"
