@@ -21,9 +21,11 @@ services:
     environment:
       DATABASE_URL: postgres://fiscaliza:${POSTGRES_PASSWORD:-fiscaliza-local}@postgres:5432/fiscaliza
       NODE_ENV: ${NODE_ENV:-development}
-      WEB_ORIGINS: ${WEB_ORIGINS:-http://localhost:8080,http://localhost:5173,http://localhost:8081,http://localhost:8082,https://fiscalizaai.matheuscastroks.com.br}
+      WEB_ORIGINS: ${WEB_ORIGINS:-http://localhost:8080,http://localhost:5173,http://localhost:8081,http://localhost:8082}
       UPLOAD_DIR: /app/uploads
       TRUST_PROXY: 172.30.97.0/24
+    init: true
+    restart: unless-stopped
     ports:
       - '${API_BIND:-127.0.0.1}:3001:3001'
     volumes:
@@ -31,8 +33,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+  # Só sobe com --profile public (veja compose.public.yaml): o comando comum
+  # `docker compose up` não expõe nada na internet.
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    image: cloudflare/cloudflared:2026.10.7
+    profiles: ['public']
     restart: unless-stopped
     command: tunnel --no-autoupdate run
     environment:

@@ -1,13 +1,38 @@
 import pg from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
+import { DEV_DATABASE_URL } from './config.js';
 import * as schema from './schema.js';
-export function database(url = process.env.DATABASE_URL) {
+
+export type DatabaseOptions = {
+  max?: number;
+  // Tempos em ms. Sem valor, o Postgres não impõe limite (usado pelos CLIs de
+  // sincronização, que fazem trabalhos longos). A API define todos.
+  statementTimeoutMs?: number;
+  lockTimeoutMs?: number;
+  idleInTransactionTimeoutMs?: number;
+};
+
+export function database(
+  url: string | undefined = process.env.DATABASE_URL,
+  options: DatabaseOptions = {},
+) {
   const pool = new pg.Pool({
-    connectionString:
-      url ?? 'postgres://fiscaliza:fiscaliza@localhost:5432/fiscaliza',
+    connectionString: url ?? DEV_DATABASE_URL,
     connectionTimeoutMillis: 5000,
-    max: 10,
+    max: options.max ?? 10,
+    ...(options.statementTimeoutMs
+      ? { statement_timeout: options.statementTimeoutMs }
+      : {}),
+    ...(options.lockTimeoutMs ? { lock_timeout: options.lockTimeoutMs } : {}),
+    ...(options.idleInTransactionTimeoutMs
+      ? {
+          idle_in_transaction_session_timeout:
+            options.idleInTransactionTimeoutMs,
+        }
+      : {}),
   });
+  // Erro em conexão ociosa não pode derrubar o processo.
+  pool.on('error', () => {});
   return { pool, db: drizzle(pool, { schema }) };
 }
 export type Database = ReturnType<typeof database>['db'];

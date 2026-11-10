@@ -2,6 +2,24 @@
 
 O CI valida o app móvel e a API. A release publica somente a imagem `ghcr.io/matheuscastroks/fiscaliza-ai-api:SHA` e faz deploy por SSH quando `VPS_DEPLOY_ENABLED=true`. Sem essa variável, publica a imagem e pula o deploy. Não há publicação web nem nas lojas. A ativação do merge automático está em [CI/CD](../.github/README.md).
 
+## Modo público no PC (enquanto não há VPS)
+
+`docker compose up` comum **não** liga o túnel e roda a API em modo de desenvolvimento. Para publicar o domínio a partir do PC, use o override endurecido:
+
+```sh
+docker compose -f compose.yaml -f compose.public.yaml --profile public up -d
+```
+
+Ele liga o `cloudflared` (versão fixada), roda a API com `NODE_ENV=production` (CORS só para `https://$PUBLIC_DOMAIN`, cookie de sessão `Secure`, sem origens `null`, LAN ou `exp://`) e limita o tamanho dos logs. A API recusa subir em produção sem `DATABASE_URL`, `WEB_ORIGINS` e `TRUST_PROXY`, e recusa a senha de exemplo do banco.
+
+Antes da primeira vez, no `.env.compose` (nunca versionado):
+
+1. Defina `POSTGRES_PASSWORD` próprio (`openssl rand -hex 32`). Em um banco já criado, troque também a senha dentro do Postgres: `docker compose exec postgres psql -U fiscaliza -d fiscaliza -c "ALTER USER fiscaliza PASSWORD 'NOVA_SENHA'"`. Só editar o arquivo não muda a senha de um banco existente.
+2. Use `API_BIND=127.0.0.1`. Com `0.0.0.0` a API fica aberta na rede local sem passar pelo túnel.
+3. Defina `PUBLIC_DOMAIN` e `CLOUDFLARE_TUNNEL_TOKEN`.
+
+O compose de desenvolvimento não traz mais o domínio público em `WEB_ORIGINS`.
+
 O Compose local já possui `cloudflared`. Nos logs consultados em 05/11/2026, a configuração recebida da Cloudflare aponta `fiscalizaai.matheuscastroks.com.br` para `http://api:3001`, com fallback `http_status:404`. O healthcheck público `/api/health` respondeu 200 OK. O Compose de produção usa os mesmos nomes de serviço e porta para preservar essa rota. A configuração remota do túnel não foi alterada.
 
 ## Preparar o servidor uma vez

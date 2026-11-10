@@ -3,9 +3,34 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import sharp from 'sharp';
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { Database } from './db.js';
 import { attachments } from './schema.js';
+
+export const attachmentId = (url: string | null | undefined) =>
+  url?.match(/^\/api\/attachments\/([a-f0-9-]{36})$/)?.[1] ?? null;
+
+// Apaga os arquivos (as linhas do banco já foram tratadas por quem chama).
+export async function removeUploadFiles(uploadDir: string, ids: string[]) {
+  await Promise.all(
+    ids.map((id) => unlink(resolve(uploadDir, id)).catch(() => undefined)),
+  );
+}
+
+export async function removeAttachments(
+  db: Database,
+  uploadDir: string,
+  ownerId: string,
+  ids: string[],
+) {
+  if (ids.length === 0) return;
+  await db
+    .delete(attachments)
+    .where(
+      and(inArray(attachments.id, ids), eq(attachments.ownerId, ownerId)),
+    );
+  await removeUploadFiles(uploadDir, ids);
+}
 
 export function registerAttachmentsRoutes(
   app: FastifyInstance,
@@ -21,7 +46,11 @@ export function registerAttachmentsRoutes(
 
   app.post(
     '/api/attachments',
-    { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
+    {
+      // Sem fila por usuário: o corpo multipart é lento e não deve segurar as
+      // outras escritas da conta.
+      config: { userLock: false, rateLimit: { max: 20, timeWindow: '1 minute' } },
+    },
     async (req) => {
       // Multipart is consumed inside the handler, unlike JSON bodies. Aborting
       // its stream must reject the read so the handler's lock finally can run.
