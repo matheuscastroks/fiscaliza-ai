@@ -165,7 +165,7 @@ export default function ResultsScreen() {
                       <AppText variant="caption" color="muted">
                         Cumprimento de prazo (SLA)
                       </AppText>
-                      <AppText variant="label">Prazos oficiais respeitados</AppText>
+                      <AppText variant="label">Os prazos estão sendo cumpridos?</AppText>
                     </View>
 
                   </View>
@@ -213,6 +213,9 @@ export default function ResultsScreen() {
                       ]}
                     />
                   </View>
+                  <AppText variant="caption" color="muted">
+                    Entre os chamados do recorte com prazo publicado. Fonte: DATA.RIO.
+                  </AppText>
                 </View>
 
                 {/* Dupla de KPIs Secundários: Conclusão & Total */}
