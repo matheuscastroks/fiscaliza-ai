@@ -53,7 +53,7 @@ export function PlaceEditor({ initialPlace, onDone, onCancel }: { initialPlace?:
   return <View style={{ gap: spacing.md }}>
     <AppText variant="sectionTitle">{initialPlace ? 'Editar lugar' : 'Adicionar lugar'}</AppText>
     <AppInput label="Nome do lugar" showLabel placeholder="Casa, Trabalho ou outro nome" value={name} editable={!busy} onChangeText={(text) => { revision.current++; setName(text); }} />
-    <AppInput label="Endereço ou referência (opcional)" showLabel value={addressLabel} editable={!busy} onChangeText={(text) => { revision.current++; setAddressLabel(text); }} />
+    <AppInput label="Endereço ou referência (opcional)" placeholder="Rua, número ou ponto de referência" showLabel value={addressLabel} editable={!busy} onChangeText={(text) => { revision.current++; setAddressLabel(text); }} />
     <AppText color="muted">Marque o local no mapa. Digitar o endereço não move o marcador. O nome e o endereço ficam só neste celular.</AppText>
     <AppButton title="Usar minha localização como ponto" variant="secondary" disabled={busy} loading={device.busy} onPress={() => {
       const version = revision.current;

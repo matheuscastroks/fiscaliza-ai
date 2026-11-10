@@ -557,9 +557,9 @@ function createStyles(colors: ThemeColors) {
       gap: spacing.md,
     },
     officialHeaderBadge: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      justifyContent: 'space-between',
+      // Ações em cima, título com a largura toda (títulos longos não quebram no meio da palavra).
+      flexDirection: 'column-reverse',
+      alignItems: 'stretch',
       paddingVertical: spacing.xs,
       gap: spacing.sm,
     },
@@ -583,6 +583,7 @@ function createStyles(colors: ThemeColors) {
     headerActions: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'flex-end',
       gap: spacing.xs,
     },
     actionButton: {

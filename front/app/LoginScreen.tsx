@@ -1,16 +1,25 @@
 import { useCallback, useState } from 'react';
+
 import { StyleSheet, View } from 'react-native';
+
 import { router, useFocusEffect } from 'expo-router';
+
 import { AuthScreenLayout } from '@/components/ui/AuthScreenLayout';
+
 import { AppErrorMessage } from '@/components/ui/AppErrorMessage';
+
 import { AppButton } from '@/components/ui/AppButton';
+
 import { AppInput } from '@/components/ui/AppInput';
-import { AppText } from '@/components/ui/AppText';
-import { GovBrButton } from '@/components/ui/GovBrButton';
+
 import { useAuthStore } from '@/stores/authStore';
+
 import { spacing } from '@/theme/spacing';
+
 import { useTheme } from '@/theme/useTheme';
+
 import { useShallow } from 'zustand/react/shallow';
+
 
 export default function LoginScreen() {
   const { colors } = useTheme();
@@ -38,19 +47,6 @@ export default function LoginScreen() {
       title="Acesse sua conta"
       description="Entre para guardar seus chamados e lugares."
     >
-      <View style={styles.accessOptions}>
-        <GovBrButton disabled />
-        <AppText variant="caption" color="subtle" style={styles.hint}>
-          Acesso com gov.br indisponível no momento
-        </AppText>
-      </View>
-      <View style={styles.divider}>
-        <View style={[styles.line, { backgroundColor: colors.border }]} />
-        <AppText variant="caption" color="subtle">
-          ou com e-mail e senha
-        </AppText>
-        <View style={[styles.line, { backgroundColor: colors.border }]} />
-      </View>
       <View style={styles.form}>
         <AppInput
           placeholder="E-mail"
@@ -98,7 +94,7 @@ export default function LoginScreen() {
         </View>
       </View>
       <AppButton
-        title="Sobre o Fiscaliza aí"
+        title="Sobre o app"
         variant="quiet"
         onPress={() => router.push('/AboutScreen')}
       />
