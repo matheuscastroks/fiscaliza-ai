@@ -217,3 +217,19 @@ export const callNotificationFollowers = pgTable(
       .defaultNow(),
   },
 );
+
+export const savedCalls = pgTable(
+  'saved_calls',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    callId: text('call_id')
+      .notNull()
+      .references(() => officialCalls.id, { onDelete: 'cascade' }),
+    savedAt: timestamp('saved_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.callId] })],
+);

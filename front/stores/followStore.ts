@@ -15,6 +15,35 @@ export function setFollowNotificationListener(
   onFollowChanged = listener;
 }
 
+/**
+ * Chamados salvos pertencem à conta: o servidor guarda a lista e o aparelho
+ * guarda uma cópia para abrir sem internet. A ponte com a API é injetada para o
+ * store continuar testável sem rede.
+ */
+export interface SavedCallsAccountApi {
+  list: () => Promise<{ call: OfficialCall; savedAt: string }[]>;
+  merge: (ids: string[]) => Promise<void>;
+  remove: (id: string) => Promise<void>;
+  clear: () => Promise<void>;
+}
+let accountApi: SavedCallsAccountApi | undefined;
+export function setSavedCallsAccountApi(api?: SavedCallsAccountApi) {
+  accountApi = api;
+}
+/** O que mudou neste aparelho e ainda não chegou à conta. */
+export interface PendingChanges {
+  clear: boolean;
+  add: string[];
+  remove: string[];
+}
+const noPending = (): PendingChanges => ({ clear: false, add: [], remove: [] });
+function readPending(value: unknown): PendingChanges {
+  const v = (value ?? {}) as Partial<PendingChanges>;
+  const ids = (list: unknown) =>
+    Array.isArray(list) ? list.filter((x): x is string => typeof x === 'string') : [];
+  return { clear: v.clear === true, add: ids(v.add), remove: ids(v.remove) };
+}
+
 export const FOLLOW_STORAGE_KEY = `fiscaliza-ai:saved:rio1746:${DEFAULT_MUNICIPALITY_ID}:v1`;
 export function followStorageKey(
   userId?: string | null,
@@ -38,7 +67,10 @@ interface FollowStore {
   statusFilter: FollowStatusFilter;
   savedCalls: OfficialCall[];
   metadata: Record<string, SavedMeta>;
+  pending: PendingChanges;
   initialize: () => Promise<void>;
+  /** Envia o que está pendente e traz a lista da conta. Falso se não deu (sem conta, sem internet). */
+  syncWithAccount: () => Promise<boolean>;
   setScope: (userId: string | null, municipalityId?: string) => Promise<void>;
   setStatusFilter: (value: FollowStatusFilter) => void;
   toggleStatusFilter: () => void;
@@ -140,6 +172,7 @@ function snapshot(call: OfficialCall): OfficialCall {
 interface PersistChange {
   savedCalls: OfficialCall[];
   metadata: Record<string, SavedMeta>;
+  pending?: PendingChanges;
   /** Alertas aplicados somente depois de a gravação ser confirmada. */
   effects?: { call: OfficialCall; saved: boolean }[];
 }
@@ -147,7 +180,42 @@ let initialization: Promise<void> | undefined;
 const enqueueWrite = createWriteQueue();
 /** Troca de escopo invalida operações de outra geração. */
 const scope = createScopeGeneration();
+let syncing: Promise<boolean> | undefined;
 export const useFollowStore = create<FollowStore>((set, get) => {
+  /** Salvos feitos antes do login passam para a conta uma única vez. */
+  const adoptAnonymousList = async (
+    municipalityId: string,
+    generation: number,
+  ) => {
+    const anonymousKey = followStorageKey(null, municipalityId);
+    try {
+      const raw = await AsyncStorage.getItem(anonymousKey);
+      if (!raw || !scope.isCurrent(generation)) return;
+      const document = JSON.parse(raw);
+      const found: OfficialCall[] = (Array.isArray(document.items) ? document.items : [])
+        .map((entry: { call?: unknown }) => entry?.call)
+        .filter((call: unknown): call is OfficialCall => validCall(call, municipalityId));
+      const fresh = found.filter((call) => !get().isCallSaved(call.id));
+      if (fresh.length > 0) {
+        const adopted = await persist(() => {
+          const metadata = { ...get().metadata };
+          const pending = { ...get().pending };
+          const stamp = new Date().toISOString();
+          for (const call of fresh) metadata[call.id] = { savedAt: stamp, checkedAt: stamp };
+          pending.add = [...new Set([...pending.add, ...fresh.map((c) => c.id)])];
+          return {
+            savedCalls: [...fresh.map(snapshot), ...get().savedCalls],
+            metadata,
+            pending,
+          };
+        });
+        if (!adopted) return;
+      }
+      await AsyncStorage.removeItem(anonymousKey);
+    } catch {
+      // A lista anônima continua no aparelho; tentamos de novo no próximo login.
+    }
+  };
   const persist = (change: () => PersistChange) => {
     const generation = scope.current();
     const scopeUserId = get().userId;
@@ -172,6 +240,7 @@ export const useFollowStore = create<FollowStore>((set, get) => {
               call: snapshot(call),
               ...next.metadata[call.id],
             })),
+            pending: next.pending ?? get().pending,
           }),
         );
         // A conta ou o município mudou durante a gravação: o resultado
@@ -180,11 +249,13 @@ export const useFollowStore = create<FollowStore>((set, get) => {
         set({
           savedCalls: next.savedCalls,
           metadata: next.metadata,
+          pending: next.pending ?? get().pending,
           persistenceError: null,
         });
         for (const effect of next.effects ?? []) {
           onFollowChanged?.(effect.call, effect.saved);
         }
+        if (scopeUserId && accountApi) void get().syncWithAccount();
         return true;
       } catch {
         if (inScope()) {
@@ -208,6 +279,86 @@ export const useFollowStore = create<FollowStore>((set, get) => {
     statusFilter: 'all',
     savedCalls: [],
     metadata: {},
+    pending: noPending(),
+    syncWithAccount: () => {
+      // Uma conversa com o servidor por vez; pedidos novos esperam a anterior.
+      const previous = syncing ?? Promise.resolve(false);
+      const current: Promise<boolean> = previous.then(async () => {
+        const api = accountApi;
+        const scopeUserId = get().userId;
+        if (!api || !scopeUserId) return false;
+        const generation = scope.current();
+        const scopeMunicipalityId = get().municipalityId;
+        const inScope = () =>
+          scope.isCurrent(generation) &&
+          get().userId === scopeUserId &&
+          get().municipalityId === scopeMunicipalityId;
+        await get().initialize();
+        if (!inScope()) return false;
+        const sent = get().pending;
+        let items: { call: OfficialCall; savedAt: string }[];
+        try {
+          if (sent.clear) await api.clear();
+          for (const id of sent.remove) await api.remove(id);
+          if (sent.add.length) await api.merge(sent.add);
+          items = await api.list();
+        } catch {
+          return false; // sem internet ou erro do servidor: tenta de novo depois
+        }
+        return enqueueWrite(async () => {
+          if (!inScope()) return false;
+          // Mudanças feitas durante a conversa com o servidor continuam pendentes.
+          const now = get().pending;
+          const pending: PendingChanges = {
+            clear: now.clear && !sent.clear,
+            add: now.add.filter((id) => !sent.add.includes(id)),
+            remove: now.remove.filter((id) => !sent.remove.includes(id)),
+          };
+          const local = new Map(get().savedCalls.map((c) => [c.id, c]));
+          const merged = new Map<string, OfficialCall>();
+          const metadata: Record<string, SavedMeta> = {};
+          const stamp = new Date().toISOString();
+          for (const item of items) {
+            if (!validCall(item.call, scopeMunicipalityId)) continue;
+            if (pending.remove.includes(item.call.id) || pending.clear) continue;
+            merged.set(item.call.id, snapshot(item.call));
+            metadata[item.call.id] = {
+              savedAt: item.savedAt,
+              checkedAt: get().metadata[item.call.id]?.checkedAt ?? stamp,
+            };
+          }
+          for (const id of pending.add) {
+            const call = local.get(id);
+            if (!call || merged.has(id)) continue;
+            merged.set(id, call);
+            metadata[id] = get().metadata[id] ?? { savedAt: stamp, checkedAt: stamp };
+          }
+          const savedCalls = [...merged.values()].sort((a, b) =>
+            metadata[b.id].savedAt.localeCompare(metadata[a.id].savedAt),
+          );
+          try {
+            await AsyncStorage.setItem(
+              followStorageKey(scopeUserId, scopeMunicipalityId),
+              JSON.stringify({
+                version: 1,
+                items: savedCalls.map((call) => ({ call, ...metadata[call.id] })),
+                pending,
+              }),
+            );
+          } catch {
+            return false;
+          }
+          if (!inScope()) return false;
+          set({ savedCalls, metadata, pending, persistenceError: null });
+          return true;
+        });
+      });
+      syncing = current;
+      void current.finally(() => {
+        if (syncing === current) syncing = undefined;
+      });
+      return current;
+    },
     initialize: () => {
       if (initialization) return initialization;
       const scopeUserId = get().userId;
@@ -240,7 +391,11 @@ export const useFollowStore = create<FollowStore>((set, get) => {
             get().userId === scopeUserId &&
             get().municipalityId === scopeMunicipalityId
           ) {
-            set({ savedCalls: [...calls.values()], metadata });
+            set({
+              savedCalls: [...calls.values()],
+              metadata,
+              pending: readPending(document.pending),
+            });
           }
         } catch {
           if (
@@ -281,8 +436,16 @@ export const useFollowStore = create<FollowStore>((set, get) => {
         persistenceError: null,
         savedCalls: [],
         metadata: {},
+        pending: noPending(),
       });
-      return get().initialize();
+      const generation = scope.current();
+      return get()
+        .initialize()
+        .then(async () => {
+          if (!userId || !accountApi || !scope.isCurrent(generation)) return;
+          await adoptAnonymousList(nextMunicipalityId, generation);
+          if (scope.isCurrent(generation)) await get().syncWithAccount();
+        });
     },
     setStatusFilter: (statusFilter) => set({ statusFilter }),
     toggleStatusFilter: () =>
@@ -294,13 +457,21 @@ export const useFollowStore = create<FollowStore>((set, get) => {
       return persist(() => {
         const exists = get().isCallSaved(call.id);
         const metadata = { ...get().metadata };
-        if (exists) delete metadata[call.id];
-        else
+        const pending = { ...get().pending };
+        if (exists) {
+          delete metadata[call.id];
+          pending.add = pending.add.filter((id) => id !== call.id);
+          pending.remove = [...new Set([...pending.remove, call.id])];
+        } else {
           metadata[call.id] = {
             savedAt: new Date().toISOString(),
             checkedAt: new Date().toISOString(),
           };
+          pending.remove = pending.remove.filter((id) => id !== call.id);
+          pending.add = [...new Set([...pending.add, call.id])];
+        }
         return {
+          pending,
           savedCalls: exists
             ? get().savedCalls.filter((c) => c.id !== call.id)
             : [snapshot(call), ...get().savedCalls],
@@ -313,6 +484,7 @@ export const useFollowStore = create<FollowStore>((set, get) => {
       persist(() => ({
         savedCalls: [],
         metadata: {},
+        pending: { clear: true, add: [], remove: [] },
         effects: get().savedCalls.map((call) => ({ call, saved: false })),
       })),
     updateSnapshots: (calls) =>

@@ -27,7 +27,8 @@ import { queryClient } from '@/services/http';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { AnimatedBrandSplash } from '@/components/ui/AnimatedBrandSplash';
 import { SignOutSheet } from '@/components/ui/SignOutSheet';
-import { useFollowStore } from '@/stores/followStore';
+import { useFollowStore, setSavedCallsAccountApi } from '@/stores/followStore';
+import { savedCallsAccountApi } from '@/services/savedCalls';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { useTerritoryFilterStore } from '@/stores/territoryFilterStore';
 import { usePlacesStore } from '@/stores/placesStore';
@@ -46,6 +47,8 @@ import { useShallow } from 'zustand/react/shallow';
 export const unstable_settings = { anchor: '(tabs)' };
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
+
+setSavedCallsAccountApi(savedCallsAccountApi);
 
 export default function RootLayout() {
   const { colors, isDark } = useTheme();

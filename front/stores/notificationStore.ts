@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import * as Notifications from 'expo-notifications';
 import {
   registerForPushNotificationsAsync,
-  sendTestPushNotification,
   followCallForNotifications,
   unfollowCallForNotifications,
 } from '@/features/notifications/notificationService';
@@ -16,7 +15,6 @@ interface NotificationState {
   error: string | null;
   initialize: (municipalityId?: string) => Promise<void>;
   requestPermissions: (municipalityId?: string) => Promise<boolean>;
-  sendTestPush: () => Promise<boolean>;
   /** Esquece token e pendências ao trocar ou encerrar a sessão. */
   reset: () => void;
   /** Reenvia chamados salvos cujo acompanhamento falhou ou pertence a outra sessão. */
@@ -121,16 +119,5 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   resync: () => {
     const token = get().pushToken;
     if (token) syncSavedCalls(token);
-  },
-
-  sendTestPush: async () => {
-    const token = get().pushToken;
-    if (!token) return false;
-    try {
-      const result = await sendTestPushNotification(token);
-      return result.success;
-    } catch {
-      return false;
-    }
   },
 }));

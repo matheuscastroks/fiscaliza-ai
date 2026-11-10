@@ -7,7 +7,6 @@ import type {
   FollowCallNotificationPayload,
   PushNotificationResult,
   PushTokenRegistrationPayload,
-  TestNotificationPayload,
   UnfollowCallNotificationPayload,
 } from '@/shared/contracts';
 import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
@@ -145,18 +144,4 @@ export async function unfollowCallForNotifications(
   } catch {
     return false;
   }
-}
-
-/**
- * Dispara uma notificação push de teste para o próprio aparelho
- */
-export async function sendTestPushNotification(
-  token: string,
-): Promise<PushNotificationResult> {
-  const payload: TestNotificationPayload = {
-    token,
-    title: 'Fiscaliza aí · Notificações Ativas',
-    body: 'Seu celular já recebe avisos dos chamados que você salvou.',
-  };
-  return request<PushNotificationResult>('/v1/notifications/test', 'POST', payload);
 }

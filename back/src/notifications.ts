@@ -1,10 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import { and, eq } from 'drizzle-orm';
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import { and, count, eq, inArray, sql } from 'drizzle-orm';
+import type { FastifyInstance } from 'fastify';
 import type { Database } from './db.js';
 import {
   callNotificationFollowers,
-  municipalities,
   officialCalls,
   userPushTokens,
 } from './schema.js';
@@ -15,8 +14,22 @@ import type {
   UnfollowCallNotificationPayload,
 } from '../../shared/contracts.js';
 
+export const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
+const EXPO_BATCH_SIZE = 100;
+export const MAX_FOLLOWS_PER_TOKEN = 200;
+
 export function isExpoPushToken(token: string): boolean {
   return typeof token === 'string' && (token.startsWith('ExponentPushToken[') || token.startsWith('ExpoPushToken['));
+}
+
+// Texto único do estado de um chamado, usado na mensagem e para não avisar
+// duas vezes sobre o mesmo estado.
+export function callStateLabel(
+  status: string | null | undefined,
+  situation?: string | null,
+): string {
+  const base = status?.trim() || 'Sem status';
+  return situation?.trim() ? `${base} (${situation.trim()})` : base;
 }
 
 export async function sendExpoPushNotification(
@@ -51,7 +64,7 @@ export async function sendExpoPushNotification(
   }));
 
   try {
-    const res = await customFetch('https://exp.host/--/api/v2/push/send', {
+    const res = await customFetch(EXPO_PUSH_URL, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -85,72 +98,159 @@ export async function sendExpoPushNotification(
   }
 }
 
-export async function notifyCallFollowers(
-  db: Database,
-  callId: string,
-  updateInfo: {
-    serviceType?: string;
-    status: string;
-    situation?: string;
-  },
+export type PushMessage = {
+  to: string;
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
+};
+export type PushOutcome = {
+  ok: boolean;
+  /** A Expo informou que o aparelho não recebe mais avisos: o token deve sair. */
+  deviceNotRegistered?: boolean;
+};
+
+// Envia em lotes de até 100 mensagens por requisição e devolve um resultado
+// por mensagem, na mesma ordem.
+export async function sendExpoPushBatch(
+  messages: PushMessage[],
   customFetch: typeof fetch = fetch,
-): Promise<number> {
-  const followers = await db
-    .select({
-      id: callNotificationFollowers.id,
-      pushToken: callNotificationFollowers.pushToken,
-      lastNotifiedStatus: callNotificationFollowers.lastNotifiedStatus,
-    })
-    .from(callNotificationFollowers)
-    .where(eq(callNotificationFollowers.callId, callId));
-
-  if (followers.length === 0) return 0;
-
-  let notifiedCount = 0;
-  const title = updateInfo.serviceType
-    ? `Atualização: ${updateInfo.serviceType}`
-    : 'Atualização de chamado 1746';
-  const body = `O chamado foi atualizado para: ${updateInfo.status}${
-    updateInfo.situation ? ` (${updateInfo.situation})` : ''
-  }.`;
-
-  for (const follower of followers) {
-    if (follower.lastNotifiedStatus === updateInfo.status) continue;
-
-    const res = await sendExpoPushNotification(
-      {
-        to: follower.pushToken,
-        title,
-        body,
-        data: {
-          callId,
-          status: updateInfo.status,
+): Promise<PushOutcome[]> {
+  const outcomes: PushOutcome[] = messages.map(() => ({ ok: false }));
+  for (let start = 0; start < messages.length; start += EXPO_BATCH_SIZE) {
+    const slice = messages.slice(start, start + EXPO_BATCH_SIZE);
+    try {
+      const res = await customFetch(EXPO_PUSH_URL, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Accept-Encoding': 'gzip, deflate',
+          'Content-Type': 'application/json',
         },
-      },
-      customFetch,
-    );
-
-    if (res.success) {
-      notifiedCount++;
-      await db
-        .update(callNotificationFollowers)
-        .set({ lastNotifiedStatus: updateInfo.status })
-        .where(eq(callNotificationFollowers.id, follower.id));
+        body: JSON.stringify(
+          slice.map((message) => ({
+            ...message,
+            data: message.data ?? {},
+            channelId: 'fiscaliza-calls-v2',
+          })),
+        ),
+      });
+      if (!res.ok) continue;
+      const body = (await res.json()) as {
+        data?: Array<{ status: string; details?: { error?: string } }>;
+      };
+      slice.forEach((_, index) => {
+        const ticket = body.data?.[index];
+        outcomes[start + index] = {
+          ok: ticket?.status === 'ok',
+          deviceNotRegistered: ticket?.details?.error === 'DeviceNotRegistered',
+        };
+      });
+    } catch {
+      // A rede falhou neste lote: as mensagens ficam como não enviadas e
+      // serão tentadas na próxima sincronização.
     }
   }
-
-  return notifiedCount;
+  return outcomes;
 }
+
+export type CallStatusChange = {
+  callId: string;
+  serviceType?: string | null;
+  status: string | null;
+  situation?: string | null;
+};
+
+// Avisa quem segue os chamados que mudaram de situação. Devolve quantos avisos
+// foram aceitos pela Expo. Nunca lança: falha de envio não pode derrubar a
+// sincronização que a chamou.
+export async function notifyStatusChanges(
+  db: Database,
+  changes: CallStatusChange[],
+  customFetch: typeof fetch = fetch,
+): Promise<number> {
+  if (changes.length === 0) return 0;
+  try {
+    const byCall = new Map(changes.map((change) => [change.callId, change]));
+    const followers = await db
+      .select({
+        id: callNotificationFollowers.id,
+        callId: callNotificationFollowers.callId,
+        pushToken: callNotificationFollowers.pushToken,
+        lastNotified: callNotificationFollowers.lastNotifiedStatus,
+      })
+      .from(callNotificationFollowers)
+      .where(inArray(callNotificationFollowers.callId, [...byCall.keys()]));
+
+    const pending: Array<{ followerId: string; state: string; message: PushMessage }> = [];
+    for (const follower of followers) {
+      const change = byCall.get(follower.callId);
+      if (!change) continue;
+      const state = callStateLabel(change.status, change.situation);
+      if (follower.lastNotified === state) continue;
+      pending.push({
+        followerId: follower.id,
+        state,
+        message: {
+          to: follower.pushToken,
+          title: change.serviceType
+            ? `Chamado de ${change.serviceType}`
+            : 'Chamado do 1746',
+          body: `A Prefeitura publicou nova situação: ${state}.`,
+          data: { callId: follower.callId, status: change.status },
+        },
+      });
+    }
+    if (pending.length === 0) return 0;
+
+    const outcomes = await sendExpoPushBatch(
+      pending.map((item) => item.message),
+      customFetch,
+    );
+    const delivered = pending.filter((_, index) => outcomes[index].ok);
+    const invalidTokens = [
+      ...new Set(
+        pending
+          .filter((_, index) => outcomes[index].deviceNotRegistered)
+          .map((item) => item.message.to),
+      ),
+    ];
+
+    if (delivered.length > 0) {
+      await db.execute(sql`
+        UPDATE call_notification_followers AS f
+        SET last_notified_status = u.state
+        FROM unnest(ARRAY[${sql.join(delivered.map((item) => sql`${item.followerId}`), sql`, `)}]::text[],
+                    ARRAY[${sql.join(delivered.map((item) => sql`${item.state}`), sql`, `)}]::text[]) AS u(id, state)
+        WHERE f.id = u.id
+      `);
+    }
+    if (invalidTokens.length > 0)
+      await db
+        .delete(userPushTokens)
+        .where(inArray(userPushTokens.pushToken, invalidTokens));
+    return delivered.length;
+  } catch (error) {
+    console.error('[push] falha ao enviar avisos de mudança de situação:', error);
+    return 0;
+  }
+}
+
+const tokenSchema = { type: 'string', minLength: 20, maxLength: 200 };
+const callIdSchema = { type: 'string', minLength: 1, maxLength: 100 };
+const failure = (error: string) => ({ success: false, error });
 
 export function registerNotificationRoutes(
   app: FastifyInstance,
   options: {
     db: Database;
-    customFetch?: typeof fetch;
   },
 ) {
   const { db } = options;
-  // Registrar ou atualizar o token de push do aparelho
+
+  // Registra o token do aparelho para a conta logada. Trocar de conta no mesmo
+  // aparelho é legítimo: o token passa para a conta nova e os avisos que a
+  // conta anterior tinha neste aparelho deixam de existir.
   app.post<{ Body: PushTokenRegistrationPayload }>(
     '/api/v1/notifications/register-token',
     {
@@ -158,57 +258,72 @@ export function registerNotificationRoutes(
         body: {
           type: 'object',
           required: ['token', 'platform'],
+          additionalProperties: false,
           properties: {
-            token: { type: 'string', minLength: 1 },
-            platform: { type: 'string', enum: ['android', 'ios', 'web'] },
-            municipalityId: { type: 'string' },
+            token: tokenSchema,
+            platform: { type: 'string', enum: ['android', 'ios'] },
+            municipalityId: { type: 'string', pattern: '^[0-9]{7}$' },
           },
         },
       },
     },
     async (req, reply) => {
-      const { token, platform, municipalityId: rawMunicipalityId } = req.body;
-      const municipalityId = rawMunicipalityId || '3304557';
-      const [muni] = await db
-        .select({ id: municipalities.id })
-        .from(municipalities)
-        .where(eq(municipalities.id, municipalityId))
-        .limit(1);
+      const { token, platform } = req.body;
+      if (!isExpoPushToken(token))
+        return reply.status(400).send(failure('Token de avisos inválido.'));
+      const user = req.user!;
+      const municipalityId = user.municipality!.id;
 
-      if (!muni) {
-        return reply.status(400).send({
-          success: false,
-          error: 'Município não cadastrado.',
-        });
-      }
-
-      const userId = req.user?.id ?? null;
-
-      await db
-        .insert(userPushTokens)
-        .values({
-          id: randomUUID(),
-          userId,
-          pushToken: token,
-          platform,
-          municipalityId,
-          updatedAt: new Date(),
-        })
-        .onConflictDoUpdate({
-          target: userPushTokens.pushToken,
-          set: {
-            userId: userId ?? undefined,
+      await db.transaction(async (tx) => {
+        const [existing] = await tx
+          .select({ userId: userPushTokens.userId })
+          .from(userPushTokens)
+          .where(eq(userPushTokens.pushToken, token))
+          .limit(1);
+        if (existing && existing.userId !== user.id)
+          await tx
+            .delete(callNotificationFollowers)
+            .where(eq(callNotificationFollowers.pushToken, token));
+        await tx
+          .insert(userPushTokens)
+          .values({
+            id: randomUUID(),
+            userId: user.id,
+            pushToken: token,
             platform,
             municipalityId,
             updatedAt: new Date(),
-          },
-        });
+          })
+          .onConflictDoUpdate({
+            target: userPushTokens.pushToken,
+            set: {
+              userId: user.id,
+              platform,
+              municipalityId,
+              updatedAt: new Date(),
+            },
+          });
+      });
 
       return reply.send({ success: true, message: 'Token registrado com sucesso.' });
     },
   );
 
-  // Começar a seguir notificações de um chamado específico
+  const ownsToken = async (token: string, userId: string) => {
+    const [row] = await db
+      .select({ id: userPushTokens.id })
+      .from(userPushTokens)
+      .where(
+        and(
+          eq(userPushTokens.pushToken, token),
+          eq(userPushTokens.userId, userId),
+        ),
+      )
+      .limit(1);
+    return Boolean(row);
+  };
+
+  // Começar a seguir um chamado. O token precisa ser de um aparelho da conta.
   app.post<{ Body: FollowCallNotificationPayload }>(
     '/api/v1/notifications/follow-call',
     {
@@ -216,45 +331,40 @@ export function registerNotificationRoutes(
         body: {
           type: 'object',
           required: ['callId', 'token'],
-          properties: {
-            callId: { type: 'string', minLength: 1 },
-            token: { type: 'string', minLength: 1 },
-          },
+          additionalProperties: false,
+          properties: { callId: callIdSchema, token: tokenSchema },
         },
       },
     },
     async (req, reply) => {
       const { callId, token } = req.body;
-      // Verifica se o chamado existe
+      const user = req.user!;
+
       const [call] = await db
-        .select({ id: officialCalls.id, officialStatus: officialCalls.officialStatus })
+        .select({
+          id: officialCalls.id,
+          officialStatus: officialCalls.officialStatus,
+          officialSituation: officialCalls.officialSituation,
+        })
         .from(officialCalls)
         .where(eq(officialCalls.id, callId))
         .limit(1);
+      if (!call)
+        return reply.status(404).send(failure('Chamado oficial não encontrado.'));
 
-      if (!call) {
-        return reply.status(404).send({
-          success: false,
-          error: 'Chamado oficial não encontrado.',
-        });
-      }
+      if (!(await ownsToken(token, user.id)))
+        return reply
+          .status(403)
+          .send(failure('Este aparelho não está registrado na sua conta.'));
 
-      // Garante que o token está registrado
-      const [tokenRow] = await db
-        .select({ pushToken: userPushTokens.pushToken })
-        .from(userPushTokens)
-        .where(eq(userPushTokens.pushToken, token))
-        .limit(1);
-
-      if (!tokenRow) {
-        await db.insert(userPushTokens).values({
-          id: randomUUID(),
-          userId: req.user?.id ?? null,
-          pushToken: token,
-          platform: 'android',
-          municipalityId: '3304557',
-        });
-      }
+      const [{ total }] = await db
+        .select({ total: count() })
+        .from(callNotificationFollowers)
+        .where(eq(callNotificationFollowers.pushToken, token));
+      if (total >= MAX_FOLLOWS_PER_TOKEN)
+        return reply
+          .status(400)
+          .send(failure('Você já acompanha o máximo de chamados com avisos.'));
 
       await db
         .insert(callNotificationFollowers)
@@ -262,8 +372,11 @@ export function registerNotificationRoutes(
           id: randomUUID(),
           callId,
           pushToken: token,
-          userId: req.user?.id ?? null,
-          lastNotifiedStatus: call.officialStatus,
+          userId: user.id,
+          lastNotifiedStatus: callStateLabel(
+            call.officialStatus,
+            call.officialSituation,
+          ),
         })
         .onConflictDoNothing();
 
@@ -271,7 +384,6 @@ export function registerNotificationRoutes(
     },
   );
 
-  // Deixar de seguir notificações de um chamado
   app.delete<{ Body: UnfollowCallNotificationPayload }>(
     '/api/v1/notifications/follow-call',
     {
@@ -279,15 +391,18 @@ export function registerNotificationRoutes(
         body: {
           type: 'object',
           required: ['callId', 'token'],
-          properties: {
-            callId: { type: 'string', minLength: 1 },
-            token: { type: 'string', minLength: 1 },
-          },
+          additionalProperties: false,
+          properties: { callId: callIdSchema, token: tokenSchema },
         },
       },
     },
     async (req, reply) => {
       const { callId, token } = req.body;
+      if (!(await ownsToken(token, req.user!.id)))
+        return reply
+          .status(403)
+          .send(failure('Este aparelho não está registrado na sua conta.'));
+
       await db
         .delete(callNotificationFollowers)
         .where(

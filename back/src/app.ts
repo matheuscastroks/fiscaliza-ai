@@ -18,6 +18,7 @@ import { registerPublicDataRoutes } from './public-data.js';
 import { registerAuthRoutes } from './auth-routes.js';
 import { registerAttachmentsRoutes } from './attachments-routes.js';
 import { registerNotificationRoutes } from './notifications.js';
+import { registerSavedCallsRoutes } from './saved-calls.js';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -333,8 +334,8 @@ export async function buildApp(
 
   registerNotificationRoutes(app, {
     db,
-    customFetch: options.fetch,
   });
+  registerSavedCallsRoutes(app, db);
 
   return app;
 }
