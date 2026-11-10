@@ -317,7 +317,7 @@ export function TerritoryCardContent({
             accessibilityLabel={
               saved
                 ? 'Deixar de acompanhar chamado ' + official.externalId
-                : 'Acompanhar chamado ' + official.externalId
+                : 'Salvar chamado ' + official.externalId
             }
             hitSlop={8}
             style={({ pressed }) => [
@@ -326,9 +326,9 @@ export function TerritoryCardContent({
             ]}
           >
             <Ionicons
-              name={saved ? 'heart' : 'heart-outline'}
+              name={saved ? 'bookmark' : 'bookmark-outline'}
               size={22}
-              color={saved ? colors.risk : colors.muted}
+              color={saved ? colors.accent : colors.muted}
             />
           </Pressable>
         )}
@@ -341,7 +341,7 @@ export function TerritoryCardContent({
           accessibilityRole="alert"
           accessibilityLiveRegion="polite"
         >
-          Não foi possível salvar. Toque no coração para tentar novamente.
+          Não foi possível salvar. Toque em Salvar para tentar novamente.
         </AppText>
       )}
       {close}

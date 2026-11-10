@@ -43,7 +43,7 @@ export default function RegisterScreen() {
   return (
     <AuthScreenLayout
       title="Criar conta"
-      description="Crie sua conta para acompanhar chamados e participar da sua cidade."
+      description="Crie sua conta para salvar chamados e consultar dados oficiais da sua cidade."
     >
       <View style={styles.form}>
         <AppInput

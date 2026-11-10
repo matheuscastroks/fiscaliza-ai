@@ -41,7 +41,7 @@ function NeighborhoodContent({ initialId }: { initialId?: string }) {
   return (
     <AppScreen keyboardAvoiding>
       <AppHeader
-        title="Meu bairro"
+        title="Serviços do bairro"
         context="Rio de Janeiro"
         onBack={() => goBack()}
       />

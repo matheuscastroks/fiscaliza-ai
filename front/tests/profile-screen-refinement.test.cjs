@@ -40,8 +40,8 @@ test('profile screen: adopts Apple Inset-Grouped tables and modern civic metrics
   assert.ok(content.includes('PostalCodeSheet'), 'Must integrate PostalCodeSheet component');
   assert.ok(content.includes('<PostalCodeSheet'), 'Must mount PostalCodeSheet bottom sheet');
   assert.ok(!content.includes("'/MunicipalityScreen'"), 'Must replace full-screen navigation with bottom sheet');
-  assert.ok(content.includes('PlacesSheet'), 'Must integrate PlacesSheet component');
-  assert.ok(content.includes('<PlacesSheet'), 'Must mount PlacesSheet bottom sheet');
+  assert.ok(!content.includes('PlacesSheet'), 'Lugares têm uma única tela: PlacesScreen');
+  assert.ok(content.includes("'/PlacesScreen'"), 'Must navigate to PlacesScreen');
 
   // Account actions & modal
   assert.ok(content.includes('useSignOutSheet'), 'Must preserve sign out sheet');
@@ -52,33 +52,16 @@ test('profile screen: adopts Apple Inset-Grouped tables and modern civic metrics
   assert.ok(!content.includes('/activity'), 'Must not reference legacy /activity route');
 });
 
-test('postal code bottom sheet: provides smooth in-place CEP lookup and confirmation for Rio citizens', () => {
-  const sheetPath = path.join(ROOT_DIR, 'components', 'profile', 'PostalCodeSheet.tsx');
-  assert.ok(fs.existsSync(sheetPath), 'PostalCodeSheet.tsx must exist');
-
-  const content = fs.readFileSync(sheetPath, 'utf8');
-  assert.ok(content.includes('export function PostalCodeSheet'), 'Must export PostalCodeSheet component');
-  assert.ok(content.includes('AppBottomSheetModal'), 'Must use AppBottomSheetModal');
-  assert.ok(content.includes('BottomSheetTextInput'), 'Must use BottomSheetTextInput for native keyboard handling');
-  assert.ok(content.includes('/profile/postal-code/'), 'Must query postal-code lookup endpoint');
-  assert.ok(content.includes('/profile/municipality'), 'Must update municipality/postalCode profile');
-  assert.ok(content.includes('acceptProfile'), 'Must update auth store with accepted profile');
-  assert.ok(content.includes('Haptics'), 'Must provide sensory feedback on search and confirm');
-
-  // Subtle border validation
-  assert.ok(content.includes('borderWidth: StyleSheet.hairlineWidth'), 'PostalCodeSheet resultCard must have subtle hairline border');
-  assert.ok(!content.includes('borderWidth: 1.5'), 'Must eliminate thick 1.5px border from result card');
-});
-
-test('places bottom sheet: manages saved places and inline editor via bottom sheet', () => {
-  const sheetPath = path.join(ROOT_DIR, 'components', 'profile', 'PlacesSheet.tsx');
-  assert.ok(fs.existsSync(sheetPath), 'PlacesSheet.tsx must exist');
-
-  const content = fs.readFileSync(sheetPath, 'utf8');
-  assert.ok(content.includes('export function PlacesSheet'), 'Must export PlacesSheet component');
-  assert.ok(content.includes('AppBottomSheetModal'), 'Must use AppBottomSheetModal');
-  assert.ok(content.includes('PlaceEditor'), 'Must integrate PlaceEditor inside bottom sheet');
-  assert.ok(content.includes('usePlacesStore'), 'Must bind places store');
-  assert.ok(content.includes('selectPlace'), 'Must support map selection');
-  assert.ok(content.includes('removePlace'), 'Must support place removal');
+test('postal code: sheet and municipality screen share one flow and service', () => {
+  const sheet = fs.readFileSync(path.join(ROOT_DIR, 'components', 'profile', 'PostalCodeSheet.tsx'), 'utf8');
+  const screen = fs.readFileSync(path.join(ROOT_DIR, 'app', 'MunicipalityScreen.tsx'), 'utf8');
+  const service = fs.readFileSync(path.join(ROOT_DIR, 'services', 'postalCode.ts'), 'utf8');
+  assert.ok(sheet.includes('AppBottomSheetModal') && sheet.includes('BottomSheetTextInput'), 'Sheet keeps native keyboard handling');
+  for (const content of [sheet, screen]) {
+    assert.ok(content.includes('usePostalCodeFlow'), 'Both screens use the shared flow');
+    assert.ok(!content.includes('/profile/postal-code/'), 'No duplicated endpoint calls in UI');
+  }
+  assert.ok(service.includes('/profile/postal-code/') && service.includes('/profile/municipality'), 'Service owns the endpoints');
+  assert.ok(fs.existsSync(path.join(ROOT_DIR, 'features', 'profile', 'usePostalCodeFlow.ts')));
+  assert.ok(!fs.existsSync(path.join(ROOT_DIR, 'components', 'profile', 'PlacesSheet.tsx')), 'PlacesSheet removed');
 });

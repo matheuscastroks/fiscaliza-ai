@@ -29,7 +29,6 @@ import { useFollowStore } from '@/stores/followStore';
 import { usePlacesStore } from '@/stores/placesStore';
 import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { PostalCodeSheet } from '@/components/profile/PostalCodeSheet';
-import { PlacesSheet } from '@/components/profile/PlacesSheet';
 import { layout, spacing } from '@/theme';
 
 type MenuItem = {
@@ -104,7 +103,6 @@ export default function ProfileScreen() {
   const [deleteError, setDeleteError] = useState('');
 
   const [cepSheetOpen, setCepSheetOpen] = useState(false);
-  const [placesSheetOpen, setPlacesSheetOpen] = useState(false);
 
   const selectPhoto = async () => {
     if (!user || picking) return;
@@ -344,7 +342,7 @@ export default function ProfileScreen() {
             accessibilityLabel={`Meus lugares salvos: ${places.length}`}
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setPlacesSheetOpen(true);
+              router.push('/PlacesScreen');
             }}
             style={({ pressed }) => [
               styles.metricCard,
@@ -487,11 +485,7 @@ export default function ProfileScreen() {
                     accessibilityLabel={item.label}
                     onPress={() => {
                       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      if (item.path === '/PlacesScreen') {
-                        setPlacesSheetOpen(true);
-                      } else {
-                        router.push(item.path);
-                      }
+                      router.push(item.path);
                     }}
                     style={({ pressed }) => [
                       styles.tableRow,
@@ -693,11 +687,6 @@ export default function ProfileScreen() {
         currentNeighborhood={user?.neighborhood}
       />
 
-      {/* Modal Bottom Sheet de Gestão de Lugares Salvos */}
-      <PlacesSheet
-        visible={placesSheetOpen}
-        onClose={() => setPlacesSheetOpen(false)}
-      />
     </AppScreen>
   );
 }

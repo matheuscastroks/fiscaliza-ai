@@ -31,21 +31,20 @@ export const citizenNavigationSections: {
   {
     title: 'Minha região',
     items: [
-      { label: 'Início', path: '/', icon: 'home-outline' },
       {
         label: 'Explorar',
         path: '/(tabs)/TerritoryScreen',
         icon: 'map-outline',
       },
       {
-        label: 'Acompanhar',
+        label: 'Salvos',
         path: '/(tabs)/FollowScreen',
-        icon: 'heart-outline',
+        icon: 'bookmark-outline',
       },
       {
         label: 'Agir',
         path: '/(tabs)/ParticipateScreen',
-        icon: 'hand-left-outline',
+        icon: 'chatbubbles-outline',
       },
     ],
   },
@@ -165,14 +164,14 @@ export function SideMenu({
                 ? user.municipality.name + ' · ' + user.municipality.state
                 : authenticated
                   ? 'Definir município'
-                  : 'Acesse para salvar e acompanhar'}
+                  : 'Acesse para salvar chamados'}
             </AppText>
             {authenticated && (
               <AppText variant="caption" color="muted">
                 {savedCount}{' '}
                 {savedCount === 1
-                  ? 'chamado acompanhado'
-                  : 'chamados acompanhados'}
+                  ? 'chamado salvo'
+                  : 'chamados salvos'}
               </AppText>
             )}
           </View>

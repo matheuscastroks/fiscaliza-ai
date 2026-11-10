@@ -39,67 +39,45 @@ interface OnboardingSlide {
 const slides: OnboardingSlide[] = [
   {
     id: 'territory',
-    badge: 'Rio no seu mapa',
+    badge: 'Explorar',
     badgeIcon: 'map-outline',
-    title: 'O Rio no seu mapa',
+    title: 'Veja o que o 1746 publicou perto de você',
     description:
-      'Veja os chamados do 1746 da sua rua e encontre escolas, postos de saúde e praças ao seu redor com transparência total.',
+      'Explore no mapa os chamados registrados na sua região e encontre escolas, postos de saúde e praças. Os dados são oficiais e têm data de atualização.',
     image: require('@/assets/images/onboarding-territory.jpg'),
     imageAlt: 'Vista da cidade do Rio de Janeiro com montanhas e ruas ensolaradas',
     benefits: [
       {
         icon: 'locate-outline',
-        title: 'Demandas geolocalizadas',
-        description: 'Buracos, iluminação, podas e obras mapeados no seu bairro.',
+        title: 'Chamados por bairro ou raio',
+        description: 'Escolha um bairro ou um lugar seu e veja só o que está por perto.',
       },
       {
         icon: 'business-outline',
-        title: 'Equipamentos públicos',
-        description: 'Consulte serviços essenciais próximos de você em poucos toques.',
+        title: 'Serviços públicos',
+        description: 'Consulte endereço e contato de escolas, saúde e praças.',
       },
     ],
   },
   {
-    id: 'follow',
-    badge: 'Fiscalização ativa',
-    badgeIcon: 'checkmark-circle-outline',
-    title: 'Fiscalize prazos e soluções',
+    id: 'save',
+    badge: 'Salvar e agir',
+    badgeIcon: 'bookmark-outline',
+    title: 'Salve chamados e ache o canal oficial',
     description:
-      'Guarde protocolos importantes para acompanhar se a Prefeitura está cumprindo os prazos oficiais de atendimento.',
+      'Guarde os chamados que importam para voltar a eles. Para abrir um novo, o app leva você ao atendimento oficial da Prefeitura; o envio é sempre feito por você.',
     image: require('@/assets/images/onboarding-follow.jpg'),
     imageAlt: 'Espaço urbano no Rio de Janeiro com calçada de pedras portuguesas e arborização',
     benefits: [
       {
         icon: 'time-outline',
-        title: 'Prazos reais de atendimento',
-        description: 'Acompanhe os prazos previstos (SLA) e a situação de cada chamado.',
+        title: 'Situação e prazo publicados',
+        description: 'Veja protocolo, datas e prazo conforme divulgados pela Prefeitura.',
       },
       {
-        icon: 'notifications-outline',
-        title: 'Alertas no seu aparelho',
-        description: 'Receba avisos automáticos quando houver novidades no protocolo.',
-      },
-    ],
-  },
-  {
-    id: 'action',
-    badge: 'Ação descomplicada',
-    badgeIcon: 'flash-outline',
-    title: 'Cobre melhorias com 1 toque',
-    description:
-      'Encontrou um problema na sua rua? Gere mensagens estruturadas para o WhatsApp do 1746 com endereço e detalhes prontos, podendo anexar fotos no chat.',
-    image: require('@/assets/images/onboarding-action.jpg'),
-    imageAlt: 'Cidadãos cariocas em movimento em espaço público no Rio de Janeiro',
-    benefits: [
-      {
-        icon: 'logo-whatsapp',
-        title: 'Assistente rápido para o 1746',
-        description: 'Texto formatado com precisão para enviar à Central 1746 em segundos.',
-      },
-      {
-        icon: 'shield-checkmark-outline',
+        icon: 'chatbubbles-outline',
         title: 'Canais oficiais reunidos',
-        description: 'Telefone 1746, portal da Prefeitura e canais oficiais ao seu alcance.',
+        description: 'Telefone 1746, WhatsApp e portal da Prefeitura em um só lugar.',
       },
     ],
   },

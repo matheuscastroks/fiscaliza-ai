@@ -13,7 +13,7 @@ test('settings screen: removes redundancies (places and saved calls) and adopts 
 
   // Elimination of redundant sections
   assert.ok(!content.includes("'/PlacesScreen'"), 'Must remove redundant PlacesScreen link from settings');
-  assert.ok(!content.includes('clearSavedCalls'), 'Must remove redundant saved calls clearing logic from settings');
+  assert.ok(content.includes('clearSavedCalls') && content.includes('Alert.alert'), 'PRODUCT.md exige apagar salvos com confirmação');
   assert.ok(!content.includes('Chamados salvos neste aparelho'), 'Must remove redundant saved calls section');
 
   // Apple Inset-Grouped containers and frameless form sections

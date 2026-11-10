@@ -10,7 +10,6 @@ test('onboarding flow: photographic assets exist and meet quality threshold', ()
   const expectedImages = [
     'onboarding-territory.jpg',
     'onboarding-follow.jpg',
-    'onboarding-action.jpg',
   ];
 
   for (const img of expectedImages) {
@@ -50,8 +49,8 @@ test('onboarding flow: removes bureaucratic disclaimers and adopts user-centric 
   assert.ok(
     content.includes('onboarding-territory.jpg') &&
       content.includes('onboarding-follow.jpg') &&
-      content.includes('onboarding-action.jpg'),
-    'OnboardingFlow must reference the 3 photographic Rio de Janeiro assets',
+      !content.includes('onboarding-action.jpg'),
+    'OnboardingFlow must reference the 2 photographic Rio de Janeiro assets',
   );
 
   // Must import expo-image and expo-linear-gradient
@@ -62,16 +61,20 @@ test('onboarding flow: removes bureaucratic disclaimers and adopts user-centric 
 
   // Must present inspiring, civic value propositions
   assert.ok(
-    content.includes('O Rio no seu mapa'),
+    content.includes('Veja o que o 1746 publicou perto de você'),
     'Should highlight territorial map exploration',
   );
   assert.ok(
-    content.includes('Fiscalize prazos e soluções'),
+    content.includes('Situação e prazo publicados'),
     'Should highlight SLA and civic monitoring',
   );
   assert.ok(
-    content.includes('Cobre melhorias com 1 toque'),
-    'Should highlight fast 1746 action and WhatsApp assistance',
+    content.includes('Salve chamados e ache o canal oficial'),
+    'Should point to the official channel instead of promising actions',
+  );
+  assert.ok(
+    !content.includes('avisos automáticos') && !content.includes('Cobre melhorias'),
+    'Must not promise automatic alerts or in-app action',
   );
   assert.ok(
     content.includes('Começar a explorar'),

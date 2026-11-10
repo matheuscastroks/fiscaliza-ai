@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, memo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, memo } from 'react';
 import {
   FlatList,
   RefreshControl,
@@ -11,6 +11,7 @@ import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import {
   AppBottomSheetModal,
+  BottomSheet,
   BottomSheetFlatList,
 } from '@/components/ui/AppBottomSheetModal';
 import { TerritoryListRow } from '@/components/territory/TerritoryListRow';
@@ -36,6 +37,15 @@ export interface TerritoryListViewProps {
   visible?: boolean;
   asSheet?: boolean;
   onClose?: () => void;
+  /** Sheet sempre presente sobre o mapa (recolhido, médio, alto), sem modal nem fundo escurecido. */
+  persistent?: boolean;
+  /** Pedido externo para expandir (true) ou recolher (false) o sheet persistente. */
+  expanded?: boolean;
+  onExpandedChange?: (expanded: boolean) => void;
+  /** Espaço reservado na base (barra de abas flutuante). */
+  bottomInset?: number;
+  summaryTitle?: string;
+  summarySubtitle?: string;
   listRef: React.RefObject<FlatList<Entry> | null>;
   listOffsetRef: React.MutableRefObject<number>;
   restoreListOffsetRef: React.MutableRefObject<boolean>;
@@ -75,6 +85,12 @@ function TerritoryListViewComponent({
   visible = true,
   asSheet = true,
   onClose,
+  persistent = false,
+  expanded = false,
+  onExpandedChange,
+  bottomInset = 0,
+  summaryTitle,
+  summarySubtitle,
   listRef,
   listOffsetRef,
   restoreListOffsetRef,
@@ -232,6 +248,37 @@ function TerritoryListViewComponent({
     </View>
   );
 
+  if (asSheet && persistent) {
+    return (
+      <PersistentSheet
+        visible={visible}
+        expanded={expanded}
+        onExpandedChange={onExpandedChange}
+        bottomInset={bottomInset}
+        title={summaryTitle ?? sectionHeading}
+        subtitle={summarySubtitle}
+      >
+        <BottomSheetFlatList<Entry>
+          data={listed}
+          keyExtractor={entryKey}
+          renderItem={renderEntry}
+          initialNumToRender={10}
+          maxToRenderPerBatch={8}
+          windowSize={7}
+          ItemSeparatorComponent={TerritoryRowSeparator}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          contentContainerStyle={[
+            cityStyles.content,
+            { gap: 0, paddingTop: spacing.xs, paddingBottom: insets.bottom + bottomInset + spacing.xl },
+          ]}
+          ListHeaderComponent={headerNotice}
+          ListFooterComponent={footerContent}
+        />
+      </PersistentSheet>
+    );
+  }
+
   if (asSheet) {
     return (
       <AppBottomSheetModal
@@ -323,7 +370,63 @@ function TerritoryListViewComponent({
 
 export const TerritoryListView = memo(TerritoryListViewComponent);
 
+const SNAP_POINTS = ['22%', '52%', '90%'];
+
+function PersistentSheet({
+  visible, expanded, onExpandedChange, bottomInset, title, subtitle, children,
+}: {
+  visible: boolean;
+  expanded: boolean;
+  onExpandedChange?: (expanded: boolean) => void;
+  bottomInset: number;
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  const { colors } = useTheme();
+  const ref = useRef<React.ComponentRef<typeof BottomSheet>>(null);
+  const last = useRef(0);
+
+  // Pedido externo (botão Mapa/Lista, voltar do Android) move o sheet.
+  useEffect(() => {
+    if (expanded === (last.current === 2)) return;
+    ref.current?.snapToIndex(expanded ? 2 : 0);
+  }, [expanded]);
+
+  if (!visible) return null;
+  return (
+    <BottomSheet
+      ref={ref}
+      index={0}
+      snapPoints={SNAP_POINTS}
+      bottomInset={bottomInset}
+      enablePanDownToClose={false}
+      onChange={(index) => {
+        last.current = index;
+        onExpandedChange?.(index === 2);
+      }}
+      backgroundStyle={[styles.sheetBackground, { backgroundColor: colors.surface }]}
+      handleIndicatorStyle={{ backgroundColor: colors.divider }}
+    >
+      <View style={styles.sheetHeader} accessibilityRole="header">
+        <AppText variant="label" numberOfLines={1}>{title}</AppText>
+        {subtitle ? <AppText variant="caption" color="muted" numberOfLines={1}>{subtitle}</AppText> : null}
+      </View>
+      {children}
+    </BottomSheet>
+  );
+}
+
 const styles = StyleSheet.create({
+  sheetBackground: {
+    borderTopLeftRadius: layout.radius.sheet,
+    borderTopRightRadius: layout.radius.sheet,
+  },
+  sheetHeader: {
+    paddingHorizontal: spacing.contentPadding,
+    paddingBottom: spacing.sm,
+    gap: 2,
+  },
   fullListOverlay: {
     position: 'absolute',
     top: 0,

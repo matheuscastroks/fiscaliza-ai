@@ -102,11 +102,11 @@ export const OfficialCallRow = memo(function OfficialCallRow({
     try {
       if (!(await toggleSavedCall(call)))
         setSaveError(
-          'Não foi possível atualizar seus acompanhamentos. Toque no coração para tentar novamente.',
+          'Não foi possível atualizar seus acompanhamentos. Toque em Salvar para tentar novamente.',
         );
     } catch {
       setSaveError(
-        'Não foi possível atualizar seus acompanhamentos. Toque no coração para tentar novamente.',
+        'Não foi possível atualizar seus acompanhamentos. Toque em Salvar para tentar novamente.',
       );
     }
   };
@@ -183,7 +183,7 @@ export const OfficialCallRow = memo(function OfficialCallRow({
               accessibilityLabel={
                 isSaved
                   ? `Deixar de acompanhar chamado ${call.externalId}`
-                  : `Acompanhar chamado ${call.externalId}`
+                  : `Salvar chamado ${call.externalId}`
               }
               accessibilityHint="Guarda este chamado nos seus acompanhamentos."
               hitSlop={8}
@@ -194,9 +194,9 @@ export const OfficialCallRow = memo(function OfficialCallRow({
               ]}
             >
               <Ionicons
-                name={isSaved ? 'heart' : 'heart-outline'}
+                name={isSaved ? 'bookmark' : 'bookmark-outline'}
                 size={18}
-                color={isSaved ? colors.risk : colors.muted}
+                color={isSaved ? colors.accent : colors.muted}
               />
             </Pressable>
           </View>
