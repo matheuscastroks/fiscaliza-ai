@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import { database } from './db.js';
+import type { Database } from './db.js';
 import {
   callNotificationFollowers,
   municipalities,
@@ -12,7 +12,6 @@ import type {
   FollowCallNotificationPayload,
   PushNotificationResult,
   PushTokenRegistrationPayload,
-  TestNotificationPayload,
   UnfollowCallNotificationPayload,
 } from '../../shared/contracts.js';
 
@@ -87,7 +86,7 @@ export async function sendExpoPushNotification(
 }
 
 export async function notifyCallFollowers(
-  db: ReturnType<typeof database>['db'],
+  db: Database,
   callId: string,
   updateInfo: {
     serviceType?: string;
@@ -146,11 +145,11 @@ export async function notifyCallFollowers(
 export function registerNotificationRoutes(
   app: FastifyInstance,
   options: {
+    db: Database;
     customFetch?: typeof fetch;
-  } = {},
+  },
 ) {
-  const customFetch = options.customFetch ?? fetch;
-
+  const { db } = options;
   // Registrar ou atualizar o token de push do aparelho
   app.post<{ Body: PushTokenRegistrationPayload }>(
     '/api/v1/notifications/register-token',
@@ -169,8 +168,6 @@ export function registerNotificationRoutes(
     },
     async (req, reply) => {
       const { token, platform, municipalityId: rawMunicipalityId } = req.body;
-      const { db } = database();
-
       const municipalityId = rawMunicipalityId || '3304557';
       const [muni] = await db
         .select({ id: municipalities.id })
@@ -228,8 +225,6 @@ export function registerNotificationRoutes(
     },
     async (req, reply) => {
       const { callId, token } = req.body;
-      const { db } = database();
-
       // Verifica se o chamado existe
       const [call] = await db
         .select({ id: officialCalls.id, officialStatus: officialCalls.officialStatus })
@@ -293,8 +288,6 @@ export function registerNotificationRoutes(
     },
     async (req, reply) => {
       const { callId, token } = req.body;
-      const { db } = database();
-
       await db
         .delete(callNotificationFollowers)
         .where(
@@ -305,39 +298,6 @@ export function registerNotificationRoutes(
         );
 
       return reply.send({ success: true, message: 'Notificações desativadas para este chamado.' });
-    },
-  );
-
-  // Enviar uma notificação push de teste direto ao aparelho
-  app.post<{ Body: TestNotificationPayload }>(
-    '/api/v1/notifications/test',
-    {
-      schema: {
-        body: {
-          type: 'object',
-          required: ['token'],
-          properties: {
-            token: { type: 'string', minLength: 1 },
-            title: { type: 'string' },
-            body: { type: 'string' },
-          },
-        },
-      },
-    },
-    async (req, reply) => {
-      const { token, title, body } = req.body;
-
-      const result = await sendExpoPushNotification(
-        {
-          to: token,
-          title: title || 'Teste do Fiscaliza aí',
-          body: body || 'Notificações push estão ativas e funcionando no seu aparelho!',
-          data: { type: 'test', timestamp: Date.now() },
-        },
-        customFetch,
-      );
-
-      return reply.send(result);
     },
   );
 }

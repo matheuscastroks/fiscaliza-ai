@@ -6,10 +6,11 @@ import swagger from '@fastify/swagger';
 import { and, eq, gt } from 'drizzle-orm';
 import Fastify, { type FastifyRequest } from 'fastify';
 import { resolve } from 'node:path';
-import pg from 'pg';
 import type { SessionUser } from '../../shared/contracts.js';
 import { tokenHash } from './auth.js';
+import { loadConfig } from './config.js';
 import { database } from './db.js';
+import { createKeyedLock } from './keyed-lock.js';
 import { municipalityService } from './municipality.js';
 import { attachments, municipalities, sessions, users } from './schema.js';
 import { registerOfficialCallsRoutes } from './official-calls.js';
@@ -47,6 +48,10 @@ const sessionCookie = (req: FastifyRequest) =>
   req.headers['x-fiscaliza-client'] === 'citizen'
     ? 'citizen_session'
     : 'session';
+const isAccountPath = (path: string) =>
+  path.startsWith('/api/auth/') ||
+  path === '/api/profile' ||
+  path.startsWith('/api/profile/');
 const publicUser = (u: typeof users.$inferSelect): SessionUser => ({
   id: u.id,
   name: u.name,
@@ -66,33 +71,31 @@ export async function buildApp(
     fetch?: typeof fetch;
   } = {},
 ) {
-  const trustedProxies = process.env.TRUST_PROXY?.split(',')
-    .map((value) => value.trim())
-    .filter(Boolean);
+  const config = loadConfig(process.env, { databaseUrl: options.databaseUrl });
   const app = Fastify({
     logger: options.logger ? { serializers: {
       req: (req) => ({ method: req.method, url: req.url?.split('?')[0], hostname: req.hostname, remoteAddress: req.ip }),
     } } : false,
-    trustProxy: trustedProxies?.length ? trustedProxies : false,
+    trustProxy: config.trustProxy,
     bodyLimit: 1024 * 1024,
+    requestTimeout: 30_000,
+    connectionTimeout: 60_000,
     ajv: { customOptions: { removeAdditional: false } },
   });
-  const connection = database(options.databaseUrl);
+  const connection = database(config.databaseUrl, {
+    statementTimeoutMs: 10_000,
+    lockTimeoutMs: 5_000,
+    idleInTransactionTimeoutMs: 15_000,
+  });
   const db = connection.db;
   const territory = municipalityService(db, options.fetch);
-  const locks = new pg.Pool({
-    connectionString:
-      options.databaseUrl ??
-      process.env.DATABASE_URL ??
-      'postgres://fiscaliza:fiscaliza@localhost:5432/fiscaliza',
-    max: 20,
-  });
+  const userLock = createKeyedLock(10_000);
 
   async function hydrate(u: typeof users.$inferSelect): Promise<SessionUser> {
     const result = publicUser(u);
     if (u.municipalityId) {
       const [m] = await db
-        .select()
+        .select({ data: municipalities.data })
         .from(municipalities)
         .where(eq(municipalities.id, u.municipalityId));
       result.municipality = m?.data ?? null;
@@ -107,15 +110,11 @@ export async function buildApp(
     return req.user.municipality.id;
   };
 
-  const origins = (
-    process.env.WEB_ORIGINS || 'http://localhost:5173,http://localhost:8081'
-  )
-    .split(',')
-    .map((x) => x.trim());
+  const origins = config.webOrigins;
 
   const isAllowedOrigin = (origin: string): boolean => {
     if (origins.includes(origin)) return true;
-    if (process.env.NODE_ENV !== 'production') {
+    if (!config.production) {
       if (origin === 'null') return true;
       if (/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(origin))
         return true;
@@ -130,11 +129,10 @@ export async function buildApp(
     return false;
   };
 
-  const uploadDir = resolve(process.env.UPLOAD_DIR || 'uploads');
+  const uploadDir = resolve(config.uploadDir);
 
   app.addHook('onClose', async () => {
     await connection.pool.end();
-    await locks.end();
   });
 
   await app.register(swagger, {
@@ -165,22 +163,18 @@ export async function buildApp(
   app.decorateRequest('user', null);
   app.decorateRequest('sessionToken', null);
 
-  // Handler ownership keeps the lock paired with finally even when the socket
-  // closes before Fastify can emit onResponse. JSON parsing/validation runs first.
+  // Escritas de um mesmo usuário rodam uma de cada vez. A fila fica na memória
+  // (sem segurar conexão do banco) e as rotas de upload ficam de fora, para um
+  // envio lento não travar as outras escritas da conta.
   app.addHook('onRoute', (route) => {
     const handler = route.handler;
+    const serialize =
+      (route.config as { userLock?: boolean } | undefined)?.userLock !== false;
     route.handler = async function (req, reply) {
       if (!req.user || ['GET', 'HEAD', 'OPTIONS'].includes(req.method))
         return handler.call(this, req, reply);
       const userId = req.user.id;
-      const lock = await locks.connect();
-      let acquired = false;
-      try {
-        if (req.raw.aborted || req.raw.socket.destroyed)
-          throw fail(499, 'Request aborted.');
-        await lock.query('SELECT pg_advisory_lock(hashtext($1))', [userId]);
-        acquired = true;
-        // A disconnected request may have waited behind an active mutation.
+      const run = async () => {
         if (req.raw.aborted || req.raw.socket.destroyed)
           throw fail(499, 'Request aborted.');
         const [fresh] = await db
@@ -189,23 +183,15 @@ export async function buildApp(
           .where(eq(users.id, userId));
         if (!fresh) throw fail(401, 'Sessao expirada.');
         req.user = await hydrate(fresh);
-        const path = req.url.split('?')[0];
-        if (!path.startsWith('/api/auth/') && !path.startsWith('/api/profile/'))
-          municipalityId(req);
+        if (!isAccountPath(req.url.split('?')[0])) municipalityId(req);
         if (req.raw.aborted || req.raw.socket.destroyed)
           throw fail(499, 'Request aborted.');
         return await handler.call(this, req, reply);
-      } finally {
-        try {
-          if (acquired)
-            await lock.query('SELECT pg_advisory_unlock(hashtext($1))', [
-              userId,
-            ]);
-          lock.release();
-        } catch {
-          lock.release(true);
-        }
-      }
+      };
+      if (!serialize) return run();
+      return userLock(userId, run, () =>
+        fail(503, 'Há outra operação em andamento. Tente de novo.'),
+      );
     };
   });
 
@@ -214,7 +200,8 @@ export async function buildApp(
       caught instanceof Error ? caught : new Error('Erro desconhecido.');
     const statusCode =
       error.statusCode && error.statusCode >= 400 ? error.statusCode : 500;
-    if (statusCode === 500) app.log.error({ type: error.name, statusCode }, 'Erro interno ao atender requisição.');
+    if (statusCode === 500)
+      app.log.error({ err: error, statusCode }, 'Erro interno ao atender requisição.');
     reply.code(statusCode).send({
       success: false,
       error:
@@ -272,8 +259,7 @@ export async function buildApp(
     if (mutation && !isLogin && !isRegistration && !req.user)
       throw fail(401, 'Entre para continuar.');
     if (
-      !path.startsWith('/api/auth/') &&
-      !path.startsWith('/api/profile/') &&
+      !isAccountPath(path) &&
       path !== '/api/health' &&
       !(req.method === 'GET' && path.startsWith('/api/rio1746/')) &&
       !(
@@ -326,6 +312,8 @@ export async function buildApp(
     ok,
     fail,
     hydrate,
+    production: config.production,
+    uploadDir,
     sessionCookie,
     validateImages,
     schema: { string, object, images },
@@ -344,6 +332,7 @@ export async function buildApp(
   });
 
   registerNotificationRoutes(app, {
+    db,
     customFetch: options.fetch,
   });
 

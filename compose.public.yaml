@@ -1,0 +1,32 @@
+# Modo público no PC: a API roda como em produção (CORS restrito, cookie Secure,
+# configuração obrigatória) e o túnel da Cloudflare fica ligado.
+#
+#   docker compose -f compose.yaml -f compose.public.yaml --profile public up -d
+#
+# Exige no .env.compose: POSTGRES_PASSWORD próprio (a senha de exemplo é
+# recusada), CLOUDFLARE_TUNNEL_TOKEN e PUBLIC_DOMAIN.
+services:
+  api:
+    environment:
+      NODE_ENV: production
+      WEB_ORIGINS: https://${PUBLIC_DOMAIN:?Configure PUBLIC_DOMAIN}
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+  postgres:
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+  cloudflared:
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?Configure CLOUDFLARE_TUNNEL_TOKEN}
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'

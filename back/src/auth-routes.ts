@@ -9,7 +9,12 @@ import {
 } from '../../shared/registration.js';
 import type { Database } from './db.js';
 import type { municipalityService } from './municipality.js';
-import { sessions, users } from './schema.js';
+import {
+  attachmentId,
+  removeAttachments,
+  removeUploadFiles,
+} from './attachments-routes.js';
+import { attachments, sessions, users } from './schema.js';
 
 export function registerAuthRoutes(
   app: FastifyInstance,
@@ -19,6 +24,8 @@ export function registerAuthRoutes(
     ok: (data: unknown) => unknown;
     fail: (statusCode: number, message: string) => Error;
     hydrate: (u: typeof users.$inferSelect) => Promise<SessionUser>;
+    production: boolean;
+    uploadDir: string;
     sessionCookie: (req: FastifyRequest) => string;
     validateImages: (
       req: FastifyRequest,
@@ -44,6 +51,8 @@ export function registerAuthRoutes(
     ok,
     fail,
     hydrate,
+    production,
+    uploadDir,
     sessionCookie,
     validateImages,
     schema,
@@ -57,7 +66,7 @@ export function registerAuthRoutes(
     reply.setCookie(sessionCookie(req), token, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      secure: production,
       path: '/api',
       maxAge: 7 * 24 * 60 * 60,
     });
@@ -159,18 +168,31 @@ export function registerAuthRoutes(
     },
     async (req) => {
       await validateImages(req, [req.body.avatar]);
+      const previous = attachmentId(req.user!.avatar);
       const [updated] = await db
         .update(users)
         .set({ avatar: req.body.avatar })
         .where(eq(users.id, req.user!.id))
         .returning();
+      // A foto anterior deixa de existir (um avatar por usuário).
+      if (previous && previous !== attachmentId(req.body.avatar))
+        await removeAttachments(db, uploadDir, req.user!.id, [previous]);
       return ok(await hydrate(updated));
     },
   );
 
   const deleteProfile = async (req: FastifyRequest, reply: FastifyReply) => {
     if (!req.user) throw fail(401, 'Entre para continuar.');
+    const owned = await db
+      .select({ id: attachments.id })
+      .from(attachments)
+      .where(eq(attachments.ownerId, req.user.id));
     await db.delete(users).where(eq(users.id, req.user.id));
+    // As linhas saíram com a conta (ON DELETE CASCADE); agora os arquivos.
+    await removeUploadFiles(
+      uploadDir,
+      owned.map((row) => row.id),
+    );
     if (req.sessionToken)
       await db
         .delete(sessions)
