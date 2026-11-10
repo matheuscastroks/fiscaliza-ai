@@ -155,6 +155,7 @@ export async function runRio1746RangeSync(
         0,
       );
       const totalUpdated = results.reduce((sum, part) => sum + part.updated, 0);
+      const totalRejected = results.reduce((sum, part) => sum + part.rejected, 0);
       const [row] = await db
         .update(sourceSyncRuns)
         .set({
@@ -164,6 +165,7 @@ export async function runRio1746RangeSync(
           receivedCount: totalFetched,
           importedCount: totalImported,
           updatedCount: totalUpdated,
+          rejectedCount: totalRejected,
           details: { partitions: results },
         })
         .where(eq(sourceSyncRuns.id, id))

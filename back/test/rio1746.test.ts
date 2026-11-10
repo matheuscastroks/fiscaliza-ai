@@ -98,7 +98,7 @@ test('rio1746: mapper handles BigQuery value wrappers and ISO timestamps', () =>
 
   const mapped = mapRawRowToOfficialCall(row);
   assert.equal(mapped.externalId, '99999');
-  assert.ok(mapped.openedAt.includes('2026-09-20'));
+  assert.ok(mapped.openedAt!.includes('2026-09-20'));
   assert.ok(mapped.closedAt?.includes('2026-09-20'));
   assert.equal(mapped.sourcePartitionDate, '2026-09-20');
 });

@@ -1,4 +1,4 @@
-import type { BigQuery } from '@google-cloud/bigquery';
+import type { BigQuery, Job } from '@google-cloud/bigquery';
 import type { ParameterizedBigQuery } from './rio1746/queries.js';
 
 export interface SyncBudget {
@@ -39,12 +39,20 @@ export async function runBudgetedQuery(
   if (BigInt(String(estimatedRaw)) > allowance) throw new SyncBudgetExceeded();
   // Reserve before starting: unknown/error billing consumes the whole allowance.
   budget.remainingBytes -= allowance;
-  const [job] = await bq.createQueryJob({
-    ...query,
-    maximumBytesBilled: allowance.toString(),
-    useLegacySql: false,
-    jobTimeoutMs: 60000,
-  });
+  let job: Job;
+  try {
+    [job] = await bq.createQueryJob({
+      ...query,
+      maximumBytesBilled: allowance.toString(),
+      useLegacySql: false,
+      jobTimeoutMs: 60000,
+    });
+  } catch (error) {
+    // O job nem foi criado: nada foi cobrado, a reserva volta e a consulta pode
+    // ser repetida. Depois de criado, qualquer falha mantém a reserva inteira.
+    budget.remainingBytes += allowance;
+    throw error;
+  }
   const [rows] = await job.getQueryResults();
   try {
     const [metadata] = await job.getMetadata();

@@ -113,8 +113,9 @@ test(
   'PostgreSQL: a sincronização avisa quem segue só quando a situação muda, em lote, e apaga token inválido',
   { skip: !process.env.DATABASE_URL },
   async (t) => {
-    const { app, db } = await setup(t);
+    const { app, db, cleanups } = await setup(t);
     const ids = [call(randomUUID()), call(randomUUID()), call(randomUUID())];
+    cleanups.push(() => db.delete(officialCalls).where(inArray(officialCalls.externalId, ids)));
     const initial = ids.map((id) => row(id, 'Aberto', 'Não Encerrado'));
     await importPartition(bigQueryFixture(() => initial), db, '2026-09-20', { pageSize: 10 });
 
@@ -170,7 +171,7 @@ test(
         await notifyStatusChanges(db, changes, expo);
       },
     });
-    assert.equal(result.updated, 3);
+    assert.equal(result.updated, 2, "a linha sem mudança não é reescrita");
     assert.equal(batches, 1);
     assert.equal(sent.length, 2);
     assert.deepEqual(

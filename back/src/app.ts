@@ -11,6 +11,7 @@ import { tokenHash } from './auth.js';
 import { loadConfig } from './config.js';
 import { database } from './db.js';
 import { createKeyedLock } from './keyed-lock.js';
+import { createResponseCache } from './response-cache.js';
 import { municipalityService } from './municipality.js';
 import { attachments, municipalities, sessions, users } from './schema.js';
 import { registerOfficialCallsRoutes } from './official-calls.js';
@@ -91,6 +92,7 @@ export async function buildApp(
   const db = connection.db;
   const territory = municipalityService(db, options.fetch);
   const userLock = createKeyedLock(10_000);
+  const cache = createResponseCache();
 
   async function hydrate(u: typeof users.$inferSelect): Promise<SessionUser> {
     const result = publicUser(u);
@@ -212,6 +214,28 @@ export async function buildApp(
     });
   });
 
+  // Dados públicos mudam no ritmo das sincronizações: um minuto de cache no
+  // aparelho e na borda, com renovação em segundo plano.
+  const publicReads = [
+    /^\/api\/rio1746\/(calls|overview|filters)/,
+    /^\/api\/public-facilities/,
+    /^\/api\/territorial-boundaries/,
+    /^\/api\/neighborhoods/,
+  ];
+  app.addHook('onSend', async (req, reply, payload) => {
+    if (
+      req.method === 'GET' &&
+      reply.statusCode === 200 &&
+      !reply.hasHeader('cache-control') &&
+      publicReads.some((pattern) => pattern.test(req.url.split('?')[0]))
+    )
+      reply.header(
+        'Cache-Control',
+        'public, max-age=60, stale-while-revalidate=300',
+      );
+    return payload;
+  });
+
   app.setNotFoundHandler((_req, reply) =>
     reply.code(404).send({ success: false, error: 'Recurso não encontrado.' }),
   );
@@ -320,8 +344,8 @@ export async function buildApp(
     schema: { string, object, images },
   });
 
-  registerOfficialCallsRoutes(app, db, connection.pool, ok, fail);
-  registerPublicDataRoutes(app, db);
+  registerOfficialCallsRoutes(app, db, connection.pool, ok, fail, cache);
+  registerPublicDataRoutes(app, db, cache);
 
 
   registerAttachmentsRoutes(app, {

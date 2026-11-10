@@ -12,7 +12,7 @@ import {
   getFacilityCounts,
   getPublicSources,
 } from './public-data-repository.js';
-import { queryOfficialOverview } from './official-call-overview.js';
+import { queryOfficialOverview, queryOpenedRange } from './official-call-overview.js';
 
 export function officialDateConditions(start?: string, end?: string): SQL[] {
   const result: SQL[] = [];
@@ -115,7 +115,7 @@ export async function getNeighborhoodOverview(
   const counts = await getFacilityCounts(db, id);
   const sources = await getPublicSources(db);
   const status = await getPublicSyncStatus(db);
-  const available = await queryOfficialOverview(db, scope.where);
+  const available = await queryOpenedRange(db, scope.where);
   const selected = await queryOfficialOverview(db, and(scope.where, ...dates));
   const source = sources.find((source) => source.sourceId === 'rio1746');
   const known = scope.confirmed && source?.state !== 'unavailable';
