@@ -109,3 +109,8 @@ test('reset drops the previous user token so a new session must register again',
   await state.getState().initialize();
   assert.equal(state.getState().pushToken, 'test-token');
 });
+
+test('push is only offered when the EAS projectId exists', () => {
+  assert.equal(service({ projectId: 'project-1' }).isPushConfigured(), true);
+  assert.equal(service({ projectId: null }).isPushConfigured(), false);
+});
