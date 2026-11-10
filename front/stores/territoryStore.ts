@@ -7,10 +7,11 @@ import {
 } from '@/features/territory/selectors';
 import { create } from 'zustand';
 import { usePlacesStore } from './placesStore';
-const REGION_KEY = 'fiscaliza-ai:region:3304557:v1';
+import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
+const REGION_KEY = `fiscaliza-ai:region:${DEFAULT_MUNICIPALITY_ID}:v1`;
 export function regionStorageKey(
   userId?: string | null,
-  municipalityId = '3304557',
+  municipalityId = DEFAULT_MUNICIPALITY_ID,
 ): string {
   return userId
     ? `fiscaliza-ai:region:${userId}:${municipalityId}:v1`
@@ -34,8 +35,6 @@ export const useTerritoryStore = create<{
     defaultNeighborhood?: string,
   ) => Promise<void>;
   setPreferredNeighborhood: (name: string) => Promise<boolean>;
-  neighborhood: string;
-  setNeighborhood: (name: string) => void;
   layers: TerritoryLayer[];
   setLayers: (layers: TerritoryLayer[]) => void;
   territoryDomain: TerritoryDomain;
@@ -49,11 +48,10 @@ export const useTerritoryStore = create<{
   setFiltersOpen: (value: boolean) => void;
 }>((set, get) => ({
   userId: null,
-  municipalityId: '3304557',
+  municipalityId: DEFAULT_MUNICIPALITY_ID,
   hydrated: false,
   persistenceError: null,
   preferredNeighborhood: '',
-  neighborhood: '',
   layers: ['official'],
   territoryDomain: 'calls',
   savedFacilityLayers: ['school', 'health', 'square'],
@@ -97,8 +95,8 @@ export const useTerritoryStore = create<{
     })();
     return initialization;
   },
-  setScope: (userId, municipalityId = '3304557', defaultNeighborhood = '') => {
-    const nextMunicipalityId = municipalityId || '3304557';
+  setScope: (userId, municipalityId = DEFAULT_MUNICIPALITY_ID, defaultNeighborhood = '') => {
+    const nextMunicipalityId = municipalityId || DEFAULT_MUNICIPALITY_ID;
     if (
       get().userId === userId &&
       get().municipalityId === nextMunicipalityId &&
@@ -114,7 +112,6 @@ export const useTerritoryStore = create<{
       hydrated: false,
       persistenceError: null,
       preferredNeighborhood: defaultNeighborhood.trim(),
-      neighborhood: '',
       isListView: false,
     });
     return get().initialize();
@@ -150,7 +147,6 @@ export const useTerritoryStore = create<{
     writes = result;
     return result.then(() => success);
   },
-  setNeighborhood: (name) => set({ neighborhood: name.trim() }),
   setLayers: (layers) => set({ layers }),
   setTerritoryDomain: (domain) => {
     if (domain === 'calls') {

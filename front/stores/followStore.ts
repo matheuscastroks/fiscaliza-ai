@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import type { OfficialCall } from '@/shared/contracts';
+import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
 
 let onFollowChanged: ((call: OfficialCall, saved: boolean) => void) | undefined;
 export function setFollowNotificationListener(
@@ -9,10 +10,10 @@ export function setFollowNotificationListener(
   onFollowChanged = listener;
 }
 
-export const FOLLOW_STORAGE_KEY = 'fiscaliza-ai:saved:rio1746:3304557:v1';
+export const FOLLOW_STORAGE_KEY = `fiscaliza-ai:saved:rio1746:${DEFAULT_MUNICIPALITY_ID}:v1`;
 export function followStorageKey(
   userId?: string | null,
-  municipalityId = '3304557',
+  municipalityId = DEFAULT_MUNICIPALITY_ID,
 ): string {
   return userId
     ? `fiscaliza-ai:saved:rio1746:${userId}:${municipalityId}:v1`
@@ -43,7 +44,7 @@ interface FollowStore {
 }
 function validCall(
   value: unknown,
-  municipalityId = '3304557',
+  municipalityId = DEFAULT_MUNICIPALITY_ID,
 ): value is OfficialCall {
   if (!value || typeof value !== 'object') return false;
   const c = value as OfficialCall;
@@ -197,7 +198,7 @@ export const useFollowStore = create<FollowStore>((set, get) => {
   };
   return {
     userId: null,
-    municipalityId: '3304557',
+    municipalityId: DEFAULT_MUNICIPALITY_ID,
     hydrated: false,
     busy: false,
     persistenceError: null,
@@ -259,8 +260,8 @@ export const useFollowStore = create<FollowStore>((set, get) => {
       })();
       return initialization;
     },
-    setScope: (userId, municipalityId = '3304557') => {
-      const nextMunicipalityId = municipalityId || '3304557';
+    setScope: (userId, municipalityId = DEFAULT_MUNICIPALITY_ID) => {
+      const nextMunicipalityId = municipalityId || DEFAULT_MUNICIPALITY_ID;
       if (
         get().userId === userId &&
         get().municipalityId === nextMunicipalityId &&

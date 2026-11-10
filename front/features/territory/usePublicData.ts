@@ -9,13 +9,15 @@ import {
 } from '@/services/publicData';
 import type { FacilitiesQuery, SourceCoverage } from '@/shared/public-data';
 import { samePublication } from './selectors';
+import { useMunicipalityId } from '@/features/city/municipality';
 export function usePublicFacilities(
   params: FacilitiesQuery,
   enabled = true,
   scope = 'municipality',
 ) {
+  const municipalityId = useMunicipalityId();
   return useInfiniteQuery({
-    queryKey: ['publicFacilities', '3304557', scope, params],
+    queryKey: ['publicFacilities', municipalityId, scope, params],
     initialPageParam: { page: 1, sources: null as SourceCoverage[] | null },
     queryFn: async ({ pageParam, signal }) => {
       const result = await fetchPublicFacilities(
@@ -41,38 +43,49 @@ export function usePublicFacilities(
     staleTime: 60000,
   });
 }
-export const usePublicFacility = (id?: string) =>
-  useQuery({
-    queryKey: ['publicFacility', '3304557', id],
-    queryFn: () => fetchPublicFacility(id!),
+export function usePublicFacility(id?: string) {
+  const municipalityId = useMunicipalityId();
+  return useQuery({
+    queryKey: ['publicFacility', municipalityId, id],
+    queryFn: ({ signal }) => fetchPublicFacility(id as string, signal),
     enabled: Boolean(id),
   });
-export const useNeighborhoods = () =>
-  useQuery({
-    queryKey: ['neighborhoods', '3304557'],
-    queryFn: fetchNeighborhoods,
+}
+export function useNeighborhoods() {
+  const municipalityId = useMunicipalityId();
+  return useQuery({
+    queryKey: ['neighborhoods', municipalityId],
+    queryFn: ({ signal }) => fetchNeighborhoods(signal),
     staleTime: 300000,
   });
-export const useNeighborhoodBoundary = (id?: string) =>
-  useQuery({
-    queryKey: ['neighborhoodBoundary', '3304557', id],
-    queryFn: () => fetchNeighborhoodBoundary(id!),
+}
+export function useNeighborhoodBoundary(id?: string) {
+  const municipalityId = useMunicipalityId();
+  return useQuery({
+    queryKey: ['neighborhoodBoundary', municipalityId, id],
+    queryFn: ({ signal }) => fetchNeighborhoodBoundary(id as string, signal),
     enabled: Boolean(id),
     staleTime: 300000,
   });
-export const usePublicSources = (enabled = true) =>
-  useQuery({
-    queryKey: ['publicSources', '3304557'],
-    queryFn: fetchPublicSources,
+}
+export function usePublicSources(enabled = true) {
+  const municipalityId = useMunicipalityId();
+  return useQuery({
+    queryKey: ['publicSources', municipalityId],
+    queryFn: ({ signal }) => fetchPublicSources(signal),
     enabled,
     staleTime: 60000,
   });
-export const useNeighborhoodOverview = (
+}
+export function useNeighborhoodOverview(
   id: string | undefined,
   dates: { startDate: string; endDate: string },
-) =>
-  useQuery({
-    queryKey: ['neighborhoodOverview', '3304557', id, dates],
-    queryFn: () => fetchNeighborhoodOverview(id!, dates),
+) {
+  const municipalityId = useMunicipalityId();
+  return useQuery({
+    queryKey: ['neighborhoodOverview', municipalityId, id, dates],
+    queryFn: ({ signal }) =>
+      fetchNeighborhoodOverview(id as string, dates, signal),
     enabled: Boolean(id),
   });
+}

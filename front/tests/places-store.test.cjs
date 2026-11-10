@@ -16,6 +16,7 @@ function load(storage) {
       if (name === 'zustand') return require('zustand');
       if (name === 'react' || name === '@/features/territory/usePublicData' || name === '@/features/territory/selectors') return {};
       if (name.startsWith('.')) return read(path.resolve(path.dirname(file), name + '.ts'));
+      if (name === '@/features/city/municipalityId') return require(name);
       throw new Error(name);
     }, mod, mod.exports);
     return mod.exports;
@@ -113,4 +114,20 @@ test('the device fix survives place selection and pending writes, but never rest
   assert.equal(restarted.getState().deviceLocation, null);
   await store.getState().setScope('b', '3304557');
   assert.equal(store.getState().deviceLocation, null);
+});
+test('a write issued before hydration finishes does not erase saved places', async () => {
+  const values = new Map(); let releaseRead;
+  const saved = { name: 'Casa', addressLabel: '', latitude: -22.9, longitude: -43.2, radiusMeters: 1000, neighborhood: null };
+  values.set('fiscaliza-ai:places:anonymous:3304557:v1', JSON.stringify({ version: 1, places: [{ id: 'p1', ...saved }], currentRadius: 1000, promptSeen: false, selection: { kind: 'municipality' } }));
+  const store = load({
+    getItem: async k => { await new Promise(r => { releaseRead = r; }); return values.get(k) || null; },
+    setItem: async (k, v) => { values.set(k, v); },
+  });
+  const hydrating = store.getState().setScope(null, '3304557');
+  const writing = store.getState().selectNeighborhood('Centro');
+  await new Promise(r => setImmediate(r));
+  releaseRead(); await hydrating; await writing;
+  assert.equal(store.getState().places.length, 1);
+  assert.equal(JSON.parse(values.get('fiscaliza-ai:places:anonymous:3304557:v1')).places.length, 1);
+  assert.equal(store.getState().selection.name, 'Centro');
 });

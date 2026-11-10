@@ -24,20 +24,37 @@ export function fetchPublicFacilities(
   }
   return request(`/public-facilities?${query}`, 'GET', undefined, signal);
 }
-export const fetchPublicFacility = (id: string) =>
-  request<PublicFacility>(`/public-facilities/${encodeURIComponent(id)}`);
-export const fetchNeighborhoods = () =>
-  request<NeighborhoodSummary[]>('/territorial-boundaries');
-export const fetchNeighborhoodBoundary = (id: string) =>
+export const fetchPublicFacility = (id: string, signal?: AbortSignal) =>
+  request<PublicFacility>(
+    `/public-facilities/${encodeURIComponent(id)}`,
+    'GET',
+    undefined,
+    signal,
+  );
+export const fetchNeighborhoods = (signal?: AbortSignal) =>
+  request<NeighborhoodSummary[]>(
+    '/territorial-boundaries',
+    'GET',
+    undefined,
+    signal,
+  );
+export const fetchNeighborhoodBoundary = (id: string, signal?: AbortSignal) =>
   request<NeighborhoodBoundary>(
     `/territorial-boundaries/${encodeURIComponent(id)}`,
+    'GET',
+    undefined,
+    signal,
   );
-export const fetchPublicSources = () =>
-  request<PublicSource[]>('/data-sources');
+export const fetchPublicSources = (signal?: AbortSignal) =>
+  request<PublicSource[]>('/data-sources', 'GET', undefined, signal);
 export const fetchNeighborhoodOverview = (
   id: string,
   dates: { startDate: string; endDate: string },
+  signal?: AbortSignal,
 ) =>
   request<NeighborhoodOverview>(
     `/neighborhoods/${encodeURIComponent(id)}/overview?${new URLSearchParams(dates)}`,
+    'GET',
+    undefined,
+    signal,
   );
