@@ -1,22 +1,19 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, StyleSheet, Pressable, Linking, Share } from 'react-native';
+import { View, StyleSheet, Pressable, Linking, Share, TextInput } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { AppText } from '@/components/ui/AppText';
-import { AppInput } from '@/components/ui/AppInput';
 import { AppButton } from '@/components/ui/AppButton';
 import { spacing, layout } from '@/theme';
+import {
+  COMPLAINT_TOPICS,
+  ComplaintTopicSheet,
+  type ComplaintTopic,
+} from './ComplaintTopicSheet';
 
-export const COMPLAINT_TOPICS = [
-  { id: 'buraco', label: 'Buraco na rua', icon: 'car-outline' },
-  { id: 'iluminacao', label: 'Luz apagada / Poste', icon: 'bulb-outline' },
-  { id: 'lixo', label: 'Lixo / Entulho', icon: 'trash-outline' },
-  { id: 'bueiro', label: 'Bueiro / Esgoto', icon: 'water-outline' },
-  { id: 'arvore', label: 'Poda de árvore', icon: 'leaf-outline' },
-  { id: 'semaforo', label: 'Semáforo apagado', icon: 'navigate-outline' },
-];
+export { COMPLAINT_TOPICS, type ComplaintTopic };
 
 export interface QuickComplaintKitProps {
   defaultLocation?: string;
@@ -29,8 +26,9 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
   const [selectedTopic, setSelectedTopic] = useState<string>('buraco');
   const [address, setAddress] = useState(defaultLocation);
   const [description, setDescription] = useState('');
-  const [detailsHeight, setDetailsHeight] = useState(80);
+  const [detailsHeight, setDetailsHeight] = useState(60);
   const [showPreview, setShowPreview] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
 
   // Sincroniza se defaultLocation chegar de forma assíncrona
@@ -43,14 +41,16 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
   // Reseta altura mínima se o texto for limpo
   useEffect(() => {
     if (!description) {
-      setDetailsHeight(80);
+      setDetailsHeight(60);
     }
   }, [description]);
 
-  const topicLabel = useMemo(
-    () => COMPLAINT_TOPICS.find((t) => t.id === selectedTopic)?.label || 'Demanda urbana',
+  const currentTopic = useMemo(
+    () => COMPLAINT_TOPICS.find((t) => t.id === selectedTopic) || COMPLAINT_TOPICS[0],
     [selectedTopic],
   );
+
+  const topicLabel = currentTopic.label;
 
   const formattedMessage = useMemo(() => {
     const loc = address.trim() || 'Rio de Janeiro (endereço a especificar)';
@@ -100,129 +100,151 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
   };
 
   return (
-    <View style={styles.card} accessibilityLabel="Assistente de solicitação rápida 1746">
-      {/* Cabeçalho do Assistente */}
-      <View style={styles.cardHeader}>
-        <View style={styles.badgeRow}>
-          <Ionicons name="flash" size={13} color={colors.accent} />
-          <AppText variant="caption" style={styles.badgeText}>
-            ASSISTENTE RÁPIDO 1746
-          </AppText>
-        </View>
+    <View style={styles.container} accessibilityLabel="Assistente de solicitação rápida 1746">
+      {/* Cabeçalho de Seção Cívico */}
+      <View style={styles.sectionHeaderRow}>
+        <Ionicons name="flash" size={13} color={colors.accent} />
+        <AppText variant="caption" style={styles.sectionHeaderText}>
+          ASSISTENTE RÁPIDO · CENTRAL 1746
+        </AppText>
+      </View>
+
+      <View style={styles.titleBlock}>
         <AppText variant="sectionTitle" style={styles.title}>
           Monte sua solicitação oficial
         </AppText>
         <AppText variant="caption" color="muted" style={styles.subtitle}>
-          Organize o chamado e envie em segundos diretamente para o WhatsApp oficial da Central 1746 da Prefeitura.
+          Organize o chamado e envie em segundos diretamente para o WhatsApp oficial da Prefeitura.
         </AppText>
       </View>
 
-      {/* 1. Escolha do Problema Urbano */}
-      <View style={styles.fieldBlock}>
-        <View style={styles.fieldLabelRow}>
-          <Ionicons name="construct-outline" size={13} color={colors.muted} />
-          <AppText variant="caption" color="muted" style={styles.fieldLabel}>
-            1. O que precisa de reparo?
-          </AppText>
-        </View>
-        <View style={styles.topicsGrid}>
-          {COMPLAINT_TOPICS.map((topic) => {
-            const isSelected = selectedTopic === topic.id;
-            return (
-              <Pressable
-                key={topic.id}
-                accessibilityRole="button"
-                accessibilityLabel={topic.label}
-                accessibilityState={{ selected: isSelected }}
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setSelectedTopic(topic.id);
-                }}
-                style={({ pressed }) => [
-                  styles.topicChip,
-                  isSelected && styles.topicChipSelected,
-                  pressed && { opacity: 0.8 },
-                ]}
-              >
-                <Ionicons
-                  name={topic.icon as React.ComponentProps<typeof Ionicons>['name']}
-                  size={14}
-                  color={isSelected ? colors.onAccentBrand : colors.ink}
-                />
-                <AppText
-                  variant="caption"
-                  numberOfLines={1}
-                  style={[
-                    styles.topicChipText,
-                    isSelected && styles.topicChipTextSelected,
+      {/* Formulário Apple Inset-Grouped Table */}
+      <View
+        style={[
+          styles.insetTable,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+        ]}
+      >
+        {/* Linha 1: Seletor com Bottom Sheet ("O que precisa de reparo?") */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`O que precisa de reparo: ${topicLabel}. Toque para alterar`}
+          onPress={() => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setSheetOpen(true);
+          }}
+          style={({ pressed }) => [
+            styles.tableRow,
+            pressed && { backgroundColor: colors.surfaceSubdued },
+          ]}
+        >
+          <View style={[styles.iconSquircle, { backgroundColor: colors.surfaceSubdued }]}>
+            <Ionicons name={currentTopic.icon} size={18} color={colors.primary} />
+          </View>
+          <View style={styles.tableRowContent}>
+            <AppText variant="caption" color="muted">
+              O que precisa de reparo?
+            </AppText>
+            <AppText variant="label" style={styles.rowValueText}>
+              {currentTopic.label}
+            </AppText>
+          </View>
+          <View style={styles.rowActionRight}>
+            <AppText variant="caption" color="muted" style={styles.changeActionText}>
+              Alterar
+            </AppText>
+            <Ionicons name="chevron-forward" size={15} color={colors.subtle} />
+          </View>
+        </Pressable>
+
+        <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
+
+        {/* Linha 2: Endereço e Localização ("Onde é o problema?") */}
+        <View style={styles.tableInputRow}>
+          <View style={[styles.iconSquircle, { backgroundColor: colors.surfaceSubdued }]}>
+            <Ionicons name="location-outline" size={18} color={colors.primary} />
+          </View>
+          <View style={styles.tableInputContent}>
+            <View style={styles.inputHeaderRow}>
+              <AppText variant="caption" color="muted">
+                Onde é o problema?
+              </AppText>
+              {defaultLocation && address !== defaultLocation && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Usar local sugerido: ${defaultLocation}`}
+                  onPress={handleApplyDefaultLocation}
+                  style={({ pressed }) => [
+                    styles.suggestedLocationPill,
+                    pressed && { opacity: 0.75 },
                   ]}
                 >
-                  {topic.label}
-                </AppText>
-              </Pressable>
-            );
-          })}
+                  <Ionicons name="navigate-outline" size={11} color={colors.primary} />
+                  <AppText variant="caption" style={styles.suggestedLocationText} numberOfLines={1}>
+                    Usar {defaultLocation}
+                  </AppText>
+                </Pressable>
+              )}
+            </View>
+            <TextInput
+              placeholder="Rua, número aproximado ou esquina"
+              placeholderTextColor={colors.muted}
+              value={address}
+              onChangeText={setAddress}
+              returnKeyType="next"
+              style={[styles.framelessInput, { color: colors.ink }]}
+            />
+          </View>
         </View>
-      </View>
 
-      {/* 2. Endereço e Referência */}
-      <View style={styles.fieldBlock}>
-        <View style={styles.fieldLabelRow}>
-          <Ionicons name="location-outline" size={13} color={colors.muted} />
-          <AppText variant="caption" color="muted" style={styles.fieldLabel}>
-            2. Onde é o problema?
-          </AppText>
-        </View>
+        <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
 
-        {defaultLocation && address !== defaultLocation && (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Usar local sugerido: ${defaultLocation}`}
-            onPress={handleApplyDefaultLocation}
-            style={({ pressed }) => [
-              styles.suggestedLocationPill,
-              pressed && { opacity: 0.75 },
-            ]}
-          >
-            <Ionicons name="navigate-outline" size={12} color={colors.primary} />
-            <AppText variant="caption" style={styles.suggestedLocationText} numberOfLines={1}>
-              Usar bairro ativo: {defaultLocation}
+        {/* Linha 3: Detalhes Adicionais (Textarea auto-expansível) */}
+        <View style={styles.tableInputRow}>
+          <View style={[styles.iconSquircle, { backgroundColor: colors.surfaceSubdued }]}>
+            <Ionicons name="document-text-outline" size={18} color={colors.primary} />
+          </View>
+          <View style={styles.tableInputContent}>
+            <AppText variant="caption" color="muted">
+              Detalhes úteis (opcional)
             </AppText>
-          </Pressable>
-        )}
-
-        <AppInput
-          placeholder="Ex: Rua Barata Ribeiro, próximo ao nº 150 - Copacabana"
-          value={address}
-          onChangeText={setAddress}
-          returnKeyType="next"
-          containerStyle={{ marginBottom: 0 }}
-        />
+            <TextInput
+              placeholder="Ex: Próximo à padaria, faixa da direita, galhos caídos"
+              placeholderTextColor={colors.muted}
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              onContentSizeChange={(e) => {
+                const h = e.nativeEvent?.contentSize?.height;
+                if (h && typeof h === 'number' && h > 0) {
+                  setDetailsHeight(Math.max(60, Math.min(180, Math.ceil(h + 8))));
+                }
+              }}
+              style={[
+                styles.detailsTextarea,
+                { height: detailsHeight, color: colors.ink, borderRadius: 12 },
+              ]}
+            />
+          </View>
+        </View>
       </View>
 
-      {/* 3. Detalhes Adicionais (Textarea auto-expansível com cantos suaves) */}
-      <View style={styles.fieldBlock}>
-        <View style={styles.fieldLabelRow}>
-          <Ionicons name="document-text-outline" size={13} color={colors.muted} />
-          <AppText variant="caption" color="muted" style={styles.fieldLabel}>
-            3. Detalhes úteis (opcional)
+      {/* Dica Cívica: Fotos e Evidências no WhatsApp */}
+      <View
+        style={[
+          styles.photoTipBanner,
+          { backgroundColor: colors.surfaceSubdued, borderColor: colors.divider },
+        ]}
+      >
+        <Ionicons name="camera-outline" size={18} color={colors.primary} />
+        <View style={styles.photoTipTextCol}>
+          <AppText variant="caption" style={styles.photoTipTitle}>
+            Fotos e evidências no WhatsApp
+          </AppText>
+          <AppText variant="caption" color="muted" style={styles.photoTipBody}>
+            Ao abrir a conversa com o 1746, o assistente oficial solicitará fotos do local. Você poderá tirá-las ou anexá-las diretamente no chat.
           </AppText>
         </View>
-        <AppInput
-          placeholder="Ex: Buraco profundo na faixa da direita / Luz piscando à noite / Galhos caídos bloqueando a calçada"
-          value={description}
-          onChangeText={setDescription}
-          multiline
-          numberOfLines={3}
-          onContentSizeChange={(e) => {
-            const h = e.nativeEvent?.contentSize?.height;
-            if (h && typeof h === 'number' && h > 0) {
-              setDetailsHeight(Math.max(80, Math.min(180, Math.ceil(h + 24))));
-            }
-          }}
-          containerStyle={{ marginBottom: 0 }}
-          style={[styles.detailsTextarea, { height: detailsHeight }]}
-        />
       </View>
 
       {/* Progressive Disclosure: Prévia da Mensagem */}
@@ -246,7 +268,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
       </Pressable>
 
       {showPreview && (
-        <View style={styles.previewBox}>
+        <View style={[styles.previewBox, { backgroundColor: colors.surfaceSubdued, borderColor: colors.border }]}>
           <View style={styles.previewHeader}>
             <Ionicons name="chatbubble-ellipses-outline" size={13} color={colors.muted} />
             <AppText variant="caption" color="muted" style={{ fontWeight: '600' }}>
@@ -288,38 +310,38 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
           onPress={handleShare}
         />
       </View>
+
+      {/* Bottom Sheet para Seleção de Tópico */}
+      <ComplaintTopicSheet
+        visible={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        selectedTopicId={selectedTopic}
+        onSelectTopic={setSelectedTopic}
+      />
     </View>
   );
 }
 
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
-    card: {
-      backgroundColor: colors.surface,
-      borderRadius: layout.radius.panel,
-      padding: spacing.md,
+    container: {
       gap: spacing.md,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      elevation: 2,
     },
-    cardHeader: {
-      gap: 3,
-    },
-    badgeRow: {
+    sectionHeaderRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 4,
+      gap: 5,
+      paddingHorizontal: spacing.xs,
     },
-    badgeText: {
-      color: colors.accent,
-      fontWeight: '800',
+    sectionHeaderText: {
+      color: colors.muted,
+      fontWeight: '700',
       fontSize: 11,
       letterSpacing: 0.5,
+    },
+    titleBlock: {
+      gap: 3,
+      paddingHorizontal: spacing.xs,
     },
     title: {
       fontSize: 18,
@@ -330,78 +352,123 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: 13,
       lineHeight: 18,
     },
-    fieldBlock: {
-      gap: 6,
+    insetTable: {
+      borderRadius: layout.radius.panel,
+      borderWidth: StyleSheet.hairlineWidth,
+      overflow: 'hidden',
     },
-    fieldLabelRow: {
+    tableRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 5,
+      paddingVertical: 12,
+      paddingHorizontal: spacing.md,
+      gap: spacing.md,
+      minHeight: 56,
     },
-    fieldLabel: {
-      fontWeight: '700',
-      fontSize: 12,
-    },
-    topicsGrid: {
+    tableInputRow: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 6,
+      alignItems: 'flex-start',
+      paddingVertical: 10,
+      paddingHorizontal: spacing.md,
+      gap: spacing.md,
+      minHeight: 56,
     },
-    topicChip: {
-      flexDirection: 'row',
+    tableDivider: {
+      height: StyleSheet.hairlineWidth,
+      marginLeft: 56,
+    },
+    iconSquircle: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
       alignItems: 'center',
-      gap: 6,
-      paddingVertical: 7,
-      paddingHorizontal: 11,
-      borderRadius: layout.radius.pill,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surfaceSubdued,
+      justifyContent: 'center',
+      marginTop: 2,
     },
-    topicChipSelected: {
-      backgroundColor: colors.ink,
-      borderColor: colors.ink,
+    tableRowContent: {
+      flex: 1,
+      gap: 2,
     },
-    topicChipText: {
-      fontSize: 12,
+    tableInputContent: {
+      flex: 1,
+      gap: 4,
+    },
+    rowValueText: {
+      fontSize: 15,
       fontWeight: '600',
-      color: colors.ink,
     },
-    topicChipTextSelected: {
-      color: colors.surface,
-      fontWeight: '700',
+    rowActionRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    changeActionText: {
+      fontWeight: '600',
+    },
+    inputHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
     },
     suggestedLocationPill: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 5,
-      alignSelf: 'flex-start',
+      gap: 4,
       backgroundColor: colors.primaryContainer,
-      paddingVertical: 4,
-      paddingHorizontal: 9,
+      paddingVertical: 2,
+      paddingHorizontal: 8,
       borderRadius: layout.radius.pill,
-      marginBottom: 2,
     },
     suggestedLocationText: {
       color: colors.primary,
       fontSize: 11,
       fontWeight: '700',
+      maxWidth: 160,
     },
-    detailsTextarea: {
-      borderRadius: 12,
-      paddingHorizontal: 14,
-      paddingTop: 12,
-      paddingBottom: 12,
-      textAlignVertical: 'top',
+    framelessInput: {
       fontSize: 14,
       lineHeight: 20,
+      paddingVertical: 4,
+      paddingHorizontal: 0,
+      minHeight: 32,
+    },
+    detailsTextarea: {
+      fontSize: 14,
+      lineHeight: 20,
+      paddingVertical: 6,
+      paddingHorizontal: 10,
+      backgroundColor: colors.surfaceSubdued,
+      textAlignVertical: 'top',
+      marginTop: 2,
+    },
+    photoTipBanner: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: spacing.sm,
+      padding: spacing.md,
+      borderRadius: layout.radius.panel,
+      borderWidth: StyleSheet.hairlineWidth,
+    },
+    photoTipTextCol: {
+      flex: 1,
+      gap: 2,
+    },
+    photoTipTitle: {
+      fontWeight: '700',
+      fontSize: 12,
+      color: colors.ink,
+    },
+    photoTipBody: {
+      fontSize: 12,
+      lineHeight: 17,
     },
     previewToggle: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
       gap: 6,
-      paddingVertical: 6,
+      paddingVertical: 4,
     },
     previewToggleText: {
       color: colors.primary,
@@ -409,12 +476,10 @@ const createStyles = (colors: ThemeColors) =>
       fontWeight: '700',
     },
     previewBox: {
-      backgroundColor: colors.surfaceSubdued,
       borderRadius: layout.radius.sm,
       padding: spacing.sm,
       gap: spacing.xs,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
     },
     previewHeader: {
       flexDirection: 'row',

@@ -5,13 +5,19 @@ const path = require('node:path');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 
-test('quick complaint kit: incorporates progressive disclosure, smart location pill, auto-growing textarea and topics grid', () => {
+test('quick complaint kit: incorporates bottom sheet topic selector, inset table, smart location pill and photo guidance', () => {
   const kitPath = path.join(ROOT_DIR, 'features', 'city', 'QuickComplaintKit.tsx');
   assert.ok(fs.existsSync(kitPath), 'QuickComplaintKit.tsx must exist');
+
+  const sheetPath = path.join(ROOT_DIR, 'features', 'city', 'ComplaintTopicSheet.tsx');
+  assert.ok(fs.existsSync(sheetPath), 'ComplaintTopicSheet.tsx must exist');
 
   const content = fs.readFileSync(kitPath, 'utf8');
   assert.ok(content.includes('export function QuickComplaintKit'), 'Must export QuickComplaintKit');
   assert.ok(content.includes('COMPLAINT_TOPICS'), 'Must define COMPLAINT_TOPICS');
+  assert.ok(content.includes('ComplaintTopicSheet'), 'Must integrate ComplaintTopicSheet bottom sheet');
+  assert.ok(content.includes('insetTable'), 'Must adopt Apple Inset-Grouped table layout');
+  assert.ok(content.includes('photoTipBanner'), 'Must provide clear photo tip banner for WhatsApp guidance');
   assert.ok(content.includes('wa.me/552134601746'), 'Must retain official 1746 WhatsApp endpoint');
   assert.ok(content.includes('Share.share'), 'Must retain Share.share action');
   assert.ok(content.includes('defaultLocation'), 'Must support defaultLocation prop');

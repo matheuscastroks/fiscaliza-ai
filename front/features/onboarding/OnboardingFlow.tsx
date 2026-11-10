@@ -87,7 +87,7 @@ const slides: OnboardingSlide[] = [
     badgeIcon: 'flash-outline',
     title: 'Cobre melhorias com 1 toque',
     description:
-      'Encontrou um problema na sua rua? Gere mensagens estruturadas para o WhatsApp do 1746 com fotos, endereço e detalhes prontos.',
+      'Encontrou um problema na sua rua? Gere mensagens estruturadas para o WhatsApp do 1746 com endereço e detalhes prontos, podendo anexar fotos no chat.',
     image: require('@/assets/images/onboarding-action.jpg'),
     imageAlt: 'Cidadãos cariocas em movimento em espaço público no Rio de Janeiro',
     benefits: [

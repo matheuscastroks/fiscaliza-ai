@@ -38,7 +38,7 @@ const OFFICIAL_CHANNELS: ChannelItem[] = [
   {
     id: 'whatsapp',
     title: 'WhatsApp Oficial da Prefeitura',
-    subtitle: '(21) 3460-1746 · Assistente oficial com envio de fotos',
+    subtitle: '(21) 3460-1746 · Canal oficial com envio de fotos no chat',
     icon: 'logo-whatsapp',
     url: OFFICIAL_WHATSAPP_URL,
   },
