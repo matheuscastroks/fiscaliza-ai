@@ -6,6 +6,8 @@ import { View, ScrollView } from 'react-native';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
+import { InsetGroup, ListRow } from '@/components/ui/ListRow';
+import { router } from 'expo-router';
 export default function HelpScreen() {
   const cityStyles = useThemedStyles(createCityStyles);
 
@@ -17,6 +19,14 @@ export default function HelpScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ gap: 20 }}>
+          <InsetGroup>
+            <ListRow
+              icon="book-outline"
+              title="Rever a apresentação"
+              subtitle="Como o Fiscaliza aí funciona, em duas telas"
+              onPress={() => router.push('/OnboardingScreen')}
+            />
+          </InsetGroup>
           <AppText variant="sectionTitle">Escolher meu bairro</AppText>
           <AppText>
             Em Preferências, escolha um bairro de referência para abrir direto no

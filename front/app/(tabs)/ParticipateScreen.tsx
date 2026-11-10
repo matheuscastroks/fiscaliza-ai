@@ -1,18 +1,30 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+
+import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+
 import { router } from 'expo-router';
+
 import * as Haptics from 'expo-haptics';
+
 import { AppScreen } from '@/components/ui/AppScreen';
+
 import { AppHeader } from '@/components/ui/AppHeader';
+
 import { AppText } from '@/components/ui/AppText';
-import { AppButton } from '@/components/ui/AppButton';
+
 import { AppToast } from '@/components/ui/AppToast';
+
 import { InsetGroup, ListRow } from '@/components/ui/ListRow';
+
 import { openExternal } from '@/services/openExternal';
+
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
+
 import { QuickComplaintKit } from '@/features/city/QuickComplaintKit';
+
 import { usePlacesStore } from '@/stores/placesStore';
+
 import {
   OFFICIAL_PORTAL,
   OFFICIAL_REQUESTS_URL,
@@ -20,10 +32,11 @@ import {
   OFFICIAL_PHONE_URL,
   OFFICIAL_SERVICES,
 } from '@/features/city/OfficialChannel';
+
 import { useTheme, spacing, layout } from '@/theme';
-import { partnerBrand } from '@/theme/palette';
+
 import { fontSizes } from '@/theme/typography';
-import { IconTile } from '@/components/ui/IconTile';
+
 
 interface ChannelItem {
   id: string;
@@ -117,52 +130,17 @@ export default function ParticipateScreen() {
             </AppText>
           </View>
 
-          <View
-            style={[
-              styles.insetTable,
-              { backgroundColor: colors.surface, borderColor: colors.border },
-            ]}
-          >
-            {OFFICIAL_CHANNELS.map((channel, idx) => {
-              const isWhatsApp = channel.id === 'whatsapp';
-              return (
-                <React.Fragment key={channel.id}>
-                  {idx > 0 && (
-                    <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
-                  )}
-                  <Pressable
-                    accessibilityRole="link"
-                    accessibilityLabel={`${channel.title} - ${channel.subtitle}`}
-                    onPress={() => handleOpenLink(channel.url)}
-                    style={({ pressed }) => [
-                      styles.tableRow,
-                      pressed && { backgroundColor: colors.surfaceSubdued },
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.iconSquircle,
-                        { backgroundColor: isWhatsApp ? partnerBrand.whatsappSurface : colors.surfaceSubdued },
-                      ]}
-                    >
-                      <Ionicons
-                        name={channel.icon}
-                        size={layout.iconSize.md}
-                        color={isWhatsApp ? partnerBrand.whatsapp : colors.primary}
-                      />
-                    </View>
-                    <View style={styles.tableRowContent}>
-                      <AppText variant="label">{channel.title}</AppText>
-                      <AppText variant="caption" color="muted">
-                        {channel.subtitle}
-                      </AppText>
-                    </View>
-                    <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
-                  </Pressable>
-                </React.Fragment>
-              );
-            })}
-          </View>
+          <InsetGroup>
+            {OFFICIAL_CHANNELS.map((channel) => (
+              <ListRow
+                key={channel.id}
+                icon={channel.icon}
+                title={channel.title}
+                subtitle={channel.subtitle}
+                onPress={() => handleOpenLink(channel.url)}
+              />
+            ))}
+          </InsetGroup>
         </View>
 
         {/* 3) Montador de mensagem, recolhido (revelação progressiva) */}
@@ -189,110 +167,17 @@ export default function ParticipateScreen() {
             </AppText>
           </View>
 
-          <View
-            style={[
-              styles.insetTable,
-              { backgroundColor: colors.surface, borderColor: colors.border },
-            ]}
-          >
-            {OFFICIAL_SERVICES.map((service, idx) => (
-              <React.Fragment key={service.url}>
-                {idx > 0 && (
-                  <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
-                )}
-                <Pressable
-                  accessibilityRole="link"
-                  accessibilityLabel={`${service.title} - ${service.agency}`}
-                  onPress={() => handleOpenLink(service.url)}
-                  style={({ pressed }) => [
-                    styles.tableRow,
-                    pressed && { backgroundColor: colors.surfaceSubdued },
-                  ]}
-                >
-                  <IconTile icon={service.icon} />
-                  <View style={styles.tableRowContent}>
-                    <View style={styles.serviceTitleRow}>
-                      <AppText variant="label" numberOfLines={1}>
-                        {service.title}
-                      </AppText>
-                      <View
-                        style={[
-                          styles.agencyBadge,
-                          { backgroundColor: colors.surfaceSubdued },
-                        ]}
-                      >
-                        <AppText variant="caption" style={styles.agencyBadgeText}>
-                          {service.agency}
-                        </AppText>
-                      </View>
-                    </View>
-                    <AppText variant="caption" color="muted" numberOfLines={1}>
-                      {service.description}
-                    </AppText>
-                  </View>
-                  <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
-                </Pressable>
-              </React.Fragment>
+          <InsetGroup>
+            {OFFICIAL_SERVICES.map((service) => (
+              <ListRow
+                key={service.url}
+                icon={service.icon}
+                title={service.title}
+                subtitle={`${service.agency} · ${service.description}`}
+                onPress={() => handleOpenLink(service.url)}
+              />
             ))}
-          </View>
-        </View>
-
-        {/* Bloco 4: Orientação Cívica: Conferir Chamados no Mapa */}
-        <View
-          style={[
-            styles.civicTipCard,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
-        >
-          <View style={styles.civicTipHeader}>
-            <View
-              style={[
-                styles.tipIconSquircle,
-                { backgroundColor: colors.primaryContainer },
-              ]}
-            >
-              <Ionicons name="map-outline" size={layout.iconSize.md} color={colors.primary} />
-            </View>
-            <View style={styles.civicTipTextCol}>
-              <AppText variant="label">Verifique o mapa antes de abrir chamado</AppText>
-              <AppText variant="caption" color="muted">
-                Se alguém já protocolou o mesmo problema na sua rua, você pode acompanhar o chamado existente e evitar duplicidade.
-              </AppText>
-            </View>
-          </View>
-          <AppButton
-            title="Conferir chamados no mapa"
-            variant="secondary"
-            icon={<Ionicons name="map" size={layout.iconSize.sm} color={colors.ink} />}
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/(tabs)/TerritoryScreen');
-            }}
-          />
-        </View>
-
-        {/* Bloco 5: Rodapé de Busca Geral e Transparência */}
-        <View style={styles.footerBlock}>
-          <Pressable
-            accessibilityRole="link"
-            accessibilityLabel="Buscar todos os serviços no portal 1746"
-            onPress={() => handleOpenLink(OFFICIAL_PORTAL)}
-            style={({ pressed }) => [
-              styles.footerPortalButton,
-              { borderColor: colors.border, backgroundColor: colors.surface },
-              pressed && { backgroundColor: colors.surfaceSubdued },
-            ]}
-          >
-            <Ionicons name="search-outline" size={layout.iconSize.sm} color={colors.ink} />
-            <AppText variant="label" style={styles.footerPortalText}>
-              Buscar outros serviços no 1746.rio
-            </AppText>
-            <Ionicons name="open-outline" size={layout.iconSize.sm} color={colors.muted} />
-          </Pressable>
-
-          <AppText variant="caption" color="muted" style={styles.disclaimerText}>
-            O Fiscaliza aí é uma ferramenta cívica e independente. O registro oficial, a execução dos serviços e os prazos são de responsabilidade exclusiva dos órgãos da Prefeitura da Cidade do Rio de Janeiro.
-          </AppText>
+          </InsetGroup>
         </View>
       </KeyboardAwareScrollView>
       <AppToast message={linkError} type="error" onDismiss={() => setLinkError(null)} />
@@ -313,93 +198,5 @@ const styles = StyleSheet.create({
   sectionHeaderText: {
     fontSize: fontSizes.meta,
     fontWeight: '500',
-  },
-  insetTable: {
-    borderRadius: layout.radius.panel,
-    borderWidth: StyleSheet.hairlineWidth,
-    overflow: 'hidden',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    minHeight: 56,
-  },
-  tableDivider: {
-    height: StyleSheet.hairlineWidth,
-    marginLeft: 54,
-  },
-  iconSquircle: {
-    width: 34,
-    height: 34,
-    borderRadius: layout.radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tableRowContent: {
-    flex: 1,
-    gap: 2,
-  },
-  serviceTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    flexWrap: 'wrap',
-  },
-  agencyBadge: {
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-    borderRadius: layout.radius.pill,
-  },
-  agencyBadgeText: {
-    fontSize: fontSizes.caption,
-    fontWeight: '600',
-  },
-  civicTipCard: {
-    borderRadius: layout.radius.panel,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: spacing.md,
-    gap: spacing.md,
-  },
-  civicTipHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  tipIconSquircle: {
-    width: 36,
-    height: 36,
-    borderRadius: layout.radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  civicTipTextCol: {
-    flex: 1,
-    gap: 3,
-  },
-  footerBlock: {
-    gap: spacing.sm,
-    paddingTop: 4,
-  },
-  footerPortalButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: layout.radius.pill,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  footerPortalText: {
-    fontSize: fontSizes.meta,
-    fontWeight: '600',
-  },
-  disclaimerText: {
-    textAlign: 'center',
-    lineHeight: 17,
-    paddingHorizontal: 12,
   },
 });

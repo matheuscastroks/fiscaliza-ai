@@ -299,49 +299,6 @@ export default function SettingsScreen() {
             />
           </InsetGroup>
         </View>
-
-        {/* Seção 4: Acessibilidade do Sistema */}
-        <View style={styles.sectionBlock}>
-          <View style={styles.sectionHeaderRow}>
-            <Ionicons name="accessibility-outline" size={layout.iconSize.sm} color={colors.muted} />
-            <AppText variant="caption" style={styles.sectionHeaderText}>
-              Acessibilidade e sistema
-            </AppText>
-          </View>
-
-          <View
-            style={[
-              styles.insetTable,
-              { backgroundColor: colors.surface, borderColor: colors.divider },
-            ]}
-          >
-            <View style={styles.tableRow}>
-              <IconTile icon="text-outline" />
-              <View style={styles.tableRowContent}>
-                <AppText variant="label">Escala tipográfica</AppText>
-                <AppText variant="caption" color="muted">
-                  O tamanho dos textos acompanha a configuração do seu aparelho
-                </AppText>
-              </View>
-            </View>
-
-            <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
-
-            <View style={styles.tableRow}>
-              <IconTile icon="eye-outline" />
-              <View style={styles.tableRowContent}>
-                <AppText variant="label">Leitores de tela</AppText>
-                <AppText variant="caption" color="muted">
-                  Controles rotulados para suporte a TalkBack e VoiceOver
-                </AppText>
-              </View>
-            </View>
-          </View>
-
-          <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
-            O Fiscaliza aí adere às diretrizes de acessibilidade e alto contraste para todos os cariocas.
-          </AppText>
-        </View>
       </KeyboardAwareScrollView>
 
       <AppToast

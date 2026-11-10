@@ -144,6 +144,8 @@ Este documento é a fonte única dos tokens e componentes. A fonte de verdade do
 - **Chamado:** problema, local, situação publicada, protocolo, datas e prazo, nessa ordem. "Salvar chamado" e "Acessar atendimento oficial" são ações distintas, sem rolagem para a segunda.
 - **Agir:** 1) "Já existe chamado? Veja no mapa"; 2) canais oficiais (telefone, WhatsApp, portal, Meus Protocolos); 3) preparar mensagem para o WhatsApp do 1746, recolhido. O texto deixa claro que quem envia é o morador, pelo canal oficial; o app não registra nem acompanha o envio.
 - **Dados do bairro:** uma tela de aprofundamento; cada gráfico traz a pergunta, a fonte e o período. Sem ranking competitivo; sem número gigante sem pergunta.
+- **Perfil:** identidade, duas métricas (salvos e lugares), domicílio e um menu curto (Preferências, Dados do bairro, Ajuda, Sobre e fontes, Conta e privacidade). Os chamados salvos ficam só na aba Salvos. Decisões raras e destrutivas (sair, apagar conta) ficam em `AccountScreen`, fora do Perfil.
+- **Telas de apoio:** `AccountScreen` (conta e privacidade) e `NeighborhoodVolumeScreen` (bairros por volume, sem numeração de ranking) existem para aliviar Perfil e Dados do bairro; qualquer tela que passe de uma pergunta principal deve ser dividida assim, exceto o mapa.
 
 Teste em cada tela: *onde estou? o que posso fazer aqui? para onde vou depois?* Rótulos de tarefa ("Salvar chamado"), nunca slogans.
 
