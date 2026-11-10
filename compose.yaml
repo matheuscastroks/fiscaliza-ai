@@ -30,6 +30,8 @@ services:
       dockerfile: back/Dockerfile
     image: fiscaliza-ai-api
     command: ['node', 'dist/back/src/migrate.js']
+    healthcheck:
+      disable: true
     restart: 'no'
     logging: *logging
     environment: &database
@@ -83,6 +85,9 @@ services:
     image: fiscaliza-ai-api
     profiles: ['public']
     command: ['node', 'dist/back/src/scheduler-cli.js']
+    # Não escuta porta: sem o healthcheck da imagem da API.
+    healthcheck:
+      disable: true
     init: true
     restart: unless-stopped
     logging: *logging

@@ -87,9 +87,18 @@ Num momento o Docker Desktop reiniciou (códigos 255) e a API e o Postgres do PC
 | Firebase: restringir no Google Cloud a chave Android antiga e não dar push nas refs locais `refs/agents/...` | **pendente, é ação sua** no console do Google Cloud; não toquei nas refs | — |
 | VPS | futuro: `compose.production.yaml` já tem API, agendador, backup e túnel | — |
 
+## Verificação em produção (P) — 10/11/2026
+Modo público aplicado no PC com a sua autorização: backup antes (`backups/daily`), senha do Postgres trocada (`ALTER USER` + `.env.compose`), `API_BIND=127.0.0.1`, `NODE_ENV=production`, `PUBLIC_DOMAIN=fiscalizaai.matheuscastroks.com.br` (estava `localhost`), containers recriados com `compose.public.yaml`. No domínio público:
+- `/api/health` → 200;
+- cadastro → `Set-Cookie: ... HttpOnly; Secure; SameSite=Lax`, `nosniff` e `frame-ancestors 'none'`;
+- CORS: `Origin: null` e `http://localhost:8081` sem `allow-origin`; só o domínio público aceito;
+- conexões no Postgres: 2 antes e 2 depois de 200 chamadas públicas;
+- API publicada só em `127.0.0.1:3001`; `cloudflared`, API, Postgres saudáveis; `scheduler` e `backup` ativos. A conta de teste criada na verificação foi apagada pela própria API.
+Ajuste feito na hora: `scheduler`/`migrate` herdavam o healthcheck da API e ficavam `unhealthy`; healthcheck desligado nesses dois.
+Ainda sem verificar: push real (sem `projectId`), sincronização do BigQuery (sem credencial: `secrets/bigquery.json` está como `{}`), VPS e builds do EAS.
+
 ## O que falta, e é seu
 - `eas init` na sua conta e commit do `projectId` (avisos no celular).
-- Trocar a senha do Postgres, `API_BIND=127.0.0.1` e subir com `compose.public.yaml` (passos em `deploy/README.md`); só isso ativa as correções de produção no PC.
 - Credencial do BigQuery em `secrets/bigquery.json` para o agendador sincronizar; monitores no Healthchecks.io/UptimeRobot; copiar `backups/` para fora do computador.
 - Restringir a chave Firebase antiga; decidir sobre trocar o package `com.anonymous.fiscalizaai`.
 - Testar em dois celulares reais os chamados salvos na conta e os avisos (sem projectId não há como enviar push real).

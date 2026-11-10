@@ -70,6 +70,8 @@ services:
   scheduler:
     image: ${IMAGE_PREFIX}-api:${IMAGE_TAG}
     command: ['node', 'dist/back/src/scheduler-cli.js']
+    healthcheck:
+      disable: true
     init: true
     restart: unless-stopped
     logging: *logging
