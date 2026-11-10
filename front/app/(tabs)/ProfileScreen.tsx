@@ -94,7 +94,7 @@ export default function ProfileScreen() {
         return;
       await useAvatarStore.getState().save(userId, uri);
     } catch {
-      setPhotoError('Não foi possível salvar a foto. Tente novamente.');
+      setPhotoError('Não conseguimos salvar a foto. Tente de novo.');
     } finally {
       setPicking(false);
     }
@@ -162,7 +162,7 @@ export default function ProfileScreen() {
               {user?.name || 'Acesso sem conta'}
             </AppText>
             <AppText variant="caption" color="muted" numberOfLines={1} selectable>
-              {user?.email || 'Seus salvos e lugares ficam guardados neste aparelho.'}
+              {user?.email || 'Seus salvos e lugares ficam guardados neste celular.'}
             </AppText>
             <View
               style={[

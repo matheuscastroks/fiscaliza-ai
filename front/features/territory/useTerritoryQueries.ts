@@ -309,7 +309,7 @@ export function useTerritoryQueries() {
     if (!focusId) return;
     if (focusedCallQuery.isError) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setToastMessage('Não foi possível localizar o chamado da notificação.');
+      setToastMessage('Não conseguimos localizar o chamado da notificação.');
     } else if (focusedCallQuery.data && (focusedCallQuery.data.latitude == null || focusedCallQuery.data.longitude == null)) {
       setToastMessage('Este chamado não possui coordenadas registradas no mapa.');
     }

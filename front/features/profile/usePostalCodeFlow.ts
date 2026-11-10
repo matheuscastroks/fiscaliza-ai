@@ -39,7 +39,7 @@ export function usePostalCodeFlow(initial = '') {
         setError(
           caught instanceof Error
             ? caught.message
-            : 'Não foi possível consultar o CEP. Verifique os dígitos e tente novamente.',
+            : 'Não conseguimos buscar o CEP. Verifique os dígitos e tente de novo.',
         );
     } finally {
       if (current === version.current) setBusy(false);
@@ -59,7 +59,7 @@ export function usePostalCodeFlow(initial = '') {
       setError(
         caught instanceof Error
           ? caught.message
-          : 'Não foi possível confirmar. Sua cidade não foi alterada.',
+          : 'Não conseguimos confirmar. Sua cidade não foi alterada.',
       );
       return false;
     } finally {

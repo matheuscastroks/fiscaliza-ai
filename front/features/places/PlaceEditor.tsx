@@ -46,15 +46,15 @@ export function PlaceEditor({ initialPlace, onDone, onCancel }: { initialPlace?:
       const data = { ...draft, neighborhood: result.neighborhood };
       const ok = initialPlace ? await state.updatePlace(initialPlace.id, data) : await state.createPlace(data);
       if (version !== revision.current) return;
-      if (ok) onDone(); else setError(usePlacesStore.getState().error || 'Não foi possível salvar. Tente novamente.');
-    } catch (e) { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : 'Não foi possível confirmar o local.'); }
+      if (ok) onDone(); else setError(usePlacesStore.getState().error || 'Não conseguimos salvar. Tente de novo.');
+    } catch (e) { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : 'Não conseguimos confirmar o local.'); }
     finally { if (abort.current === controller && !controller.signal.aborted) setBusy(false); }
   };
   return <View style={{ gap: spacing.md }}>
     <AppText variant="sectionTitle">{initialPlace ? 'Editar lugar' : 'Adicionar lugar'}</AppText>
     <AppInput label="Nome do lugar" showLabel placeholder="Casa, Trabalho ou outro nome" value={name} editable={!busy} onChangeText={(text) => { revision.current++; setName(text); }} />
     <AppInput label="Endereço ou referência (opcional)" showLabel value={addressLabel} editable={!busy} onChangeText={(text) => { revision.current++; setAddressLabel(text); }} />
-    <AppText color="muted">Confirme o local no mapa. Digitar o endereço não posiciona o marcador. O endereço e o nome ficam neste aparelho.</AppText>
+    <AppText color="muted">Confirme o local no mapa. Digitar o endereço não posiciona o marcador. O endereço e o nome ficam neste celular.</AppText>
     <AppButton title="Usar minha localização como ponto" variant="secondary" disabled={busy} loading={device.busy} onPress={() => {
       const version = revision.current;
       void device.captureLocation(false).then((result) => { if (result && version === revision.current) changePoint(result); });

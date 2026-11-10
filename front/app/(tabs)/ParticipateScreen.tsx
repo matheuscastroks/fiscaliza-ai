@@ -92,7 +92,7 @@ export default function ParticipateScreen() {
   const handleOpenLink = (url: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     void openExternal(url).then((ok) => {
-      if (!ok) setLinkError('Não foi possível abrir o canal. Tente novamente.');
+      if (!ok) setLinkError('Não conseguimos abrir o canal. Tente de novo.');
     });
   };
 

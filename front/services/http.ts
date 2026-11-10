@@ -164,7 +164,7 @@ export async function uploadImage(uri: string): Promise<string> {
   try {
     const response = await task.uploadAsync();
     if (expired || !response) {
-      throw new Error('O envio da foto foi interrompido. Tente novamente.');
+      throw new Error('O envio da foto foi interrompido. Tente de novo.');
     }
     const result = await readResult<{ url: string }>(
       '/attachments',

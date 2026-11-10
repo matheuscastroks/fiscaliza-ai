@@ -28,5 +28,5 @@ test('settings screen: removes redundancies (places and saved calls) and adopts 
   assert.ok(content.includes('NeighborhoodPicker'), 'Must preserve neighborhood reference picker');
   assert.ok(content.includes('o mapa já abrir nele'), 'Must retain map focus instructions');
   assert.ok(content.includes('useNotificationStore'), 'Must retain notification store binding');
-  assert.ok(content.includes('Testar notificação no aparelho'), 'Must retain push test action');
+  assert.ok(content.includes('Testar notificação no celular'), 'Must retain push test action');
 });

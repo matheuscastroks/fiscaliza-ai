@@ -81,7 +81,7 @@ export function QuickComplaintKit({ defaultLocation = '', inSheet = false }: Qui
       `https://api.whatsapp.com/send?phone=552134601746&text=${text}`,
     );
     setErrorNotice(
-      opened ? null : 'Não foi possível abrir o WhatsApp. Compartilhe o texto ou ligue para o 1746.',
+      opened ? null : 'Não conseguimos abrir o WhatsApp. Compartilhe o texto ou ligue para o 1746.',
     );
   };
 

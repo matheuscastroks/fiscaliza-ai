@@ -185,7 +185,7 @@ export const useFollowStore = create<FollowStore>((set, get) => {
         if (inScope()) {
           set({
             persistenceError:
-              'Não foi possível gravar os chamados salvos na sua conta. Tente novamente.',
+              'Não conseguimos guardar os chamados salvos na sua conta. Tente de novo.',
           });
         }
         return false;

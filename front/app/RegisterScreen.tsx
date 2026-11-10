@@ -94,7 +94,7 @@ export default function RegisterScreen() {
             title={
               validationError
                 ? 'Confira os dados'
-                : 'Não foi possível criar sua conta'
+                : 'Não conseguimos criar sua conta'
             }
             message={validationError || error!}
           />

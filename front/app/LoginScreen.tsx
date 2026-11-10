@@ -73,7 +73,7 @@ export default function LoginScreen() {
           }}
         />
         {error && (
-          <AppErrorMessage title="Não foi possível entrar" message={error} />
+          <AppErrorMessage title="Não conseguimos entrar" message={error} />
         )}
         <View style={styles.actions}>
           <AppButton

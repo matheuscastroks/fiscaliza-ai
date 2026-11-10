@@ -76,7 +76,7 @@ export default function FollowScreen() {
         context={
           user?.name
             ? `Conta de ${user.name.split(' ')[0]} · Seus chamados salvos`
-            : 'Seus chamados salvos neste aparelho'
+            : 'Seus chamados salvos neste celular'
         }
       />
       <FlatList
@@ -176,7 +176,7 @@ export default function FollowScreen() {
               }
               description={
                 savedCalls.length
-                  ? 'Altere o filtro acima para Todos e veja os outros registros salvos neste aparelho.'
+                  ? 'Altere o filtro acima para Todos e veja os outros registros salvos neste celular.'
                   : 'Ao explorar o mapa ou os filtros da cidade, toque em Salvar num chamado para voltar a ele depois e ver como anda.'
               }
               action={{

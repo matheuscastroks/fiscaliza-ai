@@ -105,7 +105,7 @@ export function OfficialChannel({
       {failed && (
         <>
           <AppText color="risk" accessibilityRole="alert">
-            Não foi possível abrir o atendimento. Tente novamente ou copie o
+            Não conseguimos abrir o atendimento. Tente de novo ou copie o
             endereço abaixo.
           </AppText>
           <AppText selectable variant="caption">

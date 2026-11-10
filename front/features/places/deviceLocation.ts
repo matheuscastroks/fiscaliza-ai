@@ -14,15 +14,15 @@ export async function captureDeviceLocation(device: Device, signal: AbortSignal,
       (async () => {
         if (!await device.hasServicesEnabledAsync()) throw Error('A localização do celular está desligada. Escolha um bairro ou ligue o GPS.');
         canceled();
-        if (!(await device.requestForegroundPermissionsAsync()).granted) throw Error('Localização não autorizada. Escolha um bairro ou autorize nas configurações do aparelho.');
+        if (!(await device.requestForegroundPermissionsAsync()).granted) throw Error('Localização não autorizada. Escolha um bairro ou autorize nas configurações do celular.');
         canceled();
         const { coords } = await device.getCurrentPositionAsync();
         canceled();
-        if (!Number.isFinite(coords.latitude) || !Number.isFinite(coords.longitude)) throw Error('Posição indisponível. Tente novamente.');
+        if (!Number.isFinite(coords.latitude) || !Number.isFinite(coords.longitude)) throw Error('Posição indisponível. Tente de novo.');
         return { latitude: coords.latitude, longitude: coords.longitude, accuracyMeters: coords.accuracy, capturedAt: Date.now() };
       })(),
       new Promise<never>((_, reject) => {
-        timer = setTimeout(() => { expired = true; reject(Error('A localização demorou. Tente novamente ou escolha um bairro.')); }, timeoutMs);
+        timer = setTimeout(() => { expired = true; reject(Error('A localização demorou. Tente de novo ou escolha um bairro.')); }, timeoutMs);
         cancel = () => reject(Error('Localização cancelada.'));
         signal.addEventListener('abort', cancel, { once: true });
       }),

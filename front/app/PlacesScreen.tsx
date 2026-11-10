@@ -31,7 +31,7 @@ export default function PlacesScreen() {
         }}
       >
         <AppText color="muted">
-          Guarde lugares como Casa ou Trabalho para ver rápido os chamados perto deles. Os dados ficam salvos localmente neste aparelho.
+          Guarde lugares como Casa ou Trabalho para ver rápido os chamados perto deles. Os dados ficam salvos localmente neste celular.
         </AppText>
 
         {!state.hydrated ? (

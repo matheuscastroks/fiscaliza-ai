@@ -484,7 +484,7 @@ export function useTerritoryView(q: TerritoryQueries) {
         : officialCalls.isLoading
         ? 'Buscando chamados...'
         : officialCalls.error && listed.length === 0
-          ? 'Não foi possível carregar os chamados'
+          ? 'Não conseguimos carregar os chamados'
           : `Ver em lista · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
 
   const summarySubLabel =
