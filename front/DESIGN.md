@@ -147,6 +147,8 @@ Este documento é a fonte única dos tokens e componentes. A fonte de verdade do
 - **Perfil:** identidade, duas métricas (salvos e lugares), domicílio e um menu curto (Preferências, Dados do bairro, Ajuda, Sobre e fontes, Conta e privacidade). Os chamados salvos ficam só na aba Salvos. Decisões raras e destrutivas (sair, apagar conta) ficam em `AccountScreen`, fora do Perfil.
 - **Telas de apoio:** `AccountScreen` (conta e privacidade) e `NeighborhoodVolumeScreen` (bairros por volume, sem numeração de ranking) existem para aliviar Perfil e Dados do bairro; qualquer tela que passe de uma pergunta principal deve ser dividida assim, exceto o mapa.
 
+**Linguagem.** O público são moradores do Rio, de todas as idades e escolaridades. Texto em português simples, sem jargão (SLA, recorte, equipamento, município, GPS...). Glossário, mensagens padrão e checklist de revisão em `../plan/39-guia-ux-writing.md`; o teste `tests/ux-writing.test.cjs` bloqueia os termos proibidos.
+
 **Diretriz de carga cognitiva.** Cada tela tem uma tarefa principal; conteúdos e ações são priorizados, o resto fica atrás de revelação progressiva ou vai para outra tela. Não sacrificar acessibilidade, descoberta nem eficiência de navegação só por minimalismo. Antes de mudar uma tela, justificar os elementos principais e apontar as fontes de sobrecarga; o estado atual está em `../plan/38-justificativa-ux-telas.md`.
 
 Teste em cada tela: *onde estou? o que posso fazer aqui? para onde vou depois?* Rótulos de tarefa ("Salvar chamado"), nunca slogans.

@@ -33,7 +33,7 @@ export function usePublicFacilities(
         !samePublication(pageParam.sources, result.sources)
       )
         throw new Error(
-          'O cadastro foi atualizado. Atualize esta camada para continuar.',
+          'A lista foi atualizada. Atualize para continuar.',
         );
       return result;
     },

@@ -26,7 +26,7 @@ test('settings screen: removes redundancies (places and saved calls) and adopts 
   // Essential features preserved
   assert.ok(content.includes('SlidingTabs'), 'Must preserve theme appearance switcher');
   assert.ok(content.includes('NeighborhoodPicker'), 'Must preserve neighborhood reference picker');
-  assert.ok(content.includes('focar o mapa automaticamente'), 'Must retain map focus instructions');
+  assert.ok(content.includes('o mapa já abrir nele'), 'Must retain map focus instructions');
   assert.ok(content.includes('useNotificationStore'), 'Must retain notification store binding');
   assert.ok(content.includes('Testar notificação no aparelho'), 'Must retain push test action');
 });

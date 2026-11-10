@@ -71,7 +71,7 @@ export const COMPLAINT_TOPICS: ComplaintTopic[] = [
   {
     id: 'outro',
     label: 'Outro reparo urbano',
-    description: 'Mobiliário, praça, sinalização ou demanda diversa',
+    description: 'Mobiliário, praça, sinalização ou outros assuntos',
     icon: 'construct-outline',
   },
 ];
@@ -111,7 +111,7 @@ export function ComplaintTopicSheet({
         showsVerticalScrollIndicator={false}
       >
         <AppText variant="caption" color="muted" style={styles.sheetSubtitle}>
-          Selecione a categoria do serviço para organizar sua solicitação à Central 1746.
+          Escolha o assunto para organizar sua mensagem para o 1746.
         </AppText>
 
         <View

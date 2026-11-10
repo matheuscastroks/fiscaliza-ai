@@ -41,11 +41,11 @@ export function NeighborhoodOverview({
       <View style={{ gap: 6 }}>
         <AppText variant="title">{data.neighborhood.name}</AppText>
         <AppText color="muted">
-          Serviços públicos e demandas do território.
+          Serviços públicos e chamados do bairro.
         </AppText>
       </View>
       <View style={{ gap: 12 }}>
-        <AppText variant="sectionTitle">Equipamentos municipais</AppText>
+        <AppText variant="sectionTitle">Serviços públicos</AppText>
         <AppText variant="caption" color="muted">
           Cadastros com bairro confirmado. Quantidade não indica capacidade ou
           qualidade do atendimento.
@@ -96,7 +96,7 @@ export function NeighborhoodOverview({
         })}
       </View>
       <View style={{ gap: 12 }}>
-        <AppText variant="sectionTitle">Demandas · Central 1746</AppText>
+        <AppText variant="sectionTitle">Chamados do 1746</AppText>
         <AppText variant="title">{countLabel(data.calls.total)}</AppText>
         <AppText variant="caption" color="muted">
           Período consultado: {periodLabel(dates)}
@@ -156,14 +156,14 @@ export function NeighborhoodOverview({
           </View>
         ))}
         <AppButton
-          title="Ver demandas deste período"
+          title="Ver chamados deste período"
           onPress={() => open('official')}
         />
       </View>
       <AppText variant="caption" color="muted">
-        Fontes: IPP / Prefeitura da Cidade do Rio de Janeiro (SIURB) e DATA.RIO
-        (1746). Fiscaliza aí é independente. Proximidade não estabelece
-        responsabilidade, área de atendimento ou relação causal.
+        Fontes: IPP e Prefeitura do Rio (Data.Rio). O Fiscaliza aí é independente.
+        Estar perto não quer dizer que um serviço seja o responsável por um
+        chamado.
       </AppText>
     </View>
   );

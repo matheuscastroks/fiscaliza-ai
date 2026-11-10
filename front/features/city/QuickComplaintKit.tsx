@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, StyleSheet, Pressable, Share, TextInput } from 'react-native';
+import { BottomSheetTextInput } from '@/components/ui/AppBottomSheetModal';
 import { openExternal } from '@/services/openExternal';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,9 +23,12 @@ export { COMPLAINT_TOPICS, type ComplaintTopic };
 
 export interface QuickComplaintKitProps {
   defaultLocation?: string;
+  /** Dentro de um bottom sheet: usa o campo de texto do sheet (teclado não cobre o formulário). */
+  inSheet?: boolean;
 }
 
-export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitProps) {
+export function QuickComplaintKit({ defaultLocation = '', inSheet = false }: QuickComplaintKitProps) {
+  const Input = inSheet ? BottomSheetTextInput : TextInput;
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
@@ -62,10 +66,10 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
     const desc = description.trim() || 'Solicitação de reparo / vistoria';
 
     return (
-      `Olá! Gostaria de abrir uma solicitação no 1746:\n\n` +
-      `• Serviço: ${topicLabel}\n` +
-      `• Local / Referência: ${loc}\n` +
-      `• Descrição: ${desc}`
+      `Olá! Quero pedir um serviço pelo 1746:\n\n` +
+      `• Assunto: ${topicLabel}\n` +
+      `• Onde: ${loc}\n` +
+      `• Detalhes: ${desc}`
     );
   }, [topicLabel, address, description]);
 
@@ -101,11 +105,13 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
   return (
     <View style={styles.container} accessibilityLabel="Assistente de solicitação rápida 1746">
       <View style={styles.titleBlock}>
-        <AppText variant="sectionTitle" style={styles.title}>
-          Preparar mensagem para o WhatsApp do 1746
-        </AppText>
+        {!inSheet && (
+          <AppText variant="sectionTitle" style={styles.title}>
+            Escrever mensagem para o 1746
+          </AppText>
+        )}
         <AppText variant="caption" color="muted" style={styles.subtitle}>
-          Você envia pelo WhatsApp oficial da Prefeitura. O Fiscaliza aí não registra nem acompanha esse envio.
+          Você envia a mensagem pelo WhatsApp da Prefeitura. O Fiscaliza aí não envia nem acompanha o seu pedido.
         </AppText>
       </View>
 
@@ -173,7 +179,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
                 </Pressable>
               )}
             </View>
-            <TextInput
+            <Input
               placeholder="Rua, número aproximado ou esquina"
               placeholderTextColor={colors.muted}
               value={address}
@@ -193,7 +199,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
             <AppText variant="caption" color="muted">
               Detalhes úteis (opcional)
             </AppText>
-            <TextInput
+            <Input
               placeholder="Ex: Próximo à padaria, faixa da direita, galhos caídos"
               placeholderTextColor={colors.muted}
               value={description}
@@ -224,10 +230,10 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
         <Ionicons name="camera-outline" size={layout.iconSize.md} color={colors.primary} />
         <View style={styles.photoTipTextCol}>
           <AppText variant="caption" style={styles.photoTipTitle}>
-            Fotos e evidências no WhatsApp
+            Fotos no WhatsApp
           </AppText>
           <AppText variant="caption" color="muted" style={styles.photoTipBody}>
-            Ao abrir a conversa com o 1746, o assistente oficial solicitará fotos do local. Você poderá tirá-las ou anexá-las diretamente no chat.
+            Na conversa com o 1746 você pode mandar fotos do local.
           </AppText>
         </View>
       </View>
@@ -257,7 +263,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
           <View style={styles.previewHeader}>
             <Ionicons name="chatbubble-ellipses-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" color="muted" style={{ fontWeight: '600' }}>
-              Texto para você enviar à Central 1746:
+              Texto para você enviar ao 1746:
             </AppText>
           </View>
           <AppText variant="caption" color="ink" style={styles.previewText} selectable>

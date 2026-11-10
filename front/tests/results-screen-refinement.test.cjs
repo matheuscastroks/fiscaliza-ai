@@ -8,7 +8,7 @@ const read = () => fs.readFileSync(path.join(ROOT_DIR, 'app', 'ResultsScreen.tsx
 
 test('results screen: keeps 3-KPI civic dashboard with citywide benchmark', () => {
   const content = read();
-  assert.ok(content.includes('Cumprimento de prazo'), 'Must include SLA deadline compliance KPI');
+  assert.ok(content.includes('Prazos cumpridos'), 'Must include SLA deadline compliance KPI');
   assert.ok(content.includes('Taxa de conclusão'), 'Must include resolution rate KPI');
   assert.ok(content.includes('Total registrado'), 'Must include total volume KPI');
   assert.ok(content.includes('cityOverviewQuery'), 'Must compare with citywide overview');
@@ -33,6 +33,6 @@ test('results screen: rankings drill into the neighborhood and keep official sou
   assert.ok(volume.includes('setNeighborhood') && volume.includes('Bairros por volume'), 'volume screen selects the neighborhood');
   assert.ok(!volume.includes('mais cumprem') && !volume.includes('mais rápida'), 'no competitive ranking');
   assert.ok(content.includes('/NeighborhoodVolumeScreen'), 'Results links to the volume screen');
-  assert.ok(content.includes('DATA.RIO'));
+  assert.ok(content.includes('Data.Rio'));
   assert.ok(content.includes('impactAsync'), 'Must include haptic feedback');
 });

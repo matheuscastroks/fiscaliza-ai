@@ -171,7 +171,7 @@ export default function SettingsScreen() {
           </View>
 
           <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
-            Escolha um bairro carioca para focar o mapa automaticamente ao abrir a exploração territorial.
+            Escolha um bairro para o mapa já abrir nele.
           </AppText>
 
           {regionError && (
@@ -185,7 +185,7 @@ export default function SettingsScreen() {
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
             <Ionicons name="notifications-outline" size={layout.iconSize.sm} color={colors.muted} />
-            <AppText variant="caption" style={styles.sectionHeaderText} accessibilityLabel="Notificações e alertas">
+            <AppText variant="caption" style={styles.sectionHeaderText} accessibilityLabel="Avisos">
               Notificações
             </AppText>
           </View>
@@ -216,21 +216,21 @@ export default function SettingsScreen() {
               </View>
 
               <View style={styles.tableRowContent}>
-                <AppText variant="label">Alertas no aparelho</AppText>
+                <AppText variant="label">Avisos no celular</AppText>
                 <AppText variant="caption" color="muted">
                   {!pushAvailable
-                    ? 'Ainda não disponíveis nesta versão do aplicativo'
+                    ? 'Ainda não funciona nesta versão do app'
                     : notificationsActive
-                    ? 'Alertas ativados para seus chamados salvos'
+                    ? 'Avisos ligados para seus chamados salvos'
                     : permissionGranted
-                      ? 'Permissão concedida. Toque para conectar.'
-                      : 'Notificações desativadas neste aparelho'}
+                      ? 'Permissão dada. Toque para ligar os avisos.'
+                      : 'Avisos desligados neste celular'}
                 </AppText>
               </View>
 
               {pushAvailable && (
               <AppButton
-                title={notificationsActive ? 'Ativadas' : permissionGranted ? 'Reconectar' : 'Ativar'}
+                title={notificationsActive ? 'Ligados' : permissionGranted ? 'Tentar de novo' : 'Ligar'}
                 variant={notificationsActive ? 'secondary' : 'primary'}
                 disabled={notificationLoading || notificationsActive}
                 loading={notificationLoading}
@@ -262,7 +262,7 @@ export default function SettingsScreen() {
                   <View style={styles.tableRowContent}>
                     <AppText variant="label">Testar notificação no aparelho</AppText>
                     <AppText variant="caption" color="muted">
-                      Envia uma notificação de teste (somente desenvolvimento)
+                      Envia um aviso de teste (só em desenvolvimento)
                     </AppText>
                   </View>
 
@@ -273,7 +273,7 @@ export default function SettingsScreen() {
           </View>
 
           <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
-            Quando o app sincroniza novos dados do 1746, avisamos sobre mudanças nos chamados que você salvou. O envio depende do aparelho e não é em tempo real.
+            Avisamos quando um chamado que você salvou tiver novidade. O aviso pode demorar um pouco.
           </AppText>
 
           {notificationError && (

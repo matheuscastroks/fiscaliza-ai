@@ -55,7 +55,7 @@ export function NeighborhoodPicker({
 
     const selectOpts = ['', ...resolvedLabels].map((option) => ({
       value: option,
-      label: option || 'Todo o município',
+      label: option || 'A cidade toda',
     }));
 
     return {

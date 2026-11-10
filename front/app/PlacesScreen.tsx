@@ -31,7 +31,7 @@ export default function PlacesScreen() {
         }}
       >
         <AppText color="muted">
-          Guarde referências como Casa ou Trabalho para consultar com facilidade os chamados públicos do 1746 no seu entorno. Os dados ficam salvos localmente neste aparelho.
+          Guarde lugares como Casa ou Trabalho para ver rápido os chamados perto deles. Os dados ficam salvos localmente neste aparelho.
         </AppText>
 
         {!state.hydrated ? (
@@ -65,7 +65,7 @@ export default function PlacesScreen() {
                   Nenhum lugar cadastrado
                 </AppText>
                 <AppText color="muted" style={{ textAlign: 'center' }}>
-                  Cadastre um local para monitorar serviços de iluminação, tapa-buraco e limpeza no entorno da sua rua ou trabalho.
+                  Salve um lugar para acompanhar iluminação, buracos e limpeza perto de casa ou do trabalho.
                 </AppText>
               </View>
             )}
@@ -114,7 +114,7 @@ export default function PlacesScreen() {
                   </View>
 
                   <AppButton
-                    title="Consultar entorno no mapa"
+                    title="Ver chamados perto daqui"
                     variant="secondary"
                     disabled={state.busy}
                     onPress={() => {
@@ -158,7 +158,7 @@ export default function PlacesScreen() {
                       ]}
                     >
                       <AppText variant="caption">
-                        Excluir {place.name}? Se estiver selecionado, a consulta voltará ao município.
+                        Excluir {place.name}? Se estiver em uso, o mapa volta a mostrar a cidade toda.
                       </AppText>
                       <View style={styles.actionsRow}>
                         <View style={styles.flex}>

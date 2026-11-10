@@ -12,7 +12,7 @@ export async function captureDeviceLocation(device: Device, signal: AbortSignal,
     canceled();
     return await Promise.race([
       (async () => {
-        if (!await device.hasServicesEnabledAsync()) throw Error('Localização desativada no dispositivo. Escolha um bairro ou ative o GPS.');
+        if (!await device.hasServicesEnabledAsync()) throw Error('A localização do celular está desligada. Escolha um bairro ou ligue o GPS.');
         canceled();
         if (!(await device.requestForegroundPermissionsAsync()).granted) throw Error('Localização não autorizada. Escolha um bairro ou autorize nas configurações do aparelho.');
         canceled();

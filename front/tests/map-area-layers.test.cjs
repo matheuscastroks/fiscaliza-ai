@@ -39,7 +39,7 @@ test('the saved-place center and device fix are independent, unclustered sources
   assert.equal(children[1].shape, devicePoint);
   assert.equal(children[0].cluster, undefined);
   assert.equal(children[1].cluster, undefined);
-  assert.equal(children[0].children[1].style.textField, 'Centro do entorno');
+  assert.equal(children[0].children[1].style.textField, 'Centro da área');
   assert.equal(children[1].children.style.circleColor, '#1677EB');
   assert.deepEqual(MapPositionLayers({ Mapbox, centerPoint: null, devicePoint: null, isDark: false }).children, [null, null]);
 });

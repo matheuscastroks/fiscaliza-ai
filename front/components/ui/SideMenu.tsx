@@ -164,7 +164,7 @@ export function SideMenu({
               {user?.municipality
                 ? user.municipality.name + ' · ' + user.municipality.state
                 : authenticated
-                  ? 'Definir município'
+                  ? 'Definir cidade'
                   : 'Acesse para salvar chamados'}
             </AppText>
             {authenticated && (
@@ -204,7 +204,7 @@ export function SideMenu({
                 <AppText variant="caption" color="muted" style={styles.flex}>
                   {preferred ||
                     user?.neighborhood ||
-                    'Rio de Janeiro · todo o município'}
+                    'Rio de Janeiro · cidade toda'}
                 </AppText>
                 <Ionicons
                   name="chevron-forward"

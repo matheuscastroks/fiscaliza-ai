@@ -71,7 +71,7 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
             </View>
             <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
               <AppText variant="caption" color="muted" style={styles.heroScopeLabel}>
-                Recorte Ativo
+                Área em uso
               </AppText>
               <AppText variant="label" numberOfLines={1} style={styles.heroScopeTitle}>
                 {title}
@@ -83,7 +83,7 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
             {areaOnly && onClearAreaOnly && (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Voltar ao recorte salvo"
+                accessibilityLabel="Voltar à área salvo"
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   onClearAreaOnly();
@@ -103,12 +103,12 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
             )}
           </View>
 
-          {/* Seção 1: Ações Rápidas */}
+          {/* Seção 1: Atalhos */}
           <View style={styles.filterSection}>
             <View style={styles.sectionHeaderRow}>
               <Ionicons name="flash-outline" size={layout.iconSize.sm} color={colors.accent} />
               <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
-                Ações Rápidas
+                Atalhos
               </AppText>
             </View>
             <View style={[styles.insetGroupCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -117,7 +117,7 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
                 accessibilityRole="button"
                 accessibilityLabel={
                   selection.kind === 'radius' && selection.source === 'current'
-                    ? 'Atualizar GPS'
+                    ? 'Atualizar minha localização'
                     : 'Usar minha localização'
                 }
                 disabled={device.busy}
@@ -139,11 +139,11 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
                 <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
                   <AppText variant="caption" style={styles.rowTitle}>
                     {selection.kind === 'radius' && selection.source === 'current'
-                      ? 'Atualizar GPS'
+                      ? 'Atualizar minha localização'
                       : 'Usar minha localização'}
                   </AppText>
                   <AppText variant="caption" color="muted" style={styles.rowDesc}>
-                    Capturar coordenadas do dispositivo
+                    Mostra o que está perto de você agora
                   </AppText>
                 </View>
                 {device.busy ? (
@@ -160,7 +160,7 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
               {/* Linha Todo o Município */}
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Ver todo o município do Rio de Janeiro"
+                accessibilityLabel="Ver a cidade toda do Rio de Janeiro"
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   onClearAreaOnly?.();
@@ -177,10 +177,10 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
                 </View>
                 <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
                   <AppText variant="caption" style={styles.rowTitle}>
-                    Todo o município do Rio
+                    A cidade toda
                   </AppText>
                   <AppText variant="caption" color="muted" style={styles.rowDesc}>
-                    Visualizar toda a cidade do Rio de Janeiro
+                    Ver chamados de todo o Rio de Janeiro
                   </AppText>
                 </View>
                 {selection.kind === 'municipality' && !areaOnly ? (
@@ -233,13 +233,13 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
 
           <View style={[styles.sectionDivider, { backgroundColor: colors.divider }]} />
 
-          {/* Seção 2: Meus Lugares Salvos */}
+          {/* Seção 2: Meus Meus lugares */}
           <View style={styles.filterSection}>
             <View style={styles.sectionHeaderRowBetween}>
               <View style={styles.sectionHeaderRow}>
                 <Ionicons name="bookmark-outline" size={layout.iconSize.sm} color={colors.accent} />
                 <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
-                  Lugares Salvos
+                  Meus lugares
                 </AppText>
               </View>
               <Pressable
@@ -284,7 +284,7 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
                             {p.name}
                           </AppText>
                           <AppText variant="caption" color="muted" style={styles.rowDesc}>
-                            {p.radiusMeters >= 1000 ? `${p.radiusMeters / 1000} km` : `${p.radiusMeters} m`} de raio
+                            {p.radiusMeters >= 1000 ? `${p.radiusMeters / 1000} km` : `${p.radiusMeters} m`} de distância
                           </AppText>
                         </View>
                         {isSelected ? (
@@ -315,12 +315,12 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
 
           <View style={[styles.sectionDivider, { backgroundColor: colors.divider }]} />
 
-          {/* Seção 3: Consultar por Bairro Oficial */}
+          {/* Seção 3: Escolher um bairro */}
           <View style={styles.filterSection}>
             <View style={styles.sectionHeaderRow}>
               <Ionicons name="business-outline" size={layout.iconSize.sm} color={colors.accent} />
               <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
-                Consultar por Bairro Oficial
+                Escolher um bairro
               </AppText>
             </View>
             <NeighborhoodPicker
@@ -344,12 +344,12 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
                 <View style={styles.sectionHeaderRow}>
                   <Ionicons name="radio-outline" size={layout.iconSize.sm} color={colors.accent} />
                   <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
-                    Raio de Proximidade no Entorno
+                    Até onde olhar
                   </AppText>
                 </View>
                 {selection.kind === 'pending-current' && (
                   <AppText variant="caption" color="muted" style={{ marginBottom: spacing.xs }}>
-                    Sua posição anterior não fica gravada. Atualize o GPS para consultar o entorno.
+                    Sua localização antiga não fica guardada. Atualize para ver o que está perto de você.
                   </AppText>
                 )}
                 <RadiusControl

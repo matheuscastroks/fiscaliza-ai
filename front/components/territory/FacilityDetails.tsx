@@ -58,7 +58,7 @@ export function FacilityDetails({
   return (
     <>
     <DetailSheet
-      title={item ? facilityLabels[item.category] : 'Equipamento público'}
+      title={item ? facilityLabels[item.category] : 'Serviço público'}
       onBack={onBack}
       onRefresh={query.refetch}
     >
@@ -90,7 +90,7 @@ export function FacilityDetails({
             <AppText color="muted">{facilityNeighborhoodLabel(item)}</AppText>
             {item.location && (
               <AppButton
-                title="Como chegar (abrir rota no GPS)"
+                title="Como chegar"
                 variant="secondary"
                 onPress={handleOpenDirections}
               />
@@ -139,13 +139,13 @@ export function FacilityDetails({
               Cadastro público; confirme o funcionamento com a unidade.
             </AppText>
           </DetailSection>
-          <DetailSection title="Fonte do cadastro">
+          <DetailSection title="De onde vem a informação">
             <AppText>{item.provenance.name}</AppText>
             <AppText variant="caption" color="muted">
               {item.provenance.attribution}
             </AppText>
             <AppText variant="caption" color="muted">
-              Importado em{' '}
+              Atualizado em{' '}
               {item.provenance.publishedAt
                 ? new Date(item.provenance.publishedAt).toLocaleDateString(
                     'pt-BR',
@@ -161,7 +161,7 @@ export function FacilityDetails({
             </AppText>
             {item.provenance.state === 'stale' && (
               <AppText color="attention">
-                Exibindo a última publicação disponível.
+                Mostrando a última informação que a Prefeitura divulgou.
               </AppText>
             )}
             <AppButton

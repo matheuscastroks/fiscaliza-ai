@@ -246,7 +246,7 @@ export const useFollowStore = create<FollowStore>((set, get) => {
           ) {
             set({
               persistenceError:
-                'Não foi possível carregar os chamados salvos da sua conta. Tente novamente ao reabrir o app.',
+                'Não conseguimos abrir seus chamados salvos. Feche e abra o app de novo.',
             });
           }
         } finally {

@@ -10,7 +10,7 @@ export function validatePlace(place: { name: string; addressLabel: string; latit
   if (!place.name.trim() || place.name.trim().length > 40) return 'Informe um nome com até 40 caracteres.';
   if (place.addressLabel.length > 160) return 'Use até 160 caracteres no endereço ou referência.';
   if (!Number.isFinite(place.latitude) || !Number.isFinite(place.longitude) || Math.abs(place.latitude) > 90 || Math.abs(place.longitude) > 180) return 'Confirme um ponto válido no mapa ou pelas coordenadas.';
-  if (![500, 1000, 2000, 5000].includes(place.radiusMeters)) return 'Escolha um raio disponível.';
+  if (![500, 1000, 2000, 5000].includes(place.radiusMeters)) return 'Escolha uma distância da lista.';
   return null;
 }
 export function restoreSelection(value: unknown, places: SavedPlace[]): TerritorySelection {

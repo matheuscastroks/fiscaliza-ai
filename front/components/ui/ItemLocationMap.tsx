@@ -82,7 +82,7 @@ export function ItemLocationMap({
     return null;
   }
 
-  const formattedAddress = address || neighborhood || 'Localização no município';
+  const formattedAddress = address || neighborhood || 'Localização na cidade';
 
   return (
     <View style={styles.container}>
@@ -96,7 +96,7 @@ export function ItemLocationMap({
         {showExpandAction && (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Ver no mapa territorial completo"
+            accessibilityLabel="Ver no mapa"
             onPress={handleOpenMap}
             style={({ pressed }) => [
               styles.expandButton,

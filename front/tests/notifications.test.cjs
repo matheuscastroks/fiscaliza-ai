@@ -67,7 +67,7 @@ test('notifications: settings screen provides notification controls and test tri
 
   assert.ok(
     content.includes('useNotificationStore') &&
-      content.includes('Notificações e alertas') &&
+      content.includes('Avisos') &&
       content.includes('Testar notificação no aparelho'),
     'SettingsScreen must render notifications status and test push button',
   );

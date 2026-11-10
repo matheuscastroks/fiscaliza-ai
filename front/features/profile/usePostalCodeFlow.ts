@@ -59,7 +59,7 @@ export function usePostalCodeFlow(initial = '') {
       setError(
         caught instanceof Error
           ? caught.message
-          : 'Não foi possível confirmar. Seu município não foi alterado.',
+          : 'Não foi possível confirmar. Sua cidade não foi alterada.',
       );
       return false;
     } finally {

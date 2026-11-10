@@ -64,7 +64,7 @@ export default function ResultsScreen() {
     <AppScreen>
       <AppHeader
         title="Dados do bairro"
-        context={neighborhood ? `${neighborhood} · chamados do 1746 e prazos publicados` : "Rio de Janeiro · chamados do 1746 e prazos publicados"}
+        context={neighborhood ? `${neighborhood} · chamados e prazos` : "Rio de Janeiro · chamados e prazos"}
         onBack={() => goBack()}
       />
 
@@ -76,8 +76,8 @@ export default function ResultsScreen() {
             <InsetGroup>
               <ListRow
                 icon="business-outline"
-                title="Serviços e equipamentos do bairro"
-                subtitle="Escolas, saúde e praças, com chamados do período"
+                title="Serviços públicos do bairro"
+                subtitle="Escolas, saúde e praças do bairro"
                 onPress={() =>
                   router.push({ pathname: '/NeighborhoodScreen', params: { neighborhoodId } })
                 }
@@ -96,7 +96,7 @@ export default function ResultsScreen() {
                 <Ionicons name="location-outline" size={layout.iconSize.md} color={colors.primary} />
                 <View style={styles.territoryTextCol}>
                   <AppText variant="caption" color="muted">
-                    Recorte territorial
+                    Área
                   </AppText>
                   <AppText variant="label" numberOfLines={1} style={styles.territoryName}>
                     {neighborhood || 'Rio de Janeiro'}
@@ -117,7 +117,7 @@ export default function ResultsScreen() {
                 {Boolean(neighborhood) && (
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Ver todo o município"
+                    accessibilityLabel="Ver a cidade toda"
                     onPress={() => {
                       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setNeighborhood('');
@@ -140,7 +140,7 @@ export default function ResultsScreen() {
                 <View style={styles.sectionHeaderRow}>
                   <Ionicons name="speedometer-outline" size={layout.iconSize.sm} color={colors.muted} />
                   <AppText variant="caption" style={styles.sectionHeaderText}>
-                    Prazos oficiais (SLA)
+                    Prazos
                   </AppText>
                 </View>
 
@@ -163,7 +163,7 @@ export default function ResultsScreen() {
 
                     <View style={styles.heroKpiTitleCol}>
                       <AppText variant="caption" color="muted">
-                        Cumprimento de prazo (SLA)
+                        Prazos cumpridos
                       </AppText>
                       <AppText variant="label">Os prazos estão sendo cumpridos?</AppText>
                     </View>
@@ -214,7 +214,7 @@ export default function ResultsScreen() {
                     />
                   </View>
                   <AppText variant="caption" color="muted">
-                    Entre os chamados do recorte com prazo publicado. Fonte: DATA.RIO.
+                    Considera os chamados desta área que têm prazo divulgado. Fonte: Prefeitura do Rio (Data.Rio).
                   </AppText>
                 </View>
 
@@ -287,7 +287,7 @@ export default function ResultsScreen() {
                     </AppText>
 
                     <AppText variant="caption" color="muted" numberOfLines={1}>
-                      Demandas no DATA.RIO
+                      Chamados registrados
                     </AppText>
                   </View>
                 </View>
@@ -414,7 +414,7 @@ export default function ResultsScreen() {
                         </AppText>
                       ) : (
                         <AppText variant="caption" color="muted">
-                          Entre a abertura e o encerramento publicados
+                          Do dia em que abriu até o dia em que encerrou
                         </AppText>
                       )}
                     </View>
@@ -447,18 +447,18 @@ export default function ResultsScreen() {
             <ListRow
               icon="map-outline"
               title="Bairros com mais chamados"
-              subtitle="Volume registrado por bairro, sem avaliar desempenho"
+              subtitle="Quantos chamados cada bairro tem, sem dizer se é bom ou ruim"
               onPress={() => router.push('/NeighborhoodVolumeScreen')}
             />
             <ListRow
               icon="information-circle-outline"
-              title="Fonte e limites dos dados"
-              subtitle="DATA.RIO e Escritório de Dados da PCRJ"
+              title="De onde vêm os dados"
+              subtitle="De onde vêm os dados e o que eles não mostram"
               onPress={() => router.push('/AboutScreen')}
             />
           </InsetGroup>
           <AppText variant="meta" color="muted">
-            Fonte: DATA.RIO. O Fiscaliza aí não altera prazos nem emite atestados.
+            Fonte: Prefeitura do Rio (Data.Rio). O Fiscaliza aí só mostra o que a Prefeitura divulga.
           </AppText>
       </ScrollView>
     </AppScreen>

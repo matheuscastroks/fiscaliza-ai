@@ -182,8 +182,7 @@ export default function OfficialCallDetailsScreen() {
         )}
         {isError && (
           <AppText color="risk">
-            Atualização indisponível. Exibindo a última informação salva na sua
-            conta.
+            Não foi possível atualizar. Mostrando o que você já tinha salvo.
           </AppText>
         )}
         {(persistenceError || saveFailed) && (
@@ -211,7 +210,7 @@ export default function OfficialCallDetailsScreen() {
                 color={colors.muted}
               />
               <AppText variant="caption" color="muted" numberOfLines={1}>
-                Central 1746 · {item.serviceType}
+                Chamado do 1746 · {item.serviceType}
               </AppText>
             </View>
             <AppText variant="screenTitle" style={styles.mainTitle}>
@@ -511,17 +510,17 @@ export default function OfficialCallDetailsScreen() {
           )}
         </View>
 
-        {/* Seção: Fonte e atendimento oficial */}
+        {/* Seção: De onde vem e onde pedir */}
         <View style={[styles.sectionCard, styles.infoCard]}>
           <AppText variant="sectionTitle" style={styles.sectionHeading}>
-            Fonte e atendimento oficial
+            De onde vem e onde pedir
           </AppText>
           <AppText variant="caption" color="muted" style={{ lineHeight: 18 }}>
-            Fonte: DATA.RIO, da Prefeitura do Rio de Janeiro. O Fiscaliza aí é
-            independente da prefeitura.
+            Fonte: Prefeitura do Rio (Data.Rio). O Fiscaliza aí não faz parte
+            da Prefeitura.
           </AppText>
           <AppText variant="caption" color="muted">
-            O atendimento acontece no canal oficial da prefeitura.
+            Para pedir ou acompanhar, use o canal oficial da Prefeitura.
           </AppText>
         </View>
       </ScrollView>

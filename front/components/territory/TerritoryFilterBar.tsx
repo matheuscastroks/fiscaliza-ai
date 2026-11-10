@@ -152,7 +152,7 @@ function TerritoryFilterBarComponent({
             onPress();
           }}
           accessibilityRole="button"
-          accessibilityLabel={`Recorte atual: ${summary}. Toque para alterar.`}
+          accessibilityLabel={`Área atual: ${summary}. Toque para alterar.`}
           style={({ pressed }) => [
             styles.unifiedLocationPill,
             pressed && { opacity: 0.75 },
@@ -366,7 +366,7 @@ function TerritoryFilterBarComponent({
                   <Pressable
                     key={f.id}
                     accessibilityRole="button"
-                    accessibilityLabel={`Camada ${f.label}`}
+                    accessibilityLabel={`Mostrar ${f.label}`}
                     accessibilityState={{ selected: isSelected }}
                     onPress={() => {
                       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

@@ -129,7 +129,7 @@ function TerritoryListViewComponent({
 
   const sectionHeading = locationPrompt
     ? 'Aguardando localização'
-    : `${countLabel} ${areaOnly ? 'na área visível' : 'neste recorte'}`;
+    : `${countLabel} ${areaOnly ? 'na área visível' : 'nesta área'}`;
 
   const headerNotice = (
     <View style={{ gap: spacing.sm, marginBottom: spacing.md }}>
@@ -169,8 +169,8 @@ function TerritoryListViewComponent({
               <AppText variant="caption" color="muted" style={{ flex: 1 }}>
                 Inclui {unlocatedCount}{' '}
                 {unlocatedCount === 1
-                  ? 'chamado oficial sem coordenadas publicadas no mapa.'
-                  : 'chamados oficiais sem coordenadas publicadas no mapa.'}
+                  ? 'chamado sem local marcado no mapa.'
+                  : 'chamados sem local marcado no mapa.'}
               </AppText>
             </View>
           )}
@@ -186,7 +186,7 @@ function TerritoryListViewComponent({
           kind="territory"
           height={96}
           title="Aguardando sua localização"
-          description="Permita o acesso à localização para ver os chamados ao seu redor ou feche esta lista e escolha um bairro no seletor do topo."
+          description="Permita a localização para ver os chamados perto de você. Ou feche esta lista e escolha um bairro lá em cima."
           action={{ title: 'Usar minha localização', onPress: locationPrompt.onUseLocation }}
         />
       )}
@@ -206,8 +206,8 @@ function TerritoryListViewComponent({
         <AppButton
           title={
             facilityTotal !== null
-              ? `Carregar mais ${facilityPagination.label || 'equipamentos'} (${facilityLoaded} de ${facilityTotal.toLocaleString('pt-BR')})`
-              : `Carregar mais ${facilityPagination.label || 'equipamentos'}`
+              ? `Carregar mais ${facilityPagination.label || 'serviços'} (${facilityLoaded} de ${facilityTotal.toLocaleString('pt-BR')})`
+              : `Carregar mais ${facilityPagination.label || 'serviços'}`
           }
           variant="secondary"
           disabled={facilityPagination.isFetchingNextPage}
@@ -220,8 +220,8 @@ function TerritoryListViewComponent({
         layers[0] === 'official' && (
           <IllustratedEmptyState
             kind="territory"
-            title="Nenhum chamado 1746 neste recorte"
-            description="Nenhum chamado oficial encontrado com os filtros atuais."
+            title="Nenhum chamado por aqui"
+            description="Não achamos chamados com esses filtros."
             action={{
               title: 'Limpar filtros',
               onPress: onResetFilters,
@@ -233,8 +233,8 @@ function TerritoryListViewComponent({
         !layers.includes('official') && (
           <IllustratedEmptyState
             kind="territory"
-            title="Nenhum equipamento neste recorte"
-            description="Nenhum equipamento público encontrado com os filtros atuais."
+            title="Nenhum serviço público por aqui"
+            description="Não achamos serviços públicos com esses filtros."
             action={{
               title: 'Limpar filtros',
               onPress: onResetFilters,

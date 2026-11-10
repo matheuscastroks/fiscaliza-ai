@@ -89,14 +89,14 @@ export function PlaceSelector({
           : 'Rio de Janeiro (Geral)';
 
   const subtitle = areaOnly
-    ? 'Recorte definido pelo movimento do mapa'
+    ? 'Área definida pelo mapa'
     : selection.kind === 'radius'
-      ? `${radiusShort} de raio${
+      ? `${radiusShort} de distância${
           selection.neighborhood?.name ? ` · ${selection.neighborhood.name}` : ''
         }`
       : selection.kind === 'neighborhood'
         ? 'Bairro completo'
-        : 'Toda a cidade do Rio';
+        : 'A cidade toda';
 
   const compactSummary = areaOnly
     ? 'Área visível no mapa'
@@ -128,9 +128,9 @@ export function PlaceSelector({
   const shortSummary = areaOnly
     ? 'Área no mapa'
     : selection.kind === 'pending-current'
-      ? 'GPS'
+      ? 'Perto de mim'
       : selection.kind === 'radius'
-        ? activePlace?.name || selection.neighborhood?.name || 'Entorno'
+        ? activePlace?.name || selection.neighborhood?.name || 'Perto daqui'
         : selection.kind === 'neighborhood'
           ? selection.name
           : 'Rio';
@@ -156,7 +156,7 @@ export function PlaceSelector({
           <Pressable
             onPress={() => setSheetOpen(true)}
             accessibilityRole="button"
-            accessibilityLabel={`Recorte territorial: ${compactSummary}. Toque para trocar local.`}
+            accessibilityLabel={`Área: ${compactSummary}. Toque para trocar local.`}
             style={({ pressed }) => [
               styles.compactPill,
               {
@@ -315,8 +315,7 @@ export function PlaceSelector({
         {selection.kind === 'pending-current' && (
           <View style={styles.pendingArea}>
             <AppText variant="caption" color="muted">
-              Sua posição anterior não foi salva. Atualize o GPS para consultar
-              o entorno.
+              Sua localização antiga não foi guardada. Atualize para ver o que está perto.
             </AppText>
             <AppButton
               title="Atualizar localização"

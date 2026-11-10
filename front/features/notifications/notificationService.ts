@@ -84,13 +84,13 @@ export async function registerForPushNotificationsAsync(
   // Sem projectId do EAS o Expo não emite token: avisa em português em vez de mostrar o erro cru.
   const projectId = pushProjectId();
   if (!projectId) {
-    throw new Error('Os alertas ainda não estão disponíveis nesta versão do aplicativo.');
+    throw new Error('Os avisos ainda não funcionam nesta versão do app.');
   }
   const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
   const token = tokenData.data;
   const registered = await registerTokenWithBackend(token, municipalityId);
   if (!registered) {
-    throw new Error('Não foi possível registrar os alertas no servidor. Tente novamente.');
+    throw new Error('Não conseguimos ligar os avisos. Tente de novo.');
   }
   return token;
 }
@@ -156,7 +156,7 @@ export async function sendTestPushNotification(
   const payload: TestNotificationPayload = {
     token,
     title: 'Fiscaliza aí · Notificações Ativas',
-    body: 'Seu aparelho está pronto para receber alertas de status dos chamados do 1746!',
+    body: 'Seu celular já recebe avisos dos chamados que você salvou.',
   };
   return request<PushNotificationResult>('/v1/notifications/test', 'POST', payload);
 }

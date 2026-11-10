@@ -108,7 +108,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => {
       const active = state.selection.kind === 'radius' && state.selection.placeId === id;
       const neighborhood = state.selection.kind === 'radius' ? state.selection.neighborhood : null;
       return { ...state, places: state.places.filter((p) => p.id !== id), selection: active ? neighborhood ? { kind: 'neighborhood', ...neighborhood } : { kind: 'municipality' } : state.selection };
-    }).then((ok) => { if (ok) set({ notice: 'Lugar excluído. Confira o recorte selecionado.' }); return ok; }),
+    }).then((ok) => { if (ok) set({ notice: 'Lugar apagado. Confira a área que está em uso.' }); return ok; }),
     selectPlace: (id) => save((state) => {
       const place = state.places.find((p) => p.id === id);
       if (!place) throw Error('Lugar não encontrado.');
@@ -116,7 +116,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => {
     }),
     selectNeighborhood: (name, id) => save((state) => ({ ...state, selection: name ? { kind: 'neighborhood', name, id } : { kind: 'municipality' } })),
     setRadius: (radiusMeters) => save((state) => {
-      if (![500, 1000, 2000, 5000].includes(radiusMeters)) throw Error('Escolha um raio disponível.');
+      if (![500, 1000, 2000, 5000].includes(radiusMeters)) throw Error('Escolha uma distância da lista.');
       const selection = state.selection.kind === 'radius' || state.selection.kind === 'pending-current' ? { ...state.selection, radiusMeters } : state.selection;
       return { ...state, selection, currentRadius: selection.kind === 'pending-current' || (selection.kind === 'radius' && selection.source === 'current') ? radiusMeters : state.currentRadius,
         places: state.places.map((p) => selection.kind === 'radius' && selection.placeId === p.id ? { ...p, radiusMeters } : p) };

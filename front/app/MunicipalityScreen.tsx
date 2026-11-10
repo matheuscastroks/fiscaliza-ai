@@ -29,7 +29,7 @@ export default function MunicipalityScreen() {
   return (
     <AppScreen keyboardAvoiding>
       <AppHeader
-        title={linked ? 'Meu município' : 'Sua cidade'}
+        title={linked ? 'Minha cidade' : 'Sua cidade'}
         onBack={linked ? () => goBack() : undefined}
       />
       <KeyboardAwareScrollView
@@ -42,12 +42,12 @@ export default function MunicipalityScreen() {
               {linked ? 'Atualizar meu CEP' : 'Onde você mora?'}
             </AppText>
             <AppText color="muted">
-              Informe seu CEP para encontrar seu município.
+              Digite seu CEP para encontrarmos sua cidade.
             </AppText>
           </View>
           {linked && (
             <AppText>
-              Município atual: {linked.name} · {linked.state}
+              Sua cidade: {linked.name} · {linked.state}
             </AppText>
           )}
           <AppInput
@@ -61,7 +61,7 @@ export default function MunicipalityScreen() {
             onSubmitEditing={() => void flow.search()}
           />
           <AppButton
-            title="Buscar município"
+            title="Buscar minha cidade"
             loading={busy}
             disabled={digits.length !== 8 || saving}
             onPress={() => void flow.search()}
@@ -78,7 +78,7 @@ export default function MunicipalityScreen() {
                 <AppText color="muted">{lookup.street}</AppText>
               )}
               <AppText color="muted">
-                Seus registros serão limitados a este município.
+                Você verá os chamados desta cidade.
               </AppText>
               {linked && linked.id !== lookup.municipality.id && (
                 <AppText>
@@ -86,7 +86,7 @@ export default function MunicipalityScreen() {
                 </AppText>
               )}
               <AppButton
-                title="Confirmar município"
+                title="Confirmar cidade"
                 loading={saving}
                 disabled={busy}
                 onPress={() => void confirm()}
