@@ -119,6 +119,7 @@ export function TerritoryContent() {
     refreshAll,
     filterBarProps,
     summaryLabel,
+    waitingForLocation,
     summarySubLabel,
   } = useTerritoryController();
 
@@ -242,8 +243,8 @@ export function TerritoryContent() {
               <Ionicons name="list-outline" size={layout.iconSize.md} color={colors.onSurfaceBrand} />
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <AppText variant="label" numberOfLines={1} style={styles.summaryTitle}>{summaryLabel}</AppText>
-              <AppText variant="caption" color="muted" numberOfLines={1} style={styles.summarySubtitle}>{summarySubLabel}</AppText>
+              <AppText variant="label" numberOfLines={2} maxFontSizeMultiplier={1.3} style={styles.summaryTitle}>{summaryLabel}</AppText>
+              <AppText variant="caption" color="muted" numberOfLines={2} maxFontSizeMultiplier={1.3} style={styles.summarySubtitle}>{summarySubLabel}</AppText>
             </View>
             <Ionicons name="chevron-forward" size={layout.iconSize.md} color={colors.muted} />
           </Pressable>
@@ -305,6 +306,7 @@ export function TerritoryContent() {
 
       {effectiveListView && (
         <TerritoryListView
+          locationPrompt={waitingForLocation ? { onUseLocation: () => { void locate(); } } : undefined}
           visible={isFocused}
           asSheet={mapAvailable}
           onClose={() => setIsListView(false)}

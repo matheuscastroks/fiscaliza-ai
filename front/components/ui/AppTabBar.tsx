@@ -213,11 +213,12 @@ export function AppTabBar({
                 <AppText
                   variant="meta"
                   numberOfLines={1}
+                  maxFontSizeMultiplier={1.15}
                   style={[
                     styles.tabLabel,
                     {
                       color: itemColor,
-                      fontWeight: focused ? '700' : '600',
+                      fontWeight: '600',
                     },
                   ]}
                 >

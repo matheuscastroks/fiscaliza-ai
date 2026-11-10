@@ -39,7 +39,7 @@ test('territory filter bar: integrates unified search island and 1-tap quick fil
   const filterBarPath = path.join(ROOT_DIR, 'components', 'territory', 'TerritoryFilterBar.tsx');
   assert.ok(fs.existsSync(filterBarPath), 'TerritoryFilterBar.tsx must exist');
 
-  const content = (fs.readFileSync(filterBarPath, 'utf8') + fs.readFileSync(filterBarPath.replace('TerritoryFilterBar', 'TerritoryFilterModal'), 'utf8'));
+  const content = (fs.readFileSync(filterBarPath, 'utf8') + fs.readFileSync(filterBarPath.replace('TerritoryFilterBar', 'TerritoryFilterModal'), 'utf8') + fs.readFileSync(filterBarPath.replace('TerritoryFilterBar', 'TerritoryFilterModal.styles').replace('.tsx', '.ts'), 'utf8'));
 
   // Unified bar
   assert.ok(
@@ -68,7 +68,7 @@ test('territory filter bar: integrates unified search island and 1-tap quick fil
 
 test('decluttered filter modal: removes duplicate geographical selectors and adopts frameless civic sections', () => {
   const filterBarPath = path.join(ROOT_DIR, 'components', 'territory', 'TerritoryFilterBar.tsx');
-  const content = (fs.readFileSync(filterBarPath, 'utf8') + fs.readFileSync(filterBarPath.replace('TerritoryFilterBar', 'TerritoryFilterModal'), 'utf8'));
+  const content = (fs.readFileSync(filterBarPath, 'utf8') + fs.readFileSync(filterBarPath.replace('TerritoryFilterBar', 'TerritoryFilterModal'), 'utf8') + fs.readFileSync(filterBarPath.replace('TerritoryFilterBar', 'TerritoryFilterModal.styles').replace('.tsx', '.ts'), 'utf8'));
 
   // Declutter: removed redundant scope banner from modal body
   assert.ok(

@@ -151,9 +151,8 @@ export default function FollowScreen() {
             />
 
             <AppText variant="caption" color="muted">
-              A situação exibida reflete o que foi publicado no 1746. Se constar
-              como encerrado mas o problema continuar no local, consulte o
-              protocolo ou abra nova solicitação na aba Agir.
+              Situação publicada no 1746. Encerrado não prova que o problema foi
+              resolvido: se continuar, veja a aba Agir.
             </AppText>
 
             {!hydrated && (

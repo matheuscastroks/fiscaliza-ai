@@ -16,10 +16,11 @@ function load(file, dependencies) {
   return module.exports;
 }
 
-function service({ registrationFails = false, tokenFails = false } = {}) {
+function service({ registrationFails = false, tokenFails = false, projectId = 'project-1' } = {}) {
   return load('features/notifications/notificationService.ts', {
     'react-native': { Platform: { OS: 'android' } },
     'expo-device': { isDevice: true },
+    'expo-constants': { __esModule: true, default: { expoConfig: { extra: { eas: projectId ? { projectId } : {} } } } },
     'expo-notifications': {
       setNotificationHandler() {},
       AndroidImportance: { HIGH: 4 },
@@ -39,6 +40,10 @@ function service({ registrationFails = false, tokenFails = false } = {}) {
 
 test('push activation rejects when the server has not registered the token', async () => {
   await assert.rejects(service({ registrationFails: true }).registerForPushNotificationsAsync(), /registrar/i);
+});
+
+test('missing EAS projectId gives a clear Portuguese error instead of the raw Expo message', async () => {
+  await assert.rejects(service({ projectId: null }).registerForPushNotificationsAsync(), /ainda não estão disponíveis/);
 });
 
 test('push token errors reach the caller so activation can be retried', async () => {

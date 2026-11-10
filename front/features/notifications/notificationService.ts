@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import Constants from 'expo-constants';
 import { request } from '@/services/http';
 import type {
   FollowCallNotificationPayload,
@@ -70,7 +71,12 @@ export async function registerForPushNotificationsAsync(
     return null;
   }
 
-  const tokenData = await Notifications.getExpoPushTokenAsync();
+  // Sem projectId do EAS o Expo não emite token: avisa em português em vez de mostrar o erro cru.
+  const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
+  if (!projectId) {
+    throw new Error('Os alertas ainda não estão disponíveis nesta versão do aplicativo.');
+  }
+  const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
   const token = tokenData.data;
   const registered = await registerTokenWithBackend(token, municipalityId);
   if (!registered) {
