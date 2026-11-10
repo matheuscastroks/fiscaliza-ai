@@ -5,7 +5,8 @@ import {
   Pressable,
   StyleSheet,
 } from 'react-native';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+import type { OfficialCall } from '@/shared/contracts';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +21,7 @@ import { useFollowStore, type FollowStatusFilter } from '@/stores/followStore';
 import { useSavedRefresh } from '@/features/city/useSavedRefresh';
 import { useTheme, spacing, layout } from '@/theme';
 import { isOfficialCallClosed } from '@/shared/official-call-state';
+import { useShallow } from 'zustand/react/shallow';
 
 export default function FollowScreen() {
   const { colors, isDark } = useTheme();
@@ -30,7 +32,7 @@ export default function FollowScreen() {
     persistenceError,
     statusFilter,
     setStatusFilter,
-  } = useFollowStore();
+  } = useFollowStore(useShallow((s) => ({ savedCalls: s.savedCalls, hydrated: s.hydrated, persistenceError: s.persistenceError, statusFilter: s.statusFilter, setStatusFilter: s.setStatusFilter })));
   const { refresh, refreshing, error } = useSavedRefresh();
 
   const openCount = useMemo(
@@ -53,6 +55,18 @@ export default function FollowScreen() {
             : !isOfficialCallClosed(c)),
       ),
     [savedCalls, statusFilter],
+  );
+
+  const renderCall = useCallback(
+    ({ item }: { item: OfficialCall }) => (
+      <OfficialCallRow
+        call={item}
+        onPress={() =>
+          router.push({ pathname: '/OfficialCallDetailsScreen', params: { id: item.id } })
+        }
+      />
+    ),
+    [],
   );
 
   return (
@@ -178,17 +192,7 @@ export default function FollowScreen() {
             />
           ) : undefined
         }
-        renderItem={({ item }) => (
-          <OfficialCallRow
-            call={item}
-            onPress={() =>
-              router.push({
-                pathname: '/OfficialCallDetailsScreen',
-                params: { id: item.id },
-              })
-            }
-          />
-        )}
+        renderItem={renderCall}
       />
     </AppScreen>
   );

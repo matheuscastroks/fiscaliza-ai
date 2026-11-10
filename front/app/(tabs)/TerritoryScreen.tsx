@@ -47,6 +47,7 @@ import { FacilityLoadMoreButton } from '@/components/territory/FacilityLoadMoreB
 import { fontSizes } from '@/theme/typography';
 import { lightColors } from '@/theme/colors';
 import { elevation } from '@/theme/elevation';
+import { OPEN_STATUS } from '@/features/city/callStatus';
 
 type TerritoryMapRegion = {
   latitude: number;
@@ -207,7 +208,7 @@ export function TerritoryContent() {
     if (routeNeighborhoodId && !neighborhoods.data) return;
     appliedRouteKey.current = routeKey;
     if (target) setNeighborhood(target.name);
-    setStatus('Não Encerrado');
+    setStatus(OPEN_STATUS);
     setMacroTheme('all');
     setServiceType('all');
     setSearch('');
@@ -215,9 +216,9 @@ export function TerritoryContent() {
     setAreaOnly(false);
     setAppliedBounds(null);
     if (routeLayer === 'official') setTerritoryDomain('calls');
-    else if (['school', 'health', 'square'].includes(routeLayer || '')) {
+    else if (routeLayer === 'school' || routeLayer === 'health' || routeLayer === 'square') {
       setTerritoryDomain('facilities');
-      setFacilityLayers([routeLayer as 'school']);
+      setFacilityLayers([routeLayer]);
     }
   }, [
     routeNeighborhoodId, routeLayer, neighborhoods.data, setNeighborhood,
@@ -487,7 +488,7 @@ export function TerritoryContent() {
     router.setParams({ neighborhoodId: undefined, layer: undefined, startDate: undefined, endDate: undefined });
     setSelectedId(null);
     setSelectedCluster(null);
-    setStatus('Não Encerrado');
+    setStatus(OPEN_STATUS);
     setNeighborhood('');
     setAreaOnly(false);
     setAppliedBounds(null);
@@ -538,7 +539,7 @@ export function TerritoryContent() {
         ...(layers.includes('official') ? [officialCalls.refetch()] : []),
         ...(neighborhoodId ? [boundary.refetch()] : []),
         ...Object.entries(facilityQueries)
-          .filter(([k]) => facilitiesConfirmed && layers.includes(k as 'school'))
+          .filter(([k]) => facilitiesConfirmed && (layers as string[]).includes(k))
           .map(([, q]) => q.refetch()),
       ]);
     } finally {

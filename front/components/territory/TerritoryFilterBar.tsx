@@ -37,8 +37,10 @@ import {
 import { fontSizes } from '@/theme/typography';
 import { lightColors } from '@/theme/colors';
 import { elevation } from '@/theme/elevation';
+import { CLOSED_STATUS, OPEN_STATUS } from '@/features/city/callStatus';
+import type { TerritoryLayer } from '@/features/territory/selectors';
 
-export type TerritoryLayer = 'official' | 'school' | 'health' | 'square';
+export type { TerritoryLayer };
 
 export interface FacilityLayerQuerySummary {
   isLoading: boolean;
@@ -291,14 +293,14 @@ function TerritoryFilterBarComponent({
               {/* Toggle Inline de Situação: Todas -> Abertos -> Encerrados */}
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={`Situação: ${status === 'Não Encerrado' ? 'Abertos' : status === 'Encerrado' ? 'Encerrados' : 'Todas'}. Toque para alternar.`}
+                accessibilityLabel={`Situação: ${status === OPEN_STATUS ? 'Abertos' : status === CLOSED_STATUS ? 'Encerrados' : 'Todas'}. Toque para alternar.`}
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   const next =
                     status === 'all'
-                      ? 'Não Encerrado'
-                      : status === 'Não Encerrado'
-                        ? 'Encerrado'
+                      ? OPEN_STATUS
+                      : status === OPEN_STATUS
+                        ? CLOSED_STATUS
                         : 'all';
                   onStatusChange(next);
                 }}
@@ -309,9 +311,9 @@ function TerritoryFilterBarComponent({
               >
                 <Ionicons
                   name={
-                    status === 'Não Encerrado'
+                    status === OPEN_STATUS
                       ? 'alert-circle'
-                      : status === 'Encerrado'
+                      : status === CLOSED_STATUS
                         ? 'checkmark-circle'
                         : 'funnel-outline'
                   }
@@ -325,9 +327,9 @@ function TerritoryFilterBarComponent({
                     status !== 'all' && styles.quickChipTextActive,
                   ]}
                 >
-                  {status === 'Não Encerrado'
+                  {status === OPEN_STATUS
                     ? 'Abertos'
-                    : status === 'Encerrado'
+                    : status === CLOSED_STATUS
                       ? 'Encerrados'
                       : 'Situação'}
                 </AppText>
@@ -718,8 +720,8 @@ function TerritoryFilterModalComponent({
               <View style={styles.segmentContainer}>
                 {[
                   { value: 'all', label: 'Todas', dotColor: null },
-                  { value: 'Não Encerrado', label: 'Abertos', dotColor: colors.completed },
-                  { value: 'Encerrado', label: 'Encerrados', dotColor: colors.muted },
+                  { value: OPEN_STATUS, label: 'Abertos', dotColor: colors.completed },
+                  { value: CLOSED_STATUS, label: 'Encerrados', dotColor: colors.muted },
                 ].map((opt) => {
                   const isSelected = status === opt.value;
                   return (

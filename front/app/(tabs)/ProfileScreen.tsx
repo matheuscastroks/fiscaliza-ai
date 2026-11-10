@@ -32,6 +32,7 @@ import { PostalCodeSheet } from '@/components/profile/PostalCodeSheet';
 import { layout, spacing } from '@/theme';
 import { fontSizes } from '@/theme/typography';
 import { IconTile } from '@/components/ui/IconTile';
+import { useShallow } from 'zustand/react/shallow';
 
 type MenuItem = {
   label: string;
@@ -93,7 +94,7 @@ export default function ProfileScreen() {
   const styles = useThemedStyles(createStyles);
   const insets = useSafeAreaInsets();
 
-  const { user, deleteAccount } = useAuthStore();
+  const { user, deleteAccount } = useAuthStore(useShallow((s) => ({ user: s.user, deleteAccount: s.deleteAccount })));
   const savedCalls = useFollowStore((s) => s.savedCalls);
   const places = usePlacesStore((s) => s.places);
 

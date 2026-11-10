@@ -21,6 +21,7 @@ import { layout, spacing, useTheme } from '@/theme';
 import type { TerritorySelection } from './types';
 import { fontSizes } from '@/theme/typography';
 import { lightColors } from '@/theme/colors';
+import { formatRadius } from '@/features/places/placeDisplay';
 
 export function PlaceSelector({
   prompt = false,
@@ -66,9 +67,7 @@ export function PlaceSelector({
 
   const radiusShort =
     selection.kind === 'radius' || selection.kind === 'pending-current'
-      ? selection.radiusMeters >= 1000
-        ? `${selection.radiusMeters / 1000} km`
-        : `${selection.radiusMeters} m`
+      ? formatRadius(selection.radiusMeters)
       : '';
 
   const title = areaOnly

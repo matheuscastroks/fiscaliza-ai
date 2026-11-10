@@ -41,6 +41,7 @@ import {
   InstrumentSans_600SemiBold,
   InstrumentSans_700Bold,
 } from '@expo-google-fonts/instrument-sans';
+import { useShallow } from 'zustand/react/shallow';
 export const unstable_settings = { anchor: '(tabs)' };
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -59,7 +60,7 @@ export default function RootLayout() {
     InstrumentSans_600SemiBold,
     InstrumentSans_700Bold,
   });
-  const { isReady, isAuthenticated, initialize, user } = useAuthStore();
+  const { isReady, isAuthenticated, initialize, user } = useAuthStore(useShallow((s) => ({ isReady: s.isReady, isAuthenticated: s.isAuthenticated, initialize: s.initialize, user: s.user })));
   const segments: readonly string[] = useSegments();
   useEffect(() => {
     void initialize();

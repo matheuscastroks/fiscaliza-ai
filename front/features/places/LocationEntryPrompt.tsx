@@ -7,6 +7,7 @@ import { usePlacesStore } from '@/stores/placesStore';
 import { layout, spacing, useTheme } from '@/theme';
 import { fontSizes } from '@/theme/typography';
 import { lightColors } from '@/theme/colors';
+import { useShallow } from 'zustand/react/shallow';
 
 export function LocationEntryPrompt({
   onLocate,
@@ -20,7 +21,7 @@ export function LocationEntryPrompt({
   compact?: boolean;
 }) {
   const { colors, isDark } = useTheme();
-  const { hydrated, promptSeen, dismissPrompt } = usePlacesStore();
+  const { hydrated, promptSeen, dismissPrompt } = usePlacesStore(useShallow((s) => ({ hydrated: s.hydrated, promptSeen: s.promptSeen, dismissPrompt: s.dismissPrompt })));
 
   if (!hydrated || promptSeen) return null;
 

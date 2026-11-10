@@ -3,13 +3,16 @@
  * com imagens de alta resolução (Unsplash) e gradientes otimizados.
  */
 
+import type { Ionicons } from '@expo/vector-icons';
 import { resolveServiceThemeId } from '@/shared/service-themes';
+
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
 import { categoryPalette } from '@/theme/palette';
 
 export interface ServiceCategoryTheme {
   id: string;
   label: string;
-  icon: string;
+  icon: IconName;
   color: string;
   imageUrl: string;
 }

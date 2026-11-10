@@ -14,18 +14,7 @@ export function officialCallStatus(
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
-  const color =
-    key === 'aberto'
-      ? colors.info
-      : key === 'em andamento'
-        ? colors.primary
-        : key === 'pendente'
-          ? colors.attention
-          : key === 'fechado com solucao'
-            ? colors.completed
-            : ['cancelado', 'sem possibilidade de atendimento'].includes(key)
-              ? colors.risk
-              : colors.muted;
+  const color = officialStatusColor(label, colors);
   return { label, color };
 }
 
@@ -73,4 +62,27 @@ export function resolveOfficialCallDeadline(
     label: raw,
     isOverdue: rawLower.includes('fora do prazo') || rawLower.includes('vencido'),
   };
+}
+
+/** Cor semântica de uma situação publicada (texto do servidor). A cor acompanha o texto, nunca o substitui. */
+export function officialStatusColor(label: string, colors: ThemeColors): string {
+  const key = label
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+  if (key === 'aberto') return colors.info;
+  if (key === 'em andamento') return colors.primary;
+  if (key === 'pendente') return colors.attention;
+  if (
+    key === 'fechado com solucao' ||
+    ['atendido', 'procedente', 'concluido', 'executado'].some((word) => key.includes(word))
+  )
+    return colors.completed;
+  if (
+    ['cancelado', 'improcedente', 'sem possibilidade', 'indeferido'].some((word) => key.includes(word))
+  )
+    return colors.risk;
+  if (['vistoriado', 'em analise', 'orientado', 'encaminhado'].some((word) => key.includes(word)))
+    return colors.primary;
+  return colors.muted;
 }
