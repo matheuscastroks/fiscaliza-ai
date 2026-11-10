@@ -50,7 +50,9 @@ export function mapRawRowToOfficialCall(row: RawBigQuery1746Row) {
     lng = row.longitude;
   }
 
-  const openedAt = extractDateValue(row.data_inicio) || new Date().toISOString();
+  // Sem data de abertura publicada o chamado não é importado: inventar a data
+  // de hoje distorceria períodos e ordenação.
+  const openedAt = extractDateValue(row.data_inicio);
   const closedAt = extractDateValue(row.data_fim);
   const targetDate = extractDateValue(row.data_alvo_finalizacao);
   const diagnosisTargetDate = extractDateValue(row.data_alvo_diagnostico);

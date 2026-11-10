@@ -5,6 +5,7 @@ import {
 import { parseRadiusFilter, officialRadiusCondition } from './official-call-radius.js';
 import { resolveTerritoryLocation } from './territory-location.js';
 import { queryOfficialOverview } from './official-call-overview.js';
+import { dataVersion, type ResponseCache } from './response-cache.js';
 import {
   callCursorScope,
   decodeCallCursor,
@@ -105,13 +106,103 @@ function buildPeriodCondition(periodDaysRaw?: string): SQL | undefined {
   return sql`${officialCalls.openedAt} >= (SELECT MAX(opened_at) - (${periodDays} * INTERVAL '1 day') FROM official_calls)`;
 }
 
+/** Escapa % e _ para o texto digitado casar literalmente num ILIKE. */
+export const escapeLike = (value: string) => value.replace(/[\\%_]/g, '\\$&');
+
+const text = (maxLength: number) => ({ type: 'string', maxLength });
+const digits = (max: number) => ({
+  type: 'string',
+  pattern: `^[0-9]{1,${max}}$`,
+});
+// Cada parâmetro é um texto simples; repetir o parâmetro (?search=a&search=b) dá 400.
+const filterProperties = {
+  neighborhoodId: text(100),
+  bairro: text(100),
+  tipo: text(150),
+  tema: text(50),
+  situacao: text(100),
+  periodDays: digits(3),
+  startDate: text(32),
+  endDate: text(32),
+};
+const callsQuerySchema = {
+  type: 'object',
+  properties: {
+    ...filterProperties,
+    page: digits(4),
+    limit: digits(4),
+    cursor: text(2048),
+    includeTotal: { type: 'string', enum: ['true', 'false'] },
+    subtipo: text(200),
+    hasCoordinates: { type: 'string', enum: ['true', 'false'] },
+    search: text(100),
+    centerLatitude: text(32),
+    centerLongitude: text(32),
+    radiusMeters: text(16),
+    north: text(32),
+    south: text(32),
+    east: text(32),
+    west: text(32),
+  },
+};
+const overviewQuerySchema = { type: 'object', properties: filterProperties };
+const MAX_OFFSET_PAGE = 500;
+
+type FilterQuery = {
+  neighborhoodId?: string;
+  bairro?: string;
+  tipo?: string;
+  tema?: string;
+  situacao?: string;
+  periodDays?: string;
+  startDate?: string;
+  endDate?: string;
+};
+
 export function registerOfficialCallsRoutes(
   app: FastifyInstance,
   db: Database,
   pool: pg.Pool,
   ok: (data: unknown) => { success: boolean; data: unknown },
   fail: (statusCode: number, message: string) => Error,
+  cache: ResponseCache,
 ) {
+  // Filtros compartilhados pela lista e pelo panorama.
+  async function commonConditions(query: FilterQuery) {
+    const conditions: SQL[] = [eq(officialCalls.municipalityId, '3304557')];
+    if (query.neighborhoodId && query.bairro)
+      throw fail(400, 'Use um identificador de bairro ou nome, não ambos.');
+    const territory = query.neighborhoodId
+      ? await officialTerritoryScope(db, query.neighborhoodId)
+      : { confirmed: true, where: undefined };
+    if (territory.where) conditions.push(territory.where);
+    if (query.bairro)
+      conditions.push(
+        ilike(officialCalls.neighborhoodName, escapeLike(query.bairro.trim())),
+      );
+    if (query.tipo)
+      conditions.push(eq(officialCalls.serviceType, query.tipo.trim()));
+    if (query.tema) {
+      const tema = query.tema.trim();
+      if (!isMacroThemeId(tema)) throw fail(400, 'Tema de serviço inválido.');
+      const types = serviceTypesForTheme(await distinctServiceTypes(db), tema);
+      conditions.push(
+        types.length > 0 ? inArray(officialCalls.serviceType, types) : sql`false`,
+      );
+    }
+    if (query.situacao)
+      conditions.push(
+        eq(officialCalls.officialSituation, query.situacao.trim()),
+      );
+    const periodCondition =
+      query.startDate || query.endDate
+        ? undefined
+        : buildPeriodCondition(query.periodDays);
+    if (periodCondition) conditions.push(periodCondition);
+    conditions.push(...officialDateConditions(query.startDate, query.endDate));
+    return { conditions, territory };
+  }
+
   // 1. List calls with rich filtering, visible map area bounding box, period, and pagination
   app.get<{
     Querystring: {
@@ -138,7 +229,7 @@ export function registerOfficialCallsRoutes(
       east?: string;
       west?: string;
     };
-  }>('/api/rio1746/calls', async (req) => {
+  }>('/api/rio1746/calls', { schema: { querystring: callsQuerySchema } }, async (req) => {
     const radius = parseRadiusFilter(req.query);
     if (radius) {
       const location = await resolveTerritoryLocation(db, { latitude: radius.centerLatitude, longitude: radius.centerLongitude });
@@ -149,6 +240,8 @@ export function registerOfficialCallsRoutes(
       1000,
       Math.max(1, parseInt(req.query.limit || '100', 10) || 100),
     );
+    if (page > MAX_OFFSET_PAGE)
+      throw fail(400, 'Use o cursor para continuar a lista.');
     const offset = (page - 1) * limit;
     if (req.query.cursor && page !== 1)
       throw fail(400, 'Use cursor ou página, não ambos.');
@@ -162,31 +255,8 @@ export function registerOfficialCallsRoutes(
       }
     }
 
-    const conditions: SQL[] = [eq(officialCalls.municipalityId, '3304557')];
+    const { conditions, territory } = await commonConditions(req.query);
     if (radius) conditions.push(officialRadiusCondition(radius));
-    if (req.query.neighborhoodId && req.query.bairro)
-      throw fail(400, 'Use um identificador de bairro ou nome, não ambos.');
-    const territory = req.query.neighborhoodId
-      ? await officialTerritoryScope(db, req.query.neighborhoodId)
-      : { confirmed: true, where: undefined };
-    if (territory.where) conditions.push(territory.where);
-
-    if (req.query.bairro) {
-      conditions.push(
-        ilike(officialCalls.neighborhoodName, req.query.bairro.trim()),
-      );
-    }
-    if (req.query.tipo) {
-      conditions.push(eq(officialCalls.serviceType, req.query.tipo.trim()));
-    }
-    if (req.query.tema) {
-      const tema = req.query.tema.trim();
-      if (!isMacroThemeId(tema)) throw fail(400, 'Tema de serviço inválido.');
-      const types = serviceTypesForTheme(await distinctServiceTypes(db), tema);
-      conditions.push(
-        types.length > 0 ? inArray(officialCalls.serviceType, types) : sql`false`,
-      );
-    }
     if (req.query.subtipo) {
       conditions.push(
         eq(officialCalls.serviceSubtype, req.query.subtipo.trim()),
@@ -202,19 +272,8 @@ export function registerOfficialCallsRoutes(
       conditions.push(isNotNull(officialCalls.longitude));
     }
 
-    const periodCondition =
-      req.query.startDate || req.query.endDate
-        ? undefined
-        : buildPeriodCondition(req.query.periodDays);
-    if (periodCondition) {
-      conditions.push(periodCondition);
-    }
-
-    conditions.push(
-      ...officialDateConditions(req.query.startDate, req.query.endDate),
-    );
     if (req.query.search) {
-      const term = `%${req.query.search.trim()}%`;
+      const term = `%${escapeLike(req.query.search.trim())}%`;
       const searchCond = or(
         ilike(officialCalls.serviceType, term),
         ilike(officialCalls.serviceSubtype, term),
@@ -319,6 +378,10 @@ export function registerOfficialCallsRoutes(
 
   // 3. Filter options available in the current database
   app.get('/api/rio1746/filters', async () => {
+    const version = await dataVersion(db);
+    return cache.get('filters', version, () => loadFilters());
+  });
+  async function loadFilters() {
     const [bairrosResult, tiposResult, subtiposResult, situacoesResult] =
       await Promise.all([
         db
@@ -351,7 +414,7 @@ export function registerOfficialCallsRoutes(
         .map((r) => r.situation)
         .filter(Boolean) as string[],
     });
-  });
+  }
 
   // 4. Aggregated territorial overview and SLA/outcome indicators
   app.get<{
@@ -365,51 +428,16 @@ export function registerOfficialCallsRoutes(
       startDate?: string;
       endDate?: string;
     };
-  }>('/api/rio1746/overview', async (req) => {
-    const conditions: SQL[] = [eq(officialCalls.municipalityId, '3304557')];
-    if (req.query.neighborhoodId && req.query.bairro)
-      throw fail(400, 'Use um identificador de bairro ou nome, não ambos.');
-    const territory = req.query.neighborhoodId
-      ? await officialTerritoryScope(db, req.query.neighborhoodId)
-      : { confirmed: true, where: undefined };
-    if (territory.where) conditions.push(territory.where);
-    if (req.query.bairro) {
-      conditions.push(
-        ilike(officialCalls.neighborhoodName, req.query.bairro.trim()),
-      );
-    }
-    if (req.query.tipo) {
-      conditions.push(eq(officialCalls.serviceType, req.query.tipo.trim()));
-    }
-    if (req.query.tema) {
-      const tema = req.query.tema.trim();
-      if (!isMacroThemeId(tema)) throw fail(400, 'Tema de serviço inválido.');
-      const types = serviceTypesForTheme(await distinctServiceTypes(db), tema);
-      conditions.push(
-        types.length > 0 ? inArray(officialCalls.serviceType, types) : sql`false`,
-      );
-    }
-    if (req.query.situacao) {
-      conditions.push(
-        eq(officialCalls.officialSituation, req.query.situacao.trim()),
-      );
-    }
-    const periodCondition =
-      req.query.startDate || req.query.endDate
-        ? undefined
-        : buildPeriodCondition(req.query.periodDays);
-    if (periodCondition) {
-      conditions.push(periodCondition);
-    }
+  }>('/api/rio1746/overview', { schema: { querystring: overviewQuerySchema } }, async (req) => {
+    const version = await dataVersion(db);
+    return cache.get(`overview:${JSON.stringify(req.query)}`, version, async () => {
+      const { conditions, territory } = await commonConditions(req.query);
+      const whereClause = and(...conditions);
 
-    conditions.push(
-      ...officialDateConditions(req.query.startDate, req.query.endDate),
-    );
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-
-    return ok({
-      ...(await queryOfficialOverview(db, whereClause)),
-      territoryConfirmed: territory.confirmed,
+      return ok({
+        ...(await queryOfficialOverview(db, whereClause)),
+        territoryConfirmed: territory.confirmed,
+      });
     });
   });
 

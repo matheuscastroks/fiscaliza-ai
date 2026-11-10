@@ -49,5 +49,10 @@ Limite conhecido: o envio real à Expo e o recebimento no celular não foram exe
 - Backend: tabela `saved_calls` (migração `0017`, apaga com a conta), rotas `GET /api/v1/saved-calls`, `PUT`/`DELETE /api/v1/saved-calls/:id`, `POST .../merge` (até 200) e `DELETE` da lista inteira; limite de 500 por conta; só para quem tem conta e município. Teste: outra sessão da mesma conta enxerga a lista, outra conta não.
 - App: com conta, a lista vem do servidor e o aparelho guarda uma cópia para abrir sem internet. O que muda sem rede fica pendente (`pending`) e é enviado depois; a lista salva antes do login é adotada pela conta uma vez e então removida do armazenamento anônimo. Sem conta, tudo continua só no aparelho. Lugares, bairro preferido e aparência continuam por aparelho. C (testes de adoção, outro aparelho e pendência offline); **não verificado em dois aparelhos reais**.
 
+## Fase 2 — Dados, consultas e desempenho
+Detalhes e medição em [`evidence/2026-11-10-backend-fase2.md`](evidence/2026-11-10-backend-fase2.md). Resumo: validação e escape nas rotas 1746, teto de página, filtros unificados, cache em memória invalidado pela sincronização e `Cache-Control` nas leituras públicas, painel 183 → 89 ms de mediana (medição local), geometrias dos bairros em memória, migração `0018` (índices e vínculo), importação mais segura (rejeita linha sem data, não reescreve linha igual, paginação por chave, repetição) e testes que recusam banco que não termine em `_test`.
+
+Desvio do plano: transação por página (2.500 linhas) e não por partição inteira, para não manter uma transação aberta durante as consultas ao BigQuery.
+
 ## Fases seguintes
-Fase 2 dados, consultas e cache; Fase 3 infra (Dockerfile, backup, agendador, CI, Expo); Fase 4 endurecimento e higiene. Cada uma registra aqui o que foi feito e o que ficou de fora.
+Fase 3 infra (Dockerfile, backup, agendador, CI, Expo); Fase 4 endurecimento e higiene. Cada uma registra aqui o que foi feito e o que ficou de fora.

@@ -21,6 +21,8 @@ export interface ImportResult {
   imported: number;
   updated: number;
   skippedDuplicates: number;
+  /** Linhas descartadas por não terem data de abertura publicada. */
+  rejected: number;
   durationMs: number;
 }
 
@@ -43,6 +45,55 @@ export interface ImportPartitionOptions {
   maxRecords?: number;
   /** Number of rows fetched per BigQuery page (default: 2500). */
   pageSize?: number;
+  /** Tentativas extras para uma consulta ao BigQuery que falhou (com espera crescente). */
+  retries?: number;
+  /** Espera base entre tentativas, em ms (padrão 1000). */
+  retryDelayMs?: number;
+}
+
+// Colunas que vêm da fonte oficial (tudo que o upsert pode mudar).
+const CONTENT_COLUMNS = [
+  'service_category',
+  'service_type',
+  'service_subtype',
+  'organization_name',
+  'official_status',
+  'official_situation',
+  'official_situation_type',
+  'status_justification',
+  'closed_at',
+  'target_date',
+  'diagnosis_target_date',
+  'within_deadline',
+  'time_remaining',
+  'time_unit',
+  'deadline_type',
+  'complaints_count',
+  'street_name',
+  'neighborhood_id',
+  'neighborhood_name',
+  'subprefecture',
+  'latitude',
+  'longitude',
+  'source_partition_date',
+];
+
+async function withRetries<T>(
+  run: () => Promise<T>,
+  retries: number,
+  baseDelayMs: number,
+): Promise<T> {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await run();
+    } catch (error) {
+      // Estourar o orçamento não é falha transitória.
+      if (error instanceof SyncBudgetExceeded || attempt >= retries) throw error;
+      await new Promise((resolve) =>
+        setTimeout(resolve, baseDelayMs * 2 ** attempt),
+      );
+    }
+  }
 }
 
 export function deduplicateMappedCalls<T extends { externalId: string }>(
@@ -77,12 +128,13 @@ export async function importPartition(
   const budget = normalizedOptions.budget ?? createSyncBudget();
   let coverage: SyncCoverage = 'partial';
 
-  let offset = 0;
   let pagesProcessed = 0;
   let totalFetched = 0;
   let imported = 0;
   let updated = 0;
   let skippedDuplicates = 0;
+  let rejected = 0;
+  let afterId: string | undefined;
 
   while (true) {
     const remainingBudget =
@@ -97,12 +149,17 @@ export async function importPartition(
     const { query, params } = buildPartitionCallsQuery(
       partitionDate,
       fetchLimit,
-      offset,
+      0,
+      afterId,
     );
 
     let rows: unknown[];
     try {
-      rows = await runBudgetedQuery(bq, { query, params }, budget);
+      rows = await withRetries(
+        () => runBudgetedQuery(bq, { query, params }, budget),
+        normalizedOptions.retries ?? 0,
+        normalizedOptions.retryDelayMs ?? 1000,
+      );
     } catch (error) {
       if (error instanceof SyncBudgetExceeded) break;
       throw error;
@@ -117,111 +174,125 @@ export async function importPartition(
     pagesProcessed += 1;
     totalFetched += rawRows.length;
 
+    afterId = String(rawRows[rawRows.length - 1].id_chamado);
     const mapped = rawRows.map(mapRawRowToOfficialCall);
-    const deduped = deduplicateMappedCalls(mapped);
+    const withDate = mapped.filter(
+      (call): call is typeof call & { openedAt: string } => call.openedAt !== null,
+    );
+    rejected += mapped.length - withDate.length;
+    const deduped = deduplicateMappedCalls(withDate);
     skippedDuplicates += deduped.skippedDuplicates;
 
-    // Insert in batches of 200 to stay well within pg parameter limits
+    // Uma transação por página: ou a página inteira entra, ou nada dela.
+    // Lotes de 200 para ficar longe do limite de parâmetros do pg.
     const batchSize = 200;
-    for (let i = 0; i < deduped.unique.length; i += batchSize) {
-      const chunk = deduped.unique.slice(i, i + batchSize);
-      const values = chunk.map((c) => ({
-        ...c,
-        openedAt: new Date(c.openedAt),
-        closedAt: c.closedAt ? new Date(c.closedAt) : null,
-        targetDate: c.targetDate ? new Date(c.targetDate) : null,
-        diagnosisTargetDate: c.diagnosisTargetDate
-          ? new Date(c.diagnosisTargetDate)
-          : null,
-        sourcePartitionDate: c.sourcePartitionDate || null,
-        importedAt: new Date(),
-        updatedAt: new Date(),
-      }));
+    const pageChanges: CallStatusChange[] = [];
+    await db.transaction(async (tx) => {
+      for (let i = 0; i < deduped.unique.length; i += batchSize) {
+        const chunk = deduped.unique.slice(i, i + batchSize);
+        const values = chunk.map((c) => ({
+          ...c,
+          openedAt: new Date(c.openedAt),
+          closedAt: c.closedAt ? new Date(c.closedAt) : null,
+          targetDate: c.targetDate ? new Date(c.targetDate) : null,
+          diagnosisTargetDate: c.diagnosisTargetDate
+            ? new Date(c.diagnosisTargetDate)
+            : null,
+          sourcePartitionDate: c.sourcePartitionDate || null,
+          importedAt: new Date(),
+          updatedAt: new Date(),
+        }));
 
-      const previous = await db
-        .select({
-          externalId: officialCalls.externalId,
-          status: officialCalls.officialStatus,
-          situation: officialCalls.officialSituation,
-        })
-        .from(officialCalls)
-        .where(
-          inArray(
-            officialCalls.externalId,
-            chunk.map((c) => c.externalId),
-          ),
-        );
-      const before = new Map(previous.map((row) => [row.externalId, row]));
-      const changes: CallStatusChange[] = chunk
-        .filter((c) => {
+        const previous = await tx
+          .select({
+            externalId: officialCalls.externalId,
+            status: officialCalls.officialStatus,
+            situation: officialCalls.officialSituation,
+          })
+          .from(officialCalls)
+          .where(
+            inArray(
+              officialCalls.externalId,
+              chunk.map((c) => c.externalId),
+            ),
+          );
+        const before = new Map(previous.map((row) => [row.externalId, row]));
+        for (const c of chunk) {
           const old = before.get(c.externalId);
-          return (
+          if (
             old !== undefined &&
             (old.status !== c.officialStatus ||
               old.situation !== c.officialSituation)
-          );
-        })
-        .map((c) => ({
-          callId: c.id,
-          serviceType: c.serviceType,
-          status: c.officialStatus,
-          situation: c.officialSituation,
-        }));
+          )
+            pageChanges.push({
+              callId: c.id,
+              serviceType: c.serviceType,
+              status: c.officialStatus,
+              situation: c.officialSituation,
+            });
+        }
 
-      const upsertedRows = await db
-        .insert(officialCalls)
-        .values(values)
-        .onConflictDoUpdate({
-          target: officialCalls.externalId,
-          set: {
-            serviceCategory: sql`excluded.service_category`,
-            serviceType: sql`excluded.service_type`,
-            serviceSubtype: sql`excluded.service_subtype`,
-            organizationName: sql`excluded.organization_name`,
-            officialStatus: sql`excluded.official_status`,
-            officialSituation: sql`excluded.official_situation`,
-            officialSituationType: sql`excluded.official_situation_type`,
-            statusJustification: sql`excluded.status_justification`,
-            closedAt: sql`excluded.closed_at`,
-            targetDate: sql`excluded.target_date`,
-            diagnosisTargetDate: sql`excluded.diagnosis_target_date`,
-            withinDeadline: sql`excluded.within_deadline`,
-            timeRemaining: sql`excluded.time_remaining`,
-            timeUnit: sql`excluded.time_unit`,
-            deadlineType: sql`excluded.deadline_type`,
-            complaintsCount: sql`excluded.complaints_count`,
-            streetName: sql`excluded.street_name`,
-            neighborhoodId: sql`excluded.neighborhood_id`,
-            neighborhoodName: sql`excluded.neighborhood_name`,
-            subprefecture: sql`excluded.subprefecture`,
-            latitude: sql`excluded.latitude`,
-            longitude: sql`excluded.longitude`,
-            sourcePartitionDate: sql`excluded.source_partition_date`,
-            updatedAt: new Date(),
-          },
-        })
-        .returning({
-          inserted: sql<boolean>`(xmax = 0)`,
-        });
+        const upsertedRows = await tx
+          .insert(officialCalls)
+          .values(values)
+          .onConflictDoUpdate({
+            target: officialCalls.externalId,
+            set: {
+              serviceCategory: sql`excluded.service_category`,
+              serviceType: sql`excluded.service_type`,
+              serviceSubtype: sql`excluded.service_subtype`,
+              organizationName: sql`excluded.organization_name`,
+              officialStatus: sql`excluded.official_status`,
+              officialSituation: sql`excluded.official_situation`,
+              officialSituationType: sql`excluded.official_situation_type`,
+              statusJustification: sql`excluded.status_justification`,
+              closedAt: sql`excluded.closed_at`,
+              targetDate: sql`excluded.target_date`,
+              diagnosisTargetDate: sql`excluded.diagnosis_target_date`,
+              withinDeadline: sql`excluded.within_deadline`,
+              timeRemaining: sql`excluded.time_remaining`,
+              timeUnit: sql`excluded.time_unit`,
+              deadlineType: sql`excluded.deadline_type`,
+              complaintsCount: sql`excluded.complaints_count`,
+              streetName: sql`excluded.street_name`,
+              neighborhoodId: sql`excluded.neighborhood_id`,
+              neighborhoodName: sql`excluded.neighborhood_name`,
+              subprefecture: sql`excluded.subprefecture`,
+              latitude: sql`excluded.latitude`,
+              longitude: sql`excluded.longitude`,
+              sourcePartitionDate: sql`excluded.source_partition_date`,
+              updatedAt: new Date(),
+            },
+            // Linha igual à que já existe não é reescrita.
+            setWhere: sql`(${sql.raw(
+              CONTENT_COLUMNS.map((column) => `official_calls.${column}`).join(', '),
+            )}) IS DISTINCT FROM (${sql.raw(
+              CONTENT_COLUMNS.map((column) => `excluded.${column}`).join(', '),
+            )})`,
+          })
+          .returning({
+            inserted: sql<boolean>`(xmax = 0)`,
+          });
 
-      if (changes.length > 0 && normalizedOptions.onStatusChanges) {
-        try {
-          await normalizedOptions.onStatusChanges(changes);
-        } catch {
-          // Aviso é secundário: o dado já foi gravado.
+        for (const row of upsertedRows) {
+          if (row.inserted) {
+            imported += 1;
+          } else {
+            updated += 1;
+          }
         }
       }
+    });
 
-      for (const row of upsertedRows) {
-        if (row.inserted) {
-          imported += 1;
-        } else {
-          updated += 1;
-        }
+    // Só avisa depois de a página estar gravada.
+    if (pageChanges.length > 0 && normalizedOptions.onStatusChanges) {
+      try {
+        await normalizedOptions.onStatusChanges(pageChanges);
+      } catch {
+        // Aviso é secundário: o dado já foi gravado.
       }
     }
 
-    offset += rawRows.length;
     if (rawRows.length < fetchLimit) {
       coverage = 'complete';
       break;
@@ -264,6 +335,7 @@ export async function importPartition(
     imported,
     updated,
     skippedDuplicates,
+    rejected,
     durationMs: Date.now() - startTime,
   };
 }

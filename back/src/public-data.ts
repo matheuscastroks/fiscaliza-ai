@@ -13,6 +13,7 @@ import {
   listPublicFacilities,
 } from './public-data-repository.js';
 import { getNeighborhoodOverview } from './neighborhood-overview.js';
+import { dataVersion, type ResponseCache } from './response-cache.js';
 import {
   boundaryDetailSchema,
   boundaryIdParams,
@@ -27,6 +28,7 @@ import {
 export function registerPublicDataRoutes(
   app: FastifyInstance,
   db: Database,
+  cache: ResponseCache,
 ): void {
   const ok = (data: unknown) => ({ success: true, data });
   const read = <T>(run: (connection: ReadDatabase) => Promise<T>) =>
@@ -157,16 +159,21 @@ export function registerPublicDataRoutes(
         response: { 200: envelope(neighborhoodOverviewSchema) },
       },
     },
-    async (req) =>
-      ok(
-        await read((connection) =>
-          getNeighborhoodOverview(
-            connection,
-            req.params.id,
-            req.query.startDate,
-            req.query.endDate,
+    async (req) => {
+      const version = await dataVersion(db);
+      const key = `neighborhood:${req.params.id}:${req.query.startDate}:${req.query.endDate}`;
+      return ok(
+        await cache.get(key, version, () =>
+          read((connection) =>
+            getNeighborhoodOverview(
+              connection,
+              req.params.id,
+              req.query.startDate,
+              req.query.endDate,
+            ),
           ),
         ),
-      ),
+      );
+    },
   );
 }

@@ -66,6 +66,7 @@ export function buildPartitionCallsQuery(
   partitionDate: string,
   limit = 2500,
   offset = 0,
+  afterId?: string,
 ): ParameterizedBigQuery {
   const safePartition = assertValidPartitionDate(partitionDate);
   const safeLimit = assertSafeBoundedInt(limit, 1, 50000, 'limit');
@@ -107,16 +108,18 @@ export function buildPartitionCallsQuery(
         FROM \`datario.dados_mestres.logradouro\`
         GROUP BY id_logradouro
       ) l ON c.id_logradouro = l.id_logradouro
-      WHERE c.data_particao = DATE(@partitionDate)
-      ORDER BY c.id_chamado ASC
-      LIMIT @limit
-      OFFSET @offset
+      WHERE c.data_particao = DATE(@partitionDate)${
+        afterId === undefined
+          ? ''
+          : '\n        AND CAST(c.id_chamado AS STRING) > @afterId'
+      }
+      ORDER BY CAST(c.id_chamado AS STRING) ASC
+      LIMIT @limit${afterId === undefined ? '\n      OFFSET @offset' : ''}
     `,
-    params: {
-      partitionDate: safePartition,
-      limit: safeLimit,
-      offset: safeOffset,
-    },
+    params:
+      afterId === undefined
+        ? { partitionDate: safePartition, limit: safeLimit, offset: safeOffset }
+        : { partitionDate: safePartition, limit: safeLimit, afterId },
   };
 }
 
