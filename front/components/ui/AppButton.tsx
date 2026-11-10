@@ -69,7 +69,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
         return 'onDestructive';
       case 'quiet':
       default:
-        return 'accent';
+        return 'ink';
     }
   };
 
