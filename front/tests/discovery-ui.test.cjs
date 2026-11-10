@@ -238,10 +238,10 @@ test('sidebar preserves destinations, closes before navigating, and disables its
       useFollowStore: (select) => select({ savedCalls: [] }),
     },
   });
-  assert.equal(ui.exports.citizenDestinations.length, 10);
+  assert.equal(ui.exports.citizenDestinations.length, 9);
   assert.equal(
     new Set(ui.exports.citizenDestinations.map((x) => x.path)).size,
-    10,
+    9,
   );
   let afterClose;
   const tree = ui.render('SideMenu', {

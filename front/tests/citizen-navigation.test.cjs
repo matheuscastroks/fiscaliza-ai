@@ -33,6 +33,7 @@ test('territorial discovery and local places remain accessible without authentic
     ['(tabs)', 'FollowScreen'],
     ['(tabs)', 'ParticipateScreen'],
     ['(tabs)', 'ProfileScreen'],
+    ['+not-found'],
     ['SettingsScreen'],
     ['PlacesScreen'],
     ['OfficialCallDetailsScreen'],

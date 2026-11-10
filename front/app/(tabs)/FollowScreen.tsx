@@ -58,7 +58,7 @@ export default function FollowScreen() {
   return (
     <AppScreen>
       <AppHeader
-        title="Acompanhar"
+        title="Salvos"
         context={
           user?.name
             ? `Conta de ${user.name.split(' ')[0]} · Seus chamados salvos`
@@ -159,12 +159,12 @@ export default function FollowScreen() {
               title={
                 savedCalls.length
                   ? 'Nenhum chamado neste filtro'
-                  : 'Guarde chamados para acompanhar'
+                  : 'Salve chamados para voltar a eles'
               }
               description={
                 savedCalls.length
                   ? 'Altere o filtro acima para Todos e veja os outros registros salvos neste aparelho.'
-                  : 'Ao explorar o mapa ou os filtros da cidade, toque no coração em qualquer chamado para acompanhar o andamento publicado pelo 1746.'
+                  : 'Ao explorar o mapa ou os filtros da cidade, toque em Salvar em qualquer chamado para voltar a ele e ver o andamento publicado pelo 1746.'
               }
               action={{
                 title: savedCalls.length

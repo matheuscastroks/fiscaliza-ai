@@ -238,7 +238,7 @@ export default function SettingsScreen() {
                   <View style={styles.tableRowContent}>
                     <AppText variant="label">Testar notificação no aparelho</AppText>
                     <AppText variant="caption" color="muted">
-                      Simula um alerta de mudança de status no 1746
+                      Envia uma notificação de teste (somente desenvolvimento)
                     </AppText>
                   </View>
 
@@ -249,7 +249,7 @@ export default function SettingsScreen() {
           </View>
 
           <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
-            Você recebe alertas automáticos sempre que a Prefeitura atualizar o andamento de um protocolo que você acompanha.
+            Quando o app sincroniza novos dados do 1746, avisamos sobre mudanças nos chamados que você salvou. O envio depende do aparelho e não é em tempo real.
           </AppText>
 
           {notificationError && (

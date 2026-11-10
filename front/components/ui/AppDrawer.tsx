@@ -29,6 +29,7 @@ const MAIN_TABS = new Set([
   'TerritoryScreen',
   'ParticipateScreen',
   'FollowScreen',
+  'ProfileScreen',
 ]);
 const DRAWER_EDGE_WIDTH = 48;
 const DRAWER_MIN_SWIPE_DISTANCE = 8;

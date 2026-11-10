@@ -62,7 +62,7 @@ export default function TabLayout() {
           tabBarLabel: 'Agir',
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons
-              name={focused ? 'megaphone' : 'megaphone-outline'}
+              name={focused ? 'chatbubbles' : 'chatbubbles-outline'}
               color={typeof color === 'string' ? color : undefined}
               size={size}
             />

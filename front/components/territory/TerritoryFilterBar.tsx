@@ -1,3 +1,5 @@
+import { IconButton } from '@/components/ui/IconButton';
+import { useMenu } from '@/components/ui/SideMenu';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import React, { memo, useMemo } from 'react';
@@ -181,7 +183,17 @@ function TerritoryFilterBarComponent({
   return (
     <View style={[styles.wrapper, padded && styles.paddedWrapper]}>
       {/* Linha 1: Barra Unificada de Busca (Cápsula de Local + Input + Filtros) */}
-      <View style={padded ? styles.paddedSection : styles.searchContainer}>
+      <View style={[padded ? styles.paddedSection : styles.searchContainer, styles.searchRow]}>
+        <IconButton
+          icon="menu"
+          variant="floating"
+          accessibilityLabel="Abrir menu"
+          onPress={() => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            useMenu.getState().setOpen(true);
+          }}
+        />
+        <View style={styles.searchGrow}>
         <CitySearch
           leftElement={locationTrigger}
           value={search}
@@ -193,6 +205,7 @@ function TerritoryFilterBarComponent({
           filterCount={filterCount}
           expanded={filtersOpen}
         />
+        </View>
       </View>
 
       {/* Linha 2: Carrossel Horizontal de Chips Rápidos de 1 Toque (Apple HIG Style) */}
@@ -944,6 +957,8 @@ export const TerritoryFilterModal = memo(TerritoryFilterModalComponent);
 
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
+    searchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+    searchGrow: { flex: 1 },
     wrapper: {
       gap: 6,
     },
