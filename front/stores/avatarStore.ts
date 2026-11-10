@@ -21,7 +21,12 @@ export const useAvatarStore = create<AvatarState>((set, get) => ({
     if (pending) return pending;
     if (get().photos[userId] !== undefined) return;
     const loading = (async () => {
-      const uri = await AsyncStorage.getItem(key(userId));
+      let uri: string | null = null;
+      try {
+        uri = await AsyncStorage.getItem(key(userId));
+      } catch {
+        // Foto local ilegível: segue com o avatar do perfil do servidor.
+      }
       set((state) => ({
         photos:
           state.photos[userId] === undefined
@@ -34,7 +39,8 @@ export const useAvatarStore = create<AvatarState>((set, get) => ({
         current?.id === userId &&
         !current.avatar?.startsWith('/api/attachments/')
       ) {
-        await get().save(userId, uri);
+        // A migração é oportunista; falha de rede não pode virar rejeição não tratada.
+        await get().save(userId, uri).catch(() => undefined);
       }
     })();
     pendingLoads.set(userId, loading);
