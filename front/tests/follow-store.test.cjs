@@ -34,7 +34,11 @@ function setupExports(storage) {
     require: (name) =>
       name === '@react-native-async-storage/async-storage'
         ? storage
-        : require(name),
+        : name === './scopedPersistence'
+          ? require('@/stores/scopedPersistence')
+          : name === '@/features/city/municipalityId'
+            ? require(name)
+            : require(name),
   });
   return module.exports;
 }
