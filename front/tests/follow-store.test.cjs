@@ -237,3 +237,82 @@ test('follow notifications only fire after the write is confirmed', async () => 
     { id: 'a', saved: false },
   ]);
 });
+
+function memoryStorage() {
+  const data = new Map();
+  return {
+    getItem: async (key) => data.get(key) ?? null,
+    setItem: async (key, value) => void data.set(key, value),
+    removeItem: async (key) => void data.delete(key),
+    keys: () => [...data.keys()],
+  };
+}
+function fakeAccount() {
+  const server = new Map();
+  const api = {
+    offline: false,
+    merged: [],
+    list: async () => {
+      if (api.offline) throw new Error('offline');
+      return [...server.values()].map((call) => ({ call, savedAt: '2026-11-01T00:00:00.000Z' }));
+    },
+    merge: async (ids) => {
+      if (api.offline) throw new Error('offline');
+      api.merged.push(...ids);
+      for (const id of ids) server.set(id, { ...sample, id });
+    },
+    remove: async (id) => {
+      if (api.offline) throw new Error('offline');
+      server.delete(id);
+    },
+    clear: async () => {
+      if (api.offline) throw new Error('offline');
+      server.clear();
+    },
+    server,
+  };
+  return api;
+}
+
+test('saved calls follow the account: anonymous list is adopted and another device sees it', async () => {
+  const storage = memoryStorage();
+  const account = fakeAccount();
+  const first = setupExports(storage);
+  first.setSavedCallsAccountApi(account);
+  await first.useFollowStore.getState().setScope(null);
+  await first.useFollowStore.getState().toggleSavedCall(sample);
+  await first.useFollowStore.getState().setScope('user-1');
+  assert.deepEqual([...account.merged], ['a']);
+  assert.equal(first.useFollowStore.getState().savedCalls[0].id, 'a');
+  assert.equal(storage.keys().some((key) => key.includes(':saved:') && !key.includes('user-1')), false);
+
+  // Outro aparelho: armazenamento vazio, mesma conta.
+  const second = setupExports(memoryStorage());
+  second.setSavedCallsAccountApi(account);
+  await second.useFollowStore.getState().setScope('user-1');
+  assert.deepEqual([...second.useFollowStore.getState().savedCalls.map((c) => c.id)], ['a']);
+});
+
+test('saved calls changed offline stay pending and reach the account later', async () => {
+  const storage = memoryStorage();
+  const account = fakeAccount();
+  const mod = setupExports(storage);
+  mod.setSavedCallsAccountApi(account);
+  const store = mod.useFollowStore;
+  await store.getState().setScope('user-1');
+  account.offline = true;
+  await store.getState().toggleSavedCall(sample);
+  assert.equal(store.getState().savedCalls.length, 1);
+  assert.deepEqual([...store.getState().pending.add], ['a']);
+  assert.equal(account.server.size, 0);
+
+  account.offline = false;
+  assert.equal(await store.getState().syncWithAccount(), true);
+  assert.equal(account.server.has('a'), true);
+  assert.deepEqual(JSON.parse(JSON.stringify(store.getState().pending)), { clear: false, add: [], remove: [] });
+
+  await store.getState().toggleSavedCall(sample); // desfaz
+  await store.getState().syncWithAccount();
+  assert.equal(account.server.size, 0);
+  assert.equal(store.getState().savedCalls.length, 0);
+});

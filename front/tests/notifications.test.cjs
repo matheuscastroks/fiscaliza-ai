@@ -15,8 +15,8 @@ test('notifications: service and store modules exist and export expected APIs', 
       serviceContent.includes('registerForPushNotificationsAsync') &&
       serviceContent.includes('followCallForNotifications') &&
       serviceContent.includes('unfollowCallForNotifications') &&
-      serviceContent.includes('sendTestPushNotification'),
-    'notificationService must export setup, registration, follow, unfollow and test notification functions',
+      !serviceContent.includes('sendTestPushNotification'),
+    'notificationService must export setup, registration, follow and unfollow functions, and no test-push relay',
   );
   assert.ok(
     serviceContent.includes('fiscaliza-calls'),
@@ -31,8 +31,8 @@ test('notifications: service and store modules exist and export expected APIs', 
     storeContent.includes('useNotificationStore') &&
       storeContent.includes('pushToken') &&
       storeContent.includes('permissionGranted') &&
-      storeContent.includes('sendTestPush'),
-    'notificationStore must manage pushToken, permissionGranted and sendTestPush',
+      !storeContent.includes('sendTestPush'),
+    'notificationStore must manage pushToken and permissionGranted',
   );
 });
 
@@ -61,14 +61,14 @@ test('notifications: root layout initializes notifications and registers respons
   );
 });
 
-test('notifications: settings screen provides notification controls and test trigger', () => {
+test('notifications: settings screen provides notification controls without a test relay', () => {
   const settingsFile = path.join(ROOT_DIR, 'app', 'SettingsScreen.tsx');
   const content = fs.readFileSync(settingsFile, 'utf8');
 
   assert.ok(
     content.includes('useNotificationStore') &&
       content.includes('Avisos') &&
-      content.includes('Testar notificação no celular'),
-    'SettingsScreen must render notifications status and test push button',
+      !content.includes('Testar notificação no celular'),
+    'SettingsScreen must render notifications status and no test push button',
   );
 });

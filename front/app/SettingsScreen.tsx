@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import * as Haptics from 'expo-haptics';
 
+import { router } from 'expo-router';
 import { goBack } from '@/utils/navigation';
 
 import { AppScreen } from '@/components/ui/AppScreen';
@@ -26,6 +27,7 @@ import { useThemeStore, isThemePreference } from '@/stores/themeStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
 
 import { useNotificationStore } from '@/stores/notificationStore';
+import { useAuthStore } from '@/stores/authStore';
 
 import { useFollowStore } from '@/stores/followStore';
 
@@ -75,8 +77,8 @@ export default function SettingsScreen() {
     isLoading: notificationLoading,
     error: notificationError,
     requestPermissions,
-    sendTestPush,
-  } = useNotificationStore(useShallow((s) => ({ pushToken: s.pushToken, permissionGranted: s.permissionGranted, isLoading: s.isLoading, error: s.error, requestPermissions: s.requestPermissions, sendTestPush: s.sendTestPush })));
+  } = useNotificationStore(useShallow((s) => ({ pushToken: s.pushToken, permissionGranted: s.permissionGranted, isLoading: s.isLoading, error: s.error, requestPermissions: s.requestPermissions })));
+  const signedIn = useAuthStore((s) => Boolean(s.user));
 
   const municipalityId = useMunicipalityId();
   const savedCount = useFollowStore((s) => s.savedCalls.length);
@@ -84,7 +86,9 @@ export default function SettingsScreen() {
   const confirmClearSaved = () => {
     Alert.alert(
       'Apagar chamados salvos?',
-      'Eles serão removidos deste aparelho. Os chamados continuam existindo no 1746 e você pode salvá-los de novo.',
+      signedIn
+        ? 'Eles saem da sua conta e de todos os seus aparelhos. Os chamados continuam existindo no 1746 e você pode salvá-los de novo.'
+        : 'Eles serão removidos deste aparelho. Os chamados continuam existindo no 1746 e você pode salvá-los de novo.',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -100,22 +104,9 @@ export default function SettingsScreen() {
     );
   };
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [testSending, setTestSending] = useState(false);
 
   const notificationsActive = permissionGranted && Boolean(pushToken);
   const pushAvailable = isPushConfigured();
-
-  const handleTestPush = async () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setTestSending(true);
-    const success = await sendTestPush();
-    setTestSending(false);
-    setToastMessage(
-      success
-        ? 'Notificação de teste enviada com sucesso!'
-        : 'Não conseguimos enviar a notificação de teste.',
-    );
-  };
 
   return (
     <AppScreen>
@@ -218,14 +209,22 @@ export default function SettingsScreen() {
               subtitle={
                 !pushAvailable
                   ? 'Ainda não funciona nesta versão do app'
-                  : notificationsActive
+                  : !signedIn
+                    ? 'Entre na sua conta para receber avisos dos chamados salvos'
+                    : notificationsActive
                     ? 'Avisos ligados para seus chamados salvos'
                     : permissionGranted
                       ? 'Permissão dada. Toque para ligar os avisos.'
                       : 'Avisos desligados neste celular'
               }
               trailing={
-                pushAvailable ? (
+                pushAvailable && !signedIn ? (
+                  <AppButton
+                    title="Entrar"
+                    variant="primary"
+                    onPress={() => router.push('/LoginScreen')}
+                  />
+                ) : pushAvailable ? (
                   <AppButton
                     title={notificationsActive ? 'Ligados' : permissionGranted ? 'Tentar de novo' : 'Ligar'}
                     variant={notificationsActive ? 'secondary' : 'primary'}
@@ -239,14 +238,6 @@ export default function SettingsScreen() {
                 ) : undefined
               }
             />
-            {__DEV__ && permissionGranted ? (
-              <ListRow
-                icon="paper-plane-outline"
-                title="Testar notificação no celular"
-                subtitle="Envia um aviso de teste (só em desenvolvimento)"
-                onPress={testSending || !pushToken ? undefined : handleTestPush}
-              />
-            ) : null}
           </InsetGroup>
 
           <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
@@ -260,12 +251,12 @@ export default function SettingsScreen() {
           )}
         </View>
 
-        {/* Dados neste celular: apagar chamados salvos (com confirmação) */}
+        {/* Dados guardados: apagar chamados salvos (com confirmação) */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
             <Ionicons name="phone-portrait-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
-              Dados neste celular
+              {signedIn ? 'Seus dados' : 'Dados neste celular'}
             </AppText>
           </View>
           <InsetGroup>
@@ -275,8 +266,10 @@ export default function SettingsScreen() {
               title="Apagar chamados salvos"
               subtitle={
                 savedCount > 0
-                  ? `${savedCount} ${savedCount === 1 ? 'chamado salvo será removido' : 'chamados salvos serão removidos'} deste aparelho`
-                  : 'Nenhum chamado salvo neste celular'
+                  ? `${savedCount} ${savedCount === 1 ? 'chamado salvo será removido' : 'chamados salvos serão removidos'} ${signedIn ? 'da sua conta' : 'deste aparelho'}`
+                  : signedIn
+                    ? 'Nenhum chamado salvo na sua conta'
+                    : 'Nenhum chamado salvo neste celular'
               }
               onPress={savedCount > 0 ? confirmClearSaved : undefined}
             />

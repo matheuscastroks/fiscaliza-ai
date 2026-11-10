@@ -1,4 +1,5 @@
 import { database } from './db.js';
+import { notifyStatusChanges } from './notifications.js';
 import {
   runRio1746RangeSync,
   runRio1746Sync,
@@ -18,6 +19,15 @@ async function main() {
 
   const { db, pool } = database();
   const startTime = Date.now();
+  // Quem acompanha um chamado recebe aviso quando a Prefeitura muda a situação.
+  const options = {
+    onStatusChanges: async (changes: Parameters<typeof notifyStatusChanges>[1]) => {
+      const sent = await notifyStatusChanges(db, changes);
+      console.log(
+        `[Rio1746 Sync CLI] ${changes.length} chamados mudaram de situação; ${sent} avisos enviados.`,
+      );
+    },
+  };
 
   try {
     // If secondArg is a YYYY-MM-DD date, sync the full partition range [firstArg..secondArg]
@@ -25,7 +35,13 @@ async function main() {
       console.log(
         `[Rio1746 Sync CLI] Syncing partition range: ${firstArg} .. ${secondArg}`,
       );
-      const result = await runRio1746RangeSync(db, pool, firstArg, secondArg);
+      const result = await runRio1746RangeSync(
+        db,
+        pool,
+        firstArg,
+        secondArg,
+        options,
+      );
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
       console.log(
         `[Rio1746 Sync CLI] Range sync finished in ${elapsed}s:`,
@@ -46,7 +62,7 @@ async function main() {
       db,
       pool,
       firstArg,
-      maxRecords ? { maxRecords } : {},
+      maxRecords ? { ...options, maxRecords } : options,
     );
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(

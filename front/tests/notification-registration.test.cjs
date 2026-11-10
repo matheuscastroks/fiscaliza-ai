@@ -55,7 +55,6 @@ function store({ status = 'granted', register = async () => 'test-token' } = {})
     'expo-notifications': { getPermissionsAsync: async () => ({ status }) },
     '@/features/notifications/notificationService': {
       registerForPushNotificationsAsync: register,
-      sendTestPushNotification: async () => ({ success: true }),
       followCallForNotifications() {},
     },
     './followStore': {
@@ -82,13 +81,12 @@ test('registration failure retains OS permission and exposes a retryable error',
   assert.equal(state.getState().isLoading, false);
 });
 
-test('revoking permission removes a stale push token and disables test pushes', async () => {
+test('revoking permission removes a stale push token and clears the stale state', async () => {
   const state = store({ status: 'denied' });
   state.setState({ pushToken: 'stale-token', permissionGranted: true });
   await state.getState().initialize();
   assert.equal(state.getState().pushToken, null);
   assert.equal(state.getState().permissionGranted, false);
-  assert.equal(await state.getState().sendTestPush(), false);
 });
 
 test('successful registration activates pushes and clears a previous error', async () => {

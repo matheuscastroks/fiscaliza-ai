@@ -55,7 +55,7 @@ async function distinctServiceTypes(db: Database): Promise<string[]> {
   return types;
 }
 
-function formatOfficialCall(
+export function formatOfficialCall(
   row: typeof officialCalls.$inferSelect,
 ): OfficialCall {
   return {

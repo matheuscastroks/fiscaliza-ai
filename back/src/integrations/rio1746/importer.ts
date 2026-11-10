@@ -1,5 +1,5 @@
 import type { BigQuery } from '@google-cloud/bigquery';
-import { sql } from 'drizzle-orm';
+import { inArray, sql } from 'drizzle-orm';
 import type { Database } from '../../db.js';
 import { officialCalls, syncCheckpoints } from '../../schema.js';
 import { buildPartitionCallsQuery } from './queries.js';
@@ -24,8 +24,21 @@ export interface ImportResult {
   durationMs: number;
 }
 
+export interface CallStatusChange {
+  callId: string;
+  serviceType: string;
+  status: string | null;
+  situation: string | null;
+}
+
 export interface ImportPartitionOptions {
   budget?: SyncBudget;
+  /**
+   * Chamados que já existiam e mudaram de status ou situação nesta página.
+   * Quem chama decide o que fazer (por exemplo, avisar quem acompanha); falhas
+   * aqui não interrompem a importação.
+   */
+  onStatusChanges?: (changes: CallStatusChange[]) => Promise<void>;
   /** Maximum records to import in total across pages. Omit or set undefined to import the entire partition. */
   maxRecords?: number;
   /** Number of rows fetched per BigQuery page (default: 2500). */
@@ -125,6 +138,36 @@ export async function importPartition(
         updatedAt: new Date(),
       }));
 
+      const previous = await db
+        .select({
+          externalId: officialCalls.externalId,
+          status: officialCalls.officialStatus,
+          situation: officialCalls.officialSituation,
+        })
+        .from(officialCalls)
+        .where(
+          inArray(
+            officialCalls.externalId,
+            chunk.map((c) => c.externalId),
+          ),
+        );
+      const before = new Map(previous.map((row) => [row.externalId, row]));
+      const changes: CallStatusChange[] = chunk
+        .filter((c) => {
+          const old = before.get(c.externalId);
+          return (
+            old !== undefined &&
+            (old.status !== c.officialStatus ||
+              old.situation !== c.officialSituation)
+          );
+        })
+        .map((c) => ({
+          callId: c.id,
+          serviceType: c.serviceType,
+          status: c.officialStatus,
+          situation: c.officialSituation,
+        }));
+
       const upsertedRows = await db
         .insert(officialCalls)
         .values(values)
@@ -160,6 +203,14 @@ export async function importPartition(
         .returning({
           inserted: sql<boolean>`(xmax = 0)`,
         });
+
+      if (changes.length > 0 && normalizedOptions.onStatusChanges) {
+        try {
+          await normalizedOptions.onStatusChanges(changes);
+        } catch {
+          // Aviso é secundário: o dado já foi gravado.
+        }
+      }
 
       for (const row of upsertedRows) {
         if (row.inserted) {

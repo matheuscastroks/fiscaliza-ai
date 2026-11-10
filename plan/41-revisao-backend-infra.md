@@ -33,5 +33,21 @@ Ressalva sobre o lock: a fila em memória pressupõe uma única instância da AP
 ### O que encontrei no ambiente local (não alterado)
 O `.env.compose` do PC usa a **senha de exemplo do Postgres**, `NODE_ENV=development` e `API_BIND=0.0.0.0` (API aberta na rede local sem passar pelo túnel). Com o modo público, a API recusa subir com essa senha. Para ligar o modo público é preciso, antes: definir uma senha própria (e rodar `ALTER USER` dentro do Postgres), trocar `API_BIND` para `127.0.0.1` e subir com `compose.public.yaml`. Passos em `deploy/README.md`. Não executei isso porque reinicia a produção.
 
+## Fase 1 — Push correto e completo
+| Item | Estado | Evidência |
+| --- | --- | --- |
+| O aparelho (token) pertence a uma conta: seguir e deixar de seguir exigem ser o dono (403 para outra conta); registrar o token em outra conta o transfere e apaga os avisos da conta anterior | feito | C + L (testes) |
+| Validação: `additionalProperties: false`, token Expo válido, tamanhos máximos, no máximo 200 chamados com aviso por aparelho; plataforma só `android`/`ios` | feito | C + L |
+| O município do token vem da conta, não do corpo | feito | C |
+| A sincronização do 1746 detecta chamados que mudaram de status ou situação (compara com o valor anterior) e avisa quem segue, em lotes de até 100 por requisição à Expo; `DeviceNotRegistered` apaga o token; atualização de estado em um único `UPDATE`; falha de envio não derruba a sincronização | feito | C + L (testes com Expo simulada) |
+| Mensagem factual: "A Prefeitura publicou nova situação: X" | feito | C |
+| App: avisos só para quem tem conta (anônimo vê "Entre na sua conta"); botão e rota de teste removidos | feito | C (testes do app); não visto em aparelho |
+
+Limite conhecido: o envio real à Expo e o recebimento no celular não foram exercitados (sem `projectId` do EAS); a evidência é com a Expo simulada.
+
+### Pedido adicional: chamados salvos na conta
+- Backend: tabela `saved_calls` (migração `0017`, apaga com a conta), rotas `GET /api/v1/saved-calls`, `PUT`/`DELETE /api/v1/saved-calls/:id`, `POST .../merge` (até 200) e `DELETE` da lista inteira; limite de 500 por conta; só para quem tem conta e município. Teste: outra sessão da mesma conta enxerga a lista, outra conta não.
+- App: com conta, a lista vem do servidor e o aparelho guarda uma cópia para abrir sem internet. O que muda sem rede fica pendente (`pending`) e é enviado depois; a lista salva antes do login é adotada pela conta uma vez e então removida do armazenamento anônimo. Sem conta, tudo continua só no aparelho. Lugares, bairro preferido e aparência continuam por aparelho. C (testes de adoção, outro aparelho e pendência offline); **não verificado em dois aparelhos reais**.
+
 ## Fases seguintes
-Fase 1 push correto; Fase 2 dados, consultas e cache; Fase 3 infra (Dockerfile, backup, agendador, CI, Expo); Fase 4 endurecimento e higiene. Cada uma registra aqui o que foi feito e o que ficou de fora.
+Fase 2 dados, consultas e cache; Fase 3 infra (Dockerfile, backup, agendador, CI, Expo); Fase 4 endurecimento e higiene. Cada uma registra aqui o que foi feito e o que ficou de fora.
