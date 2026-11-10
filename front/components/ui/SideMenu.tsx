@@ -13,6 +13,7 @@ import type { ThemeColors } from '@/theme/colors';
 import { useAuthStore } from '@/stores/authStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { useFollowStore } from '@/stores/followStore';
+import { fontSizes } from '@/theme/typography';
 
 export const useMenu = create<{
   open: boolean;
@@ -286,7 +287,7 @@ function createStyles(colors: ThemeColors) {
       alignItems: 'center',
       gap: spacing.xs,
     },
-    brandName: { fontSize: 20, flexShrink: 1 },
+    brandName: { fontSize: fontSizes.sectionTitle, flexShrink: 1 },
     iconButton: {
       minWidth: 48,
       minHeight: 48,

@@ -15,6 +15,7 @@ import {
   BottomSheetFlatList,
   BottomSheetTextInput,
 } from './AppBottomSheetModal';
+import { fontSizes } from '@/theme/typography';
 
 export interface SelectOption {
   value: string;
@@ -125,7 +126,7 @@ export function AppSelect({
               variant="body"
               style={[
                 styles.optionLabel,
-                active && { fontWeight: '700', color: colors.ink },
+                active && { fontWeight: '600', color: colors.ink },
               ]}
             >
               {item.label}
@@ -175,7 +176,7 @@ export function AppSelect({
             numberOfLines={1}
             style={[
               styles.triggerText,
-              compact && { fontWeight: '700' },
+              compact && { fontWeight: '600' },
               isFiltered && compact && { color: colors.onSelection },
               !isFiltered && !compact && { color: colors.ink },
             ]}
@@ -336,7 +337,7 @@ const createStyles = (colors: ThemeColors) =>
     searchInput: {
       flex: 1,
       height: 44,
-      fontSize: 15,
+      fontSize: fontSizes.label,
       fontFamily: fontFamilies.regular,
     },
     list: {

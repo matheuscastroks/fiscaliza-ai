@@ -88,7 +88,7 @@ function component(file, mocks = {}) {
         return { ThemeToggleButton: 'ThemeToggleButton' };
       if (name.endsWith('/UserAvatar')) return { UserAvatar: 'UserAvatar' };
       if (name.endsWith('/SignOutSheet')) return {};
-      if (name === '@/features/city/formatDates') return require(name);
+      if (name === '@/features/city/formatDates' || name.startsWith('@/theme/')) return require(name);
       throw Error(name);
     },
   });

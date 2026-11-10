@@ -16,6 +16,7 @@ import { layout } from '@/theme/layout';
 import { AppText } from './AppText';
 import { useKeyboardAwareInput } from './KeyboardAwareScrollView';
 import { fontFamilies } from '@/theme/typography';
+import { fontSizes } from '@/theme/typography';
 
 export interface AppInputProps extends TextInputProps {
   label?: string;
@@ -164,7 +165,7 @@ const createStyles = (colors: ThemeColors) =>
       borderColor: colors.border,
       borderRadius: layout.radius.button,
       color: colors.ink,
-      fontSize: 16,
+      fontSize: fontSizes.body,
       fontFamily: fontFamilies.regular,
     },
     multiline: {

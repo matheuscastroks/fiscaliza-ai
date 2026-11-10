@@ -17,6 +17,7 @@ import {
   TerritoryCardContent,
   type Entry,
 } from '@/components/territory/TerritoryPreviewCard';
+import { lightColors } from '@/theme/colors';
 
 interface TerritoryClusterCarouselProps {
   entries: Entry[];
@@ -62,7 +63,7 @@ export function TerritoryClusterCarousel({
       <View style={styles.headerRow}>
         <View style={[styles.counterBadge, { backgroundColor: colors.surface }]}>
           <Ionicons name="layers" size={14} color={colors.accent} />
-          <AppText variant="caption" style={{ fontWeight: '700' }}>
+          <AppText variant="caption" style={{ fontWeight: '600' }}>
             {currentIndex + 1} de {entries.length} no local
           </AppText>
         </View>
@@ -76,7 +77,7 @@ export function TerritoryClusterCarousel({
               accessibilityLabel="Aproximar mapa neste local"
             >
               <Ionicons name="scan-outline" size={14} color={colors.ink} />
-              <AppText variant="caption" style={{ fontWeight: '700' }}>
+              <AppText variant="caption" style={{ fontWeight: '600' }}>
                 Aproximar
               </AppText>
             </Pressable>
@@ -143,7 +144,7 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: layout.radius.pill,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
-      shadowColor: '#000000',
+      shadowColor: lightColors.black,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.12,
       shadowRadius: 4,
@@ -163,7 +164,7 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: layout.radius.pill,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
-      shadowColor: '#000000',
+      shadowColor: lightColors.black,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.12,
       shadowRadius: 4,
@@ -177,7 +178,7 @@ const createStyles = (colors: ThemeColors) =>
       justifyContent: 'center',
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
-      shadowColor: '#000000',
+      shadowColor: lightColors.black,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.12,
       shadowRadius: 4,

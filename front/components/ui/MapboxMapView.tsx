@@ -12,6 +12,7 @@ import { circleFeature, pointFeature, type MapSearchArea } from '@/features/terr
 import { useMapCamera } from '@/features/territory/useMapCamera';
 import type { CapturedDeviceLocation } from '@/features/places/types';
 import { MapAreaLayers, MapPositionLayers } from '@/components/territory/MapAreaLayers';
+import { lightColors } from '@/theme/colors';
 
 export type MarkerKind =
   | 'occurrence'
@@ -123,7 +124,7 @@ export function buildMarkersFeatureCollection(
       const validColor =
         c && c.length === 7 && c.charCodeAt(0) === 35 && /^#[0-9a-f]{6}$/i.test(c)
           ? c
-          : '#0072BB';
+          : lightColors.primary;
       features[count++] = {
         type: 'Feature' as const,
         id: m.id,
@@ -437,14 +438,14 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
             <Mapbox.FillLayer
               id="boundary-fill"
               style={{
-                fillColor: '#0072BB',
+                fillColor: lightColors.primary,
                 fillOpacity: 0.08,
               }}
             />
             <Mapbox.LineLayer
               id="boundary-line"
               style={{
-                lineColor: '#0072BB',
+                lineColor: lightColors.primary,
                 lineWidth: 2,
                 lineOpacity: 0.8,
               }}
@@ -467,7 +468,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
             id="clusters-circle"
             filter={['has', 'point_count']}
             style={{
-              circleColor: '#16576C',
+              circleColor: lightColors.primary,
               circleRadius: [
                 'step',
                 ['get', 'point_count'],
@@ -478,7 +479,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
                 26,
               ],
               circleStrokeWidth: 2.5,
-              circleStrokeColor: '#ffffff',
+              circleStrokeColor: lightColors.white,
             }}
           />
           <Mapbox.SymbolLayer
@@ -487,7 +488,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
             style={{
               textField: ['get', 'point_count_abbreviated'],
               textSize: 13,
-              textColor: '#ffffff',
+              textColor: lightColors.white,
               textIgnorePlacement: true,
               textAllowOverlap: true,
             }}
@@ -499,7 +500,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
               circleColor: ['get', 'color'],
               circleRadius: 8,
               circleStrokeWidth: 2,
-              circleStrokeColor: '#ffffff',
+              circleStrokeColor: lightColors.white,
             }}
           />
         </Mapbox.ShapeSource>
@@ -515,7 +516,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
                 circleColor: ['get', 'color'],
                 circleRadius: 13,
                 circleStrokeWidth: 3.5,
-                circleStrokeColor: '#ffffff',
+                circleStrokeColor: lightColors.white,
               }}
             />
           </Mapbox.ShapeSource>
@@ -543,7 +544,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
             <View
               style={[
                 styles.draggablePin,
-                { backgroundColor: m.color || '#16576C' },
+                { backgroundColor: m.color || lightColors.primary },
               ]}
             />
           </Mapbox.PointAnnotation>
@@ -557,15 +558,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     overflow: 'hidden',
-    backgroundColor: '#f1f5f9',
+    backgroundColor: lightColors.surfaceSubdued,
   },
   draggablePin: {
     width: 22,
     height: 22,
     borderRadius: 11,
     borderWidth: 3,
-    borderColor: '#ffffff',
-    shadowColor: '#000000',
+    borderColor: lightColors.white,
+    shadowColor: lightColors.black,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.32,
     shadowRadius: 5,

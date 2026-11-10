@@ -20,6 +20,7 @@ import {
 } from '@/features/city/useOfficialCalls';
 import { formatDays, topByVolume } from '@/features/city/resultRankings';
 import { layout, spacing } from '@/theme';
+import { fontSizes } from '@/theme/typography';
 
 function getStatusSemanticColor(status: string, colors: ThemeColors): string {
   const normalized = status
@@ -225,7 +226,7 @@ export default function ResultsScreen() {
                       {slaRate}%
                     </AppText>
                     <View style={styles.heroKpiDetailCol}>
-                      <AppText variant="label" style={{ fontWeight: '700' }}>
+                      <AppText variant="label" style={{ fontWeight: '600' }}>
                         {withinDeadlineCount.toLocaleString('pt-BR')} no prazo
                       </AppText>
                       <AppText variant="caption" color="muted">
@@ -440,7 +441,7 @@ export default function ResultsScreen() {
                       {formatDays(avgDays)}
                     </AppText>
                     <View style={styles.heroKpiDetailCol}>
-                      <AppText variant="label" style={{ fontWeight: '700' }}>
+                      <AppText variant="label" style={{ fontWeight: '600' }}>
                         Tempo médio até o encerramento
                       </AppText>
                       {neighborhood && cityAvgDays != null ? (
@@ -679,7 +680,7 @@ const createStyles = (colors: ThemeColors) =>
     rankPosition: {
       width: 18,
       textAlign: 'center',
-      fontWeight: '900',
+      fontWeight: '600',
     },
     rankingContent: {
       flex: 1,
@@ -687,11 +688,11 @@ const createStyles = (colors: ThemeColors) =>
     },
     rankingLabel: {
       flex: 1,
-      fontWeight: '700',
+      fontWeight: '600',
       paddingRight: 8,
     },
     rankingValue: {
-      fontWeight: '800',
+      fontWeight: '600',
     },
     rankingNote: {
       paddingHorizontal: 6,
@@ -718,8 +719,8 @@ const createStyles = (colors: ThemeColors) =>
       gap: 1,
     },
     territoryName: {
-      fontSize: 15,
-      fontWeight: '800',
+      fontSize: fontSizes.label,
+      fontWeight: '600',
     },
     territoryActions: {
       flexDirection: 'row',
@@ -743,8 +744,8 @@ const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: 4,
     },
     sectionHeaderText: {
-      fontSize: 11,
-      fontWeight: '800',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       letterSpacing: 0.6,
     },
     heroKpiCard: {
@@ -783,8 +784,8 @@ const createStyles = (colors: ThemeColors) =>
       gap: 12,
     },
     heroKpiNumber: {
-      fontSize: 34,
-      fontWeight: '900',
+      fontSize: fontSizes.screenTitle,
+      fontWeight: '600',
       lineHeight: 38,
     },
     heroKpiDetailCol: {
@@ -815,8 +816,8 @@ const createStyles = (colors: ThemeColors) =>
       justifyContent: 'center',
     },
     secondaryKpiNumber: {
-      fontSize: 22,
-      fontWeight: '800',
+      fontSize: fontSizes.sectionTitle,
+      fontWeight: '600',
       lineHeight: 26,
     },
     breakdownBlock: {
@@ -851,8 +852,8 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: 4,
     },
     statusLabelText: {
-      fontSize: 13,
-      fontWeight: '700',
+      fontSize: fontSizes.meta,
+      fontWeight: '600',
     },
     barTrack: {
       height: 6,

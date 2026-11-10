@@ -11,6 +11,8 @@ import * as Haptics from 'expo-haptics';
 import { AppText } from '@/components/ui/AppText';
 import { layout, useTheme } from '@/theme';
 import type { RadiusMeters } from './types';
+import { fontSizes } from '@/theme/typography';
+import { lightColors } from '@/theme/colors';
 
 export const RADIUS_OPTIONS: { value: RadiusMeters; label: string }[] = [
   { value: 500, label: '500 m' },
@@ -81,7 +83,7 @@ export function RadiusControl({
           styles.pillRow,
           compact && styles.pillRowCompact,
           {
-            backgroundColor: isDark ? colors.surfaceSubdued : '#F1F5F9',
+            backgroundColor: colors.surfaceSubdued,
             borderColor: colors.border,
             borderRadius: pillRadius,
           },
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
     gap: 0,
   },
   label: {
-    fontSize: 12,
+    fontSize: fontSizes.caption,
     fontWeight: '500',
   },
   pillRow: {
@@ -179,7 +181,7 @@ const styles = StyleSheet.create({
     bottom: 3,
     left: 3,
     borderRadius: pillRadiusVal,
-    shadowColor: '#000',
+    shadowColor: lightColors.black,
     shadowOffset: { width: 0, height: 1.5 },
     shadowOpacity: 0.18,
     shadowRadius: 2.5,
@@ -198,9 +200,9 @@ const styles = StyleSheet.create({
     height: 30,
   },
   pillText: {
-    fontSize: 13,
+    fontSize: fontSizes.meta,
   },
   pillTextCompact: {
-    fontSize: 12,
+    fontSize: fontSizes.caption,
   },
 });

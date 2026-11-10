@@ -19,6 +19,8 @@ import { RadiusControl } from './RadiusControl';
 import { LocationEntryPrompt } from './LocationEntryPrompt';
 import { layout, spacing, useTheme } from '@/theme';
 import type { TerritorySelection } from './types';
+import { fontSizes } from '@/theme/typography';
+import { lightColors } from '@/theme/colors';
 
 export function PlaceSelector({
   prompt = false,
@@ -173,7 +175,7 @@ export function PlaceSelector({
                 ]}
               >
                 <Ionicons name="arrow-undo" size={13} color={colors.onAccent} />
-                <AppText variant="caption" style={{ color: colors.onAccent, fontWeight: '700' }}>
+                <AppText variant="caption" style={{ color: colors.onAccent, fontWeight: '600' }}>
                   Voltar
                 </AppText>
               </Pressable>
@@ -210,8 +212,8 @@ export function PlaceSelector({
                   pressed && { backgroundColor: colors.surfaceSubdued },
                 ]}
               >
-                <View style={[styles.rowIconBadge, { backgroundColor: '#2563EB18' }]}>
-                  <Ionicons name="navigate" size={16} color="#2563EB" />
+                <View style={[styles.rowIconBadge, { backgroundColor: colors.infoSurface }]}>
+                  <Ionicons name="navigate" size={16} color={colors.info} />
                 </View>
                 <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
                   <AppText variant="caption" style={styles.rowTitle}>
@@ -226,7 +228,7 @@ export function PlaceSelector({
                 {device.busy ? (
                   <AppText variant="caption" color="muted">Buscando...</AppText>
                 ) : selection.kind === 'radius' && selection.source === 'current' ? (
-                  <Ionicons name="checkmark-circle" size={18} color="#2563EB" />
+                  <Ionicons name="checkmark-circle" size={18} color={colors.info} />
                 ) : (
                   <Ionicons name="chevron-forward" size={16} color={colors.muted} />
                 )}
@@ -249,8 +251,8 @@ export function PlaceSelector({
                   pressed && { backgroundColor: colors.surfaceSubdued },
                 ]}
               >
-                <View style={[styles.rowIconBadge, { backgroundColor: '#10B98118' }]}>
-                  <Ionicons name="globe-outline" size={16} color="#10B981" />
+                <View style={[styles.rowIconBadge, { backgroundColor: colors.completedSurface }]}>
+                  <Ionicons name="globe-outline" size={16} color={colors.completed} />
                 </View>
                 <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
                   <AppText variant="caption" style={styles.rowTitle}>
@@ -261,7 +263,7 @@ export function PlaceSelector({
                   </AppText>
                 </View>
                 {selection.kind === 'municipality' && !areaOnly ? (
-                  <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+                  <Ionicons name="checkmark-circle" size={18} color={colors.completed} />
                 ) : (
                   <Ionicons name="chevron-forward" size={16} color={colors.muted} />
                 )}
@@ -290,8 +292,8 @@ export function PlaceSelector({
                       pressed && { backgroundColor: colors.surfaceSubdued },
                     ]}
                   >
-                    <View style={[styles.rowIconBadge, { backgroundColor: '#F59E0B18' }]}>
-                      <Ionicons name="business" size={16} color="#F59E0B" />
+                    <View style={[styles.rowIconBadge, { backgroundColor: colors.attentionSurface }]}>
+                      <Ionicons name="business" size={16} color={colors.attention} />
                     </View>
                     <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
                       <AppText variant="caption" style={styles.rowTitle}>
@@ -326,7 +328,7 @@ export function PlaceSelector({
                 }}
                 hitSlop={8}
               >
-                <AppText variant="caption" style={{ color: colors.accent, fontWeight: '700' }}>
+                <AppText variant="caption" style={{ color: colors.accent, fontWeight: '600' }}>
                   Gerenciar
                 </AppText>
               </Pressable>
@@ -357,7 +359,7 @@ export function PlaceSelector({
                           <Ionicons name="bookmark" size={15} color={isSelected ? colors.onSurfaceBrand : colors.muted} />
                         </View>
                         <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-                          <AppText variant="caption" style={[styles.rowTitle, isSelected && { fontWeight: '800' }]}>
+                          <AppText variant="caption" style={[styles.rowTitle, isSelected && { fontWeight: '600' }]}>
                             {p.name}
                           </AppText>
                           <AppText variant="caption" color="muted" style={styles.rowDesc}>
@@ -693,7 +695,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: layout.radius.pill,
     borderWidth: 1,
-    shadowColor: '#000000',
+    shadowColor: lightColors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.09,
     shadowRadius: 6,
@@ -708,8 +710,8 @@ const styles = StyleSheet.create({
   },
   compactTitle: {
     flex: 1,
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: fontSizes.meta,
+    fontWeight: '600',
   },
   compactChangeChip: {
     flexDirection: 'row',
@@ -720,8 +722,8 @@ const styles = StyleSheet.create({
     borderRadius: layout.radius.pill,
   },
   compactChangeText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: fontSizes.caption,
+    fontWeight: '600',
   },
   locationCard: {
     borderRadius: layout.radius.panel,
@@ -755,7 +757,7 @@ const styles = StyleSheet.create({
     borderRadius: layout.radius.pill,
   },
   changeText: {
-    fontSize: 12,
+    fontSize: fontSizes.caption,
     fontWeight: '600',
   },
   inlineRadius: {
@@ -797,14 +799,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   heroScopeLabel: {
-    fontSize: 10,
-    fontWeight: '800',
+    fontSize: fontSizes.caption,
+    fontWeight: '600',
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   heroScopeTitle: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: fontSizes.meta,
+    fontWeight: '600',
   },
   undoAreaButton: {
     flexDirection: 'row',
@@ -833,9 +835,9 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   sectionHeaderTitle: {
-    fontWeight: '800',
+    fontWeight: '600',
     letterSpacing: 0.6,
-    fontSize: 11,
+    fontSize: fontSizes.caption,
     textTransform: 'uppercase',
   },
   sectionDivider: {
@@ -852,8 +854,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   groupHeaderLabel: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: fontSizes.caption,
+    fontWeight: '600',
     letterSpacing: 0.3,
     textTransform: 'uppercase',
   },
@@ -881,11 +883,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowTitle: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: fontSizes.meta,
+    fontWeight: '600',
   },
   rowDesc: {
-    fontSize: 11,
+    fontSize: fontSizes.caption,
   },
   emptyPlacesButton: {
     flexDirection: 'row',
@@ -903,10 +905,10 @@ const styles = StyleSheet.create({
   },
   errorText: {
     paddingHorizontal: spacing.xs,
-    fontSize: 13,
+    fontSize: fontSizes.meta,
   },
   noticeText: {
     paddingHorizontal: spacing.xs,
-    fontSize: 13,
+    fontSize: fontSizes.meta,
   },
 });

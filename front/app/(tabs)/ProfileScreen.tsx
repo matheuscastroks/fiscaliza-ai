@@ -30,6 +30,7 @@ import { usePlacesStore } from '@/stores/placesStore';
 import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { PostalCodeSheet } from '@/components/profile/PostalCodeSheet';
 import { layout, spacing } from '@/theme';
+import { fontSizes } from '@/theme/typography';
 
 type MenuItem = {
   label: string;
@@ -738,8 +739,8 @@ const createStyles = (colors: ThemeColors) =>
       gap: 3,
     },
     heroName: {
-      fontSize: 18,
-      fontWeight: '800',
+      fontSize: fontSizes.sectionTitle,
+      fontWeight: '600',
       color: colors.ink,
     },
     statusPill: {
@@ -754,8 +755,8 @@ const createStyles = (colors: ThemeColors) =>
       marginTop: 4,
     },
     statusPillText: {
-      fontSize: 11,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
     },
     errorAlert: {
       flexDirection: 'row',
@@ -792,14 +793,14 @@ const createStyles = (colors: ThemeColors) =>
       justifyContent: 'center',
     },
     metricValue: {
-      fontSize: 24,
-      fontWeight: '800',
+      fontSize: fontSizes.screenTitle,
+      fontWeight: '600',
       color: colors.ink,
     },
     metricLabel: {
-      fontWeight: '700',
+      fontWeight: '600',
       color: colors.ink,
-      fontSize: 13,
+      fontSize: fontSizes.meta,
       marginTop: 2,
     },
     sectionBlock: {
@@ -812,8 +813,8 @@ const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: 4,
     },
     sectionHeaderText: {
-      fontSize: 11,
-      fontWeight: '800',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       letterSpacing: 0.6,
       color: colors.muted,
     },
@@ -854,7 +855,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     versionFooter: {
       textAlign: 'center',
-      fontSize: 11,
+      fontSize: fontSizes.caption,
       marginTop: spacing.xs,
       paddingBottom: spacing.md,
     },

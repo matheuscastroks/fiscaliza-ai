@@ -18,6 +18,8 @@ import {
 } from '@/features/city/officialCallStatus';
 import { resolveServiceCategoryTheme } from '@/features/city/officialCategoryThemes';
 import { formatCallDate, formatTimeRemainingShort } from '@/features/city/formatDates';
+import { lightColors } from '@/theme/colors';
+import { fontSizes } from '@/theme/typography';
 
 function formatRelativeTime(dateIso?: string | null): string | null {
   if (!dateIso) return null;
@@ -82,7 +84,7 @@ export function entryToMarker(entry: Entry): MapMarker | null {
         longitude: point.longitude,
         title: `1746 · ${entry.item.serviceSubtype || entry.item.serviceType}`,
         color:
-          entry.item.officialSituation === 'Encerrado' ? '#236B50' : '#0072BB',
+          entry.item.officialSituation === 'Encerrado' ? lightColors.completed : lightColors.primary,
         kind: 'official',
       }
     : null;
@@ -262,7 +264,7 @@ export function TerritoryCardContent({
               style={[
                 styles.slaBadge,
                 isOverdue
-                  ? { backgroundColor: isDark ? '#7F1D1D40' : '#FEE2E2', borderColor: '#EF4444' }
+                  ? { backgroundColor: colors.riskSurface, borderColor: colors.risk }
                   : { backgroundColor: colors.surfaceSubdued, borderColor: colors.border },
               ]}
             >
@@ -405,7 +407,7 @@ const createStyles = (colors: ThemeColors) =>
     categoryLabel: {
       fontWeight: '600',
       color: colors.ink,
-      fontSize: 12,
+      fontSize: fontSizes.caption,
     },
     agencyBadge: {
       paddingHorizontal: 5,
@@ -416,8 +418,8 @@ const createStyles = (colors: ThemeColors) =>
       flexShrink: 0,
     },
     agencyText: {
-      fontSize: 9,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       color: colors.muted,
       textTransform: 'uppercase',
     },
@@ -434,7 +436,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: 3,
     },
     metaChipText: {
-      fontSize: 11,
+      fontSize: fontSizes.caption,
       fontWeight: '500',
     },
     slaBadge: {
@@ -447,8 +449,8 @@ const createStyles = (colors: ThemeColors) =>
       borderWidth: StyleSheet.hairlineWidth,
     },
     slaBadgeText: {
-      fontSize: 10,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
     },
     protocolChip: {
       paddingHorizontal: 5,
@@ -458,8 +460,8 @@ const createStyles = (colors: ThemeColors) =>
       borderColor: colors.border,
     },
     protocolText: {
-      fontSize: 10,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       color: colors.muted,
     },
     statusBadge: {
@@ -473,13 +475,13 @@ const createStyles = (colors: ThemeColors) =>
     dot: { width: 6, height: 6, borderRadius: 3 },
     statusText: {
       fontWeight: '600',
-      fontSize: 11,
+      fontSize: fontSizes.caption,
       lineHeight: 15,
     },
     title: {
-      fontSize: 16,
+      fontSize: fontSizes.body,
       lineHeight: 22,
-      fontWeight: '700',
+      fontWeight: '600',
       color: colors.ink,
     },
     location: {

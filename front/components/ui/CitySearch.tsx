@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
 import { spacing } from '@/theme';
 import { fontFamilies } from '@/theme/typography';
+import { fontSizes } from '@/theme/typography';
 
 export interface CitySearchProps {
   value?: string;
@@ -85,7 +86,7 @@ export function CitySearch({
           onPress={onPress}
           style={{ flex: 1, minHeight: 44, justifyContent: 'center' }}
         >
-          <AppText color="muted" style={{ fontSize: 15 }}>
+          <AppText color="muted" style={{ fontSize: fontSizes.label }}>
             Buscar na minha região…
           </AppText>
         </Pressable>
@@ -137,7 +138,7 @@ export function CitySearch({
                 justifyContent: 'center',
               }}
             >
-              <AppText variant="meta" style={{ fontSize: 10, fontWeight: '800' }}>
+              <AppText variant="meta" style={{ fontSize: fontSizes.caption, fontWeight: '600' }}>
                 {filterCount}
               </AppText>
             </View>

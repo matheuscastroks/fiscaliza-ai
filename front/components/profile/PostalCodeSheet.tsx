@@ -16,6 +16,7 @@ import { AppButton } from '@/components/ui/AppButton';
 import { useAuthStore } from '@/stores/authStore';
 import { formatPostalCode } from '@/services/postalCode';
 import { usePostalCodeFlow } from '@/features/profile/usePostalCodeFlow';
+import { fontSizes } from '@/theme/typography';
 
 export interface PostalCodeSheetProps {
   visible: boolean;
@@ -291,8 +292,8 @@ const createStyles = (colors: ThemeColors) =>
     },
     textInput: {
       flex: 1,
-      fontSize: 16,
-      fontWeight: '700',
+      fontSize: fontSizes.body,
+      fontWeight: '600',
       paddingVertical: 10,
     },
     resultCard: {
@@ -316,8 +317,8 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: layout.radius.pill,
     },
     resultBadgeText: {
-      fontSize: 10,
-      fontWeight: '800',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       letterSpacing: 0.5,
     },
     cepPill: {
@@ -326,14 +327,14 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: layout.radius.pill,
     },
     cepPillText: {
-      fontSize: 11,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       color: colors.ink,
       fontFamily: 'monospace',
     },
     neighborhoodTitle: {
-      fontSize: 18,
-      fontWeight: '800',
+      fontSize: fontSizes.sectionTitle,
+      fontWeight: '600',
     },
     resultActions: {
       gap: spacing.xs,

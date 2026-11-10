@@ -3,6 +3,8 @@ import { Animated, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { layout, spacing, useTheme } from '@/theme';
+import { fontSizes } from '@/theme/typography';
+import { lightColors } from '@/theme/colors';
 
 export interface AppToastProps {
   message: string | null;
@@ -157,7 +159,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: pillRadius,
     borderWidth: StyleSheet.hairlineWidth,
-    shadowColor: '#000000',
+    shadowColor: lightColors.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.14,
     shadowRadius: 8,
@@ -165,7 +167,7 @@ const styles = StyleSheet.create({
     maxWidth: '92%',
   },
   messageText: {
-    fontSize: 12,
+    fontSize: fontSizes.caption,
     fontWeight: '600',
     flexShrink: 1,
   },

@@ -120,7 +120,7 @@ export default function PlacesScreen() {
                         { backgroundColor: isDark ? colors.surfaceSubdued : colors.surfaceSubdued, borderColor: colors.border },
                       ]}
                     >
-                      <AppText variant="caption" style={{ fontWeight: '700', color: colors.onSurfaceBrand }}>
+                      <AppText variant="caption" style={{ fontWeight: '600', color: colors.onSurfaceBrand }}>
                         {radiusLabel}
                       </AppText>
                     </View>

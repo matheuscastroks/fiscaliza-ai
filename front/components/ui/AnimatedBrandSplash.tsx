@@ -16,6 +16,7 @@ import Animated, {
 import { AppBrandGlyph } from './AppBrandGlyph';
 import { AppText } from './AppText';
 import { spacing, useTheme } from '@/theme';
+import { fontSizes } from '@/theme/typography';
 
 /**
  * Overlay de abertura que anima o SVG da marca (pin + 3 raios amarelos + wordmark)
@@ -233,9 +234,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   wordmark: {
-    fontSize: 28,
+    fontSize: fontSizes.screenTitle,
     lineHeight: 34,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: -0.5,
   },
   tagline: {

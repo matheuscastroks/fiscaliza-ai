@@ -21,6 +21,8 @@ import {
   OFFICIAL_SERVICES,
 } from '@/features/city/OfficialChannel';
 import { useTheme, spacing, layout } from '@/theme';
+import { partnerBrand } from '@/theme/palette';
+import { fontSizes } from '@/theme/typography';
 
 interface ChannelItem {
   id: string;
@@ -139,13 +141,13 @@ export default function ParticipateScreen() {
                     <View
                       style={[
                         styles.iconSquircle,
-                        { backgroundColor: isWhatsApp ? '#E7FCEB' : colors.surfaceSubdued },
+                        { backgroundColor: isWhatsApp ? partnerBrand.whatsappSurface : colors.surfaceSubdued },
                       ]}
                     >
                       <Ionicons
                         name={channel.icon}
                         size={18}
-                        color={isWhatsApp ? '#25D366' : colors.primary}
+                        color={isWhatsApp ? partnerBrand.whatsapp : colors.primary}
                       />
                     </View>
                     <View style={styles.tableRowContent}>
@@ -315,7 +317,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   sectionHeaderText: {
-    fontSize: 13,
+    fontSize: fontSizes.meta,
     fontWeight: '500',
   },
   insetTable: {
@@ -358,8 +360,8 @@ const styles = StyleSheet.create({
     borderRadius: layout.radius.pill,
   },
   agencyBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: fontSizes.caption,
+    fontWeight: '600',
   },
   civicTipCard: {
     borderRadius: layout.radius.panel,
@@ -398,7 +400,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   footerPortalText: {
-    fontSize: 13,
+    fontSize: fontSizes.meta,
     fontWeight: '600',
   },
   disclaimerText: {

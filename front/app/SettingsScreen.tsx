@@ -18,6 +18,7 @@ import { InsetGroup, ListRow } from '@/components/ui/ListRow';
 import { useMunicipalityId } from '@/features/city/municipality';
 import { AppToast } from '@/components/ui/AppToast';
 import { useTheme, spacing, layout } from '@/theme';
+import { fontSizes } from '@/theme/typography';
 
 const appearanceOptions = [
   {
@@ -387,8 +388,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   sectionHeaderText: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: fontSizes.caption,
+    fontWeight: '600',
     letterSpacing: 0.6,
   },
   insetContainer: {

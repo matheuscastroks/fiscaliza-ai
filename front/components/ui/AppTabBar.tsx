@@ -17,6 +17,7 @@ import { type Tabs } from 'expo-router';
 import { AppText } from './AppText';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { beginMapTrace } from '@/features/territory/mapPerformance';
+import { fontSizes } from '@/theme/typography';
 
 const TAB_HEIGHT = 48;
 const TAB_PADDING = 6;
@@ -272,7 +273,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: 2,
     },
     tabLabel: {
-      fontSize: 10,
+      fontSize: fontSizes.caption,
       lineHeight: 12,
     },
     selected: {

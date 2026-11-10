@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { layout, spacing, useTheme } from '@/theme';
+import { fontSizes } from '@/theme/typography';
 
 export interface CategoryChipItem {
   id: string;
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   label: {
-    fontSize: 13,
+    fontSize: fontSizes.meta,
     lineHeight: 16,
   },
 });

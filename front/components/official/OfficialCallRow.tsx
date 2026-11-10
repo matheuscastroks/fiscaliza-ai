@@ -14,6 +14,8 @@ import {
   officialCallStatus,
   resolveOfficialCallDeadline,
 } from '@/features/city/officialCallStatus';
+import { fontSizes } from '@/theme/typography';
+import { lightColors } from '@/theme/colors';
 
 export interface OfficialCallRowProps {
   call: OfficialCall;
@@ -237,7 +239,7 @@ export const OfficialCallRow = memo(function OfficialCallRow({
                 style={[
                   styles.slaBadge,
                   isOverdue
-                    ? { backgroundColor: isDark ? '#7F1D1D40' : '#FEE2E2', borderColor: '#EF4444' }
+                    ? { backgroundColor: colors.riskSurface, borderColor: colors.risk }
                     : { backgroundColor: colors.surfaceSubdued, borderColor: colors.border },
                 ]}
               >
@@ -325,7 +327,7 @@ function createStyles(colors: ThemeColors) {
       borderColor: colors.border,
       overflow: 'hidden',
       elevation: 1,
-      shadowColor: '#000000',
+      shadowColor: lightColors.black,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 4,
@@ -357,7 +359,7 @@ function createStyles(colors: ThemeColors) {
     categoryLabel: {
       fontWeight: '600',
       color: colors.ink,
-      fontSize: 12,
+      fontSize: fontSizes.caption,
     },
     agencyBadge: {
       paddingHorizontal: 6,
@@ -368,8 +370,8 @@ function createStyles(colors: ThemeColors) {
       flexShrink: 0,
     },
     agencyText: {
-      fontSize: 10,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       color: colors.muted,
       textTransform: 'uppercase',
     },
@@ -393,7 +395,7 @@ function createStyles(colors: ThemeColors) {
     },
     statusText: {
       fontWeight: '600',
-      fontSize: 11,
+      fontSize: fontSizes.caption,
       lineHeight: 15,
     },
     heart: {
@@ -406,9 +408,9 @@ function createStyles(colors: ThemeColors) {
       borderColor: colors.border,
     },
     title: {
-      fontSize: 16,
+      fontSize: fontSizes.body,
       lineHeight: 22,
-      fontWeight: '700',
+      fontWeight: '600',
       color: colors.ink,
     },
     locationRow: {
@@ -445,7 +447,7 @@ function createStyles(colors: ThemeColors) {
       gap: 3,
     },
     metaChipText: {
-      fontSize: 11,
+      fontSize: fontSizes.caption,
       fontWeight: '500',
     },
     slaBadge: {
@@ -458,8 +460,8 @@ function createStyles(colors: ThemeColors) {
       borderWidth: StyleSheet.hairlineWidth,
     },
     slaBadgeText: {
-      fontSize: 10,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
     },
     protocolChip: {
       paddingHorizontal: 6,
@@ -469,8 +471,8 @@ function createStyles(colors: ThemeColors) {
       borderColor: colors.border,
     },
     protocolText: {
-      fontSize: 10,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       color: colors.muted,
     },
     locatePill: {
@@ -485,8 +487,8 @@ function createStyles(colors: ThemeColors) {
       borderColor: colors.border,
     },
     locatePillText: {
-      fontSize: 11,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       color: colors.onSurfaceBrand,
     },
     flex: {

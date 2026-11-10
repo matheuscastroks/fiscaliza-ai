@@ -5,6 +5,8 @@ import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { usePlacesStore } from '@/stores/placesStore';
 import { layout, spacing, useTheme } from '@/theme';
+import { fontSizes } from '@/theme/typography';
+import { lightColors } from '@/theme/colors';
 
 export function LocationEntryPrompt({
   onLocate,
@@ -212,10 +214,10 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   title: {
-    fontWeight: '700',
+    fontWeight: '600',
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: fontSizes.caption,
     lineHeight: 17,
   },
   closeBtn: {
@@ -239,7 +241,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: layout.radius.pill,
     borderWidth: 1,
-    shadowColor: '#000000',
+    shadowColor: lightColors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -248,7 +250,7 @@ const styles = StyleSheet.create({
   compactLabel: {
     flex: 1,
     fontWeight: '600',
-    fontSize: 12,
+    fontSize: fontSizes.caption,
   },
   compactActions: {
     flexDirection: 'row',
@@ -273,8 +275,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   compactPillText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: fontSizes.caption,
+    fontWeight: '600',
   },
   compactCloseBtn: {
     padding: 4,

@@ -34,6 +34,8 @@ import {
 import {
   useTerritoryDomain,
 } from '@/stores/territoryStore';
+import { fontSizes } from '@/theme/typography';
+import { lightColors } from '@/theme/colors';
 
 export type TerritoryLayer = 'official' | 'school' | 'health' | 'square';
 
@@ -527,21 +529,21 @@ function TerritoryFilterModalComponent({
       label: 'Escolas',
       sublabel: 'Educação pública municipal',
       icon: 'school',
-      activeColor: '#2563EB',
+      activeColor: colors.info,
     },
     {
       id: 'health',
       label: 'Saúde',
       sublabel: 'Postos, UPAs e hospitais',
       icon: 'medkit',
-      activeColor: '#16A34A',
+      activeColor: colors.completed,
     },
     {
       id: 'square',
       label: 'Praças e Lazer',
       sublabel: 'Parques e áreas públicas',
       icon: 'leaf',
-      activeColor: '#059669',
+      activeColor: colors.completed,
     },
   ];
 
@@ -715,8 +717,8 @@ function TerritoryFilterModalComponent({
               <View style={styles.segmentContainer}>
                 {[
                   { value: 'all', label: 'Todas', dotColor: null },
-                  { value: 'Não Encerrado', label: 'Abertos', dotColor: '#10B981' },
-                  { value: 'Encerrado', label: 'Encerrados', dotColor: '#6B7280' },
+                  { value: 'Não Encerrado', label: 'Abertos', dotColor: colors.completed },
+                  { value: 'Encerrado', label: 'Encerrados', dotColor: colors.muted },
                 ].map((opt) => {
                   const isSelected = status === opt.value;
                   return (
@@ -856,7 +858,7 @@ function TerritoryFilterModalComponent({
                         <Ionicons
                           name={cfg.icon}
                           size={18}
-                          color={isSelected ? '#FFFFFF' : colors.muted}
+                          color={isSelected ? lightColors.white : colors.muted}
                         />
                       </View>
                       <View style={{ flex: 1, gap: 1 }}>
@@ -866,7 +868,7 @@ function TerritoryFilterModalComponent({
                             styles.facilityCardTitle,
                             isSelected && {
                               color: colors.ink,
-                              fontWeight: '700',
+                              fontWeight: '600',
                             },
                           ]}
                         >
@@ -981,7 +983,7 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      shadowColor: '#000000',
+      shadowColor: lightColors.black,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.09,
       shadowRadius: 6,
@@ -992,16 +994,16 @@ const createStyles = (colors: ThemeColors) =>
       borderColor: colors.accent,
     },
     viewModeText: {
-      fontSize: 12,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       color: colors.ink,
     },
     viewModeTextActive: {
       color: colors.onAccent,
-      fontWeight: '800',
+      fontWeight: '600',
     },
     searchContainer: {
-      shadowColor: '#000000',
+      shadowColor: lightColors.black,
       shadowOffset: { width: 0, height: 3 },
       shadowOpacity: 0.1,
       shadowRadius: 8,
@@ -1024,8 +1026,8 @@ const createStyles = (colors: ThemeColors) =>
       justifyContent: 'center',
     },
     unifiedLocationText: {
-      fontSize: 13,
-      fontWeight: '700',
+      fontSize: fontSizes.meta,
+      fontWeight: '600',
       color: colors.ink,
       flexShrink: 1,
     },
@@ -1050,7 +1052,7 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      shadowColor: '#000000',
+      shadowColor: lightColors.black,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.06,
       shadowRadius: 3,
@@ -1061,13 +1063,13 @@ const createStyles = (colors: ThemeColors) =>
       borderColor: colors.onSurfaceBrand,
     },
     quickChipText: {
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       color: colors.muted,
       fontWeight: '500',
     },
     quickChipTextActive: {
       color: colors.ink,
-      fontWeight: '700',
+      fontWeight: '600',
     },
     scopeContextCard: {
       flexDirection: 'row',
@@ -1089,14 +1091,14 @@ const createStyles = (colors: ThemeColors) =>
       justifyContent: 'center',
     },
     scopeContextSub: {
-      fontSize: 10,
-      fontWeight: '800',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       letterSpacing: 0.5,
       textTransform: 'uppercase',
     },
     scopeContextTitle: {
-      fontSize: 15,
-      fontWeight: '800',
+      fontSize: fontSizes.label,
+      fontWeight: '600',
       color: colors.ink,
     },
     topSwitcherScroll: {
@@ -1116,7 +1118,7 @@ const createStyles = (colors: ThemeColors) =>
       borderWidth: 1,
       borderColor: colors.border,
       gap: 3,
-      shadowColor: '#000000',
+      shadowColor: lightColors.black,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.08,
       shadowRadius: 4,
@@ -1135,13 +1137,13 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.accent,
     },
     domainPillText: {
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       fontWeight: '600',
       color: colors.ink,
     },
     domainPillTextActive: {
       color: colors.onAccent,
-      fontWeight: '700',
+      fontWeight: '600',
     },
     activeFilterPill: {
       flexDirection: 'row',
@@ -1154,15 +1156,15 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      shadowColor: '#000000',
+      shadowColor: lightColors.black,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.08,
       shadowRadius: 4,
       elevation: 2,
     },
     activeFilterText: {
-      fontWeight: '700',
-      fontSize: 11,
+      fontWeight: '600',
+      fontSize: fontSizes.caption,
       color: colors.ink,
     },
     filterModalScroll: {
@@ -1195,20 +1197,20 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      shadowColor: '#000000',
+      shadowColor: lightColors.black,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 2,
     },
     domainTabButtonText: {
-      fontSize: 13,
+      fontSize: fontSizes.meta,
       fontWeight: '600',
       color: colors.muted,
     },
     domainTabButtonTextActive: {
       color: colors.ink,
-      fontWeight: '800',
+      fontWeight: '600',
     },
     filterFormContainer: {
       gap: spacing.md,
@@ -1223,9 +1225,9 @@ const createStyles = (colors: ThemeColors) =>
       marginBottom: 2,
     },
     sectionHeaderTitle: {
-      fontWeight: '800',
+      fontWeight: '600',
       letterSpacing: 0.6,
-      fontSize: 11,
+      fontSize: fontSizes.caption,
       color: colors.muted,
       textTransform: 'uppercase',
     },
@@ -1248,14 +1250,14 @@ const createStyles = (colors: ThemeColors) =>
       gap: 6,
     },
     sectionTitle: {
-      fontWeight: '800',
+      fontWeight: '600',
       letterSpacing: 0.5,
-      fontSize: 11,
+      fontSize: fontSizes.caption,
       color: colors.muted,
       textTransform: 'uppercase',
     },
     sectionDesc: {
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       marginTop: -2,
       marginBottom: 2,
     },
@@ -1289,12 +1291,12 @@ const createStyles = (colors: ThemeColors) =>
       justifyContent: 'center',
     },
     facilityCardTitle: {
-      fontSize: 14,
-      fontWeight: '700',
+      fontSize: fontSizes.meta,
+      fontWeight: '600',
       color: colors.ink,
     },
     facilityCardDesc: {
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       color: colors.muted,
     },
     filterSubfield: {
@@ -1302,8 +1304,8 @@ const createStyles = (colors: ThemeColors) =>
       marginTop: 2,
     },
     fieldSubLabel: {
-      fontWeight: '700',
-      fontSize: 11,
+      fontWeight: '600',
+      fontSize: fontSizes.caption,
       letterSpacing: 0.3,
       textTransform: 'uppercase',
     },
@@ -1327,7 +1329,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     segmentButtonActive: {
       backgroundColor: colors.ink,
-      shadowColor: '#000000',
+      shadowColor: lightColors.black,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.12,
       shadowRadius: 3,
@@ -1335,12 +1337,12 @@ const createStyles = (colors: ThemeColors) =>
     },
     segmentText: {
       fontWeight: '600',
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       color: colors.ink,
     },
     segmentTextActive: {
       color: colors.surface,
-      fontWeight: '700',
+      fontWeight: '600',
     },
     wrapChipsRow: {
       flexDirection: 'row',
@@ -1361,13 +1363,13 @@ const createStyles = (colors: ThemeColors) =>
       borderColor: colors.ink,
     },
     periodChipText: {
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       fontWeight: '600',
       color: colors.ink,
     },
     periodChipTextActive: {
       color: colors.surface,
-      fontWeight: '700',
+      fontWeight: '600',
     },
     macroThemesTrack: {
       flexDirection: 'row',
@@ -1391,13 +1393,13 @@ const createStyles = (colors: ThemeColors) =>
       borderColor: colors.accent,
     },
     macroThemeChipText: {
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       fontWeight: '600',
       color: colors.ink,
     },
     macroThemeChipTextSelected: {
       color: colors.onAccent,
-      fontWeight: '700',
+      fontWeight: '600',
     },
     clearLink: {
       flexDirection: 'row',
@@ -1407,7 +1409,7 @@ const createStyles = (colors: ThemeColors) =>
       marginTop: 2,
     },
     clearLinkText: {
-      fontSize: 11,
+      fontSize: fontSizes.caption,
       fontWeight: '600',
       color: colors.accent,
     },
@@ -1445,9 +1447,9 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.surface,
     },
     resetButtonText: {
-      fontWeight: '700',
+      fontWeight: '600',
       color: colors.ink,
-      fontSize: 13,
+      fontSize: fontSizes.meta,
     },
     applyButton: {
       flex: 1,
@@ -1470,8 +1472,8 @@ const createStyles = (colors: ThemeColors) =>
       }),
     },
     applyButtonText: {
-      fontWeight: '800',
+      fontWeight: '600',
       color: colors.onAccent,
-      fontSize: 14,
+      fontSize: fontSizes.meta,
     },
   });

@@ -6,6 +6,7 @@ import { AppText } from '@/components/ui/AppText';
 import { useTheme } from '@/theme/useTheme';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { lightColors } from '@/theme/colors';
 
 export interface FacilityLoadMoreButtonProps {
   label: string;
@@ -68,12 +69,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: layout.radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
-    shadowColor: '#000000',
+    shadowColor: lightColors.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.14,
     shadowRadius: 8,
     elevation: 5,
   },
   pressed: { opacity: 0.85 },
-  text: { fontWeight: '700' },
+  text: { fontWeight: '600' },
 });

@@ -4,6 +4,7 @@
  */
 
 import { resolveServiceThemeId } from '@/shared/service-themes';
+import { categoryPalette } from '@/theme/palette';
 
 export interface ServiceCategoryTheme {
   id: string;
@@ -18,7 +19,7 @@ export const OFFICIAL_CATEGORIES_THEMES: Record<string, ServiceCategoryTheme> = 
     id: 'lighting',
     label: 'Iluminação',
     icon: 'bulb-outline',
-    color: '#EAB308',
+    color: categoryPalette.lighting,
     imageUrl:
       'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80',
   },
@@ -26,7 +27,7 @@ export const OFFICIAL_CATEGORIES_THEMES: Record<string, ServiceCategoryTheme> = 
     id: 'road',
     label: 'Vias e Asfalto',
     icon: 'car-outline',
-    color: '#F97316',
+    color: categoryPalette.road,
     imageUrl:
       'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80',
   },
@@ -34,7 +35,7 @@ export const OFFICIAL_CATEGORIES_THEMES: Record<string, ServiceCategoryTheme> = 
     id: 'cleaning',
     label: 'Limpeza e Lixo',
     icon: 'trash-outline',
-    color: '#10B981',
+    color: categoryPalette.cleaning,
     imageUrl:
       'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80',
   },
@@ -42,7 +43,7 @@ export const OFFICIAL_CATEGORIES_THEMES: Record<string, ServiceCategoryTheme> = 
     id: 'traffic',
     label: 'Trânsito e Semáforo',
     icon: 'navigate-outline',
-    color: '#EF4444',
+    color: categoryPalette.traffic,
     imageUrl:
       'https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=800&q=80',
   },
@@ -50,7 +51,7 @@ export const OFFICIAL_CATEGORIES_THEMES: Record<string, ServiceCategoryTheme> = 
     id: 'nature',
     label: 'Árvores e Ambiente',
     icon: 'leaf-outline',
-    color: '#059669',
+    color: categoryPalette.nature,
     imageUrl:
       'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
   },
@@ -58,7 +59,7 @@ export const OFFICIAL_CATEGORIES_THEMES: Record<string, ServiceCategoryTheme> = 
     id: 'drainage',
     label: 'Drenagem e Esgoto',
     icon: 'water-outline',
-    color: '#0284C7',
+    color: categoryPalette.drainage,
     imageUrl:
       'https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=800&q=80',
   },
@@ -66,7 +67,7 @@ export const OFFICIAL_CATEGORIES_THEMES: Record<string, ServiceCategoryTheme> = 
     id: 'health',
     label: 'Saúde e Clínicas',
     icon: 'medkit-outline',
-    color: '#DC2626',
+    color: categoryPalette.health,
     imageUrl:
       'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80',
   },
@@ -74,7 +75,7 @@ export const OFFICIAL_CATEGORIES_THEMES: Record<string, ServiceCategoryTheme> = 
     id: 'social',
     label: 'Cidadania e Social',
     icon: 'people-outline',
-    color: '#6366F1',
+    color: categoryPalette.social,
     imageUrl:
       'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80',
   },
@@ -82,7 +83,7 @@ export const OFFICIAL_CATEGORIES_THEMES: Record<string, ServiceCategoryTheme> = 
     id: 'animals',
     label: 'Proteção Animal',
     icon: 'paw-outline',
-    color: '#D97706',
+    color: categoryPalette.animals,
     imageUrl:
       'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=800&q=80',
   },
@@ -90,7 +91,7 @@ export const OFFICIAL_CATEGORIES_THEMES: Record<string, ServiceCategoryTheme> = 
     id: 'transit',
     label: 'Transporte Público',
     icon: 'bus-outline',
-    color: '#2563EB',
+    color: categoryPalette.transit,
     imageUrl:
       'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=800&q=80',
   },
@@ -98,7 +99,7 @@ export const OFFICIAL_CATEGORIES_THEMES: Record<string, ServiceCategoryTheme> = 
     id: 'general',
     label: 'Serviços Urbanos',
     icon: 'business-outline',
-    color: '#0072BB',
+    color: categoryPalette.general,
     imageUrl:
       'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=800&q=80',
   },

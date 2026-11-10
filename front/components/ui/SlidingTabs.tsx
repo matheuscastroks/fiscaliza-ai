@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
 import { AppSelect } from './AppSelect';
 import { spacing } from '@/theme';
+import { lightColors } from '@/theme/colors';
 
 export interface SlidingOption {
   value: string;
@@ -168,7 +169,7 @@ export function SlidingTabs({
               borderWidth: 1,
               borderColor: active ? 'transparent' : colors.border,
               elevation: scroll && !active ? 1 : 0,
-              shadowColor: scroll && !active ? '#000000' : undefined,
+              shadowColor: scroll && !active ? lightColors.black : undefined,
               shadowOffset:
                 scroll && !active ? { width: 0, height: 1 } : undefined,
               shadowOpacity: scroll && !active ? 0.08 : undefined,

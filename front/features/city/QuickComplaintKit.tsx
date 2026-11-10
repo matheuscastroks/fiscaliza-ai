@@ -13,6 +13,9 @@ import {
   ComplaintTopicSheet,
   type ComplaintTopic,
 } from './ComplaintTopicSheet';
+import { partnerBrand } from '@/theme/palette';
+import { fontSizes } from '@/theme/typography';
+import { lightColors } from '@/theme/colors';
 
 export { COMPLAINT_TOPICS, type ComplaintTopic };
 
@@ -285,7 +288,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
             pressed && styles.whatsAppButtonPressed,
           ]}
         >
-          <Ionicons name="logo-whatsapp" size={19} color="#FFFFFF" />
+          <Ionicons name="logo-whatsapp" size={19} color={lightColors.white} />
           <AppText variant="label" style={styles.whatsAppButtonText}>
             Abrir WhatsApp do 1746
           </AppText>
@@ -322,8 +325,8 @@ const createStyles = (colors: ThemeColors) =>
     },
     sectionHeaderText: {
       color: colors.muted,
-      fontWeight: '700',
-      fontSize: 11,
+      fontWeight: '600',
+      fontSize: fontSizes.caption,
       letterSpacing: 0.5,
     },
     titleBlock: {
@@ -331,12 +334,12 @@ const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: spacing.xs,
     },
     title: {
-      fontSize: 18,
+      fontSize: fontSizes.sectionTitle,
       lineHeight: 22,
-      fontWeight: '700',
+      fontWeight: '600',
     },
     subtitle: {
-      fontSize: 13,
+      fontSize: fontSizes.meta,
       lineHeight: 18,
     },
     insetTable: {
@@ -381,7 +384,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: 4,
     },
     rowValueText: {
-      fontSize: 15,
+      fontSize: fontSizes.label,
       fontWeight: '600',
     },
     rowActionRight: {
@@ -409,19 +412,19 @@ const createStyles = (colors: ThemeColors) =>
     },
     suggestedLocationText: {
       color: colors.primary,
-      fontSize: 11,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       maxWidth: 160,
     },
     framelessInput: {
-      fontSize: 14,
+      fontSize: fontSizes.meta,
       lineHeight: 20,
       paddingVertical: 4,
       paddingHorizontal: 0,
       minHeight: 32,
     },
     detailsTextarea: {
-      fontSize: 14,
+      fontSize: fontSizes.meta,
       lineHeight: 20,
       paddingVertical: 6,
       paddingHorizontal: 10,
@@ -442,12 +445,12 @@ const createStyles = (colors: ThemeColors) =>
       gap: 2,
     },
     photoTipTitle: {
-      fontWeight: '700',
-      fontSize: 12,
+      fontWeight: '600',
+      fontSize: fontSizes.caption,
       color: colors.ink,
     },
     photoTipBody: {
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       lineHeight: 17,
     },
     previewToggle: {
@@ -459,8 +462,8 @@ const createStyles = (colors: ThemeColors) =>
     },
     previewToggleText: {
       color: colors.primary,
-      fontSize: 12,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
     },
     previewBox: {
       borderRadius: layout.radius.sm,
@@ -474,7 +477,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: 6,
     },
     previewText: {
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       lineHeight: 17,
       fontFamily: 'monospace',
     },
@@ -489,22 +492,22 @@ const createStyles = (colors: ThemeColors) =>
       gap: 8,
       minHeight: layout.touchTarget.minHeight,
       borderRadius: layout.radius.button,
-      backgroundColor: '#25D366',
+      backgroundColor: partnerBrand.whatsapp,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
-      shadowColor: '#25D366',
+      shadowColor: partnerBrand.whatsapp,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.2,
       shadowRadius: 4,
       elevation: 2,
     },
     whatsAppButtonPressed: {
-      backgroundColor: '#1EBE5D',
+      backgroundColor: partnerBrand.whatsappPressed,
       opacity: 0.9,
     },
     whatsAppButtonText: {
-      color: '#FFFFFF',
-      fontWeight: '700',
-      fontSize: 15,
+      color: lightColors.white,
+      fontWeight: '600',
+      fontSize: fontSizes.label,
     },
   });

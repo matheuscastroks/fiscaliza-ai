@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/useTheme';
 import { AppText } from './AppText';
 import { spacing } from '@/theme';
+import { fontSizes } from '@/theme/typography';
 
 export interface AppBottomSheetModalProps {
   visible: boolean;
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: fontSizes.sectionTitle,
     flex: 1,
   },
   headerRightContainer: {

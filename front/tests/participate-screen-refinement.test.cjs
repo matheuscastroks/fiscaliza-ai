@@ -32,7 +32,7 @@ test('quick complaint kit: incorporates bottom sheet topic selector, inset table
   assert.ok(content.includes('borderRadius: 12'), 'Must use soft 12px corner radius instead of full pill to prevent clipping');
 
   // WhatsApp brand color
-  assert.ok(content.includes('#25D366'), 'Must use official WhatsApp green for the send button');
+  assert.ok(content.includes('partnerBrand.whatsapp'), 'Must use official WhatsApp green token for the send button');
 
   const appInputPath = path.join(ROOT_DIR, 'components', 'ui', 'AppInput.tsx');
   const appInputContent = fs.readFileSync(appInputPath, 'utf8');

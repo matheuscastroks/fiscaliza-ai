@@ -31,6 +31,7 @@ import { useFollowStore } from '@/stores/followStore';
 import { OfficialCallTimeline } from '@/components/official/OfficialCallTimeline';
 import { goBack } from '@/utils/navigation';
 import { formatTimeRemaining, isDateOnly, parseCallDate } from '@/features/city/formatDates';
+import { fontSizes } from '@/theme/typography';
 
 export default function OfficialCallDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -622,7 +623,7 @@ function createStyles(colors: ThemeColors) {
     },
     slaPillText: {
       fontWeight: '600',
-      fontSize: 12,
+      fontSize: fontSizes.caption,
     },
     summaryRow: {
       flexDirection: 'row',
@@ -643,11 +644,11 @@ function createStyles(colors: ThemeColors) {
       borderColor: colors.divider,
     },
     mainTitle: {
-      fontSize: 24,
+      fontSize: fontSizes.screenTitle,
       lineHeight: 30,
     },
     sectionHeading: {
-      fontSize: 16,
+      fontSize: fontSizes.body,
       marginBottom: spacing.xxs,
     },
     statusRow: {

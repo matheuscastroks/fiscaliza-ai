@@ -8,6 +8,7 @@ import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { AppText } from './AppText';
 import { MapboxMapView, type MarkerKind } from './MapboxMapView';
+import { lightColors } from '@/theme/colors';
 
 export interface ItemLocationMapProps {
   id?: string;
@@ -68,7 +69,7 @@ export function ItemLocationMap({
     if (color) return color;
     if (kind === 'occurrence') {
       if (status === 'resolved') return colors.completed;
-      if (status === 'in_progress') return '#2563eb';
+      if (status === 'in_progress') return lightColors.info;
       return colors.attention;
     }
     if (kind === 'proposal') return colors.attention;
