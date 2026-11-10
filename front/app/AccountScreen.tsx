@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -22,9 +22,27 @@ import { goBack } from '@/utils/navigation';
 export default function AccountScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const { user, deleteAccount } = useAuthStore(
-    useShallow((s) => ({ user: s.user, deleteAccount: s.deleteAccount })),
+  const { user, deleteAccount, logoutAll } = useAuthStore(
+    useShallow((s) => ({ user: s.user, deleteAccount: s.deleteAccount, logoutAll: s.logoutAll })),
   );
+  const confirmLogoutAll = () => {
+    Alert.alert(
+      'Sair em todos os celulares?',
+      'Você será desconectado aqui e em todo celular onde entrou na sua conta. Seus chamados salvos continuam na conta.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Sair em todos',
+          style: 'destructive',
+          onPress: () => {
+            void logoutAll()
+              .catch(() => undefined)
+              .then(() => router.replace('/LoginScreen'));
+          },
+        },
+      ],
+    );
+  };
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -54,7 +72,7 @@ export default function AccountScreen() {
         {user ? (
           <>
             <AppText variant="meta" color="muted">
-              Conectado como {user.email}. Seus chamados salvos e lugares ficam neste celular.
+              Conectado como {user.email}. Seus chamados salvos ficam na sua conta e voltam em qualquer celular onde você entrar. Seus lugares ficam só neste celular.
             </AppText>
             <InsetGroup>
               <ListRow
@@ -66,6 +84,13 @@ export default function AccountScreen() {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   useSignOutSheet.getState().setOpen(true);
                 }}
+              />
+              <ListRow
+                icon="phone-portrait-outline"
+                tone="neutral"
+                title="Sair em todos os celulares"
+                subtitle="Encerra a conta em todo celular onde você entrou"
+                onPress={confirmLogoutAll}
               />
             </InsetGroup>
             <View style={styles.danger}>

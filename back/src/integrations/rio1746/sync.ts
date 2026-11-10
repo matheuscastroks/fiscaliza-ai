@@ -27,7 +27,7 @@ export async function getSyncStatus(db: ReadDatabase) {
   return row ?? null;
 }
 
-function publicRun(row: typeof sourceSyncRuns.$inferSelect): SyncRunSummary {
+export function publicRun(row: typeof sourceSyncRuns.$inferSelect): SyncRunSummary {
   return {
     id: row.id,
     sourceId: row.sourceId,

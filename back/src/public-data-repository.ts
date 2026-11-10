@@ -1,3 +1,5 @@
+import { RIO_MUNICIPALITY_ID } from './constants.js';
+import { httpError } from './http-errors.js';
 import { and, asc, eq, ilike, inArray, or, sql, type SQL } from 'drizzle-orm';
 import type { ReadDatabase } from './db.js';
 import {
@@ -20,8 +22,7 @@ import type {
   PublicFacilitySummary,
   PublicSource,
 } from '../../shared/contracts.js';
-export const failPublic = (statusCode: number, message: string) =>
-  Object.assign(new Error(message), { statusCode });
+export const failPublic = httpError;
 export const CATEGORY_SOURCES: Record<FacilityCategory, string> = {
   school: 'siurb-schools',
   health: 'siurb-health',
@@ -111,7 +112,7 @@ export async function getPublicSources(
   const [any] = await db
     .select({ id: officialCalls.id })
     .from(officialCalls)
-    .where(eq(officialCalls.municipalityId, '3304557'))
+    .where(eq(officialCalls.municipalityId, RIO_MUNICIPALITY_ID))
     .limit(1);
   return [
     ...sources,
@@ -140,14 +141,14 @@ export async function getPublicSources(
 }
 export const activeFacilities = () =>
   and(
-    eq(publicFacilities.municipalityId, '3304557'),
+    eq(publicFacilities.municipalityId, RIO_MUNICIPALITY_ID),
     eq(dataSources.id, publicFacilities.sourceId),
     eq(dataSources.publishedRunId, publicFacilities.lastSeenRunId),
     publishedSource(),
   );
 export const activeBoundaries = () =>
   and(
-    eq(territorialBoundaries.municipalityId, '3304557'),
+    eq(territorialBoundaries.municipalityId, RIO_MUNICIPALITY_ID),
     eq(dataSources.id, territorialBoundaries.sourceId),
     eq(dataSources.publishedRunId, territorialBoundaries.lastSeenRunId),
     publishedSource(),

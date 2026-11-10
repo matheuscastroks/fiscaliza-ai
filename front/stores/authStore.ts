@@ -45,6 +45,8 @@ interface AuthState {
     password: string,
   ) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  /** Encerra a sessão em todos os aparelhos da conta. */
+  logoutAll: () => Promise<void>;
   register: (
     input: RegistrationInput,
   ) => Promise<{ success: boolean; error?: string }>;
@@ -57,6 +59,18 @@ interface AuthState {
   deleteAccount: () => Promise<{ success: boolean; error?: string }>;
   setLoading: (loading: boolean) => void;
 }
+async function endSession(path: string) {
+  useAuthStore.setState({ sessionVersion: useAuthStore.getState().sessionVersion + 1 });
+  try {
+    await request(path, 'POST');
+  } finally {
+    await saveToken(null);
+    await cacheSessionUser(null);
+    queryClient.clear();
+    useAuthStore.setState({ user: null, isAuthenticated: false, error: null, offline: false });
+  }
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   offline: false,
   user: null,
@@ -125,17 +139,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (result.data) void cacheSessionUser(result.data);
     return { success: result.success, error: result.error };
   },
-  logout: async () => {
-    set({ sessionVersion: get().sessionVersion + 1 });
-    try {
-      await request('/auth/logout', 'POST');
-    } finally {
-      await saveToken(null);
-      await cacheSessionUser(null);
-      queryClient.clear();
-      set({ user: null, isAuthenticated: false, error: null, offline: false });
-    }
-  },
+  logout: async () => endSession('/auth/logout'),
+  logoutAll: async () => endSession('/auth/logout-all'),
   clearError: () => set({ error: null }),
   setLoading: (isLoading) => set({ isLoading }),
   refreshUser: async () => {

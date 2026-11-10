@@ -1,3 +1,5 @@
+import { RIO_MUNICIPALITY_ID } from './constants.js';
+import { httpError } from './http-errors.js';
 import { eq } from 'drizzle-orm';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -7,8 +9,7 @@ import type { Municipality, PostalCodeLookup } from '../../shared/contracts.js';
 export type Geometry =
   | { type: 'Polygon'; coordinates: number[][][] }
   | { type: 'MultiPolygon'; coordinates: number[][][][] };
-export const territorialError = (statusCode: number, message: string) =>
-  Object.assign(new Error(message), { statusCode });
+export const territorialError = httpError;
 // Ring boundary counts as municipal territory, including boundaries of interior holes.
 function ringState(
   point: number[],
@@ -125,11 +126,11 @@ export function municipalityFromGeometry(
 }
 export async function officialRio() {
   const geometry = parseGeometry(
-    JSON.parse(await readFile(resolve('data/3304557.geojson'), 'utf8')),
+    JSON.parse(await readFile(resolve(`data/${RIO_MUNICIPALITY_ID}.geojson`), 'utf8')),
   );
   return {
-    id: '3304557',
-    data: municipalityFromGeometry('3304557', 'Rio de Janeiro', 'RJ', geometry),
+    id: RIO_MUNICIPALITY_ID,
+    data: municipalityFromGeometry(RIO_MUNICIPALITY_ID, 'Rio de Janeiro', 'RJ', geometry),
     geometry,
   };
 }

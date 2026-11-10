@@ -1,6 +1,6 @@
 import { BigQuery } from '@google-cloud/bigquery';
 
-const bq = new BigQuery({ projectId: 'gen-lang-client-0798661946' });
+const bq = new BigQuery({ projectId: process.env.GCP_PROJECT_ID });
 
 async function diagnose() {
   console.log('--- 1. Querying MIN and MAX data_particao ---');

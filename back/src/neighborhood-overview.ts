@@ -1,3 +1,4 @@
+import { RIO_MUNICIPALITY_ID } from './constants.js';
 import { and, eq, gte, inArray, lt, lte, or, sql, type SQL } from 'drizzle-orm';
 import type { ReadDatabase } from './db.js';
 import { officialCalls } from './schema.js';
@@ -74,7 +75,7 @@ export async function officialTerritoryScope(db: ReadDatabase, id: string) {
     .from(officialCalls)
     .where(
       and(
-        eq(officialCalls.municipalityId, '3304557'),
+        eq(officialCalls.municipalityId, RIO_MUNICIPALITY_ID),
         inArray(officialCalls.neighborhoodId, candidates),
       ),
     );
@@ -98,7 +99,7 @@ export async function officialTerritoryScope(db: ReadDatabase, id: string) {
   return {
     confirmed: checks.length > 0,
     where: checks.length
-      ? and(eq(officialCalls.municipalityId, '3304557'), or(...checks))!
+      ? and(eq(officialCalls.municipalityId, RIO_MUNICIPALITY_ID), or(...checks))!
       : sql`false`,
   };
 }

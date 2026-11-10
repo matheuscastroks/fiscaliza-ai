@@ -1,3 +1,4 @@
+import { publicRun } from '../rio1746/sync.js';
 import type pg from 'pg';
 import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
@@ -10,24 +11,6 @@ import { getSiurbLayer, type SiurbLayerId } from './catalog.js';
 import { readLayerSnapshot } from './client.js';
 import { mapSiurbFeature } from './mapper.js';
 import { ensureSiurbSources, publishSiurbSnapshot } from './repository.js';
-function summary(row: typeof sourceSyncRuns.$inferSelect): SyncRunSummary {
-  return {
-    id: row.id,
-    sourceId: row.sourceId,
-    status: row.status,
-    coverage: row.coverage,
-    requestedStart: row.requestedStart,
-    requestedEnd: row.requestedEnd,
-    startedAt: row.startedAt.toISOString(),
-    finishedAt: row.finishedAt?.toISOString() ?? null,
-    counters: {
-      received: row.receivedCount,
-      imported: row.importedCount,
-      updated: row.updatedCount,
-      rejected: row.rejectedCount,
-    },
-  };
-}
 export async function syncSiurbLayer(
   pool: pg.Pool,
   db: Database,
@@ -77,7 +60,7 @@ export async function syncSiurbLayer(
         if (!boundary?.publishedRunId)
           throw new Error('Importe primeiro os limites de bairros.');
       }
-      return summary(
+      return publicRun(
         await publishSiurbSnapshot(db, layer, id, snapshot, valid),
       );
     } catch (error) {

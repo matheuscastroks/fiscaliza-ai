@@ -1,3 +1,4 @@
+import { RIO_MUNICIPALITY_ID } from './constants.js';
 import {
   date,
   doublePrecision,
@@ -48,7 +49,7 @@ export const territorialBoundaries = pgTable(
     id: text('id').primaryKey(),
     municipalityId: text('municipality_id')
       .notNull()
-      .default('3304557')
+      .default(RIO_MUNICIPALITY_ID)
       .references(() => municipalities.id),
     sourceId: text('source_id')
       .notNull()
@@ -85,7 +86,7 @@ export const publicFacilities = pgTable(
     id: text('id').primaryKey(),
     municipalityId: text('municipality_id')
       .notNull()
-      .default('3304557')
+      .default(RIO_MUNICIPALITY_ID)
       .references(() => municipalities.id),
     sourceId: text('source_id')
       .notNull()

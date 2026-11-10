@@ -1,3 +1,4 @@
+import { RIO_MUNICIPALITY_ID } from './constants.js';
 import { eq } from 'drizzle-orm';
 import type { ReadDatabase } from './db.js';
 import { municipalities, territorialBoundaries, dataSources } from './schema.js';
@@ -17,10 +18,10 @@ export function resolvePointNeighborhood(point: { latitude: number; longitude: n
 }
 
 export async function resolveTerritoryLocation(db: ReadDatabase, point: { latitude: number; longitude: number }): Promise<TerritoryLocationResolution> {
-  const [municipality] = await db.select().from(municipalities).where(eq(municipalities.id, '3304557'));
+  const [municipality] = await db.select().from(municipalities).where(eq(municipalities.id, RIO_MUNICIPALITY_ID));
   if (!municipality) throw territorialError(503, 'Malha municipal indisponível. Tente novamente.');
   const insideMunicipality = containsPoint(municipality.geometry, point.latitude, point.longitude);
-  if (!insideMunicipality) return { municipalityId: '3304557', insideMunicipality: false, neighborhood: null };
+  if (!insideMunicipality) return { municipalityId: RIO_MUNICIPALITY_ID, insideMunicipality: false, neighborhood: null };
   const version = await dataVersion(db);
   if (boundaryCache?.version !== version) {
     const rows = db
@@ -30,5 +31,5 @@ export async function resolveTerritoryLocation(db: ReadDatabase, point: { latitu
     boundaryCache.rows.catch(() => { boundaryCache = undefined; });
   }
   const boundaries = await boundaryCache!.rows;
-  return { municipalityId: '3304557', insideMunicipality, neighborhood: resolvePointNeighborhood(point, boundaries) };
+  return { municipalityId: RIO_MUNICIPALITY_ID, insideMunicipality, neighborhood: resolvePointNeighborhood(point, boundaries) };
 }

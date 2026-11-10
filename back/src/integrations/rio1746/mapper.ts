@@ -1,3 +1,4 @@
+import { RIO_MUNICIPALITY_ID } from '../../constants.js';
 import type { RawBigQuery1746Row } from './types.js';
 
 function extractDateValue(val: { value: string } | string | null | undefined): string | null {
@@ -62,7 +63,7 @@ export function mapRawRowToOfficialCall(row: RawBigQuery1746Row) {
     id: `rio1746-${row.id_chamado}`,
     externalId: String(row.id_chamado),
     source: 'rio1746' as const,
-    municipalityId: '3304557', // Rio de Janeiro
+    municipalityId: RIO_MUNICIPALITY_ID, // Rio de Janeiro
     serviceCategory: row.categoria || null,
     serviceType: row.tipo || 'Outros',
     serviceSubtype: row.subtipo || 'Geral',

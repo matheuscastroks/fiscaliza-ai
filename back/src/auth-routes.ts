@@ -2,7 +2,15 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import type { SessionUser } from '../../shared/contracts.js';
-import { hashPassword, newToken, tokenHash, verifyPassword } from './auth.js';
+import {
+  createLoginThrottle,
+  hashPassword,
+  needsRehash,
+  newToken,
+  spendPasswordTime,
+  tokenHash,
+  verifyPassword,
+} from './auth.js';
 import {
   registrationError,
   type RegistrationInput,
@@ -57,6 +65,8 @@ export function registerAuthRoutes(
     validateImages,
     schema,
   } = options;
+
+  const loginThrottle = createLoginThrottle();
 
   function setSessionCookie(
     req: FastifyRequest,
@@ -137,12 +147,27 @@ export function registerAuthRoutes(
       },
     },
     async (req, reply) => {
-      const [u] = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, req.body.email.toLowerCase().trim()));
-      if (!u || !(await verifyPassword(req.body.password, u.passwordHash)))
+      const email = req.body.email.toLowerCase().trim();
+      if (loginThrottle.blocked(email))
+        throw fail(429, 'Muitas tentativas. Tente de novo em alguns minutos.');
+      const [u] = await db.select().from(users).where(eq(users.email, email));
+      if (!u) {
+        // Mesmo custo de um login real: o tempo não revela se a conta existe.
+        await spendPasswordTime(req.body.password);
+        loginThrottle.fail(email);
         throw fail(401, 'E-mail ou senha inválidos.');
+      }
+      if (!(await verifyPassword(req.body.password, u.passwordHash))) {
+        loginThrottle.fail(email);
+        throw fail(401, 'E-mail ou senha inválidos.');
+      }
+      loginThrottle.reset(email);
+      // Conta com hash do custo antigo: regrava no custo atual.
+      if (needsRehash(u.passwordHash))
+        await db
+          .update(users)
+          .set({ passwordHash: await hashPassword(req.body.password) })
+          .where(eq(users.id, u.id));
       const token = newToken();
       await db.insert(sessions).values({
         tokenHash: tokenHash(token),
@@ -208,6 +233,14 @@ export function registerAuthRoutes(
       await db
         .delete(sessions)
         .where(eq(sessions.tokenHash, tokenHash(req.sessionToken)));
+    reply.clearCookie(sessionCookie(req), { path: '/api' });
+    return ok(null);
+  });
+
+  // Encerra a sessão em todos os aparelhos da conta.
+  app.post('/api/auth/logout-all', async (req, reply) => {
+    if (!req.user) throw fail(401, 'Entre para continuar.');
+    await db.delete(sessions).where(eq(sessions.userId, req.user.id));
     reply.clearCookie(sessionCookie(req), { path: '/api' });
     return ok(null);
   });
