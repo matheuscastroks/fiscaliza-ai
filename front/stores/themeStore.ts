@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Appearance } from 'react-native';
 import { create } from 'zustand';
+import { createScopeGeneration, createWriteQueue } from './scopedPersistence';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 export type ThemeMode = 'light' | 'dark';
@@ -27,8 +28,8 @@ interface ThemeState {
 }
 
 let initialization: Promise<void> | undefined;
-let revision = 0;
-let writes: Promise<void> = Promise.resolve();
+const enqueueWrite = createWriteQueue();
+const revision = createScopeGeneration();
 
 export const useThemeStore = create<ThemeState>((set) => ({
   preference: 'system',
@@ -37,7 +38,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
   persistenceError: null,
   initialize: () => {
     if (initialization) return initialization;
-    const startedRevision = revision;
+    const startedRevision = revision.current();
     // Keep the OS preference intact: forcing Appearance would hide system changes.
     Appearance.addChangeListener(({ colorScheme }) => {
       set({ systemMode: colorScheme === 'dark' ? 'dark' : 'light' });
@@ -49,7 +50,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
       try {
         const saved = await AsyncStorage.getItem(THEME_STORAGE_KEY);
         // A user action during hydration always wins over the previously saved value.
-        if (revision === startedRevision && isThemePreference(saved)) {
+        if (revision.isCurrent(startedRevision) && isThemePreference(saved)) {
           set({ preference: saved });
         }
       } catch {
@@ -64,24 +65,21 @@ export const useThemeStore = create<ThemeState>((set) => ({
   },
   setPreference: async (preference) => {
     if (!isThemePreference(preference)) return;
-    const currentRevision = ++revision;
+    const currentRevision = revision.next();
     set({ preference, persistenceError: null });
     // Serialize writes so rapid selections cannot restore an older value on restart.
-    writes = writes
-      .catch(() => undefined)
-      .then(async () => {
-        try {
-          await AsyncStorage.setItem(THEME_STORAGE_KEY, preference);
-          if (revision === currentRevision) set({ persistenceError: null });
-        } catch {
-          if (revision === currentRevision) {
-            set({
-              persistenceError:
-                'A aparência mudou nesta sessão, mas não pôde ser salva. Toque na opção para tentar de novo.',
-            });
-          }
+    await enqueueWrite(async () => {
+      try {
+        await AsyncStorage.setItem(THEME_STORAGE_KEY, preference);
+        if (revision.isCurrent(currentRevision)) set({ persistenceError: null });
+      } catch {
+        if (revision.isCurrent(currentRevision)) {
+          set({
+            persistenceError:
+              'A aparência mudou nesta sessão, mas não pôde ser salva. Toque na opção para tentar de novo.',
+          });
         }
-      });
-    await writes;
+      }
+    });
   },
 }));

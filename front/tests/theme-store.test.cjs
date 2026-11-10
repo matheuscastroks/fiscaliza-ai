@@ -36,7 +36,9 @@ function setup({ saved = null, read, write, system = 'light' } = {}) {
           }
         : name === '@react-native-async-storage/async-storage'
           ? storage
-          : require(name),
+          : name === './scopedPersistence'
+            ? require('@/stores/scopedPersistence')
+            : require(name),
   });
   return { ...module.exports, listeners, savedWrites };
 }

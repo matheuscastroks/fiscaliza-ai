@@ -1,6 +1,6 @@
 # Quadro final do plano de melhorias do frontend
 
-Data: 2026-11-10. Cada linha cita o que existe no código e o tipo de evidência (C = código/testes automatizados; A = aparelho Android via adb; — = não feito). Estado de `main` no commit do quadro: app 159 testes e 30 testes `.ts` passando, typecheck passando, lint com 0 erros e 3 avisos, `back/` 32 testes passando.
+Data: 2026-11-10. Cada linha cita o que existe no código e o tipo de evidência (C = código/testes automatizados; A = aparelho Android via adb; — = não feito). Estado de `main` no commit do quadro: app 159 testes e 30 testes `.ts` passando, typecheck passando, lint sem erros e sem avisos, `back/` 32 testes passando.
 
 ## Fase 0 — bugs
 | # | Item | Estado | Evidência |
@@ -37,12 +37,12 @@ Data: 2026-11-10. Cada linha cita o que existe no código e o tipo de evidência
 ## Fase 3 — migração visual
 - Cores, fontes, pesos, raios, ícones, sombras e caixa alta em tokens — C.
 - `CallSummary` único; `IconTile`; `InsetGroup` em Perfil, Agir, Preferências, Conta — C + A.
-- **Não migrado:** blocos próprios `tableRow`/`insetTable` ainda existem em Preferências (parte), Lugares, Ajuda e outras telas; o KPI principal de Dados do bairro continua grande (agora com pergunta e fonte).
+- Blocos próprios `tableRow`/`insetTable` não existem mais em nenhuma tela (a última, a linha de avisos de Preferências, migrou). O KPI principal de Dados do bairro continua grande, agora com pergunta e fonte.
 
 ## Fase 4 — estrutura e testes
 - Código morto e 5 dependências sem uso removidos — C (bundle Android exporta).
 - Arquivos: `TerritoryScreen` 390 linhas; controlador dividido em `useTerritoryQueries` (387) e `useTerritoryView` (525); `ProfileScreen` 391; `ResultsScreen` 466; `PlaceSelector` 350; `TerritoryFilterModal` 563. Nenhum arquivo do plano passa de 600 linhas.
-- `scopedPersistence` usado por `territoryStore` e `placesStore`; **`followStore` e `themeStore` mantêm filas próprias** — C.
+- `scopedPersistence` (fila serial, geração de escopo) usado por `territoryStore`, `placesStore`, `followStore` e `themeStore`; o formato das chaves já gravadas foi mantido — C (testes de concorrência).
 - `useShallow`, `OPEN_STATUS`, `formatRadius`, `officialStatusColor`, `mutation()` restrito — C.
 - Imagens do onboarding em WebP (~2,3 MB para ~540 KB) — C (peso medido; abertura não medida).
 - Testes de render: renderizador mínimo para `node --test` (8 testes). **`@testing-library/react-native` não foi adotado** (exige Babel/Jest) — decisão de infraestrutura pendente.
@@ -64,6 +64,6 @@ Data: 2026-11-10. Cada linha cita o que existe no código e o tipo de evidência
 ## Pendências reais
 1. Decidir se adota um executor de testes de componentes (Jest + `@testing-library/react-native`).
 2. Cadastrar no servidor os contornos dos demais bairros (a API devolve 1).
-3. Configurar o `projectId` do EAS para os avisos funcionarem.
+3. Rodar `eas init` na sua conta e commitar o `projectId` para os avisos funcionarem.
 4. Testar os textos com moradores e aferir contraste/desempenho em aparelhos de entrada.
-5. Migrar os blocos de lista restantes para `InsetGroup`/`ListRow` e levar `followStore`/`themeStore` ao `scopedPersistence`.
+5. O `projectId` do EAS não pôde ser criado daqui (não há `eas.json` nem login na conta); sem ele os avisos ficam desligados e o app diz isso.

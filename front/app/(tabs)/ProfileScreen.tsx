@@ -1,53 +1,73 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 
+
 import React, { useState } from 'react';
+
 
 import { Pressable, ScrollView, View } from 'react-native';
 
+
 import * as Haptics from 'expo-haptics';
+
 
 import { Ionicons } from '@expo/vector-icons';
 
+
 import { router } from 'expo-router';
+
 import * as ImagePicker from 'expo-image-picker';
+
 
 import * as FileSystem from 'expo-file-system/legacy';
 
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 import { AppScreen } from '@/components/ui/AppScreen';
 
+
 import { AppHeader } from '@/components/ui/AppHeader';
+
 
 import { AppText } from '@/components/ui/AppText';
 
+
 import { AppButton } from '@/components/ui/AppButton';
+
 
 import { UserAvatar } from '@/components/ui/UserAvatar';
 
+
 import { useAuthStore } from '@/stores/authStore';
+
 
 import { useAvatarStore } from '@/stores/avatarStore';
 
+
 import { useFollowStore } from '@/stores/followStore';
+
 
 import { usePlacesStore } from '@/stores/placesStore';
 
+
 import { PostalCodeSheet } from '@/components/profile/PostalCodeSheet';
 
+
 import { layout } from '@/theme';
+
 import { IconTile } from '@/components/ui/IconTile';
 
+
 import { InsetGroup, ListRow } from '@/components/ui/ListRow';
+
 
 
 import { createStyles } from '@/features/profile/profileScreenStyles';
 
 
+
 export default function ProfileScreen() {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
-  const insets = useSafeAreaInsets();
 
   const user = useAuthStore((s) => s.user);
   const savedCalls = useFollowStore((s) => s.savedCalls);

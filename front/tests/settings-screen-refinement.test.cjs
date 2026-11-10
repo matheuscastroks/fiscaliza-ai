@@ -19,9 +19,7 @@ test('settings screen: removes redundancies (places and saved calls) and adopts 
   // Apple Inset-Grouped containers and frameless form sections
   assert.ok(content.includes('sectionBlock'), 'Must use frameless section blocks');
   assert.ok(content.includes('sectionHeaderRow'), 'Must style headers with sectionHeaderRow');
-  assert.ok(content.includes('insetTable'), 'Must adopt Apple Inset Tables');
-  assert.ok(content.includes('tableRow'), 'Must use structured table rows');
-  assert.ok(content.includes('iconSquircle'), 'Must style section icons with squircles');
+  assert.ok(content.includes('InsetGroup') && content.includes('ListRow'), 'Must use the shared InsetGroup/ListRow');
 
   // Essential features preserved
   assert.ok(content.includes('SlidingTabs'), 'Must preserve theme appearance switcher');

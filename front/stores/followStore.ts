@@ -1,7 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { create } from 'zustand';
+
+import { createScopeGeneration, createWriteQueue } from './scopedPersistence';
 import type { OfficialCall } from '@/shared/contracts';
+
 import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
+
 
 let onFollowChanged: ((call: OfficialCall, saved: boolean) => void) | undefined;
 export function setFollowNotificationListener(
@@ -139,19 +144,19 @@ interface PersistChange {
   effects?: { call: OfficialCall; saved: boolean }[];
 }
 let initialization: Promise<void> | undefined;
-let queue = Promise.resolve();
-/** Incrementa a cada troca de escopo; operações de outra geração são descartadas. */
-let scopeGeneration = 0;
+const enqueueWrite = createWriteQueue();
+/** Troca de escopo invalida operações de outra geração. */
+const scope = createScopeGeneration();
 export const useFollowStore = create<FollowStore>((set, get) => {
   const persist = (change: () => PersistChange) => {
-    const generation = scopeGeneration;
+    const generation = scope.current();
     const scopeUserId = get().userId;
     const scopeMunicipalityId = get().municipalityId;
     const inScope = () =>
-      generation === scopeGeneration &&
+      scope.isCurrent(generation) &&
       get().userId === scopeUserId &&
       get().municipalityId === scopeMunicipalityId;
-    const result = queue.then(async () => {
+    return enqueueWrite(async () => {
       if (!inScope()) return false;
       await get().initialize();
       if (!inScope()) return false;
@@ -193,8 +198,6 @@ export const useFollowStore = create<FollowStore>((set, get) => {
         set({ busy: false });
       }
     });
-    queue = result.then(() => undefined);
-    return result;
   };
   return {
     userId: null,
@@ -270,7 +273,7 @@ export const useFollowStore = create<FollowStore>((set, get) => {
         return initialization;
       }
       initialization = undefined;
-      scopeGeneration += 1;
+      scope.next();
       set({
         userId,
         municipalityId: nextMunicipalityId,

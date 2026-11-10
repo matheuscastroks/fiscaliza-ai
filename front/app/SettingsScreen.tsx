@@ -1,27 +1,48 @@
 import React, { useState } from 'react';
-import { Alert, View, StyleSheet, Pressable } from 'react-native';
+
+import { Alert, View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+
 import * as Haptics from 'expo-haptics';
+
 import { goBack } from '@/utils/navigation';
+
 import { AppScreen } from '@/components/ui/AppScreen';
+
 import { AppHeader } from '@/components/ui/AppHeader';
+
 import { AppText } from '@/components/ui/AppText';
+
 import { AppButton } from '@/components/ui/AppButton';
+
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
+
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
+
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
+
 import { useThemeStore, isThemePreference } from '@/stores/themeStore';
+
 import { useTerritoryStore } from '@/stores/territoryStore';
+
 import { useNotificationStore } from '@/stores/notificationStore';
+
 import { useFollowStore } from '@/stores/followStore';
+
 import { isPushConfigured } from '@/features/notifications/notificationService';
+
 import { InsetGroup, ListRow } from '@/components/ui/ListRow';
+
 import { useMunicipalityId } from '@/features/city/municipality';
+
 import { AppToast } from '@/components/ui/AppToast';
+
 import { useTheme, spacing, layout } from '@/theme';
+
 import { fontSizes } from '@/theme/typography';
-import { IconTile } from '@/components/ui/IconTile';
+
 import { useShallow } from 'zustand/react/shallow';
+
 
 const appearanceOptions = [
   {
@@ -190,87 +211,43 @@ export default function SettingsScreen() {
             </AppText>
           </View>
 
-          <View
-            style={[
-              styles.insetTable,
-              { backgroundColor: colors.surface, borderColor: colors.divider },
-            ]}
-          >
-            {/* Linha 1: Status das Notificações */}
-            <View style={styles.tableRow}>
-              <View
-                style={[
-                  styles.iconSquircle,
-                  {
-                    backgroundColor: notificationsActive
-                      ? colors.completedSurface
-                      : colors.surfaceSubdued,
-                  },
-                ]}
-              >
-                <Ionicons
-                  name={notificationsActive ? 'notifications' : 'notifications-off-outline'}
-                  size={layout.iconSize.md}
-                  color={notificationsActive ? colors.completed : colors.primary}
-                />
-              </View>
-
-              <View style={styles.tableRowContent}>
-                <AppText variant="label">Avisos no celular</AppText>
-                <AppText variant="caption" color="muted">
-                  {!pushAvailable
-                    ? 'Ainda não funciona nesta versão do app'
-                    : notificationsActive
+          <InsetGroup>
+            <ListRow
+              icon={notificationsActive ? 'notifications' : 'notifications-off-outline'}
+              title="Avisos no celular"
+              subtitle={
+                !pushAvailable
+                  ? 'Ainda não funciona nesta versão do app'
+                  : notificationsActive
                     ? 'Avisos ligados para seus chamados salvos'
                     : permissionGranted
                       ? 'Permissão dada. Toque para ligar os avisos.'
-                      : 'Avisos desligados neste celular'}
-                </AppText>
-              </View>
-
-              {pushAvailable && (
-              <AppButton
-                title={notificationsActive ? 'Ligados' : permissionGranted ? 'Tentar de novo' : 'Ligar'}
-                variant={notificationsActive ? 'secondary' : 'primary'}
-                disabled={notificationLoading || notificationsActive}
-                loading={notificationLoading}
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  void requestPermissions(municipalityId);
-                }}
+                      : 'Avisos desligados neste celular'
+              }
+              trailing={
+                pushAvailable ? (
+                  <AppButton
+                    title={notificationsActive ? 'Ligados' : permissionGranted ? 'Tentar de novo' : 'Ligar'}
+                    variant={notificationsActive ? 'secondary' : 'primary'}
+                    disabled={notificationLoading || notificationsActive}
+                    loading={notificationLoading}
+                    onPress={() => {
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void requestPermissions(municipalityId);
+                    }}
+                  />
+                ) : undefined
+              }
+            />
+            {__DEV__ && permissionGranted ? (
+              <ListRow
+                icon="paper-plane-outline"
+                title="Testar notificação no celular"
+                subtitle="Envia um aviso de teste (só em desenvolvimento)"
+                onPress={testSending || !pushToken ? undefined : handleTestPush}
               />
-              )}
-            </View>
-
-            {/* Linha 2: Disparo de Notificação de Teste (quando permitido) */}
-            {__DEV__ && permissionGranted && (
-              <>
-                <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Testar notificação no celular"
-                  disabled={testSending || !pushToken}
-                  onPress={handleTestPush}
-                  style={({ pressed }) => [
-                    styles.tableRow,
-                    pressed && { backgroundColor: colors.surfaceSubdued },
-                    (testSending || !pushToken) && { opacity: 0.6 },
-                  ]}
-                >
-                  <IconTile icon="paper-plane-outline" />
-
-                  <View style={styles.tableRowContent}>
-                    <AppText variant="label">Testar notificação no celular</AppText>
-                    <AppText variant="caption" color="muted">
-                      Envia um aviso de teste (só em desenvolvimento)
-                    </AppText>
-                  </View>
-
-                  <Ionicons name="send-outline" size={layout.iconSize.sm} color={colors.primary} />
-                </Pressable>
-              </>
-            )}
-          </View>
+            ) : null}
+          </InsetGroup>
 
           <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
             Avisamos quando um chamado que você salvou tiver novidade. O aviso pode demorar um pouco.
@@ -339,35 +316,6 @@ const styles = StyleSheet.create({
     borderRadius: layout.radius.panel,
     borderWidth: StyleSheet.hairlineWidth,
     padding: spacing.sm,
-  },
-  insetTable: {
-    borderRadius: layout.radius.panel,
-    borderWidth: StyleSheet.hairlineWidth,
-    overflow: 'hidden',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    minHeight: 56,
-  },
-  tableDivider: {
-    height: StyleSheet.hairlineWidth,
-    marginLeft: 54,
-  },
-  iconSquircle: {
-    width: 34,
-    height: 34,
-    borderRadius: layout.radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tableRowContent: {
-    flex: 1,
-    gap: 2,
-    paddingRight: 6,
   },
   sectionFooterText: {
     paddingHorizontal: 6,

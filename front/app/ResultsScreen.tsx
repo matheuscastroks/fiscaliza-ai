@@ -55,11 +55,6 @@ export default function ResultsScreen() {
   const cityAvgDays = cityOverviewQuery.data?.avgResolutionDays ?? null;
   const avgDays = overview?.avgResolutionDays ?? null;
 
-  const openNeighborhood = (name: string) => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setNeighborhood(name);
-  };
-
   return (
     <AppScreen>
       <AppHeader
