@@ -9,6 +9,7 @@ import { useFollowStore } from '@/stores/followStore';
 import { resolveServiceCategoryTheme } from '@/features/city/officialCategoryThemes';
 import type { OfficialCall } from '@/shared/contracts';
 import { isOfficialCallClosed } from '@/shared/official-call-state';
+import { formatCallDate, formatTimeRemainingShort } from '@/features/city/formatDates';
 import {
   officialCallStatus,
   resolveOfficialCallDeadline,
@@ -73,15 +74,10 @@ export const OfficialCallRow = memo(function OfficialCallRow({
   const deadlineInfo = resolveOfficialCallDeadline(call, isClosed);
   const isOverdue = !isClosed && deadlineInfo?.isOverdue === true;
 
-  const opened = new Date(call.openedAt);
-  const openedLabel = Number.isNaN(opened.getTime())
-    ? 'Data de abertura não informada'
-    : 'Aberto em ' +
-      opened.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
+  const openedDate = formatCallDate(call.openedAt);
+  const openedLabel = openedDate
+    ? `Aberto em ${openedDate}`
+    : 'Data de abertura não informada';
 
   const relativeTime = formatRelativeTime(call.openedAt);
   const agencyName = call.organizationName?.trim() || null;
@@ -97,8 +93,8 @@ export const OfficialCallRow = memo(function OfficialCallRow({
     ? null
     : isOverdue
       ? 'Prazo vencido'
-      : call.timeRemaining != null && call.timeRemaining > 0
-        ? `Restam ${call.timeRemaining}${(call.timeUnit || '').toUpperCase().startsWith('H') ? 'h' : 'd'}`
+      : formatTimeRemainingShort(call.timeRemaining, call.timeUnit)
+        ? `Restam ${formatTimeRemainingShort(call.timeRemaining, call.timeUnit)}`
         : null;
 
   const toggle = async () => {

@@ -7,6 +7,7 @@ import { AppText } from '@/components/ui/AppText';
 import { spacing } from '@/theme';
 import type { OfficialCall } from '@/shared/contracts';
 import { isOfficialCallClosed } from '@/shared/official-call-state';
+import { formatCallDate } from '@/features/city/formatDates';
 
 export interface OfficialCallTimelineProps {
   call: OfficialCall;
@@ -22,19 +23,7 @@ interface TimelineStep {
 }
 
 function formatDate(dateStr?: string | null): string | null {
-  if (!dateStr) return null;
-  try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return null;
-    return d.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      ...(/^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? { timeZone: 'UTC' } : {}),
-    });
-  } catch {
-    return null;
-  }
+  return formatCallDate(dateStr);
 }
 
 function buildTimelineSteps(call: OfficialCall, isClosed: boolean): TimelineStep[] {

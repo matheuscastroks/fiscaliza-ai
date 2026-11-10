@@ -17,6 +17,7 @@ import {
   resolveOfficialCallDeadline,
 } from '@/features/city/officialCallStatus';
 import { resolveServiceCategoryTheme } from '@/features/city/officialCategoryThemes';
+import { formatCallDate, formatTimeRemainingShort } from '@/features/city/formatDates';
 
 function formatRelativeTime(dateIso?: string | null): string | null {
   if (!dateIso) return null;
@@ -152,10 +153,7 @@ export function TerritoryCardContent({
       .filter(Boolean)
       .join(' · ') || 'Bairro não informado';
   const status = officialCallStatus(official, colors, isDark);
-  const date = new Date(official.openedAt);
-  const dateLabel = Number.isNaN(date.getTime())
-    ? 'Data não informada'
-    : date.toLocaleDateString('pt-BR');
+  const dateLabel = formatCallDate(official.openedAt) ?? 'Data não informada';
 
   const isClosed = isOfficialCallClosed(official);
   const deadlineInfo = resolveOfficialCallDeadline(official, isClosed);
@@ -166,8 +164,8 @@ export function TerritoryCardContent({
     ? null
     : isOverdue
       ? 'Prazo vencido'
-      : official.timeRemaining != null && official.timeRemaining > 0
-        ? `Restam ${official.timeRemaining}${(official.timeUnit || '').toUpperCase().startsWith('H') ? 'h' : 'd'}`
+      : formatTimeRemainingShort(official.timeRemaining, official.timeUnit)
+        ? `Restam ${formatTimeRemainingShort(official.timeRemaining, official.timeUnit)}`
         : null;
 
   const save = async () => {
