@@ -18,6 +18,8 @@ function load(deleteAccount) {
     console,
     require: (name) => {
       if (name === 'zustand') return require(name);
+      if (name === '@react-native-async-storage/async-storage')
+        return { default: { setItem: async () => {}, getItem: async () => null, removeItem: async () => {} } };
       if (name === '@/services/auth') return { authApi: { deleteAccount } };
       if (name === '@/shared/profile-session')
         return { applyCurrentProfile: async () => true };

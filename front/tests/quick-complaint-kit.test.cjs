@@ -23,6 +23,6 @@ test('participate screen: integrates QuickComplaintKit with territory location',
 
   const content = fs.readFileSync(screenPath, 'utf8');
   assert.ok(content.includes('QuickComplaintKit'), 'Must import and mount QuickComplaintKit');
-  assert.ok(content.includes('useTerritoryStore'), 'Must use territory store for neighborhood context');
+  assert.ok(content.includes('usePlacesStore'), 'Must use the active places selection for neighborhood context');
   assert.ok(content.includes('<QuickComplaintKit'), 'Must render QuickComplaintKit in the scroll tree');
 });

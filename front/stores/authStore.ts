@@ -1,16 +1,38 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import type { SessionUser } from '@/shared/contracts';
 import type { RegistrationInput } from '@/shared/registration';
 import { authApi } from '@/services/auth';
 import { applyCurrentProfile } from '@/shared/profile-session';
 import {
+  NetworkError,
   onSessionExpired,
   queryClient,
   request,
   restoreToken,
   saveToken,
 } from '@/services/http';
+const SESSION_CACHE_KEY = 'fiscaliza-ai:session-user:v1';
+async function cacheSessionUser(user: SessionUser | null) {
+  try {
+    if (user) await AsyncStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(user));
+    else await AsyncStorage.removeItem(SESSION_CACHE_KEY);
+  } catch {
+    // O cache é só conveniência offline; falhar aqui não pode quebrar a sessão.
+  }
+}
+async function readCachedSessionUser(): Promise<SessionUser | null> {
+  try {
+    const raw = await AsyncStorage.getItem(SESSION_CACHE_KEY);
+    const user = raw ? (JSON.parse(raw) as SessionUser) : null;
+    return user && typeof user.id === 'string' ? user : null;
+  } catch {
+    return null;
+  }
+}
 interface AuthState {
+  /** true quando a sessão veio do cache porque o servidor estava inacessível. */
+  offline: boolean;
   user: SessionUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -36,6 +58,7 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
 }
 export const useAuthStore = create<AuthState>((set, get) => ({
+  offline: false,
   user: null,
   isAuthenticated: false,
   isLoading: false,
@@ -46,9 +69,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await restoreToken();
       const user = await request<SessionUser>('/auth/me');
-      set({ user: user, isAuthenticated: true });
-    } catch {
-      set({ user: null, isAuthenticated: false });
+      set({ user: user, isAuthenticated: true, offline: false });
+      void cacheSessionUser(user);
+    } catch (error) {
+      // Sem rede não é sessão inválida: mantém o usuário em cache (401 já limpa o token).
+      const cached = error instanceof NetworkError ? await readCachedSessionUser() : null;
+      if (cached) set({ user: cached, isAuthenticated: true, offline: true });
+      else {
+        set({ user: null, isAuthenticated: false, offline: false });
+        void cacheSessionUser(null);
+      }
     } finally {
       set({ isReady: true });
     }
@@ -69,8 +99,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       isReady: true,
       isLoading: false,
       error: result.error || null,
-      ...(result.data ? { user: result.data, isAuthenticated: true } : {}),
+      ...(result.data ? { user: result.data, isAuthenticated: true, offline: false } : {}),
     });
+    if (result.data) void cacheSessionUser(result.data);
     return { success: result.success, error: result.error };
   },
   register: async (input) => {
@@ -89,8 +120,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       isReady: true,
       isLoading: false,
       error: result.error || null,
-      ...(result.data ? { user: result.data, isAuthenticated: true } : {}),
+      ...(result.data ? { user: result.data, isAuthenticated: true, offline: false } : {}),
     });
+    if (result.data) void cacheSessionUser(result.data);
     return { success: result.success, error: result.error };
   },
   logout: async () => {
@@ -99,8 +131,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await request('/auth/logout', 'POST');
     } finally {
       await saveToken(null);
+      await cacheSessionUser(null);
       queryClient.clear();
-      set({ user: null, isAuthenticated: false, error: null });
+      set({ user: null, isAuthenticated: false, error: null, offline: false });
     }
   },
   clearError: () => set({ error: null }),
@@ -169,6 +202,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 }));
 onSessionExpired(() => {
+  void cacheSessionUser(null);
   queryClient.clear();
   useAuthStore.setState((state) => ({
     user: null,

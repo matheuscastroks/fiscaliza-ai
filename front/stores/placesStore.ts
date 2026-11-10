@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { restoreSelection, validatePlace } from '../features/places/selection';
 import type { CapturedDeviceLocation, Neighborhood, RadiusMeters, SavedPlace, TerritorySelection } from '../features/places/types';
+import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
 
 export const placesStorageKey = (userId: string | null, municipalityId: string) =>
   `fiscaliza-ai:places:${userId || 'anonymous'}:${municipalityId}:v1`;
@@ -38,6 +39,9 @@ export const usePlacesStore = create<PlacesState>((set, get) => {
     const key = placesStorageKey(get().userId, get().municipalityId);
     const operation = writes.then(async () => {
       if (scope !== generation) return false;
+      // Nunca grava antes de ler o armazenamento: evita apagar lugares salvos.
+      if (initialization) await initialization;
+      if (scope !== generation) return false;
       set({ busy: true, error: null });
       try {
         const previous = get();
@@ -70,7 +74,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => {
     return { ...state, places, selection };
   });
   return {
-    ...empty(), deviceLocation: null, userId: null, municipalityId: '3304557', hydrated: false, busy: false, error: null, notice: null,
+    ...empty(), deviceLocation: null, userId: null, municipalityId: DEFAULT_MUNICIPALITY_ID, hydrated: false, busy: false, error: null, notice: null,
     recordDeviceLocation: (point) => set({ deviceLocation: normalizeCapture(point) }),
     setScope(userId, municipalityId, defaultNeighborhood = '') {
       if (get().userId === userId && get().municipalityId === municipalityId && initialization) return initialization;
@@ -86,7 +90,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => {
             const places = value.places.filter((p: SavedPlace) => p && typeof p.id === 'string' && typeof p.name === 'string' && typeof p.addressLabel === 'string' && !validatePlace(p) && (p.neighborhood === null || (typeof p.neighborhood?.id === 'string' && typeof p.neighborhood?.name === 'string')));
             snapshot = { places, selection: restoreSelection(value.selection, places), currentRadius: [500, 1000, 2000, 5000].includes(value.currentRadius) ? value.currentRadius : 1000, promptSeen: value.promptSeen === true };
           } else {
-            const legacyKey = userId ? `fiscaliza-ai:region:${userId}:${municipalityId}:v1` : municipalityId === '3304557' ? 'fiscaliza-ai:region:3304557:v1' : '';
+            const legacyKey = userId ? `fiscaliza-ai:region:${userId}:${municipalityId}:v1` : municipalityId === DEFAULT_MUNICIPALITY_ID ? `fiscaliza-ai:region:${DEFAULT_MUNICIPALITY_ID}:v1` : '';
             const legacyRaw = legacyKey ? await AsyncStorage.getItem(legacyKey) : null;
             const legacy = legacyRaw ? JSON.parse(legacyRaw) : null;
             const name = typeof legacy?.neighborhood === 'string' ? legacy.neighborhood : defaultNeighborhood;

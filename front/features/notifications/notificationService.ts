@@ -9,6 +9,7 @@ import type {
   TestNotificationPayload,
   UnfollowCallNotificationPayload,
 } from '@/shared/contracts';
+import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
 
 // Configura como as notificações são exibidas quando o app está em primeiro plano
 Notifications.setNotificationHandler({
@@ -43,7 +44,7 @@ export async function setupNotificationChannels(): Promise<void> {
  * Solicita permissão e obtém o Expo Push Token do dispositivo
  */
 export async function registerForPushNotificationsAsync(
-  municipalityId = '3304557',
+  municipalityId = DEFAULT_MUNICIPALITY_ID,
 ): Promise<string | null> {
   if (Platform.OS === 'web') return null;
 
@@ -82,7 +83,7 @@ export async function registerForPushNotificationsAsync(
  */
 export async function registerTokenWithBackend(
   token: string,
-  municipalityId = '3304557',
+  municipalityId = DEFAULT_MUNICIPALITY_ID,
 ): Promise<boolean> {
   try {
     const payload: PushTokenRegistrationPayload = {

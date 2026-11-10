@@ -45,7 +45,7 @@ test('participate screen: adopts Apple Inset-Grouped tables and KeyboardAwareScr
 
   const content = fs.readFileSync(screenPath, 'utf8');
   assert.ok(content.includes('QuickComplaintKit'), 'Must render QuickComplaintKit as hero');
-  assert.ok(content.includes('useTerritoryStore'), 'Must bind neighborhood from territory store');
+  assert.ok(content.includes('usePlacesStore'), 'Must bind neighborhood from the active places selection');
   assert.ok(content.includes('OFFICIAL_CHANNELS'), 'Must define unified official channels list');
   assert.ok(content.includes('insetTable'), 'Must use Apple Inset-Grouped table style');
   assert.ok(content.includes('OFFICIAL_SERVICES'), 'Must render official services catalog');

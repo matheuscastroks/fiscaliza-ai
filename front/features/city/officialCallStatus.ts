@@ -1,11 +1,12 @@
 import type { OfficialCall } from '@/shared/contracts';
 import type { ThemeColors } from '@/theme/colors';
+import { deadlineInstant } from './formatDates';
 
 /** Preserve the published outcome: administrative closure is not proof of resolution. */
 export function officialCallStatus(
   call: OfficialCall,
   colors: ThemeColors,
-  isDark: boolean,
+  _isDark?: boolean,
 ) {
   const label =
     call.officialStatus || call.officialSituation || 'Situação não informada';
@@ -15,13 +16,9 @@ export function officialCallStatus(
     .toLowerCase();
   const color =
     key === 'aberto'
-      ? isDark
-        ? '#93C5FD'
-        : '#1D4ED8'
+      ? colors.info
       : key === 'em andamento'
-        ? isDark
-          ? '#67E8F9'
-          : '#0E7490'
+        ? colors.primary
         : key === 'pendente'
           ? colors.attention
           : key === 'fechado com solucao'
@@ -42,7 +39,7 @@ export function resolveOfficialCallDeadline(
   isClosed: boolean,
   now = new Date(),
 ): { label: string; isOverdue: boolean } | null {
-  const targetMs = call.targetDate ? new Date(call.targetDate).getTime() : NaN;
+  const targetMs = deadlineInstant(call.targetDate);
   const closedMs = call.closedAt ? new Date(call.closedAt).getTime() : NaN;
   const raw = call.withinDeadline?.trim() || '';
   const rawLower = raw

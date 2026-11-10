@@ -7,6 +7,7 @@ import {
   unfollowCallForNotifications,
 } from '@/features/notifications/notificationService';
 import { useFollowStore, setFollowNotificationListener } from './followStore';
+import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
 
 interface NotificationState {
   pushToken: string | null;
@@ -16,12 +17,25 @@ interface NotificationState {
   initialize: (municipalityId?: string) => Promise<void>;
   requestPermissions: (municipalityId?: string) => Promise<boolean>;
   sendTestPush: () => Promise<boolean>;
+  /** Esquece token e pendências ao trocar ou encerrar a sessão. */
+  reset: () => void;
+  /** Reenvia chamados salvos cujo acompanhamento falhou ou pertence a outra sessão. */
+  resync: () => void;
+}
+
+// Chamados cujo follow não chegou ao servidor; reenviados em resync/initialize.
+const pendingFollows = new Set<string>();
+
+async function followWithRetry(callId: string, token: string) {
+  const ok = await followCallForNotifications(callId, token);
+  if (ok) pendingFollows.delete(callId);
+  else pendingFollows.add(callId);
 }
 
 function syncSavedCalls(token: string) {
   const savedCalls = useFollowStore.getState().savedCalls;
   for (const call of savedCalls) {
-    void followCallForNotifications(call.id, token);
+    void followWithRetry(call.id, token);
   }
 }
 
@@ -30,8 +44,9 @@ setFollowNotificationListener((call, saved) => {
   const token = useNotificationStore.getState().pushToken;
   if (!token) return;
   if (saved) {
-    void followCallForNotifications(call.id, token);
+    void followWithRetry(call.id, token);
   } else {
+    pendingFollows.delete(call.id);
     void unfollowCallForNotifications(call.id, token);
   }
 });
@@ -42,7 +57,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  initialize: async (municipalityId = '3304557') => {
+  initialize: async (municipalityId = DEFAULT_MUNICIPALITY_ID) => {
     try {
       const { status } = await Notifications.getPermissionsAsync();
       const granted = status === 'granted';
@@ -64,7 +79,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     }
   },
 
-  requestPermissions: async (municipalityId = '3304557') => {
+  requestPermissions: async (municipalityId = DEFAULT_MUNICIPALITY_ID) => {
     set({ isLoading: true, error: null });
     try {
       const token = await registerForPushNotificationsAsync(municipalityId);
@@ -96,6 +111,16 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     } finally {
       set({ isLoading: false });
     }
+  },
+
+  reset: () => {
+    pendingFollows.clear();
+    set({ pushToken: null, permissionGranted: false, isLoading: false, error: null });
+  },
+
+  resync: () => {
+    const token = get().pushToken;
+    if (token) syncSavedCalls(token);
   },
 
   sendTestPush: async () => {

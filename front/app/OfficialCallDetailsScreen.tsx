@@ -30,6 +30,7 @@ import { useOfficialCall } from '@/features/city/useOfficialCalls';
 import { useFollowStore } from '@/stores/followStore';
 import { OfficialCallTimeline } from '@/components/official/OfficialCallTimeline';
 import { goBack } from '@/utils/navigation';
+import { formatTimeRemaining, isDateOnly, parseCallDate } from '@/features/city/formatDates';
 
 export default function OfficialCallDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -106,47 +107,24 @@ export default function OfficialCallDetailsScreen() {
 
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return '—';
-    try {
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      return d.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    } catch {
-      return dateStr;
-    }
+    // Datas sem horário (prazos) não mostram hora; instantes mostram no fuso local.
+    const options: Intl.DateTimeFormatOptions = isDateOnly(dateStr)
+      ? { day: '2-digit', month: '2-digit', year: 'numeric' }
+      : { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const parsed = parseCallDate(dateStr);
+    return parsed ? parsed.toLocaleString('pt-BR', options) : dateStr;
   };
 
   const formatSla = () => {
-    if (item.timeRemaining == null || item.timeRemaining <= 0) return null;
-    const rawUnit = (item.timeUnit || '').trim().toUpperCase();
-    const unitLabel =
-      rawUnit === 'D' || rawUnit.startsWith('DIA')
-        ? item.timeRemaining === 1
-          ? 'dia'
-          : 'dias'
-        : rawUnit === 'H' || rawUnit.startsWith('HORA')
-        ? item.timeRemaining === 1
-          ? 'hora'
-          : 'horas'
-        : rawUnit === 'M' ||
-          rawUnit.startsWith('MES') ||
-          rawUnit.startsWith('MÊS')
-        ? item.timeRemaining === 1
-          ? 'mês'
-          : 'meses'
-        : item.timeUnit || 'dias';
+    const remaining = formatTimeRemaining(item.timeRemaining, item.timeUnit);
+    if (!remaining) return null;
     const typeSuffix =
       item.deadlineType === 'D'
         ? ' (diagnóstico)'
         : item.deadlineType === 'F'
         ? ' (finalização)'
         : '';
-    return `${item.timeRemaining} ${unitLabel}${typeSuffix}`;
+    return `${remaining}${typeSuffix}`;
   };
 
   const slaLabel = formatSla();

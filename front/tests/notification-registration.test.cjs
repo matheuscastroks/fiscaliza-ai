@@ -93,3 +93,14 @@ test('successful registration activates pushes and clears a previous error', asy
   assert.equal(state.getState().pushToken, 'test-token');
   assert.equal(state.getState().error, null);
 });
+
+test('reset drops the previous user token so a new session must register again', async () => {
+  const state = store();
+  await state.getState().initialize();
+  assert.equal(state.getState().pushToken, 'test-token');
+  state.getState().reset();
+  assert.equal(state.getState().pushToken, null);
+  assert.equal(state.getState().permissionGranted, false);
+  await state.getState().initialize();
+  assert.equal(state.getState().pushToken, 'test-token');
+});

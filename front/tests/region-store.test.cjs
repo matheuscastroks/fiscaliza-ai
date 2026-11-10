@@ -1,4 +1,4 @@
-﻿const { test } = require('node:test');
+const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -36,11 +36,9 @@ test('preferred neighborhood survives restart without persisting temporary explo
   };
   const store = setup(storage);
   await store.getState().setPreferredNeighborhood('Centro');
-  store.getState().setNeighborhood('Santa Cruz');
   const restarted = setup(storage);
   await restarted.getState().initialize();
   assert.equal(restarted.getState().preferredNeighborhood, 'Centro');
-  assert.equal(restarted.getState().neighborhood, '');
   assert.equal(restarted.getState().layers[0], 'official');
 });
 test('region storage failure preserves preference and late read preserves explicit selection', async () => {

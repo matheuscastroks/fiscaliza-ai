@@ -41,7 +41,7 @@ function component(file, mocks = {}) {
         const statusModule = { exports: {} };
         vm.runInNewContext(ts.transpileModule(fs.readFileSync('features/city/officialCallStatus.ts', 'utf8'), {
           compilerOptions: { module: ts.ModuleKind.CommonJS },
-        }).outputText, { exports: statusModule.exports, module: statusModule });
+        }).outputText, { exports: statusModule.exports, module: statusModule, require: (dep) => require(dep === './formatDates' ? '@/features/city/formatDates' : dep) });
         return statusModule.exports;
       }
       if (name === 'react') return hooks;
@@ -88,6 +88,7 @@ function component(file, mocks = {}) {
         return { ThemeToggleButton: 'ThemeToggleButton' };
       if (name.endsWith('/UserAvatar')) return { UserAvatar: 'UserAvatar' };
       if (name.endsWith('/SignOutSheet')) return {};
+      if (name === '@/features/city/formatDates') return require(name);
       throw Error(name);
     },
   });

@@ -8,6 +8,13 @@ export const API_URL = (
 export const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 15000 } },
 });
+/** Falha de transporte (sem rede/timeout), distinta de resposta do servidor como 401. */
+export class NetworkError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NetworkError';
+  }
+}
 let sessionToken: string | null = null;
 let onExpired: (() => void) | undefined;
 async function expireUnauthorizedSession(path: string, status: number) {
@@ -104,7 +111,7 @@ export async function request<T>(
       error instanceof TypeError ||
       (error instanceof Error && error.name === 'AbortError')
     )
-      throw new Error(
+      throw new NetworkError(
         'Sem conexão com o serviço. Verifique a rede e tente novamente.',
       );
     throw error;

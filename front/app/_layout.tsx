@@ -33,6 +33,7 @@ import { usePlacesStore } from '@/stores/placesStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import * as Notifications from 'expo-notifications';
 
+import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
 import {
   useFonts,
   InstrumentSans_400Regular,
@@ -64,7 +65,9 @@ export default function RootLayout() {
     void initialize();
   }, [initialize]);
   useEffect(() => {
-    void useNotificationStore.getState().initialize(user?.municipality?.id || '3304557');
+    // Novo usuário (ou logout) nunca herda o token/inscrições do anterior.
+    useNotificationStore.getState().reset();
+    void useNotificationStore.getState().initialize(user?.municipality?.id || DEFAULT_MUNICIPALITY_ID);
     const sub = Notifications.addNotificationResponseReceivedListener((response) => {
       const callId = response.notification.request.content.data?.callId;
       if (typeof callId === 'string' && callId) {
@@ -74,12 +77,16 @@ export default function RootLayout() {
     return () => {
       sub.remove();
     };
-  }, [user?.municipality?.id]);
+  }, [user?.id, user?.municipality?.id]);
   useEffect(() => {
     if (!isReady) return;
     const userId = isAuthenticated && user?.id ? user.id : null;
-    const municipalityId = user?.municipality?.id || '3304557';
-    void useFollowStore.getState().setScope(userId, municipalityId);
+    const municipalityId = user?.municipality?.id || DEFAULT_MUNICIPALITY_ID;
+    // Salvos carregam de forma assíncrona: só então reenvia ao servidor.
+    void useFollowStore
+      .getState()
+      .setScope(userId, municipalityId)
+      .then(() => useNotificationStore.getState().resync());
     void usePlacesStore.getState().setScope(userId, municipalityId, user?.neighborhood || '');
     void useTerritoryStore
       .getState()
