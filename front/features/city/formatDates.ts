@@ -58,3 +58,21 @@ export function formatTimeRemainingShort(amount?: number | null, rawUnit?: strin
   const unit = unitOf(rawUnit);
   return unit ? `${amount}${SHORT[unit]}` : formatTimeRemaining(amount, rawUnit);
 }
+
+/** "Hoje", "Ontem", "Há 3 dias": idade de um instante em relação a agora. */
+export function formatRelativeAge(value?: string | null, now = new Date()): string | null {
+  const date = parseCallDate(value);
+  if (!date) return null;
+  const diffMs = now.getTime() - date.getTime();
+  if (diffMs < 0) return 'Recente';
+  const hours = Math.floor(diffMs / 3600000);
+  if (hours < 24) return hours <= 1 ? 'Hoje' : `Há ${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'Ontem';
+  if (days < 30) return `Há ${days} dias`;
+  const months = Math.floor(days / 30);
+  if (months === 1) return 'Há 1 mês';
+  if (months < 12) return `Há ${months} meses`;
+  const years = Math.floor(days / 365);
+  return `Há ${years} ${years === 1 ? 'ano' : 'anos'}`;
+}

@@ -78,6 +78,16 @@ function component(file, mocks = {}) {
           }),
         };
       if (name.endsWith('/AppText')) return { AppText: 'AppText' };
+      if (name === '@/components/official/CallSummary')
+        return {
+          CallSummary: 'CallSummary',
+          describeCall: (call) => ({
+            title: call.serviceSubtype || call.serviceType,
+            locationText: 'Rua · Bairro',
+            openedLabel: 'Aberto em 01/01/2026',
+            status: { label: call.officialSituation || 'Aberto', color: '#000' },
+          }),
+        };
       if (name.endsWith('/AppButton')) return { AppButton: 'AppButton' };
       if (name.endsWith('/AppBrandGlyph'))
         return {
@@ -103,10 +113,11 @@ function component(file, mocks = {}) {
 
 function nodes(tree) {
   if (!tree || typeof tree !== 'object') return [];
-  const children = tree.props?.children;
+  // CallSummary recebe os controles como props (slots); eles também fazem parte da árvore.
+  const children = [tree.props?.children, tree.props?.headerAccessory, tree.props?.metaTrailing];
   return [
     tree,
-    ...(Array.isArray(children) ? children.flat(Infinity) : [children]).flatMap(
+    ...children.flatMap((child) => (Array.isArray(child) ? child.flat(Infinity) : [child])).flatMap(
       nodes,
     ),
   ];
