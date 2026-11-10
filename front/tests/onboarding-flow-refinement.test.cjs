@@ -8,8 +8,8 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 test('onboarding flow: photographic assets exist and meet quality threshold', () => {
   const imagesDir = path.join(ROOT_DIR, 'assets', 'images');
   const expectedImages = [
-    'onboarding-territory.jpg',
-    'onboarding-follow.jpg',
+    'onboarding-territory.webp',
+    'onboarding-follow.webp',
   ];
 
   for (const img of expectedImages) {
@@ -47,8 +47,8 @@ test('onboarding flow: removes bureaucratic disclaimers and adopts user-centric 
 
   // Must use real photographic assets instead of vector illustrations
   assert.ok(
-    content.includes('onboarding-territory.jpg') &&
-      content.includes('onboarding-follow.jpg') &&
+    content.includes('onboarding-territory.webp') &&
+      content.includes('onboarding-follow.webp') &&
       !content.includes('onboarding-action.jpg'),
     'OnboardingFlow must reference the 2 photographic Rio de Janeiro assets',
   );
