@@ -1,3 +1,5 @@
+import { router } from 'expo-router';
+import { InsetGroup, ListRow } from '@/components/ui/ListRow';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { goBack } from '@/utils/navigation';
@@ -16,14 +18,7 @@ import {
   useOfficialFilters,
   useOfficialOverview,
 } from '@/features/city/useOfficialCalls';
-import {
-  MIN_RANKING_VOLUME,
-  fastestResolution,
-  formatDays,
-  slowestResolution,
-  topByDeadlineRate,
-  topByVolume,
-} from '@/features/city/resultRankings';
+import { formatDays, topByVolume } from '@/features/city/resultRankings';
 import { layout, spacing } from '@/theme';
 
 function getStatusSemanticColor(status: string, colors: ThemeColors): string {
@@ -61,10 +56,10 @@ function getStatusSemanticColor(status: string, colors: ThemeColors): string {
 }
 
 export default function ResultsScreen() {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const cityStyles = useThemedStyles(createCityStyles);
   const styles = useThemedStyles(createStyles);
-  const { neighborhood, setNeighborhood } = useTerritorySelection();
+  const { neighborhood, neighborhoodId, setNeighborhood } = useTerritorySelection();
 
   const officialFilters = useOfficialFilters();
   const overviewQuery = useOfficialOverview({
@@ -89,18 +84,8 @@ export default function ResultsScreen() {
   const overdueCount = overview?.overdueCount ?? 0;
   const statusBreakdown = closedOverview?.statusBreakdown || overview?.statusBreakdown || [];
 
-  // Comparativo com a média da cidade
-  const citySlaRate = cityOverviewQuery.data?.withinDeadlineRate ?? null;
-  const slaDiff =
-    neighborhood && citySlaRate !== null
-      ? slaRate - citySlaRate
-      : null;
-
   const ranking = cityOverviewQuery.data?.neighborhoodRanking || [];
   const mostProblems = topByVolume(ranking);
-  const bestDeadline = topByDeadlineRate(ranking);
-  const fastest = fastestResolution(ranking);
-  const slowest = slowestResolution(ranking);
   const topServices = (overview?.topServices || []).slice(0, 6);
   const speedByService = new Map(
     (overview?.serviceSpeed || []).map((s) => [s.type, s.avgResolutionDays]),
@@ -116,8 +101,8 @@ export default function ResultsScreen() {
   return (
     <AppScreen>
       <AppHeader
-        title="Resultados e Prazos · 1746"
-        context="Carta de Serviços e SLA da Prefeitura do Rio"
+        title="Dados do bairro"
+        context={neighborhood ? `${neighborhood} · chamados do 1746 e prazos publicados` : "Rio de Janeiro · chamados do 1746 e prazos publicados"}
         onBack={() => goBack()}
       />
 
@@ -125,6 +110,18 @@ export default function ResultsScreen() {
         contentContainerStyle={cityStyles.content}
         showsVerticalScrollIndicator={false}
       >
+          {neighborhoodId ? (
+            <InsetGroup>
+              <ListRow
+                icon="business-outline"
+                title="Serviços e equipamentos do bairro"
+                subtitle="Escolas, saúde e praças, com chamados do período"
+                onPress={() =>
+                  router.push({ pathname: '/NeighborhoodScreen', params: { neighborhoodId } })
+                }
+              />
+            </InsetGroup>
+          ) : null}
           <View style={styles.headerContainer}>
             {/* Cápsula Territorial Inteligente */}
             <View
@@ -209,40 +206,6 @@ export default function ResultsScreen() {
                       <AppText variant="label">Prazos oficiais respeitados</AppText>
                     </View>
 
-                    {/* Pílula de Comparativo com a Cidade */}
-                    {slaDiff !== null && (
-                      <View
-                        style={[
-                          styles.benchmarkPill,
-                          {
-                            backgroundColor:
-                              slaDiff >= 0
-                                ? isDark
-                                  ? 'rgba(46, 125, 50, 0.2)'
-                                  : '#E8F5E9'
-                                : isDark
-                                  ? 'rgba(198, 40, 40, 0.2)'
-                                  : '#FFEBEE',
-                          },
-                        ]}
-                      >
-                        <Ionicons
-                          name={slaDiff >= 0 ? 'trending-up' : 'trending-down'}
-                          size={13}
-                          color={slaDiff >= 0 ? colors.completed : colors.risk}
-                        />
-                        <AppText
-                          variant="caption"
-                          style={{
-                            fontWeight: '700',
-                            fontSize: 11,
-                            color: slaDiff >= 0 ? colors.completed : colors.risk,
-                          }}
-                        >
-                          {slaDiff >= 0 ? `+${slaDiff}%` : `${slaDiff}%`} vs média do Rio
-                        </AppText>
-                      </View>
-                    )}
                   </View>
 
                   <View style={styles.heroKpiValueRow}>
@@ -499,7 +462,7 @@ export default function ResultsScreen() {
             {topServices.length > 0 && (
               <RankingSection
                 icon="construct-outline"
-                title={neighborhood ? `PROBLEMAS MAIS REGISTRADOS · ${neighborhood.toUpperCase()}` : 'PROBLEMAS MAIS REGISTRADOS'}
+                title={neighborhood ? `Problemas mais registrados · ${neighborhood}` : 'Problemas mais registrados'}
                 rows={topServices.map((service) => {
                   const days = speedByService.get(service.type);
                   return {
@@ -518,7 +481,7 @@ export default function ResultsScreen() {
             {mostProblems.length > 0 && (
               <RankingSection
                 icon="alert-circle-outline"
-                title="BAIRROS COM MAIS CHAMADOS"
+                title="Bairros com mais chamados registrados"
                 rows={mostProblems.map((row) => ({
                   key: row.neighborhood,
                   label: row.neighborhood,
@@ -531,57 +494,9 @@ export default function ResultsScreen() {
               />
             )}
 
-            {bestDeadline.length > 0 && (
-              <RankingSection
-                icon="ribbon-outline"
-                title="BAIRROS QUE MAIS CUMPREM O PRAZO"
-                rows={bestDeadline.map((row) => ({
-                  key: row.neighborhood,
-                  label: row.neighborhood,
-                  detail: `${row.count.toLocaleString('pt-BR')} chamados analisados`,
-                  value: `${row.withinDeadlineRate}%`,
-                  share: (row.withinDeadlineRate ?? 0) / 100,
-                  tone: colors.completed,
-                  onPress: () => openNeighborhood(row.neighborhood),
-                }))}
-              />
-            )}
-
-            {fastest.length > 0 && (
-              <RankingSection
-                icon="flash-outline"
-                title="RESOLUÇÃO MAIS RÁPIDA"
-                rows={fastest.map((row) => ({
-                  key: row.neighborhood,
-                  label: row.neighborhood,
-                  detail: `${row.closedCount.toLocaleString('pt-BR')} encerrados`,
-                  value: formatDays(row.avgResolutionDays),
-                  share: (fastest[0]?.avgResolutionDays ?? 0) / Math.max(row.avgResolutionDays ?? 1, 0.1),
-                  tone: colors.completed,
-                  onPress: () => openNeighborhood(row.neighborhood),
-                }))}
-              />
-            )}
-
-            {slowest.length > 0 && (
-              <RankingSection
-                icon="time-outline"
-                title="RESOLUÇÃO MAIS LENTA"
-                rows={slowest.map((row) => ({
-                  key: row.neighborhood,
-                  label: row.neighborhood,
-                  detail: `${row.closedCount.toLocaleString('pt-BR')} encerrados`,
-                  value: formatDays(row.avgResolutionDays),
-                  share: (row.avgResolutionDays ?? 0) / Math.max(slowest[0]?.avgResolutionDays ?? 1, 0.1),
-                  tone: colors.attention,
-                  onPress: () => openNeighborhood(row.neighborhood),
-                }))}
-              />
-            )}
-
             {ranking.length > 0 && (
               <AppText variant="caption" color="muted" style={styles.rankingNote}>
-                Rankings de prazo e velocidade consideram bairros com pelo menos {MIN_RANKING_VOLUME} chamados. Toque em um bairro para ver seus indicadores.
+                A lista mostra apenas o volume de chamados registrados, sem avaliar o desempenho de cada bairro. Toque em um bairro para ver seus dados.
               </AppText>
             )}
           </View>
