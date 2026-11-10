@@ -28,3 +28,13 @@ test('postal code helper keeps only digits and masks them', () => {
   assert.equal(formatPostalCode('20a04-0020999'), '20040-020');
   assert.equal(onlyDigits('20040-020'), '20040020');
 });
+
+test('territory filters reset to the open-calls default', () => {
+  const { useTerritoryFilterStore } = require('@/stores/territoryFilterStore');
+  const store = useTerritoryFilterStore;
+  store.getState().setFilter('search', 'buraco');
+  store.getState().setFilter('status', 'all');
+  store.getState().reset();
+  assert.equal(store.getState().search, '');
+  assert.equal(store.getState().status, 'Não Encerrado');
+});

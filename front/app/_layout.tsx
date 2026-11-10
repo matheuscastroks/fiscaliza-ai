@@ -29,6 +29,7 @@ import { AnimatedBrandSplash } from '@/components/ui/AnimatedBrandSplash';
 import { SignOutSheet } from '@/components/ui/SignOutSheet';
 import { useFollowStore } from '@/stores/followStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
+import { useTerritoryFilterStore } from '@/stores/territoryFilterStore';
 import { usePlacesStore } from '@/stores/placesStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import * as Notifications from 'expo-notifications';
@@ -78,6 +79,10 @@ export default function RootLayout() {
     return () => {
       sub.remove();
     };
+  }, [user?.id, user?.municipality?.id]);
+  useEffect(() => {
+    // Filtros da exploração nunca atravessam usuário ou município.
+    useTerritoryFilterStore.getState().reset();
   }, [user?.id, user?.municipality?.id]);
   useEffect(() => {
     if (!isReady) return;
