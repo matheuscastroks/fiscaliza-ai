@@ -14,6 +14,7 @@ import { useThemeStore, isThemePreference } from '@/stores/themeStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { useFollowStore } from '@/stores/followStore';
+import { isPushConfigured } from '@/features/notifications/notificationService';
 import { InsetGroup, ListRow } from '@/components/ui/ListRow';
 import { useMunicipalityId } from '@/features/city/municipality';
 import { AppToast } from '@/components/ui/AppToast';
@@ -81,6 +82,7 @@ export default function SettingsScreen() {
   const [testSending, setTestSending] = useState(false);
 
   const notificationsActive = permissionGranted && Boolean(pushToken);
+  const pushAvailable = isPushConfigured();
 
   const handleTestPush = async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -216,7 +218,9 @@ export default function SettingsScreen() {
               <View style={styles.tableRowContent}>
                 <AppText variant="label">Alertas no aparelho</AppText>
                 <AppText variant="caption" color="muted">
-                  {notificationsActive
+                  {!pushAvailable
+                    ? 'Ainda não disponíveis nesta versão do aplicativo'
+                    : notificationsActive
                     ? 'Alertas ativados para seus chamados salvos'
                     : permissionGranted
                       ? 'Permissão concedida. Toque para conectar.'
@@ -224,6 +228,7 @@ export default function SettingsScreen() {
                 </AppText>
               </View>
 
+              {pushAvailable && (
               <AppButton
                 title={notificationsActive ? 'Ativadas' : permissionGranted ? 'Reconectar' : 'Ativar'}
                 variant={notificationsActive ? 'secondary' : 'primary'}
@@ -234,6 +239,7 @@ export default function SettingsScreen() {
                   void requestPermissions(municipalityId);
                 }}
               />
+              )}
             </View>
 
             {/* Linha 2: Disparo de Notificação de Teste (quando permitido) */}

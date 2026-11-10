@@ -47,7 +47,7 @@ Este documento descreve o estado atual do código e o que foi observado no apare
 
 - **Tarefa:** ajustar aparência, bairro de referência, alertas e apagar salvos.
 - **Cortado:** bloco de acessibilidade sem função e com promessa não verificada.
-- **Observação:** o botão de alertas mostra "Reconectar" mesmo quando os alertas não estão disponíveis nesta versão; a mensagem agora explica, mas o botão deveria sumir. Pendência pequena.
+- **Corrigido:** sem `projectId` do EAS os alertas não existem; a linha passa a dizer "Ainda não disponíveis nesta versão" e o botão não aparece.
 
 ## Onboarding
 

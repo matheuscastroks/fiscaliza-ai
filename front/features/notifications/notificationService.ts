@@ -42,6 +42,16 @@ export async function setupNotificationChannels(): Promise<void> {
   }
 }
 
+/** projectId do EAS; sem ele o Expo não emite token de push. */
+export function pushProjectId(): string | undefined {
+  return Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId ?? undefined;
+}
+
+/** Alertas só existem em versões com projectId configurado. */
+export function isPushConfigured(): boolean {
+  return Boolean(pushProjectId());
+}
+
 /**
  * Solicita permissão e obtém o Expo Push Token do dispositivo
  */
@@ -72,7 +82,7 @@ export async function registerForPushNotificationsAsync(
   }
 
   // Sem projectId do EAS o Expo não emite token: avisa em português em vez de mostrar o erro cru.
-  const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
+  const projectId = pushProjectId();
   if (!projectId) {
     throw new Error('Os alertas ainda não estão disponíveis nesta versão do aplicativo.');
   }
