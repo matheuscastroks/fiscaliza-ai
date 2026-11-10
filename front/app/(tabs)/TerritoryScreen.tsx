@@ -1,3 +1,4 @@
+import { formatCallDate } from '@/features/city/formatDates';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { mapPerformanceEnabled, mapPerformanceVariant } from '@/features/territory/mapPerformance';
 import { useMapPerformance } from '@/features/territory/useMapPerformance';
@@ -11,7 +12,7 @@ import type { ThemeColors } from '@/theme/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { layout } from '@/theme/layout';
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
-import { BackHandler, Platform, Pressable, FlatList, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { BackHandler, Platform, Pressable, FlatList, StyleSheet, View, ActivityIndicator, useWindowDimensions } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams, useIsFocused } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -70,6 +71,7 @@ export function TerritoryContent() {
   const insets = useSafeAreaInsets();
   const styles = useThemedStyles(createStyles);
   const mapAvailable = isMapboxAvailable();
+  const { height: windowHeight } = useWindowDimensions();
 
   const listOffsetRef = useRef(0);
   const listRef = useRef<FlatList<Entry>>(null);
@@ -136,7 +138,8 @@ export function TerritoryContent() {
   const debouncedSearch = useDebouncedValue(search, 300);
   const appliedSearch = search.trim() ? debouncedSearch.trim() : '';
   const { isListView, setIsListView } = useTerritoryViewMode();
-  const effectiveListView = isListView || !mapAvailable;
+  // Com mapa, a lista vive num sheet persistente (isListView = sheet expandido).
+  const effectiveListView = !mapAvailable;
   const { territoryDomain, setTerritoryDomain, setFacilityLayers } = useTerritoryDomain();
   const { interactionsComplete, visitTrace } = useMapPerformance(isFocused, effectiveListView);
 
@@ -618,19 +621,32 @@ export function TerritoryContent() {
     facilityQueries, facilitiesConfirmed, macroTheme, setMacroTheme, resetFilters,
   ]);
 
+  const savedPlaces = usePlacesStore((s) => s.places);
+  const scopeLabel =
+    selection.kind === 'radius'
+      ? selection.source === 'place'
+        ? savedPlaces.find((place) => place.id === selection.placeId)?.name || 'Lugar salvo'
+        : 'Perto de você'
+      : selection.kind === 'neighborhood'
+        ? selection.name
+        : 'Rio de Janeiro';
+
   const summaryLabel =
     territoryDomain === 'facilities'
       ? totalFacilitiesKnown !== null && listed.length < totalFacilitiesKnown
-        ? `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')} de ${totalFacilitiesKnown.toLocaleString('pt-BR')})`
-        : `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')})`
+        ? `${scopeLabel} · ${listed.length.toLocaleString('pt-BR')} de ${totalFacilitiesKnown.toLocaleString('pt-BR')} equipamentos`
+        : `${scopeLabel} · ${listed.length.toLocaleString('pt-BR')} equipamentos`
       : officialCalls.isLoading
-        ? 'Consultando chamados neste recorte...'
-        : `Ver em lista · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
+        ? `${scopeLabel} · consultando chamados...`
+        : `${scopeLabel} · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
 
-  const summarySubLabel =
-    territoryDomain === 'calls' && unlocated.length > 0
-      ? `+${unlocated.length} sem ponto no mapa · Toque para abrir a lista`
-      : 'Toque em um ponto no mapa ou abra a lista completa';
+  const lastImport = useMemo(() => formatCallDate(listed.reduce((latest, entry) =>
+    entry.type === 'official' && entry.item.importedAt > latest ? entry.item.importedAt : latest, '') || null), [listed]);
+
+  const summarySubLabel = [
+    territoryDomain === 'calls' && unlocated.length > 0 ? `+${unlocated.length} sem ponto no mapa` : null,
+    territoryDomain === 'calls' && lastImport ? `dados de ${lastImport}` : null,
+  ].filter(Boolean).join(' · ') || 'Toque num ponto do mapa ou puxe para ver a lista';
 
   return (
     <View style={[styles.container, !isFocused && mapPerformanceVariant !== 'visible-surface' && { display: 'none' }]}>
@@ -701,8 +717,8 @@ export function TerritoryContent() {
       )}
 
       {/* Dock Vertical Direita: Controles Rápidos do Mapa (Posição e Enquadrar) */}
-      {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
-        <View style={[styles.rightMapDock, { bottom: insets.bottom + 160 }]}>
+      {!effectiveListView && !isListView && !selectedEntry && selectedClusterEntries.length === 0 && (
+        <View style={[styles.rightMapDock, { bottom: insets.bottom + 88 + windowHeight * 0.22 + spacing.sm }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Minha posição"
@@ -737,27 +753,7 @@ export function TerritoryContent() {
       )}
 
       {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
-        <View style={[styles.bottomFloatingContainer, { bottom: insets.bottom + 90 }]}>
-          {/* Barra Contextual de Resultados e Acesso à Lista */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`${summaryLabel}. ${summarySubLabel}`}
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setIsListView(true);
-            }}
-            style={({ pressed }) => [styles.summaryBarButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
-          >
-            <View style={[styles.summaryIconCircle, { backgroundColor: colors.surfaceSubdued }]}>
-              <Ionicons name="list-outline" size={18} color={colors.onSurfaceBrand} />
-            </View>
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <AppText variant="label" numberOfLines={1} style={styles.summaryTitle}>{summaryLabel}</AppText>
-              <AppText variant="caption" color="muted" numberOfLines={1} style={styles.summarySubtitle}>{summarySubLabel}</AppText>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.muted} />
-          </Pressable>
-
+        <View style={[styles.bottomFloatingContainer, { bottom: insets.bottom + 88 + windowHeight * 0.22 + spacing.sm }]}>
           {facilityPagination?.hasMore && (
             <FacilityLoadMoreButton
               label={facilityPagination.label}
@@ -813,10 +809,16 @@ export function TerritoryContent() {
         />
       )}
 
-      {effectiveListView && (
+      {(effectiveListView || (mapAvailable && !selectedEntry && selectedClusterEntries.length === 0)) && (
         <TerritoryListView
-          visible={effectiveListView && isFocused}
+          visible={isFocused}
           asSheet={mapAvailable}
+          persistent={mapAvailable}
+          expanded={isListView}
+          onExpandedChange={setIsListView}
+          bottomInset={insets.bottom + 88}
+          summaryTitle={summaryLabel}
+          summarySubtitle={summarySubLabel}
           onClose={() => setIsListView(false)}
           listRef={listRef}
           listOffsetRef={listOffsetRef}
