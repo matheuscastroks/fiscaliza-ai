@@ -175,7 +175,7 @@ export function TerritoryContent() {
         <View style={[styles.contextualAreaPillContainer, { top: insets.top + 108 }]}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={areaOnly ? 'Voltar ao recorte selecionado' : 'Buscar nesta área'}
+            accessibilityLabel={areaOnly ? 'Voltar à área escolhida' : 'Buscar nesta área'}
             style={({ pressed }) => [styles.areaPillButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -185,7 +185,7 @@ export function TerritoryContent() {
           >
             <Ionicons name={areaOnly ? 'globe-outline' : 'scan-outline'} size={layout.iconSize.sm} color={colors.ink} />
             <AppText variant="caption" style={{ fontWeight: '600' }}>
-              {areaOnly ? 'Voltar ao recorte' : 'Buscar nesta área'}
+              {areaOnly ? 'Voltar à área' : 'Buscar nesta área'}
             </AppText>
           </Pressable>
         </View>
@@ -211,7 +211,7 @@ export function TerritoryContent() {
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Enquadrar recorte"
+            accessibilityLabel="Ver a cidade toda"
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               updateCameraRegion(municipalOverviewRegion);

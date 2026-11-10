@@ -477,24 +477,24 @@ export function useTerritoryView(q: TerritoryQueries) {
   const summaryLabel =
     territoryDomain === 'facilities'
       ? totalFacilitiesKnown !== null && listed.length < totalFacilitiesKnown
-        ? `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')} de ${totalFacilitiesKnown.toLocaleString('pt-BR')})`
-        : `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')})`
+        ? `Ver lista de serviços públicos (${listed.length.toLocaleString('pt-BR')} de ${totalFacilitiesKnown.toLocaleString('pt-BR')})`
+        : `Ver lista de serviços públicos (${listed.length.toLocaleString('pt-BR')})`
       : activeSelection.kind === 'pending-current'
         ? 'Aguardando sua localização'
         : officialCalls.isLoading
-        ? 'Consultando chamados neste recorte...'
+        ? 'Buscando chamados...'
         : officialCalls.error && listed.length === 0
           ? 'Não foi possível carregar os chamados'
           : `Ver em lista · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
 
   const summarySubLabel =
     territoryDomain === 'calls' && activeSelection.kind === 'pending-current'
-      ? 'Toque em localizar ou escolha um bairro no seletor acima'
+      ? 'Toque em localizar ou escolha um bairro lá em cima'
       : territoryDomain === 'calls' && officialCalls.error && listed.length === 0
-      ? 'Verifique a conexão. Toque para ver o motivo e tentar de novo'
+      ? 'Confira sua internet. Toque para tentar de novo'
       : territoryDomain === 'calls' && unlocated.length > 0
       ? `+${unlocated.length} sem ponto no mapa · Toque para abrir a lista`
-      : 'Toque em um ponto no mapa ou abra a lista completa';
+      : 'Toque num ponto do mapa ou veja a lista';
 
   return {
     unlocated,

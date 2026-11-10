@@ -185,7 +185,7 @@ export default function ProfileScreen() {
                   { color: user ? colors.primary : colors.muted },
                 ]}
               >
-                {user ? 'Cidadão Conectado' : 'Consulta Pública Local'}
+                {user ? 'Conta ativa' : 'Sem conta'}
               </AppText>
             </View>
           </View>
@@ -252,7 +252,7 @@ export default function ProfileScreen() {
               Chamados salvos
             </AppText>
             <AppText variant="meta" color="muted">
-              Central 1746
+              Da Prefeitura
             </AppText>
           </Pressable>
 
@@ -287,7 +287,7 @@ export default function ProfileScreen() {
               Meus lugares
             </AppText>
             <AppText variant="meta" color="muted">
-              Pontos e raios
+              Casa, trabalho e mais
             </AppText>
           </Pressable>
         </View>
@@ -297,7 +297,7 @@ export default function ProfileScreen() {
           <View style={styles.sectionHeaderRow}>
             <Ionicons name="location-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
-              Domicílio
+              Onde você mora
             </AppText>
           </View>
 
@@ -309,7 +309,7 @@ export default function ProfileScreen() {
           >
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`CEP Residencial no Rio: ${
+              accessibilityLabel={`Meu CEP: ${
                 formattedCep || 'Cadastrar CEP'
               }`}
               onPress={() => {
@@ -324,12 +324,12 @@ export default function ProfileScreen() {
               <IconTile icon="location" />
               <View style={styles.tableRowContent}>
                 <AppText variant="label">
-                  {formattedCep ? `CEP ${formattedCep}` : 'Cadastrar meu CEP'}
+                  {formattedCep ? `CEP ${formattedCep}` : 'Informar meu CEP'}
                 </AppText>
                 <AppText variant="caption" color="muted">
                   {formattedCep
                     ? `${user?.neighborhood ? `${user.neighborhood} · ` : ''}Rio de Janeiro, RJ`
-                    : 'Defina seu endereço residencial na cidade do Rio'}
+                    : 'Para ver o que acontece perto de casa'}
                 </AppText>
               </View>
               <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
@@ -343,13 +343,13 @@ export default function ProfileScreen() {
             <ListRow
               icon="options-outline"
               title="Preferências do aplicativo"
-              subtitle="Aparência, bairro e alertas"
+              subtitle="Tema, bairro e avisos"
               onPress={() => router.push('/SettingsScreen')}
             />
             <ListRow
               icon="stats-chart-outline"
               title="Dados do bairro"
-              subtitle="Chamados e prazos do 1746"
+              subtitle="Chamados e prazos"
               onPress={() => router.push('/ResultsScreen')}
             />
             <ListRow
@@ -360,8 +360,8 @@ export default function ProfileScreen() {
             />
             <ListRow
               icon="information-circle-outline"
-              title="Sobre e fontes oficiais"
-              subtitle="Origem e limites dos dados"
+              title="Sobre o app"
+              subtitle="De onde vêm as informações"
               onPress={() => router.push('/AboutScreen')}
             />
             <ListRow
@@ -374,7 +374,7 @@ export default function ProfileScreen() {
         </View>
 
         <AppText variant="meta" color="muted" style={styles.versionFooter}>
-          Fiscaliza aí · Versão 1.0.0 · Dados Abertos PCRJ
+          Fiscaliza aí · versão 1.0.0
         </AppText>
       </ScrollView>
 

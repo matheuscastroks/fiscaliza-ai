@@ -43,7 +43,7 @@ test('proxy errors never surface raw JSON parser messages as password errors', a
   });
   await assert.rejects(
     request('/auth/login', 'POST', {}),
-    /serviço está temporariamente indisponível/i,
+    /fora do ar por um momento/i,
   );
 });
 
@@ -57,7 +57,7 @@ test('invalid JSON and unexpected envelopes have a recovery message', async () =
   ]) {
     await assert.rejects(
       transport({ status: 200, json })('/auth/login', 'POST', {}),
-      /resposta inválida/i,
+      /algo deu errado/i,
     );
   }
 });
@@ -85,7 +85,7 @@ test('unauthorized protected responses expire the session even with a malformed 
     const request = transport({ status: 401, json }, () => {
       expired++;
     });
-    await assert.rejects(request('/auth/me'), /resposta inválida/i);
+    await assert.rejects(request('/auth/me'), /algo deu errado/i);
     assert.equal(expired, 1);
   }
 });

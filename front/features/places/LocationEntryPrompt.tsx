@@ -60,7 +60,7 @@ export function LocationEntryPrompt({
         <View style={styles.compactActions}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Usar meu GPS"
+            accessibilityLabel="Usar minha localização"
             disabled={busy}
             onPress={() => {
               void dismissPrompt();
@@ -81,7 +81,7 @@ export function LocationEntryPrompt({
                 variant="caption"
                 style={[styles.compactPillText, { color: colors.onAccent }]}
               >
-                Usar GPS
+                Usar minha localização
               </AppText>
             )}
           </Pressable>
@@ -156,7 +156,7 @@ export function LocationEntryPrompt({
             Quer ver o que acontece perto de você?
           </AppText>
           <AppText variant="caption" color="muted" style={styles.subtitle}>
-            Ative o GPS para consultar sua rua ou escolha um bairro manualmente.
+            Ligue a localização para ver sua rua ou escolha um bairro.
           </AppText>
         </View>
 
@@ -176,7 +176,7 @@ export function LocationEntryPrompt({
       <View style={styles.actions}>
         <View style={styles.actionItem}>
           <AppButton
-            title="Usar meu GPS"
+            title="Usar minha localização"
             loading={busy}
             onPress={() => {
               void dismissPrompt();

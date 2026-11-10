@@ -27,7 +27,7 @@ export default function NeighborhoodVolumeScreen() {
           loading={overview.isLoading}
           error={overview.error}
           retry={() => { void overview.refetch(); }}
-          empty={rows.length === 0 ? { description: 'Ainda não há chamados suficientes publicados para listar bairros.' } : undefined}
+          empty={rows.length === 0 ? { description: 'Ainda não há chamados suficientes para mostrar os bairros.' } : undefined}
         >
           <RankingSection
             icon="alert-circle-outline"

@@ -22,6 +22,7 @@ import { openExternal } from '@/services/openExternal';
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 
 import { QuickComplaintKit } from '@/features/city/QuickComplaintKit';
+import { AppBottomSheetModal, BottomSheetScrollView } from '@/components/ui/AppBottomSheetModal';
 
 import { usePlacesStore } from '@/stores/placesStore';
 
@@ -50,28 +51,28 @@ const OFFICIAL_CHANNELS: ChannelItem[] = [
   {
     id: 'phone',
     title: 'Ligar para o 1746',
-    subtitle: 'Atendimento telefônico 24h para chamados e emergências',
+    subtitle: 'Atendimento por telefone, 24 horas',
     icon: 'call-outline',
     url: OFFICIAL_PHONE_URL,
   },
   {
     id: 'whatsapp',
     title: 'WhatsApp Oficial da Prefeitura',
-    subtitle: '(21) 3460-1746 · Canal oficial com envio de fotos no chat',
+    subtitle: '(21) 3460-1746 · Mande mensagem e fotos',
     icon: 'logo-whatsapp',
     url: OFFICIAL_WHATSAPP_URL,
   },
   {
     id: 'portal',
     title: 'Portal 1746.rio',
-    subtitle: 'Catálogo de serviços online e formulários detalhados',
+    subtitle: 'Peça serviços pela internet',
     icon: 'globe-outline',
     url: OFFICIAL_PORTAL,
   },
   {
     id: 'requests',
     title: 'Meus Protocolos no 1746',
-    subtitle: 'Histórico de solicitações e acompanhamento oficial',
+    subtitle: 'Veja seus pedidos e como andam',
     icon: 'receipt-outline',
     url: OFFICIAL_REQUESTS_URL,
   },
@@ -99,7 +100,7 @@ export default function ParticipateScreen() {
     <AppScreen>
       <AppHeader
         title="Agir no 1746"
-        context="Canais oficiais da Prefeitura"
+        context="Onde pedir serviços da Prefeitura"
       />
       <KeyboardAwareScrollView
         contentContainerStyle={{
@@ -116,7 +117,7 @@ export default function ParticipateScreen() {
           <ListRow
             icon="map-outline"
             title="Já existe chamado? Veja no mapa"
-            subtitle="Procure registros próximos e acompanhe o andamento publicado"
+            subtitle="Veja chamados perto de você e como andam"
             onPress={() => router.push('/(tabs)/TerritoryScreen')}
           />
         </InsetGroup>
@@ -126,7 +127,7 @@ export default function ParticipateScreen() {
           <View style={styles.sectionHeaderRow}>
             <Ionicons name="shield-checkmark-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
-              Canais oficiais de atendimento
+              Onde pedir um serviço
             </AppText>
           </View>
 
@@ -143,20 +144,15 @@ export default function ParticipateScreen() {
           </InsetGroup>
         </View>
 
-        {/* 3) Montador de mensagem, recolhido (revelação progressiva) */}
+        {/* 3) Montador de mensagem: uma tarefa própria, num bottom sheet (revelação progressiva) */}
         <InsetGroup>
           <ListRow
             icon="chatbubble-ellipses-outline"
-            title="Preparar mensagem para o WhatsApp do 1746"
-            subtitle={kitOpen ? 'Toque para recolher' : 'Monte o texto e envie você mesmo pelo canal oficial'}
-            onPress={() => setKitOpen((open) => !open)}
+            title="Escrever mensagem para o 1746"
+            subtitle="Monte o texto e envie você mesmo no WhatsApp"
+            onPress={() => setKitOpen(true)}
           />
         </InsetGroup>
-        {kitOpen && (
-          <QuickComplaintKit
-            defaultLocation={neighborhood ? `${neighborhood}, Rio de Janeiro` : 'Rio de Janeiro'}
-          />
-        )}
 
         {/* Bloco 3: Serviços Mais Solicitados (Apple Inset-Grouped Table com Chevrons) */}
         <View style={styles.sectionBlock}>
@@ -180,6 +176,23 @@ export default function ParticipateScreen() {
           </InsetGroup>
         </View>
       </KeyboardAwareScrollView>
+      <AppBottomSheetModal
+        visible={kitOpen}
+        onClose={() => setKitOpen(false)}
+        title="Mensagem para o 1746"
+        snapPoints={['90%']}
+      >
+        <BottomSheetScrollView
+          contentContainerStyle={{ padding: spacing.contentPadding, paddingBottom: spacing.xxxl }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <QuickComplaintKit
+            inSheet
+            defaultLocation={neighborhood ? `${neighborhood}, Rio de Janeiro` : 'Rio de Janeiro'}
+          />
+        </BottomSheetScrollView>
+      </AppBottomSheetModal>
       <AppToast message={linkError} type="error" onDismiss={() => setLinkError(null)} />
     </AppScreen>
   );

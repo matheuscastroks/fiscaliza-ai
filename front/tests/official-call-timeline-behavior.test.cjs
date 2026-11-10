@@ -45,7 +45,7 @@ test('an open call does not fabricate inspections or treat deadlines as complete
   const tree = render({ openedAt: '2026-09-15T12:00:00Z', officialSituation: 'Não Encerrado', targetDate: '2026-10-01', diagnosisTargetDate: '2026-09-20' });
   const content = texts(tree).join(' ');
   assert.doesNotMatch(content, /Encaminhamento e análise técnica|Execução do serviço|Em análise pela secretaria/);
-  assert.match(content, /Sem encerramento publicado/);
+  assert.match(content, /Ainda sem encerramento/);
   assert.doesNotMatch(content, /01\/10\/2026|20\/09\/2026/);
 });
 
@@ -57,7 +57,7 @@ test('administrative closure never certifies that field work was executed', () =
 
 test('closed calls without a published closure date do not invent one', () => {
   const content = texts(render({ openedAt: '2026-09-15', officialSituation: 'Encerrado', statusJustification: 'Duplicidade de protocolo' })).join(' ');
-  assert.match(content, /Data de encerramento não publicada/);
+  assert.match(content, /ainda não informou quando encerrou/);
   assert.match(content, /Duplicidade de protocolo/);
 });
 

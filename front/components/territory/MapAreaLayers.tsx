@@ -30,7 +30,7 @@ export function MapPositionLayers({ Mapbox, centerPoint, devicePoint }: {
   return <>
     {centerPoint && <Mapbox.ShapeSource id="search-center-source" shape={centerPoint}>
       <Mapbox.CircleLayer id="search-center-point" style={{ circleColor: palette.ink, circleRadius: 5, circleStrokeColor: palette.white, circleStrokeWidth: 2 }} />
-      <Mapbox.SymbolLayer id="search-center-label" style={{ textField: 'Centro do entorno', textSize: 12, textOffset: [0, 1.2], textAnchor: 'top', textColor: palette.ink, textHaloColor: palette.surface, textHaloWidth: 1.5 }} />
+      <Mapbox.SymbolLayer id="search-center-label" style={{ textField: 'Centro da área', textSize: 12, textOffset: [0, 1.2], textAnchor: 'top', textColor: palette.ink, textHaloColor: palette.surface, textHaloWidth: 1.5 }} />
     </Mapbox.ShapeSource>}
     {devicePoint && <Mapbox.ShapeSource id="device-position-source" shape={devicePoint}>
       <Mapbox.CircleLayer id="device-position-point" style={{ circleColor: lightColors.info, circleRadius: 8, circleStrokeColor: lightColors.white, circleStrokeWidth: 3 }} />

@@ -79,7 +79,7 @@ function NeighborhoodContent({ initialId }: { initialId?: string }) {
         />
         {!id && (
           <AppText color="muted">
-            Escolha um bairro para conhecer seus serviços e demandas.
+            Escolha um bairro para ver os serviços e chamados dele.
           </AppText>
         )}
         {id && overview.data && (
@@ -92,7 +92,7 @@ function NeighborhoodContent({ initialId }: { initialId?: string }) {
         {!options.isLoading && options.data?.length === 0 && (
           <View>
             <AppText color="muted">
-              Limites de bairro ainda não publicados. Tente atualizar mais
+              Os limites dos bairros ainda não estão disponíveis. Tente de novo mais
               tarde.
             </AppText>
           </View>

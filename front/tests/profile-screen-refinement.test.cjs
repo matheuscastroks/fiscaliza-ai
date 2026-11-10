@@ -14,7 +14,7 @@ test('profile screen: lean identity, metrics, domicile and a short menu; account
   assert.ok(content.includes('UserAvatar') && content.includes('useAuthStore'), 'identity bound to the session');
   assert.ok(content.includes('useFollowStore') && content.includes('usePlacesStore'), 'metrics bound to saved calls and places');
   assert.ok(content.includes('metricCard') && content.includes('savedCalls.length') && content.includes('places.length'), 'two civic metrics');
-  assert.ok(content.includes('Domicílio') && content.includes('Cadastrar meu CEP') && content.includes('<PostalCodeSheet'), 'single CEP registration in a sheet');
+  assert.ok(content.includes('Domicílio') && content.includes('Informar meu CEP') && content.includes('<PostalCodeSheet'), 'single CEP registration in a sheet');
   assert.ok(content.includes("'/PlacesScreen'") && !content.includes('PlacesSheet'), 'places have a single screen');
   assert.ok(!content.includes('Município e Bairro'), 'no redundant municipality selector');
 

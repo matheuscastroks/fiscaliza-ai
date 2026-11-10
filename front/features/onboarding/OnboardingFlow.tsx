@@ -51,7 +51,7 @@ const slides: OnboardingSlide[] = [
     benefits: [
       {
         icon: 'locate-outline',
-        title: 'Chamados por bairro ou raio',
+        title: 'Chamados por bairro ou perto de você',
         description: 'Escolha um bairro ou um lugar seu e veja só o que está por perto.',
       },
       {
@@ -73,8 +73,8 @@ const slides: OnboardingSlide[] = [
     benefits: [
       {
         icon: 'time-outline',
-        title: 'Situação e prazo publicados',
-        description: 'Veja protocolo, datas e prazo conforme divulgados pela Prefeitura.',
+        title: 'Situação e prazo',
+        description: 'Veja o protocolo, as datas e o prazo que a Prefeitura informou.',
       },
       {
         icon: 'chatbubbles-outline',

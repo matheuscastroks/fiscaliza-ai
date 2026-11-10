@@ -23,7 +23,7 @@ test('facility details: provides quick actions for GPS route and phone calls', (
   const content = fs.readFileSync(facilityPath, 'utf8');
   assert.ok(content.includes('handleOpenDirections'), 'Must implement GPS route handler');
   assert.ok(content.includes('handleCall'), 'Must implement phone call handler');
-  assert.ok(content.includes('Como chegar (abrir rota no GPS)'), 'Must render GPS navigation CTA');
+  assert.ok(content.includes('Como chegar'), 'Must render GPS navigation CTA');
   assert.ok(content.includes('Ligar para a unidade'), 'Must render direct phone CTA when available');
 });
 
@@ -34,7 +34,7 @@ test('places screen: renders structured cards with icons, radius badges and map 
   const content = fs.readFileSync(placesPath, 'utf8');
   assert.ok(content.includes('getPlaceIcon'), 'Must map place category icons');
   assert.ok(content.includes('formatRadius'), 'Must format radius in meters or km');
-  assert.ok(content.includes('Consultar entorno no mapa'), 'Must provide direct map query CTA');
+  assert.ok(content.includes('Ver chamados perto daqui'), 'Must provide direct map query CTA');
   assert.ok(content.includes('styles.placeCard'), 'Must wrap places in structured card containers');
 });
 
@@ -56,5 +56,5 @@ test('vocabulary alignment: removes legacy Home references from help and setting
 
   assert.ok(!settingsContent.includes('na Home'), 'SettingsScreen must not refer to Home');
   assert.ok(!helpContent.includes('na Home'), 'HelpScreen must not refer to Home');
-  assert.ok(settingsContent.includes('focar o mapa automaticamente'), 'SettingsScreen must refer to map focus');
+  assert.ok(settingsContent.includes('o mapa já abrir nele'), 'SettingsScreen must refer to map focus');
 });

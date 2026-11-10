@@ -38,7 +38,7 @@ function buildTimelineSteps(call: OfficialCall, isClosed: boolean): TimelineStep
   steps.push({
     id: 'opened',
     title: 'Chamado registrado',
-    subtitle: 'Protocolo aberto na Central 1746',
+    subtitle: 'Chamado aberto no 1746',
     date: openedDate,
     state: 'done',
     icon: 'document-text-outline',
@@ -48,10 +48,10 @@ function buildTimelineSteps(call: OfficialCall, isClosed: boolean): TimelineStep
   // Prazos estimados não comprovam vistoria nem realização do serviço.
   steps.push({
     id: 'closed',
-    title: isClosed ? 'Encerramento no 1746' : 'Sem encerramento publicado',
+    title: isClosed ? 'Encerramento no 1746' : 'Ainda sem encerramento',
     subtitle: isClosed
       ? [
-          !closedDate && 'Data de encerramento não publicada.',
+          !closedDate && 'A Prefeitura ainda não informou quando encerrou.',
           call.statusJustification || 'O encerramento administrativo não comprova a execução do serviço.',
         ].filter(Boolean).join(' ')
       : call.officialSituation || call.officialStatus || 'A fonte ainda não publicou um encerramento.',

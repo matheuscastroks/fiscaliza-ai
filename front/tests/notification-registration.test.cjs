@@ -39,11 +39,11 @@ function service({ registrationFails = false, tokenFails = false, projectId = 'p
 }
 
 test('push activation rejects when the server has not registered the token', async () => {
-  await assert.rejects(service({ registrationFails: true }).registerForPushNotificationsAsync(), /registrar/i);
+  await assert.rejects(service({ registrationFails: true }).registerForPushNotificationsAsync(), /ligar os avisos/i);
 });
 
 test('missing EAS projectId gives a clear Portuguese error instead of the raw Expo message', async () => {
-  await assert.rejects(service({ projectId: null }).registerForPushNotificationsAsync(), /ainda não estão disponíveis/);
+  await assert.rejects(service({ projectId: null }).registerForPushNotificationsAsync(), /ainda não funcionam/);
 });
 
 test('push token errors reach the caller so activation can be retried', async () => {

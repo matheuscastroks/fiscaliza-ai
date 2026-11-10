@@ -61,7 +61,7 @@ export function FacilityLoadMoreButton({
       />
       <AppText variant="caption" style={styles.text}>
         {isFetching
-          ? 'Carregando equipamentos...'
+          ? 'Carregando serviços...'
           : `Carregar mais ${label}${count}`}
       </AppText>
     </Pressable>

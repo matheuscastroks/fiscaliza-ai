@@ -42,11 +42,11 @@ async function readResult<T>(
     typeof result.success !== 'boolean'
   )
     throw new ApiError(
-      'O serviço retornou uma resposta inválida. Tente novamente.',
+      'Algo deu errado. Tente de novo em instantes.',
     );
   if (status < 200 || status >= 300 || !result.success)
     throw new ApiError(
-      result.error || 'Não foi possível concluir. Tente novamente.',
+      result.error || 'Não deu certo. Tente de novo.',
     );
   return result.data as T;
 }
@@ -106,8 +106,8 @@ export async function request<T>(
       await expireUnauthorizedSession(path, response.status);
       throw new ApiError(
         response.status >= 500
-          ? 'O serviço está temporariamente indisponível. Tente novamente em instantes.'
-          : 'O serviço retornou uma resposta inválida. Tente novamente.',
+          ? 'O app está fora do ar por um momento. Tente de novo em instantes.'
+          : 'Algo deu errado. Tente de novo em instantes.',
       );
     }
     return await readResult(path, response.status, result);
@@ -117,7 +117,7 @@ export async function request<T>(
     // Tudo que não veio do servidor (TypeError, timeout, falha nativa de rede) é falta de conexão.
     if (error instanceof ApiError) throw error;
     throw new NetworkError(
-      'Sem conexão com o serviço. Verifique a rede e tente novamente.',
+      'Sem internet no momento. Confira sua conexão e tente de novo.',
     );
   } finally {
     clearTimeout(timer);

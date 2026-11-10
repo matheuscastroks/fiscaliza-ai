@@ -84,7 +84,7 @@ export function PostalCodeSheet({
                 Vincule seu CEP carioca
               </AppText>
               <AppText variant="body" color="muted">
-                Acesse sua conta para registrar seu domicílio cívico, acompanhar chamados do seu bairro e receber notificações personalizadas.
+                Entre na sua conta para guardar seu CEP e acompanhar os chamados do seu bairro.
               </AppText>
             </View>
             <AppButton
@@ -100,7 +100,7 @@ export function PostalCodeSheet({
           <View style={{ gap: spacing.md }}>
             <View style={styles.headerInfo}>
               <AppText variant="caption" color="muted">
-                Informe seu CEP residencial no município do Rio de Janeiro:
+                Digite o CEP de onde você mora:
               </AppText>
             </View>
 
@@ -183,7 +183,7 @@ export function PostalCodeSheet({
                       variant="caption"
                       style={[styles.resultBadgeText, { color: colors.completed }]}
                     >
-                      Domicílio encontrado
+                      Endereço encontrado
                     </AppText>
                   </View>
                   <View

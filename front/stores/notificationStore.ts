@@ -93,13 +93,13 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       set({
         pushToken: null,
         permissionGranted: granted,
-        error: granted ? 'A permissão foi concedida, mas não foi possível ativar os alertas. Tente novamente.' : null,
+        error: granted ? 'A permissão foi dada, mas não conseguimos ligar os avisos. Tente de novo.' : null,
       });
       return false;
     } catch {
       set({
         pushToken: null,
-        error: 'Não foi possível ativar os alertas. Tente novamente.',
+        error: 'Não conseguimos ligar os avisos. Tente de novo.',
       });
       try {
         const { status } = await Notifications.getPermissionsAsync();

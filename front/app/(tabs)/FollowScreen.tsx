@@ -151,8 +151,8 @@ export default function FollowScreen() {
             />
 
             <AppText variant="caption" color="muted">
-              Situação publicada no 1746. Encerrado não prova que o problema foi
-              resolvido: se continuar, veja a aba Agir.
+              Situação informada pela Prefeitura. “Encerrado” não garante que o
+              problema foi resolvido: se continuar, veja a aba Agir.
             </AppText>
 
             {!hydrated && (
@@ -177,7 +177,7 @@ export default function FollowScreen() {
               description={
                 savedCalls.length
                   ? 'Altere o filtro acima para Todos e veja os outros registros salvos neste aparelho.'
-                  : 'Ao explorar o mapa ou os filtros da cidade, toque em Salvar em qualquer chamado para voltar a ele e ver o andamento publicado pelo 1746.'
+                  : 'Ao explorar o mapa ou os filtros da cidade, toque em Salvar num chamado para voltar a ele depois e ver como anda.'
               }
               action={{
                 title: savedCalls.length

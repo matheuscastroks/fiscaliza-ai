@@ -13,7 +13,7 @@ export function Provenance({ source }: { source: SourceCoverage }) {
           ? 'Fonte sem publicação disponível'
           : source.state === 'stale'
             ? 'Última publicação disponível'
-            : 'Cadastro publicado'}
+            : 'Informação divulgada'}
         {source.publishedAt
           ? ` · Importação: ${dayLabel(source.publishedAt)}`
           : ''}

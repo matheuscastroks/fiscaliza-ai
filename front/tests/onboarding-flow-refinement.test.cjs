@@ -65,7 +65,7 @@ test('onboarding flow: removes bureaucratic disclaimers and adopts user-centric 
     'Should highlight territorial map exploration',
   );
   assert.ok(
-    content.includes('Situação e prazo publicados'),
+    content.includes('Situação e prazo'),
     'Should highlight SLA and civic monitoring',
   );
   assert.ok(

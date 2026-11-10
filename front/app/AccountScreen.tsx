@@ -61,7 +61,7 @@ export default function AccountScreen() {
                 icon="log-out-outline"
                 tone="neutral"
                 title="Sair da conta"
-                subtitle="Encerra a sessão neste aparelho"
+                subtitle="Sai da conta neste celular"
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   useSignOutSheet.getState().setOpen(true);
@@ -70,14 +70,14 @@ export default function AccountScreen() {
             </InsetGroup>
             <View style={styles.danger}>
               <AppText variant="meta" color="muted">
-                Zona de risco
+                Cuidado: não dá para desfazer
               </AppText>
               <InsetGroup>
                 <ListRow
                   icon="trash-outline"
                   tone="risk"
                   title="Apagar minha conta"
-                  subtitle="Remove permanentemente seus dados e preferências do servidor"
+                  subtitle="Apaga para sempre seus dados e preferências"
                   onPress={() => {
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     setDeleteError('');
@@ -122,7 +122,7 @@ export default function AccountScreen() {
           <View style={{ gap: spacing.xs }}>
             <AppText variant="sectionTitle">Apagar conta permanentemente?</AppText>
             <AppText color="muted">
-              Esta ação é irreversível. Seus dados de cadastro, preferências e acessos serão removidos dos nossos servidores.
+              Não dá para desfazer. Seus dados de cadastro e preferências serão apagados.
             </AppText>
           </View>
           {deleteError !== '' && (

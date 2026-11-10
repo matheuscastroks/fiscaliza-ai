@@ -108,7 +108,7 @@ export function TerritoryCardContent({
       <View>
         <View style={styles.facilityHeader}>
           <AppText variant="caption" color="muted">
-            Equipamento público
+            Serviço público
           </AppText>
         </View>
         <FacilityRow item={entry.item} onPress={() => onOpen(entry)} />

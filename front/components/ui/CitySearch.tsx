@@ -43,7 +43,7 @@ export function CitySearch({
     actionIcon ?? (onAction ? 'list-outline' : 'options-outline');
   const resolvedLabel =
     actionLabel ??
-    (onAction ? 'Alternar visualização' : 'Filtros do território');
+    (onAction ? 'Alternar visualização' : 'Filtros');
   const isActionActive = actionActive ?? (filterCount > 0 || expanded);
 
   return (
@@ -65,9 +65,9 @@ export function CitySearch({
       {!leftElement && <Ionicons name="search-outline" size={layout.iconSize.md} color={colors.muted} />}
       {onChangeText ? (
         <TextInput
-          accessibilityLabel="Buscar no território"
+          accessibilityLabel="Buscar"
           keyboardAppearance={mode}
-          placeholder={leftElement ? 'Buscar chamado ou serviço...' : 'Buscar protocolo, serviço ou bairro...'}
+          placeholder={leftElement ? 'Buscar chamado ou serviço...' : 'Buscar por protocolo, assunto ou bairro...'}
           value={value}
           onChangeText={onChangeText}
           placeholderTextColor={colors.muted}
@@ -83,7 +83,7 @@ export function CitySearch({
       ) : (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Pesquisar no território"
+          accessibilityLabel="Buscar"
           onPress={onPress}
           style={{ flex: 1, minHeight: 44, justifyContent: 'center' }}
         >

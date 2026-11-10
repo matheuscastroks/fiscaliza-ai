@@ -156,7 +156,7 @@ function TerritoryFilterModalComponent({
     <AppBottomSheetModal
       visible={visible}
       onClose={onClose}
-      title="Filtros do Território"
+      title="Filtros"
       snapPoints={snapPoints}
     >
       <BottomSheetScrollView
@@ -421,7 +421,7 @@ function TerritoryFilterModalComponent({
               <View style={styles.sectionHeaderRow}>
                 <Ionicons name="business" size={layout.iconSize.sm} color={colors.accent} />
                 <AppText variant="caption" style={styles.sectionHeaderTitle}>
-                  Equipamentos Públicos no Mapa
+                  Serviços públicos no mapa
                 </AppText>
               </View>
               <AppText
@@ -440,7 +440,7 @@ function TerritoryFilterModalComponent({
                     <Pressable
                       key={cfg.id}
                       accessibilityRole="button"
-                      accessibilityLabel={`Equipamento ${cfg.label}`}
+                      accessibilityLabel={`Serviço ${cfg.label}`}
                       accessibilityState={{ selected: isSelected }}
                       onPress={() => toggleFacility(cfg.id)}
                       style={({ pressed }) => [
@@ -507,7 +507,7 @@ function TerritoryFilterModalComponent({
           <View style={styles.emptyWarningHint}>
             <Ionicons name="information-circle-outline" size={layout.iconSize.sm} color={colors.risk} />
             <AppText variant="caption" color="muted" style={{ flex: 1 }}>
-              Nenhum chamado encontrado para este filtro no recorte. Experimente ampliar o período ou o raio.
+              Nenhum chamado com esses filtros. Tente mudar o período ou a distância.
             </AppText>
           </View>
         )}
@@ -551,7 +551,7 @@ function TerritoryFilterModalComponent({
                 ? totalCalls === 0
                   ? 'Ver resultados (0 chamados)'
                   : `Ver ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`
-                : 'Ver equipamentos'}
+                : 'Ver serviços'}
             </AppText>
             <Ionicons name="arrow-forward" size={layout.iconSize.sm} color={colors.onAccent} />
           </Pressable>
