@@ -7,6 +7,7 @@ import {
 } from '@/features/territory/selectors';
 import { create } from 'zustand';
 import { usePlacesStore } from './placesStore';
+import { createScopeGeneration, createWriteQueue } from './scopedPersistence';
 import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
 const REGION_KEY = `fiscaliza-ai:region:${DEFAULT_MUNICIPALITY_ID}:v1`;
 export function regionStorageKey(
@@ -18,8 +19,8 @@ export function regionStorageKey(
     : REGION_KEY;
 }
 let initialization: Promise<void> | undefined;
-let writes = Promise.resolve();
-let scopeVersion = 0;
+const enqueueWrite = createWriteQueue();
+const scope = createScopeGeneration();
 export type TerritoryDomain = 'calls' | 'facilities';
 
 export const useTerritoryStore = create<{
@@ -105,7 +106,7 @@ export const useTerritoryStore = create<{
       return initialization;
     }
     initialization = undefined;
-    scopeVersion++;
+    scope.next();
     set({
       userId,
       municipalityId: nextMunicipalityId,
@@ -118,34 +119,32 @@ export const useTerritoryStore = create<{
   },
   setPreferredNeighborhood: (name) => {
     let success = false;
-    const requestedScope = scopeVersion;
+    const requestedScope = scope.current();
     const { userId, municipalityId } = get();
     const key = regionStorageKey(userId, municipalityId);
-    const result = writes.then(async () => {
-      if (requestedScope !== scopeVersion) return;
+    return enqueueWrite(async () => {
+      if (!scope.isCurrent(requestedScope)) return;
       await get().initialize();
-      if (requestedScope !== scopeVersion) return;
+      if (!scope.isCurrent(requestedScope)) return;
       try {
         const neighborhood = name.trim();
         await AsyncStorage.setItem(
           key,
           JSON.stringify({ version: 1, neighborhood }),
         );
-        if (requestedScope !== scopeVersion) return;
+        if (!scope.isCurrent(requestedScope)) return;
         set({ preferredNeighborhood: neighborhood, persistenceError: null });
         const places = usePlacesStore.getState();
         if (places.userId === userId && places.municipalityId === municipalityId) await places.selectNeighborhood(neighborhood);
         success = true;
       } catch {
-        if (requestedScope !== scopeVersion) return;
+        if (!scope.isCurrent(requestedScope)) return;
         set({
           persistenceError:
             'Não foi possível salvar sua região. Tente novamente.',
         });
       }
-    });
-    writes = result;
-    return result.then(() => success);
+    }).then(() => success);
   },
   setLayers: (layers) => set({ layers }),
   setTerritoryDomain: (domain) => {
