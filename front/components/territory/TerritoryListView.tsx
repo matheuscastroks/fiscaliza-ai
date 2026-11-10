@@ -36,6 +36,8 @@ export interface TerritoryListViewProps {
   visible?: boolean;
   asSheet?: boolean;
   onClose?: () => void;
+  /** Recorte "localização atual" sem posição: explica e oferece capturar ou escolher um bairro. */
+  locationPrompt?: { onUseLocation: () => void };
   listRef: React.RefObject<FlatList<Entry> | null>;
   listOffsetRef: React.MutableRefObject<number>;
   restoreListOffsetRef: React.MutableRefObject<boolean>;
@@ -75,6 +77,7 @@ function TerritoryListViewComponent({
   visible = true,
   asSheet = true,
   onClose,
+  locationPrompt,
   listRef,
   listOffsetRef,
   restoreListOffsetRef,
@@ -124,9 +127,9 @@ function TerritoryListViewComponent({
     return listed.length.toLocaleString('pt-BR');
   }, [layers, listed.length, totalCalls, facilityLoaded, facilityTotal]);
 
-  const sectionHeading = `${
-    areaOnly ? 'Registros na área visível' : 'Registros no território'
-  } (${countLabel})`;
+  const sectionHeading = locationPrompt
+    ? 'Aguardando localização'
+    : `${countLabel} ${areaOnly ? 'na área visível' : 'neste recorte'}`;
 
   const headerNotice = (
     <View style={{ gap: spacing.sm, marginBottom: spacing.md }}>
@@ -178,6 +181,15 @@ function TerritoryListViewComponent({
 
   const footerContent = (
     <View style={{ gap: spacing.md, marginTop: spacing.md }}>
+      {locationPrompt && (
+        <IllustratedEmptyState
+          kind="territory"
+          height={96}
+          title="Aguardando sua localização"
+          description="Permita o acesso à localização para ver os chamados ao seu redor ou feche esta lista e escolha um bairro no seletor do topo."
+          action={{ title: 'Usar minha localização', onPress: locationPrompt.onUseLocation }}
+        />
+      )}
       {layers.includes('official') && hasMoreCalls && (
         <AppButton
           title={`Carregar mais chamados (${listed.length} de ${totalCalls.toLocaleString('pt-BR')})`}

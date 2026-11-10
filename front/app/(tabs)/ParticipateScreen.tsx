@@ -86,7 +86,7 @@ export default function ParticipateScreen() {
     <AppScreen>
       <AppHeader
         title="Agir no 1746"
-        context="Canais oficiais da Prefeitura para abrir e acompanhar protocolos. O envio é feito por você."
+        context="Canais oficiais da Prefeitura"
       />
       <KeyboardAwareScrollView
         contentContainerStyle={{

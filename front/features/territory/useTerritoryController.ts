@@ -635,19 +635,25 @@ export function useTerritoryController() {
     facilityQueries, facilitiesConfirmed, macroTheme, setMacroTheme, resetFilters,
   ]);
 
+  const waitingForLocation = activeSelection.kind === 'pending-current';
+
   const summaryLabel =
     territoryDomain === 'facilities'
       ? totalFacilitiesKnown !== null && listed.length < totalFacilitiesKnown
         ? `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')} de ${totalFacilitiesKnown.toLocaleString('pt-BR')})`
         : `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')})`
-      : officialCalls.isLoading
+      : activeSelection.kind === 'pending-current'
+        ? 'Aguardando sua localização'
+        : officialCalls.isLoading
         ? 'Consultando chamados neste recorte...'
         : officialCalls.error && listed.length === 0
           ? 'Não foi possível carregar os chamados'
           : `Ver em lista · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
 
   const summarySubLabel =
-    territoryDomain === 'calls' && officialCalls.error && listed.length === 0
+    territoryDomain === 'calls' && activeSelection.kind === 'pending-current'
+      ? 'Toque em localizar ou escolha um bairro no seletor acima'
+      : territoryDomain === 'calls' && officialCalls.error && listed.length === 0
       ? 'Verifique a conexão. Toque para ver o motivo e tentar de novo'
       : territoryDomain === 'calls' && unlocated.length > 0
       ? `+${unlocated.length} sem ponto no mapa · Toque para abrir a lista`
@@ -724,6 +730,7 @@ export function useTerritoryController() {
     refreshAll,
     filterBarProps,
     summaryLabel,
+    waitingForLocation,
     summarySubLabel,
   };
 }

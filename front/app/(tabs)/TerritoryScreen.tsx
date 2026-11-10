@@ -119,6 +119,7 @@ export function TerritoryContent() {
     refreshAll,
     filterBarProps,
     summaryLabel,
+    waitingForLocation,
     summarySubLabel,
   } = useTerritoryController();
 
@@ -305,6 +306,7 @@ export function TerritoryContent() {
 
       {effectiveListView && (
         <TerritoryListView
+          locationPrompt={waitingForLocation ? { onUseLocation: () => { void locate(); } } : undefined}
           visible={isFocused}
           asSheet={mapAvailable}
           onClose={() => setIsListView(false)}

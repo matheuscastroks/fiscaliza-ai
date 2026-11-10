@@ -166,7 +166,7 @@ export default function ProfileScreen() {
     <AppScreen>
       <AppHeader
         title="Meu perfil"
-        context="Identidade cidadã e configurações"
+        context="Sua conta e preferências"
         hideUserAvatar
         rightElement={
           <Pressable
