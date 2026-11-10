@@ -1,8 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { create } from 'zustand';
-import { createScopeGeneration, createWriteQueue, scopedStorageKey } from './scopedPersistence';
+
+import { createScopeGeneration, createWriteQueue } from './scopedPersistence';
 import type { OfficialCall } from '@/shared/contracts';
+
 import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
+
 
 let onFollowChanged: ((call: OfficialCall, saved: boolean) => void) | undefined;
 export function setFollowNotificationListener(

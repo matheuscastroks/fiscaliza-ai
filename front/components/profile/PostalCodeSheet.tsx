@@ -39,12 +39,12 @@ export function PostalCodeSheet({
   const flow = usePostalCodeFlow(
     currentPostalCode ? formatPostalCode(currentPostalCode) : '',
   );
-  const { postalCode, digits, lookup, busy, saving, error } = flow;
+  const { postalCode, digits, lookup, busy, saving, error, reset } = flow;
 
   // Sincroniza CEP inicial ao abrir
   useEffect(() => {
-    if (visible) flow.reset(currentPostalCode ? formatPostalCode(currentPostalCode) : '');
-  }, [visible, currentPostalCode]);
+    if (visible) reset(currentPostalCode ? formatPostalCode(currentPostalCode) : '');
+  }, [visible, currentPostalCode, reset]);
 
   const handleSearch = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
