@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, StyleSheet, Pressable, Linking, Share, TextInput } from 'react-native';
+import { View, StyleSheet, Pressable, Share, TextInput } from 'react-native';
+import { openExternal } from '@/services/openExternal';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
@@ -60,26 +61,20 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
       `Olá! Gostaria de abrir uma solicitação no 1746:\n\n` +
       `• Serviço: ${topicLabel}\n` +
       `• Local / Referência: ${loc}\n` +
-      `• Descrição: ${desc}\n\n` +
-      `Registrado com auxílio do aplicativo Fiscaliza aí.`
+      `• Descrição: ${desc}`
     );
   }, [topicLabel, address, description]);
 
   const handleOpenWhatsApp = async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const url = `https://wa.me/552134601746?text=${encodeURIComponent(formattedMessage)}`;
-    try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        await Linking.openURL(
-          `https://api.whatsapp.com/send?phone=552134601746&text=${encodeURIComponent(formattedMessage)}`,
-        );
-      }
-    } catch {
-      setErrorNotice('Não foi possível abrir o WhatsApp automaticamente. Tente a opção de compartilhar ou ligar 1746.');
-    }
+    const text = encodeURIComponent(formattedMessage);
+    const opened = await openExternal(
+      `https://wa.me/552134601746?text=${text}`,
+      `https://api.whatsapp.com/send?phone=552134601746&text=${text}`,
+    );
+    setErrorNotice(
+      opened ? null : 'Não foi possível abrir o WhatsApp. Compartilhe o texto ou ligue para o 1746.',
+    );
   };
 
   const handleShare = async () => {
@@ -101,20 +96,12 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
 
   return (
     <View style={styles.container} accessibilityLabel="Assistente de solicitação rápida 1746">
-      {/* Cabeçalho de Seção Cívico */}
-      <View style={styles.sectionHeaderRow}>
-        <Ionicons name="flash" size={13} color={colors.accent} />
-        <AppText variant="caption" style={styles.sectionHeaderText}>
-          ASSISTENTE RÁPIDO · CENTRAL 1746
-        </AppText>
-      </View>
-
       <View style={styles.titleBlock}>
         <AppText variant="sectionTitle" style={styles.title}>
-          Monte sua solicitação oficial
+          Preparar mensagem para o WhatsApp do 1746
         </AppText>
         <AppText variant="caption" color="muted" style={styles.subtitle}>
-          Organize o chamado e envie em segundos diretamente para o WhatsApp oficial da Prefeitura.
+          Você envia pelo WhatsApp oficial da Prefeitura. O Fiscaliza aí não registra nem acompanha esse envio.
         </AppText>
       </View>
 
@@ -263,7 +250,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
           color={colors.primary}
         />
         <AppText variant="caption" style={styles.previewToggleText}>
-          {showPreview ? 'Ocultar prévia da mensagem' : 'Ver mensagem que será enviada'}
+          {showPreview ? 'Ocultar prévia da mensagem' : 'Ver a mensagem preparada'}
         </AppText>
       </Pressable>
 
@@ -272,7 +259,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
           <View style={styles.previewHeader}>
             <Ionicons name="chatbubble-ellipses-outline" size={13} color={colors.muted} />
             <AppText variant="caption" color="muted" style={{ fontWeight: '600' }}>
-              Texto preparado para a Central 1746:
+              Texto para você enviar à Central 1746:
             </AppText>
           </View>
           <AppText variant="caption" color="ink" style={styles.previewText} selectable>
@@ -291,7 +278,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
       <View style={styles.actionsBlock}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Enviar no WhatsApp do 1746"
+          accessibilityLabel="Abrir o WhatsApp do 1746 com a mensagem"
           onPress={handleOpenWhatsApp}
           style={({ pressed }) => [
             styles.whatsAppButton,
@@ -300,11 +287,11 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
         >
           <Ionicons name="logo-whatsapp" size={19} color="#FFFFFF" />
           <AppText variant="label" style={styles.whatsAppButtonText}>
-            Enviar no WhatsApp do 1746
+            Abrir WhatsApp do 1746
           </AppText>
         </Pressable>
         <AppButton
-          title="Compartilhar texto da solicitação"
+          title="Compartilhar texto"
           variant="secondary"
           icon={<Ionicons name="share-outline" size={16} color={colors.ink} />}
           onPress={handleShare}

@@ -8,6 +8,7 @@ import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppToast } from '@/components/ui/AppToast';
+import { InsetGroup, ListRow } from '@/components/ui/ListRow';
 import { openExternal } from '@/services/openExternal';
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { QuickComplaintKit } from '@/features/city/QuickComplaintKit';
@@ -70,6 +71,7 @@ export default function ParticipateScreen() {
   });
 
   const [linkError, setLinkError] = useState<string | null>(null);
+  const [kitOpen, setKitOpen] = useState(false);
   const handleOpenLink = (url: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     void openExternal(url).then((ok) => {
@@ -81,7 +83,7 @@ export default function ParticipateScreen() {
     <AppScreen>
       <AppHeader
         title="Agir no 1746"
-        context="Canais oficiais da Prefeitura do Rio para abrir e acompanhar protocolos"
+        context="Canais oficiais da Prefeitura para abrir e acompanhar protocolos. O envio é feito por você."
       />
       <KeyboardAwareScrollView
         contentContainerStyle={{
@@ -93,17 +95,22 @@ export default function ParticipateScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Bloco Hero: Assistente Rápido de Solicitação */}
-        <QuickComplaintKit
-          defaultLocation={neighborhood ? `${neighborhood}, Rio de Janeiro` : 'Rio de Janeiro'}
-        />
+        {/* 1) Antes de registrar algo novo: já existe chamado? */}
+        <InsetGroup>
+          <ListRow
+            icon="map-outline"
+            title="Já existe chamado? Veja no mapa"
+            subtitle="Procure registros próximos e acompanhe o andamento publicado"
+            onPress={() => router.push('/(tabs)/TerritoryScreen')}
+          />
+        </InsetGroup>
 
         {/* Bloco 2: Canais Oficiais de Atendimento (Apple Inset-Grouped Table) */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
             <Ionicons name="shield-checkmark-outline" size={13} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
-              CANAIS OFICIAIS DE ATENDIMENTO
+              Canais oficiais de atendimento
             </AppText>
           </View>
 
@@ -155,12 +162,27 @@ export default function ParticipateScreen() {
           </View>
         </View>
 
+        {/* 3) Montador de mensagem, recolhido (revelação progressiva) */}
+        <InsetGroup>
+          <ListRow
+            icon="chatbubble-ellipses-outline"
+            title="Preparar mensagem para o WhatsApp do 1746"
+            subtitle={kitOpen ? 'Toque para recolher' : 'Monte o texto e envie você mesmo pelo canal oficial'}
+            onPress={() => setKitOpen((open) => !open)}
+          />
+        </InsetGroup>
+        {kitOpen && (
+          <QuickComplaintKit
+            defaultLocation={neighborhood ? `${neighborhood}, Rio de Janeiro` : 'Rio de Janeiro'}
+          />
+        )}
+
         {/* Bloco 3: Serviços Mais Solicitados (Apple Inset-Grouped Table com Chevrons) */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
             <Ionicons name="apps-outline" size={13} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
-              SERVIÇOS MAIS SOLICITADOS NO RIO
+              Serviços mais solicitados no Rio
             </AppText>
           </View>
 
@@ -293,9 +315,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   sectionHeaderText: {
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.6,
+    fontSize: 13,
+    fontWeight: '500',
   },
   insetTable: {
     borderRadius: layout.radius.panel,

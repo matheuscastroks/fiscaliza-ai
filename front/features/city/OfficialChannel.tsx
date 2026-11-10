@@ -1,5 +1,6 @@
+import { openExternal } from '@/services/openExternal';
 import { useState } from 'react';
-import { Linking, View } from 'react-native';
+import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppText } from '@/components/ui/AppText';
@@ -94,9 +95,10 @@ export function OfficialChannel({
         onPress={() => {
           setFailed(false);
           setBusy(true);
-          void Linking.openURL(url)
-            .catch(() => setFailed(true))
-            .finally(() => setBusy(false));
+          void openExternal(url).then((ok) => {
+            setFailed(!ok);
+            setBusy(false);
+          });
         }}
       />
       {failed && (

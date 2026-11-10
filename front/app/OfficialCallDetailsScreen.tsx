@@ -522,15 +522,29 @@ export default function OfficialCallDetailsScreen() {
           <AppText variant="caption" color="muted">
             O atendimento acontece no canal oficial da prefeitura.
           </AppText>
-          <OfficialChannel />
         </View>
       </ScrollView>
+      <View
+        style={[
+          styles.officialAction,
+          { paddingBottom: Math.max(insets.bottom, spacing.md) },
+        ]}
+      >
+        <OfficialChannel variant="primary" />
+      </View>
     </AppScreen>
   );
 }
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
+    officialAction: {
+      paddingHorizontal: spacing.contentPadding,
+      paddingTop: spacing.sm,
+      backgroundColor: colors.canvas,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.divider,
+    },
     centerContainer: {
       flex: 1,
       alignItems: 'center',

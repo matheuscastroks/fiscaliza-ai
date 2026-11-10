@@ -40,7 +40,8 @@ export function ItemLocationMap({
   const styles = useThemedStyles(createStyles);
 
   const handleOpenMap = () => {
-    router.push({
+    // Volta ao mapa existente em vez de empilhar outro.
+    router.dismissTo({
       pathname: '/(tabs)/TerritoryScreen',
       params: {
         focusId: id,
