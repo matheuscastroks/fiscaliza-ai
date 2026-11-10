@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { Alert, View, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { goBack } from '@/utils/navigation';
@@ -13,6 +13,8 @@ import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useThemeStore, isThemePreference } from '@/stores/themeStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { useNotificationStore } from '@/stores/notificationStore';
+import { useFollowStore } from '@/stores/followStore';
+import { InsetGroup, ListRow } from '@/components/ui/ListRow';
 import { useMunicipalityId } from '@/features/city/municipality';
 import { AppToast } from '@/components/ui/AppToast';
 import { useTheme, spacing, layout } from '@/theme';
@@ -52,6 +54,26 @@ export default function SettingsScreen() {
   } = useNotificationStore();
 
   const municipalityId = useMunicipalityId();
+  const savedCount = useFollowStore((s) => s.savedCalls.length);
+  const clearSavedCalls = useFollowStore((s) => s.clearSavedCalls);
+  const confirmClearSaved = () => {
+    Alert.alert(
+      'Apagar chamados salvos?',
+      'Eles serão removidos deste aparelho. Os chamados continuam existindo no 1746 e você pode salvá-los de novo.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Apagar',
+          style: 'destructive',
+          onPress: () => {
+            void clearSavedCalls().then((ok) =>
+              setToastMessage(ok ? 'Chamados salvos apagados.' : 'Não foi possível apagar. Tente novamente.'),
+            );
+          },
+        },
+      ],
+    );
+  };
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [testSending, setTestSending] = useState(false);
 
@@ -257,6 +279,29 @@ export default function SettingsScreen() {
               {notificationError}
             </AppText>
           )}
+        </View>
+
+        {/* Dados neste aparelho: apagar chamados salvos (com confirmação) */}
+        <View style={styles.sectionBlock}>
+          <View style={styles.sectionHeaderRow}>
+            <Ionicons name="phone-portrait-outline" size={13} color={colors.muted} />
+            <AppText variant="caption" style={styles.sectionHeaderText}>
+              Dados neste aparelho
+            </AppText>
+          </View>
+          <InsetGroup>
+            <ListRow
+              icon="trash-outline"
+              tone="risk"
+              title="Apagar chamados salvos"
+              subtitle={
+                savedCount > 0
+                  ? `${savedCount} ${savedCount === 1 ? 'chamado salvo será removido' : 'chamados salvos serão removidos'} deste aparelho`
+                  : 'Nenhum chamado salvo neste aparelho'
+              }
+              onPress={savedCount > 0 ? confirmClearSaved : undefined}
+            />
+          </InsetGroup>
         </View>
 
         {/* Seção 4: Acessibilidade do Sistema */}
