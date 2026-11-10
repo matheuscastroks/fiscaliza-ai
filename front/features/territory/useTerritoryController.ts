@@ -1,47 +1,67 @@
-import { formatCallDate } from '@/features/city/formatDates';
 
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
+
 import { mapPerformanceEnabled } from '@/features/territory/mapPerformance';
+
 
 import { useMapPerformance } from '@/features/territory/useMapPerformance';
 
+
 import { type TerritoryFilterBarProps } from '@/components/territory/TerritoryFilterBar';
+
 
 import { usePublicSources, usePublicFacilities, useNeighborhoods, useNeighborhoodBoundary } from '@/features/territory/usePublicData';
 
+
 import { chooseTerritorialEntries, computeOverviewRegion, TERRITORY_PERIOD_OPTIONS, TERRITORY_STATUS_OPTIONS } from '@/features/territory/selectors';
+
 
 import { summarizeFacilityPagination } from '@/features/territory/facilityPagination';
 
+
 import { useTheme } from '@/theme/useTheme';
+
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
-import { BackHandler, Platform, FlatList, useWindowDimensions } from 'react-native';
+
+import { BackHandler, Platform, FlatList } from 'react-native';
 
 import * as Haptics from 'expo-haptics';
 
+
 import { router, useLocalSearchParams, useIsFocused } from 'expo-router';
+
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+
 import { useDeviceLocation } from '@/features/places/useDeviceLocation';
+
 
 import { useTerritoryFilters } from '@/features/places/useTerritoryFilters';
 
+
 import { usePlacesStore } from '@/stores/placesStore';
+
 
 import { mapOverlayContext } from '@/features/territory/mapArea';
 
+
 import { useInfiniteOfficialCalls, useOfficialCall, useOfficialFilters } from '@/features/city/useOfficialCalls';
+
 
 import { useTerritoryStore, useTerritorySelection, useTerritoryViewMode, useTerritoryFiltersModal, useTerritoryDomain } from '@/stores/territoryStore';
 
+
 import { isMapboxAvailable, type MapMarker } from '@/components/ui/MapboxMapView';
 
+
 import { entryLocation, entryToMarker, type Entry } from '@/components/territory/TerritoryPreviewCard';
+
 import { OPEN_STATUS } from '@/features/city/callStatus';
+
 
 
 type TerritoryMapRegion = {
@@ -67,7 +87,6 @@ export function useTerritoryController() {
   const { colors, mode } = useTheme();
   const insets = useSafeAreaInsets();
   const mapAvailable = isMapboxAvailable();
-  const { height: windowHeight } = useWindowDimensions();
 
   const listOffsetRef = useRef(0);
   const listRef = useRef<FlatList<Entry>>(null);
@@ -134,8 +153,7 @@ export function useTerritoryController() {
   const debouncedSearch = useDebouncedValue(search, 300);
   const appliedSearch = search.trim() ? debouncedSearch.trim() : '';
   const { isListView, setIsListView } = useTerritoryViewMode();
-  // Com mapa, a lista vive num sheet persistente (isListView = sheet expandido).
-  const effectiveListView = !mapAvailable;
+  const effectiveListView = isListView || !mapAvailable;
   const { territoryDomain, setTerritoryDomain, setFacilityLayers } = useTerritoryDomain();
   const { interactionsComplete, visitTrace } = useMapPerformance(isFocused, effectiveListView);
 
@@ -617,32 +635,19 @@ export function useTerritoryController() {
     facilityQueries, facilitiesConfirmed, macroTheme, setMacroTheme, resetFilters,
   ]);
 
-  const savedPlaces = usePlacesStore((s) => s.places);
-  const scopeLabel =
-    selection.kind === 'radius'
-      ? selection.source === 'place'
-        ? savedPlaces.find((place) => place.id === selection.placeId)?.name || 'Lugar salvo'
-        : 'Perto de você'
-      : selection.kind === 'neighborhood'
-        ? selection.name
-        : 'Rio de Janeiro';
-
   const summaryLabel =
     territoryDomain === 'facilities'
       ? totalFacilitiesKnown !== null && listed.length < totalFacilitiesKnown
-        ? `${scopeLabel} · ${listed.length.toLocaleString('pt-BR')} de ${totalFacilitiesKnown.toLocaleString('pt-BR')} equipamentos`
-        : `${scopeLabel} · ${listed.length.toLocaleString('pt-BR')} equipamentos`
+        ? `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')} de ${totalFacilitiesKnown.toLocaleString('pt-BR')})`
+        : `Ver lista de equipamentos (${listed.length.toLocaleString('pt-BR')})`
       : officialCalls.isLoading
-        ? `${scopeLabel} · consultando chamados...`
-        : `${scopeLabel} · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
+        ? 'Consultando chamados neste recorte...'
+        : `Ver em lista · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
 
-  const lastImport = useMemo(() => formatCallDate(listed.reduce((latest, entry) =>
-    entry.type === 'official' && entry.item.importedAt > latest ? entry.item.importedAt : latest, '') || null), [listed]);
-
-  const summarySubLabel = [
-    territoryDomain === 'calls' && unlocated.length > 0 ? `+${unlocated.length} sem ponto no mapa` : null,
-    territoryDomain === 'calls' && lastImport ? `dados de ${lastImport}` : null,
-  ].filter(Boolean).join(' · ') || 'Toque num ponto do mapa ou puxe para ver a lista';
+  const summarySubLabel =
+    territoryDomain === 'calls' && unlocated.length > 0
+      ? `+${unlocated.length} sem ponto no mapa · Toque para abrir a lista`
+      : 'Toque em um ponto no mapa ou abra a lista completa';
 
   return {
     isFocused,
@@ -650,7 +655,6 @@ export function useTerritoryController() {
     mode,
     insets,
     mapAvailable,
-    windowHeight,
     listOffsetRef,
     listRef,
     restoreListOffsetRef,
