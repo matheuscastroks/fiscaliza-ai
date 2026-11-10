@@ -119,7 +119,9 @@ test('decluttered filter modal: removes duplicate geographical selectors and ado
 
 test('place selector bottom sheet: adopts Apple Inset-Grouped table design and smooth scroll', () => {
   const placeSelectorPath = path.join(ROOT_DIR, 'features', 'places', 'PlaceSelector.tsx');
-  const content = fs.readFileSync(placeSelectorPath, 'utf8');
+  const content = ['PlaceSelector.tsx', 'PlaceSelectorSheet.tsx', 'PlaceSelector.styles.ts']
+    .map((name) => fs.readFileSync(path.join(path.dirname(placeSelectorPath), name), 'utf8'))
+    .join(String.fromCharCode(10));
 
   assert.ok(
     content.includes('BottomSheetScrollView'),
