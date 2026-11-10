@@ -11,7 +11,7 @@ module.exports = ({ config }) => {
   });
   return {
     ...config,
-    userInterfaceStyle: 'light',
+    userInterfaceStyle: 'automatic',
     plugins: [
       ...plugins,
       [

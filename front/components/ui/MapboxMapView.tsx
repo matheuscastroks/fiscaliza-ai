@@ -326,11 +326,13 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
       if (!feature) return;
       if (feature.properties?.cluster) {
         // Android parses this argument as a GeoJSON Feature, not a cluster ID.
-        const leaves = await shapeSourceRef.current?.getClusterLeaves(
-          feature,
-          100,
-          0,
-        );
+        let leaves: any;
+        try {
+          leaves = await shapeSourceRef.current?.getClusterLeaves(feature, 100, 0);
+        } catch {
+          // Sem a lista de itens, o grupo ainda dá zoom no ponto tocado.
+          leaves = undefined;
+        }
         const childIds: string[] = (leaves?.features || [])
           .map((f: any) => String(f.id || f.properties?.id))
           .filter(Boolean);

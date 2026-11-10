@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, Pressable, Linking } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -7,9 +7,11 @@ import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
+import { AppToast } from '@/components/ui/AppToast';
+import { openExternal } from '@/services/openExternal';
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { QuickComplaintKit } from '@/features/city/QuickComplaintKit';
-import { useTerritoryStore } from '@/stores/territoryStore';
+import { usePlacesStore } from '@/stores/placesStore';
 import {
   OFFICIAL_PORTAL,
   OFFICIAL_REQUESTS_URL,
@@ -60,11 +62,19 @@ const OFFICIAL_CHANNELS: ChannelItem[] = [
 
 export default function ParticipateScreen() {
   const { colors } = useTheme();
-  const neighborhood = useTerritoryStore((s) => s.neighborhood);
+  const neighborhood = usePlacesStore((s) => {
+    const { selection } = s;
+    if (selection.kind === 'neighborhood') return selection.name;
+    if (selection.kind === 'radius') return selection.neighborhood?.name ?? '';
+    return '';
+  });
 
+  const [linkError, setLinkError] = useState<string | null>(null);
   const handleOpenLink = (url: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    void Linking.openURL(url);
+    void openExternal(url).then((ok) => {
+      if (!ok) setLinkError('Não foi possível abrir o canal. Tente novamente.');
+    });
   };
 
   return (
@@ -267,6 +277,7 @@ export default function ParticipateScreen() {
           </AppText>
         </View>
       </KeyboardAwareScrollView>
+      <AppToast message={linkError} type="error" onDismiss={() => setLinkError(null)} />
     </AppScreen>
   );
 }

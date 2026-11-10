@@ -190,9 +190,16 @@ export function TerritoryContent() {
     if (filters) setFiltersOpen(true);
   }, [filters, setFiltersOpen]);
 
+  // Parâmetros de rota são aplicados uma única vez; refetch de bairros não reinicia filtros.
+  const appliedRouteKey = useRef<string | null>(null);
   useEffect(() => {
     if (!routeNeighborhoodId && !routeLayer) return;
+    const routeKey = `${routeNeighborhoodId ?? ''}|${routeLayer ?? ''}`;
+    if (appliedRouteKey.current === routeKey) return;
     const target = neighborhoods.data?.find((n) => n.id === routeNeighborhoodId);
+    // Com bairro na rota, espera a lista carregar para resolver o nome.
+    if (routeNeighborhoodId && !neighborhoods.data) return;
+    appliedRouteKey.current = routeKey;
     if (target) setNeighborhood(target.name);
     setStatus('Não Encerrado');
     setMacroTheme('all');
@@ -250,8 +257,15 @@ export function TerritoryContent() {
 
   const focusedCallQuery = useOfficialCall(focusId, isFocused && Boolean(focusId));
 
+  // O foco vindo de notificação/rota vale uma vez por chamado; trocar para Serviços depois não o desfaz.
+  const consumedFocusId = useRef<string | null>(null);
   useEffect(() => {
-    if (!focusId) return;
+    if (!focusId) {
+      consumedFocusId.current = null;
+      return;
+    }
+    if (consumedFocusId.current === focusId) return;
+    consumedFocusId.current = focusId;
     setTerritoryDomain('calls');
     if (!layers.includes('official')) setLayers(['official']);
     // eslint-disable-next-line react-hooks/set-state-in-effect

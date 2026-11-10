@@ -13,6 +13,7 @@ import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useThemeStore, isThemePreference } from '@/stores/themeStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { useNotificationStore } from '@/stores/notificationStore';
+import { useMunicipalityId } from '@/features/city/municipality';
 import { AppToast } from '@/components/ui/AppToast';
 import { useTheme, spacing, layout } from '@/theme';
 
@@ -50,6 +51,7 @@ export default function SettingsScreen() {
     sendTestPush,
   } = useNotificationStore();
 
+  const municipalityId = useMunicipalityId();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [testSending, setTestSending] = useState(false);
 
@@ -204,13 +206,13 @@ export default function SettingsScreen() {
                 loading={notificationLoading}
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  void requestPermissions();
+                  void requestPermissions(municipalityId);
                 }}
               />
             </View>
 
             {/* Linha 2: Disparo de Notificação de Teste (quando permitido) */}
-            {permissionGranted && (
+            {__DEV__ && permissionGranted && (
               <>
                 <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
                 <Pressable

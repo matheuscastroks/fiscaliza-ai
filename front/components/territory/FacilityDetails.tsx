@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Linking, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { DetailSheet, DetailSection } from '@/components/ui/DetailSheet';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
+import { AppToast } from '@/components/ui/AppToast';
+import { openExternal } from '@/services/openExternal';
 import { MapboxMapView } from '@/components/ui/MapboxMapView';
 import { QueryState } from '@/features/city/CityUI';
 import { usePublicFacility } from '@/features/territory/usePublicData';
@@ -26,6 +28,7 @@ export function FacilityDetails({
   const query = usePublicFacility(id);
   const { colors, isDark } = useTheme();
   const item = query.data;
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   const handleOpenDirections = async () => {
     if (!item?.location) return;
@@ -37,16 +40,9 @@ export function FacilityDetails({
         ? `maps:0,0?q=${label}@${latitude},${longitude}`
         : `geo:${latitude},${longitude}?q=${latitude},${longitude}(${label})`;
     const fallbackUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-    try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        await Linking.openURL(fallbackUrl);
-      }
-    } catch {
-      await Linking.openURL(fallbackUrl);
-    }
+    const supported = await Linking.canOpenURL(url).catch(() => false);
+    if (!(await openExternal(supported ? url : fallbackUrl, fallbackUrl)))
+      setLinkError('Não foi possível abrir o mapa. Tente novamente.');
   };
 
   const handleCall = async () => {
@@ -54,14 +50,12 @@ export function FacilityDetails({
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const cleaned = item.phone.replace(/[^0-9+]/g, '');
     const url = `tel:${cleaned}`;
-    try {
-      await Linking.openURL(url);
-    } catch {
-      // Ignora erro se discador indisponível
-    }
+    if (!(await openExternal(url)))
+      setLinkError('Não foi possível abrir o discador neste aparelho.');
   };
 
   return (
+    <>
     <DetailSheet
       title={item ? facilityLabels[item.category] : 'Equipamento público'}
       onBack={onBack}
@@ -173,7 +167,9 @@ export function FacilityDetails({
               title="Consultar fonte oficial"
               variant="secondary"
               onPress={() => {
-                void Linking.openURL(item.provenance.officialUrl);
+                void openExternal(item.provenance.officialUrl).then((ok) => {
+                  if (!ok) setLinkError('Não foi possível abrir a fonte oficial.');
+                });
               }}
             />
           </DetailSection>
@@ -182,5 +178,7 @@ export function FacilityDetails({
         <AppText>Cadastro indisponível. Volte à exploração.</AppText>
       ) : null}
     </DetailSheet>
+    <AppToast message={linkError} type="error" onDismiss={() => setLinkError(null)} />
+    </>
   );
 }
