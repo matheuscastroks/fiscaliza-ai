@@ -6,7 +6,7 @@ import { deadlineInstant } from './formatDates';
 export function officialCallStatus(
   call: OfficialCall,
   colors: ThemeColors,
-  isDark: boolean,
+  _isDark?: boolean,
 ) {
   const label =
     call.officialStatus || call.officialSituation || 'Situação não informada';
@@ -16,13 +16,9 @@ export function officialCallStatus(
     .toLowerCase();
   const color =
     key === 'aberto'
-      ? isDark
-        ? '#93C5FD'
-        : '#1D4ED8'
+      ? colors.info
       : key === 'em andamento'
-        ? isDark
-          ? '#67E8F9'
-          : '#0E7490'
+        ? colors.primary
         : key === 'pendente'
           ? colors.attention
           : key === 'fechado com solucao'

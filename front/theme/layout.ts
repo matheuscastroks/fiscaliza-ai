@@ -16,6 +16,12 @@ export const layout = {
     hairline: 1,
     focus: 2,
   },
+  /** Tamanhos de ícone permitidos; não use números soltos em `size`. */
+  iconSize: {
+    sm: 16,
+    md: 20,
+    lg: 24,
+  },
   touchTarget: {
     minHeight: 48,
     minWidth: 48,
