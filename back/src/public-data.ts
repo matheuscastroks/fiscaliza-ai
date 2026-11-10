@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify';
+import { ok } from './http-errors.js';
 import type { Database, ReadDatabase } from './db.js';
 import { resolveTerritoryLocation } from './territory-location.js';
 import type {
@@ -30,7 +31,6 @@ export function registerPublicDataRoutes(
   db: Database,
   cache: ResponseCache,
 ): void {
-  const ok = (data: unknown) => ({ success: true, data });
   const read = <T>(run: (connection: ReadDatabase) => Promise<T>) =>
     db.transaction((tx) => run(tx), {
       isolationLevel: 'repeatable read',

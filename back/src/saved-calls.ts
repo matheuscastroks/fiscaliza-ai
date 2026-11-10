@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify';
+import { httpError, ok } from './http-errors.js';
 import { and, count, desc, eq, inArray } from 'drizzle-orm';
 import type { Database } from './db.js';
 import { formatOfficialCall } from './official-calls.js';
@@ -6,8 +7,6 @@ import { officialCalls, savedCalls } from './schema.js';
 
 export const MAX_SAVED_CALLS = 500;
 const callId = { type: 'string', minLength: 1, maxLength: 100 };
-const ok = (data: unknown) => ({ success: true, data });
-const failure = (error: string) => ({ success: false, error });
 
 // Chamados salvos da conta. O servidor é a fonte da lista; o aplicativo guarda
 // uma cópia para abrir sem internet.
@@ -47,15 +46,13 @@ export function registerSavedCallsRoutes(app: FastifyInstance, db: Database) {
         .where(eq(officialCalls.id, req.params.callId))
         .limit(1);
       if (!call)
-        return reply.status(404).send(failure('Chamado oficial não encontrado.'));
+        throw httpError(404, 'Chamado oficial não encontrado.');
       const [{ total }] = await db
         .select({ total: count() })
         .from(savedCalls)
         .where(eq(savedCalls.userId, userId));
       if (total >= MAX_SAVED_CALLS)
-        return reply
-          .status(400)
-          .send(failure('Você chegou ao limite de chamados salvos.'));
+        throw httpError(400, 'Você chegou ao limite de chamados salvos.');
       await db
         .insert(savedCalls)
         .values({ userId, callId: call.id })
@@ -93,9 +90,7 @@ export function registerSavedCallsRoutes(app: FastifyInstance, db: Database) {
         .where(eq(savedCalls.userId, userId));
       const room = Math.max(0, MAX_SAVED_CALLS - total);
       if (room === 0)
-        return reply
-          .status(400)
-          .send(failure('Você chegou ao limite de chamados salvos.'));
+        throw httpError(400, 'Você chegou ao limite de chamados salvos.');
       const rows = existing
         .slice(0, room)
         .map((row) => ({ userId, callId: row.id }));

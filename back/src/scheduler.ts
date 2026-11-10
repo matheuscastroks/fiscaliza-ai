@@ -7,6 +7,8 @@ import { notifyStatusChanges } from './notifications.js';
 import { runRio1746RangeSync } from './integrations/rio1746/sync.js';
 import { syncSiurbLayer } from './integrations/siurb/sync.js';
 import { sessions } from './schema.js';
+import { loadConfig } from './config.js';
+import { removeOrphanAttachments } from './orphans.js';
 import type pg from 'pg';
 
 export type Job = {
@@ -107,6 +109,12 @@ export function buildJobs(db: Database, pool: pg.Pool, now = () => new Date()): 
         for (const id of [18, 1, 2, 16] as const)
           await syncSiurbLayer(pool, db, id);
       },
+    },
+    {
+      name: 'fotos-orfas',
+      hour: 3,
+      minute: 45,
+      run: () => removeOrphanAttachments(db, loadConfig().uploadDir),
     },
     {
       name: 'limpeza-de-sessoes',

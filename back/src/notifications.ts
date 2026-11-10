@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { and, count, eq, inArray, sql } from 'drizzle-orm';
 import type { FastifyInstance } from 'fastify';
 import type { Database } from './db.js';
+import { httpError, ok } from './http-errors.js';
 import {
   callNotificationFollowers,
   officialCalls,
@@ -238,7 +239,6 @@ export async function notifyStatusChanges(
 
 const tokenSchema = { type: 'string', minLength: 20, maxLength: 200 };
 const callIdSchema = { type: 'string', minLength: 1, maxLength: 100 };
-const failure = (error: string) => ({ success: false, error });
 
 export function registerNotificationRoutes(
   app: FastifyInstance,
@@ -270,7 +270,7 @@ export function registerNotificationRoutes(
     async (req, reply) => {
       const { token, platform } = req.body;
       if (!isExpoPushToken(token))
-        return reply.status(400).send(failure('Token de avisos inválido.'));
+        throw httpError(400, 'Token de avisos inválido.');
       const user = req.user!;
       const municipalityId = user.municipality!.id;
 
@@ -305,7 +305,7 @@ export function registerNotificationRoutes(
           });
       });
 
-      return reply.send({ success: true, message: 'Token registrado com sucesso.' });
+      return ok({ message: 'Token registrado com sucesso.' });
     },
   );
 
@@ -350,21 +350,17 @@ export function registerNotificationRoutes(
         .where(eq(officialCalls.id, callId))
         .limit(1);
       if (!call)
-        return reply.status(404).send(failure('Chamado oficial não encontrado.'));
+        throw httpError(404, 'Chamado oficial não encontrado.');
 
       if (!(await ownsToken(token, user.id)))
-        return reply
-          .status(403)
-          .send(failure('Este aparelho não está registrado na sua conta.'));
+        throw httpError(403, 'Este aparelho não está registrado na sua conta.');
 
       const [{ total }] = await db
         .select({ total: count() })
         .from(callNotificationFollowers)
         .where(eq(callNotificationFollowers.pushToken, token));
       if (total >= MAX_FOLLOWS_PER_TOKEN)
-        return reply
-          .status(400)
-          .send(failure('Você já acompanha o máximo de chamados com avisos.'));
+        throw httpError(400, 'Você já acompanha o máximo de chamados com avisos.');
 
       await db
         .insert(callNotificationFollowers)
@@ -380,7 +376,7 @@ export function registerNotificationRoutes(
         })
         .onConflictDoNothing();
 
-      return reply.send({ success: true, message: 'Notificações ativadas para este chamado.' });
+      return ok({ message: 'Notificações ativadas para este chamado.' });
     },
   );
 
@@ -399,9 +395,7 @@ export function registerNotificationRoutes(
     async (req, reply) => {
       const { callId, token } = req.body;
       if (!(await ownsToken(token, req.user!.id)))
-        return reply
-          .status(403)
-          .send(failure('Este aparelho não está registrado na sua conta.'));
+        throw httpError(403, 'Este aparelho não está registrado na sua conta.');
 
       await db
         .delete(callNotificationFollowers)
@@ -412,7 +406,7 @@ export function registerNotificationRoutes(
           ),
         );
 
-      return reply.send({ success: true, message: 'Notificações desativadas para este chamado.' });
+      return ok({ message: 'Notificações desativadas para este chamado.' });
     },
   );
 }

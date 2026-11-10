@@ -1,5 +1,6 @@
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
@@ -10,7 +11,9 @@ import type { SessionUser } from '../../shared/contracts.js';
 import { tokenHash } from './auth.js';
 import { loadConfig } from './config.js';
 import { database } from './db.js';
+import { rateLimitKey } from './client-ip.js';
 import { createKeyedLock } from './keyed-lock.js';
+import { httpError as fail, ok } from './http-errors.js';
 import { createResponseCache } from './response-cache.js';
 import { municipalityService } from './municipality.js';
 import { attachments, municipalities, sessions, users } from './schema.js';
@@ -43,9 +46,6 @@ const images = {
   maxItems: 8,
   items: { type: 'string', pattern: '^/api/attachments/[a-f0-9-]{36}$' },
 };
-const fail = (statusCode: number, message: string) =>
-  Object.assign(new Error(message), { statusCode });
-const ok = (data: unknown) => ({ success: true, data });
 const sessionCookie = (req: FastifyRequest) =>
   req.headers['x-fiscaliza-client'] === 'citizen'
     ? 'citizen_session'
@@ -161,7 +161,20 @@ export async function buildApp(
   await app.register(multipart, {
     limits: { fileSize: 5 * 1024 * 1024, files: 1, fields: 0, parts: 1 },
   });
-  await app.register(rateLimit, { max: 120, timeWindow: '1 minute' });
+  // API JSON: sem HSTS (o HTTPS é da Cloudflare) e sem conteúdo ativo.
+  await app.register(helmet, {
+    hsts: false,
+    contentSecurityPolicy: {
+      directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] },
+    },
+    referrerPolicy: { policy: 'no-referrer' },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  });
+  await app.register(rateLimit, {
+    max: 120,
+    timeWindow: '1 minute',
+    keyGenerator: rateLimitKey(config.trustProxy),
+  });
 
   app.decorateRequest('user', null);
   app.decorateRequest('sessionToken', null);
@@ -249,6 +262,8 @@ export async function buildApp(
     const path = req.url.split('?')[0];
     const isLogin = path === '/api/auth/login';
     const isRegistration = path === '/api/auth/register';
+    // Sair com a sessão já vencida precisa funcionar para limpar o cookie.
+    const isLogout = path === '/api/auth/logout';
     if (
       !isLogin &&
       mutation &&
@@ -281,7 +296,7 @@ export async function buildApp(
         req.sessionToken = token;
       }
     }
-    if (mutation && !isLogin && !isRegistration && !req.user)
+    if (mutation && !isLogin && !isRegistration && !isLogout && !req.user)
       throw fail(401, 'Entre para continuar.');
     if (
       !isAccountPath(path) &&
@@ -344,7 +359,7 @@ export async function buildApp(
     schema: { string, object, images },
   });
 
-  registerOfficialCallsRoutes(app, db, connection.pool, ok, fail, cache);
+  registerOfficialCallsRoutes(app, db, ok, fail, cache);
   registerPublicDataRoutes(app, db, cache);
 
 

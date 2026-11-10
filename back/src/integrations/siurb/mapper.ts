@@ -1,3 +1,4 @@
+import { RIO_MUNICIPALITY_ID } from '../../constants.js';
 import type {
   publicFacilities,
   territorialBoundaries,
@@ -79,7 +80,7 @@ export function mapSiurbFeature(
         type: 'boundary',
         value: {
           id: `rio-neighborhood:${code}`,
-          municipalityId: '3304557',
+          municipalityId: RIO_MUNICIPALITY_ID,
           sourceId: layer.sourceId,
           externalId: code,
           name,
@@ -135,7 +136,7 @@ export function mapSiurbFeature(
       reportedName,
       value: {
         id: `${layer.sourceId}:${externalId}`,
-        municipalityId: '3304557',
+        municipalityId: RIO_MUNICIPALITY_ID,
         externalId,
         sourceId: layer.sourceId,
         category: layer.category,

@@ -45,7 +45,7 @@ services:
     init: true
     restart: unless-stopped
     logging: *logging
-    mem_limit: 512m
+    mem_limit: 768m
     cpus: 1.5
     environment:
       <<: *database
@@ -94,6 +94,9 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/bigquery_credentials
       HEALTHCHECK_PING_URL: ${HEALTHCHECK_SYNC_URL:-}
       RIO1746_MAX_RUN_BYTES: ${RIO1746_MAX_RUN_BYTES:-500000000}
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - fiscaliza_uploads:/app/uploads
     secrets:
       - bigquery_credentials
     depends_on:

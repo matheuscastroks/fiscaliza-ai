@@ -1,3 +1,4 @@
+import { RIO_MUNICIPALITY_ID } from './constants.js';
 const nullableString = { anyOf: [{ type: 'string' }, { type: 'null' }] };
 const nullableNumber = { anyOf: [{ type: 'number' }, { type: 'null' }] };
 const sourceProperties = {
@@ -103,7 +104,7 @@ export const boundarySummarySchema = {
   properties: {
     id: { type: 'string' },
     name: { type: 'string' },
-    municipalityId: { const: '3304557' },
+    municipalityId: { const: RIO_MUNICIPALITY_ID },
   },
 };
 export const boundaryDetailSchema = {

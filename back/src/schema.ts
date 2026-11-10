@@ -1,3 +1,4 @@
+import { RIO_MUNICIPALITY_ID } from './constants.js';
 import {
   pgTable,
   text,
@@ -117,7 +118,7 @@ export const officialCalls = pgTable('official_calls', {
   id: text('id').primaryKey(),
   externalId: text('external_id').notNull().unique(),
   source: text('source').notNull().default('rio1746'),
-  municipalityId: text('municipality_id').notNull().default('3304557'),
+  municipalityId: text('municipality_id').notNull().default(RIO_MUNICIPALITY_ID),
   serviceCategory: text('service_category'),
   serviceType: text('service_type').notNull(),
   serviceSubtype: text('service_subtype').notNull(),

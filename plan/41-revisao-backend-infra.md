@@ -72,5 +72,24 @@ Desvio do plano: transação por página (2.500 linhas) e não por partição in
 ### Incidente durante a execução
 Num momento o Docker Desktop reiniciou (códigos 255) e a API e o Postgres do PC não voltaram sozinhos, porque o Compose antigo não tinha `restart`. Religuei os dois containers como estavam (`docker start`), sem alterar configuração. O novo `compose.yaml` já define `restart: unless-stopped`, mas só vale depois de recriar os containers.
 
-## Fases seguintes
-Fase 4 endurecimento e higiene. Cada uma registra aqui o que foi feito e o que ficou de fora.
+## Fase 4 — Endurecimento e higiene
+| Item | Estado | Evidência |
+| --- | --- | --- |
+| Login de e-mail inexistente gasta o mesmo tempo de um login real (hash fictício) | feito | C (resposta igual); o tempo em si não foi medido |
+| scrypt mais caro com regravação transparente no login | feito com desvio: N = 2^16 (64 MiB), não 2^17 (128 MiB), porque cada login ocupa a memória inteira e o container tem 768 MiB; hash antigo continua valendo | C (testes) |
+| Limite de falhas por conta (10 em 15 min) além do limite por IP | feito; a contrapartida é que alguém pode bloquear a conta de outra pessoa por 15 min errando a senha de propósito | C |
+| Sair com sessão vencida limpa o cookie; "Sair em todos os celulares" (`POST /api/auth/logout-all`, com confirmação na tela Conta e privacidade) | feito | C |
+| `@fastify/helmet` (nosniff, CSP `default-src 'none'`, `frame-ancestors 'none'`, Referrer-Policy), sem HSTS | feito | C |
+| Limite de requisições pelo IP real da Cloudflare, só quando a conexão vem do túnel | feito | C |
+| Um avatar por usuário (Fase 0) e tarefa que apaga fotos sem uso há mais de um dia (agendador, 3h45) | feito | C |
+| Cache persistente do CEP (ViaCEP/IBGE) | já existia: `postal_codes`, validade de 30 dias | C |
+| Código: erro HTTP e envelope únicos (`http-errors.ts`), `publicRun`/resumo únicos, constante do município no lugar de 23 literais, notificações e salvos no envelope `ok`/erro padrão, parâmetro `pool` sem uso removido, id de projeto GCP fora de `scripts/diagnose.mjs`, variáveis mortas fora do exemplo de produção | feito | C |
+| Firebase: restringir no Google Cloud a chave Android antiga e não dar push nas refs locais `refs/agents/...` | **pendente, é ação sua** no console do Google Cloud; não toquei nas refs | — |
+| VPS | futuro: `compose.production.yaml` já tem API, agendador, backup e túnel | — |
+
+## O que falta, e é seu
+- `eas init` na sua conta e commit do `projectId` (avisos no celular).
+- Trocar a senha do Postgres, `API_BIND=127.0.0.1` e subir com `compose.public.yaml` (passos em `deploy/README.md`); só isso ativa as correções de produção no PC.
+- Credencial do BigQuery em `secrets/bigquery.json` para o agendador sincronizar; monitores no Healthchecks.io/UptimeRobot; copiar `backups/` para fora do computador.
+- Restringir a chave Firebase antiga; decidir sobre trocar o package `com.anonymous.fiscalizaai`.
+- Testar em dois celulares reais os chamados salvos na conta e os avisos (sem projectId não há como enviar push real).

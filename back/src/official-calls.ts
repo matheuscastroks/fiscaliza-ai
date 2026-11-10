@@ -1,3 +1,4 @@
+import { RIO_MUNICIPALITY_ID } from './constants.js';
 import {
   officialDateConditions,
   officialTerritoryScope,
@@ -27,7 +28,6 @@ import {
   type SQL,
 } from 'drizzle-orm';
 import type { Database } from './db.js';
-import type pg from 'pg';
 import { officialCalls } from './schema.js';
 import {
   getPublicSyncStatus,
@@ -50,7 +50,7 @@ async function distinctServiceTypes(db: Database): Promise<string[]> {
   const rows = await db
     .selectDistinct({ type: officialCalls.serviceType })
     .from(officialCalls)
-    .where(eq(officialCalls.municipalityId, '3304557'));
+    .where(eq(officialCalls.municipalityId, RIO_MUNICIPALITY_ID));
   const types = rows.map((r) => r.type).filter(Boolean) as string[];
   serviceTypesCache.set(db, { at: Date.now(), types });
   return types;
@@ -162,14 +162,13 @@ type FilterQuery = {
 export function registerOfficialCallsRoutes(
   app: FastifyInstance,
   db: Database,
-  pool: pg.Pool,
   ok: (data: unknown) => { success: boolean; data: unknown },
   fail: (statusCode: number, message: string) => Error,
   cache: ResponseCache,
 ) {
   // Filtros compartilhados pela lista e pelo panorama.
   async function commonConditions(query: FilterQuery) {
-    const conditions: SQL[] = [eq(officialCalls.municipalityId, '3304557')];
+    const conditions: SQL[] = [eq(officialCalls.municipalityId, RIO_MUNICIPALITY_ID)];
     if (query.neighborhoodId && query.bairro)
       throw fail(400, 'Use um identificador de bairro ou nome, não ambos.');
     const territory = query.neighborhoodId
