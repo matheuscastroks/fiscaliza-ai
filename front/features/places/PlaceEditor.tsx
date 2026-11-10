@@ -54,7 +54,7 @@ export function PlaceEditor({ initialPlace, onDone, onCancel }: { initialPlace?:
     <AppText variant="sectionTitle">{initialPlace ? 'Editar lugar' : 'Adicionar lugar'}</AppText>
     <AppInput label="Nome do lugar" showLabel placeholder="Casa, Trabalho ou outro nome" value={name} editable={!busy} onChangeText={(text) => { revision.current++; setName(text); }} />
     <AppInput label="Endereço ou referência (opcional)" showLabel value={addressLabel} editable={!busy} onChangeText={(text) => { revision.current++; setAddressLabel(text); }} />
-    <AppText color="muted">Confirme o local no mapa. Digitar o endereço não posiciona o marcador. O endereço e o nome ficam neste celular.</AppText>
+    <AppText color="muted">Marque o local no mapa. Digitar o endereço não move o marcador. O nome e o endereço ficam só neste celular.</AppText>
     <AppButton title="Usar minha localização como ponto" variant="secondary" disabled={busy} loading={device.busy} onPress={() => {
       const version = revision.current;
       void device.captureLocation(false).then((result) => { if (result && version === revision.current) changePoint(result); });
@@ -62,13 +62,13 @@ export function PlaceEditor({ initialPlace, onDone, onCancel }: { initialPlace?:
     <View style={{ height: 240, borderRadius: layout.radius.card, overflow: 'hidden', backgroundColor: colors.surface }}>
       <MapboxMapView region={{ ...(validPoint ? point : { latitude: -22.91, longitude: -43.2 }), zoom: 14 }} markers={validPoint ? [{ ...point, id: 'place', title: name || 'Lugar' }] : []} onMapClick={(p) => { if (!busy) changePoint(p); }} interactive={!busy} isDark={isDark} />
     </View>
-    <AppText variant="label">Confirmar por coordenadas</AppText>
-    <AppText variant="caption" color="muted">Alternativa ao mapa. Exemplo de formato: -22.91 e -43.20.</AppText>
+    <AppText variant="label">Digitar latitude e longitude</AppText>
+    <AppText variant="caption" color="muted">Se preferir, digite os números. Exemplo: -22.91 e -43.20.</AppText>
     <AppInput label="Latitude" showLabel value={latitude} editable={!busy} keyboardType="numbers-and-punctuation" onChangeText={(v) => { revision.current++; setLatitude(v); }} />
     <AppInput label="Longitude" showLabel value={longitude} editable={!busy} keyboardType="numbers-and-punctuation" onChangeText={(v) => { revision.current++; setLongitude(v); }} />
     <RadiusControl value={radiusMeters} onChange={(r) => { if (!busy) { revision.current++; setRadius(r); } }} />
     {(error || device.error) && <AppText color="risk" accessibilityRole="alert">{error || device.error}</AppText>}
-    <AppButton title="Confirmar ponto e salvar lugar" loading={busy} onPress={() => { void save(); }} />
+    <AppButton title="Salvar lugar" loading={busy} onPress={() => { void save(); }} />
     <AppButton title="Cancelar" variant="secondary" disabled={busy} onPress={onCancel} />
   </View>;
 }
