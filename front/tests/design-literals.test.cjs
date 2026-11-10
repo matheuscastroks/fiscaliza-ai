@@ -17,12 +17,17 @@ function files(dir) {
 }
 
 function measure() {
-  const counts = { hexColors: 0, fontSizeLiterals: 0, heavyWeights: 0 };
+  const counts = { hexColors: 0, fontSizeLiterals: 0, heavyWeights: 0, radiusLiterals: 0, iconSizeLiterals: 0, shadowProps: 0, uppercaseStyles: 0, monospace: 0 };
   for (const file of roots.flatMap(files)) {
     const text = fs.readFileSync(file, 'utf8');
     counts.hexColors += (text.match(/['"`]#[0-9a-fA-F]{3,8}['"`]/g) || []).length;
     counts.fontSizeLiterals += (text.match(/fontSize:\s*\d/g) || []).length;
-    counts.heavyWeights += (text.match(/fontWeight:\s*['"](?:800|900)['"]/g) || []).length;
+    counts.heavyWeights += (text.match(/fontWeight:\s*['"](?:700|800|900|bold)['"]/g) || []).length;
+    counts.radiusLiterals += (text.match(/borderw*Radius:\s*[1-9]\d*\b(?!\s*[/*+-])/g) || []).length;
+    counts.iconSizeLiterals += (text.match(/<Ionicons\b[^>]*?size=\{\d+\}/gs) || []).length;
+    counts.shadowProps += (text.match(/\b(?:shadowOpacity|shadowRadius|shadowOffset)\s*:|(?<![A-Za-z.])elevation:\s*\d/g) || []).length;
+    counts.uppercaseStyles += (text.match(/textTransform:\s*['"]uppercase|letterSpacing:/g) || []).length;
+    counts.monospace += (text.match(/monospace/g) || []).length;
   }
   return counts;
 }

@@ -56,7 +56,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             {user && !hideUserAvatar ? (
               <UserAvatar size={48} />
             ) : (
-              <Ionicons name="menu-outline" size={24} color={colors.ink} />
+              <Ionicons name="menu-outline" size={layout.iconSize.lg} color={colors.ink} />
             )}
           </TouchableOpacity>
         )}
@@ -71,7 +71,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             accessibilityLabel="Voltar"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="chevron-back" size={20} color={colors.ink} />
+            <Ionicons name="chevron-back" size={layout.iconSize.md} color={colors.ink} />
           </TouchableOpacity>
         )}
         <View
@@ -140,7 +140,7 @@ const createStyles = (colors: ThemeColors) =>
     circleButton: {
       width: 48,
       height: 48,
-      borderRadius: 24,
+      borderRadius: layout.radius.card,
       backgroundColor: colors.surface,
       alignItems: 'center',
       justifyContent: 'center',

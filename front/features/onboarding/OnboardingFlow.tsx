@@ -18,6 +18,8 @@ import { AppButton } from '@/components/ui/AppButton';
 import { AppBrandGlyph } from '@/components/ui/AppBrandGlyph';
 import { ThemeToggleButton } from '@/components/ui/ThemeToggleButton';
 import { layout, spacing, useTheme } from '@/theme';
+import { fontSizes } from '@/theme/typography';
+import { lightColors } from '@/theme/colors';
 
 interface OnboardingBenefit {
   icon: keyof typeof Ionicons.glyphMap;
@@ -296,7 +298,7 @@ export function OnboardingFlow({
 
                   {/* Top-Left Floating Feature Badge */}
                   <View style={styles.floatingPill}>
-                    <Ionicons name={item.badgeIcon} size={13} color="#FFFFFF" />
+                    <Ionicons name={item.badgeIcon} size={layout.iconSize.sm} color={lightColors.white} />
                     <AppText variant="caption" style={styles.floatingPillText}>
                       {item.badge}
                     </AppText>
@@ -359,7 +361,7 @@ export function OnboardingFlow({
                           >
                             <Ionicons
                               name={benefit.icon}
-                              size={18}
+                              size={layout.iconSize.md}
                               color={colors.primary}
                             />
                           </View>
@@ -429,7 +431,7 @@ export function OnboardingFlow({
                   },
                 ]}
               >
-                <Ionicons name="arrow-back" size={20} color={colors.ink} />
+                <Ionicons name="arrow-back" size={layout.iconSize.md} color={colors.ink} />
               </Pressable>
             )}
             <View style={styles.primaryBtnWrapper}>
@@ -452,7 +454,7 @@ export function OnboardingFlow({
                           : 'compass-outline'
                         : 'arrow-forward'
                     }
-                    size={20}
+                    size={layout.iconSize.md}
                     color={colors.onAccentBrand}
                   />
                 }
@@ -488,7 +490,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   brandTitle: {
-    fontWeight: '700',
+    fontWeight: '600',
     lineHeight: 24,
   },
   headerActions: {
@@ -551,9 +553,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.58)',
   },
   floatingPillText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 12,
+    color: lightColors.white,
+    fontWeight: '600',
+    fontSize: fontSizes.caption,
   },
   stepBadge: {
     position: 'absolute',
@@ -565,9 +567,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.58)',
   },
   stepBadgeText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 11,
+    color: lightColors.white,
+    fontWeight: '600',
+    fontSize: fontSizes.caption,
   },
   copyBlock: {
     width: '100%',
@@ -609,8 +611,8 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   benefitTitle: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: fontSizes.meta,
+    fontWeight: '600',
   },
   footer: {
     paddingHorizontal: spacing.contentPadding,
@@ -633,7 +635,7 @@ const styles = StyleSheet.create({
   },
   dot: {
     height: 8,
-    borderRadius: 4,
+    borderRadius: layout.radius.xs,
   },
   actionRow: {
     flexDirection: 'row',
@@ -643,7 +645,7 @@ const styles = StyleSheet.create({
   backCircle: {
     width: 54,
     height: 54,
-    borderRadius: 27,
+    borderRadius: layout.radius.card,
     borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
     justifyContent: 'center',

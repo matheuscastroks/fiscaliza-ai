@@ -20,6 +20,7 @@ import {
 } from '@/features/city/useOfficialCalls';
 import { formatDays, topByVolume } from '@/features/city/resultRankings';
 import { layout, spacing } from '@/theme';
+import { fontSizes } from '@/theme/typography';
 
 function getStatusSemanticColor(status: string, colors: ThemeColors): string {
   const normalized = status
@@ -131,7 +132,7 @@ export default function ResultsScreen() {
               ]}
             >
               <View style={styles.territoryInfo}>
-                <Ionicons name="location-outline" size={18} color={colors.primary} />
+                <Ionicons name="location-outline" size={layout.iconSize.md} color={colors.primary} />
                 <View style={styles.territoryTextCol}>
                   <AppText variant="caption" color="muted">
                     Recorte territorial
@@ -166,7 +167,7 @@ export default function ResultsScreen() {
                       pressed && { opacity: 0.7 },
                     ]}
                   >
-                    <Ionicons name="close" size={15} color={colors.muted} />
+                    <Ionicons name="close" size={layout.iconSize.sm} color={colors.muted} />
                   </Pressable>
                 )}
               </View>
@@ -176,7 +177,7 @@ export default function ResultsScreen() {
             {overview && totalCalls > 0 && (
               <View style={styles.dashboardBlock}>
                 <View style={styles.sectionHeaderRow}>
-                  <Ionicons name="speedometer-outline" size={13} color={colors.muted} />
+                  <Ionicons name="speedometer-outline" size={layout.iconSize.sm} color={colors.muted} />
                   <AppText variant="caption" style={styles.sectionHeaderText}>
                     INDICADORES OFICIAIS DE DESEMPENHO (SLA)
                   </AppText>
@@ -196,7 +197,7 @@ export default function ResultsScreen() {
                         { backgroundColor: colors.primaryContainer },
                       ]}
                     >
-                      <Ionicons name="timer-outline" size={20} color={colors.primary} />
+                      <Ionicons name="timer-outline" size={layout.iconSize.md} color={colors.primary} />
                     </View>
 
                     <View style={styles.heroKpiTitleCol}>
@@ -225,7 +226,7 @@ export default function ResultsScreen() {
                       {slaRate}%
                     </AppText>
                     <View style={styles.heroKpiDetailCol}>
-                      <AppText variant="label" style={{ fontWeight: '700' }}>
+                      <AppText variant="label" style={{ fontWeight: '600' }}>
                         {withinDeadlineCount.toLocaleString('pt-BR')} no prazo
                       </AppText>
                       <AppText variant="caption" color="muted">
@@ -271,7 +272,7 @@ export default function ResultsScreen() {
                       >
                         <Ionicons
                           name="checkmark-done-circle-outline"
-                          size={16}
+                          size={layout.iconSize.sm}
                           color={colors.completed}
                         />
                       </View>
@@ -308,7 +309,7 @@ export default function ResultsScreen() {
                       >
                         <Ionicons
                           name="documents-outline"
-                          size={16}
+                          size={layout.iconSize.sm}
                           color={colors.primary}
                         />
                       </View>
@@ -331,7 +332,7 @@ export default function ResultsScreen() {
                 {statusBreakdown.length > 0 && (
                   <View style={styles.breakdownBlock}>
                     <View style={styles.sectionHeaderRow}>
-                      <Ionicons name="pie-chart-outline" size={13} color={colors.muted} />
+                      <Ionicons name="pie-chart-outline" size={layout.iconSize.sm} color={colors.muted} />
                       <AppText variant="caption" style={styles.sectionHeaderText}>
                         DESFECHO OPERACIONAL (STATUS OFICIAL 1746)
                       </AppText>
@@ -424,9 +425,9 @@ export default function ResultsScreen() {
             {avgDays != null && (
               <View style={styles.dashboardBlock}>
                 <View style={styles.sectionHeaderRow}>
-                  <Ionicons name="hourglass-outline" size={13} color={colors.muted} />
+                  <Ionicons name="hourglass-outline" size={layout.iconSize.sm} color={colors.muted} />
                   <AppText variant="caption" style={styles.sectionHeaderText}>
-                    VELOCIDADE DE RESOLUÇÃO
+                    Velocidade de resolução
                   </AppText>
                 </View>
                 <View
@@ -440,7 +441,7 @@ export default function ResultsScreen() {
                       {formatDays(avgDays)}
                     </AppText>
                     <View style={styles.heroKpiDetailCol}>
-                      <AppText variant="label" style={{ fontWeight: '700' }}>
+                      <AppText variant="label" style={{ fontWeight: '600' }}>
                         Tempo médio até o encerramento
                       </AppText>
                       {neighborhood && cityAvgDays != null ? (
@@ -507,11 +508,11 @@ export default function ResultsScreen() {
               <View style={styles.sectionHeaderRow}>
                 <Ionicons
                   name="information-circle-outline"
-                  size={13}
+                  size={layout.iconSize.sm}
                   color={colors.muted}
                 />
                 <AppText variant="caption" style={styles.sectionHeaderText}>
-                  TRANSPARÊNCIA CÍVICA E FONTES OFICIAIS
+                  Transparência e fontes oficiais
                 </AppText>
               </View>
 
@@ -530,7 +531,7 @@ export default function ResultsScreen() {
                   >
                     <Ionicons
                       name="shield-checkmark-outline"
-                      size={17}
+                      size={layout.iconSize.sm}
                       color={colors.primary}
                     />
                   </View>
@@ -554,7 +555,7 @@ export default function ResultsScreen() {
                       { backgroundColor: colors.primaryContainer },
                     ]}
                   >
-                    <Ionicons name="server-outline" size={17} color={colors.primary} />
+                    <Ionicons name="server-outline" size={layout.iconSize.sm} color={colors.primary} />
                   </View>
                   <View style={styles.transparencyTextCol}>
                     <AppText variant="label">Base de Dados Abertos</AppText>
@@ -597,7 +598,7 @@ function RankingSection({
   return (
     <View style={styles.dashboardBlock}>
       <View style={styles.sectionHeaderRow}>
-        <Ionicons name={icon} size={13} color={colors.muted} />
+        <Ionicons name={icon} size={layout.iconSize.sm} color={colors.muted} />
         <AppText variant="caption" style={styles.sectionHeaderText} numberOfLines={1}>
           {title}
         </AppText>
@@ -653,7 +654,7 @@ function RankingSection({
                 </View>
               </View>
               {row.onPress ? (
-                <Ionicons name="chevron-forward" size={15} color={colors.subtle} />
+                <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
               ) : null}
             </Pressable>
           </View>
@@ -679,7 +680,7 @@ const createStyles = (colors: ThemeColors) =>
     rankPosition: {
       width: 18,
       textAlign: 'center',
-      fontWeight: '900',
+      fontWeight: '600',
     },
     rankingContent: {
       flex: 1,
@@ -687,11 +688,11 @@ const createStyles = (colors: ThemeColors) =>
     },
     rankingLabel: {
       flex: 1,
-      fontWeight: '700',
+      fontWeight: '600',
       paddingRight: 8,
     },
     rankingValue: {
-      fontWeight: '800',
+      fontWeight: '600',
     },
     rankingNote: {
       paddingHorizontal: 6,
@@ -718,8 +719,8 @@ const createStyles = (colors: ThemeColors) =>
       gap: 1,
     },
     territoryName: {
-      fontSize: 15,
-      fontWeight: '800',
+      fontSize: fontSizes.label,
+      fontWeight: '600',
     },
     territoryActions: {
       flexDirection: 'row',
@@ -729,7 +730,7 @@ const createStyles = (colors: ThemeColors) =>
     clearBairroBtn: {
       width: 32,
       height: 32,
-      borderRadius: 16,
+      borderRadius: layout.radius.panel,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -743,9 +744,8 @@ const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: 4,
     },
     sectionHeaderText: {
-      fontSize: 11,
-      fontWeight: '800',
-      letterSpacing: 0.6,
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
     },
     heroKpiCard: {
       borderRadius: layout.radius.panel,
@@ -783,8 +783,8 @@ const createStyles = (colors: ThemeColors) =>
       gap: 12,
     },
     heroKpiNumber: {
-      fontSize: 34,
-      fontWeight: '900',
+      fontSize: fontSizes.screenTitle,
+      fontWeight: '600',
       lineHeight: 38,
     },
     heroKpiDetailCol: {
@@ -815,8 +815,8 @@ const createStyles = (colors: ThemeColors) =>
       justifyContent: 'center',
     },
     secondaryKpiNumber: {
-      fontSize: 22,
-      fontWeight: '800',
+      fontSize: fontSizes.sectionTitle,
+      fontWeight: '600',
       lineHeight: 26,
     },
     breakdownBlock: {
@@ -848,20 +848,20 @@ const createStyles = (colors: ThemeColors) =>
     statusDot: {
       width: 8,
       height: 8,
-      borderRadius: 4,
+      borderRadius: layout.radius.xs,
     },
     statusLabelText: {
-      fontSize: 13,
-      fontWeight: '700',
+      fontSize: fontSizes.meta,
+      fontWeight: '600',
     },
     barTrack: {
       height: 6,
-      borderRadius: 3,
+      borderRadius: layout.radius.xs,
       overflow: 'hidden',
     },
     barFill: {
       height: '100%',
-      borderRadius: 3,
+      borderRadius: layout.radius.xs,
     },
     listSectionHeader: {
       gap: 10,

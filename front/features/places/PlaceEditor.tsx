@@ -11,6 +11,7 @@ import { RadiusControl } from './RadiusControl';
 import { validatePlace } from './selection';
 import type { SavedPlace, Point, RadiusMeters } from './types';
 import { spacing, useTheme } from '@/theme';
+import { layout } from '@/theme/layout';
 
 export function PlaceEditor({ initialPlace, onDone, onCancel }: { initialPlace?: SavedPlace; onDone: () => void; onCancel: () => void }) {
   const { colors, isDark } = useTheme();
@@ -58,7 +59,7 @@ export function PlaceEditor({ initialPlace, onDone, onCancel }: { initialPlace?:
       const version = revision.current;
       void device.captureLocation(false).then((result) => { if (result && version === revision.current) changePoint(result); });
     }} />
-    <View style={{ height: 240, borderRadius: 28, overflow: 'hidden', backgroundColor: colors.surface }}>
+    <View style={{ height: 240, borderRadius: layout.radius.card, overflow: 'hidden', backgroundColor: colors.surface }}>
       <MapboxMapView region={{ ...(validPoint ? point : { latitude: -22.91, longitude: -43.2 }), zoom: 14 }} markers={validPoint ? [{ ...point, id: 'place', title: name || 'Lugar' }] : []} onMapClick={(p) => { if (!busy) changePoint(p); }} interactive={!busy} isDark={isDark} />
     </View>
     <AppText variant="label">Confirmar por coordenadas</AppText>

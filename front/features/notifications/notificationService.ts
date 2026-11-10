@@ -10,6 +10,7 @@ import type {
   UnfollowCallNotificationPayload,
 } from '@/shared/contracts';
 import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
+import { lightColors } from '@/theme/colors';
 
 // Configura como as notificações são exibidas quando o app está em primeiro plano
 Notifications.setNotificationHandler({
@@ -34,7 +35,7 @@ export async function setupNotificationChannels(): Promise<void> {
       name: 'Chamados e Alertas do 1746',
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#16576C',
+      lightColor: lightColors.primary,
       enableVibrate: true,
     });
   }

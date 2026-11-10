@@ -15,6 +15,7 @@ import {
   BottomSheetFlatList,
   BottomSheetTextInput,
 } from './AppBottomSheetModal';
+import { fontSizes } from '@/theme/typography';
 
 export interface SelectOption {
   value: string;
@@ -117,7 +118,7 @@ export function AppSelect({
             {item.icon && (
               <Ionicons
                 name={item.icon}
-                size={18}
+                size={layout.iconSize.md}
                 color={active ? colors.accent : colors.muted}
               />
             )}
@@ -125,7 +126,7 @@ export function AppSelect({
               variant="body"
               style={[
                 styles.optionLabel,
-                active && { fontWeight: '700', color: colors.ink },
+                active && { fontWeight: '600', color: colors.ink },
               ]}
             >
               {item.label}
@@ -134,7 +135,7 @@ export function AppSelect({
           {active && (
             <Ionicons
               name="checkmark-circle"
-              size={20}
+              size={layout.iconSize.md}
               color={colors.accent}
             />
           )}
@@ -175,7 +176,7 @@ export function AppSelect({
             numberOfLines={1}
             style={[
               styles.triggerText,
-              compact && { fontWeight: '700' },
+              compact && { fontWeight: '600' },
               isFiltered && compact && { color: colors.onSelection },
               !isFiltered && !compact && { color: colors.ink },
             ]}
@@ -228,7 +229,7 @@ export function AppSelect({
               },
             ]}
           >
-            <Ionicons name="search-outline" size={18} color={colors.muted} />
+            <Ionicons name="search-outline" size={layout.iconSize.md} color={colors.muted} />
             <BottomSheetTextInput
               value={search}
               onChangeText={setSearch}
@@ -240,7 +241,7 @@ export function AppSelect({
             />
             {search.length > 0 && (
               <Pressable onPress={() => setSearch('')} hitSlop={8}>
-                <Ionicons name="close-circle" size={18} color={colors.muted} />
+                <Ionicons name="close-circle" size={layout.iconSize.md} color={colors.muted} />
               </Pressable>
             )}
           </View>
@@ -336,7 +337,7 @@ const createStyles = (colors: ThemeColors) =>
     searchInput: {
       flex: 1,
       height: 44,
-      fontSize: 15,
+      fontSize: fontSizes.label,
       fontFamily: fontFamilies.regular,
     },
     list: {

@@ -10,7 +10,7 @@ export function MapAreaLayers({ Mapbox, searchCircle, accuracyCircle }: {
   Mapbox: NativeMapbox; searchCircle: Circle; accuracyCircle: Circle; isDark?: boolean;
 }) {
   const palette = lightColors;
-  const positionColor = '#1677EB';
+  const positionColor = lightColors.info;
   return <>
     {searchCircle && <Mapbox.ShapeSource id="search-area-source" shape={searchCircle}>
       <Mapbox.FillLayer id="search-area-fill" style={{ fillColor: palette.ink, fillOpacity: 0.055 }} />
@@ -33,7 +33,7 @@ export function MapPositionLayers({ Mapbox, centerPoint, devicePoint }: {
       <Mapbox.SymbolLayer id="search-center-label" style={{ textField: 'Centro do entorno', textSize: 12, textOffset: [0, 1.2], textAnchor: 'top', textColor: palette.ink, textHaloColor: palette.surface, textHaloWidth: 1.5 }} />
     </Mapbox.ShapeSource>}
     {devicePoint && <Mapbox.ShapeSource id="device-position-source" shape={devicePoint}>
-      <Mapbox.CircleLayer id="device-position-point" style={{ circleColor: '#1677EB', circleRadius: 8, circleStrokeColor: '#FFFFFF', circleStrokeWidth: 3 }} />
+      <Mapbox.CircleLayer id="device-position-point" style={{ circleColor: lightColors.info, circleRadius: 8, circleStrokeColor: lightColors.white, circleStrokeWidth: 3 }} />
     </Mapbox.ShapeSource>}
   </>;
 }

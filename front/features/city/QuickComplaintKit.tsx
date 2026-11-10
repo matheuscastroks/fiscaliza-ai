@@ -13,6 +13,10 @@ import {
   ComplaintTopicSheet,
   type ComplaintTopic,
 } from './ComplaintTopicSheet';
+import { partnerBrand } from '@/theme/palette';
+import { fontSizes } from '@/theme/typography';
+import { lightColors } from '@/theme/colors';
+import { IconTile } from '@/components/ui/IconTile';
 
 export { COMPLAINT_TOPICS, type ComplaintTopic };
 
@@ -125,9 +129,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
             pressed && { backgroundColor: colors.surfaceSubdued },
           ]}
         >
-          <View style={[styles.iconSquircle, { backgroundColor: colors.surfaceSubdued }]}>
-            <Ionicons name={currentTopic.icon} size={18} color={colors.primary} />
-          </View>
+          <IconTile icon={currentTopic.icon} />
           <View style={styles.tableRowContent}>
             <AppText variant="caption" color="muted">
               O que precisa de reparo?
@@ -140,7 +142,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
             <AppText variant="caption" color="muted" style={styles.changeActionText}>
               Alterar
             </AppText>
-            <Ionicons name="chevron-forward" size={15} color={colors.subtle} />
+            <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
           </View>
         </Pressable>
 
@@ -148,9 +150,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
 
         {/* Linha 2: Endereço e Localização ("Onde é o problema?") */}
         <View style={styles.tableInputRow}>
-          <View style={[styles.iconSquircle, { backgroundColor: colors.surfaceSubdued }]}>
-            <Ionicons name="location-outline" size={18} color={colors.primary} />
-          </View>
+          <IconTile icon="location-outline" />
           <View style={styles.tableInputContent}>
             <View style={styles.inputHeaderRow}>
               <AppText variant="caption" color="muted">
@@ -166,7 +166,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
                     pressed && { opacity: 0.75 },
                   ]}
                 >
-                  <Ionicons name="navigate-outline" size={11} color={colors.primary} />
+                  <Ionicons name="navigate-outline" size={layout.iconSize.sm} color={colors.primary} />
                   <AppText variant="caption" style={styles.suggestedLocationText} numberOfLines={1}>
                     Usar {defaultLocation}
                   </AppText>
@@ -188,9 +188,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
 
         {/* Linha 3: Detalhes Adicionais (Textarea auto-expansível) */}
         <View style={styles.tableInputRow}>
-          <View style={[styles.iconSquircle, { backgroundColor: colors.surfaceSubdued }]}>
-            <Ionicons name="document-text-outline" size={18} color={colors.primary} />
-          </View>
+          <IconTile icon="document-text-outline" />
           <View style={styles.tableInputContent}>
             <AppText variant="caption" color="muted">
               Detalhes úteis (opcional)
@@ -209,7 +207,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
               }}
               style={[
                 styles.detailsTextarea,
-                { height: detailsHeight, color: colors.ink, borderRadius: 12 },
+                { height: detailsHeight, color: colors.ink, borderRadius: layout.radius.sm },
               ]}
             />
           </View>
@@ -223,7 +221,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
           { backgroundColor: colors.surfaceSubdued, borderColor: colors.divider },
         ]}
       >
-        <Ionicons name="camera-outline" size={18} color={colors.primary} />
+        <Ionicons name="camera-outline" size={layout.iconSize.md} color={colors.primary} />
         <View style={styles.photoTipTextCol}>
           <AppText variant="caption" style={styles.photoTipTitle}>
             Fotos e evidências no WhatsApp
@@ -246,7 +244,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
       >
         <Ionicons
           name={showPreview ? 'chevron-up-circle-outline' : 'chevron-down-circle-outline'}
-          size={16}
+          size={layout.iconSize.sm}
           color={colors.primary}
         />
         <AppText variant="caption" style={styles.previewToggleText}>
@@ -257,7 +255,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
       {showPreview && (
         <View style={[styles.previewBox, { backgroundColor: colors.surfaceSubdued, borderColor: colors.border }]}>
           <View style={styles.previewHeader}>
-            <Ionicons name="chatbubble-ellipses-outline" size={13} color={colors.muted} />
+            <Ionicons name="chatbubble-ellipses-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" color="muted" style={{ fontWeight: '600' }}>
               Texto para você enviar à Central 1746:
             </AppText>
@@ -285,7 +283,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
             pressed && styles.whatsAppButtonPressed,
           ]}
         >
-          <Ionicons name="logo-whatsapp" size={19} color="#FFFFFF" />
+          <Ionicons name="logo-whatsapp" size={layout.iconSize.md} color={lightColors.white} />
           <AppText variant="label" style={styles.whatsAppButtonText}>
             Abrir WhatsApp do 1746
           </AppText>
@@ -293,7 +291,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
         <AppButton
           title="Compartilhar texto"
           variant="secondary"
-          icon={<Ionicons name="share-outline" size={16} color={colors.ink} />}
+          icon={<Ionicons name="share-outline" size={layout.iconSize.sm} color={colors.ink} />}
           onPress={handleShare}
         />
       </View>
@@ -322,21 +320,20 @@ const createStyles = (colors: ThemeColors) =>
     },
     sectionHeaderText: {
       color: colors.muted,
-      fontWeight: '700',
-      fontSize: 11,
-      letterSpacing: 0.5,
+      fontWeight: '600',
+      fontSize: fontSizes.caption,
     },
     titleBlock: {
       gap: 3,
       paddingHorizontal: spacing.xs,
     },
     title: {
-      fontSize: 18,
+      fontSize: fontSizes.sectionTitle,
       lineHeight: 22,
-      fontWeight: '700',
+      fontWeight: '600',
     },
     subtitle: {
-      fontSize: 13,
+      fontSize: fontSizes.meta,
       lineHeight: 18,
     },
     insetTable: {
@@ -367,7 +364,7 @@ const createStyles = (colors: ThemeColors) =>
     iconSquircle: {
       width: 36,
       height: 36,
-      borderRadius: 10,
+      borderRadius: layout.radius.sm,
       alignItems: 'center',
       justifyContent: 'center',
       marginTop: 2,
@@ -381,7 +378,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: 4,
     },
     rowValueText: {
-      fontSize: 15,
+      fontSize: fontSizes.label,
       fontWeight: '600',
     },
     rowActionRight: {
@@ -409,19 +406,19 @@ const createStyles = (colors: ThemeColors) =>
     },
     suggestedLocationText: {
       color: colors.primary,
-      fontSize: 11,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       maxWidth: 160,
     },
     framelessInput: {
-      fontSize: 14,
+      fontSize: fontSizes.meta,
       lineHeight: 20,
       paddingVertical: 4,
       paddingHorizontal: 0,
       minHeight: 32,
     },
     detailsTextarea: {
-      fontSize: 14,
+      fontSize: fontSizes.meta,
       lineHeight: 20,
       paddingVertical: 6,
       paddingHorizontal: 10,
@@ -442,12 +439,12 @@ const createStyles = (colors: ThemeColors) =>
       gap: 2,
     },
     photoTipTitle: {
-      fontWeight: '700',
-      fontSize: 12,
+      fontWeight: '600',
+      fontSize: fontSizes.caption,
       color: colors.ink,
     },
     photoTipBody: {
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       lineHeight: 17,
     },
     previewToggle: {
@@ -459,8 +456,8 @@ const createStyles = (colors: ThemeColors) =>
     },
     previewToggleText: {
       color: colors.primary,
-      fontSize: 12,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
     },
     previewBox: {
       borderRadius: layout.radius.sm,
@@ -474,9 +471,8 @@ const createStyles = (colors: ThemeColors) =>
       gap: 6,
     },
     previewText: {
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       lineHeight: 17,
-      fontFamily: 'monospace',
     },
     actionsBlock: {
       gap: spacing.xs,
@@ -489,22 +485,17 @@ const createStyles = (colors: ThemeColors) =>
       gap: 8,
       minHeight: layout.touchTarget.minHeight,
       borderRadius: layout.radius.button,
-      backgroundColor: '#25D366',
+      backgroundColor: partnerBrand.whatsapp,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
-      shadowColor: '#25D366',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-      elevation: 2,
     },
     whatsAppButtonPressed: {
-      backgroundColor: '#1EBE5D',
+      backgroundColor: partnerBrand.whatsappPressed,
       opacity: 0.9,
     },
     whatsAppButtonText: {
-      color: '#FFFFFF',
-      fontWeight: '700',
-      fontSize: 15,
+      color: lightColors.white,
+      fontWeight: '600',
+      fontSize: fontSizes.label,
     },
   });

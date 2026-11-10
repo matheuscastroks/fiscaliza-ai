@@ -29,14 +29,14 @@ test('quick complaint kit: incorporates bottom sheet topic selector, inset table
   assert.ok(content.includes('multiline'), 'Details field must be multiline');
   assert.ok(content.includes('onContentSizeChange'), 'Details field must track content size for auto-growth');
   assert.ok(content.includes('detailsTextarea'), 'Details field must apply detailsTextarea style');
-  assert.ok(content.includes('borderRadius: 12'), 'Must use soft 12px corner radius instead of full pill to prevent clipping');
+  assert.ok(content.includes('layout.radius.sm'), 'Must use the soft theme radius token instead of a literal or full pill');
 
   // WhatsApp brand color
-  assert.ok(content.includes('#25D366'), 'Must use official WhatsApp green for the send button');
+  assert.ok(content.includes('partnerBrand.whatsapp'), 'Must use official WhatsApp green token for the send button');
 
   const appInputPath = path.join(ROOT_DIR, 'components', 'ui', 'AppInput.tsx');
   const appInputContent = fs.readFileSync(appInputPath, 'utf8');
-  assert.ok(appInputContent.includes('borderRadius: 12'), 'AppInput multiline style must also adopt safe 12px border radius');
+  assert.ok(appInputContent.includes('layout.radius'), 'AppInput multiline style must use theme radius tokens');
 });
 
 test('participate screen: adopts Apple Inset-Grouped tables and KeyboardAwareScrollView', () => {

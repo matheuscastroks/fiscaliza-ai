@@ -200,7 +200,7 @@ export function DetailSection({
         </AppText>
         <Ionicons
           name={open ? 'chevron-up' : 'chevron-down'}
-          size={20}
+          size={layout.iconSize.md}
           color={colors.ink}
         />
       </Pressable>
@@ -308,7 +308,7 @@ const createStyles = (colors: ThemeColors) =>
       width: 40,
       height: 4,
       backgroundColor: colors.divider,
-      borderRadius: 2,
+      borderRadius: layout.radius.xs,
     },
     content: {
       paddingHorizontal: spacing.contentPadding,

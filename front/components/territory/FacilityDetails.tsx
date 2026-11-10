@@ -18,6 +18,7 @@ import {
 } from '@/features/territory/selectors';
 import { facilityTitle } from './FacilityRow';
 import { useTheme } from '@/theme/useTheme';
+import { layout } from '@/theme/layout';
 export function FacilityDetails({
   id,
   onBack,
@@ -71,7 +72,7 @@ export function FacilityDetails({
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Ionicons
               name={facilityIcons[item.category]}
-              size={32}
+              size={layout.iconSize.lg}
               color={colors.ink}
             />
             <AppText variant="title" style={{ flex: 1 }}>
@@ -96,7 +97,7 @@ export function FacilityDetails({
             )}
           </DetailSection>
           {item.location && (
-            <View style={{ height: 230, borderRadius: 24, overflow: 'hidden' }}>
+            <View style={{ height: 230, borderRadius: layout.radius.card, overflow: 'hidden' }}>
               <MapboxMapView
                 region={{ ...item.location, zoom: 16 }}
                 markers={[

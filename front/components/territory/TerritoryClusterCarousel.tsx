@@ -17,6 +17,8 @@ import {
   TerritoryCardContent,
   type Entry,
 } from '@/components/territory/TerritoryPreviewCard';
+import { lightColors } from '@/theme/colors';
+import { elevation } from '@/theme/elevation';
 
 interface TerritoryClusterCarouselProps {
   entries: Entry[];
@@ -61,8 +63,8 @@ export function TerritoryClusterCarousel({
       {/* Header controls: Counter + Zoom In + Close */}
       <View style={styles.headerRow}>
         <View style={[styles.counterBadge, { backgroundColor: colors.surface }]}>
-          <Ionicons name="layers" size={14} color={colors.accent} />
-          <AppText variant="caption" style={{ fontWeight: '700' }}>
+          <Ionicons name="layers" size={layout.iconSize.sm} color={colors.accent} />
+          <AppText variant="caption" style={{ fontWeight: '600' }}>
             {currentIndex + 1} de {entries.length} no local
           </AppText>
         </View>
@@ -75,8 +77,8 @@ export function TerritoryClusterCarousel({
               accessibilityRole="button"
               accessibilityLabel="Aproximar mapa neste local"
             >
-              <Ionicons name="scan-outline" size={14} color={colors.ink} />
-              <AppText variant="caption" style={{ fontWeight: '700' }}>
+              <Ionicons name="scan-outline" size={layout.iconSize.sm} color={colors.ink} />
+              <AppText variant="caption" style={{ fontWeight: '600' }}>
                 Aproximar
               </AppText>
             </Pressable>
@@ -89,7 +91,7 @@ export function TerritoryClusterCarousel({
             accessibilityLabel="Fechar visualização de aglomerado"
             hitSlop={8}
           >
-            <Ionicons name="close" size={16} color={colors.ink} />
+            <Ionicons name="close" size={layout.iconSize.sm} color={colors.ink} />
           </Pressable>
         </View>
       </View>
@@ -135,6 +137,7 @@ const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: spacing.md,
     },
     counterBadge: {
+      ...elevation.floating,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
@@ -143,11 +146,6 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: layout.radius.pill,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.12,
-      shadowRadius: 4,
-      elevation: 4,
     },
     actionsGroup: {
       flexDirection: 'row',
@@ -155,6 +153,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: spacing.xs,
     },
     actionPill: {
+      ...elevation.floating,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 5,
@@ -163,25 +162,16 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: layout.radius.pill,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.12,
-      shadowRadius: 4,
-      elevation: 4,
     },
     closeCircle: {
+      ...elevation.floating,
       width: 32,
       height: 32,
-      borderRadius: 16,
+      borderRadius: layout.radius.panel,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.12,
-      shadowRadius: 4,
-      elevation: 4,
     },
     listContent: {
       paddingHorizontal: spacing.md,

@@ -176,7 +176,7 @@ function TerritoryListViewComponent({
             >
               <Ionicons
                 name="information-circle-outline"
-                size={16}
+                size={layout.iconSize.sm}
                 color={colors.onSurfaceBrand}
               />
               <AppText variant="caption" color="muted" style={{ flex: 1 }}>

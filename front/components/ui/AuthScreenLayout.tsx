@@ -12,6 +12,7 @@ import { ThemeToggleButton } from './ThemeToggleButton';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { useTheme } from '@/theme/useTheme';
+import { fontSizes } from '@/theme/typography';
 
 export function AuthScreenLayout({
   title,
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderRadius: layout.radius.pill,
   },
-  brandTitle: { fontWeight: '700', fontSize: 14 },
+  brandTitle: { fontWeight: '600', fontSize: fontSizes.meta },
   sheet: {
     flex: 1,
     marginTop: -layout.radius.sheet,

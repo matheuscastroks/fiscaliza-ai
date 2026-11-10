@@ -35,7 +35,7 @@ export function CitizenAction({
     >
       <Ionicons
         name={icon}
-        size={26}
+        size={layout.iconSize.lg}
         color={primary ? colors.onAccentBrand : colors.onSurfaceBrand}
       />
       <View style={{ flex: 1, gap: spacing.xxs }}>
@@ -49,7 +49,7 @@ export function CitizenAction({
           {description}
         </AppText>
       </View>
-      <Ionicons name="arrow-forward" size={22} color={color} />
+      <Ionicons name="arrow-forward" size={layout.iconSize.md} color={color} />
     </Pressable>
   );
 }

@@ -8,6 +8,7 @@ import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { AppText } from './AppText';
 import { MapboxMapView, type MarkerKind } from './MapboxMapView';
+import { lightColors } from '@/theme/colors';
 
 export interface ItemLocationMapProps {
   id?: string;
@@ -68,7 +69,7 @@ export function ItemLocationMap({
     if (color) return color;
     if (kind === 'occurrence') {
       if (status === 'resolved') return colors.completed;
-      if (status === 'in_progress') return '#2563eb';
+      if (status === 'in_progress') return lightColors.info;
       return colors.attention;
     }
     if (kind === 'proposal') return colors.attention;
@@ -87,7 +88,7 @@ export function ItemLocationMap({
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTitleRow}>
-          <Ionicons name="location" size={16} color={pinColor} />
+          <Ionicons name="location" size={layout.iconSize.sm} color={pinColor} />
           <AppText variant="label" style={styles.headerLabel}>
             Localização exata
           </AppText>
@@ -105,7 +106,7 @@ export function ItemLocationMap({
             <AppText variant="caption" color="accent" style={{ fontWeight: '600' }}>
               Abrir no mapa
             </AppText>
-            <Ionicons name="chevron-forward" size={14} color={colors.accent} />
+            <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.accent} />
           </Pressable>
         )}
       </View>
@@ -142,7 +143,7 @@ export function ItemLocationMap({
       </Pressable>
 
       <View style={styles.footer}>
-        <Ionicons name="navigate-outline" size={14} color={colors.muted} />
+        <Ionicons name="navigate-outline" size={layout.iconSize.sm} color={colors.muted} />
         <AppText variant="caption" color="muted" style={styles.addressText} numberOfLines={2}>
           {formattedAddress}
           {neighborhood && !formattedAddress.includes(neighborhood)

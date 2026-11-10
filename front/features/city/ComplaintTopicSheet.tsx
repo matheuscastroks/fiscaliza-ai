@@ -10,6 +10,7 @@ import {
   BottomSheetScrollView,
 } from '@/components/ui/AppBottomSheetModal';
 import { AppText } from '@/components/ui/AppText';
+import { fontSizes } from '@/theme/typography';
 
 export interface ComplaintTopic {
   id: string;
@@ -151,7 +152,7 @@ export function ComplaintTopicSheet({
                   >
                     <Ionicons
                       name={topic.icon}
-                      size={20}
+                      size={layout.iconSize.md}
                       color={isSelected ? colors.primary : colors.ink}
                     />
                   </View>
@@ -161,7 +162,7 @@ export function ComplaintTopicSheet({
                       variant="label"
                       style={[
                         styles.topicLabel,
-                        isSelected && { color: colors.primary, fontWeight: '700' },
+                        isSelected && { color: colors.primary, fontWeight: '600' },
                       ]}
                     >
                       {topic.label}
@@ -174,7 +175,7 @@ export function ComplaintTopicSheet({
                   {isSelected && (
                     <Ionicons
                       name="checkmark-circle"
-                      size={20}
+                      size={layout.iconSize.md}
                       color={colors.primary}
                     />
                   )}
@@ -197,7 +198,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: spacing.md,
     },
     sheetSubtitle: {
-      fontSize: 13,
+      fontSize: fontSizes.meta,
       lineHeight: 18,
     },
     insetTable: {
@@ -220,7 +221,7 @@ const createStyles = (colors: ThemeColors) =>
     iconSquircle: {
       width: 38,
       height: 38,
-      borderRadius: 10,
+      borderRadius: layout.radius.sm,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -229,7 +230,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: 2,
     },
     topicLabel: {
-      fontSize: 15,
+      fontSize: fontSizes.label,
       fontWeight: '600',
     },
   });

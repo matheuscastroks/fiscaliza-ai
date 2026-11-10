@@ -2,6 +2,7 @@ import type {
   FacilityCategory,
   SourceCoverage,
 } from '../../../shared/public-data.ts';
+import { facilityPalette } from '../../theme/palette.ts';
 export type TerritoryLayer = 'official' | FacilityCategory;
 export const facilityLabels = {
   school: 'Escolas',
@@ -13,11 +14,7 @@ export const facilityIcons = {
   health: 'medical-outline',
   square: 'leaf-outline',
 } as const;
-export const facilityColors = {
-  school: '#98632B',
-  health: '#247B83',
-  square: '#347453',
-};
+export const facilityColors = facilityPalette;
 export function chooseTerritorialEntries<C, F extends { category: string }>(
   calls: C[],
   facilities: F[],

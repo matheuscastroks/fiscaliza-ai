@@ -14,6 +14,9 @@ import { AppButton } from './AppButton';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { useTheme } from '@/theme/useTheme';
+import { partnerBrand } from '@/theme/palette';
+import { fontSizes } from '@/theme/typography';
+import { lightColors } from '@/theme/colors';
 
 export interface GovBrButtonProps {
   onPress?: () => void;
@@ -62,11 +65,11 @@ export const GovBrButton: React.FC<GovBrButtonProps> = ({
         accessibilityHint={disabled ? 'Acesso indisponível no momento' : 'Identificação com conta gov.br'}
       >
         {loading ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
+          <ActivityIndicator size="small" color={lightColors.white} />
         ) : (
           <View style={styles.contentRow}>
             <View style={styles.iconCircle}>
-              <Ionicons name={disabled ? 'lock-closed' : 'person'} size={14} color="#1351B4" />
+              <Ionicons name={disabled ? 'lock-closed' : 'person'} size={layout.iconSize.sm} color={partnerBrand.govBr} />
             </View>
             <AppText style={styles.label}>
               Entrar com{' '}
@@ -93,7 +96,7 @@ export const GovBrButton: React.FC<GovBrButtonProps> = ({
           >
             <View style={styles.modalHeader}>
               <View style={styles.modalGovBadge}>
-                <Ionicons name="shield-checkmark" size={20} color="#1351B4" />
+                <Ionicons name="shield-checkmark" size={layout.iconSize.md} color={partnerBrand.govBr} />
                 <AppText style={styles.modalGovBadgeText}>gov.br</AppText>
               </View>
               <TouchableOpacity
@@ -102,7 +105,7 @@ export const GovBrButton: React.FC<GovBrButtonProps> = ({
                 accessibilityLabel="Fechar"
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons name="close" size={22} color={colors.subtle} />
+                <Ionicons name="close" size={layout.iconSize.md} color={colors.subtle} />
               </TouchableOpacity>
             </View>
 
@@ -133,7 +136,7 @@ export const GovBrButton: React.FC<GovBrButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#1351B4',
+    backgroundColor: partnerBrand.govBr,
     minHeight: 52,
     borderRadius: layout.radius.pill,
     paddingHorizontal: spacing.lg,
@@ -141,11 +144,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    shadowColor: '#071D41',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.16,
-    shadowRadius: 4,
-    elevation: 3,
   },
   disabled: {
     opacity: 0.5,
@@ -159,22 +157,22 @@ const styles = StyleSheet.create({
   iconCircle: {
     width: 24,
     height: 24,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    borderRadius: layout.radius.sm,
+    backgroundColor: lightColors.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
   label: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: lightColors.white,
+    fontSize: fontSizes.body,
     lineHeight: 22,
     fontWeight: '500',
   },
   labelBold: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: lightColors.white,
+    fontSize: fontSizes.body,
     lineHeight: 22,
-    fontWeight: '800',
+    fontWeight: '600',
   },
   modalBackdrop: {
     flex: 1,
@@ -188,11 +186,6 @@ const styles = StyleSheet.create({
     maxWidth: 440,
     borderRadius: layout.radius.sheet,
     padding: spacing.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    elevation: 8,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -203,14 +196,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#EBF2FA',
+    backgroundColor: partnerBrand.govBrSurface,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: layout.radius.pill,
   },
   modalGovBadgeText: {
-    color: '#1351B4',
-    fontWeight: '800',
-    fontSize: 13,
+    color: partnerBrand.govBr,
+    fontWeight: '600',
+    fontSize: fontSizes.meta,
   },
 });

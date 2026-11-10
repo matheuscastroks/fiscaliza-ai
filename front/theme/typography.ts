@@ -65,3 +65,13 @@ export const typography: Record<string, TextStyle> = {
 };
 
 export type TypographyVariant = keyof typeof typography;
+
+/** Escala fechada de tamanhos para estilos que não usam AppText (ex.: marcadores, badges). */
+export const fontSizes = {
+  caption: 12,
+  meta: 13,
+  label: 15,
+  body: 16,
+  sectionTitle: 21,
+  screenTitle: 26,
+} as const;

@@ -1,5 +1,10 @@
 {
-  "hexColors": 102,
-  "fontSizeLiterals": 115,
-  "heavyWeights": 26
+  "hexColors": 0,
+  "fontSizeLiterals": 0,
+  "heavyWeights": 0,
+  "radiusLiterals": 0,
+  "iconSizeLiterals": 0,
+  "shadowProps": 0,
+  "uppercaseStyles": 0,
+  "monospace": 0
 }

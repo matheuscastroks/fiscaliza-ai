@@ -18,6 +18,8 @@ import { InsetGroup, ListRow } from '@/components/ui/ListRow';
 import { useMunicipalityId } from '@/features/city/municipality';
 import { AppToast } from '@/components/ui/AppToast';
 import { useTheme, spacing, layout } from '@/theme';
+import { fontSizes } from '@/theme/typography';
+import { IconTile } from '@/components/ui/IconTile';
 
 const appearanceOptions = [
   {
@@ -103,9 +105,9 @@ export default function SettingsScreen() {
         {/* Seção 1: Aparência do Aplicativo (Apple Segmented HIG) */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
-            <Ionicons name="color-palette-outline" size={13} color={colors.muted} />
+            <Ionicons name="color-palette-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
-              APARÊNCIA DO APLICATIVO
+              Aparência do aplicativo
             </AppText>
           </View>
 
@@ -143,9 +145,9 @@ export default function SettingsScreen() {
         {/* Seção 2: Bairro de Referência no Mapa */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
-            <Ionicons name="map-outline" size={13} color={colors.muted} />
+            <Ionicons name="map-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
-              BAIRRO DE REFERÊNCIA NO MAPA
+              Bairro de referência no mapa
             </AppText>
           </View>
 
@@ -179,9 +181,9 @@ export default function SettingsScreen() {
         {/* Seção 3: Notificações e Alertas do 1746 */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
-            <Ionicons name="notifications-outline" size={13} color={colors.muted} />
+            <Ionicons name="notifications-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText} accessibilityLabel="Notificações e alertas">
-              NOTIFICAÇÕES E ALERTAS
+              Notificações
             </AppText>
           </View>
 
@@ -205,7 +207,7 @@ export default function SettingsScreen() {
               >
                 <Ionicons
                   name={notificationsActive ? 'notifications' : 'notifications-off-outline'}
-                  size={18}
+                  size={layout.iconSize.md}
                   color={notificationsActive ? colors.completed : colors.primary}
                 />
               </View>
@@ -248,14 +250,7 @@ export default function SettingsScreen() {
                     (testSending || !pushToken) && { opacity: 0.6 },
                   ]}
                 >
-                  <View
-                    style={[
-                      styles.iconSquircle,
-                      { backgroundColor: colors.primaryContainer },
-                    ]}
-                  >
-                    <Ionicons name="paper-plane-outline" size={17} color={colors.primary} />
-                  </View>
+                  <IconTile icon="paper-plane-outline" />
 
                   <View style={styles.tableRowContent}>
                     <AppText variant="label">Testar notificação no aparelho</AppText>
@@ -264,7 +259,7 @@ export default function SettingsScreen() {
                     </AppText>
                   </View>
 
-                  <Ionicons name="send-outline" size={16} color={colors.primary} />
+                  <Ionicons name="send-outline" size={layout.iconSize.sm} color={colors.primary} />
                 </Pressable>
               </>
             )}
@@ -284,7 +279,7 @@ export default function SettingsScreen() {
         {/* Dados neste aparelho: apagar chamados salvos (com confirmação) */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
-            <Ionicons name="phone-portrait-outline" size={13} color={colors.muted} />
+            <Ionicons name="phone-portrait-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
               Dados neste aparelho
             </AppText>
@@ -307,9 +302,9 @@ export default function SettingsScreen() {
         {/* Seção 4: Acessibilidade do Sistema */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
-            <Ionicons name="accessibility-outline" size={13} color={colors.muted} />
+            <Ionicons name="accessibility-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
-              ACESSIBILIDADE E SISTEMA
+              Acessibilidade e sistema
             </AppText>
           </View>
 
@@ -320,14 +315,7 @@ export default function SettingsScreen() {
             ]}
           >
             <View style={styles.tableRow}>
-              <View
-                style={[
-                  styles.iconSquircle,
-                  { backgroundColor: colors.surfaceSubdued },
-                ]}
-              >
-                <Ionicons name="text-outline" size={18} color={colors.primary} />
-              </View>
+              <IconTile icon="text-outline" />
               <View style={styles.tableRowContent}>
                 <AppText variant="label">Escala tipográfica</AppText>
                 <AppText variant="caption" color="muted">
@@ -339,14 +327,7 @@ export default function SettingsScreen() {
             <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
 
             <View style={styles.tableRow}>
-              <View
-                style={[
-                  styles.iconSquircle,
-                  { backgroundColor: colors.surfaceSubdued },
-                ]}
-              >
-                <Ionicons name="eye-outline" size={18} color={colors.primary} />
-              </View>
+              <IconTile icon="eye-outline" />
               <View style={styles.tableRowContent}>
                 <AppText variant="label">Leitores de tela</AppText>
                 <AppText variant="caption" color="muted">
@@ -387,9 +368,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   sectionHeaderText: {
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.6,
+    fontSize: fontSizes.caption,
+    fontWeight: '600',
   },
   insetContainer: {
     borderRadius: layout.radius.panel,

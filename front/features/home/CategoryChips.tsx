@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { layout, spacing, useTheme } from '@/theme';
+import { fontSizes } from '@/theme/typography';
 
 export interface CategoryChipItem {
   id: string;
@@ -94,7 +95,7 @@ export function CategoryChips({
           >
             <Ionicons
               name={item.icon}
-              size={15}
+              size={layout.iconSize.sm}
               color={isSelected ? colors.canvas : colors.muted}
             />
             <AppText
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   label: {
-    fontSize: 13,
+    fontSize: fontSizes.meta,
     lineHeight: 16,
   },
 });

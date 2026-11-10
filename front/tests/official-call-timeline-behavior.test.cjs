@@ -20,7 +20,7 @@ function render(call) {
       if (name === '@/components/ui/AppText') return { AppText: 'Text' };
       if (name === '@/theme/useTheme') return { useTheme: () => ({ colors: {} }), useThemedStyles: () => ({}) };
       if (name === '@/theme') return { spacing: {} };
-      if (name === '@/features/city/formatDates') return require(name);
+      if (name === '@/features/city/formatDates' || name === '@/theme/typography' || name === '@/theme/layout') return require(name);
       if (name === '@/shared/official-call-state') {
         const stateModule = { exports: {} };
         const stateCode = ts.transpileModule(fs.readFileSync('../shared/official-call-state.ts', 'utf8'), {

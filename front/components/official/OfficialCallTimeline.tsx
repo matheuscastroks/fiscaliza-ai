@@ -8,6 +8,8 @@ import { spacing } from '@/theme';
 import type { OfficialCall } from '@/shared/contracts';
 import { isOfficialCallClosed } from '@/shared/official-call-state';
 import { formatCallDate } from '@/features/city/formatDates';
+import { fontSizes } from '@/theme/typography';
+import { layout } from '@/theme/layout';
 
 export interface OfficialCallTimelineProps {
   call: OfficialCall;
@@ -88,7 +90,7 @@ function OfficialCallTimelineComponent({ call }: OfficialCallTimelineProps) {
               >
                 <Ionicons
                   name={isDone ? 'checkmark' : step.icon}
-                  size={14}
+                  size={layout.iconSize.sm}
                   color={
                     isDone
                       ? colors.onAccent
@@ -115,7 +117,7 @@ function OfficialCallTimelineComponent({ call }: OfficialCallTimelineProps) {
                   variant="label"
                   style={[
                     styles.stepTitle,
-                    isActive && { color: colors.accent, fontWeight: '700' },
+                    isActive && { color: colors.accent, fontWeight: '600' },
                   ]}
                 >
                   {step.title}
@@ -159,7 +161,7 @@ const createStyles = (colors: ThemeColors) =>
     nodeCircle: {
       width: 26,
       height: 26,
-      borderRadius: 13,
+      borderRadius: layout.radius.sm,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 2,
@@ -200,14 +202,14 @@ const createStyles = (colors: ThemeColors) =>
     stepTitle: {
       fontWeight: '600',
       color: colors.ink,
-      fontSize: 14,
+      fontSize: fontSizes.meta,
     },
     stepDate: {
-      fontSize: 12,
+      fontSize: fontSizes.caption,
     },
     stepSubtitle: {
       marginTop: 2,
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       lineHeight: 17,
     },
   });

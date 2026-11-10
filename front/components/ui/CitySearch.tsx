@@ -4,6 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
 import { spacing } from '@/theme';
 import { fontFamilies } from '@/theme/typography';
+import { fontSizes } from '@/theme/typography';
+import { layout } from '@/theme/layout';
 
 export interface CitySearchProps {
   value?: string;
@@ -49,7 +51,7 @@ export function CitySearch({
       style={{
         minHeight: 48,
         backgroundColor: colors.surface,
-        borderRadius: 24,
+        borderRadius: layout.radius.card,
         paddingLeft: leftElement ? 6 : spacing.md,
         paddingRight: 5,
         flexDirection: 'row',
@@ -60,7 +62,7 @@ export function CitySearch({
       }}
     >
       {leftElement}
-      {!leftElement && <Ionicons name="search-outline" size={20} color={colors.muted} />}
+      {!leftElement && <Ionicons name="search-outline" size={layout.iconSize.md} color={colors.muted} />}
       {onChangeText ? (
         <TextInput
           accessibilityLabel="Buscar no território"
@@ -85,7 +87,7 @@ export function CitySearch({
           onPress={onPress}
           style={{ flex: 1, minHeight: 44, justifyContent: 'center' }}
         >
-          <AppText color="muted" style={{ fontSize: 15 }}>
+          <AppText color="muted" style={{ fontSize: fontSizes.label }}>
             Buscar na minha região…
           </AppText>
         </Pressable>
@@ -97,7 +99,7 @@ export function CitySearch({
           accessibilityRole="button"
           accessibilityLabel="Limpar busca"
         >
-          <Ionicons name="close-circle" size={18} color={colors.muted} />
+          <Ionicons name="close-circle" size={layout.iconSize.md} color={colors.muted} />
         </Pressable>
       )}
       {handleAction && (
@@ -110,7 +112,7 @@ export function CitySearch({
           style={{
             width: 38,
             height: 38,
-            borderRadius: 19,
+            borderRadius: layout.radius.panel,
             backgroundColor: isActionActive ? colors.accent : colors.ink,
             alignItems: 'center',
             justifyContent: 'center',
@@ -118,7 +120,7 @@ export function CitySearch({
         >
           <Ionicons
             name={resolvedIcon}
-            size={18}
+            size={layout.iconSize.md}
             color={colors.onAccent}
           />
           {filterCount > 0 && (
@@ -129,7 +131,7 @@ export function CitySearch({
                 top: -2,
                 minWidth: 17,
                 height: 17,
-                borderRadius: 9,
+                borderRadius: layout.radius.sm,
                 backgroundColor: colors.surface,
                 borderWidth: 1,
                 borderColor: colors.border,
@@ -137,7 +139,7 @@ export function CitySearch({
                 justifyContent: 'center',
               }}
             >
-              <AppText variant="meta" style={{ fontSize: 10, fontWeight: '800' }}>
+              <AppText variant="meta" style={{ fontSize: fontSizes.caption, fontWeight: '600' }}>
                 {filterCount}
               </AppText>
             </View>

@@ -16,6 +16,8 @@ import { AppButton } from '@/components/ui/AppButton';
 import { useAuthStore } from '@/stores/authStore';
 import { formatPostalCode } from '@/services/postalCode';
 import { usePostalCodeFlow } from '@/features/profile/usePostalCodeFlow';
+import { fontSizes } from '@/theme/typography';
+import { IconTile } from '@/components/ui/IconTile';
 
 export interface PostalCodeSheetProps {
   visible: boolean;
@@ -76,14 +78,7 @@ export function PostalCodeSheet({
         {!user ? (
           /* Estado Não Conectado: Apelo para Login */
           <View style={styles.guestCard}>
-            <View
-              style={[
-                styles.iconSquircle,
-                { backgroundColor: colors.primaryContainer },
-              ]}
-            >
-              <Ionicons name="location" size={24} color={colors.primary} />
-            </View>
+            <IconTile icon="location" />
             <View style={{ gap: 4 }}>
               <AppText variant="sectionTitle">
                 Vincule seu CEP carioca
@@ -119,7 +114,7 @@ export function PostalCodeSheet({
                 },
               ]}
             >
-              <Ionicons name="search-outline" size={18} color={colors.muted} />
+              <Ionicons name="search-outline" size={layout.iconSize.md} color={colors.muted} />
               <BottomSheetTextInput
                 value={postalCode}
                 placeholder="Digite seu CEP (00000-000)"
@@ -143,7 +138,7 @@ export function PostalCodeSheet({
                 >
                   <Ionicons
                     name="close-circle"
-                    size={18}
+                    size={layout.iconSize.md}
                     color={colors.muted}
                   />
                 </Pressable>
@@ -156,7 +151,7 @@ export function PostalCodeSheet({
                 title="Consultar CEP"
                 loading={busy}
                 disabled={digits.length !== 8 || saving}
-                icon={<Ionicons name="search" size={16} color={colors.onAccent} />}
+                icon={<Ionicons name="search" size={layout.iconSize.sm} color={colors.onAccent} />}
                 onPress={() => void handleSearch()}
               />
             )}
@@ -181,14 +176,14 @@ export function PostalCodeSheet({
                   >
                     <Ionicons
                       name="checkmark-circle"
-                      size={13}
+                      size={layout.iconSize.sm}
                       color={colors.completed}
                     />
                     <AppText
                       variant="caption"
                       style={[styles.resultBadgeText, { color: colors.completed }]}
                     >
-                      DOMICÍLIO ENCONTRADO
+                      Domicílio encontrado
                     </AppText>
                   </View>
                   <View
@@ -221,7 +216,7 @@ export function PostalCodeSheet({
                     icon={
                       <Ionicons
                         name="checkmark-circle-outline"
-                        size={18}
+                        size={layout.iconSize.md}
                         color={colors.onAccent}
                       />
                     }
@@ -243,7 +238,7 @@ export function PostalCodeSheet({
                 style={[styles.errorBox, { borderColor: colors.risk }]}
                 accessibilityRole="alert"
               >
-                <Ionicons name="alert-circle" size={16} color={colors.risk} />
+                <Ionicons name="alert-circle" size={layout.iconSize.sm} color={colors.risk} />
                 <AppText variant="caption" color="risk" style={styles.flex}>
                   {error}
                 </AppText>
@@ -283,7 +278,7 @@ const createStyles = (colors: ThemeColors) =>
     inputWrapper: {
       flexDirection: 'row',
       alignItems: 'center',
-      borderRadius: 12,
+      borderRadius: layout.radius.sm,
       borderWidth: 1,
       paddingHorizontal: 14,
       minHeight: 52,
@@ -291,8 +286,8 @@ const createStyles = (colors: ThemeColors) =>
     },
     textInput: {
       flex: 1,
-      fontSize: 16,
-      fontWeight: '700',
+      fontSize: fontSizes.body,
+      fontWeight: '600',
       paddingVertical: 10,
     },
     resultCard: {
@@ -316,9 +311,8 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: layout.radius.pill,
     },
     resultBadgeText: {
-      fontSize: 10,
-      fontWeight: '800',
-      letterSpacing: 0.5,
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
     },
     cepPill: {
       paddingVertical: 2,
@@ -326,14 +320,13 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: layout.radius.pill,
     },
     cepPillText: {
-      fontSize: 11,
-      fontWeight: '700',
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
       color: colors.ink,
-      fontFamily: 'monospace',
     },
     neighborhoodTitle: {
-      fontSize: 18,
-      fontWeight: '800',
+      fontSize: fontSizes.sectionTitle,
+      fontWeight: '600',
     },
     resultActions: {
       gap: spacing.xs,

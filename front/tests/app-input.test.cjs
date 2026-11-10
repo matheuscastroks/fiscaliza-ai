@@ -57,7 +57,7 @@ function setup() {
         return { useKeyboardAwareInput: () => null };
       if (name === '@/theme/spacing') return { spacing: {} };
       if (name === '@/theme/layout')
-        return { layout: { radius: {}, borderWidth: {}, touchTarget: {} } };
+        return { layout: { radius: {}, borderWidth: {}, touchTarget: {}, iconSize: {} } };
       if (name === '@/theme/typography') return { fontFamilies: {} };
       throw new Error(name);
     },

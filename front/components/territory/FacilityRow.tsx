@@ -9,6 +9,7 @@ import {
   facilityIcons,
   facilityNeighborhoodLabel,
 } from '@/features/territory/selectors';
+import { layout } from '@/theme/layout';
 export const facilityTitle = (item: PublicFacilitySummary) =>
   item.name || item.address || 'Espaço público sem nome informado';
 export function FacilityRow({
@@ -29,7 +30,7 @@ export function FacilityRow({
         alignItems: 'center',
         gap: 12,
         padding: 16,
-        borderRadius: 22,
+        borderRadius: layout.radius.panel,
         backgroundColor: colors.surface,
         minHeight: 92,
       }}
@@ -38,7 +39,7 @@ export function FacilityRow({
         style={{
           width: 44,
           height: 44,
-          borderRadius: 22,
+          borderRadius: layout.radius.panel,
           backgroundColor: colors.surfaceSubdued,
           alignItems: 'center',
           justifyContent: 'center',
@@ -46,7 +47,7 @@ export function FacilityRow({
       >
         <Ionicons
           name={facilityIcons[item.category]}
-          size={21}
+          size={layout.iconSize.md}
           color={colors.ink}
         />
       </View>
@@ -60,7 +61,7 @@ export function FacilityRow({
           {!item.location ? ' · Sem ponto no mapa' : ''}
         </AppText>
       </View>
-      <Ionicons name="arrow-forward" size={17} color={colors.ink} />
+      <Ionicons name="arrow-forward" size={layout.iconSize.sm} color={colors.ink} />
     </Pressable>
   );
 }

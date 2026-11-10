@@ -7,7 +7,7 @@ const ts = require('typescript');
 function loadLayers() {
   const module = { exports: {} };
   const jsx = (type, props) => ({ type, ...props });
-  const palette = { ink: '#111', white: '#fff', surface: '#fafafa' };
+  const palette = { ink: '#111', white: '#fff', surface: '#fafafa', info: '#1677EB' };
   const code = ts.transpileModule(fs.readFileSync('components/territory/MapAreaLayers.tsx', 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;

@@ -5,73 +5,17 @@ const path = require('node:path');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 
-test('call cards: OfficialCallRow integrates smart civic metadata (relative time, SLA, protocol, agency)', () => {
-  const rowPath = path.join(ROOT_DIR, 'components', 'official', 'OfficialCallRow.tsx');
-  assert.ok(fs.existsSync(rowPath), 'OfficialCallRow.tsx must exist');
+test('call cards: lista e sheet compartilham um único CallSummary com metadados cívicos', () => {
+  const read = (...parts) => fs.readFileSync(path.join(ROOT_DIR, ...parts), 'utf8');
+  const summary = read('components', 'official', 'CallSummary.tsx');
+  const row = read('components', 'official', 'OfficialCallRow.tsx');
+  const preview = read('components', 'territory', 'TerritoryPreviewCard.tsx');
 
-  const content = fs.readFileSync(rowPath, 'utf8');
-
-  // Relative time helper and usage
-  assert.ok(
-    content.includes('formatRelativeTime'),
-    'OfficialCallRow must format relative time (e.g. Há X dias)',
-  );
-  assert.ok(
-    content.includes('metaChip'),
-    'OfficialCallRow must render relative time in metaChip',
-  );
-
-  // SLA and overdue detection
-  assert.ok(
-    content.includes('resolveOfficialCallDeadline'),
-    'OfficialCallRow must resolve official deadline status',
-  );
-  assert.ok(
-    content.includes('isOverdue'),
-    'OfficialCallRow must detect overdue status',
-  );
-  assert.ok(
-    content.includes('slaBadge'),
-    'OfficialCallRow must render distinct SLA badge',
-  );
-
-  // Protocol pill
-  assert.ok(
-    content.includes('protocolChip'),
-    'OfficialCallRow must render protocolChip with monospace styling',
-  );
-
-  // Agency tag
-  assert.ok(
-    content.includes('agencyBadge'),
-    'OfficialCallRow must render agencyBadge when organizationName is present',
-  );
-});
-
-test('call cards: TerritoryPreviewCard incorporates matching civic metadata', () => {
-  const previewPath = path.join(ROOT_DIR, 'components', 'territory', 'TerritoryPreviewCard.tsx');
-  assert.ok(fs.existsSync(previewPath), 'TerritoryPreviewCard.tsx must exist');
-
-  const content = fs.readFileSync(previewPath, 'utf8');
-
-  assert.ok(
-    content.includes('formatRelativeTime'),
-    'TerritoryPreviewCard must support relative time',
-  );
-  assert.ok(
-    content.includes('resolveOfficialCallDeadline'),
-    'TerritoryPreviewCard must resolve deadline status',
-  );
-  assert.ok(
-    content.includes('metadataRow'),
-    'TerritoryPreviewCard must format metadata in structured metadataRow',
-  );
-  assert.ok(
-    content.includes('protocolChip'),
-    'TerritoryPreviewCard must include protocolChip',
-  );
-  assert.ok(
-    content.includes('agencyBadge'),
-    'TerritoryPreviewCard must support agencyBadge',
-  );
+  assert.ok(summary.includes('formatRelativeAge'), 'CallSummary must format relative age (e.g. Há X dias)');
+  assert.ok(summary.includes('resolveOfficialCallDeadline') && summary.includes('isOverdue'), 'CallSummary must resolve overdue deadlines');
+  assert.ok(summary.includes('slaBadge') && summary.includes('protocolChip') && summary.includes('agencyBadge'), 'CallSummary renders SLA, protocol and agency');
+  for (const [name, content] of [['OfficialCallRow', row], ['TerritoryPreviewCard', preview]]) {
+    assert.ok(content.includes('<CallSummary'), `${name} must render the shared CallSummary`);
+    assert.ok(!content.includes('slaBadge') && !content.includes('categoryBadge'), `${name} must not duplicate the summary markup`);
+  }
 });

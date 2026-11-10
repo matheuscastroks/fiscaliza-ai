@@ -17,6 +17,8 @@ import Animated, {
 import { AppText } from './AppText';
 import { spacing } from '@/theme/spacing';
 import { useTheme } from '@/theme/useTheme';
+import { fontSizes } from '@/theme/typography';
+import { lightColors } from '@/theme/colors';
 
 export type BrandVariant = 'auto' | 'light' | 'dark' | 'onDark' | 'negative';
 
@@ -39,7 +41,7 @@ export function resolveBrandVariant(
   color?: string,
 ): Exclude<BrandVariant, 'auto'> {
   if (variant !== 'auto') return variant;
-  if (color && color.toUpperCase() === '#FFFFFF') return 'onDark';
+  if (color && color.toUpperCase() === lightColors.white) return 'onDark';
   return isDark ? 'dark' : 'light';
 }
 
@@ -330,9 +332,9 @@ export function AppBrandGlyph({
 }
 
 const LOCKUP_SIZES = {
-  sm: { glyph: 22, fontSize: 15, lineHeight: 20, gap: spacing.xs },
-  md: { glyph: 32, fontSize: 20, lineHeight: 25, gap: spacing.xs },
-  lg: { glyph: 44, fontSize: 26, lineHeight: 32, gap: spacing.sm },
+  sm: { glyph: 22, fontSize: fontSizes.label, lineHeight: 20, gap: spacing.xs },
+  md: { glyph: 32, fontSize: fontSizes.sectionTitle, lineHeight: 25, gap: spacing.xs },
+  lg: { glyph: 44, fontSize: fontSizes.screenTitle, lineHeight: 32, gap: spacing.sm },
 } as const;
 
 export function AppBrandLockup({
@@ -432,7 +434,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   wordmark: {
-    fontWeight: '700',
-    letterSpacing: -0.3,
+    fontWeight: '600',
   },
 });
