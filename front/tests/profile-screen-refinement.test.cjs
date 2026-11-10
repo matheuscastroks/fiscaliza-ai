@@ -9,7 +9,7 @@ test('profile screen: adopts Apple Inset-Grouped tables and modern civic metrics
   const screenPath = path.join(ROOT_DIR, 'app', '(tabs)', 'ProfileScreen.tsx');
   assert.ok(fs.existsSync(screenPath), 'ProfileScreen.tsx must exist');
 
-  const content = fs.readFileSync(screenPath, 'utf8');
+  const content = fs.readFileSync(screenPath, 'utf8') + fs.readFileSync(path.join(ROOT_DIR, 'features', 'profile', 'profileScreenStyles.ts'), 'utf8');
 
   // Core stores & avatar
   assert.ok(content.includes('UserAvatar'), 'Must integrate UserAvatar');
