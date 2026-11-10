@@ -12,6 +12,7 @@ const PUBLIC = new Set([
   'ResultsScreen',
   '+not-found',
   'AccountScreen',
+  'NeighborhoodVolumeScreen',
 ]);
 export function isPublicCitizenRoute(segments: readonly string[]): boolean {
   if (!segments[0]) return true;

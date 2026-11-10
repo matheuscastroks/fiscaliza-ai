@@ -13,10 +13,11 @@ import { breakdownShare } from '@/features/city/resultBreakdown';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useTerritorySelection } from '@/stores/territoryStore';
 import { useOfficialFilters, useOfficialOverview } from '@/features/city/useOfficialCalls';
-import { formatDays, topByVolume } from '@/features/city/resultRankings';
+import { formatDays } from '@/features/city/resultRankings';
 import { layout } from '@/theme';
 import { officialStatusColor } from '@/features/city/officialCallStatus';
 import { createStyles } from '@/features/city/resultsScreenStyles';
+import { RankingSection } from '@/features/city/RankingSection';
 
 export default function ResultsScreen() {
   const { colors } = useTheme();
@@ -47,8 +48,6 @@ export default function ResultsScreen() {
   const overdueCount = overview?.overdueCount ?? 0;
   const statusBreakdown = closedOverview?.statusBreakdown || overview?.statusBreakdown || [];
 
-  const ranking = cityOverviewQuery.data?.neighborhoodRanking || [];
-  const mostProblems = topByVolume(ranking);
   const topServices = (overview?.topServices || []).slice(0, 6);
   const speedByService = new Map(
     (overview?.serviceSpeed || []).map((s) => [s.type, s.avgResolutionDays]),
@@ -100,7 +99,7 @@ export default function ResultsScreen() {
                     Recorte territorial
                   </AppText>
                   <AppText variant="label" numberOfLines={1} style={styles.territoryName}>
-                    {neighborhood || 'Todo o Rio de Janeiro'}
+                    {neighborhood || 'Rio de Janeiro'}
                   </AppText>
                 </View>
               </View>
@@ -141,7 +140,7 @@ export default function ResultsScreen() {
                 <View style={styles.sectionHeaderRow}>
                   <Ionicons name="speedometer-outline" size={layout.iconSize.sm} color={colors.muted} />
                   <AppText variant="caption" style={styles.sectionHeaderText}>
-                    INDICADORES OFICIAIS DE DESEMPENHO (SLA)
+                    Prazos oficiais (SLA)
                   </AppText>
                 </View>
 
@@ -296,7 +295,7 @@ export default function ResultsScreen() {
                     <View style={styles.sectionHeaderRow}>
                       <Ionicons name="pie-chart-outline" size={layout.iconSize.sm} color={colors.muted} />
                       <AppText variant="caption" style={styles.sectionHeaderText}>
-                        DESFECHO OPERACIONAL (STATUS OFICIAL 1746)
+                        Como os chamados terminaram
                       </AppText>
                     </View>
 
@@ -439,189 +438,26 @@ export default function ResultsScreen() {
                 })}
               />
             )}
-
-            {/* Rankings territoriais (município inteiro) */}
-            {mostProblems.length > 0 && (
-              <RankingSection
-                icon="alert-circle-outline"
-                title="Bairros com mais chamados registrados"
-                rows={mostProblems.map((row) => ({
-                  key: row.neighborhood,
-                  label: row.neighborhood,
-                  detail: row.overdueCount > 0 ? `${row.overdueCount.toLocaleString('pt-BR')} fora do prazo` : undefined,
-                  value: row.count.toLocaleString('pt-BR'),
-                  share: row.count / (mostProblems[0]?.count || 1),
-                  tone: colors.risk,
-                  onPress: () => openNeighborhood(row.neighborhood),
-                }))}
-              />
-            )}
-
-            {ranking.length > 0 && (
-              <AppText variant="caption" color="muted" style={styles.rankingNote}>
-                A lista mostra apenas o volume de chamados registrados, sem avaliar o desempenho de cada bairro. Toque em um bairro para ver seus dados.
-              </AppText>
-            )}
           </View>
 
-          <View style={styles.footerContainer}>
-            {/* Card de Transparência e Marco Regulatório (Apple Inset Table) */}
-            <View style={styles.transparencyBlock}>
-              <View style={styles.sectionHeaderRow}>
-                <Ionicons
-                  name="information-circle-outline"
-                  size={layout.iconSize.sm}
-                  color={colors.muted}
-                />
-                <AppText variant="caption" style={styles.sectionHeaderText}>
-                  Transparência e fontes oficiais
-                </AppText>
-              </View>
-
-              <View
-                style={[
-                  styles.transparencyTable,
-                  { backgroundColor: colors.surface, borderColor: colors.divider },
-                ]}
-              >
-                <View style={styles.transparencyRow}>
-                  <View
-                    style={[
-                      styles.kpiSmallIcon,
-                      { backgroundColor: colors.primaryContainer },
-                    ]}
-                  >
-                    <Ionicons
-                      name="shield-checkmark-outline"
-                      size={layout.iconSize.sm}
-                      color={colors.primary}
-                    />
-                  </View>
-                  <View style={styles.transparencyTextCol}>
-                    <AppText variant="label">Marco Regulatório do 1746</AppText>
-                    <AppText variant="caption" color="muted">
-                      Os prazos de atendimento seguem o Decreto Rio nº 44.850 e a Carta
-                      de Serviços aos Cidadãos da Prefeitura do Rio.
-                    </AppText>
-                  </View>
-                </View>
-
-                <View
-                  style={[styles.tableDivider, { backgroundColor: colors.divider }]}
-                />
-
-                <View style={styles.transparencyRow}>
-                  <View
-                    style={[
-                      styles.kpiSmallIcon,
-                      { backgroundColor: colors.primaryContainer },
-                    ]}
-                  >
-                    <Ionicons name="server-outline" size={layout.iconSize.sm} color={colors.primary} />
-                  </View>
-                  <View style={styles.transparencyTextCol}>
-                    <AppText variant="label">Base de Dados Abertos</AppText>
-                    <AppText variant="caption" color="muted">
-                      Consolidação oficial via DATA.RIO e Escritório de Dados da PCRJ. O
-                      Fiscaliza aí não altera prazos nem emite atestados.
-                    </AppText>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </View>
+          <InsetGroup>
+            <ListRow
+              icon="map-outline"
+              title="Bairros com mais chamados"
+              subtitle="Volume registrado por bairro, sem avaliar desempenho"
+              onPress={() => router.push('/NeighborhoodVolumeScreen')}
+            />
+            <ListRow
+              icon="information-circle-outline"
+              title="Fonte e limites dos dados"
+              subtitle="DATA.RIO e Escritório de Dados da PCRJ"
+              onPress={() => router.push('/AboutScreen')}
+            />
+          </InsetGroup>
+          <AppText variant="meta" color="muted">
+            Fonte: DATA.RIO. O Fiscaliza aí não altera prazos nem emite atestados.
+          </AppText>
       </ScrollView>
     </AppScreen>
-  );
-}
-
-interface RankingRow {
-  key: string;
-  label: string;
-  detail?: string;
-  value: string;
-  /** Fração 0–1 usada apenas para a barra visual. */
-  share: number;
-  tone: string;
-  onPress?: () => void;
-}
-
-function RankingSection({
-  icon,
-  title,
-  rows,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  rows: RankingRow[];
-}) {
-  const { colors } = useTheme();
-  const styles = useThemedStyles(createStyles);
-  return (
-    <View style={styles.dashboardBlock}>
-      <View style={styles.sectionHeaderRow}>
-        <Ionicons name={icon} size={layout.iconSize.sm} color={colors.muted} />
-        <AppText variant="caption" style={styles.sectionHeaderText} numberOfLines={1}>
-          {title}
-        </AppText>
-      </View>
-      <View
-        style={[
-          styles.breakdownTable,
-          { backgroundColor: colors.surface, borderColor: colors.divider },
-        ]}
-      >
-        {rows.map((row, idx) => (
-          <View key={row.key}>
-            {idx > 0 && (
-              <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
-            )}
-            <Pressable
-              disabled={!row.onPress}
-              onPress={row.onPress}
-              accessibilityRole={row.onPress ? 'button' : undefined}
-              accessibilityLabel={`${idx + 1}º ${row.label}: ${row.value}`}
-              style={({ pressed }) => [
-                styles.rankingRow,
-                pressed && { backgroundColor: colors.surfaceSubdued },
-              ]}
-            >
-              <AppText variant="label" style={[styles.rankPosition, { color: row.tone }]}>
-                {idx + 1}
-              </AppText>
-              <View style={styles.rankingContent}>
-                <View style={styles.breakdownLabelRow}>
-                  <AppText variant="label" numberOfLines={1} style={styles.rankingLabel}>
-                    {row.label}
-                  </AppText>
-                  <AppText variant="label" style={[styles.rankingValue, { color: row.tone }]}>
-                    {row.value}
-                  </AppText>
-                </View>
-                {row.detail ? (
-                  <AppText variant="caption" color="muted" numberOfLines={1}>
-                    {row.detail}
-                  </AppText>
-                ) : null}
-                <View style={[styles.barTrack, { backgroundColor: colors.surfaceSubdued }]}>
-                  <View
-                    style={[
-                      styles.barFill,
-                      {
-                        width: `${Math.max(2, Math.min(100, row.share * 100))}%`,
-                        backgroundColor: row.tone,
-                      },
-                    ]}
-                  />
-                </View>
-              </View>
-              {row.onPress ? (
-                <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
-              ) : null}
-            </Pressable>
-          </View>
-        ))}
-      </View>
-    </View>
   );
 }

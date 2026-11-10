@@ -18,7 +18,7 @@ test('results screen: replaces closed-call history with territorial and service 
   const content = read();
   assert.ok(!content.includes('useInfiniteOfficialCalls'), 'History list must be removed');
   assert.ok(!content.includes('HISTÓRICO DE ATENDIMENTOS'), 'History section must be removed');
-  for (const title of ['Bairros com mais chamados registrados', 'Problemas mais registrados', 'Velocidade de resolução']) {
+  for (const title of ['Problemas mais registrados', 'Velocidade de resolução']) {
     assert.ok(content.includes(title), `Must render ${title}`);
   }
   // Sem ranking competitivo: nada de bairros que "mais cumprem prazo" nem resolução mais rápida/lenta.
@@ -29,7 +29,10 @@ test('results screen: replaces closed-call history with territorial and service 
 
 test('results screen: rankings drill into the neighborhood and keep official sources', () => {
   const content = read();
-  assert.ok(content.includes('openNeighborhood'), 'Ranking rows must select the neighborhood');
+  const volume = fs.readFileSync('app/NeighborhoodVolumeScreen.tsx', 'utf8');
+  assert.ok(volume.includes('setNeighborhood') && volume.includes('Bairros por volume'), 'volume screen selects the neighborhood');
+  assert.ok(!volume.includes('mais cumprem') && !volume.includes('mais rápida'), 'no competitive ranking');
+  assert.ok(content.includes('/NeighborhoodVolumeScreen'), 'Results links to the volume screen');
   assert.ok(content.includes('DATA.RIO'));
   assert.ok(content.includes('impactAsync'), 'Must include haptic feedback');
 });
