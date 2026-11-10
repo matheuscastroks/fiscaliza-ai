@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -14,8 +14,8 @@ import {
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { useAuthStore } from '@/stores/authStore';
-import { request } from '@/services/http';
-import type { PostalCodeLookup, SessionUser } from '@/shared/contracts';
+import { formatPostalCode } from '@/services/postalCode';
+import { usePostalCodeFlow } from '@/features/profile/usePostalCodeFlow';
 
 export interface PostalCodeSheetProps {
   visible: boolean;
@@ -34,93 +34,26 @@ export function PostalCodeSheet({
   const styles = useThemedStyles(createStyles);
 
   const user = useAuthStore((s) => s.user);
-  const acceptProfile = useAuthStore((s) => s.acceptProfile);
-
-  const [postalCode, setPostalCode] = useState(
-    currentPostalCode
-      ? currentPostalCode.replace(/^(\d{5})(\d{3})$/, '$1-$2')
-      : '',
+  const flow = usePostalCodeFlow(
+    currentPostalCode ? formatPostalCode(currentPostalCode) : '',
   );
-  const [lookup, setLookup] = useState<PostalCodeLookup | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const requestVersion = useRef(0);
-
-  const digits = postalCode.replace(/\D/g, '');
+  const { postalCode, digits, lookup, busy, saving, error } = flow;
 
   // Sincroniza CEP inicial ao abrir
   useEffect(() => {
-    if (visible) {
-      if (currentPostalCode) {
-        setPostalCode(currentPostalCode.replace(/^(\d{5})(\d{3})$/, '$1-$2'));
-      }
-      setLookup(null);
-      setError('');
-    }
+    if (visible) flow.reset(currentPostalCode ? formatPostalCode(currentPostalCode) : '');
   }, [visible, currentPostalCode]);
 
-  const handleSearch = async () => {
-    if (digits.length !== 8 || busy || saving) return;
+  const handleSearch = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const version = ++requestVersion.current;
-    setBusy(true);
-    setError('');
-    setLookup(null);
-
-    try {
-      const result = await request<PostalCodeLookup>(
-        '/profile/postal-code/' + digits,
-      );
-      if (version === requestVersion.current) {
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        setLookup(result);
-      }
-    } catch (caught) {
-      if (version === requestVersion.current) {
-        setError(
-          caught instanceof Error
-            ? caught.message
-            : 'Não foi possível encontrar este CEP. Verifique os dígitos e tente novamente.',
-        );
-      }
-    } finally {
-      if (version === requestVersion.current) {
-        setBusy(false);
-      }
-    }
+    void flow.search();
   };
 
   const handleConfirm = async () => {
-    if (!lookup || saving) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setSaving(true);
-    setError('');
-    const sessionVersion = useAuthStore.getState().sessionVersion;
-
-    try {
-      const profile = await request<SessionUser>(
-        '/profile/municipality',
-        'PUT',
-        {
-          postalCode: lookup.postalCode,
-          municipalityId: lookup.municipality.id,
-        },
-      );
-      if (await acceptProfile(profile, sessionVersion)) {
-        void Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Success,
-        );
-        onClose();
-      }
-    } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : 'Não foi possível salvar seu CEP. Tente novamente.',
-      );
-    } finally {
-      setSaving(false);
+    if (await flow.confirm()) {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      onClose();
     }
   };
 
@@ -195,17 +128,7 @@ export function PostalCodeSheet({
                 keyboardAppearance={mode}
                 maxLength={9}
                 editable={!busy && !saving}
-                onChangeText={(value) => {
-                  const normalized = value.replace(/\D/g, '').slice(0, 8);
-                  setPostalCode(
-                    normalized.length > 5
-                      ? normalized.slice(0, 5) + '-' + normalized.slice(5)
-                      : normalized,
-                  );
-                  requestVersion.current++;
-                  setLookup(null);
-                  setError('');
-                }}
+                onChangeText={(value) => flow.reset(formatPostalCode(value))}
                 onSubmitEditing={() => {
                   if (digits.length === 8) void handleSearch();
                 }}
@@ -215,11 +138,7 @@ export function PostalCodeSheet({
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Limpar CEP"
-                  onPress={() => {
-                    setPostalCode('');
-                    setLookup(null);
-                    setError('');
-                  }}
+                  onPress={() => flow.reset('')}
                   hitSlop={8}
                 >
                   <Ionicons
@@ -312,10 +231,7 @@ export function PostalCodeSheet({
                     title="Digitar outro CEP"
                     variant="quiet"
                     disabled={saving}
-                    onPress={() => {
-                      setLookup(null);
-                      setPostalCode('');
-                    }}
+                    onPress={() => flow.reset('')}
                   />
                 </View>
               </View>

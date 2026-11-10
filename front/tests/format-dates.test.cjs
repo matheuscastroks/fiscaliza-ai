@@ -21,3 +21,10 @@ test('time remaining uses the right unit, and M means months', () => {
   assert.equal(dates.formatTimeRemainingShort(2, 'H'), '2h');
   assert.equal(dates.formatTimeRemaining(0, 'D'), null);
 });
+
+test('postal code helper keeps only digits and masks them', () => {
+  const { formatPostalCode, onlyDigits } = require('@/features/profile/postalCodeFormat');
+  assert.equal(formatPostalCode('20040020'), '20040-020');
+  assert.equal(formatPostalCode('20a04-0020999'), '20040-020');
+  assert.equal(onlyDigits('20040-020'), '20040020');
+});
