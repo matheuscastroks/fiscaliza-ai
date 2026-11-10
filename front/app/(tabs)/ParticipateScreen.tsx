@@ -23,6 +23,7 @@ import {
 import { useTheme, spacing, layout } from '@/theme';
 import { partnerBrand } from '@/theme/palette';
 import { fontSizes } from '@/theme/typography';
+import { IconTile } from '@/components/ui/IconTile';
 
 interface ChannelItem {
   id: string;
@@ -208,14 +209,7 @@ export default function ParticipateScreen() {
                     pressed && { backgroundColor: colors.surfaceSubdued },
                   ]}
                 >
-                  <View
-                    style={[
-                      styles.iconSquircle,
-                      { backgroundColor: colors.surfaceSubdued },
-                    ]}
-                  >
-                    <Ionicons name={service.icon} size={layout.iconSize.md} color={colors.primary} />
-                  </View>
+                  <IconTile icon={service.icon} />
                   <View style={styles.tableRowContent}>
                     <View style={styles.serviceTitleRow}>
                       <AppText variant="label" numberOfLines={1}>

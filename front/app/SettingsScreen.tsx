@@ -19,6 +19,7 @@ import { useMunicipalityId } from '@/features/city/municipality';
 import { AppToast } from '@/components/ui/AppToast';
 import { useTheme, spacing, layout } from '@/theme';
 import { fontSizes } from '@/theme/typography';
+import { IconTile } from '@/components/ui/IconTile';
 
 const appearanceOptions = [
   {
@@ -249,14 +250,7 @@ export default function SettingsScreen() {
                     (testSending || !pushToken) && { opacity: 0.6 },
                   ]}
                 >
-                  <View
-                    style={[
-                      styles.iconSquircle,
-                      { backgroundColor: colors.primaryContainer },
-                    ]}
-                  >
-                    <Ionicons name="paper-plane-outline" size={layout.iconSize.sm} color={colors.primary} />
-                  </View>
+                  <IconTile icon="paper-plane-outline" />
 
                   <View style={styles.tableRowContent}>
                     <AppText variant="label">Testar notificação no aparelho</AppText>
@@ -321,14 +315,7 @@ export default function SettingsScreen() {
             ]}
           >
             <View style={styles.tableRow}>
-              <View
-                style={[
-                  styles.iconSquircle,
-                  { backgroundColor: colors.surfaceSubdued },
-                ]}
-              >
-                <Ionicons name="text-outline" size={layout.iconSize.md} color={colors.primary} />
-              </View>
+              <IconTile icon="text-outline" />
               <View style={styles.tableRowContent}>
                 <AppText variant="label">Escala tipográfica</AppText>
                 <AppText variant="caption" color="muted">
@@ -340,14 +327,7 @@ export default function SettingsScreen() {
             <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
 
             <View style={styles.tableRow}>
-              <View
-                style={[
-                  styles.iconSquircle,
-                  { backgroundColor: colors.surfaceSubdued },
-                ]}
-              >
-                <Ionicons name="eye-outline" size={layout.iconSize.md} color={colors.primary} />
-              </View>
+              <IconTile icon="eye-outline" />
               <View style={styles.tableRowContent}>
                 <AppText variant="label">Leitores de tela</AppText>
                 <AppText variant="caption" color="muted">

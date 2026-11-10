@@ -17,6 +17,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { formatPostalCode } from '@/services/postalCode';
 import { usePostalCodeFlow } from '@/features/profile/usePostalCodeFlow';
 import { fontSizes } from '@/theme/typography';
+import { IconTile } from '@/components/ui/IconTile';
 
 export interface PostalCodeSheetProps {
   visible: boolean;
@@ -77,14 +78,7 @@ export function PostalCodeSheet({
         {!user ? (
           /* Estado Não Conectado: Apelo para Login */
           <View style={styles.guestCard}>
-            <View
-              style={[
-                styles.iconSquircle,
-                { backgroundColor: colors.primaryContainer },
-              ]}
-            >
-              <Ionicons name="location" size={layout.iconSize.lg} color={colors.primary} />
-            </View>
+            <IconTile icon="location" />
             <View style={{ gap: 4 }}>
               <AppText variant="sectionTitle">
                 Vincule seu CEP carioca

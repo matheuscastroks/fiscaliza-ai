@@ -31,6 +31,7 @@ import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { PostalCodeSheet } from '@/components/profile/PostalCodeSheet';
 import { layout, spacing } from '@/theme';
 import { fontSizes } from '@/theme/typography';
+import { IconTile } from '@/components/ui/IconTile';
 
 type MenuItem = {
   label: string;
@@ -403,14 +404,7 @@ export default function ProfileScreen() {
                 pressed && { backgroundColor: colors.surfaceSubdued },
               ]}
             >
-              <View
-                style={[
-                  styles.iconSquircle,
-                  { backgroundColor: colors.primaryContainer },
-                ]}
-              >
-                <Ionicons name="location" size={layout.iconSize.md} color={colors.primary} />
-              </View>
+              <IconTile icon="location" />
               <View style={styles.tableRowContent}>
                 <AppText variant="label">
                   {formattedCep ? `CEP ${formattedCep}` : 'Cadastrar meu CEP'}
@@ -493,14 +487,7 @@ export default function ProfileScreen() {
                       pressed && { backgroundColor: colors.surfaceSubdued },
                     ]}
                   >
-                    <View
-                      style={[
-                        styles.iconSquircle,
-                        { backgroundColor: colors.surfaceSubdued },
-                      ]}
-                    >
-                      <Ionicons name={item.icon} size={layout.iconSize.md} color={colors.primary} />
-                    </View>
+                    <IconTile icon={item.icon} />
                     <View style={styles.tableRowContent}>
                       <AppText variant="label">{item.label}</AppText>
                     </View>
@@ -541,14 +528,7 @@ export default function ProfileScreen() {
                     pressed && { backgroundColor: colors.surfaceSubdued },
                   ]}
                 >
-                  <View
-                    style={[
-                      styles.iconSquircle,
-                      { backgroundColor: colors.surfaceSubdued },
-                    ]}
-                  >
-                    <Ionicons name="log-out-outline" size={layout.iconSize.md} color={colors.ink} />
-                  </View>
+                  <IconTile icon="log-out-outline" tone="neutral" />
                   <View style={styles.tableRowContent}>
                     <AppText variant="label">Sair da conta</AppText>
                     <AppText variant="caption" color="muted">
@@ -573,14 +553,7 @@ export default function ProfileScreen() {
                     pressed && { backgroundColor: colors.riskSurface },
                   ]}
                 >
-                  <View
-                    style={[
-                      styles.iconSquircle,
-                      { backgroundColor: colors.riskSurface },
-                    ]}
-                  >
-                    <Ionicons name="trash-outline" size={layout.iconSize.md} color={colors.risk} />
-                  </View>
+                  <IconTile icon="trash-outline" tone="risk" />
                   <View style={styles.tableRowContent}>
                     <AppText variant="label" style={{ color: colors.risk }}>
                       Apagar minha conta
@@ -605,14 +578,7 @@ export default function ProfileScreen() {
                   pressed && { backgroundColor: colors.surfaceSubdued },
                 ]}
               >
-                <View
-                  style={[
-                    styles.iconSquircle,
-                    { backgroundColor: colors.primaryContainer },
-                  ]}
-                >
-                  <Ionicons name="person-add-outline" size={layout.iconSize.md} color={colors.primary} />
-                </View>
+                <IconTile icon="person-add-outline" />
                 <View style={styles.tableRowContent}>
                   <AppText variant="label">Entrar ou criar conta</AppText>
                   <AppText variant="caption" color="muted">

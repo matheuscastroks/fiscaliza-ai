@@ -16,6 +16,7 @@ import {
 import { partnerBrand } from '@/theme/palette';
 import { fontSizes } from '@/theme/typography';
 import { lightColors } from '@/theme/colors';
+import { IconTile } from '@/components/ui/IconTile';
 
 export { COMPLAINT_TOPICS, type ComplaintTopic };
 
@@ -128,9 +129,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
             pressed && { backgroundColor: colors.surfaceSubdued },
           ]}
         >
-          <View style={[styles.iconSquircle, { backgroundColor: colors.surfaceSubdued }]}>
-            <Ionicons name={currentTopic.icon} size={layout.iconSize.md} color={colors.primary} />
-          </View>
+          <IconTile icon={currentTopic.icon} />
           <View style={styles.tableRowContent}>
             <AppText variant="caption" color="muted">
               O que precisa de reparo?
@@ -151,9 +150,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
 
         {/* Linha 2: Endereço e Localização ("Onde é o problema?") */}
         <View style={styles.tableInputRow}>
-          <View style={[styles.iconSquircle, { backgroundColor: colors.surfaceSubdued }]}>
-            <Ionicons name="location-outline" size={layout.iconSize.md} color={colors.primary} />
-          </View>
+          <IconTile icon="location-outline" />
           <View style={styles.tableInputContent}>
             <View style={styles.inputHeaderRow}>
               <AppText variant="caption" color="muted">
@@ -191,9 +188,7 @@ export function QuickComplaintKit({ defaultLocation = '' }: QuickComplaintKitPro
 
         {/* Linha 3: Detalhes Adicionais (Textarea auto-expansível) */}
         <View style={styles.tableInputRow}>
-          <View style={[styles.iconSquircle, { backgroundColor: colors.surfaceSubdued }]}>
-            <Ionicons name="document-text-outline" size={layout.iconSize.md} color={colors.primary} />
-          </View>
+          <IconTile icon="document-text-outline" />
           <View style={styles.tableInputContent}>
             <AppText variant="caption" color="muted">
               Detalhes úteis (opcional)
