@@ -48,7 +48,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => {
         const previous = get();
         const next = change(previous);
         try { await AsyncStorage.setItem(key, JSON.stringify(persisted(next))); }
-        catch { throw Error('Não foi possível salvar neste aparelho. Tente novamente.'); }
+        catch { throw Error('Não conseguimos salvar neste celular. Tente de novo.'); }
         if (scope !== generation) return false;
         let selection = get().selection !== previous.selection ? get().selection : next.selection;
         if (selection.kind === 'radius' && selection.source === 'current' && next.currentRadius !== previous.currentRadius) {
@@ -57,7 +57,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => {
         set({ ...next, selection, deviceLocation: get().deviceLocation, busy: false });
         return true;
       } catch (error) {
-        if (scope === generation) set({ busy: false, error: error instanceof Error ? error.message : 'Não foi possível salvar. Tente novamente.' });
+        if (scope === generation) set({ busy: false, error: error instanceof Error ? error.message : 'Não conseguimos salvar. Tente de novo.' });
         return false;
       }
     });
@@ -97,7 +97,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => {
           }
           if (scope === generation) set(snapshot);
         } catch {
-          if (scope === generation) set({ error: 'Não foi possível ler seus lugares neste aparelho. Tente novamente.' });
+          if (scope === generation) set({ error: 'Não conseguimos ler seus lugares neste celular. Tente de novo.' });
         } finally { if (scope === generation) set({ hydrated: true }); }
       })();
       return initialization;

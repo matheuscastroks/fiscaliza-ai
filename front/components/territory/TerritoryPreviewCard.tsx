@@ -191,7 +191,7 @@ export function TerritoryCardContent({
           accessibilityRole="alert"
           accessibilityLiveRegion="polite"
         >
-          Não foi possível salvar. Toque em Salvar para tentar novamente.
+          Não conseguimos salvar. Toque em Salvar para tentar de novo.
         </AppText>
       )}
       {close}

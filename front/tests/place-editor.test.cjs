@@ -38,7 +38,7 @@ function setup() {
   return { control, resolve: (value) => resolve(value), count: () => ({ writes, done }), failSave: () => { succeed = false; }, switchScope: () => { current = { ...current, userId: 'b' }; } };
 }
 const flush = () => new Promise(r => setImmediate(r));
-const saveLabel = 'Confirmar ponto e salvar lugar';
+const saveLabel = 'Salvar lugar';
 test('late point resolution cannot save edited coordinates and leaves the form recoverable', async () => {
   const h = setup(); h.control('title', saveLabel).onPress();
   h.control('label', 'Latitude').onChangeText('-22.95');

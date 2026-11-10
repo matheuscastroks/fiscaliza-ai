@@ -82,7 +82,7 @@ export const useTerritoryStore = create<{
           get().municipalityId === scopeMunicipalityId
         ) {
           set({
-            persistenceError: 'Não foi possível ler sua região na sua conta.',
+            persistenceError: 'Não conseguimos ler sua região na sua conta.',
           });
         }
       } finally {
@@ -141,7 +141,7 @@ export const useTerritoryStore = create<{
         if (!scope.isCurrent(requestedScope)) return;
         set({
           persistenceError:
-            'Não foi possível salvar sua região. Tente novamente.',
+            'Não conseguimos salvar sua região. Tente de novo.',
         });
       }
     }).then(() => success);

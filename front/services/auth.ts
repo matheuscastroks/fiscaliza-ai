@@ -11,7 +11,7 @@ async function wrap<T>(action: () => Promise<T>): Promise<ApiResult<T>> {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Tente novamente.',
+      error: error instanceof Error ? error.message : 'Tente de novo.',
     };
   }
 }

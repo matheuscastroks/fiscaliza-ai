@@ -33,7 +33,7 @@ export function useDeviceLocation() {
       if (adopt) current.setCurrentLocation(point, territory.neighborhood);
       return { ...point, neighborhood: territory.neighborhood };
     } catch (e) {
-      if (!abort.signal.aborted) setError(e instanceof Error ? e.message : 'Não foi possível obter sua localização.');
+      if (!abort.signal.aborted) setError(e instanceof Error ? e.message : 'Não conseguimos obter sua localização.');
       return null;
     } finally {
       if (controller.current === abort) { controller.current = null; setBusy(false); }

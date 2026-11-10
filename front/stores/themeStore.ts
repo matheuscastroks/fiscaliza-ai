@@ -54,7 +54,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
         }
       } catch {
         set({
-          persistenceError: 'Não foi possível carregar a aparência salva.',
+          persistenceError: 'Não conseguimos carregar a aparência salva.',
         });
       } finally {
         set({ hydrated: true });
@@ -77,7 +77,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
           if (revision === currentRevision) {
             set({
               persistenceError:
-                'A aparência mudou nesta sessão, mas não pôde ser salva. Toque na opção para tentar novamente.',
+                'A aparência mudou nesta sessão, mas não pôde ser salva. Toque na opção para tentar de novo.',
             });
           }
         }

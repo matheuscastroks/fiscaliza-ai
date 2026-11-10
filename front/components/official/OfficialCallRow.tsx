@@ -41,11 +41,11 @@ export const OfficialCallRow = memo(function OfficialCallRow({
     try {
       if (!(await toggleSavedCall(call)))
         setSaveError(
-          'Não foi possível atualizar seus acompanhamentos. Toque em Salvar para tentar novamente.',
+          'Não conseguimos atualizar seus acompanhamentos. Toque em Salvar para tentar de novo.',
         );
     } catch {
       setSaveError(
-        'Não foi possível atualizar seus acompanhamentos. Toque em Salvar para tentar novamente.',
+        'Não conseguimos atualizar seus acompanhamentos. Toque em Salvar para tentar de novo.',
       );
     }
   };

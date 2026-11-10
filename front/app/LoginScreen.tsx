@@ -36,7 +36,7 @@ export default function LoginScreen() {
   return (
     <AuthScreenLayout
       title="Acesse sua conta"
-      description="Consulte dados públicos e acompanhe informações da sua cidade."
+      description="Entre para guardar seus chamados e lugares."
     >
       <View style={styles.accessOptions}>
         <GovBrButton disabled />
@@ -73,7 +73,7 @@ export default function LoginScreen() {
           }}
         />
         {error && (
-          <AppErrorMessage title="Não foi possível entrar" message={error} />
+          <AppErrorMessage title="Não conseguimos entrar" message={error} />
         )}
         <View style={styles.actions}>
           <AppButton

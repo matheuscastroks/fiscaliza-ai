@@ -71,7 +71,7 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: () => {
             void clearSavedCalls().then((ok) =>
-              setToastMessage(ok ? 'Chamados salvos apagados.' : 'Não foi possível apagar. Tente novamente.'),
+              setToastMessage(ok ? 'Chamados salvos apagados.' : 'Não conseguimos apagar. Tente de novo.'),
             );
           },
         },
@@ -92,7 +92,7 @@ export default function SettingsScreen() {
     setToastMessage(
       success
         ? 'Notificação de teste enviada com sucesso!'
-        : 'Não foi possível enviar a notificação de teste.',
+        : 'Não conseguimos enviar a notificação de teste.',
     );
   };
 
@@ -248,7 +248,7 @@ export default function SettingsScreen() {
                 <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Testar notificação no aparelho"
+                  accessibilityLabel="Testar notificação no celular"
                   disabled={testSending || !pushToken}
                   onPress={handleTestPush}
                   style={({ pressed }) => [
@@ -260,7 +260,7 @@ export default function SettingsScreen() {
                   <IconTile icon="paper-plane-outline" />
 
                   <View style={styles.tableRowContent}>
-                    <AppText variant="label">Testar notificação no aparelho</AppText>
+                    <AppText variant="label">Testar notificação no celular</AppText>
                     <AppText variant="caption" color="muted">
                       Envia um aviso de teste (só em desenvolvimento)
                     </AppText>
@@ -283,12 +283,12 @@ export default function SettingsScreen() {
           )}
         </View>
 
-        {/* Dados neste aparelho: apagar chamados salvos (com confirmação) */}
+        {/* Dados neste celular: apagar chamados salvos (com confirmação) */}
         <View style={styles.sectionBlock}>
           <View style={styles.sectionHeaderRow}>
             <Ionicons name="phone-portrait-outline" size={layout.iconSize.sm} color={colors.muted} />
             <AppText variant="caption" style={styles.sectionHeaderText}>
-              Dados neste aparelho
+              Dados neste celular
             </AppText>
           </View>
           <InsetGroup>
@@ -299,7 +299,7 @@ export default function SettingsScreen() {
               subtitle={
                 savedCount > 0
                   ? `${savedCount} ${savedCount === 1 ? 'chamado salvo será removido' : 'chamados salvos serão removidos'} deste aparelho`
-                  : 'Nenhum chamado salvo neste aparelho'
+                  : 'Nenhum chamado salvo neste celular'
               }
               onPress={savedCount > 0 ? confirmClearSaved : undefined}
             />

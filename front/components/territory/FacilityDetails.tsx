@@ -43,7 +43,7 @@ export function FacilityDetails({
     const fallbackUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
     const supported = await Linking.canOpenURL(url).catch(() => false);
     if (!(await openExternal(supported ? url : fallbackUrl, fallbackUrl)))
-      setLinkError('Não foi possível abrir o mapa. Tente novamente.');
+      setLinkError('Não conseguimos abrir o mapa. Tente de novo.');
   };
 
   const handleCall = async () => {
@@ -52,7 +52,7 @@ export function FacilityDetails({
     const cleaned = item.phone.replace(/[^0-9+]/g, '');
     const url = `tel:${cleaned}`;
     if (!(await openExternal(url)))
-      setLinkError('Não foi possível abrir o discador neste aparelho.');
+      setLinkError('Não conseguimos abrir o discador neste celular.');
   };
 
   return (
@@ -169,7 +169,7 @@ export function FacilityDetails({
               variant="secondary"
               onPress={() => {
                 void openExternal(item.provenance.officialUrl).then((ok) => {
-                  if (!ok) setLinkError('Não foi possível abrir a fonte oficial.');
+                  if (!ok) setLinkError('Não conseguimos abrir a fonte oficial.');
                 });
               }}
             />

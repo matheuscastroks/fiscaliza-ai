@@ -35,14 +35,14 @@ export default function AccountScreen() {
     try {
       const res = await deleteAccount();
       if (!res.success) {
-        setDeleteError(res.error || 'Não foi possível apagar a conta. Tente novamente.');
+        setDeleteError(res.error || 'Não conseguimos apagar a conta. Tente de novo.');
         setDeleting(false);
         return;
       }
       setConfirmDelete(false);
       router.replace('/LoginScreen');
     } catch {
-      setDeleteError('Erro ao apagar conta. Tente novamente.');
+      setDeleteError('Erro ao apagar conta. Tente de novo.');
       setDeleting(false);
     }
   };
@@ -54,7 +54,7 @@ export default function AccountScreen() {
         {user ? (
           <>
             <AppText variant="meta" color="muted">
-              Conectado como {user.email}. Seus chamados salvos e lugares ficam neste aparelho.
+              Conectado como {user.email}. Seus chamados salvos e lugares ficam neste celular.
             </AppText>
             <InsetGroup>
               <ListRow
@@ -90,7 +90,7 @@ export default function AccountScreen() {
         ) : (
           <>
             <AppText variant="meta" color="muted">
-              Você está usando o app sem conta. Salvos e lugares ficam só neste aparelho.
+              Você está usando o app sem conta. Salvos e lugares ficam só neste celular.
             </AppText>
             <InsetGroup>
               <ListRow

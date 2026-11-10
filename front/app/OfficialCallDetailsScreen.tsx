@@ -77,7 +77,7 @@ export default function OfficialCallDetailsScreen() {
             Chamado indisponível
           </AppText>
           <AppText variant="body" color="muted" style={{ textAlign: 'center' }}>
-            Não foi possível carregar as informações oficiais deste chamado.
+            Não conseguimos carregar as informações oficiais deste chamado.
           </AppText>
           <AppButton
             title="Tentar novamente"
@@ -177,12 +177,12 @@ export default function OfficialCallDetailsScreen() {
       >
         {!data && item && (
           <AppText variant="caption" color="muted">
-            Última informação consultada e salva neste aparelho.
+            Última informação consultada e salva neste celular.
           </AppText>
         )}
         {isError && (
           <AppText color="risk">
-            Não foi possível atualizar. Mostrando o que você já tinha salvo.
+            Não conseguimos atualizar. Mostrando o que você já tinha salvo.
           </AppText>
         )}
         {(persistenceError || saveFailed) && (
@@ -192,7 +192,7 @@ export default function OfficialCallDetailsScreen() {
             accessibilityLiveRegion="polite"
           >
             {persistenceError ||
-              'Não foi possível salvar. Toque em Salvar para tentar novamente.'}
+              'Não conseguimos salvar. Toque em Salvar para tentar de novo.'}
           </AppText>
         )}
 
@@ -264,8 +264,8 @@ export default function OfficialCallDetailsScreen() {
               }}
               accessibilityLabel={
                 isSaved
-                  ? 'Remover dos chamados salvos neste aparelho'
-                  : 'Salvar chamado neste aparelho para acompanhar'
+                  ? 'Remover dos chamados salvos neste celular'
+                  : 'Salvar chamado neste celular para acompanhar'
               }
               style={({ pressed }) => [
                 styles.saveButton,

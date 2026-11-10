@@ -8,7 +8,7 @@ import { spacing } from '@/theme/spacing';
 
 export function AppErrorMessage({
   message,
-  title = 'Não foi possível concluir',
+  title = 'Não conseguimos concluir',
   onRetry,
 }: {
   message: string;
