@@ -60,3 +60,7 @@ back/openapi.json
 /front/ios/
 /front/web-dist/
 /front/google-services.json
+
+# Backups e credenciais locais do modo público
+backups/
+secrets/

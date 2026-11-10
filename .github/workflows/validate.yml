@@ -38,20 +38,21 @@ jobs:
       EXPO_NO_TELEMETRY: 1
       EXPO_PUBLIC_API_URL: http://127.0.0.1:3001/api
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
           cache: npm
           cache-dependency-path: front/package-lock.json
       - run: npm ci --prefix front
+      - run: npm audit --omit=dev --audit-level=high --prefix front
       - run: npm test
       - run: npm run typecheck --prefix front
       - run: npm run lint
       - run: npm run export:android --prefix front -- --output-dir ../.validation/android-bundle --max-workers 2
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: android-js-validation
           path: .validation/android-bundle
@@ -84,35 +85,50 @@ jobs:
       run:
         working-directory: back
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: ${{ matrix.node }}
           cache: npm
           cache-dependency-path: back/package-lock.json
       - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
       - run: npm run build
       - run: node dist/back/src/migrate.js
       - run: node --test --test-concurrency=1 dist/back/test/*.test.js
       - run: node dist/back/src/openapi.js
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: api-contract-node-${{ matrix.node }}
           path: back/openapi.json
           if-no-files-found: error
           retention-days: 7
+  image:
+    name: Docker image
+    needs: owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Build the API image
+        run: docker build -f back/Dockerfile -t fiscaliza-api:ci .
+      - name: The image boots without test sources
+        run: |
+          docker run --rm fiscaliza-api:ci sh -c 'test ! -d dist/back/test && test -f dist/back/src/server.js && test -f dist/back/src/scheduler-cli.js'
   automation:
     name: Automation
     needs: owner
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
       - run: node --test .github/tests/*.test.cjs
@@ -131,7 +147,7 @@ jobs:
           docker compose -f compose.production.yaml config --quiet
   gate:
     name: CI gate
-    needs: [owner, app, api, automation]
+    needs: [owner, app, api, image, automation]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 2
@@ -139,4 +155,4 @@ jobs:
       - name: Require every job to succeed
         env:
           RESULTS: ${{ toJSON(needs.*.result) }}
-        run: node -e 'const r=JSON.parse(process.env.RESULTS); if(r.length!==4 || r.some(x=>x!=="success")) process.exit(1);'
+        run: node -e 'const r=JSON.parse(process.env.RESULTS); if(r.length!==5 || r.some(x=>x!=="success")) process.exit(1);'

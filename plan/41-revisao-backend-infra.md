@@ -54,5 +54,23 @@ Detalhes e medição em [`evidence/2026-11-10-backend-fase2.md`](evidence/2026-1
 
 Desvio do plano: transação por página (2.500 linhas) e não por partição inteira, para não manter uma transação aberta durante as consultas ao BigQuery.
 
+## Fase 3 — Infra
+| Item | Estado | Evidência |
+| --- | --- | --- |
+| Dockerfile em dois estágios, base por digest, `HEALTHCHECK`, `CMD` direto em Node, `init: true`; imagem 625 MB → 348 MB; sem testes na imagem | feito | L (build, subida contra o Postgres local: saudável; `docker stop` em 0,6 s) |
+| Migração como serviço de uma execução no Compose local; na produção, antes do Node no `command` (com `exec`) para funcionar com `up --wait` | feito (desvio do plano na produção) | C (`compose config`); L só no Compose local |
+| Backup diário (`pg_dump -Fc` + tar dos uploads), 7 diários e 4 semanais, escrita atômica; `deploy/restore.sh`; teste de restauração | feito | L: restauração em banco descartável com as mesmas contagens; **não testado na VPS nem copiado para fora da máquina** |
+| Agendador em Node (`scheduler.ts`): 1746 às 4h, SIURB aos domingos, limpeza de sessões; ping de sucesso/falha; credencial do BigQuery como secret | feito (desvio: Node em vez de supercronic, sem binário externo a manter) | C (testes de horário de Brasília, execução diária única, ping); **não executado contra o BigQuery real** |
+| Compose: limites de memória e CPU, rotação de logs, `restart` em todos os serviços, healthcheck do `cloudflared`, versão do `cloudflared` fixada, `scheduler` e `backup` também na produção | feito | C (`compose config`) |
+| Log de erro com stack | feito na Fase 0 | C |
+| Monitores externos (UptimeRobot, Healthchecks.io) | **pendente, depende da sua conta**; o código já faz o ping | — |
+| CI: `docker build` da imagem (e checagem de que não leva testes), `npm audit --omit=dev --audit-level=high` nos dois projetos, Dependabot (npm, actions, docker), actions fixadas por SHA | feito | C (não rodado no GitHub; o CI roda ao subir a branch) |
+| Teste de "drift" do OpenAPI | adaptado: o `openapi.json` não é versionado (é gerado), então o teste confere que o contrato gerado documenta conta, avisos e chamados salvos e não tem `/notifications/test` | C |
+| Expo: `eas.json` (development/preview/production, URL da API por perfil); o build de preview/production **falha** se `EXPO_PUBLIC_API_URL` não for https público; um só nome para o token do Mapbox (`EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN`, nomes antigos aceitos com aviso) | feito | C (teste do guard; `app.config.js` recusa a URL de desenvolvimento num perfil de release). Build do EAS não executado |
+| Trocar o package `com.anonymous.fiscalizaai` | **não feito, decisão sua**: o `google-services.json` (Firebase) e o app instalado dependem desse id; trocar exige registrar o app novo no Firebase e baixar outro arquivo, e quem já instalou teria de reinstalar | — |
+
+### Incidente durante a execução
+Num momento o Docker Desktop reiniciou (códigos 255) e a API e o Postgres do PC não voltaram sozinhos, porque o Compose antigo não tinha `restart`. Religuei os dois containers como estavam (`docker start`), sem alterar configuração. O novo `compose.yaml` já define `restart: unless-stopped`, mas só vale depois de recriar os containers.
+
 ## Fases seguintes
-Fase 3 infra (Dockerfile, backup, agendador, CI, Expo); Fase 4 endurecimento e higiene. Cada uma registra aqui o que foi feito e o que ficou de fora.
+Fase 4 endurecimento e higiene. Cada uma registra aqui o que foi feito e o que ficou de fora.
