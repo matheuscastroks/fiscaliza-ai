@@ -80,10 +80,7 @@ export const MAPBOX_STYLE_LIGHT = MAPBOX_STYLE_STREETS;
 export const MAPBOX_STYLE_DARK = MAPBOX_STYLE_STREETS;
 
 export function resolveMapboxAccessToken(): string {
-  const envToken =
-    process.env.EXPO_PUBLIC_API_MAPBOX ||
-    process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN ||
-    '';
+  const envToken = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN || '';
   if (envToken) return envToken.trim();
   const extraToken = Constants.expoConfig?.extra?.mapboxAccessToken;
   return typeof extraToken === 'string' ? extraToken.trim() : '';

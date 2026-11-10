@@ -18,7 +18,29 @@ Antes da primeira vez, no `.env.compose` (nunca versionado):
 2. Use `API_BIND=127.0.0.1`. Com `0.0.0.0` a API fica aberta na rede local sem passar pelo túnel.
 3. Defina `PUBLIC_DOMAIN` e `CLOUDFLARE_TUNNEL_TOKEN`.
 
-O compose de desenvolvimento não traz mais o domínio público em `WEB_ORIGINS`.
+O compose de desenvolvimento não traz mais o domínio público em `WEB_ORIGINS`. Com `--profile public` sobem também o `scheduler` e o `backup` descritos abaixo.
+
+## Imagem, migrações e sinais
+A imagem da API é feita em dois estágios (compila e depois copia só `dist/`, as migrações e os dados; sem testes nem fontes) com base fixada por digest e `HEALTHCHECK`. O processo principal é o Node, então `docker stop` encerra a API na hora. As migrações rodam no serviço de uma execução `migrate` (Compose local) ou antes do Node no `command` da API (Compose de produção, para funcionar com `up --wait`).
+
+## Backup e restauração
+O serviço `backup` (perfil `public` no PC; sempre ligado na VPS) faz, todo dia depois das 2h de Brasília, um `pg_dump -Fc` e um `tar` dos uploads em `BACKUP_DIR` (padrão `./backups`; na VPS `/opt/fiscaliza-ai/backups`), mantendo 7 cópias diárias e 4 semanais (domingos). O arquivo só aparece completo (escrita em temporário e renomeação). **Copie essa pasta para fora do computador** (OneDrive, Google Drive ou outro disco): sem isso, uma falha de disco perde tudo.
+
+Para restaurar num banco novo e conferir:
+
+```sh
+deploy/restore.sh backups/daily/fiscaliza-AAAAMMDD-HHMMSS.dump backups/daily/uploads-AAAAMMDD-HHMMSS.tar.gz
+# banco restaurado em "fiscaliza_restore"; confira e apague com
+docker compose exec postgres psql -U fiscaliza -d postgres -c 'DROP DATABASE fiscaliza_restore'
+```
+
+Para substituir a produção, pare a API, rode com `DB=fiscaliza` (o script pede a palavra SUBSTITUIR) e suba de novo. Restauração testada em 10/11/2026 no ambiente local: backup da base de desenvolvimento restaurado em banco descartável, com as mesmas contagens (30 usuários, 27.814 chamados, 4 anexos, 1 município), e o tar dos uploads listado. Não foi testada na VPS.
+
+## Sincronização agendada
+O serviço `scheduler` (mesma imagem) roda no horário de Brasília: `rio1746` às 4h (os últimos `RIO1746_SYNC_DAYS` dias fechados, padrão 2; avisa quem segue chamados que mudaram de situação), `siurb` aos domingos às 5h e limpeza de sessões vencidas às 3h30. Ao subir, não repete o que já passou do horário no dia. Precisa de uma credencial de service account do BigQuery em `BIGQUERY_CREDENTIALS_FILE` (padrão `./secrets/bigquery.json` no PC; `/opt/fiscaliza-ai/secrets/bigquery.json` na VPS) e de `GCP_PROJECT_ID`. O arquivo deve existir mesmo que ainda esteja vazio (`{}`); sem credencial válida a tarefa falha e fica registrada no log. O lock por fonte impede sobreposição com execuções manuais.
+
+## Monitoramento
+Crie dois monitores gratuitos de "job" no Healthchecks.io (um para a sincronização, outro para o backup) e coloque as URLs de ping em `HEALTHCHECK_SYNC_URL` e `HEALTHCHECK_BACKUP_URL`; o agendador chama a URL ao concluir e `/fail` ao falhar, e o monitor alerta quando o ping para de chegar. Para a API, aponte um monitor externo (UptimeRobot, por exemplo) para `https://<domínio>/api/health`. Não criei esses monitores: dependem da sua conta.
 
 O Compose local já possui `cloudflared`. Nos logs consultados em 05/11/2026, a configuração recebida da Cloudflare aponta `fiscalizaai.matheuscastroks.com.br` para `http://api:3001`, com fallback `http_status:404`. O healthcheck público `/api/health` respondeu 200 OK. O Compose de produção usa os mesmos nomes de serviço e porta para preservar essa rota. A configuração remota do túnel não foi alterada.
 

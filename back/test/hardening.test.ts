@@ -226,3 +226,19 @@ test(
     assert.ok(after <= before + 2, `conexões ${before} -> ${after}`);
   },
 );
+
+test('contrato OpenAPI gerado documenta conta, avisos e chamados salvos', async (t) => {
+  const app = await buildApp();
+  t.after(() => app.close());
+  await app.ready();
+  const paths = app.swagger().paths ?? {};
+  for (const [path, method] of [
+    ['/api/profile', 'delete'],
+    ['/api/v1/notifications/register-token', 'post'],
+    ['/api/v1/notifications/follow-call', 'delete'],
+    ['/api/v1/saved-calls', 'get'],
+    ['/api/v1/saved-calls/{callId}', 'put'],
+  ] as const)
+    assert.ok((paths as Record<string, Record<string, unknown>>)[path]?.[method], `${method} ${path}`);
+  assert.equal((paths as Record<string, unknown>)['/api/v1/notifications/test'], undefined);
+});

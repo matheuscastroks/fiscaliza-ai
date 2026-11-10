@@ -1,32 +1,20 @@
 # Modo público no PC: a API roda como em produção (CORS restrito, cookie Secure,
-# configuração obrigatória) e o túnel da Cloudflare fica ligado.
+# configuração obrigatória), o túnel da Cloudflare fica ligado e sobem também o
+# agendador de sincronização e o backup diário.
 #
 #   docker compose -f compose.yaml -f compose.public.yaml --profile public up -d
 #
 # Exige no .env.compose: POSTGRES_PASSWORD próprio (a senha de exemplo é
-# recusada), CLOUDFLARE_TUNNEL_TOKEN e PUBLIC_DOMAIN.
+# recusada), CLOUDFLARE_TUNNEL_TOKEN, PUBLIC_DOMAIN e o arquivo de credencial do
+# BigQuery (BIGQUERY_CREDENTIALS_FILE, padrão ./secrets/bigquery.json).
 services:
   api:
     environment:
       NODE_ENV: production
       WEB_ORIGINS: https://${PUBLIC_DOMAIN:?Configure PUBLIC_DOMAIN}
-    logging:
-      driver: json-file
-      options:
-        max-size: '10m'
-        max-file: '5'
-  postgres:
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-size: '10m'
-        max-file: '3'
+  scheduler:
+    environment:
+      NODE_ENV: production
   cloudflared:
     environment:
       TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?Configure CLOUDFLARE_TUNNEL_TOKEN}
-    logging:
-      driver: json-file
-      options:
-        max-size: '10m'
-        max-file: '3'
