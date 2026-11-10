@@ -59,7 +59,13 @@ Data: 2026-11-10. Cada linha cita o que existe no código e o tipo de evidência
 | Salvar um chamado e reencontrá-lo em Salvos, inclusive depois de fechar e reabrir o app | Samsung |
 | Modo escuro, fonte 1,5×, offline, localização negada | Xiaomi (offline com conta) e Samsung (fonte, offline) |
 | Onboarding, Perfil, Conta e privacidade, Agir, Preferências, Dados do bairro, mensagem para o 1746 | Xiaomi e/ou Samsung |
-| Não percorrido: detalhe do chamado por toque, Lugares/editor por toque, login e cadastro, apagar conta | — |
+| Detalhe do chamado (por toque), Lugares e editor de lugar, Login, Cadastro, Conta e privacidade sem conta | Samsung |
+| Não percorrido: apagar conta e sair da conta (exigem uma conta real; ação destrutiva, não executada) | — |
+
+## Defeitos achados nesta última passada e corrigidos
+- Detalhe do chamado: título ficava espremido ao lado dos botões e quebrava no meio da palavra; botões foram para cima do título.
+- Login: botão "Entrar com gov.br" sempre desativado saiu (era ruído sem função); "Sobre o Fiscaliza aí" virou "Sobre o app"; nome da marca cortado na faixa do topo.
+- Editor de lugar: rótulo e texto de exemplo do endereço eram idênticos.
 
 ## Pendências reais
 1. Decidir se adota um executor de testes de componentes (Jest + `@testing-library/react-native`).

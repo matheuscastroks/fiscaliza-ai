@@ -46,14 +46,14 @@ test('auth ui: GovBrButton component adheres to official DS Gov.br standards', (
   );
 });
 
-test('auth ui: LoginScreen integrates civic hero backdrop and GovBrButton', () => {
+test('auth ui: LoginScreen integrates civic hero backdrop and offers only options that work', () => {
   const loginScreenPath = path.join(ROOT_DIR, 'app', 'LoginScreen.tsx');
   assert.ok(fs.existsSync(loginScreenPath), 'LoginScreen.tsx must exist');
 
   const content = fs.readFileSync(loginScreenPath, 'utf8');
   assert.ok(
-    content.includes('GovBrButton'),
-    'LoginScreen must render GovBrButton',
+    !content.includes('GovBrButton'),
+    'LoginScreen must not show the gov.br button while it is unavailable',
   );
   const layout = fs.readFileSync(
     path.join(ROOT_DIR, 'components', 'ui', 'AuthScreenLayout.tsx'),
