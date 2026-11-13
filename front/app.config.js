@@ -37,6 +37,8 @@ module.exports = ({ config }) => {
           : {},
       ],
       'expo-secure-store',
+      'expo-status-bar',
+      'expo-web-browser',
       [
         '@sentry/react-native/expo',
         {

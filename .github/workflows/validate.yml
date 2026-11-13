@@ -52,10 +52,13 @@ jobs:
           cache: npm
           cache-dependency-path: front/package-lock.json
       - run: npm ci --prefix front
+      - name: Check Expo compatibility
+        working-directory: front
+        run: npx expo-doctor
       - run: npm audit --omit=dev --audit-level=high --prefix front
       - run: npm test
       - run: npm run typecheck --prefix front
-      - run: npm run lint
+      - run: npm run lint --prefix front
       - run: npm run export:android --prefix front -- --output-dir ../.validation/android-bundle --max-workers 2
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -100,6 +103,7 @@ jobs:
           cache-dependency-path: back/package-lock.json
       - run: npm ci
       - run: npm audit --omit=dev --audit-level=high
+      - run: npm run lint
       - run: npm run build
       - run: node dist/back/src/migrate.js
       - run: node --test --test-concurrency=1 dist/back/test/*.test.js

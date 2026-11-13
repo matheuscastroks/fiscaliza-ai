@@ -61,3 +61,10 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Corrigidos parâmetros/imports sem uso e removidos any explícitos da entrada territorial; validação de CEP agora confere tipos string antes das regex.
 - Evidência: lint backend/shared sem avisos, typecheck backend e teste de geometria municipal passaram. Suite completa com banco ainda pendente.
 - Ferramentas alinhadas às versões já instaladas no app; npm informa ESLint 9 sem suporte e sete vulnerabilidades moderadas na árvore backend. Avaliação de atualização permanece pendente, sem audit fix forçado.
+
+## Fase 5 — atualização Expo desbloqueada (Codex)
+- Skill expo-upgrade recuperada de expo/skills, commit cd91460c0834e29ebb5fad92c34a690a3b207ed2; pasta, referências, licença e origem preservadas em front/.agents/skills/expo-upgrade.
+- expo install --fix atualizou os 14 pacotes dentro do SDK 58. O comando encerrou com erro ao tentar editar app.config.js; plugins expo-status-bar/expo-web-browser foram adicionados manualmente conforme a mensagem. expo install --check depois confirmou dependências atualizadas.
+- React Compiler habilitado. CI agora executa Expo Doctor e lint backend no job correto (correção de aplicação anterior que não havia alterado o YAML por CRLF).
+- Expo Doctor: 20/20 checks, com aviso de prebuild Android ausente para Sentry. Build, testes completos após atualização e validação S22 ainda pendentes; não atribuir a este estado os testes da integração anterior.
+- PostgreSQL 17 disponível em imagem local; usar contêiner separado para os próximos testes, sem tocar no serviço de produção existente.
