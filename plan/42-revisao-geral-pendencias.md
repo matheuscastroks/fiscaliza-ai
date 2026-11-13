@@ -118,3 +118,9 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Exportações anteriores mantidas por compatibilidade. Testes de geometria importam o módulo puro diretamente, eliminando o carregador que simulava React e módulos nativos.
 - Typecheck app, lint sem avisos e 17 testes relacionados (marcadores, contorno, câmera, cluster e gesto) passaram.
 - Native loader, eventos e câmera seguem no componente principal. Verificação visual no S22 continua pendente; useTerritoryView ainda precisa ser dividido.
+
+## Fase 5 — controlador territorial dividido
+- Extraído useTerritoryEntries: lista, marcadores, detalhe selecionado, cluster selecionado, paginação por camada e disponibilidade derivam do mesmo recorte. useTerritoryView concentra callbacks, filtros e câmera (366 linhas após remoção de linhas vazias acumuladas).
+- Dois testes RNTL do hook passaram: área visível exclui chamados sem ponto e inclui foco externo nos marcadores; bairro conserva registros sem coordenadas. Teste verificado falhando por módulo ausente antes da extração.
+- Typecheck app, lint sem avisos e 11 regressões de mapa/gesto passaram. Proteção de geração de requisições continua no código de consultas; esta extração não altera a garantia de respostas assíncronas.
+- Mais testes das consultas e de troca de recorte, além de validação no aparelho, continuam pendentes no plano completo.
