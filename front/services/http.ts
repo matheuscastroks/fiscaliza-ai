@@ -158,15 +158,16 @@ export function assetUrl(url: string) {
 export async function uploadImage(uri: string): Promise<string> {
   if (uri.startsWith('/api/attachments/') || /^https?:/.test(uri)) return uri;
   // Native mobile uploader via Expo FileSystem
-  const fs = await import('expo-file-system/legacy');
-  if (!(await fs.getInfoAsync(uri)).exists) {
+  const fs = await import('expo-file-system');
+  const file = new fs.File(uri);
+  if (!file.exists) {
     throw new Error(
       'A foto não está mais disponível. Escolha a imagem novamente.',
     );
   }
-  const task = fs.createUploadTask(API_URL + '/attachments', uri, {
+  const task = file.createUploadTask(API_URL + '/attachments', {
     httpMethod: 'POST',
-    uploadType: fs.FileSystemUploadType.MULTIPART,
+    uploadType: fs.UploadType.MULTIPART,
     fieldName: 'file',
     headers: {
       'X-Fiscaliza-Client': CLIENT_HEADER,
@@ -176,7 +177,7 @@ export async function uploadImage(uri: string): Promise<string> {
   let expired = false;
   const timer = setTimeout(() => {
     expired = true;
-    void task.cancelAsync().catch(() => undefined);
+    task.cancel();
   }, 15000);
   try {
     const response = await task.uploadAsync();
@@ -191,5 +192,6 @@ export async function uploadImage(uri: string): Promise<string> {
     return result.url;
   } finally {
     clearTimeout(timer);
+    task.release();
   }
 }

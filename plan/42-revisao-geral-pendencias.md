@@ -124,3 +124,10 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Dois testes RNTL do hook passaram: área visível exclui chamados sem ponto e inclui foco externo nos marcadores; bairro conserva registros sem coordenadas. Teste verificado falhando por módulo ausente antes da extração.
 - Typecheck app, lint sem avisos e 11 regressões de mapa/gesto passaram. Proteção de geração de requisições continua no código de consultas; esta extração não altera a garantia de respostas assíncronas.
 - Mais testes das consultas e de troca de recorte, além de validação no aparelho, continuam pendentes no plano completo.
+
+## Fase 5 — TypeScript e FileSystem
+- TypeScript backend alinhado em ~6.0.3 ao app, evitando versões distintas ao compilar shared.
+- Upload de avatar usa File.createUploadTask/UploadType da API atual de expo-file-system; preserva multipart, cabeçalho nativo, sessão, limite de 15 segundos e mensagem do servidor. Tarefa nativa liberada no finally, inclusive em falha HTTP.
+- Cópia local do perfil usa Directory/File/Paths; nenhuma importação expo-file-system/legacy permanece.
+- Três testes de upload falharam antes da migração; 11 testes de transporte passaram depois. Typecheck app/API, lint app e duas regressões do perfil passaram. Validar cópia/upload/cancelamento no S22 com novo build.
+- expo-linking é peer obrigatório do expo-router e foi preservado. Remoção de expo-web-browser/expo-asset ainda depende da avaliação dos usos indiretos e Expo Doctor. Permissão de galeria também permanece pendente.
