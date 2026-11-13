@@ -49,3 +49,9 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Validação: 31 testes de automação passaram; atualização package-lock-only concluída e comparação confirmou zero mudanças de versões de pacotes.
 - expo-upgrade também não foi encontrado em ~/.claude (busca incluindo arquivos ignorados); nenhuma skill foi copiada. A falta limita a atualização Expo, não os demais itens.
 - Restante da Fase 5, revisão final, build S22 e deploy continuam pendentes. Não considerar o objetivo concluído.
+
+## Fase 5 — saúde das sincronizações (Codex)
+- Adicionado GET /api/health/deep público, sem cache, com lastSuccessAt e ageSeconds por fonte (1746 e quatro camadas SIURB). Ausência de sucesso completo é null; idade não é apresentada como comprovação de cobertura dos dados.
+- Consulta agrega somente execuções success. Falha no banco responde 503 sem detalhes internos no corpo.
+- Evidência: teste falhou antes da implementação; três testes passaram (idade/ausência, falha sanitizada, rota pública no buildApp com banco indisponível). Typecheck backend passou.
+- Pendente: validar a agregação contra Postgres de teste e incluir o endpoint na revisão final. Nenhum teste acessou produção.

@@ -1,3 +1,4 @@
+import { HEALTH_SOURCE_IDS, registerDeepHealthRoute } from './deep-health.js';
 import { randomUUID } from 'node:crypto';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
@@ -330,6 +331,7 @@ export async function buildApp(
     if (
       !isAccountPath(path) &&
       path !== '/api/health' &&
+      path !== '/api/health/deep' &&
       !(req.method === 'GET' && path.startsWith('/api/rio1746/')) &&
       !(
         req.method === 'GET' &&
@@ -373,6 +375,14 @@ export async function buildApp(
   app.get('/api/health', async () => {
     await connection.pool.query('SELECT 1');
     return ok({ status: 'ok' });
+  });
+
+  registerDeepHealthRoute(app, async () => {
+    const result = await connection.pool.query<{ sourceId: string; finishedAt: Date | null }>(
+      'SELECT source_id AS "sourceId", MAX(finished_at) AS "finishedAt" FROM source_sync_runs WHERE source_id = ANY($1::text[]) AND status = $2 GROUP BY source_id',
+      [HEALTH_SOURCE_IDS, 'success'],
+    );
+    return result.rows;
   });
 
   registerAuthRoutes(app, {
