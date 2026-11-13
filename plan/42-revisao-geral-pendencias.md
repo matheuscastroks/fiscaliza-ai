@@ -139,3 +139,16 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Evidência: teste PostgreSQL com 610 registros sintéticos passou (600 pontos representados, 10 sem ponto, soma das células igual à cobertura, viewport externo vazio preservando total). Lint backend passou; typecheck final acompanhar antes de concluir.
 - AINDA NÃO CORRIGIDO NO APP: falta rota HTTP com validação e reaproveitamento dos filtros, serviço/hook do app por viewport, render de agregados sem reclustering com pesos errados, interação de zoom/detalhe, rótulos de cobertura e testes de integração/end-to-end. Não afirmar resolução visual antes disso.
 - Correção da regex de estilos e demais itens originais do plano permanecem pendentes.
+
+## Pedido em andamento — Expo Start e S22
+- Metro da branch atual iniciado com expo start --dev-client --localhost --port 8082; sessão 13523 deve permanecer ativa. Porta 8081 pertence à outra worktree e foi preservada.
+- S22 reconectado e autorizado: RQCT30454WK (SM_S901E). adb reverse tcp:8082 tcp:8082 aplicado; Bundle Location no menu RN ajustado e conferido como localhost:8082.
+- Bundle JS compilado e solicitado pelo aparelho. APK antigo falhou com Cannot find native module ExpoNetwork; avisos de default export/ErrorBoundary são consequência do import nativo quebrado.
+- expo prebuild --platform android --no-install concluído. Compilação/instalação em andamento na sessão 80977, comando RCT_METRO_PORT=8082 npx expo run:android --device RQCT30454WK --no-bundler. Log .validation/fase5-s22-build.log; conferir sessão antes de reiniciar.
+- Ainda não afirmar app atualizado/funcionando no aparelho. Ao concluir APK, verificar conexão à 8082, tela inicial, erros nativos e continuar os testes UI autorizados pelo usuário.
+- Trabalho da rota espacial foi interrompido para este pedido; backend agregador está commitado, endpoint e app seguem pendentes.
+
+## Fase 5 — guarda de estilos corrigida
+- Regex borderw*Radius corrigida para border\w*Radius; teste reproduziu cantos específicos ignorados e passou após correção.
+- Guarda agora inclui rgba() e todos os pesos numéricos/literais de fonte. Inventário inicial das novas métricas: 9 rgba e 90 pesos; limites anteriores preservados (incluindo zero raios literais).
+- Dois testes da guarda passaram. Estes limites registram dívida existente e impedem aumento; não indicam que os 99 literais foram removidos.
