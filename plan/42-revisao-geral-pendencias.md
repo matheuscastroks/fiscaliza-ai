@@ -142,9 +142,9 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 
 ## Pedido em andamento — Expo Start e S22
 - Metro da branch atual iniciado com expo start --dev-client --localhost --port 8082; sessão 13523 deve permanecer ativa. Porta 8081 pertence à outra worktree e foi preservada.
-- S22 reconectado e autorizado: RQCT30454WK (SM_S901E). adb reverse tcp:8082 tcp:8082 aplicado; Bundle Location no menu RN ajustado e conferido como localhost:8082.
+- S22 reconectado e autorizado: <serial-s22> (SM_S901E). adb reverse tcp:8082 tcp:8082 aplicado; Bundle Location no menu RN ajustado e conferido como localhost:8082.
 - Bundle JS compilado e solicitado pelo aparelho. APK antigo falhou com Cannot find native module ExpoNetwork; avisos de default export/ErrorBoundary são consequência do import nativo quebrado.
-- expo prebuild --platform android --no-install concluído. Compilação/instalação em andamento na sessão 80977, comando RCT_METRO_PORT=8082 npx expo run:android --device RQCT30454WK --no-bundler. Log .validation/fase5-s22-build.log; conferir sessão antes de reiniciar.
+- expo prebuild --platform android --no-install concluído. Compilação/instalação em andamento na sessão 80977, comando RCT_METRO_PORT=8082 npx expo run:android --device <serial-s22> --no-bundler. Log .validation/fase5-s22-build.log; conferir sessão antes de reiniciar.
 - Ainda não afirmar app atualizado/funcionando no aparelho. Ao concluir APK, verificar conexão à 8082, tela inicial, erros nativos e continuar os testes UI autorizados pelo usuário.
 - Trabalho da rota espacial foi interrompido para este pedido; backend agregador está commitado, endpoint e app seguem pendentes.
 
@@ -166,3 +166,16 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Metro sessão 19099 continua ativo em 8082 com um worker. Banco fiscaliza-fase5-test foi parado para reduzir consumo de memória.
 - Endpoint GET /api/rio1746/map implementado localmente com viewport obrigatório, sem paginação. callConditions agora compartilha os filtros de lista/mapa. Teste sem banco reproduziu 404 antes e passou com 400 de validação depois; typecheck backend passou.
 - Teste HTTP com banco ainda precisa ser repetido quando o contêiner de teste for reiniciado; tentativa anterior teve timeout de conexão sob pressão de memória, não validou o comportamento. Integração app/camada espacial ainda pendente.
+
+## Continuidade — APK e transporte espacial
+- Build limitado sessão 25582 segue em app:buildCMakeDebug[arm64-v8a]. Medidos 14 clang++ ativos mesmo com um worker Gradle; memória livre 1477228 KiB nesse momento. Não reiniciar apenas por demora: consultar o handle e resultado final.
+- Transporte fetchOfficialMap preparado em front/services/officialCalls.ts com serializador de filtros compartilhado com lista; remove paginação/hasCoordinates e transmite viewport e AbortSignal. Teste official-map-transport passou.
+- Alterações de transporte ainda não commitadas; typecheck/lint na sessão 82543, logs fase5-map-transport-{types,lint}.log. Consultar resultado antes de declarar validadas.
+- Camada/renderização/contador espacial ainda não ligados ao app. APK ainda não instalado; Metro ativo 19099 em 8082.
+
+## Atualização nativa S22 — APK instalado
+- Build limitado terminou com sucesso: 16m32s, 432 tarefas. APK debug 112832949 bytes; SHA256 206E4CD10731D804DEADE5D351ADC270180BE4617D3D1E60C9D6853C2DED8C5A.
+- adb install -r confirmou Success; lastUpdateTime do pacote 13/11/2026 15:03:02. Dados do app preservados.
+- Metro anterior 19099 não respondia a /status após a compilação. Reiniciado com --clear e um worker, sessão 62626; /status confirmou packager-status:running. App reaberto; validar tela e erros após bundle antes de declarar a jornada funcionando.
+- Transporte espacial: teste, typecheck e lint app concluídos com sucesso. Hook/render/contadores e teste HTTP com banco ainda pendentes.
+- Falha temporária de revisão automática por limite de uso impediu um docker start; esse comando não foi executado. Aprovação voltou a responder para instalação/reabertura do APK. Banco de teste continua parado até nova verificação.

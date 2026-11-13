@@ -1,3 +1,4 @@
+import type { OfficialCallMapQueryParams, OfficialMapSnapshot } from '@/shared/official-map';
 import { request } from './http';
 import type {
   OfficialCall,
@@ -7,10 +8,7 @@ import type {
   OfficialCallsQueryParams,
 } from '@/shared/contracts';
 
-export async function fetchOfficialCalls(
-  params: OfficialCallsQueryParams = {},
-  signal?: AbortSignal,
-): Promise<OfficialCallsListResponse> {
+function officialCallsSearchParams(params: OfficialCallsQueryParams) {
   const query = new URLSearchParams();
   if (params.centerLatitude !== undefined) query.set('centerLatitude', String(params.centerLatitude));
   if (params.centerLongitude !== undefined) query.set('centerLongitude', String(params.centerLongitude));
@@ -40,6 +38,14 @@ export async function fetchOfficialCalls(
   if (params.east !== undefined) query.set('east', String(params.east));
   if (params.west !== undefined) query.set('west', String(params.west));
 
+  return query;
+}
+
+export async function fetchOfficialCalls(
+  params: OfficialCallsQueryParams = {},
+  signal?: AbortSignal,
+): Promise<OfficialCallsListResponse> {
+  const query = officialCallsSearchParams(params);
   const qs = query.toString();
   return request<OfficialCallsListResponse>(
     `/rio1746/calls${qs ? `?${qs}` : ''}`,
@@ -47,6 +53,16 @@ export async function fetchOfficialCalls(
     undefined,
     signal,
   );
+}
+
+/** Spatial representation uses the same filters while excluding list pagination. */
+export async function fetchOfficialMap(params: OfficialCallMapQueryParams, signal?: AbortSignal): Promise<OfficialMapSnapshot> {
+  const query = officialCallsSearchParams(params);
+  for (const key of ['page', 'limit', 'cursor', 'includeTotal', 'hasCoordinates']) query.delete(key);
+  for (const key of ['viewNorth', 'viewSouth', 'viewEast', 'viewWest'] as const) {
+    query.set(key, String(params[key]));
+  }
+  return request<OfficialMapSnapshot>('/rio1746/map?' + query.toString(), 'GET', undefined, signal);
 }
 
 export async function fetchOfficialCall(
