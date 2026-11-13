@@ -56,6 +56,7 @@ export interface FacilityLayerQuerySummary {
 
 export interface TerritoryFilterBarProps {
   search: string;
+  searchFocusRequest?: string;
   onSearchChange: (value: string) => void;
   onOpenFilters: () => void;
   filtersOpen: boolean;
@@ -102,6 +103,7 @@ export interface TerritoryFilterBarProps {
 
 function TerritoryFilterBarComponent({
   search,
+  searchFocusRequest,
   onSearchChange,
   onOpenFilters,
   filtersOpen,
@@ -133,7 +135,9 @@ function TerritoryFilterBarComponent({
 
   // A busca começa recolhida para o bairro caber inteiro; abre por toque ou com texto.
   const [searchOpen, setSearchOpen] = useState(Boolean(search));
-  const searchCollapsed = !searchOpen && !search;
+  const [dismissedRequest, setDismissedRequest] = useState<string>();
+  const requestedSearch = Boolean(searchFocusRequest) && dismissedRequest !== searchFocusRequest;
+  const searchCollapsed = !searchOpen && !search && !requestedSearch;
 
   const callsLabel = officialCallsStatus.isLoading
     ? '…'
@@ -201,6 +205,7 @@ function TerritoryFilterBarComponent({
         />
         <View style={styles.searchGrow}>
         <CitySearch
+          key={searchFocusRequest}
           leftElement={locationTrigger}
           value={search}
           onChangeText={onSearchChange}
@@ -208,6 +213,7 @@ function TerritoryFilterBarComponent({
           onExpandSearch={() => setSearchOpen(true)}
           onCollapseSearch={() => {
             setSearchOpen(false);
+            setDismissedRequest(searchFocusRequest);
             onSearchChange('');
           }}
           onFilters={() => {

@@ -129,16 +129,10 @@ export const createStyles = (colors: ThemeColors) =>
       color: colors.surface,
       fontWeight: '600',
     },
-    wrapChipsRow: {
+    periodTrack: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8,
-    },
-    macroThemesTrack: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8,
-      paddingVertical: 2,
+      gap: spacing.xs,
+      paddingVertical: spacing.xxs,
     },
     modalFooter: {
       flexDirection: 'row',

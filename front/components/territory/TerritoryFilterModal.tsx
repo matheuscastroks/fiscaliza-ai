@@ -4,6 +4,7 @@ import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import React, { memo, useMemo } from 'react';
 
 import { View, Pressable } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -13,7 +14,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
 import { Chip } from '@/components/ui/Chip';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import type { IconName } from '@/components/ui/IconButton';
 
 import { AppSelect } from '@/components/ui/AppSelect';
 
@@ -247,26 +247,20 @@ function TerritoryFilterModalComponent({
             <View style={styles.filterSection}>
               <SectionHeader icon="apps-outline" title="Tema Cívico" />
 
-              <View style={styles.macroThemesTrack}>
-                {CIVIC_MACRO_THEMES.map((theme) => {
-                  const isSelected = macroTheme === theme.id;
-                  return (
-                    <Chip
-                      key={theme.id}
-                      label={theme.label}
-                      icon={theme.icon as IconName}
-                      selected={isSelected}
-                      onPress={() => {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        onMacroThemeChange(theme.id);
-                        if (theme.id !== 'all' && !matchesMacroTheme(serviceType, null, theme.id)) {
-                          onServiceTypeChange('all');
-                        }
-                      }}
-                    />
-                  );
-                })}
-              </View>
+              <AppSelect
+                label="Tema cívico"
+                placeholder="Buscar tema cívico…"
+                icon="apps-outline"
+                defaultValue="all"
+                options={CIVIC_MACRO_THEMES.map((theme) => ({ value: theme.id, label: theme.label }))}
+                value={macroTheme}
+                onChange={(value) => {
+                  onMacroThemeChange(value);
+                  if (value !== 'all' && !matchesMacroTheme(serviceType, null, value)) {
+                    onServiceTypeChange('all');
+                  }
+                }}
+              />
             </View>
 
             {/* Seção 2: Subtipo Específico */}
@@ -342,7 +336,8 @@ function TerritoryFilterModalComponent({
             {/* Seção 4: Período */}
             <View style={styles.filterSection}>
               <SectionHeader icon="calendar-outline" title="Período de Abertura" />
-              <View style={styles.wrapChipsRow}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled
+                keyboardShouldPersistTaps="handled" contentContainerStyle={styles.periodTrack}>
                 {periodOptions.map((opt) => {
                   const isSelected = period === opt.value;
                   return (
@@ -357,7 +352,7 @@ function TerritoryFilterModalComponent({
                     />
                   );
                 })}
-              </View>
+              </ScrollView>
             </View>
           </View>
         )}

@@ -274,6 +274,7 @@ export function useTerritoryView(q: TerritoryQueries) {
     onClearAreaOnly: handleClearAreaOnly,
     mapAvailable,
     search,
+    searchFocusRequest: q.searchFocusRequest,
     onSearchChange: setSearch,
     onOpenFilters: () => setFiltersOpen(true),
     filtersOpen,
@@ -311,7 +312,7 @@ export function useTerritoryView(q: TerritoryQueries) {
     onMacroThemeChange: (value: string) => { setMacroTheme(value); setSelectedId(null); setSelectedCluster(null); },
     onResetFilters: resetFilters,
   }), [
-    selection, areaOnly, handleClearAreaOnly, mapAvailable, routeNeighborhoodId,
+    selection, areaOnly, handleClearAreaOnly, mapAvailable, routeNeighborhoodId, q.searchFocusRequest,
     setSearch, setServiceType, setPeriod, setStatus, search, setFiltersOpen, filtersOpen,
     filterCount, bairroOptions, neighborhood, neighborhoodId, handleNeighborhoodChange,
     serviceType, serviceTypeOptions, period, status, layers, setLayers, startDate, endDate,

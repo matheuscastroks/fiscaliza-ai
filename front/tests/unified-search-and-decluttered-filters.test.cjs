@@ -79,15 +79,6 @@ test('decluttered filter modal: removes duplicate geographical selectors and ado
     content.includes('filterFormContainer'),
     'Filter modal must use frameless filterFormContainer instead of nested cards',
   );
-  assert.ok(
-    content.includes('macroThemesTrack'),
-    'Filter modal must preserve macroThemesTrack',
-  );
-  assert.ok(
-    content.includes("flexWrap: 'wrap'"),
-    'macroThemesTrack must use wrap layout to avoid horizontal scroll deadlock in bottom sheet',
-  );
-
   // No duplicate pickers in modal
   assert.ok(
     !content.includes('<NeighborhoodPicker'),

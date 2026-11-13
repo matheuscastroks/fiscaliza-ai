@@ -28,7 +28,6 @@ import { usePlacesStore } from '@/stores/placesStore';
 
 import {
   OFFICIAL_PORTAL,
-  OFFICIAL_REQUESTS_URL,
   OFFICIAL_WHATSAPP_LABEL,
   OFFICIAL_WHATSAPP_URL,
   OFFICIAL_PHONE_URL,
@@ -71,13 +70,7 @@ const OFFICIAL_CHANNELS: ChannelItem[] = [
     icon: 'globe-outline',
     url: OFFICIAL_PORTAL,
   },
-  {
-    id: 'requests',
-    title: 'Meus Protocolos no 1746',
-    subtitle: 'Veja seus pedidos e como andam',
-    icon: 'receipt-outline',
-    url: OFFICIAL_REQUESTS_URL,
-  },
+
 ];
 
 export default function ParticipateScreen() {
@@ -135,6 +128,15 @@ export default function ParticipateScreen() {
           </View>
 
           <InsetGroup>
+            <ListRow
+              icon="receipt-outline"
+              title="Buscar meu protocolo"
+              subtitle="Digite o número para consultar os dados no app"
+              onPress={() => router.navigate({
+                pathname: '/(tabs)/TerritoryScreen',
+                params: { lookup: 'protocol', lookupRequest: String(Date.now()) },
+              })}
+            />
             {OFFICIAL_CHANNELS.map((channel) => (
               <ListRow
                 key={channel.id}

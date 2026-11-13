@@ -46,7 +46,7 @@ export function describeCall(call: OfficialCall, colors: ThemeColors) {
 
 export interface CallSummaryProps {
   call: OfficialCall;
-  /** Ao lado da situação (ex.: botão Salvar). */
+  /** Ação independente à direita do título (ex.: botão Salvar). */
   headerAccessory?: React.ReactNode;
   /** À direita dos metadados, separado por uma linha (ex.: "No mapa"). */
   metaTrailing?: React.ReactNode;
@@ -65,8 +65,7 @@ export function CallSummary({ call, headerAccessory, metaTrailing, headerInset =
     <View style={metaTrailing ? styles.metaLeft : styles.metaRow}>
       {d.relativeAge ? (
         <View style={styles.metaChip}>
-          <Ionicons name="time-outline" size={layout.iconSize.sm} color={colors.muted} />
-          <AppText variant="caption" color="muted">{d.relativeAge}</AppText>
+          <AppText variant="caption" color="muted" style={styles.shrink}>{d.relativeAge}</AppText>
         </View>
       ) : null}
       {d.slaText ? (
@@ -83,11 +82,11 @@ export function CallSummary({ call, headerAccessory, metaTrailing, headerInset =
             size={layout.iconSize.sm}
             color={d.isOverdue ? colors.risk : colors.onSurfaceBrand}
           />
-          <AppText variant="caption" color={d.isOverdue ? 'risk' : 'ink'}>{d.slaText}</AppText>
+          <AppText variant="caption" color={d.isOverdue ? 'risk' : 'ink'} style={styles.shrink}>{d.slaText}</AppText>
         </View>
       ) : null}
-      <View style={[styles.protocolChip, { backgroundColor: colors.surfaceSubdued }]}>
-        <AppText variant="protocol" color="muted">#{call.externalId}</AppText>
+      <View style={styles.protocolChip}>
+        <AppText variant="protocol" color="muted" style={styles.shrink}>#{call.externalId}</AppText>
       </View>
     </View>
   );
@@ -95,29 +94,31 @@ export function CallSummary({ call, headerAccessory, metaTrailing, headerInset =
   return (
     <View style={styles.root}>
       <View style={[styles.header, headerInset > 0 && { paddingRight: headerInset }]}>
-        <View style={styles.categoryCluster}>
+        <View style={styles.heading}>
           <View style={styles.categoryBadge}>
-            <Ionicons name={iconName} size={layout.iconSize.sm} color={colors.ink} />
-            <AppText variant="caption" color="ink" numberOfLines={1} style={styles.shrink}>
+            <Ionicons name={iconName} size={layout.iconSize.sm} color={colors.muted} />
+            <AppText variant="caption" color="muted" numberOfLines={1} style={styles.shrink}>
               {d.theme.label}
             </AppText>
           </View>
-          {d.agencyName ? (
-            <View style={[styles.agencyBadge, { backgroundColor: colors.surfaceSubdued }]}>
-              <AppText variant="caption" color="muted" numberOfLines={1}>{d.agencyName}</AppText>
-            </View>
-          ) : null}
+          <AppText variant="sectionTitle" numberOfLines={2} accessibilityLabel={d.title} style={styles.title}>
+            {d.title}
+          </AppText>
         </View>
-        <View style={styles.headerRight}>
-          <View style={[styles.statusBadge, { backgroundColor: d.status.color + '1F' }]}>
-            <View style={[styles.statusDot, { backgroundColor: d.status.color }]} />
-            <AppText variant="caption" color={d.status.color}>{d.status.label}</AppText>
-          </View>
-          {headerAccessory}
-        </View>
+        {headerAccessory ? <View style={styles.headerAction}>{headerAccessory}</View> : null}
       </View>
 
-      <AppText variant="sectionTitle" numberOfLines={2} style={styles.title}>{d.title}</AppText>
+      <View style={styles.contextRow}>
+        <View style={[styles.statusBadge, { backgroundColor: d.status.color + '1F' }]}>
+          <View style={[styles.statusDot, { backgroundColor: d.status.color }]} />
+          <AppText variant="caption" color={d.status.color} style={styles.shrink}>{d.status.label}</AppText>
+        </View>
+        {d.agencyName ? (
+          <AppText variant="caption" color="muted" numberOfLines={2} accessibilityLabel={d.agencyName} style={styles.agency}>
+            {d.agencyName}
+          </AppText>
+        ) : null}
+      </View>
 
       <View style={styles.locationRow}>
         <Ionicons name="location-outline" size={layout.iconSize.sm} color={colors.muted} />
@@ -142,19 +143,15 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     root: { gap: spacing.xs },
     shrink: { flexShrink: 1 },
-    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.xs },
-    categoryCluster: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flex: 1, minWidth: 0 },
-    categoryBadge: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs, flexShrink: 1 },
-    agencyBadge: {
-      paddingHorizontal: spacing.xs,
-      paddingVertical: spacing.xxs / 2,
-      borderRadius: layout.radius.pill,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
-      flexShrink: 0,
-    },
-    headerRight: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+    header: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs },
+    heading: { flex: 1, minWidth: 0, gap: spacing.xxs },
+    categoryBadge: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs, minWidth: 0 },
+    headerAction: { flexShrink: 0 },
+    contextRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.xs },
+    agency: { flexGrow: 1, flexShrink: 1, flexBasis: 120, minWidth: 0 },
     statusBadge: {
+      maxWidth: '100%',
+      flexShrink: 1,
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xxs,
@@ -162,13 +159,15 @@ const createStyles = (colors: ThemeColors) =>
       paddingVertical: spacing.xxs / 2,
       borderRadius: layout.radius.pill,
     },
-    statusDot: { width: spacing.xs - 2, height: spacing.xs - 2, borderRadius: layout.radius.xs },
+    statusDot: { width: spacing.xs - 2, height: spacing.xs - 2, borderRadius: layout.radius.xs, flexShrink: 0 },
     title: { fontSize: fontSizes.body, lineHeight: 22 },
     locationRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs },
     metaRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.xs },
-    metaLeft: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.xs, flex: 1, minWidth: 0 },
-    metaChip: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs },
+    metaLeft: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.xs, flexGrow: 1, flexBasis: 200, minWidth: 0 },
+    metaChip: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs, maxWidth: '100%', flexShrink: 1 },
     slaBadge: {
+      maxWidth: '100%',
+      flexShrink: 1,
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xxs,
@@ -177,21 +176,15 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: layout.radius.pill,
       borderWidth: StyleSheet.hairlineWidth,
     },
-    protocolChip: {
-      paddingHorizontal: spacing.xs,
-      paddingVertical: spacing.xxs / 2,
-      borderRadius: layout.radius.xs,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
-    },
+    protocolChip: { maxWidth: '100%' },
     footerRow: {
       flexDirection: 'row',
+      flexWrap: 'wrap',
       alignItems: 'center',
-      justifyContent: 'space-between',
       gap: spacing.xs,
       paddingTop: spacing.xs,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: colors.divider,
     },
-    trailing: { flexDirection: 'row', alignItems: 'center', flexShrink: 0 },
+    trailing: { flexDirection: 'row', alignItems: 'center', flexShrink: 0, maxWidth: '100%' },
   });
