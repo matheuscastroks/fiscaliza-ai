@@ -59,7 +59,7 @@ test('"Buscar nesta área" depende de gesto do usuário, não de movimento da c�
 });
 
 test('copiar protocolo usa a área de transferência, não o compartilhamento', () => {
-  const screen = read('app', 'OfficialCallDetailsScreen.tsx');
+  const screen = read('features', 'city', 'call-details', 'OfficialCallDetailsScreen.tsx');
   assert.match(screen, /copyText\(item\.externalId\)/);
   assert.match(read('utils', 'clipboard.ts'), /expo-clipboard/);
 });

@@ -1,4 +1,7 @@
 const PUBLIC = new Set([
+  'calls',
+  'facilities',
+  'neighborhoods',
   'LoginScreen',
   'RegisterScreen',
   'AboutScreen',

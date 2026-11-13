@@ -64,7 +64,7 @@ export default function FollowScreen() {
       <OfficialCallRow
         call={item}
         onPress={() =>
-          router.push({ pathname: '/OfficialCallDetailsScreen', params: { id: item.id } })
+          router.push({ pathname: '/calls/[id]', params: { id: item.id } })
         }
       />
     ),

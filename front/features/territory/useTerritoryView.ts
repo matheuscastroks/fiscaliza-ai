@@ -295,7 +295,7 @@ export function useTerritoryView(q: TerritoryQueries) {
 
   const openEntry = useCallback((entry: Entry) => {
     router.push({
-      pathname: entry.type === 'facility' ? '/FacilityDetailsScreen' : '/OfficialCallDetailsScreen',
+      pathname: entry.type === 'facility' ? '/facilities/[id]' : '/calls/[id]',
       params: { id: entry.item.id },
     });
   }, []);

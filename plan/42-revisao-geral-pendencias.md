@@ -93,3 +93,9 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Extraídos estilos para features/city/call-details/styles.ts e seção de datas para OfficialCallDates.tsx. Tela principal preserva navegação, estado, ações e seções restantes; divisão do controlador ainda pendente.
 - Teste RNTL escrito antes da extração e verificado falhando por módulo ausente; passou após extração, cobrindo ausência de diagnóstico/encerramento/SLA sem inventar conteúdo.
 - Typecheck app, lint app e 15 verificações existentes relacionadas passaram. Não equivale à validação visual no S22.
+
+## Fase 5 — rotas dinâmicas
+- Criadas calls/[id], facilities/[id], neighborhoods/[id] e neighborhoods/index. Telas movidas para features; entradas antigas redirecionam preservando id/neighborhoodId e a seleção de bairro sem ID.
+- Links de Salvos, resultados e território usam rotas novas; classificação pública inclui os novos caminhos. Parâmetros vazios, múltiplos, com separadores/espaços ou maiores que 200 caracteres são rejeitados antes de montar a tela.
+- Tipos regenerados pelo Metro temporário (encerrado); typecheck e lint app passaram. Cinco testes RNTL dos redirects, teste de parâmetros e 17 regressões passaram.
+- Regra do plano preserva redirects legados apesar da recomendação genérica da skill de remover rotas antigas. Guarda de autenticação exclusivamente Stack.Protected, navegação nativa e App Links ainda pendentes.

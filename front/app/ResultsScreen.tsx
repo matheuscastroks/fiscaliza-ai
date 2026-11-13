@@ -75,7 +75,7 @@ export default function ResultsScreen() {
                 title="Serviços públicos do bairro"
                 subtitle="Escolas, saúde e praças do bairro"
                 onPress={() =>
-                  router.push({ pathname: '/NeighborhoodScreen', params: { neighborhoodId } })
+                  router.push({ pathname: '/neighborhoods/[id]', params: { id: neighborhoodId } })
                 }
               />
             </InsetGroup>
