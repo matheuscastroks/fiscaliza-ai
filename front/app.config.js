@@ -26,7 +26,7 @@ module.exports = ({ config }) => {
         'expo-image-picker',
         {
           photosPermission:
-            'Permita selecionar fotos para complementar seu registro.',
+            'O Fiscaliza aí acessa suas fotos só quando você escolhe uma imagem para o seu perfil.',
           microphonePermission: false,
         },
       ],

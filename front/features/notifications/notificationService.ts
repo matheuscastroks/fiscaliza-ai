@@ -114,6 +114,16 @@ export async function registerTokenWithBackend(
   }
 }
 
+/** Este aparelho deixa de receber avisos da conta (ao sair dela). */
+export async function unregisterTokenWithBackend(token: string): Promise<boolean> {
+  try {
+    await request('/v1/notifications/register-token', 'DELETE', { token });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Ativa notificações no servidor para um chamado salvo específico
  */

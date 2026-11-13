@@ -4,9 +4,11 @@ import {
   registerForPushNotificationsAsync,
   followCallForNotifications,
   unfollowCallForNotifications,
+  unregisterTokenWithBackend,
 } from '@/features/notifications/notificationService';
 import { useFollowStore, setFollowNotificationListener } from './followStore';
 import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
+import { onBeforeSessionEnd } from './authStore';
 
 interface NotificationState {
   pushToken: string | null;
@@ -121,3 +123,10 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     if (token) syncSavedCalls(token);
   },
 }));
+
+// Ao sair da conta, este aparelho deixa de receber os avisos dela. Roda antes
+// do logout, enquanto a sessão ainda autoriza o pedido.
+onBeforeSessionEnd(async () => {
+  const token = useNotificationStore.getState().pushToken;
+  if (token) await unregisterTokenWithBackend(token);
+});

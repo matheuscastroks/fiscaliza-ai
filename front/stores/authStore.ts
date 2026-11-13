@@ -56,12 +56,37 @@ interface AuthState {
     user: SessionUser,
     expectedVersion: number,
   ) => Promise<boolean>;
-  deleteAccount: () => Promise<{ success: boolean; error?: string }>;
+  deleteAccount: (password: string) => Promise<{ success: boolean; error?: string }>;
   setLoading: (loading: boolean) => void;
 }
+// Tarefas que precisam da sessão ainda válida antes de sair (ex.: o aparelho
+// deixar de receber avisos da conta). Registradas por outras stores, para esta
+// não depender delas.
+const beforeSessionEnd = new Set<() => Promise<void>>();
+export function onBeforeSessionEnd(task: () => Promise<void>): () => void {
+  beforeSessionEnd.add(task);
+  return () => beforeSessionEnd.delete(task);
+}
+
+/**
+ * Apaga deste aparelho o que pertence à conta (salvos, lugares, recorte, foto).
+ * As chaves locais levam o id do usuário; depois de apagar a conta, nada dela
+ * pode ficar no celular.
+ */
+export async function purgeUserData(userId: string): Promise<void> {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const owned = keys.filter((key) => key.includes(userId));
+    if (owned.length > 0) await AsyncStorage.multiRemove(owned);
+  } catch {
+    // Melhor esforço: a conta já não existe no servidor.
+  }
+}
+
 async function endSession(path: string) {
   useAuthStore.setState({ sessionVersion: useAuthStore.getState().sessionVersion + 1 });
   try {
+    for (const task of beforeSessionEnd) await task().catch(() => undefined);
     await request(path, 'POST');
   } finally {
     await saveToken(null);
@@ -186,11 +211,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       },
     );
   },
-  deleteAccount: async () => {
+  deleteAccount: async (password) => {
     if (get().isLoading) return { success: false };
     set({ isLoading: true });
+    const userId = get().user?.id;
     try {
-      const result = await authApi.deleteAccount();
+      const result = await authApi.deleteAccount(password);
       // A conta continua existindo no servidor: preserva a sessão para
       // permitir nova tentativa.
       if (!result.success) return result;
@@ -199,6 +225,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       } catch {
         // A conta já foi removida; o encerramento local ocorre no finally de logout.
       }
+      if (userId) await purgeUserData(userId);
       set({ user: null, isAuthenticated: false });
       return result;
     } finally {

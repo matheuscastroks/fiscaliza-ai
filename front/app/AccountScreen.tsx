@@ -9,6 +9,7 @@ import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
+import { AppInput } from '@/components/ui/AppInput';
 import { InsetGroup, ListRow } from '@/components/ui/ListRow';
 import { useSignOutSheet } from '@/components/ui/SignOutSheet';
 import { AppBottomSheetModal, BottomSheetView } from '@/components/ui/AppBottomSheetModal';
@@ -46,12 +47,17 @@ export default function AccountScreen() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleDeleteAccount = async () => {
+    if (!password) {
+      setDeleteError('Digite sua senha para confirmar.');
+      return;
+    }
     setDeleting(true);
     setDeleteError('');
     try {
-      const res = await deleteAccount();
+      const res = await deleteAccount(password);
       if (!res.success) {
         setDeleteError(res.error || 'Não conseguimos apagar a conta. Tente de novo.');
         setDeleting(false);
@@ -106,6 +112,7 @@ export default function AccountScreen() {
                   onPress={() => {
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     setDeleteError('');
+                    setPassword('');
                     setConfirmDelete(true);
                   }}
                 />
@@ -147,9 +154,21 @@ export default function AccountScreen() {
           <View style={{ gap: spacing.xs }}>
             <AppText variant="sectionTitle">Apagar conta permanentemente?</AppText>
             <AppText color="muted">
-              Não dá para desfazer. Seus dados de cadastro e preferências serão apagados.
+              Não dá para desfazer. Seus dados de cadastro, chamados salvos e preferências serão apagados, inclusive deste celular.
             </AppText>
           </View>
+          <AppInput
+            label="Sua senha"
+            showLabel
+            placeholder="Digite sua senha para confirmar"
+            secureTextEntry
+            autoComplete="current-password"
+            textContentType="password"
+            value={password}
+            onChangeText={setPassword}
+            editable={!deleting}
+            onSubmitEditing={handleDeleteAccount}
+          />
           {deleteError !== '' && (
             <View style={styles.error} accessibilityRole="alert">
               <Ionicons name="alert-circle" size={layout.iconSize.sm} color={colors.risk} />
