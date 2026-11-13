@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     gap: 6,
     minHeight: layout.touchTarget.minHeight,
     paddingHorizontal: spacing.md,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
     borderWidth: StyleSheet.hairlineWidth,
   },
   pressed: { opacity: 0.85 },

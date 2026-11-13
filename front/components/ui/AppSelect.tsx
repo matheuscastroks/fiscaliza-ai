@@ -293,7 +293,7 @@ const createStyles = (colors: ThemeColors) =>
     compactTrigger: {
       height: 38,
       paddingHorizontal: spacing.sm + 4,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.compact,
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -330,7 +330,7 @@ const createStyles = (colors: ThemeColors) =>
       marginVertical: spacing.xs,
       paddingHorizontal: spacing.md,
       height: 44,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.control,
       borderWidth: 1,
       gap: spacing.xs,
     },

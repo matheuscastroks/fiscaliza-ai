@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
     borderWidth: 1,
   },
   flex: {

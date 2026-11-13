@@ -6,10 +6,14 @@ export const layout = {
   radius: {
     xs: 6,
     sm: 10,
-    button: 28,
-    card: 28,
+    // Cantos dos controles do mapa são a referência visual do aplicativo.
+    control: 20,
+    compact: 14,
+    avatar: 20,
+    button: 20,
+    card: 20,
     panel: 20,
-    sheet: 32,
+    sheet: 24,
     pill: 9999,
   },
   borderWidth: {

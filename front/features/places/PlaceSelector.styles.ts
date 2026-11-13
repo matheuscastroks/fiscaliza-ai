@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     paddingLeft: 6,
     paddingRight: 6,
     paddingVertical: 4,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
     borderWidth: 1,
   },
   compactIconBadge: {
@@ -44,7 +44,7 @@ export const styles = StyleSheet.create({
     gap: 3,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
   },
   compactChangeText: {
     fontSize: fontSizes.caption,
@@ -79,7 +79,7 @@ export const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
   },
   changeText: {
     fontSize: fontSizes.caption,
@@ -137,7 +137,7 @@ export const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
   },
   filterFormContainer: {
     gap: spacing.md,

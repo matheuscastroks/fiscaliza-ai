@@ -114,7 +114,7 @@ export const createStyles = (colors: ThemeColors) =>
       gap: 4,
       paddingHorizontal: 8,
       paddingVertical: 4,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.control,
     },
     heroKpiValueRow: {
       flexDirection: 'row',

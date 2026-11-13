@@ -42,7 +42,7 @@ export function createStyles(colors: ThemeColors) {
       height: layout.touchTarget.minHeight,
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.control,
       backgroundColor: colors.surfaceSubdued,
     },
     headerActions: {
@@ -56,7 +56,7 @@ export function createStyles(colors: ThemeColors) {
       height: layout.touchTarget.minHeight,
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.control,
       backgroundColor: colors.surfaceSubdued,
     },
     protocolPill: {
@@ -73,7 +73,7 @@ export function createStyles(colors: ThemeColors) {
       alignSelf: 'flex-start',
       paddingVertical: 5,
       paddingHorizontal: 12,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.compact,
       borderWidth: 1,
       marginTop: -spacing.xs,
       marginBottom: spacing.xs,

@@ -238,7 +238,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     bar: {
       height: TAB_HEIGHT + 2 * TAB_PADDING,
-      borderRadius: (TAB_HEIGHT + 2 * TAB_PADDING) / 2,
+      borderRadius: layout.radius.control,
       backgroundColor: colors.navigationSurface,
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -263,7 +263,7 @@ const createStyles = (colors: ThemeColors) =>
     selected: {
       position: 'absolute',
       height: TAB_HEIGHT,
-      borderRadius: TAB_HEIGHT / 2,
+      borderRadius: layout.radius.compact,
       backgroundColor: colors.navigationSelection,
     },
   });

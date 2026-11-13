@@ -44,7 +44,7 @@ export function UserAvatar({
     .join('')
     .toUpperCase();
   return (
-    <View style={[styles.frame, { width: size, height: size }]}>
+    <View style={[styles.frame, { width: size, height: size, borderRadius: Math.min(layout.radius.avatar, size * 0.4) }]}>
       {uri && failed !== uri ? (
         <Image
           source={{ uri: assetUrl(uri) }}
@@ -67,7 +67,6 @@ export function UserAvatar({
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     frame: {
-      borderRadius: layout.radius.pill,
       overflow: 'hidden',
       backgroundColor: colors.surfaceSubdued,
       alignItems: 'center',

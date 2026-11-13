@@ -250,7 +250,7 @@ const createStyles = (colors: ThemeColors) =>
       height: 36,
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.compact,
     },
     close: {
       position: 'absolute',

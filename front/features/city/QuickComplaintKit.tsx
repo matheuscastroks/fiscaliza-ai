@@ -409,7 +409,7 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.primaryContainer,
       paddingVertical: 2,
       paddingHorizontal: 8,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.control,
     },
     suggestedLocationText: {
       color: colors.primary,

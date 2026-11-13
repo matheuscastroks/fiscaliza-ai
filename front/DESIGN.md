@@ -64,10 +64,13 @@ typography:
 rounded:
   xs: "6px"
   sm: "10px"
-  button: "28px"
-  card: "28px"
+  control: "20px"
+  compact: "14px"
+  avatar: "20px"
+  button: "20px"
+  card: "20px"
   panel: "20px"
-  sheet: "32px"
+  sheet: "24px"
   pill: "9999px"
 spacing:
   xxs: "4px"
@@ -120,8 +123,8 @@ components:
     backgroundColor: "{colors.ink}"
     textColor: "{colors.surface}"
     height: "72px"
-    rounded: "36px"
-  header-circle:
+    rounded: "{rounded.control}"
+  header-control:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
     width: "48px"
@@ -183,7 +186,7 @@ Sem CAIXA ALTA espaçada. Preserve o escalonamento de texto do sistema.
 ## Layout, formas e elevação
 
 - `AppScreen`: largura fluida até 760, áreas seguras. Ritmo de 4 (`spacing`): `contentPadding = lg`, `gutter = md`, `rowGap = sm`, `sectionGap = xl`. Acima de 1100 há navegação lateral e conteúdo até 1200.
-- **Raios** (`layout.radius`): `xs`, `sm`, `panel`, `card`, `sheet`, `pill`. Cápsulas em ações e campos de uma linha; círculos de 48 em voltar/menu; campo multilinha usa `panel`.
+- **Raios** (`layout.radius`): `xs`, `sm`, `compact`, `control`, `avatar`, `panel`, `card`, `sheet`. O squircle dos controles do mapa é a referência: cantos de 20 em ações, campos, cards e avatares; 14 em controles compactos e seleção interna da tab bar; 24 nos painéis. Avatares pequenos limitam o raio a 40% do tamanho. Círculos ficam restritos a pontos geográficos e indicadores.
 - **Ícones** (`layout.iconSize`): `sm 16`, `md 20`, `lg 24`.
 - **Elevação** (`theme/elevation.ts`): só `none` e `floating`. Cartões, campos, cabeçalho e linhas de lista são planos. `floating` é para tab bar, sheets e botões sobre o mapa. Texto sobre foto usa gradiente funcional de contraste.
 - Alvos de toque de pelo menos 48. Nunca animação `entering` em `Marker`; movimento reduzido torna transições imediatas.
@@ -195,7 +198,7 @@ Cada componente tem variantes fechadas e estados acessíveis.
 - `AppButton`: `primary` (cor de ação), `secondary` (branco com borda), `quiet` (transparente, texto `ink`), `destructive` (`risk`). Altura mínima 54; um botão primário por tela; carregamento e bloqueio declarados; confirmação visual só após a resposta da API.
 - `AppInput`: placeholder no lugar de rótulo persistente, altura mínima 56; foco muda a borda; erro usa `risk` com mensagem anunciada; preserva texto em falhas.
 - `AppHeader`: título, contexto territorial opcional e controles circulares. Ícones interativos exigem nome acessível.
-- `AppTabBar`: cápsula sólida de tinta, altura 64, quatro alvos de 48, ativo em círculo branco; some em rotas internas e com teclado aberto.
+- `AppTabBar`: barra sólida de tinta com cantos de 20, altura 64, quatro alvos de 48, seleção branca com cantos de 14; some em rotas internas e com teclado aberto.
 - `SideMenu`/`AppDrawer`: destinos reais, sem pontuação fictícia nem selo institucional; o botão de menu existe em todas as abas principais.
 - `DetailSheet`, `AppBottomSheetModal`: espaçamento declarado no `BottomSheetView` (`paddingHorizontal: contentPadding`, `paddingTop: md`, `paddingBottom: max(insets.bottom + md, xxl)`).
 - Base compartilhada: `IconButton`, `Chip` (claro em repouso, escuro selecionado), `StatusBadge`, `IconTile`, `ListRow`/`InsetGroup`, `Surface` (plano, proibido aninhar), `SectionHeader`, `ScreenState` (carregando, erro com nova tentativa, vazio com ação) e `CallSummary` (miolo único do chamado, usado na lista e no sheet). Telas antigas ainda têm blocos próprios que devem migrar para esses componentes.

@@ -16,7 +16,7 @@ export const createStyles = (colors: ThemeColors) =>
     domainTabsTrack: {
       flexDirection: 'row',
       backgroundColor: colors.canvas,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.control,
       padding: 4,
       borderWidth: 1,
       borderColor: colors.border,
@@ -29,7 +29,7 @@ export const createStyles = (colors: ThemeColors) =>
       justifyContent: 'center',
       gap: 6,
       paddingVertical: 10,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.compact,
     },
     domainTabButtonActive: {
       backgroundColor: colors.surface,
@@ -102,7 +102,7 @@ export const createStyles = (colors: ThemeColors) =>
     segmentContainer: {
       flexDirection: 'row',
       backgroundColor: colors.canvas,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.control,
       padding: 3,
       borderWidth: 1,
       borderColor: colors.border,
@@ -115,7 +115,7 @@ export const createStyles = (colors: ThemeColors) =>
       justifyContent: 'center',
       minHeight: layout.touchTarget.minHeight - 4,
       paddingHorizontal: 8,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.compact,
     },
     segmentButtonActive: {
       backgroundColor: colors.ink,

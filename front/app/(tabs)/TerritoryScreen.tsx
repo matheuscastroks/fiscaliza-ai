@@ -404,7 +404,7 @@ const createStyles = (colors: ThemeColors) =>
       ...elevation.floating,
       position: 'absolute', alignSelf: 'center', flexDirection: 'row', alignItems: 'center',
       gap: 8, backgroundColor: colors.floatingInk, paddingHorizontal: 14, paddingVertical: 8,
-      borderRadius: layout.radius.pill, zIndex: 40,
+      borderRadius: layout.radius.control, zIndex: 40,
     },
     statusScrim: { position: 'absolute', top: 0, left: 0, right: 0 },
     topFloatingHeader: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50, paddingHorizontal: spacing.md, gap: 8 },
@@ -418,7 +418,7 @@ const createStyles = (colors: ThemeColors) =>
     areaPillButton: {
       ...elevation.floating,
       flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: layout.touchTarget.minHeight, paddingHorizontal: spacing.md,
-      borderRadius: layout.radius.pill, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
+      borderRadius: layout.radius.control, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
     },
     summaryBarButton: {
       flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.sm + 4,

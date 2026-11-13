@@ -156,8 +156,6 @@ export function RadiusControl({
   );
 }
 
-const pillRadiusVal = layout?.radius?.pill || 9999;
-
 const styles = StyleSheet.create({
   container: {
     gap: 6,
@@ -172,7 +170,7 @@ const styles = StyleSheet.create({
   pillRow: {
     flexDirection: 'row',
     position: 'relative',
-    borderRadius: pillRadiusVal,
+    borderRadius: layout.radius.control,
     padding: 3,
     borderWidth: 1,
     overflow: 'hidden',
@@ -186,14 +184,14 @@ const styles = StyleSheet.create({
     top: 3,
     bottom: 3,
     left: 3,
-    borderRadius: pillRadiusVal,
+    borderRadius: layout.radius.compact,
   },
   pill: {
     flex: 1,
     paddingVertical: 7,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: pillRadiusVal,
+    borderRadius: layout.radius.compact,
     zIndex: 1,
   },
   pillCompact: {

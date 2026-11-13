@@ -308,7 +308,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: 4,
       paddingVertical: 3,
       paddingHorizontal: 8,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.control,
     },
     resultBadgeText: {
       fontSize: fontSizes.caption,
@@ -317,7 +317,7 @@ const createStyles = (colors: ThemeColors) =>
     cepPill: {
       paddingVertical: 2,
       paddingHorizontal: 8,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.control,
     },
     cepPillText: {
       fontSize: fontSizes.caption,

@@ -37,7 +37,7 @@ export const styles = StyleSheet.create({
   skipPill: {
     minHeight: 44,
     paddingHorizontal: spacing.md,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
     borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
     justifyContent: 'center',
@@ -85,7 +85,7 @@ export const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
     backgroundColor: 'rgba(0, 0, 0, 0.58)',
   },
   floatingPillText: {
@@ -99,7 +99,7 @@ export const styles = StyleSheet.create({
     right: 12,
     paddingHorizontal: 8,
     paddingVertical: 5,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
     backgroundColor: 'rgba(0, 0, 0, 0.58)',
   },
   stepBadgeText: {

@@ -210,3 +210,10 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 
 - Confirmação nativa adicional: zoom afastado mostrou cinco grupos 698 + 4239 + 1604 + 1151 + 2 = 7694, exatamente o contador de visíveis, sem o amontoado anterior. Evidência local .validation/map-zoom-out-final.png; não publicar captura (pode conter notificação de outro app).
 - Período horizontal confirmado no S22: swipe levou Todo o período de x=942 parcialmente cortado a x=617..1032 completamente visível; todos os itens permaneceram em y=1816..1936. XML .validation/period-horizontal-verified.xml. Lint completo terminou exit0; teste de filtros após limpeza de mocks 3/3 e tipos passaram.
+
+
+## Padrão de cantos solicitado pelo usuário — 13/11
+- Controles do mapa são a referência: control/avatar/button/card/panel 20; compact 14; sheet 24. Tab bar externa 20 e seleção interna 14. UserAvatar usa o mesmo recorte para foto e iniciais, limitado a 40% do tamanho em avatares pequenos.
+- Aplicado a menu/voltar, tab bar, campos, seletores, filtros, salvos, cards, controles de raio, telas de lugares e ações compartilhadas. Tokens e DESIGN.md/referências de geometria do sidecar alinhados. Pontos geográficos continuam circulares.
+- App recarregado por ADB no Metro 8082. Inspeção nativa: Explorar, Salvos, Perfil e menu; capturas locais ignoradas .validation/squircle-*.png podem conter dados pessoais, não publicar.
+- npm test --prefix front passou: etapas TS/CJS (169 CJS) e 30 Jest/9 suites. Tipos app e lint completo passaram, diff sem erros de whitespace. Sem dependências novas, sem alteração de API ou deploy neste ajuste.

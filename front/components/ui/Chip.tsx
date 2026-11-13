@@ -44,7 +44,7 @@ const createStyles = (colors: ThemeColors) =>
     base: {
       minHeight: layout.touchTarget.minHeight - spacing.xs,
       paddingHorizontal: spacing.md,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.compact,
       justifyContent: 'center',
       borderWidth: layout.borderWidth.hairline,
     },
