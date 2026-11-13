@@ -21,7 +21,11 @@ export function officialDateConditions(start?: string, end?: string): SQL[] {
   const parse = (value: string) => {
     try {
       assertValidPartitionDate(value.slice(0, 10));
-      const date = new Date(value);
+      // Um dia sem hora é o dia no Rio (UTC-3), não em UTC: "2026-10-01"
+      // começa às 03:00 UTC. Mesma regra das datas importadas do 1746.
+      const date = new Date(
+        /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00-03:00` : value,
+      );
       if (!Number.isFinite(date.getTime())) throw new Error();
       return date;
     } catch {

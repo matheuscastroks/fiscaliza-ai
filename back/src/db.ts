@@ -31,8 +31,10 @@ export function database(
         }
       : {}),
   });
-  // Erro em conexão ociosa não pode derrubar o processo.
-  pool.on('error', () => {});
+  // Erro em conexão ociosa não pode derrubar o processo, mas precisa aparecer.
+  pool.on('error', (error) => {
+    console.error('[db] erro em conexão ociosa do pool:', error.message);
+  });
   return { pool, db: drizzle(pool, { schema }) };
 }
 export type Database = ReturnType<typeof database>['db'];
