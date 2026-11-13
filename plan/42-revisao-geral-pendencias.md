@@ -35,3 +35,10 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - `eas init` (push real e OTA); monitores no Healthchecks.io/UptimeRobot; chave antiga do Firebase; troca do `package` (adiada).
 - Decidir sobre o serviço que ocupa a porta 3001 (a API ficou em 43001).
 - Dar push da `main` (nada foi enviado ao GitHub).
+
+## Continuação Codex — 13/11/2026
+- Fase 4 integrada localmente na main no commit `c53cc08`, sem conflitos. `npm install --prefix front` concluído; manifest e lockfile permaneceram sem diferenças.
+- `npm test` passou após a integração (incluindo 173 testes CJS e 5 testes Jest). Typecheck do app e da API e lint do app também passaram (exit code 0).
+- Nenhum push, deploy, migração de produção ou sync BigQuery foi executado.
+- Fase 5 ainda não implementada: a skill expo-overview exige carregar expo-upgrade para atualizar dependências, mas expo-upgrade/SKILL.md não foi encontrado em front/.agents, ~/.agents/skills, ~/.codex/skills nem no cache de plugins. Restaurar essa skill antes da atualização Expo.
+- Build novo e validação conjunta no S22 continuam pendentes.
