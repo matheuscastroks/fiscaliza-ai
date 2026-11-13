@@ -15,6 +15,7 @@ import { database } from './db.js';
 import { rateLimitKey } from './client-ip.js';
 import { createKeyedLock } from './keyed-lock.js';
 import { httpError as fail, ok } from './http-errors.js';
+import { reportError } from './monitoring.js';
 import { createResponseCache } from './response-cache.js';
 import { municipalityService } from './municipality.js';
 import { attachments, municipalities, sessions, users } from './schema.js';
@@ -224,8 +225,10 @@ export async function buildApp(
       caught instanceof Error ? caught : new Error('Erro desconhecido.');
     const statusCode =
       error.statusCode && error.statusCode >= 400 ? error.statusCode : 500;
-    if (statusCode >= 500)
+    if (statusCode >= 500) {
       request.log.error({ err: error, statusCode }, 'Erro interno ao atender requisição.');
+      reportError(error, { route: request.routeOptions.url, method: request.method, reqId: request.id });
+    }
     // Mensagens do validador e do limite de requisições vêm em inglês e com
     // detalhes internos: o app mostra uma frase em português.
     const message =

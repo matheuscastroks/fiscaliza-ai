@@ -54,6 +54,7 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
       WEB_ORIGINS: ${WEB_ORIGINS:-http://localhost:8080,http://localhost:5173,http://localhost:8081,http://localhost:8082}
       UPLOAD_DIR: /app/uploads
+      SENTRY_DSN: ${SENTRY_DSN:-}
       TRUST_PROXY: 172.30.97.0/24
     ports:
       - '${API_BIND:-127.0.0.1}:${API_PORT:-43001}:3001'
@@ -100,6 +101,7 @@ services:
       HEALTHCHECK_PING_URL: ${HEALTHCHECK_SYNC_URL:-}
       RIO1746_MAX_RUN_BYTES: ${RIO1746_MAX_RUN_BYTES:-500000000}
       UPLOAD_DIR: /app/uploads
+      SENTRY_DSN: ${SENTRY_DSN:-}
     volumes:
       - fiscaliza_uploads:/app/uploads
     secrets:
