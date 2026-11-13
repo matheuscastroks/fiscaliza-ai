@@ -1,10 +1,11 @@
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 
 import type { ThemeColors } from '@/theme/colors';
 
 import React, { useEffect, useState } from 'react';
 
-import { View, Pressable, StyleSheet, useWindowDimensions, Keyboard, Animated, AccessibilityInfo } from 'react-native';
+import { View, Pressable, StyleSheet, useWindowDimensions, Keyboard, Animated } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,10 +21,11 @@ import { beginMapTrace } from '@/features/territory/mapPerformance';
 import { fontSizes } from '@/theme/typography';
 
 import { elevation } from '@/theme/elevation';
+import { layout } from '@/theme/layout';
 
 
-const TAB_HEIGHT = 48;
-const TAB_PADDING = 6;
+const TAB_HEIGHT = layout.tabBar.itemHeight;
+const TAB_PADDING = layout.tabBar.padding;
 const TAB_GAP = 6;
 
 export type AppTabBarProps = Parameters<
@@ -77,22 +79,8 @@ export function AppTabBar({
 
   const target = selectedIndex * (tabWidth + TAB_GAP);
   const [selectionAnim] = useState(() => new Animated.Value(target));
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const reducedMotion = useReducedMotion();
 
-  useEffect(() => {
-    let active = true;
-    void AccessibilityInfo.isReduceMotionEnabled().then((value) => {
-      if (active) setReducedMotion(value);
-    });
-    const sub = AccessibilityInfo.addEventListener(
-      'reduceMotionChanged',
-      setReducedMotion,
-    );
-    return () => {
-      active = false;
-      sub.remove();
-    };
-  }, []);
 
   useEffect(() => {
     if (reducedMotion) {
@@ -136,7 +124,7 @@ export function AppTabBar({
       style={[
         styles.barContainer,
         {
-          bottom: insets.bottom + 14,
+          bottom: insets.bottom + layout.tabBar.bottomGap,
           left: insets.left,
           right: insets.right,
         },

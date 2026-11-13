@@ -2,6 +2,7 @@ import { OfficialChannel } from '@/features/city/OfficialChannel';
 import { isOfficialCallClosed } from '@/shared/official-call-state';
 import React, { useEffect, useState } from 'react';
 import {
+  describeOfficialPhase,
   officialCallStatus,
   resolveOfficialCallDeadline,
 } from '@/features/city/officialCallStatus';
@@ -30,19 +31,24 @@ import { useOfficialCall } from '@/features/city/useOfficialCalls';
 import { useFollowStore } from '@/stores/followStore';
 import { OfficialCallTimeline } from '@/components/official/OfficialCallTimeline';
 import { goBack } from '@/utils/navigation';
-import { formatTimeRemaining, isDateOnly, parseCallDate } from '@/features/city/formatDates';
+import { formatCallDateTime, formatTimeRemaining } from '@/features/city/formatDates';
 import { fontSizes } from '@/theme/typography';
 import { useShallow } from 'zustand/react/shallow';
+import { AppToast } from '@/components/ui/AppToast';
+import { copyText } from '@/utils/clipboard';
 
 export default function OfficialCallDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useTheme();
   const [saveFailed, setSaveFailed] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const styles = useThemedStyles(createStyles);
 
-  const { data, isLoading, isError, refetch, isRefetching } =
+  const { data, isLoading, isError, error, refetch, isRefetching } =
     useOfficialCall(id);
+  // Sem rede é diferente de chamado inexistente: um pede para tentar de novo, o outro não.
+  const offline = error?.name === 'NetworkError';
   const savedCalls = useFollowStore((s) => s.savedCalls);
   const toggleSavedCall = useFollowStore((s) => s.toggleSavedCall);
   const { busy, hydrated, persistenceError, updateSnapshots } = useFollowStore(useShallow((s) => ({ busy: s.busy, hydrated: s.hydrated, persistenceError: s.persistenceError, updateSnapshots: s.updateSnapshots })));
@@ -56,11 +62,11 @@ export default function OfficialCallDetailsScreen() {
   if (isLoading && !item) {
     return (
       <AppScreen>
-        <AppHeader title="Chamado 1746" onBack={() => goBack()} />
+        <AppHeader title="Chamado" onBack={() => goBack()} />
         <View style={styles.centerContainer}>
           <Ionicons name="sync" size={layout.iconSize.lg} color={colors.muted} />
           <AppText variant="body" color="muted">
-            Carregando dados oficiais do chamado...
+            Carregando dados oficiais do chamado…
           </AppText>
         </View>
       </AppScreen>
@@ -70,14 +76,20 @@ export default function OfficialCallDetailsScreen() {
   if (!item) {
     return (
       <AppScreen>
-        <AppHeader title="Chamado 1746" onBack={() => goBack()} />
+        <AppHeader title="Chamado" onBack={() => goBack()} />
         <View style={styles.centerContainer}>
-          <Ionicons name="alert-circle-outline" size={layout.iconSize.lg} color={colors.risk} />
-          <AppText variant="sectionTitle" style={{ textAlign: 'center' }}>
-            Chamado indisponível
+          <Ionicons
+            name={offline ? 'cloud-offline-outline' : 'alert-circle-outline'}
+            size={layout.iconSize.lg}
+            color={offline ? colors.muted : colors.risk}
+          />
+          <AppText variant="sectionTitle" accessibilityRole="header" style={{ textAlign: 'center' }}>
+            {offline ? 'Sem internet no momento' : 'Chamado indisponível'}
           </AppText>
           <AppText variant="body" color="muted" style={{ textAlign: 'center' }}>
-            Não conseguimos carregar as informações oficiais deste chamado.
+            {offline
+              ? 'Confira sua conexão e tente de novo.'
+              : 'Não achamos este chamado nos dados da Prefeitura. Ele pode ter saído da base do 1746.'}
           </AppText>
           <AppButton
             title="Tentar novamente"
@@ -104,16 +116,6 @@ export default function OfficialCallDetailsScreen() {
     } catch {
       setSaveFailed(true);
     }
-  };
-
-  const formatDate = (dateStr?: string | null) => {
-    if (!dateStr) return '—';
-    // Datas sem horário (prazos) não mostram hora; instantes mostram no fuso local.
-    const options: Intl.DateTimeFormatOptions = isDateOnly(dateStr)
-      ? { day: '2-digit', month: '2-digit', year: 'numeric' }
-      : { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-    const parsed = parseCallDate(dateStr);
-    return parsed ? parsed.toLocaleString('pt-BR', options) : dateStr;
   };
 
   const formatSla = () => {
@@ -157,87 +159,10 @@ export default function OfficialCallDetailsScreen() {
 
   return (
     <AppScreen>
-      <AppHeader title="Chamado 1746" onBack={() => goBack()} />
-
-      <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={() => {
-              void refetch();
-            }}
-            tintColor={colors.ink}
-            colors={[colors.ink]}
-          />
-        }
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: insets.bottom + spacing.xl },
-        ]}
-      >
-        {!data && item && (
-          <AppText variant="caption" color="muted">
-            Última informação consultada e salva neste celular.
-          </AppText>
-        )}
-        {isError && (
-          <AppText color="risk">
-            Não conseguimos atualizar. Mostrando o que você já tinha salvo.
-          </AppText>
-        )}
-        {(persistenceError || saveFailed) && (
-          <AppText
-            color="risk"
-            accessibilityRole="alert"
-            accessibilityLiveRegion="polite"
-          >
-            {persistenceError ||
-              'Não conseguimos salvar. Toque em Salvar para tentar de novo.'}
-          </AppText>
-        )}
-
-        {/* Cabeçalho editorial do chamado (sem card aninhado) */}
-        <View style={styles.officialHeaderBadge}>
-          <View style={styles.headerTextCol}>
-            <View style={styles.categoryLine}>
-              <Ionicons
-                name={
-                  categoryTheme.icon as React.ComponentProps<
-                    typeof Ionicons
-                  >['name']
-                }
-                size={15}
-                color={colors.muted}
-              />
-              <AppText variant="caption" color="muted" numberOfLines={1}>
-                Chamado do 1746 · {item.serviceType}
-              </AppText>
-            </View>
-            <AppText variant="screenTitle" style={styles.mainTitle}>
-              {item.serviceSubtype || item.serviceType}
-            </AppText>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Compartilhar ou copiar protocolo ${item.externalId}`}
-              onPress={async () => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                await Share.share({
-                  message: item.externalId,
-                  title: `Protocolo 1746 nº ${item.externalId}`,
-                });
-              }}
-              style={({ pressed }) => [
-                styles.protocolPill,
-                pressed && { opacity: 0.7 },
-              ]}
-            >
-              <Ionicons name="copy-outline" size={layout.iconSize.sm} color={colors.muted} />
-              <AppText variant="protocol" color="muted" selectable>
-                Protocolo {item.externalId}
-              </AppText>
-            </Pressable>
-          </View>
-
+      <AppHeader
+        title="Chamado"
+        onBack={() => goBack()}
+        rightElement={
           <View style={styles.headerActions}>
             <Pressable
               onPress={handleShare}
@@ -279,6 +204,98 @@ export default function OfficialCallDetailsScreen() {
               />
             </Pressable>
           </View>
+        }
+      />
+
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={() => {
+              void refetch();
+            }}
+            tintColor={colors.ink}
+            colors={[colors.ink]}
+          />
+        }
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + spacing.xl },
+        ]}
+      >
+        {!data && item && (
+          <AppText variant="caption" color="muted">
+            Última informação consultada e salva neste celular.
+          </AppText>
+        )}
+        {isError && (
+          <AppText color="risk">
+            {offline ? 'Sem internet no momento. ' : 'Não conseguimos atualizar. '}
+            Mostrando o que você já tinha salvo.
+          </AppText>
+        )}
+        {(persistenceError || saveFailed) && (
+          <AppText
+            color="risk"
+            accessibilityRole="alert"
+            accessibilityLiveRegion="polite"
+          >
+            {persistenceError ||
+              'Não conseguimos salvar. Toque em Salvar para tentar de novo.'}
+          </AppText>
+        )}
+
+        {/* Cabeçalho editorial do chamado (sem card aninhado) */}
+        <View style={styles.officialHeaderBadge}>
+          <View style={styles.headerTextCol}>
+            <View style={styles.categoryLine}>
+              <Ionicons
+                name={
+                  categoryTheme.icon as React.ComponentProps<
+                    typeof Ionicons
+                  >['name']
+                }
+                size={layout.iconSize.sm}
+                color={colors.muted}
+              />
+              <AppText variant="caption" color="muted" numberOfLines={1}>
+                {item.serviceType}
+              </AppText>
+            </View>
+            <AppText variant="screenTitle" accessibilityRole="header" style={styles.mainTitle}>
+              {item.serviceSubtype || item.serviceType}
+            </AppText>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Copiar protocolo ${item.externalId}`}
+              hitSlop={{ top: 12, bottom: 12 }}
+              onPress={async () => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                try {
+                  if (await copyText(item.externalId)) {
+                    setToast('Protocolo copiado');
+                    return;
+                  }
+                } catch {
+                  // Sem área de transferência: cai no compartilhamento abaixo.
+                }
+                await Share.share({
+                  message: item.externalId,
+                  title: `Protocolo 1746 nº ${item.externalId}`,
+                }).catch(() => undefined);
+              }}
+              style={({ pressed }) => [
+                styles.protocolPill,
+                pressed && { opacity: 0.7 },
+              ]}
+            >
+              <Ionicons name="copy-outline" size={layout.iconSize.sm} color={colors.muted} />
+              <AppText variant="protocol" color="muted">
+                Protocolo {item.externalId}
+              </AppText>
+            </Pressable>
+          </View>
+
         </View>
 
         {/* Badge de Prazo Oficial (SLA) em Destaque */}
@@ -349,9 +366,7 @@ export default function OfficialCallDetailsScreen() {
             <AppText variant="caption" color="muted">
               {[
                 item.serviceCategory,
-                item.officialSituationType
-                  ? `Tipo: ${item.officialSituationType}`
-                  : null,
+                describeOfficialPhase(item.officialSituationType),
               ]
                 .filter(Boolean)
                 .join(' · ')}
@@ -405,7 +420,7 @@ export default function OfficialCallDetailsScreen() {
                 Data de abertura
               </AppText>
               <AppText variant="label" color="ink">
-                {formatDate(item.openedAt)}
+                {formatCallDateTime(item.openedAt)}
               </AppText>
             </View>
 
@@ -414,7 +429,7 @@ export default function OfficialCallDetailsScreen() {
                 Prazo estimado
               </AppText>
               <AppText variant="label" color="ink">
-                {formatDate(item.targetDate)}
+                {formatCallDateTime(item.targetDate)}
               </AppText>
             </View>
 
@@ -435,7 +450,7 @@ export default function OfficialCallDetailsScreen() {
                   Previsão de diagnóstico
                 </AppText>
                 <AppText variant="label" color="ink">
-                  {formatDate(item.diagnosisTargetDate)}
+                  {formatCallDateTime(item.diagnosisTargetDate)}
                 </AppText>
               </View>
             ) : null}
@@ -446,7 +461,7 @@ export default function OfficialCallDetailsScreen() {
                   Data de encerramento
                 </AppText>
                 <AppText variant="label" color="ink">
-                  {formatDate(item.closedAt)}
+                  {formatCallDateTime(item.closedAt)}
                 </AppText>
               </View>
             ) : null}
@@ -532,6 +547,7 @@ export default function OfficialCallDetailsScreen() {
       >
         <OfficialChannel variant="primary" />
       </View>
+      <AppToast message={toast} onDismiss={() => setToast(null)} type="info" />
     </AppScreen>
   );
 }
@@ -558,10 +574,8 @@ function createStyles(colors: ThemeColors) {
     },
     officialHeaderBadge: {
       // Ações em cima, título com a largura toda (títulos longos não quebram no meio da palavra).
-      flexDirection: 'column-reverse',
+      flexDirection: 'column',
       alignItems: 'stretch',
-      paddingVertical: spacing.xs,
-      gap: spacing.sm,
     },
     headerTextCol: {
       flex: 1,
@@ -573,8 +587,8 @@ function createStyles(colors: ThemeColors) {
       gap: spacing.xxs,
     },
     saveButton: {
-      width: 44,
-      height: 44,
+      width: layout.touchTarget.minWidth,
+      height: layout.touchTarget.minHeight,
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: layout.radius.pill,
@@ -587,8 +601,8 @@ function createStyles(colors: ThemeColors) {
       gap: spacing.xs,
     },
     actionButton: {
-      width: 44,
-      height: 44,
+      width: layout.touchTarget.minWidth,
+      height: layout.touchTarget.minHeight,
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: layout.radius.pill,

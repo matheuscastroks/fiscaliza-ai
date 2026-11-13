@@ -24,13 +24,9 @@ interface TimelineStep {
   icon: keyof typeof Ionicons.glyphMap;
 }
 
-function formatDate(dateStr?: string | null): string | null {
-  return formatCallDate(dateStr);
-}
-
 function buildTimelineSteps(call: OfficialCall, isClosed: boolean): TimelineStep[] {
-  const openedDate = formatDate(call.openedAt);
-  const closedDate = formatDate(call.closedAt);
+  const openedDate = formatCallDate(call.openedAt);
+  const closedDate = formatCallDate(call.closedAt);
 
   const steps: TimelineStep[] = [];
 

@@ -22,6 +22,12 @@ export const layout = {
     md: 20,
     lg: 24,
   },
+  /** Barra de abas flutuante: altura total e distância da borda inferior segura. */
+  tabBar: {
+    itemHeight: 48,
+    padding: 6,
+    bottomGap: 14,
+  },
   touchTarget: {
     minHeight: 48,
     minWidth: 48,

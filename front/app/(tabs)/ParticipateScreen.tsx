@@ -29,12 +29,14 @@ import { usePlacesStore } from '@/stores/placesStore';
 import {
   OFFICIAL_PORTAL,
   OFFICIAL_REQUESTS_URL,
+  OFFICIAL_WHATSAPP_LABEL,
   OFFICIAL_WHATSAPP_URL,
   OFFICIAL_PHONE_URL,
   OFFICIAL_SERVICES,
 } from '@/features/city/OfficialChannel';
 
 import { useTheme, spacing, layout } from '@/theme';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 
 import { fontSizes } from '@/theme/typography';
 
@@ -58,7 +60,7 @@ const OFFICIAL_CHANNELS: ChannelItem[] = [
   {
     id: 'whatsapp',
     title: 'WhatsApp Oficial da Prefeitura',
-    subtitle: '(21) 3460-1746 · Mande mensagem e fotos',
+    subtitle: `${OFFICIAL_WHATSAPP_LABEL} · Mande mensagem e fotos`,
     icon: 'logo-whatsapp',
     url: OFFICIAL_WHATSAPP_URL,
   },
@@ -79,6 +81,7 @@ const OFFICIAL_CHANNELS: ChannelItem[] = [
 ];
 
 export default function ParticipateScreen() {
+  const { contentInset } = useTabBarInset();
   const { colors } = useTheme();
   const neighborhood = usePlacesStore((s) => {
     const { selection } = s;
@@ -105,7 +108,7 @@ export default function ParticipateScreen() {
       <KeyboardAwareScrollView
         contentContainerStyle={{
           padding: spacing.contentPadding,
-          paddingBottom: 140,
+          paddingBottom: contentInset,
           gap: spacing.lg,
         }}
         bottomOffset={48}
