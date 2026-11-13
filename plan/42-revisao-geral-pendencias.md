@@ -68,3 +68,17 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - React Compiler habilitado. CI agora executa Expo Doctor e lint backend no job correto (correção de aplicação anterior que não havia alterado o YAML por CRLF).
 - Expo Doctor: 20/20 checks, com aviso de prebuild Android ausente para Sentry. Build, testes completos após atualização e validação S22 ainda pendentes; não atribuir a este estado os testes da integração anterior.
 - PostgreSQL 17 disponível em imagem local; usar contêiner separado para os próximos testes, sem tocar no serviço de produção existente.
+
+## Fase 5 — validação após atualização (Codex, em andamento)
+- npm test do app, npm run typecheck (app/API) e npm run lint (app/API/shared) concluídos com exit 0 após 2edea99; logs .validation/fase5-{app-tests,types,lint}.log.
+- PostgreSQL exclusivo de teste criado: contêiner fiscaliza-fase5-test, porta 127.0.0.1:55432, banco fiscaliza_test, credenciais descartáveis validation-local-only. Não usa volume ou banco de produção.
+- Suite API com banco em execução, sessão 15874; bundle Android com Compiler em execução, sessão 40084. Consultar esses handles e logs antes de reiniciar. Logs .validation/fase5-api-tests.log e fase5-bundle.log.
+- Novo teste real ScreenState ainda NÃO validado: primeira execução excedeu 5s; diagnóstico com --testTimeout=30000 em execução na sessão 68344, log fase5-screen-state-diagnostic.log. Arquivo não commitado em front/tests/components/screen-state.test.tsx; investigar antes de considerar migrado.
+- Bundle emitiu aviso de export interno router-store inexistente em expo-router; investigar o resultado final antes de qualquer alteração em dependências.
+
+## Fase 5 — encerramento das validações e renderizador real
+- Processos antes pendentes concluídos: API 86/86 sem skips, bundle Android exportado com Compiler; teste ScreenState passou com timeout padrão em reexecução. Não houve alteração permanente de timeout.
+- Cobertura RNTL ampliada para 11 testes (3 suites): erro/retry/carregamento/conteúdo, vazio/ação, cabeçalho, toque desabilitado, alvo de toque, linhas opcionais e resumo de chamado. Todos passaram.
+- Removidos ui-components.test.cjs e helpers/render.cjs, substituídos pela cobertura RNTL. Outros testes que leem fontes continuam pendentes de migração.
+- Adicionado teste PostgreSQL da saúde detalhada: escolhe o sucesso mais recente e ignora falhas posteriores; 4/4 testes de saúde passaram no banco isolado. Lint completo e typecheck backend após as alterações passaram.
+- Sessões 15874, 40084 e 68344 encerradas. Contêiner fiscaliza-fase5-test permanece disponível para validações seguintes.
