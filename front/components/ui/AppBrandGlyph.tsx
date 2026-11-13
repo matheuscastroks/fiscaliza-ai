@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useEffect } from 'react';
 import {
-  AccessibilityInfo,
   StyleSheet,
   View,
   type ViewStyle,
@@ -60,22 +60,8 @@ export function AppBrandGlyph({
 }) {
   const { isDark } = useTheme();
   const resolvedVariant = resolveBrandVariant(variant, isDark, color);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const reducedMotion = useReducedMotion();
 
-  useEffect(() => {
-    let mounted = true;
-    void AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
-      if (mounted) setReducedMotion(enabled);
-    });
-    const sub = AccessibilityInfo.addEventListener(
-      'reduceMotionChanged',
-      setReducedMotion,
-    );
-    return () => {
-      mounted = false;
-      sub.remove();
-    };
-  }, []);
 
   const dropOffset = Math.max(8, Math.round(size * 0.22));
 

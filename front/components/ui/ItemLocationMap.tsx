@@ -8,7 +8,6 @@ import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { AppText } from './AppText';
 import { MapboxMapView, type MarkerKind } from './MapboxMapView';
-import { lightColors } from '@/theme/colors';
 
 export interface ItemLocationMapProps {
   id?: string;
@@ -18,7 +17,6 @@ export interface ItemLocationMapProps {
   neighborhood?: string;
   title?: string;
   kind?: MarkerKind;
-  status?: string;
   color?: string;
   height?: number;
   showExpandAction?: boolean;
@@ -31,8 +29,7 @@ export function ItemLocationMap({
   address,
   neighborhood,
   title,
-  kind = 'occurrence',
-  status,
+  kind = 'official',
   color,
   height = 190,
   showExpandAction = true,
@@ -65,18 +62,7 @@ export function ItemLocationMap({
     );
   }, [latitude, longitude]);
 
-  const pinColor = useMemo(() => {
-    if (color) return color;
-    if (kind === 'occurrence') {
-      if (status === 'resolved') return colors.completed;
-      if (status === 'in_progress') return lightColors.info;
-      return colors.attention;
-    }
-    if (kind === 'proposal') return colors.attention;
-    if (kind === 'action') return colors.completed;
-    if (kind === 'consultation') return colors.muted;
-    return colors.accent;
-  }, [color, kind, status, colors]);
+  const pinColor = color || colors.accent;
 
   if (!isValid || latitude == null || longitude == null) {
     return null;
@@ -114,7 +100,8 @@ export function ItemLocationMap({
       <Pressable
         onPress={handleOpenMap}
         accessibilityRole="button"
-        accessibilityLabel="Explorar no mapa completo"
+        accessibilityLabel={`Mapa do local: ${formattedAddress}`}
+        accessibilityHint="Abre o mapa completo"
         style={[styles.mapFrame, { height }]}
         collapsable={false}
       >

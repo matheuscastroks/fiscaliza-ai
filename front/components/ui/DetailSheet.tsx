@@ -1,3 +1,4 @@
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
@@ -11,7 +12,6 @@ import {
   StyleSheet,
   View,
   useWindowDimensions,
-  AccessibilityInfo,
   RefreshControl,
 } from 'react-native';
 import { Image } from 'expo-image';
@@ -62,15 +62,12 @@ export function DetailSheet({
   useEffect(() => {
     motion.configure(resting, minimum);
   }, [resting, minimum, motion]);
+  const reducedMotion = useReducedMotion();
   useEffect(() => {
-    void AccessibilityInfo.isReduceMotionEnabled().then((v) =>
-      motion.setReduced(v),
-    );
-    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', (v) =>
-      motion.setReduced(v),
-    );
+    motion.setReduced(reducedMotion);
+  }, [motion, reducedMotion]);
+  useEffect(() => {
     return () => {
-      sub.remove();
       motion.stop();
     };
   }, [motion]);

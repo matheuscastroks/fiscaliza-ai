@@ -1,9 +1,9 @@
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useTheme } from '@/theme/useTheme';
 
 import { useEffect, useRef, useState } from 'react';
 
 import {
-  AccessibilityInfo,
   Animated,
   Easing,
   Pressable,
@@ -51,25 +51,11 @@ export function SlidingTabs({
   const [positions, setPositions] = useState<
     Record<string, { x: number; width: number }>
   >({});
-  const [reduced, setReduced] = useState(false);
+  const reduced = useReducedMotion();
   const [left] = useState(() => new Animated.Value(0));
   const [width] = useState(() => new Animated.Value(0));
   const positioned = useRef(false);
   const selected = positions[value];
-  useEffect(() => {
-    let active = true;
-    void AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
-      if (active) setReduced(enabled);
-    });
-    const sub = AccessibilityInfo.addEventListener(
-      'reduceMotionChanged',
-      setReduced,
-    );
-    return () => {
-      active = false;
-      sub.remove();
-    };
-  }, []);
   useEffect(() => {
     if (!selected) return;
     if (!positioned.current || reduced) {

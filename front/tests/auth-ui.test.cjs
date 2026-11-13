@@ -20,30 +20,9 @@ test('auth ui: backdrop photo asset exists and has valid size', () => {
   );
 });
 
-test('auth ui: GovBrButton component adheres to official DS Gov.br standards', () => {
-  const govButtonPath = path.join(
-    ROOT_DIR,
-    'components',
-    'ui',
-    'GovBrButton.tsx',
-  );
-  assert.ok(fs.existsSync(govButtonPath), 'GovBrButton.tsx must exist');
-
-  const content = fs.readFileSync(govButtonPath, 'utf8');
-  assert.ok(
-    content.includes('export const GovBrButton'),
-    'Must export GovBrButton component',
-  );
-  assert.ok(
-    content.includes('#1351B4'),
-    'Must use official Gov.br primary blue (#1351B4)',
-  );
-  assert.ok(content.includes('Entrar com'), 'Must include "Entrar com" text');
-  assert.ok(content.includes('gov.br'), 'Must include "gov.br" brand text');
-  assert.ok(
-    content.includes('layout.radius.pill'),
-    'Must use pill radius for DS Gov.br standard',
-  );
+test('auth ui: no gov.br button while there is no real gov.br integration', () => {
+  const govButtonPath = path.join(ROOT_DIR, 'components', 'ui', 'GovBrButton.tsx');
+  assert.ok(!fs.existsSync(govButtonPath), 'GovBrButton.tsx was dead code and must stay removed');
 });
 
 test('auth ui: LoginScreen integrates civic hero backdrop and offers only options that work', () => {

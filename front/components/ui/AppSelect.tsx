@@ -49,7 +49,7 @@ export function AppSelect({
   options,
   value,
   onChange,
-  placeholder = 'Pesquisar opção...',
+  placeholder = 'Pesquisar opção…',
   icon,
   compact = false,
   defaultValue = '',

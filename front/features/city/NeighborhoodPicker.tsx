@@ -81,7 +81,7 @@ export function NeighborhoodPicker({
   return (
     <AppSelect
       label="Filtrar por bairro"
-      placeholder="Buscar bairro do Rio de Janeiro..."
+      placeholder="Buscar bairro do Rio de Janeiro…"
       icon="location-outline"
       compact={compact}
       defaultValue=""

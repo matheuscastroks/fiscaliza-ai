@@ -20,10 +20,12 @@ import { useAuthStore } from '@/stores/authStore';
 import { useFollowStore, type FollowStatusFilter } from '@/stores/followStore';
 import { useSavedRefresh } from '@/features/city/useSavedRefresh';
 import { useTheme, spacing, layout } from '@/theme';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 import { isOfficialCallClosed } from '@/shared/official-call-state';
 import { useShallow } from 'zustand/react/shallow';
 
 export default function FollowScreen() {
+  const { contentInset } = useTabBarInset();
   const { colors, isDark } = useTheme();
   const user = useAuthStore((s) => s.user);
   const {
@@ -87,7 +89,7 @@ export default function FollowScreen() {
         windowSize={5}
         contentContainerStyle={{
           padding: spacing.contentPadding,
-          paddingBottom: 120,
+          paddingBottom: contentInset,
           gap: spacing.md,
           flexGrow: 1,
         }}

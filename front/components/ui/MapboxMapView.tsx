@@ -9,22 +9,13 @@ import {
 import Constants from 'expo-constants';
 import { mapPerformanceEvent } from '@/features/territory/mapPerformance';
 import { circleFeature, pointFeature, type MapSearchArea } from '@/features/territory/mapArea';
-import { useMapCamera } from '@/features/territory/useMapCamera';
+import { useMapCamera, type CameraBounds, type CameraPadding } from '@/features/territory/useMapCamera';
 import type { CapturedDeviceLocation } from '@/features/places/types';
 import { MapAreaLayers, MapPositionLayers } from '@/components/territory/MapAreaLayers';
 import { lightColors } from '@/theme/colors';
-import { elevation } from '@/theme/elevation';
-import { layout } from '@/theme/layout';
+import { mapPalette, MAPBOX_STYLE_DARK, MAPBOX_STYLE_LIGHT } from '@/theme/map';
 
-export type MarkerKind =
-  | 'occurrence'
-  | 'proposal'
-  | 'consultation'
-  | 'action'
-  | 'official'
-  | 'school'
-  | 'health'
-  | 'square';
+export type MarkerKind = 'official' | 'school' | 'health' | 'square';
 
 export interface MapMarker {
   id: string;
@@ -33,7 +24,6 @@ export interface MapMarker {
   title?: string;
   color?: string;
   kind?: MarkerKind;
-  draggable?: boolean;
 }
 
 export interface MapboxRegion {
@@ -42,6 +32,18 @@ export interface MapboxRegion {
   latitudeDelta?: number;
   longitudeDelta?: number;
   zoom?: number;
+  /** Quando presente (objeto novo), a câmera enquadra a caixa em vez de centralizar. */
+  bounds?: CameraBounds;
+}
+
+export interface MapRegionChange {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+  zoom?: number;
+  /** Verdadeiro só quando a mudança veio de um gesto do usuário (arrastar, pinçar). */
+  userGesture: boolean;
 }
 
 export interface MapboxMapViewProps {
@@ -64,20 +66,17 @@ export interface MapboxMapViewProps {
     latitude: number;
     longitude: number;
   }) => void;
-  onRegionChange?: (region: {
-    latitude: number;
-    longitude: number;
-    latitudeDelta: number;
-    longitudeDelta: number;
-    zoom?: number;
-  }) => void;
+  onRegionChange?: (region: MapRegionChange) => void;
   interactive?: boolean;
   isDark?: boolean;
+  /** Área ocupada por barras e botões sobre o mapa, para enquadrar o conteúdo visível. */
+  cameraPadding?: CameraPadding;
+  /** Descrição para leitores de tela. */
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
-export const MAPBOX_STYLE_STREETS = 'mapbox://styles/mapbox/streets-v12';
-export const MAPBOX_STYLE_LIGHT = MAPBOX_STYLE_STREETS;
-export const MAPBOX_STYLE_DARK = MAPBOX_STYLE_STREETS;
+export { MAPBOX_STYLE_DARK, MAPBOX_STYLE_LIGHT };
 
 export function resolveMapboxAccessToken(): string {
   const envToken = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN || '';
@@ -86,8 +85,8 @@ export function resolveMapboxAccessToken(): string {
   return typeof extraToken === 'string' ? extraToken.trim() : '';
 }
 
-export function mapboxStyleUrl(_isDark?: boolean): string {
-  return MAPBOX_STYLE_STREETS;
+export function mapboxStyleUrl(isDark = false): string {
+  return mapPalette(isDark).styleUrl;
 }
 
 export function computeMapboxZoom(region: MapboxRegion): number {
@@ -132,7 +131,6 @@ export function buildMarkersFeatureCollection(
           title: m.title || '',
           color: validColor,
           kind: m.kind || 'official',
-          draggable: Boolean(m.draggable),
           selected: m.id === selectedId ? 1 : 0,
         },
         geometry: {
@@ -237,7 +235,11 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
   isDark = false,
   performanceDiagnostics = false,
   diagnosticTrace = null,
+  cameraPadding,
+  accessibilityLabel,
+  accessibilityHint,
 }: MapboxMapViewProps) {
+  const palette = mapPalette(isDark);
   const [completedTrace, setCompletedTrace] = useState<number | null>(null);
   const mounted = useRef(true);
   const initialTrace = useRef(diagnosticTrace);
@@ -263,20 +265,11 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
   const zoom = useMemo(() => computeMapboxZoom(region), [region]);
 
 
-  const nonDraggableMarkers = useMemo(
-    () => markers.filter((m) => !m.draggable),
-    [markers],
-  );
-  const draggableMarkers = useMemo(
-    () => markers.filter((m) => m.draggable),
-    [markers],
-  );
-
   const markersResult = useMemo(() => {
     const start = performanceDiagnostics ? performance.now() : 0;
-    const shape = buildMarkersFeatureCollection(nonDraggableMarkers);
+    const shape = buildMarkersFeatureCollection(markers);
     return { shape, durationMs: performanceDiagnostics ? performance.now() - start : 0 };
-  }, [nonDraggableMarkers, performanceDiagnostics]);
+  }, [markers, performanceDiagnostics]);
   const markersShape = markersResult.shape;
   useEffect(() => {
     if (performanceDiagnostics) {
@@ -287,8 +280,8 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
 
   const selectedMarker = useMemo(
     () =>
-      selectedId ? nonDraggableMarkers.find((m) => m.id === selectedId) : null,
-    [nonDraggableMarkers, selectedId],
+      selectedId ? markers.find((m) => m.id === selectedId) : null,
+    [markers, selectedId],
   );
   const selectedMarkerShape = useMemo(
     () =>
@@ -317,8 +310,8 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
     return searchArea.source === 'place' || !matchesDevice ? pointFeature(searchArea) : null;
   }, [searchArea, searchCircle, deviceLocation]);
 
-  useMapCamera(cameraRef, { latitude: region.latitude, longitude: region.longitude, zoom }, searchCircle, fitSearchArea,
-    searchArea?.capturedAt);
+  useMapCamera(cameraRef, { latitude: region.latitude, longitude: region.longitude, zoom, bounds: region.bounds },
+    searchCircle, fitSearchArea, searchArea?.capturedAt, cameraPadding);
 
   const handleShapePress = useCallback(
     async (event: any) => {
@@ -387,7 +380,10 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
         }
         lastEmittedCameraRef.current = { lat, lng, zoom: z };
         const approxDelta = 360 / Math.pow(2, Math.max(1, z));
+        // Movimentos da própria câmera (enquadrar, localizar) não contam como gesto.
+        const userGesture = Boolean(state?.gestures?.isGestureActive);
         onRegionChange?.({
+          userGesture,
           latitude: lat,
           longitude: lng,
           latitudeDelta: approxDelta,
@@ -399,15 +395,21 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
     [onRegionChange, zoom],
   );
 
+  const containerStyle = [styles.container, { backgroundColor: palette.background }, style];
+  const a11y = accessibilityLabel
+    ? { accessible: true, accessibilityLabel, accessibilityHint }
+    : {};
+
   if (!Mapbox) {
-    return <View style={[styles.container, style]} />;
+    return <View style={containerStyle} {...a11y} />;
   }
 
   return (
-    <View style={[styles.container, style]}>
+    <View style={containerStyle} {...a11y}>
       <Mapbox.MapView
         style={StyleSheet.absoluteFill}
-        styleURL={mapboxStyleUrl(isDark)}
+        styleURL={palette.styleUrl}
+        localizeLabels={{ locale: 'pt' }}
         scrollEnabled={interactive}
         pitchEnabled={false}
         rotateEnabled={false}
@@ -437,14 +439,14 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
             <Mapbox.FillLayer
               id="boundary-fill"
               style={{
-                fillColor: lightColors.primary,
+                fillColor: palette.boundary,
                 fillOpacity: 0.08,
               }}
             />
             <Mapbox.LineLayer
               id="boundary-line"
               style={{
-                lineColor: lightColors.primary,
+                lineColor: palette.boundary,
                 lineWidth: 2,
                 lineOpacity: 0.8,
               }}
@@ -467,7 +469,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
             id="clusters-circle"
             filter={['has', 'point_count']}
             style={{
-              circleColor: lightColors.primary,
+              circleColor: palette.cluster,
               circleRadius: [
                 'step',
                 ['get', 'point_count'],
@@ -478,7 +480,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
                 26,
               ],
               circleStrokeWidth: 2.5,
-              circleStrokeColor: lightColors.white,
+              circleStrokeColor: palette.clusterStroke,
             }}
           />
           <Mapbox.SymbolLayer
@@ -487,7 +489,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
             style={{
               textField: ['get', 'point_count_abbreviated'],
               textSize: 13,
-              textColor: lightColors.white,
+              textColor: palette.clusterText,
               textIgnorePlacement: true,
               textAllowOverlap: true,
             }}
@@ -499,7 +501,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
               circleColor: ['get', 'color'],
               circleRadius: 8,
               circleStrokeWidth: 2,
-              circleStrokeColor: lightColors.white,
+              circleStrokeColor: palette.markerStroke,
             }}
           />
         </Mapbox.ShapeSource>
@@ -515,7 +517,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
                 circleColor: ['get', 'color'],
                 circleRadius: 13,
                 circleStrokeWidth: 3.5,
-                circleStrokeColor: lightColors.white,
+                circleStrokeColor: palette.markerStroke,
               }}
             />
           </Mapbox.ShapeSource>
@@ -523,31 +525,6 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
 
         <MapPositionLayers Mapbox={Mapbox} centerPoint={centerPoint} devicePoint={devicePoint} isDark={isDark} />
 
-        {draggableMarkers.map((m) => (
-          <Mapbox.PointAnnotation
-            key={m.id}
-            id={m.id}
-            coordinate={[m.longitude, m.latitude]}
-            draggable
-            onSelected={() => onMarkerClick?.(m.id)}
-            onDragEnd={(e: any) => {
-              const coords = e?.geometry?.coordinates;
-              if (Array.isArray(coords) && coords.length >= 2) {
-                onMapClick?.({
-                  longitude: Number(coords[0]),
-                  latitude: Number(coords[1]),
-                });
-              }
-            }}
-          >
-            <View
-              style={[
-                styles.draggablePin,
-                { backgroundColor: m.color || lightColors.primary },
-              ]}
-            />
-          </Mapbox.PointAnnotation>
-        ))}
       </Mapbox.MapView>
     </View>
   );
@@ -557,14 +534,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     overflow: 'hidden',
-    backgroundColor: lightColors.surfaceSubdued,
-  },
-  draggablePin: {
-      ...elevation.floating,
-    width: 22,
-    height: 22,
-    borderRadius: layout.radius.sm,
-    borderWidth: 3,
-    borderColor: lightColors.white,
   },
 });

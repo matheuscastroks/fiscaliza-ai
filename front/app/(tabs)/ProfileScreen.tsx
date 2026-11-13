@@ -23,6 +23,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 
 
 import { AppScreen } from '@/components/ui/AppScreen';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 
 
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -66,6 +67,7 @@ import { createStyles } from '@/features/profile/profileScreenStyles';
 
 
 export default function ProfileScreen() {
+  const { contentInset } = useTabBarInset();
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
@@ -133,7 +135,7 @@ export default function ProfileScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: contentInset }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >

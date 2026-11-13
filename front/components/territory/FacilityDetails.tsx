@@ -8,7 +8,8 @@ import { AppButton } from '@/components/ui/AppButton';
 import { AppToast } from '@/components/ui/AppToast';
 import { openExternal } from '@/services/openExternal';
 import { MapboxMapView } from '@/components/ui/MapboxMapView';
-import { QueryState } from '@/features/city/CityUI';
+import { ScreenState } from '@/components/ui/ScreenState';
+import { formatCallDate } from '@/features/city/formatDates';
 import { usePublicFacility } from '@/features/territory/usePublicData';
 import {
   facilityLabels,
@@ -62,7 +63,7 @@ export function FacilityDetails({
       onBack={onBack}
       onRefresh={query.refetch}
     >
-      <QueryState
+      <ScreenState
         loading={query.isLoading}
         error={query.error}
         retry={query.refetch}
@@ -146,17 +147,9 @@ export function FacilityDetails({
             </AppText>
             <AppText variant="caption" color="muted">
               Atualizado em{' '}
-              {item.provenance.publishedAt
-                ? new Date(item.provenance.publishedAt).toLocaleDateString(
-                    'pt-BR',
-                  )
-                : 'data não informada'}
+              {formatCallDate(item.provenance.publishedAt) ?? 'data não informada'}
               . Atualização na origem:{' '}
-              {item.provenance.sourceUpdatedAt
-                ? new Date(item.provenance.sourceUpdatedAt).toLocaleDateString(
-                    'pt-BR',
-                  )
-                : 'não informada'}
+              {formatCallDate(item.provenance.sourceUpdatedAt) ?? 'não informada'}
               .
             </AppText>
             {item.provenance.state === 'stale' && (

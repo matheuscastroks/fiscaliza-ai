@@ -3,7 +3,7 @@ import { Pressable, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
 import { spacing } from '@/theme';
-import { fontFamilies , fontSizes } from '@/theme/typography';
+import { fontFamilies, fontSizes } from '@/theme/typography';
 
 import { layout } from '@/theme/layout';
 
@@ -21,7 +21,16 @@ export interface CitySearchProps {
   expanded?: boolean;
   filterCount?: number;
   leftElement?: React.ReactNode;
+  /**
+   * Com `leftElement`, a busca fica recolhida num ícone para o elemento à esquerda
+   * (ex.: bairro) ter a largura toda; ao tocar, o campo ocupa o lugar dele.
+   */
+  searchCollapsed?: boolean;
+  onExpandSearch?: () => void;
+  onCollapseSearch?: () => void;
 }
+
+const ICON_BUTTON = layout.touchTarget.minHeight - 4;
 
 export function CitySearch({
   value,
@@ -35,6 +44,9 @@ export function CitySearch({
   expanded = false,
   filterCount = 0,
   leftElement,
+  searchCollapsed,
+  onExpandSearch,
+  onCollapseSearch,
 }: CitySearchProps) {
   const { colors, mode } = useTheme();
 
@@ -45,29 +57,61 @@ export function CitySearch({
     actionLabel ??
     (onAction ? 'Alternar visualização' : 'Filtros');
   const isActionActive = actionActive ?? (filterCount > 0 || expanded);
+  const collapsible = Boolean(leftElement) && searchCollapsed !== undefined;
+  const showLeft = Boolean(leftElement) && (!collapsible || searchCollapsed);
+  const showInput = Boolean(onChangeText) && (!collapsible || !searchCollapsed);
+
+  const iconButton = {
+    width: ICON_BUTTON,
+    height: ICON_BUTTON,
+    borderRadius: layout.radius.panel,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  };
 
   return (
     <View
       style={{
-        minHeight: 48,
+        minHeight: layout.touchTarget.minHeight + 4,
         backgroundColor: colors.surface,
         borderRadius: layout.radius.card,
-        paddingLeft: leftElement ? 6 : spacing.md,
-        paddingRight: 5,
+        paddingLeft: leftElement ? 2 : spacing.md,
+        paddingRight: 3,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: spacing.xs,
+        gap: spacing.xxs,
         borderWidth: 1,
         borderColor: colors.border,
       }}
     >
-      {leftElement}
+      {showLeft && <View style={{ flex: 1, minWidth: 0 }}>{leftElement}</View>}
+      {collapsible && !searchCollapsed && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Fechar busca"
+          onPress={onCollapseSearch}
+          style={iconButton}
+        >
+          <Ionicons name="arrow-back" size={layout.iconSize.md} color={colors.ink} />
+        </Pressable>
+      )}
       {!leftElement && <Ionicons name="search-outline" size={layout.iconSize.md} color={colors.muted} />}
-      {onChangeText ? (
+      {collapsible && searchCollapsed && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Buscar chamado ou serviço"
+          onPress={onExpandSearch}
+          style={iconButton}
+        >
+          <Ionicons name="search-outline" size={layout.iconSize.md} color={colors.ink} />
+        </Pressable>
+      )}
+      {showInput && onChangeText ? (
         <TextInput
           accessibilityLabel="Buscar"
           keyboardAppearance={mode}
-          placeholder={leftElement ? 'Buscar chamado ou serviço...' : 'Buscar por protocolo, assunto ou bairro...'}
+          autoFocus={collapsible}
+          placeholder={leftElement ? 'Assunto ou protocolo' : 'Buscar por protocolo, assunto ou bairro…'}
           value={value}
           onChangeText={onChangeText}
           placeholderTextColor={colors.muted}
@@ -75,12 +119,12 @@ export function CitySearch({
           style={{
             flex: 1,
             minHeight: 44,
-            fontSize: leftElement ? 14 : 15,
+            fontSize: fontSizes.label,
             fontFamily: fontFamilies.regular,
             color: colors.ink,
           }}
         />
-      ) : (
+      ) : !onChangeText ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Buscar"
@@ -91,11 +135,11 @@ export function CitySearch({
             Buscar na minha região…
           </AppText>
         </Pressable>
-      )}
-      {onChangeText && Boolean(value) && (
+      ) : null}
+      {showInput && onChangeText && Boolean(value) && (
         <Pressable
           onPress={() => onChangeText('')}
-          hitSlop={8}
+          hitSlop={12}
           accessibilityRole="button"
           accessibilityLabel="Limpar busca"
         >
@@ -105,17 +149,13 @@ export function CitySearch({
       {handleAction && (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={resolvedLabel}
+          accessibilityLabel={filterCount > 0 ? `${resolvedLabel}, ${filterCount} ativos` : resolvedLabel}
           accessibilityState={{ expanded: expanded || Boolean(actionActive) }}
           aria-expanded={expanded || Boolean(actionActive)}
           onPress={handleAction}
           style={{
-            width: 38,
-            height: 38,
-            borderRadius: layout.radius.panel,
+            ...iconButton,
             backgroundColor: isActionActive ? colors.accent : colors.ink,
-            alignItems: 'center',
-            justifyContent: 'center',
           }}
         >
           <Ionicons

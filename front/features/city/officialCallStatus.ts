@@ -86,3 +86,23 @@ export function officialStatusColor(label: string, colors: ThemeColors): string 
     return colors.primary;
   return colors.muted;
 }
+
+/**
+ * "tipo_situacao" do 1746 em linguagem simples ("Andamento" vira "Fase no 1746: em andamento").
+ * Devolve null quando não há valor.
+ */
+export function describeOfficialPhase(value?: string | null): string | null {
+  const raw = value?.trim();
+  if (!raw) return null;
+  const key = raw.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const known: Record<string, string> = {
+    andamento: 'em andamento',
+    'em andamento': 'em andamento',
+    encerrado: 'encerrado',
+    fechado: 'encerrado',
+    pendente: 'aguardando atendimento',
+    aberto: 'aberto, aguardando atendimento',
+    'nao iniciado': 'ainda não iniciado',
+  };
+  return `Fase no 1746: ${known[key] ?? raw.toLowerCase()}`;
+}

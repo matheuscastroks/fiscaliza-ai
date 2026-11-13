@@ -6,7 +6,7 @@ import { useTheme, useThemedStyles } from '@/theme/useTheme';
 
 import type { ThemeColors } from '@/theme/colors';
 
-import { memo } from 'react';
+import { memo, useState } from 'react';
 
 import { View, ScrollView, StyleSheet, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
@@ -131,8 +131,12 @@ function TerritoryFilterBarComponent({
     setFacilityLayers,
   } = useTerritoryDomain();
 
+  // A busca começa recolhida para o bairro caber inteiro; abre por toque ou com texto.
+  const [searchOpen, setSearchOpen] = useState(Boolean(search));
+  const searchCollapsed = !searchOpen && !search;
+
   const callsLabel = officialCallsStatus.isLoading
-    ? '...'
+    ? '…'
     : totalCalls > 999
       ? `${(totalCalls / 1000).toFixed(1)}k`
       : `${totalCalls}`;
@@ -200,6 +204,12 @@ function TerritoryFilterBarComponent({
           leftElement={locationTrigger}
           value={search}
           onChangeText={onSearchChange}
+          searchCollapsed={searchCollapsed}
+          onExpandSearch={() => setSearchOpen(true)}
+          onCollapseSearch={() => {
+            setSearchOpen(false);
+            onSearchChange('');
+          }}
           onFilters={() => {
             void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             onOpenFilters();
@@ -211,11 +221,12 @@ function TerritoryFilterBarComponent({
       </View>
 
       {/* Linha 2: Carrossel Horizontal de Chips Rápidos de 1 Toque (Apple HIG Style) */}
-      <View style={padded ? styles.paddedSection : undefined}>
+      {/* A faixa vai até a borda da tela e termina com recuo, para o último chip não ficar cortado. */}
+      <View style={padded ? undefined : styles.bleed}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.quickChipsTrack}
+          contentContainerStyle={[styles.quickChipsTrack, styles.trackInset]}
         >
           {/* Alternador de Domínio: 1746 vs Serviços Públicos */}
           <View style={styles.domainPillTrack}>
@@ -227,6 +238,7 @@ function TerritoryFilterBarComponent({
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setTerritoryDomain('calls');
               }}
+              hitSlop={DOMAIN_HIT_SLOP}
               style={[
                 styles.domainPillButton,
                 territoryDomain === 'calls' && styles.domainPillButtonActive,
@@ -259,6 +271,7 @@ function TerritoryFilterBarComponent({
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setTerritoryDomain('facilities');
               }}
+              hitSlop={DOMAIN_HIT_SLOP}
               style={[
                 styles.domainPillButton,
                 territoryDomain === 'facilities' && styles.domainPillButtonActive,
@@ -301,6 +314,7 @@ function TerritoryFilterBarComponent({
                         : 'all';
                   onStatusChange(next);
                 }}
+                hitSlop={CHIP_HIT_SLOP}
                 style={[
                   styles.quickChip,
                   status !== 'all' && styles.quickChipActive,
@@ -315,7 +329,7 @@ function TerritoryFilterBarComponent({
                         : 'funnel-outline'
                   }
                   size={layout.iconSize.sm}
-                  color={status !== 'all' ? colors.onAccentBrand : colors.muted}
+                  color={status !== 'all' ? colors.onSurfaceBrand : colors.muted}
                 />
                 <AppText
                   variant="caption"
@@ -341,13 +355,14 @@ function TerritoryFilterBarComponent({
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     onMacroThemeChange?.('all');
                   }}
+                  hitSlop={CHIP_HIT_SLOP}
                   style={[styles.quickChip, styles.quickChipActive]}
                 >
-                  <Ionicons name="pricetag" size={layout.iconSize.sm} color={colors.onAccentBrand} />
+                  <Ionicons name="pricetag" size={layout.iconSize.sm} color={colors.onSurfaceBrand} />
                   <AppText variant="caption" style={[styles.quickChipText, styles.quickChipTextActive]}>
                     {CIVIC_MACRO_THEMES.find((t) => t.id === macroTheme)?.label || macroTheme}
                   </AppText>
-                  <Ionicons name="close" size={layout.iconSize.sm} color={colors.onAccentBrand} />
+                  <Ionicons name="close" size={layout.iconSize.sm} color={colors.onSurfaceBrand} />
                 </Pressable>
               )}
             </>
@@ -377,6 +392,7 @@ function TerritoryFilterBarComponent({
                       if (next.length === 0) return;
                       setFacilityLayers(next);
                     }}
+                    hitSlop={CHIP_HIT_SLOP}
                     style={[
                       styles.quickChip,
                       isSelected && styles.quickChipActive,
@@ -385,7 +401,7 @@ function TerritoryFilterBarComponent({
                     <Ionicons
                       name={f.icon}
                       size={layout.iconSize.sm}
-                      color={isSelected ? colors.onAccentBrand : colors.muted}
+                      color={isSelected ? colors.onSurfaceBrand : colors.muted}
                     />
                     <AppText
                       variant="caption"
@@ -411,6 +427,7 @@ function TerritoryFilterBarComponent({
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 onOpenFilters();
               }}
+              hitSlop={CHIP_HIT_SLOP}
               style={({ pressed }) => [
                 styles.activeFilterPill,
                 pressed && { opacity: 0.8 },
@@ -428,6 +445,10 @@ function TerritoryFilterBarComponent({
   );
 }
 
+// Chips de 36 (ou 32 + trilho) com folga vertical chegam a 48 de área de toque.
+const CHIP_HIT_SLOP = { top: 6, bottom: 6 };
+const DOMAIN_HIT_SLOP = { top: 8, bottom: 8 };
+
 export const TerritoryFilterBar = memo(TerritoryFilterBarComponent);
 
 const createStyles = (colors: ThemeColors) =>
@@ -435,7 +456,7 @@ const createStyles = (colors: ThemeColors) =>
     searchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
     searchGrow: { flex: 1 },
     wrapper: {
-      gap: 6,
+      gap: 0,
     },
     paddedWrapper: {
       paddingBottom: spacing.xs,
@@ -451,8 +472,7 @@ const createStyles = (colors: ThemeColors) =>
     unifiedLocationPill: {
       flexDirection: 'row',
       alignItems: 'center',
-      maxWidth: 130,
-      height: 38,
+      minHeight: 44,
       paddingLeft: 4,
       paddingRight: 6,
       gap: 4,
@@ -473,20 +493,27 @@ const createStyles = (colors: ThemeColors) =>
     unifiedDivider: {
       width: 1,
       height: 20,
-      marginLeft: 4,
+      marginLeft: 'auto',
+    },
+    bleed: {
+      marginHorizontal: -spacing.md,
+    },
+    trackInset: {
+      paddingHorizontal: spacing.md,
     },
     quickChipsTrack: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.xs,
-      paddingVertical: 2,
+      // Espaço para a folga de toque dos chips (o Android não aceita toque fora do pai).
+      paddingVertical: 6,
     },
     quickChip: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 5,
-      height: 30,
-      paddingHorizontal: 10,
+      minHeight: 36,
+      paddingHorizontal: spacing.sm,
       borderRadius: layout.radius.panel,
       backgroundColor: colors.surface,
       borderWidth: 1,
@@ -521,8 +548,8 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       flexShrink: 0,
       gap: 5,
-      paddingVertical: 5,
-      paddingHorizontal: 10,
+      minHeight: 32,
+      paddingHorizontal: spacing.sm,
       borderRadius: layout.radius.pill,
     },
     domainPillButtonActive: {
@@ -542,8 +569,8 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       flexShrink: 0,
       gap: 4,
-      paddingVertical: 6,
-      paddingHorizontal: 10,
+      minHeight: 36,
+      paddingHorizontal: spacing.sm,
       borderRadius: layout.radius.pill,
       backgroundColor: colors.surface,
       borderWidth: 1,

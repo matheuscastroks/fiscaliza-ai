@@ -164,7 +164,7 @@ test('territory screen: respects architecture constraints and line ceiling', () 
   );
 
   assert.ok(
-    content.includes('top: insets.top + 108'),
-    'Contextual search pill must be placed right below top search bar (top: insets.top + 108)',
+    content.includes('top: headerHeight + spacing.xs'),
+    'Contextual search pill must sit right below the measured top search bar',
   );
 });

@@ -51,17 +51,6 @@ export const createStyles = (colors: ThemeColors) =>
     filterSection: {
       gap: spacing.xs + 2,
     },
-    sectionHeaderRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      marginBottom: 2,
-    },
-    sectionHeaderTitle: {
-      fontWeight: '600',
-      fontSize: fontSizes.caption,
-      color: colors.muted,
-    },
     sectionDivider: {
       height: StyleSheet.hairlineWidth,
       backgroundColor: colors.divider,
@@ -124,7 +113,7 @@ export const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: 9,
+      minHeight: layout.touchTarget.minHeight - 4,
       paddingHorizontal: 8,
       borderRadius: layout.radius.pill,
     },
@@ -145,57 +134,11 @@ export const createStyles = (colors: ThemeColors) =>
       flexWrap: 'wrap',
       gap: 8,
     },
-    periodChip: {
-      height: 34,
-      justifyContent: 'center',
-      paddingHorizontal: 14,
-      borderRadius: layout.radius.panel,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-    },
-    periodChipActive: {
-      backgroundColor: colors.ink,
-      borderColor: colors.ink,
-    },
-    periodChipText: {
-      fontSize: fontSizes.caption,
-      fontWeight: '600',
-      color: colors.ink,
-    },
-    periodChipTextActive: {
-      color: colors.surface,
-      fontWeight: '600',
-    },
     macroThemesTrack: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: 8,
       paddingVertical: 2,
-    },
-    macroThemeChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      height: 36,
-      paddingHorizontal: 12,
-      borderRadius: layout.radius.panel,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-    },
-    macroThemeChipSelected: {
-      backgroundColor: colors.accent,
-      borderColor: colors.accent,
-    },
-    macroThemeChipText: {
-      fontSize: fontSizes.caption,
-      fontWeight: '600',
-      color: colors.ink,
-    },
-    macroThemeChipTextSelected: {
-      color: colors.onAccent,
-      fontWeight: '600',
     },
     modalFooter: {
       flexDirection: 'row',

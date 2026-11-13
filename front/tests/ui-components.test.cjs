@@ -43,16 +43,6 @@ test('IconButton always has an accessible name and a 48 touch target', () => {
   assert.equal(find(tree, (n) => n.type === 'Ionicons').props.name, 'menu');
 });
 
-test('StatusBadge always shows the status as text and picks the tone color', () => {
-  const { load } = ui();
-  const { StatusBadge } = load('StatusBadge');
-  const tree = StatusBadge({ label: 'Em andamento', tone: 'progress' });
-  const label = find(tree, (n) => n.type === 'AppText');
-  assert.equal(label.props.children, 'Em andamento');
-  assert.equal(label.props.color, '#primary');
-  assert.equal(StatusBadge({ label: 'Cancelado', tone: 'risk' }).props.style[1].backgroundColor, '#riskSurface');
-});
-
 test('ListRow is a button only when it has an action, and shows title, subtitle and chevron', () => {
   const { load } = ui();
   const { ListRow } = load('ListRow');

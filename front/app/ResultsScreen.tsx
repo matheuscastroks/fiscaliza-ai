@@ -8,7 +8,8 @@ import * as Haptics from 'expo-haptics';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
-import { QueryState, createCityStyles } from '@/features/city/CityUI';
+import { createCityStyles } from '@/features/city/CityUI';
+import { ScreenState } from '@/components/ui/ScreenState';
 import { breakdownShare } from '@/features/city/resultBreakdown';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
 import { useTerritorySelection } from '@/stores/territoryStore';
@@ -370,7 +371,7 @@ export default function ResultsScreen() {
               </View>
             )}
 
-            <QueryState
+            <ScreenState
               loading={overviewQuery.isPending || cityOverviewQuery.isPending}
               error={overviewQuery.error || cityOverviewQuery.error}
               retry={() => {

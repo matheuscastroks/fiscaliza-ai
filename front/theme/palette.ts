@@ -30,9 +30,6 @@ export const partnerBrand = {
   whatsapp: '#25D366',
   whatsappPressed: '#1EBE5D',
   whatsappSurface: '#E7FCEB',
-  govBr: '#1351B4',
-  govBrSurface: '#EBF2FA',
-  govBrShadow: '#071D41',
 } as const;
 
 export type CategoryKey = keyof typeof categoryPalette;
