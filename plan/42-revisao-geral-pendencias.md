@@ -9,13 +9,13 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - **Fase 3, app:** Sentry no app (`EXPO_PUBLIC_SENTRY_DSN`) e na API (`SENTRY_DSN`); `ErrorBoundary`; retry só de rede; `focusManager`/`onlineManager` (`expo-network`); cache persistido; abertura sem esperar `/auth/me`; splash curta depois da primeira vez; `useLastNotificationResponse`.
 - **Fase 6, infra e docs:** Caddy removido; ignores; Postman; `plan/` arquivado; `docs/decisoes.md`; AGENTS/README/PRODUCT; Dependabot no CI; shellcheck.
 
-## Pronto, mas fora da `main`
-- **Fase 4, interface no aparelho:** branch `refs/heads/fix/app-fase-4-interface` (worktree `.claude/worktrees/youthful-lumiere-e60a3f`), 3 commits, conferida no S22. **Falta juntar na `main`.** Conflito esperado em `front/package.json` e `front/package-lock.json` (a Fase 3 instalou `@sentry/react-native`, `expo-network` e os persisters; a Fase 4 instalou `expo-clipboard`): manter as dependências dos dois lados e rodar `npm install` em `front/`. Depois, `npm test`, `npm run typecheck` e `npm run lint`.
+## Integração da Fase 4 (concluída localmente)
+- **Fase 4, interface no aparelho:** branch `refs/heads/fix/app-fase-4-interface` (worktree `.claude/worktrees/youthful-lumiere-e60a3f`), 3 commits, conferida no S22. **Integrada na main local em c53cc08; instalação, testes, tipos e lint passaram. O texto seguinte registra a previsão original de integração.** Conflito esperado em `front/package.json` e `front/package-lock.json` (a Fase 3 instalou `@sentry/react-native`, `expo-network` e os persisters; a Fase 4 instalou `expo-clipboard`): manter as dependências dos dois lados e rodar `npm install` em `front/`. Depois, `npm test`, `npm run typecheck` e `npm run lint`.
 
 ## Falta fazer
 1. **Verificar no aparelho as Fases 1, 3 e 4 juntas.** Depois da junção, gerar um build de desenvolvimento novo (`npx expo run:android` em `front/`): o Sentry e o `expo-network` são módulos nativos e o APK instalado não os tem. Percorrer: abrir sem rede (cache e conta guardada), modo avião e volta (salvos pendentes sobem), apagar conta com senha, sair (sem avisos depois), erro forçado com a `ErrorBoundary` chegando ao Sentry (`EXPO_PUBLIC_SENTRY_DEV=1`).
 2. **Aplicar em produção:** reconstruir a imagem da API (`docker compose --env-file .env.compose -f compose.yaml -f compose.public.yaml --profile public up -d --build api scheduler migrate`). Isso aplica as migrações `0019` e `0020`; o dump das tabelas legadas já está em `backups/legacy/participacao-20261113.dump`. Antes, rodar um backup (`BACKUP_ONCE=1`).
-3. **Fase 5, estrutura e testes (não iniciada):**
+3. **Fase 5, estrutura e testes (em andamento; itens originais abaixo, evidências atuais ao final):**
    - `npx expo install --fix` (14 pacotes com patch atrasado; o `expo-doctor` só reclama disso) e depois o job `expo-doctor` no CI;
    - `jest`, `jest-expo` e `@types/jest` para devDependencies; remover o script `reset-project` e dependências sem uso (conferir peers);
    - `engines` e `.nvmrc` (22) no app; alinhar TypeScript (front 6.0, back 5.9);
@@ -112,3 +112,9 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Testes de interação passaram antes e depois da extração: avançar, voltar, pular e concluir replay. Expectativas validam os títulos e conteúdo visíveis em cada etapa.
 - Removida inspeção de código de onboarding-flow-refinement; preservada verificação de assets presentes e não vazios. Tamanho de arquivo não é tratado como prova de qualidade de imagem.
 - Typecheck app, lint app, dois testes RNTL e dez regressões relacionadas passaram. Layout e leitura com fonte ampliada ainda precisam do aparelho.
+
+## Fase 5 — Mapbox dividido
+- MapboxMapView ficou com 382 linhas. Conversão GeoJSON, normalização de contorno e cálculo de zoom em features/territory/mapboxGeometry.ts; apresentação de clusters/marcadores/seleção em MapMarkerLayers.tsx.
+- Exportações anteriores mantidas por compatibilidade. Testes de geometria importam o módulo puro diretamente, eliminando o carregador que simulava React e módulos nativos.
+- Typecheck app, lint sem avisos e 17 testes relacionados (marcadores, contorno, câmera, cluster e gesto) passaram.
+- Native loader, eventos e câmera seguem no componente principal. Verificação visual no S22 continua pendente; useTerritoryView ainda precisa ser dividido.

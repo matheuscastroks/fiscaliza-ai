@@ -5,62 +5,7 @@ const vm = require('node:vm');
 const ts = require('typescript');
 
 function loadMapboxHelpers() {
-  const source = ts.transpileModule(
-    fs.readFileSync('components/ui/MapboxMapView.tsx', 'utf8'),
-    {
-      compilerOptions: {
-        module: ts.ModuleKind.CommonJS,
-        target: ts.ScriptTarget.ES2022,
-        esModuleInterop: true,
-        jsx: ts.JsxEmit.React,
-      },
-    },
-  ).outputText;
-
-  const mod = { exports: {} };
-  const mocks = {
-    '@/features/territory/useMapCamera': {},
-    '@/features/territory/mapArea': {},
-    '@/components/territory/MapAreaLayers': {},
-    '@/features/territory/mapPerformance': { mapPerformanceEvent() {} },
-    react: {
-      useCallback: (fn) => fn,
-      useEffect: () => {},
-      useMemo: (fn) => fn(),
-      useRef: (v) => ({ current: v }),
-      createElement: () => ({}),
-      memo: (c) => c,
-    },
-    'react-native': {
-      NativeModules: {},
-      Platform: { OS: 'web' },
-      StyleSheet: { create: (s) => s },
-      View: 'View',
-    },
-    'expo-constants': {
-      default: { expoConfig: { extra: { mapboxAccessToken: 'pk.test_token' } } },
-    },
-    'react-native-webview': {
-      WebView: 'WebView',
-    },
-    '@/features/territory/selectors': {
-      scriptJson: (v) => JSON.stringify(v),
-    },
-  };
-
-  const fn = vm.runInThisContext(
-    '(function(require,module,exports,process){' + source + '\n})',
-  );
-  fn(
-    (id) => {
-      if (id in mocks) return mocks[id];
-      return require(id);
-    },
-    mod,
-    mod.exports,
-    { env: {} },
-  );
-  return mod.exports;
+  return require('@/features/territory/mapboxGeometry');
 }
 
 test('buildMarkersFeatureCollection converts 14,000 markers into a GeoJSON FeatureCollection with selection state', () => {

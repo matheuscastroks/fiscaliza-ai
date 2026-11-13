@@ -1,3 +1,4 @@
+import { MapMarkerLayers } from '@/components/territory/MapMarkerLayers';
 import React, { useRef, useMemo, useEffect, useCallback, useState, memo } from 'react';
 import {
   NativeModules,
@@ -12,8 +13,10 @@ import { circleFeature, pointFeature, type MapSearchArea } from '@/features/terr
 import { useMapCamera, type CameraBounds, type CameraPadding } from '@/features/territory/useMapCamera';
 import type { CapturedDeviceLocation } from '@/features/places/types';
 import { MapAreaLayers, MapPositionLayers } from '@/components/territory/MapAreaLayers';
-import { lightColors } from '@/theme/colors';
+import { computeMapboxZoom, buildMarkersFeatureCollection, normalizeBoundaryFeatureCollection } from '@/features/territory/mapboxGeometry';
 import { mapPalette, MAPBOX_STYLE_DARK, MAPBOX_STYLE_LIGHT } from '@/theme/map';
+
+export { computeMapboxZoom, buildMarkersFeatureCollection, normalizeBoundaryFeatureCollection, mapboxStyleUrl } from '@/features/territory/mapboxGeometry';
 
 export type MarkerKind = 'official' | 'school' | 'health' | 'square';
 
@@ -83,100 +86,6 @@ export function resolveMapboxAccessToken(): string {
   if (envToken) return envToken.trim();
   const extraToken = Constants.expoConfig?.extra?.mapboxAccessToken;
   return typeof extraToken === 'string' ? extraToken.trim() : '';
-}
-
-export function mapboxStyleUrl(isDark = false): string {
-  return mapPalette(isDark).styleUrl;
-}
-
-export function computeMapboxZoom(region: MapboxRegion): number {
-  if (typeof region.zoom === 'number' && Number.isFinite(region.zoom)) {
-    return region.zoom;
-  }
-  const delta = Math.max(
-    region.latitudeDelta || 0.05,
-    region.longitudeDelta || 0.05,
-    0.001,
-  );
-  return Math.max(3, Math.min(18, Math.round(Math.log2(360 / delta))));
-}
-
-export function buildMarkersFeatureCollection(
-  markers: MapMarker[],
-  selectedId?: string | null,
-) {
-  const len = markers.length;
-  const features = new Array(len);
-  let count = 0;
-  for (let i = 0; i < len; i++) {
-    const m = markers[i];
-    const lat = m.latitude;
-    const lng = m.longitude;
-    if (
-      typeof lat === 'number' &&
-      typeof lng === 'number' &&
-      Number.isFinite(lat) &&
-      Number.isFinite(lng)
-    ) {
-      const c = m.color;
-      const validColor =
-        c && c.length === 7 && c.charCodeAt(0) === 35 && /^#[0-9a-f]{6}$/i.test(c)
-          ? c
-          : lightColors.primary;
-      features[count++] = {
-        type: 'Feature' as const,
-        id: m.id,
-        properties: {
-          id: m.id,
-          title: m.title || '',
-          color: validColor,
-          kind: m.kind || 'official',
-          selected: m.id === selectedId ? 1 : 0,
-        },
-        geometry: {
-          type: 'Point' as const,
-          coordinates: [lng, lat] as [number, number],
-        },
-      };
-    }
-  }
-  if (count < len) {
-    features.length = count;
-  }
-  return {
-    type: 'FeatureCollection' as const,
-    features,
-  };
-}
-
-export function normalizeBoundaryFeatureCollection(boundary: unknown) {
-  if (!boundary || typeof boundary !== 'object') {
-    return { type: 'FeatureCollection' as const, features: [] };
-  }
-  const b = boundary as {
-    type?: string;
-    features?: unknown[];
-    geometry?: unknown;
-  };
-  if (b.type === 'FeatureCollection' && Array.isArray(b.features)) {
-    return b as { type: 'FeatureCollection'; features: unknown[] };
-  }
-  if (b.type === 'Feature' && b.geometry) {
-    return { type: 'FeatureCollection' as const, features: [b] };
-  }
-  if (b.type === 'Polygon' || b.type === 'MultiPolygon') {
-    return {
-      type: 'FeatureCollection' as const,
-      features: [
-        {
-          type: 'Feature' as const,
-          properties: {},
-          geometry: b,
-        },
-      ],
-    };
-  }
-  return { type: 'FeatureCollection' as const, features: [] };
 }
 
 function isNativeMapboxAvailable(): boolean {
@@ -456,72 +365,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
 
         <MapAreaLayers Mapbox={Mapbox} searchCircle={searchCircle} accuracyCircle={accuracyCircle} isDark={isDark} />
 
-        <Mapbox.ShapeSource
-          ref={shapeSourceRef}
-          id="markers-source"
-          shape={markersShape}
-          cluster
-          clusterRadius={48}
-          clusterMaxZoomLevel={15}
-          onPress={handleShapePress}
-        >
-          <Mapbox.CircleLayer
-            id="clusters-circle"
-            filter={['has', 'point_count']}
-            style={{
-              circleColor: palette.cluster,
-              circleRadius: [
-                'step',
-                ['get', 'point_count'],
-                20,
-                10,
-                23,
-                50,
-                26,
-              ],
-              circleStrokeWidth: 2.5,
-              circleStrokeColor: palette.clusterStroke,
-            }}
-          />
-          <Mapbox.SymbolLayer
-            id="clusters-count"
-            filter={['has', 'point_count']}
-            style={{
-              textField: ['get', 'point_count_abbreviated'],
-              textSize: 13,
-              textColor: palette.clusterText,
-              textIgnorePlacement: true,
-              textAllowOverlap: true,
-            }}
-          />
-          <Mapbox.CircleLayer
-            id="unclustered-point"
-            filter={['!', ['has', 'point_count']]}
-            style={{
-              circleColor: ['get', 'color'],
-              circleRadius: 8,
-              circleStrokeWidth: 2,
-              circleStrokeColor: palette.markerStroke,
-            }}
-          />
-        </Mapbox.ShapeSource>
-
-        {selectedMarkerShape && (
-          <Mapbox.ShapeSource
-            id="selected-marker-source"
-            shape={selectedMarkerShape}
-          >
-            <Mapbox.CircleLayer
-              id="selected-marker-halo"
-              style={{
-                circleColor: ['get', 'color'],
-                circleRadius: 13,
-                circleStrokeWidth: 3.5,
-                circleStrokeColor: palette.markerStroke,
-              }}
-            />
-          </Mapbox.ShapeSource>
-        )}
+        <MapMarkerLayers Mapbox={Mapbox} shapeSourceRef={shapeSourceRef} markersShape={markersShape} selectedMarkerShape={selectedMarkerShape} handleShapePress={handleShapePress} isDark={isDark} />
 
         <MapPositionLayers Mapbox={Mapbox} centerPoint={centerPoint} devicePoint={devicePoint} isDark={isDark} />
 
