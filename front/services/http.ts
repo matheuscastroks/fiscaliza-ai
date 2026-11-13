@@ -10,7 +10,13 @@ export const API_URL = (
 // Sem importar react-native aqui: no app nativo não existe `document`.
 const CLIENT_HEADER = typeof document === 'undefined' ? 'citizen-native' : 'citizen';
 export const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 1, staleTime: 15000 } },
+  defaultOptions: {
+    queries: {
+      // Repetir só falha de transporte: 404, 401 ou 422 não mudam na segunda vez.
+      retry: (failureCount, error) => error instanceof NetworkError && failureCount < 2,
+      staleTime: 15000,
+    },
+  },
 });
 /** Falha de transporte (sem rede/timeout), distinta de resposta do servidor como 401. */
 export class NetworkError extends Error {
@@ -82,7 +88,11 @@ export async function request<T>(
     throw error;
   }
   signal?.addEventListener('abort', cancel, { once: true });
-  const timer = setTimeout(() => controller.abort(), 15000);
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, 15000);
   try {
     const multipart = body instanceof FormData;
     const response = await fetch(API_URL + path, {
@@ -120,8 +130,11 @@ export async function request<T>(
     if (signal?.aborted) throw error;
     // Tudo que não veio do servidor (TypeError, timeout, falha nativa de rede) é falta de conexão.
     if (error instanceof ApiError) throw error;
+    // Demora do servidor não é falta de internet: a mensagem diz o que houve.
     throw new NetworkError(
-      'Sem internet no momento. Confira sua conexão e tente de novo.',
+      timedOut
+        ? 'O servidor demorou para responder. Tente de novo em instantes.'
+        : 'Sem internet no momento. Confira sua conexão e tente de novo.',
     );
   } finally {
     clearTimeout(timer);

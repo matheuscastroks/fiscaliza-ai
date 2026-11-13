@@ -1,11 +1,10 @@
-const { getDefaultConfig } = require('expo/metro-config');
+const { getSentryExpoConfig } = require('@sentry/react-native/metro');
 const path = require('node:path');
 
+// Mesma base do getDefaultConfig da Expo, com os ids de depuração do Sentry
+// nos bundles (para os erros apontarem a linha certa do código).
 /** @type {import('expo/metro-config').MetroConfig} */
-const config = getDefaultConfig(__dirname, {
-  // [Web-only]: Enables CSS support in Metro.
-  isCSSEnabled: true,
-});
+const config = getSentryExpoConfig(__dirname);
 
 // Preserve conditional exports used by the installed Expo SDK.
 config.resolver.unstable_enablePackageExports = true;
@@ -19,7 +18,6 @@ config.watchFolders = [
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 config.resolver.blockList = [
   path.join(repositoryRoot, 'back'),
-  path.join(repositoryRoot, 'municipal'),
   path.join(repositoryRoot, '.validation'),
   path.join(__dirname, '.agents'),
   path.join(__dirname, '.impeccable'),

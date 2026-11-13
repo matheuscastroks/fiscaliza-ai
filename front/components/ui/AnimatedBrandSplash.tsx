@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   AccessibilityInfo,
   Pressable,
@@ -61,12 +62,21 @@ export function AnimatedBrandSplash() {
     let exitTimer: ReturnType<typeof setTimeout> | null = null;
     let unmountTimer: ReturnType<typeof setTimeout> | null = null;
 
-    void AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
+    // A animação inteira (3,5 s) só na primeira abertura; depois, a marca
+    // aparece e sai em pouco mais de um segundo.
+    const SEEN_KEY = 'fiscaliza-ai:brand-splash-seen:v1';
+    const seen = AsyncStorage.getItem(SEEN_KEY).then(
+      (value) => value === '1',
+      () => false,
+    );
+    void Promise.all([AccessibilityInfo.isReduceMotionEnabled(), seen]).then(([reduced, repeat]) => {
       if (!mounted) return;
       if (reduced) {
         setVisible(false);
         return;
       }
+      if (!repeat) void AsyncStorage.setItem(SEEN_KEY, '1').catch(() => undefined);
+      const exitAt = repeat ? 1100 : 3050;
 
       // 1. "Fiscaliza" desliza e surge com física suave logo após o 3º traço superior
       fiscalizaOpacity.value = withDelay(580, withTiming(1, { duration: 280 }));
@@ -109,11 +119,11 @@ export function AnimatedBrandSplash() {
           duration: 450,
           easing: Easing.out(Easing.cubic),
         });
-      }, 3050);
+      }, exitAt);
 
       unmountTimer = setTimeout(() => {
         if (mounted) setVisible(false);
-      }, 3500);
+      }, exitAt + 450);
     });
 
     return () => {

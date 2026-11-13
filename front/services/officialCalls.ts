@@ -61,8 +61,8 @@ export async function fetchOfficialCall(
   );
 }
 
-export async function fetchOfficialFilters(): Promise<OfficialCallsFilterOptions> {
-  return request<OfficialCallsFilterOptions>('/rio1746/filters');
+export async function fetchOfficialFilters(signal?: AbortSignal): Promise<OfficialCallsFilterOptions> {
+  return request<OfficialCallsFilterOptions>('/rio1746/filters', 'GET', undefined, signal);
 }
 
 export interface OfficialOverviewQueryParams {
@@ -110,6 +110,6 @@ export interface SyncStatusResult {
   latestRun: import('@/shared/contracts').SyncRunSummary | null;
 }
 
-export async function fetchSyncStatus(): Promise<SyncStatusResult | null> {
-  return request<SyncStatusResult | null>('/rio1746/sync-status');
+export async function fetchSyncStatus(signal?: AbortSignal): Promise<SyncStatusResult | null> {
+  return request<SyncStatusResult | null>('/rio1746/sync-status', 'GET', undefined, signal);
 }

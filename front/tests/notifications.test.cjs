@@ -56,7 +56,7 @@ test('notifications: root layout initializes notifications and registers respons
 
   assert.ok(
     content.includes('useNotificationStore') &&
-      content.includes('addNotificationResponseReceivedListener'),
+      content.includes('useLastNotificationResponse'),
     'RootLayout must mount notification store initialization and tap response listener for deep linking',
   );
 });

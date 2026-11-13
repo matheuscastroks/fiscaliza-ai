@@ -37,6 +37,14 @@ module.exports = ({ config }) => {
           : {},
       ],
       'expo-secure-store',
+      [
+        '@sentry/react-native/expo',
+        {
+          organization: 'instituto-de-pesquisa-economic',
+          project: 'fiscaliza-ai',
+          // O envio de source maps no build do EAS usa SENTRY_AUTH_TOKEN (secret).
+        },
+      ],
     ],
     extra: {
       ...(config.extra || {}),

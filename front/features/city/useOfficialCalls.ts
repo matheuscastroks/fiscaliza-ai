@@ -124,7 +124,7 @@ export function useOfficialCall(id: string | null | undefined, enabled = true) {
   return useQuery({
     queryKey: ['officialCall', id],
     queryFn: ({ signal }) => {
-      if (!id) throw new Error('Call ID is required');
+      if (!id) throw new Error('Chamado não informado.');
       return fetchOfficialCall(id, signal);
     },
     enabled: Boolean(enabled && id),
@@ -135,7 +135,7 @@ export function useOfficialCall(id: string | null | undefined, enabled = true) {
 export function useOfficialFilters(enabled = true) {
   return useQuery({
     queryKey: ['officialCallsFilters'],
-    queryFn: () => fetchOfficialFilters(),
+    queryFn: ({ signal }) => fetchOfficialFilters(signal),
     enabled,
     staleTime: 5 * 60 * 1000,
   });
@@ -175,7 +175,7 @@ export function useOfficialOverview(
 export function useSyncStatus(enabled = true) {
   return useQuery({
     queryKey: ['officialCallsSyncStatus'],
-    queryFn: () => fetchSyncStatus(),
+    queryFn: ({ signal }) => fetchSyncStatus(signal),
     enabled,
     staleTime: 30 * 1000,
   });
