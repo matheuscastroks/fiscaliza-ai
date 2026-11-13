@@ -1,3 +1,4 @@
+import { useSpatialCalls } from './useSpatialCalls';
 
 import type { CameraBounds } from './useMapCamera';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -173,17 +174,19 @@ export function useTerritoryQueries() {
   const officialSource = sources.data?.find((s) => s.sourceId === 'rio1746');
   const officialFilters = useOfficialFilters(isFocused && interactionsComplete);
   const officialTime = { startDate, endDate, periodDays: startDate || endDate || period === 'all' ? undefined : Number(period) };
-  const officialCalls = useInfiniteOfficialCalls(
-    {
+  const officialParams = {
       ...(areaOnly && appliedBounds ? appliedBounds : routeNeighborhoodId ? { neighborhoodId: routeNeighborhoodId } : territorialFilters.params),
       tipo: serviceType === 'all' ? undefined : serviceType,
       tema: macroTheme === 'all' ? undefined : macroTheme,
       situacao: status === 'all' ? undefined : status,
       ...officialTime,
       search: appliedSearch || undefined,
-      limit: 50,
-      hasCoordinates: areaOnly ? true : undefined,
-    },
+    };
+  const { spatialMap, setSpatialViewport } = useSpatialCalls(officialParams,
+    isFocused && mapAvailable && layers.includes('official') && territorialFilters.hydrated,
+    territorialFilters.cacheScope, INITIAL_REGION);
+  const officialCalls = useInfiniteOfficialCalls(
+    { ...officialParams, limit: 50, hasCoordinates: areaOnly ? true : undefined },
     isFocused && layers.includes('official') && territorialFilters.hydrated,
     mapPerformanceEnabled,
     territorialFilters.cacheScope,
@@ -272,6 +275,7 @@ export function useTerritoryQueries() {
     return () => sub.remove();
   }, [isFocused, selectedId, selectedCluster, isListView, mapAvailable, areaOnly, setIsListView]);
 
+  const selectedCallQuery = useOfficialCall(selectedId, isFocused && Boolean(selectedId) && layers.includes('official'));
   const focusedCallQuery = useOfficialCall(focusId, isFocused && Boolean(focusId));
 
   // O foco vindo de notificação/rota vale uma vez por chamado; trocar para Serviços depois não o desfaz.
@@ -318,6 +322,7 @@ export function useTerritoryQueries() {
   }, [focusId, focusedCallQuery.isError, focusedCallQuery.data]);
 
   return {
+    spatialMap, setSpatialViewport, selectedCallQuery,
     isFocused,
     colors,
     mode,

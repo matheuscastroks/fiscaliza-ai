@@ -23,6 +23,8 @@ test('PostgreSQL: spatial aggregates cover every matching point independently of
   const outside = await queryOfficialMap(db, eq(officialCalls.serviceType, 'map-coverage-fixture'), { north: -20, south: -21, east: -43, west: -44 });
   assert.equal(outside.visibleTotal, 0);
   assert.equal(outside.total, 610);
+  assert.ok(result.bounds);
+  assert.deepEqual(outside.bounds, result.bounds);
   assert.deepEqual(outside.cells, []);
 });
 

@@ -91,6 +91,7 @@ export function TerritoryContent() {
     effectiveListView,
     visitTrace,
     officialCalls,
+    spatialMap,
     serviceTypeOptions,
     filtersOpen,
     setFiltersOpen,
@@ -153,6 +154,11 @@ export function TerritoryContent() {
             style={StyleSheet.absoluteFill}
             region={region}
             markers={allMapMarkers}
+            spatialCells={layers.includes('official') ? spatialMap.data?.cells ?? [] : undefined}
+            onSpatialCellPress={cell => updateCameraRegion({
+              latitude: cell.latitude, longitude: cell.longitude, latitudeDelta: Math.max(0.00004, cell.north - cell.south), longitudeDelta: Math.max(0.00004, cell.east - cell.west), zoom: Math.min(19, (region.zoom ?? 12) + 2),
+              bounds: { northEast: [cell.east + 0.00002, cell.north + 0.00002], southWest: [cell.west - 0.00002, cell.south - 0.00002] },
+            })}
             boundary={boundary.data?.geometry}
             searchArea={mapOverlay.searchArea}
             deviceLocation={mapOverlay.deviceLocation}

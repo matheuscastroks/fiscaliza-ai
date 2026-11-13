@@ -187,3 +187,12 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Avisos Reanimated "Dependencies should only be used on the web" continuam em lote durante navegação; aviso Sentry.wrap antes de init aparece no modo dev com captura desligada. Investigar, não considerar validação limpa.
 - Evidências locais ignoradas: .validation/s22-updated.png e XMLs s22-updated-ui, s22-list-ui e s22-detail-ui. Nenhuma captura foi publicada.
 - Pedido de atualizar APK e abrir pelo Expo Start atendido. Objetivo completo permanece ativo: cobertura espacial, testes restantes, documentação consolidada, revisão, merge e entrega ainda pendentes.
+
+## Camada espacial integrada — pronta para ativação da API
+- Mapa 1746 usa agregados de /rio1746/map por viewport real do Mapbox, com debounce de 450ms, cancelamento e chave por escopo/filtros. Lista mantém páginas de 50; seus registros não definem mais a cobertura dos clusters.
+- Células exibem count integral sem reclustering como se cada célula fosse um chamado. Toque no grupo enquadra seus pontos; singleton consulta o detalhe mesmo fora da página da lista. Contadores distinguem visíveis no mapa e sem coordenadas no recorte.
+- API também devolve extensão de todos os pontos filtrados, independente da câmera, para enquadramento inicial completo. Durante atualização, a interface informa que os pontos estão sendo atualizados.
+- Validação: app passou testes TS/CJS e 26 testes Jest (8 suites); API 90/90 com PostgreSQL real sem skips; typecheck app/API e lint completo passaram. Teste espacial final 3/3 confirmou extensão independente de viewport, soma de contagens e filtros iguais aos da lista.
+- Mocks de native-upload-compatibility alinhados à API moderna já migrada, preservando autenticação, multipart, ausência de arquivo e falhas de envio; quatro falhas antigas eram apenas mocks de expo-file-system/legacy.
+- PENDENTE DE ATIVAÇÃO: API publicada ainda precisa ser reconstruída após backup. Isso também aplica migrações locais pendentes 0019/0020, portanto requer confirmação específica conforme o pedido inicial. Só depois validar cobertura real no S22 e registrar medições; nenhum ganho de desempenho foi afirmado.
+- Não houve push nem atualização de produção nesta implementação.

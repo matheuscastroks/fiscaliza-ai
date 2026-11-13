@@ -1,3 +1,5 @@
+import type { OfficialMapCell, MapViewport } from '@/shared/official-map';
+import { SpatialCallLayers } from '@/components/territory/SpatialCallLayers';
 import { MapMarkerLayers } from '@/components/territory/MapMarkerLayers';
 import React, { useRef, useMemo, useEffect, useCallback, useState, memo } from 'react';
 import {
@@ -40,6 +42,7 @@ export interface MapboxRegion {
 }
 
 export interface MapRegionChange {
+  visibleBounds?: MapViewport;
   latitude: number;
   longitude: number;
   latitudeDelta: number;
@@ -55,6 +58,8 @@ export interface MapboxMapViewProps {
   style?: ViewStyle;
   region: MapboxRegion;
   markers?: MapMarker[];
+  spatialCells?: OfficialMapCell[];
+  onSpatialCellPress?: (cell: OfficialMapCell) => void;
   boundary?: unknown;
   searchArea?: MapSearchArea | null;
   deviceLocation?: CapturedDeviceLocation | null;
@@ -130,6 +135,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
   style,
   region,
   markers = [],
+  spatialCells, onSpatialCellPress,
   boundary,
   searchArea,
   deviceLocation,
@@ -292,6 +298,10 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
         // Movimentos da própria câmera (enquadrar, localizar) não contam como gesto.
         const userGesture = Boolean(state?.gestures?.isGestureActive);
         onRegionChange?.({
+          visibleBounds: state.properties.bounds ? {
+            north: state.properties.bounds.ne[1], east: state.properties.bounds.ne[0],
+            south: state.properties.bounds.sw[1], west: state.properties.bounds.sw[0],
+          } : undefined,
           userGesture,
           latitude: lat,
           longitude: lng,
@@ -365,7 +375,11 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
 
         <MapAreaLayers Mapbox={Mapbox} searchCircle={searchCircle} accuracyCircle={accuracyCircle} isDark={isDark} />
 
-        <MapMarkerLayers Mapbox={Mapbox} shapeSourceRef={shapeSourceRef} markersShape={markersShape} selectedMarkerShape={selectedMarkerShape} handleShapePress={handleShapePress} isDark={isDark} />
+        {spatialCells && <SpatialCallLayers Mapbox={Mapbox} cells={spatialCells} isDark={isDark} onSelect={cell => {
+          if (cell.id && cell.count === 1) onMarkerClick?.(cell.id);
+          else onSpatialCellPress?.(cell);
+        }} />}
+        <MapMarkerLayers Mapbox={Mapbox} shapeSourceRef={shapeSourceRef} markersShape={spatialCells ? { type: 'FeatureCollection', features: [] } : markersShape} selectedMarkerShape={selectedMarkerShape} handleShapePress={handleShapePress} isDark={isDark} />
 
         <MapPositionLayers Mapbox={Mapbox} centerPoint={centerPoint} devicePoint={devicePoint} isDark={isDark} />
 

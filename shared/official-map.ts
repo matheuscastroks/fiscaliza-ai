@@ -20,6 +20,8 @@ export type OfficialMapSnapshot = {
   unlocatedTotal: number;
   /** Matching records inside this viewport; equals the sum of cell counts. */
   visibleTotal: number;
+  /** Extent of all located matches, independent of the viewport. */
+  bounds: MapViewport | null;
   cells: OfficialMapCell[];
 };
 export type OfficialCallMapQueryParams = Omit<OfficialCallsQueryParams,

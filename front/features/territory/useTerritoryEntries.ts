@@ -5,7 +5,7 @@ import { entryLocation, entryToMarker, type Entry } from '@/components/territory
 import type { MapMarker } from '@/components/ui/MapboxMapView';
 import type { useTerritoryQueries } from './useTerritoryQueries';
 
-type Queries = Pick<ReturnType<typeof useTerritoryQueries>, 'officialCalls' | 'schools' | 'health' | 'squares' | 'layers' | 'neighborhood' | 'neighborhoodId' | 'areaOnly' | 'selectedId' | 'focusedCallQuery' | 'facilityQueries' | 'selectedCluster'>;
+type Queries = Pick<ReturnType<typeof useTerritoryQueries>, 'officialCalls' | 'schools' | 'health' | 'squares' | 'layers' | 'neighborhood' | 'neighborhoodId' | 'areaOnly' | 'selectedId' | 'focusedCallQuery' | 'facilityQueries' | 'selectedCluster'> & { selectedCallQuery?: { data?: import('@/shared/contracts').OfficialCall } };
 
 /** Deriva lista, seleção e marcadores a partir do mesmo recorte e das páginas carregadas. */
 export function useTerritoryEntries(q: Queries) {
@@ -41,8 +41,9 @@ export function useTerritoryEntries(q: Queries) {
     ) {
       return { type: 'official' as const, item: focusedCallQuery.data };
     }
+    if (q.selectedCallQuery?.data?.id === selectedId) return { type: 'official', item: q.selectedCallQuery.data };
     return null;
-  }, [selectedId, entries, officialCalls.data?.calls, focusedCallQuery.data]);
+  }, [q.selectedCallQuery?.data, selectedId, entries, officialCalls.data?.calls, focusedCallQuery.data]);
 
   const activeFacilityQueries = useMemo(() => {
     const labels = { school: 'escolas', health: 'serviços de saúde', square: 'praças' } as const;

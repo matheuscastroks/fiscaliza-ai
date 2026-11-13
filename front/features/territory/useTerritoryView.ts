@@ -79,12 +79,17 @@ export function useTerritoryView(q: TerritoryQueries) {
     totalCalls, hasMoreCalls, dataReady, allMapMarkers } = useTerritoryEntries(q);
 
   const municipalOverviewRegion = useMemo(() => {
+    const extent = q.spatialMap.data?.bounds;
+    if (layers.includes('official') && extent) return computeOverviewRegion([
+      { latitude: extent.north, longitude: extent.east },
+      { latitude: extent.south, longitude: extent.west },
+    ], INITIAL_REGION);
     const points = entries
       .map((entry) => entryLocation(entry))
       .filter((pt): pt is { latitude: number; longitude: number } => Boolean(pt));
     const calculated = computeOverviewRegion(points, INITIAL_REGION);
     return { ...calculated, zoom: calculated.zoom ?? 12 };
-  }, [entries]);
+  }, [entries, layers, q.spatialMap.data?.bounds]);
 
   const filterCount =
     Number(Boolean(neighborhood)) +
@@ -98,13 +103,14 @@ export function useTerritoryView(q: TerritoryQueries) {
   useEffect(() => {
     // Enquadra os pontos do bairro (ou da cidade, sem bairro) quando chegam pela primeira vez.
     if (areaOnly || focusId || activeSelection.kind === 'radius' || activeSelection.kind === 'pending-current') return;
+    if (layers.includes('official') && !q.spatialMap.data) return;
     const fitKey = neighborhood || '__city__';
     if (lastFittedNeighborhoodRef.current === fitKey) return;
-    if (entries.some((entry) => Boolean(entryLocation(entry)))) {
+    if (q.spatialMap.data?.locatedTotal || entries.some((entry) => Boolean(entryLocation(entry)))) {
       lastFittedNeighborhoodRef.current = fitKey;
       updateCameraRegion(municipalOverviewRegion);
     }
-  }, [neighborhood, areaOnly, focusId, entries, municipalOverviewRegion, activeSelection.kind, updateCameraRegion]);
+  }, [neighborhood, areaOnly, focusId, entries, municipalOverviewRegion, activeSelection.kind, updateCameraRegion, layers, q.spatialMap.data]);
 
   const openEntry = useCallback((entry: Entry) => {
     router.push({
@@ -154,6 +160,7 @@ export function useTerritoryView(q: TerritoryQueries) {
 
   const handleRegionChange = useCallback(
     (newRegion: MapRegionChange) => {
+      q.setSpatialViewport(newRegion);
       viewportRef.current = {
         ...viewportRef.current,
         latitude: newRegion.latitude,
@@ -165,7 +172,7 @@ export function useTerritoryView(q: TerritoryQueries) {
       // "Buscar nesta área" só faz sentido depois que a pessoa mexe no mapa.
       if (newRegion.userGesture) setHasMovedCamera(true);
     },
-    [],
+    [q.setSpatialViewport, viewportRef, setHasMovedCamera],
   );
 
   const resetFilters = useCallback(() => {
@@ -361,6 +368,11 @@ export function useTerritoryView(q: TerritoryQueries) {
     filterBarProps,
     waitingForLocation,
     summaryLabel,
-    summarySubLabel,
+    summarySubLabel: layers.includes('official')
+      ? q.spatialMap.isError ? 'Mapa indisponível. A lista continua disponível.'
+        : q.spatialMap.isFetching ? 'Atualizando os pontos do mapa…'
+        : q.spatialMap.data ? `${q.spatialMap.data.visibleTotal.toLocaleString('pt-BR')} no mapa · ${q.spatialMap.data.unlocatedTotal.toLocaleString('pt-BR')} sem coordenadas no recorte`
+        : 'Carregando todos os pontos deste recorte…'
+      : summarySubLabel,
   };
 }

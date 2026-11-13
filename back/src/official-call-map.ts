@@ -37,6 +37,8 @@ export async function queryOfficialMap(db: Database, where: SQL, viewport: MapVi
       (SELECT count(*)::int FROM located) AS "locatedTotal",
       ((SELECT count(*) FROM matching) - (SELECT count(*) FROM located))::int AS "unlocatedTotal",
       (SELECT count(*)::int FROM visible) AS "visibleTotal",
+      (SELECT CASE WHEN count(*) = 0 THEN NULL ELSE json_build_object(
+        'north', max(latitude), 'south', min(latitude), 'east', max(longitude), 'west', min(longitude)) END FROM located) AS bounds,
       COALESCE((SELECT json_agg(cells) FROM cells), '[]'::json) AS cells
   `);
   return result.rows[0];

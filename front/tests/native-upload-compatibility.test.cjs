@@ -69,18 +69,14 @@ function nativeHttp(uploadResponse, exists = true) {
     'services/http.ts',
     {
       'react-native': { Platform: { OS: 'android' } },
-      'expo-file-system/legacy': {
-        getInfoAsync: async (uri) => {
-          calls.push({ info: uri });
-          return { exists };
-        },
-        FileSystemUploadType: { MULTIPART: 1 },
-        createUploadTask: (url, uri, options) => {
-          calls.push({ url, uri, options });
-          return {
-            uploadAsync: async () => uploadResponse,
-            cancelAsync: async () => {},
-          };
+      'expo-file-system': {
+        UploadType: { MULTIPART: 1 },
+        File: class {
+          constructor(uri) { this.uri = uri; this.exists = exists; calls.push({ info: uri }); }
+          createUploadTask(url, options) {
+            calls.push({ url, uri: this.uri, options });
+            return { uploadAsync: async () => uploadResponse, cancel() {}, release() {} };
+          }
         },
       },
       'expo-secure-store': {
@@ -99,7 +95,7 @@ function nativeHttp(uploadResponse, exists = true) {
   return { http, calls };
 }
 
-test('native upload works without File/FormData constructors and preserves auth and multipart contract', async () => {
+test('native upload works without global File/FormData constructors and preserves auth and multipart contract', async () => {
   const { http, calls } = nativeHttp({
     status: 200,
     body: JSON.stringify({
