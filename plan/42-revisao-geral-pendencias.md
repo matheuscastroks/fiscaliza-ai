@@ -42,3 +42,10 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Nenhum push, deploy, migração de produção ou sync BigQuery foi executado.
 - Fase 5 ainda não implementada: a skill expo-overview exige carregar expo-upgrade para atualizar dependências, mas expo-upgrade/SKILL.md não foi encontrado em front/.agents, ~/.agents/skills, ~/.codex/skills nem no cache de plugins. Restaurar essa skill antes da atualização Expo.
 - Build novo e validação conjunta no S22 continuam pendentes.
+
+## Fase 5 — configuração inicial (Codex)
+- Branch local `refactor/fase5-estrutura-testes`.
+- Jest/jest-expo/@types/jest movidos para devDependencies; reset-project removido; engines do app e .nvmrc (raiz/app) definidos; CI app/automação lê .nvmrc, matriz API 22/24 preservada; .editorconfig adicionado; source.sortMembers removido.
+- Validação: 31 testes de automação passaram; atualização package-lock-only concluída e comparação confirmou zero mudanças de versões de pacotes.
+- expo-upgrade também não foi encontrado em ~/.claude (busca incluindo arquivos ignorados); nenhuma skill foi copiada. A falta limita a atualização Expo, não os demais itens.
+- Restante da Fase 5, revisão final, build S22 e deploy continuam pendentes. Não considerar o objetivo concluído.
