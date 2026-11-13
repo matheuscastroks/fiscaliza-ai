@@ -17,6 +17,7 @@ export async function createCitizen(
     method: 'POST',
     url: '/api/auth/register',
     remoteAddress: `203.0.113.${Math.floor(Math.random() * 250) + 1}`,
+    headers: { 'x-fiscaliza-client': 'citizen-native' },
     payload: { name: 'Pessoa de teste', email, password: 'Senha-de-teste-123' },
   });
   assert.equal(response.statusCode, 201, response.body);

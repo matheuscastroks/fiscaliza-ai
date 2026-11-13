@@ -4,14 +4,14 @@ import { database } from '../src/db.js';
 import { applyMigrations } from '../src/migrations.js';
 
 test(
-  'territorial migrations preserve existing calls, records and accounts and can run twice',
+  'territorial migrations preserve existing calls and accounts and can run twice',
   { skip: !process.env.DATABASE_URL },
   async () => {
     const { pool } = database();
     const counts = async () =>
       (
         await pool.query(
-          'SELECT (SELECT count(*) FROM users) AS users, (SELECT count(*) FROM records) AS records, (SELECT count(*) FROM official_calls) AS calls',
+          'SELECT (SELECT count(*) FROM users) AS users, (SELECT count(*) FROM official_calls) AS calls',
         )
       ).rows;
     try {
@@ -23,6 +23,15 @@ test(
         "SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename IN ('data_sources','public_facilities','territorial_boundaries','territorial_boundary_aliases')",
       );
       assert.equal(tables.rowCount, 4);
+      // O legado da participação não existe mais (0019).
+      const legacy = await pool.query(
+        "SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename IN ('records','relations','answers','demo_engagement')",
+      );
+      assert.equal(legacy.rowCount, 0);
+      const sector = await pool.query(
+        "SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='sector'",
+      );
+      assert.equal(sector.rowCount, 0);
     } finally {
       await pool.end();
     }

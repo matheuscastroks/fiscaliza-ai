@@ -316,6 +316,34 @@ export function registerNotificationRoutes(
 ) {
   const { db } = options;
 
+  // Sair da conta neste aparelho: o token deixa de receber avisos da conta.
+  // Só apaga o token se ele for desta conta (outra conta não desliga o aparelho
+  // de ninguém). Os avisos que ele seguia saem junto (ON DELETE CASCADE).
+  app.delete<{ Body: { token: string } }>(
+    '/api/v1/notifications/register-token',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          required: ['token'],
+          additionalProperties: false,
+          properties: { token: tokenSchema },
+        },
+      },
+    },
+    async (req) => {
+      await db
+        .delete(userPushTokens)
+        .where(
+          and(
+            eq(userPushTokens.pushToken, req.body.token),
+            eq(userPushTokens.userId, req.user!.id),
+          ),
+        );
+      return ok(null);
+    },
+  );
+
   // Registra o token do aparelho para a conta logada. Trocar de conta no mesmo
   // aparelho é legítimo: o token passa para a conta nova e os avisos que a
   // conta anterior tinha neste aparelho deixam de existir.

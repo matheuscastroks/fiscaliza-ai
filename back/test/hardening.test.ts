@@ -162,10 +162,18 @@ test(
       [idOf(second)],
     );
 
+    const wrong = await app.inject({
+      method: 'DELETE',
+      url: '/api/auth/profile',
+      headers: citizen.headers,
+      payload: { password: 'senha-errada-123' },
+    });
+    assert.equal(wrong.statusCode, 403, 'sem a senha certa a conta fica');
     const removed = await app.inject({
       method: 'DELETE',
-      url: '/api/profile',
+      url: '/api/auth/profile',
       headers: citizen.headers,
+      payload: { password: 'Senha-de-teste-123' },
     });
     assert.equal(removed.statusCode, 200, removed.body);
     assert.equal(
@@ -233,7 +241,8 @@ test('contrato OpenAPI gerado documenta conta, avisos e chamados salvos', async 
   await app.ready();
   const paths = app.swagger().paths ?? {};
   for (const [path, method] of [
-    ['/api/profile', 'delete'],
+    ['/api/auth/profile', 'delete'],
+    ['/api/v1/notifications/register-token', 'delete'],
     ['/api/v1/notifications/register-token', 'post'],
     ['/api/v1/notifications/follow-call', 'delete'],
     ['/api/v1/saved-calls', 'get'],

@@ -5,6 +5,10 @@ import type { ApiResult } from '@/shared/contracts';
 export const API_URL = (
   process.env.EXPO_PUBLIC_API_URL || 'http://localhost:43001/api'
 ).replace(/\/$/, '');
+// O app nativo recebe o token da sessão no corpo (vai para o SecureStore); o
+// navegador recebe só o cookie httpOnly. A API decide por este cabeçalho.
+// Sem importar react-native aqui: no app nativo não existe `document`.
+const CLIENT_HEADER = typeof document === 'undefined' ? 'citizen-native' : 'citizen';
 export const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 15000 } },
 });
@@ -86,7 +90,7 @@ export async function request<T>(
       credentials: 'include',
       signal: controller.signal,
       headers: {
-        'X-Fiscaliza-Client': 'citizen',
+        'X-Fiscaliza-Client': CLIENT_HEADER,
         ...(multipart || body === undefined
           ? {}
           : { 'Content-Type': 'application/json' }),
@@ -152,7 +156,7 @@ export async function uploadImage(uri: string): Promise<string> {
     uploadType: fs.FileSystemUploadType.MULTIPART,
     fieldName: 'file',
     headers: {
-      'X-Fiscaliza-Client': 'citizen',
+      'X-Fiscaliza-Client': CLIENT_HEADER,
       ...(sessionToken ? { Authorization: 'Bearer ' + sessionToken } : {}),
     },
   });

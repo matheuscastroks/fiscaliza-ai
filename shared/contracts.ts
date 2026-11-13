@@ -38,7 +38,6 @@ export interface SessionUser {
   name: string;
   email: string;
   role: Role;
-  sector?: string;
   municipality?: Municipality | null;
   postalCode?: string;
   neighborhood?: string;

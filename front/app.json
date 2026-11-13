@@ -38,12 +38,6 @@
         }
       ],
       [
-        "expo-image-picker",
-        {
-          "photosPermission": "O aplicativo acessa suas fotos para permitir anexar imagens como evidência da ocorrência relatada."
-        }
-      ],
-      [
         "expo-location",
         {
           "locationWhenInUsePermission": "O aplicativo utiliza sua localização para encontrar chamados do 1746 no entorno escolhido."

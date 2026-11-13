@@ -64,6 +64,12 @@ export async function spendPasswordTime(password: string) {
   await verifyPassword(password, await dummyHash);
 }
 
+export const SESSION_DAYS = 7;
+export const SESSION_MS = SESSION_DAYS * 24 * 60 * 60 * 1000;
+/** Renova a sessão em uso quando faltar menos que isto para vencer. */
+export const SESSION_RENEW_BELOW_MS = SESSION_MS / 2;
+export const sessionExpiry = (now = Date.now()) => new Date(now + SESSION_MS);
+
 export const tokenHash = (token: string) =>
   createHash('sha256').update(token).digest('hex');
 export const newToken = () => randomBytes(32).toString('base64url');
