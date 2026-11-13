@@ -1,8 +1,5 @@
-import { useTheme } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
-import React from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { AppErrorMessage } from '@/components/ui/AppErrorMessage';
+import { StyleSheet } from 'react-native';
 
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
@@ -23,37 +20,3 @@ export const createCityStyles = (colors: ThemeColors) =>
     controls: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
     description: { lineHeight: 24 },
   });
-export function QueryState({
-  loading,
-  error,
-  retry,
-}: {
-  loading?: boolean;
-  error?: Error | null;
-  retry?: () => unknown;
-}) {
-  const { colors } = useTheme();
-
-  return (
-    <View accessibilityLiveRegion="polite" style={{ gap: 12 }}>
-      {loading && (
-        <ActivityIndicator
-          accessibilityLabel="Carregando"
-          color={colors.accent}
-        />
-      )}
-      {error && (
-        <AppErrorMessage
-          message={error.message}
-          onRetry={
-            retry
-              ? () => {
-                  void retry();
-                }
-              : undefined
-          }
-        />
-      )}
-    </View>
-  );
-}

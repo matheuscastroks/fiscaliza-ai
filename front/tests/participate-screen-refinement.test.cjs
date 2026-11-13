@@ -18,7 +18,7 @@ test('quick complaint kit: incorporates bottom sheet topic selector, inset table
   assert.ok(content.includes('ComplaintTopicSheet'), 'Must integrate ComplaintTopicSheet bottom sheet');
   assert.ok(content.includes('insetTable'), 'Must adopt Apple Inset-Grouped table layout');
   assert.ok(content.includes('photoTipBanner'), 'Must provide clear photo tip banner for WhatsApp guidance');
-  assert.ok(content.includes('wa.me/552134601746'), 'Must retain official 1746 WhatsApp endpoint');
+  assert.ok(content.includes('OFFICIAL_WHATSAPP_URL'), 'Must retain official 1746 WhatsApp endpoint');
   assert.ok(content.includes('Share.share'), 'Must retain Share.share action');
   assert.ok(content.includes('defaultLocation'), 'Must support defaultLocation prop');
   assert.ok(content.includes('showPreview'), 'Must support progressive disclosure with preview toggle');

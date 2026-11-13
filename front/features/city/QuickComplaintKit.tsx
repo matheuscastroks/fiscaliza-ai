@@ -18,6 +18,7 @@ import { partnerBrand } from '@/theme/palette';
 import { fontSizes } from '@/theme/typography';
 import { lightColors } from '@/theme/colors';
 import { IconTile } from '@/components/ui/IconTile';
+import { OFFICIAL_WHATSAPP_NUMBER, OFFICIAL_WHATSAPP_URL } from './OfficialChannel';
 
 export { COMPLAINT_TOPICS, type ComplaintTopic };
 
@@ -77,8 +78,8 @@ export function QuickComplaintKit({ defaultLocation = '', inSheet = false }: Qui
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const text = encodeURIComponent(formattedMessage);
     const opened = await openExternal(
-      `https://wa.me/552134601746?text=${text}`,
-      `https://api.whatsapp.com/send?phone=552134601746&text=${text}`,
+      `${OFFICIAL_WHATSAPP_URL}?text=${text}`,
+      `https://api.whatsapp.com/send?phone=${OFFICIAL_WHATSAPP_NUMBER}&text=${text}`,
     );
     setErrorNotice(
       opened ? null : 'Não conseguimos abrir o WhatsApp. Compartilhe o texto ou ligue para o 1746.',

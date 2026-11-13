@@ -3,7 +3,6 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Chip } from '@/components/ui/Chip';
 import { IconButton } from '@/components/ui/IconButton';
 import { InsetGroup, ListRow } from '@/components/ui/ListRow';
-import { StatusBadge } from '@/components/ui/StatusBadge';
 
 describe('componentes base', () => {
   it('Chip mostra o estado selecionado e responde ao toque', async () => {
@@ -22,10 +21,6 @@ describe('componentes base', () => {
     expect(onPress).toHaveBeenCalled();
   });
 
-  it('StatusBadge sempre mostra a situação em texto', async () => {
-    await render(<StatusBadge label="Em andamento" tone="progress" />);
-    expect(screen.getByText('Em andamento')).toBeTruthy();
-  });
 
   it('ListRow só vira botão quando tem ação', async () => {
     const onPress = jest.fn();

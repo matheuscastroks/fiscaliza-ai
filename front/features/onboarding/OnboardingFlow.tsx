@@ -1,6 +1,6 @@
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  AccessibilityInfo,
   FlatList,
   Pressable,
   ScrollView,
@@ -97,25 +97,11 @@ export function OnboardingFlow({
   const [viewport, setViewport] = useState(Math.min(width, 1200));
   const [page, setPage] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [reduced, setReduced] = useState(false);
+  const reduced = useReducedMotion();
   const list = useRef<FlatList<OnboardingSlide>>(null);
   const wide = viewport >= 850;
   const pageRef = useRef(page);
 
-  useEffect(() => {
-    let active = true;
-    void AccessibilityInfo.isReduceMotionEnabled().then((value) => {
-      if (active) setReduced(value);
-    });
-    const subscription = AccessibilityInfo.addEventListener(
-      'reduceMotionChanged',
-      setReduced,
-    );
-    return () => {
-      active = false;
-      subscription.remove();
-    };
-  }, []);
 
   useEffect(() => {
     pageRef.current = page;

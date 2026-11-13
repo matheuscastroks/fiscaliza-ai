@@ -9,7 +9,7 @@ colors:
   surface: "#FFFFFF"
   surfaceSubdued: "#E0EFF2"
   muted: "#556B73"
-  subtle: "#69818B"
+  subtle: "#58707A"
   divider: "#D9E3E7"
   border: "#D9E3E7"
   borderActive: "#16576C"

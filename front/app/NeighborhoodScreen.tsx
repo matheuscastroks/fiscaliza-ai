@@ -6,7 +6,8 @@ import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppSelect } from '@/components/ui/AppSelect';
-import { QueryState, createCityStyles } from '@/features/city/CityUI';
+import { createCityStyles } from '@/features/city/CityUI';
+import { ScreenState } from '@/components/ui/ScreenState';
 import { NeighborhoodOverview } from '@/features/territory/NeighborhoodOverview';
 import {
   useNeighborhoodOverview,
@@ -69,7 +70,7 @@ function NeighborhoodContent({ initialId }: { initialId?: string }) {
           onChange={setId}
           options={neighborhoodOptions}
         />
-        <QueryState
+        <ScreenState
           loading={options.isLoading || Boolean(id && overview.isLoading)}
           error={options.error || overview.error}
           retry={() => {

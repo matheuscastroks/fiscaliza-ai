@@ -147,7 +147,7 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
                   </AppText>
                 </View>
                 {device.busy ? (
-                  <AppText variant="caption" color="muted">Buscando...</AppText>
+                  <AppText variant="caption" color="muted">Buscando…</AppText>
                 ) : selection.kind === 'radius' && selection.source === 'current' ? (
                   <Ionicons name="checkmark-circle" size={layout.iconSize.md} color={colors.info} />
                 ) : (

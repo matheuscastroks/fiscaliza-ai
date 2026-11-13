@@ -10,7 +10,10 @@ import { layout } from '@/theme/layout';
 export const OFFICIAL_PORTAL = 'https://www.1746.rio/hc/pt-br';
 export const OFFICIAL_SIGNIN_URL = 'https://www.1746.rio/hc/pt-br/signin';
 export const OFFICIAL_REQUESTS_URL = 'https://www.1746.rio/hc/pt-br/requests';
-export const OFFICIAL_WHATSAPP_URL = 'https://wa.me/552134601746';
+/** WhatsApp oficial do 1746: número único para link, rótulo e mensagem pronta. */
+export const OFFICIAL_WHATSAPP_NUMBER = '552134601746';
+export const OFFICIAL_WHATSAPP_LABEL = '(21) 3460-1746';
+export const OFFICIAL_WHATSAPP_URL = `https://wa.me/${OFFICIAL_WHATSAPP_NUMBER}`;
 export const OFFICIAL_PHONE_URL = 'tel:1746';
 
 export const OFFICIAL_SERVICES: {

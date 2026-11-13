@@ -61,7 +61,7 @@ export function FacilityLoadMoreButton({
       />
       <AppText variant="caption" style={styles.text}>
         {isFetching
-          ? 'Carregando serviços...'
+          ? 'Carregando serviços…'
           : `Carregar mais ${label}${count}`}
       </AppText>
     </Pressable>
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    height: 42,
+    minHeight: layout.touchTarget.minHeight,
     paddingHorizontal: spacing.md,
     borderRadius: layout.radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
