@@ -54,7 +54,7 @@ Copy-Item .env.compose.example .env.compose
 docker compose --env-file .env.compose up --build
 ```
 
-API: `http://localhost:3001/api`. O container aplica migrações antes de iniciar a API, sem criar contas ou dados de exemplo. Volumes preservam banco e anexos. Não use `docker compose down -v` para atualizar os serviços, pois remove os dados.
+API: `http://localhost:43001/api` (porta do host definida por `API_PORT` no `.env.compose`; dentro da rede do Compose a API continua em `api:3001`). O container aplica migrações antes de iniciar a API, sem criar contas ou dados de exemplo. Volumes preservam banco e anexos. Não use `docker compose down -v` para atualizar os serviços, pois remove os dados.
 
 ### Acesso, criação e encerramento de conta
 
@@ -77,7 +77,7 @@ sessão, login, duplicidade, senha inválida e rejeição de privilégios e orig
 Execute somente contra um banco isolado de validação, pois cria uma conta:
 
 ```powershell
-postman collection run postman/fiscaliza.collection.json -i "Cadastro de conta" --env-var "baseUrl=http://localhost:3001/api" --no-report-events
+postman collection run postman/fiscaliza.collection.json -i "Cadastro de conta" --env-var "baseUrl=http://localhost:43001/api" --no-report-events
 ```
 
 Com PostgreSQL já iniciado, defina `DATABASE_URL` no ambiente do processo:

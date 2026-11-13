@@ -72,7 +72,8 @@ jobs:
           set -euo pipefail
           remote="$VPS_USER@$VPS_HOST"
           release="/opt/fiscaliza-ai/releases/$GITHUB_SHA"
-          tar -czf release.tgz compose.production.yaml deploy/deploy.sh
+          # A lista é a mesma que o CI valida (deploy/release-files.txt).
+          tar -czf release.tgz -T deploy/release-files.txt
           ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=yes -p "$VPS_PORT" "$remote" "mkdir -p '$release'"
           scp -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=yes -P "$VPS_PORT" release.tgz "$remote:$release/release.tgz"
           ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=yes -p "$VPS_PORT" "$remote" \
