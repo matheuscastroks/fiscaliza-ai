@@ -1,165 +1,67 @@
-# Decisões de Arquitetura e Engenharia — Fiscaliza aí
+# Decisões de arquitetura e engenharia — Fiscaliza aí
 
-Este documento sintetiza a visão técnica, os critérios de escolha, os tradeoffs deliberados e as diretrizes de escalabilidade do **Fiscaliza aí**, servindo como guia de alinhamento para engenheiros e lideranças técnicas.
+Síntese das escolhas técnicas, dos limites assumidos e de como o sistema cresce. O produto está descrito em [`PRODUCT.md`](../PRODUCT.md); as regras de trabalho, em [`AGENTS.md`](../AGENTS.md). Atualizado em 13/11/2026, depois da revisão geral (`plan/evidence/2026-11-13-*`).
 
----
+## 1. Escolhas tecnológicas
 
-## 1. Escolhas Tecnológicas
+| Camada | Tecnologia | Por quê |
+| --- | --- | --- |
+| App | **Expo SDK 58** (React Native 0.88, React 19.3, Nova Arquitetura) com **Expo Router** | Uma base para Android e iOS, rotas por arquivo, builds pelo EAS. Não há versão web publicada. |
+| Mapa | **Mapbox** (`@rnmapbox/maps`) | Pontos e grupos desenhados pela GPU a partir de um único GeoJSON (`ShapeSource` com `cluster`), estilos `streets-v12` e `dark-v11`. Sem o módulo nativo (Expo Go), a lista é a visão principal. |
+| API | **Fastify 5** (TypeScript, compilado com `tsc`) | Validação por JSON Schema antes do código da rota, baixo custo por requisição, plugins sem injeção de dependência. |
+| Dados | **PostgreSQL 17 + Drizzle ORM** | Integridade relacional (chaves estrangeiras com `ON DELETE CASCADE`, unicidade de salvos e seguidores). O Drizzle é o construtor de consultas; as migrações são SQL versionado com checksum (`back/migrations`). |
+| Estado no app | **TanStack Query + zustand** | Query para dados do servidor (cache, cancelamento, foco e rede via `focusManager`/`onlineManager`, cache persistido para abrir sem internet); zustand para sessão, preferências e lugares, com persistência separada por conta e município. |
+| Importação | **BigQuery** (1746, Data.Rio) e **SIURB/IPP** | Só o servidor consulta as fontes; o app lê a API. Cada execução tem orçamento de bytes e trava por fonte. |
+| Avisos | **Expo Push** | O servidor avisa quem segue um chamado quando a situação publicada muda, com caixa de saída para reenviar o que falhou. |
+| Erros | **Sentry** | App, API e agendador, sem dados pessoais (só o id da conta). Sem DSN, nada é enviado. |
 
-| Camada | Tecnologia Adotada | Alternativas Consideradas | Racional da Decisão |
-|---|---|---|---|
-| **Mobile / Frontend** | **Expo SDK 57 (React Native 0.86)** com **Expo Router** | Flutter, React Native bare, PWA pura | • **Universalidade com base única**: compila para Android, iOS e Web a partir da mesma árvore de código.<br>• **Expo Router (File-based routing)**: rotas fortemente tipadas (`/app/(tabs)`), deep linking nativo, layouts aninhados e navegação declarativa sem boilerplate de boilerplate navigation.<br>• **Velocidade de iteração**: Expo Go e Prebuild eliminam dependências de compilação C++/Gradle pesadas em etapas iniciais. |
-| **Motor de Mapas** | **Mapbox (`@rnmapbox/maps` + `mapbox-gl`)** | `react-native-maps`, `expo-maps`, Leaflet/OSM | • **Renderização vetorial na GPU (Metal/Vulkan/WebGL)**: suporta mais de 14.000 chamados e equipamentos simultâneos via `ShapeSource` / `GeoJSONSource` sem criar Views ou nós DOM individuais por ponto.<br>• **Clustering nativo**: agrupamento espacial de alta velocidade (`cluster: true`) com expansão progressiva (>10 itens) e carrossel contextual (≤10 itens).<br>• **Estilos vetoriais oficiais**: alternância nativa entre `light-v11` e `dark-v11` sem filtros CSS pesados. |
-| **Backend & API** | **Fastify (TypeScript)** | Express, NestJS, Go (Gin/Fiber) | • **Performance e baixo consumo**: arquitetura assíncrona leve com menor overhead de I/O que o Express.<br>• **Validação nativa de schema (Ajv / JSON Schema)**: validação estrita de payload antes de tocar a lógica de negócio, garantindo tipos em tempo de execução.<br>• **Modularidade sem complexidade acidental**: plugins isolados sem o peso de decorators e injeção de dependência intrusiva do NestJS. |
-| **Banco de Dados & ORM** | **PostgreSQL 17 + Drizzle ORM** | Prisma, TypeORM, MongoDB | • **Consistência relacional estrita**: relações cívicas, auditoria de mudanças de status, votos únicos e restrições de chave estrangeira exigem ACID estrito.<br>• **Drizzle ORM**: consultas SQL-like de altíssimo desempenho, migrações determinísticas em TypeScript, zero overhead de runtime engine (ao contrário do binário em Rust do Prisma) e tipagem segura ponta a ponta compartilhada com o frontend (`shared/contracts.ts`). |
-| **Inteligência Artificial** | **Google Gemini (Server-side)** | Modelos locais (ONNX), OpenAI GPT-4 Vision | • **Segurança arquitetural**: chaves de API e prompts permanecem restritos ao servidor Fastify; o cliente nunca expõe credenciais de IA.<br>• **Fallback gracioso**: caso o serviço de IA esteja indisponível ou sem chave configurada, o sistema ativa imediatamente heurísticas locais determinísticas sem interromper a jornada do cidadão. |
-| **Gerenciamento de Estado** | **Zustand + TanStack Query (React Query)** | Redux Toolkit, Context API puro | • **Zustand**: stores globais ultra-leves para sessão (`authStore`), preferências territoriais (`territoryStore`) e tema (`themeStore`), sem reducers verbosos.<br>• **TanStack Query**: separação clara entre estado da interface (local) e cache assíncrono do servidor (invalidação, refetch em foco, retentativas e estados de carregamento/erro). |
+## 2. Limites assumidos
 
----
+- **Sem participação nem escrita pública.** O app não registra ocorrências, propostas, consultas ou ações. As tabelas desse período foram removidas (migração `0019`) depois de guardado o dump. O caminho para pedir um serviço é o canal oficial (1746).
+- **Sem painel municipal e sem papéis de gestão.** Contas são só de cidadãos; importações são comandos do servidor.
+- **Fotos em disco.** Hoje só existe a foto de perfil, em volume do container, servida com `Cache-Control: private, no-store`. Object storage só faria sentido com mais de uma instância da API.
+- **Uma instância da API.** A fila de escritas por usuário e o cache de respostas ficam na memória. Com mais de uma instância, a serialização volta para o banco (`pg_advisory_xact_lock` em transação curta) e o cache para fora do processo.
+- **Base do 1746 parcial.** A sincronização diária relê os dias recentes e os chamados abertos que alguém salvou ou acompanha. A ausência de um chamado na base não prova que ele não exista no 1746.
+- **Atualização por consulta, não em tempo real.** O app renova dados no foco da tela, ao voltar para o app e ao reconectar. Não há WebSocket nem SSE.
 
-## 2. Tradeoffs e Dívida Técnica
+## 3. Padrões
 
-Toda decisão de engenharia em estágio inicial busca equilibrar velocidade de entrega com sustentabilidade arquitetural. Abaixo estão os tradeoffs assumidos e seus planos de mitigação:
-
-### 2.1. Renderização Vetorial Mapbox (Native SDK + WebGL)
-* **O que foi feito**: Componente unificado `MapboxMapView` utilizando `@rnmapbox/maps` em builds nativas e `mapbox-gl` WebGL na Web e em ambientes sem módulo nativo compilado.
-* **Tradeoff**: Builds nativas completas (`npx expo run:android` / `run:ios`) utilizam o SDK C++ do Mapbox, enquanto o fallback WebGL garante compatibilidade imediata em qualquer ambiente de desenvolvimento.
-* **Resolução Prioritária**: A conversão dos pontos territoriais para uma única `FeatureCollection` GeoJSON processada pela GPU eliminou o gargalo de instanciação de marcadores e as re-renderizações de estado durante o arrasto da câmera (`viewportRef`).
-
-### 2.2. Remoção do Painel Web Municipal Dedicado
-* **O que foi feito**: O diretório `municipal/` foi completamente removido do repositório.
-* **Tradeoff**: Não manteremos uma interface web própria para servidores públicos dentro deste monorepo.
-* **Racional Estratégico**: Prefeituras e órgãos públicos já operam canais consolidados de atendimento (e.g., sistemas 156/1746, ERPs públicos ou CRMs de zeladoria). Criar um painel concorrente geraria fricção de adoção e duplicidade operacional.
-* **Resolução Prioritária**: O backend do Fiscaliza aí foi mantido como autoridade canônica. A evolução focará na disponibilização de **Webhooks e APIs de Integração bidirecional** (OpenAPI padronizado), permitindo que ocorrências registradas pelo cidadão sejam despachadas diretamente para os sistemas oficiais de gestão da cidade.
-
-### 2.3. Armazenamento de Fotos Local vs. Object Storage (S3 / R2 / GCS)
-* **O que foi feito**: Uploads salvos em volume de disco montado (`/app/uploads`), servidos via Fastify com validação de assinatura de arquivo.
-* **Tradeoff**: Simplicidade operacional máxima para desenvolvimento e deploy em VPS única, mas cria dependência de disco persistente não distribuído.
-* **Priorização**: Para escala de produção multi-região, abstrair o serviço de upload para um adapter compatível com S3 (AWS S3 ou Cloudflare R2 com CDN), gerando presigned URLs para upload direto do cliente e preservando a integridade do backend.
-
-### 2.4. Atualização de Dados: Polling & Refetch vs. WebSockets / SSE
-* **O que foi feito**: Atualizações de ocorrências e iniciativas são sincronizadas por gatilhos de foco e navegação via React Query.
-* **Tradeoff**: Economia de bateria no dispositivo móvel e eliminação de conexões persistentes ociosas no servidor, com latência de poucos segundos na visualização de mudanças de status.
-* **Priorização**: Manter polling na maioria das telas e introduzir Server-Sent Events (SSE) exclusivamente na tela de acompanhamento detalhado (`ProblemDetailsScreen`) quando houver intervenção ativa em andamento.
-
-### 2.5. Segmentação Exclusiva dos Domínios Territoriais (Chamados 1746 vs. Serviços Públicos)
-* **O que foi feito**: A visualização no mapa e na lista foi dividida em dois domínios mutuamente exclusivos selecionáveis por abas pill: Chamados 1746 e Serviços Públicos (Educação, Saúde, Praças e Lazer).
-* **Racional Estratégico**: A exibição combinada de milhares de chamados de zeladoria com centenas de equipamentos públicos em uma mesma tela gerava confusão cognitiva para o morador e sobreposição de marcadores no mapa.
-* **Resolução**: Ao selecionar "Chamados 1746", os filtros exibem apenas parâmetros de ocorrências e recorte geográfico. Ao selecionar "Serviços Públicos", os filtros contextualizam exclusivamente as categorias de equipamentos municipais.
-
-### 2.6. Encerramento de Conta e Conformidade com a LGPD (`DELETE /api/profile`)
-* **O que foi feito**: Implementação de endpoint `DELETE /api/profile` com exclusão em cascata das sessões, lugares salvos e remoção segura de avatar do disco.
-* **Racional Estratégico**: Garantia do direito à exclusão e privacidade do cidadão sem intervenção manual de administradores, permitindo revogação total da conta através de fluxo seguro de confirmação em modal.
-
----
-
-## 3. Padrões e Boas Práticas
-
-Para manter a consistência entre múltiplos desenvolvedores, o projeto segue diretrizes rigorosas de engenharia:
-
-### 3.1. Arquitetura de Pastas e Responsabilidades
+### Organização
 ```
 fiscaliza-ai/
-├── front/             # Aplicativo Expo Android/iOS
-│   ├── app/           # Rotas Expo Router
-│   ├── features/      # Jornadas e regras do cliente
-│   ├── components/    # UI compartilhada
-│   ├── theme/         # Tokens visuais
-│   ├── stores/        # Estado local
-│   ├── services/      # Transporte HTTP
-│   └── tests/         # Testes do aplicativo
-├── back/              # API Fastify, migrações, integrações e testes
-├── shared/            # Contratos e helpers comuns
-├── deploy/            # Infraestrutura existente
-└── package.json       # Atalhos; instalações independentes em front/ e back/
+├── front/      # App Expo (app/ rotas, features/, components/, theme/, stores/, services/, tests/)
+├── back/       # API Fastify, migrações, integrações, agendador e testes
+├── shared/     # Contratos usados pelo app e pela API
+├── deploy/     # Scripts de deploy, backup e restauração
+└── plan/       # Decisões, planos e evidências
 ```
+Instalações npm independentes em `front/` e `back/`, sem workspaces.
 
-### 3.2. Contratos Compartilhados (`Single Source of Truth`)
-* Qualquer contrato de dados (interfaces de `Occurrence`, `CivicItem`, `SessionUser`, payloads de mutação) reside em `shared/contracts.ts`.
-* O frontend e o backend consomem as mesmas definições de tipos, eliminando divergências de serialização e desserialização.
+### Contratos
+Tipos de resposta e de payload ficam em `shared/` (`contracts.ts`, `public-data.ts`, `registration.ts`) e são importados pelos dois lados. O servidor valida toda entrada com JSON Schema; o tipo compartilhado não substitui a validação.
 
-### 3.3. Convenções de Código e Linting
-* **TypeScript Estrito**: `strict: true`, sem uso de `any` implícito. Casts de tipo arbitrários (`as unknown as X`) são rejeitados.
-* **Linter Automatizado**: `expo lint` (baseado nas regras recomendadas da comunidade React Native/Expo) integrado aos workflows do GitHub Actions.
-* **Princípio RITO**: Razão, Informação, Tarefa e Originalidade. Interfaces limpas, tipografia legível (`Instrument Sans`), sem slogans genéricos, sem cards aninhados desnecessários e com estados de erro/carregamento declarativos.
+### Código
+TypeScript estrito nos dois projetos; `expo lint` no app. Commits em Conventional Commits (`feat`, `fix`, `refactor`, `docs`), em português.
 
-### 3.4. Estrutura de Commits
-Adotamos o padrão **Conventional Commits**:
-* `feat(territory): add marker clustering and horizontal card carousel`
-* `fix(backend): correct IBGE polygon raycasting on boundary points`
-* `refactor: clean up municipal dashboard dependencies from CI`
-* `test(reports): add unit test for location coordinate validation`
+### Testes
+- **App:** `node --test` para regras puras e stores; Jest com React Native Testing Library para componentes.
+- **API:** `node --test` contra Fastify real e PostgreSQL de teste (banco terminado em `_test`); no CI, sem banco a suíte falha em vez de pular.
+- **CI** (`.github/workflows/validate.yml`): tipos, lint, testes, auditoria de dependências, export Android, build da imagem Docker e validação do pacote de deploy.
 
-Commits devem ser atômicos e autoexplicativos, viabilizando geração de changelogs e rastreabilidade de regressões.
-
-### 3.5. Estratégia de Testes
-A pirâmide de testes prioriza velocidade e proteção contra quebras de regras cívicas:
-1. **Testes Unitários e Comportamentais (`front/tests/*.test.ts`, `front/tests/*.test.cjs`)**:
-   - Execução ultrarrápida via runner nativo do Node.js (`node --test`).
-   - Validam lógica de negócios isolada: normalização de bairros, ordenação territorial, precedência de perfis, heurísticas de classificação de imagem e regras de expiração de consultas.
-2. **Testes de Integração de API (`back/test/*.test.ts`)**:
-   - Testam endpoints reais Fastify e consultas SQL.
-   - Cobrem autenticação, cookies de sessão, CSRF, limites de taxa, validação de polígonos territoriais e unicidade de apoios comunitários.
-3. **Smoke Tests e Pré-deploy (`.github/workflows/validate.yml`)**:
-   - Verificação estática (`npm run typecheck`), lint (`npm run lint`), compilação de contrato OpenAPI e teste de export web antes de qualquer release.
-
----
-
-## 4. Escalabilidade e Manutenção
-
-O desenho arquitetural do Fiscaliza aí prevê o crescimento sustentável ao longo de quatro dimensões críticas:
+## 4. Infraestrutura e crescimento
 
 ```mermaid
-flowchart TD
-    subgraph Client["Camada Cliente (Universal)"]
-        Mobile["App Expo (Android / iOS)"]
-        Web["Cidadão Web (Expo Web PWA)"]
-    end
-
-    subgraph Edge["Borda & Segurança"]
-        Caddy["Caddy Server (Reverse Proxy / HTTPS)"]
-    end
-
-    subgraph AppServer["Serviço de Aplicação"]
-        Fastify["Fastify Cluster (Node.js)"]
-        TerritoryValidator["Validador Territorial (IBGE GeoJSON)"]
-    end
-
-    subgraph DataTier["Camada de Dados"]
-        Postgres[(PostgreSQL 17)]
-        SpatialIndex["PostGIS / Spatial Index"]
-    end
-
-    subgraph Integrations["Ecossistema Externo"]
-        CityHallAPI["Sistemas da Prefeitura (1746 / ERP / SIS)"]
-        GeminiAPI["Google Gemini API (Análise Visual)"]
-    end
-
-    Mobile --> Caddy
-    Web --> Caddy
-    Caddy --> Fastify
-    Fastify --> TerritoryValidator
-    Fastify --> Postgres
-    Postgres -.-> SpatialIndex
-    Fastify -.-> CityHallAPI
-    Fastify -.-> GeminiAPI
+flowchart LR
+  App["App Expo (Android/iOS)"] --> CF["Cloudflare (HTTPS, túnel)"]
+  CF --> API["API Fastify"]
+  API --> PG[(PostgreSQL 17)]
+  Sched["Agendador (mesma imagem)"] --> PG
+  Sched --> BQ["BigQuery 1746 / SIURB"]
+  Sched --> Expo["Expo Push"]
+  Backup["Backup diário"] --> PG
 ```
 
-### 4.1. Escala Territorial e Volume de Dados
-* **Particionamento por Município**: Todas as tabelas críticas (`records`, `attachments`, `comments`, `supports`) são particionadas logicamente pela coluna `municipality_id` (código IBGE de 7 dígitos). À medida que novas cidades entram na base, o banco pode particionar fisicamente as tabelas por range/list de IBGE.
-* **Evolução Espacial com PostGIS**: O validador atual em memória (Raycasting em GeoJSON oficial do IBGE) atende com precisão até dezenas de milhares de requisições. Para escala de milhões de pontos, ativaremos a extensão **PostGIS** com índices espaciais `GIST` (`ST_Contains(geom, ST_SetSRID(ST_Point(lng, lat), 4326))`), transferindo a checagem poligonal para o motor indexado do banco.
-
-### 4.2. Escala de Tráfego e Concorrência
-* **Statelessness da API**: A instância Fastify é 100% stateless. A sessão do usuário é verificada via tokens criptografados/cookies assinados. Múltiplos containers da API podem rodar em paralelo atrás de um balanceador (Caddy / Nginx / AWS ALB) sem necessidade de afinidade de sessão.
-* **Cache em Camadas**:
-  - Dados estáticos do município (malha de bairros e polígono IBGE): armazenados em memória no processo ou Redis com TTL longo.
-  - Consultas e Ações públicas: invalidação baseada em eventos (cache-aside via Redis).
-
-### 4.3. Multi-secretarias e Roteamento Setorial
-* Em um cenário de prefeitura de grande porte, as ocorrências não pertencem a uma entidade monolítica, mas a secretarias distintas (Conservação, Iluminação Pública, Meio Ambiente, Transporte).
-* **Roteamento Inteligente**: A classificação assistida por IA e as categorias pré-definidas associam cada ocorrência a uma tag de competência (`service_unit`).
-* **Webhooks por Unidade**: A API disparará eventos específicos (`occurrence.created`, `occurrence.updated`) para endpoints registrados de cada secretaria responsável, permitindo que cada órgão acompanhe e responda no seu próprio ritmo sem travar a base central.
-
-### 4.4. Manutenibilidade e Ciclo de Vida
-* **Isolamento de Mudanças**: O desacoplamento rígido entre `front/app/` (rotas), `front/features/` (regras e fluxos) e `front/components/` (UI pura) garante que refatorações visuais ou atualizações de dependências (e.g. novas versões do Expo SDK) não quebrem regras de negócio nem exijam reescrita de testes de integração.
-* **Observabilidade**: Fastify integrado com Pino Logger estruturado em JSON, pronto para ingestão por ferramentas de monitoramento (Prometheus, Grafana, Datadog ou OpenTelemetry).
+- **Hoje:** API, agendador, Postgres, backup e `cloudflared` em Docker Compose no PC (`compose.yaml` + `compose.public.yaml`), API em `127.0.0.1:43001`. O `compose.production.yaml` e o `release.yml` preparam a VPS.
+- **Território:** a checagem de ponto dentro do município e do bairro é feita em memória sobre o GeoJSON oficial. Com muito mais volume, a troca natural é o PostGIS com índice GIST.
+- **Outros municípios:** o município vem da sessão (código IBGE) e as chaves locais do app levam conta e município; a importação do 1746 é específica do Rio.
+- **Observabilidade:** logs JSON (pino) com id de requisição vindo do `cf-ray`, Sentry para erros e pings de monitor no agendador e no backup (Healthchecks.io, quando configurado).
