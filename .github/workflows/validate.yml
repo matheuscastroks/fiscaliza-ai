@@ -138,13 +138,25 @@ jobs:
         env:
           IMAGE_PREFIX: ghcr.io/example/fiscaliza-ai
           IMAGE_TAG: ${{ github.sha }}
-          RELEASE_DIR: ${{ github.workspace }}
           PUBLIC_DOMAIN: fiscalizaai.matheuscastroks.com.br
           CLOUDFLARE_TUNNEL_TOKEN: validation-only-not-a-real-token
           POSTGRES_PASSWORD: validation-only
         run: |
           bash -n deploy/deploy.sh
-          docker compose -f compose.production.yaml config --quiet
+          sh -n deploy/backup.sh
+          bash -n deploy/restore.sh
+          # Valida a partir do pacote que o release envia, não do checkout: um
+          # arquivo montado no Compose e ausente do pacote quebraria a VPS.
+          export RELEASE_DIR="$RUNNER_TEMP/release"
+          mkdir -p "$RELEASE_DIR"
+          tar -czf "$RUNNER_TEMP/release.tgz" -T deploy/release-files.txt
+          tar -xzf "$RUNNER_TEMP/release.tgz" -C "$RELEASE_DIR"
+          docker compose -f "$RELEASE_DIR/compose.production.yaml" config --quiet
+          missing=0
+          while IFS= read -r source; do
+            case "$source" in "$RELEASE_DIR"/*) test -e "$source" || { echo "Ausente no pacote: $source"; missing=1; } ;; esac
+          done < <(docker compose -f "$RELEASE_DIR/compose.production.yaml" config --format json | jq -r '.services[].volumes[]? | select(.type == "bind") | .source')
+          exit "$missing"
   gate:
     name: CI gate
     needs: [owner, app, api, image, automation]

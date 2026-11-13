@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { QueryClient, type QueryKey } from '@tanstack/react-query';
 import type { ApiResult } from '@/shared/contracts';
 export const API_URL = (
-  process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api'
+  process.env.EXPO_PUBLIC_API_URL || 'http://localhost:43001/api'
 ).replace(/\/$/, '');
 export const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 15000 } },
