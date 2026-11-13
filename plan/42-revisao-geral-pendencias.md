@@ -55,3 +55,9 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Consulta agrega somente execuções success. Falha no banco responde 503 sem detalhes internos no corpo.
 - Evidência: teste falhou antes da implementação; três testes passaram (idade/ausência, falha sanitizada, rota pública no buildApp com banco indisponível). Typecheck backend passou.
 - Pendente: validar a agregação contra Postgres de teste e incluir o endpoint na revisão final. Nenhum teste acessou produção.
+
+## Fase 5 — lint backend/shared (Codex)
+- ESLint e typescript-eslint instalados como devDependencies do backend; configuração raiz cobre back/src, back/test e shared. Comando raiz lint verifica app e API; job API executa lint, job app continua independente da instalação backend.
+- Corrigidos parâmetros/imports sem uso e removidos any explícitos da entrada territorial; validação de CEP agora confere tipos string antes das regex.
+- Evidência: lint backend/shared sem avisos, typecheck backend e teste de geometria municipal passaram. Suite completa com banco ainda pendente.
+- Ferramentas alinhadas às versões já instaladas no app; npm informa ESLint 9 sem suporte e sete vulnerabilidades moderadas na árvore backend. Avaliação de atualização permanece pendente, sem audit fix forçado.

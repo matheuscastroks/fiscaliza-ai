@@ -40,7 +40,7 @@ export function registerSavedCallsRoutes(app: FastifyInstance, db: Database) {
         },
       },
     },
-    async (req, reply) => {
+    async (req) => {
       const userId = req.user!.id;
       const [call] = await db
         .select({ id: officialCalls.id })
@@ -78,7 +78,7 @@ export function registerSavedCallsRoutes(app: FastifyInstance, db: Database) {
         },
       },
     },
-    async (req, reply) => {
+    async (req) => {
       const userId = req.user!.id;
       const wanted = [...new Set(req.body.callIds)];
       if (wanted.length === 0) return ok({ added: 0 });

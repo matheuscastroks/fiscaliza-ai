@@ -7,7 +7,6 @@ import { eq } from 'drizzle-orm';
 import { buildApp } from '../src/app.js';
 import { loadConfig } from '../src/config.js';
 import { database } from '../src/db.js';
-import { applyMigrations } from '../src/migrations.js';
 import { createKeyedLock } from '../src/keyed-lock.js';
 import { attachments, users } from '../src/schema.js';
 import { createCitizen, uploadPhoto } from './helpers.js';

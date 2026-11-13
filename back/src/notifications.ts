@@ -363,7 +363,7 @@ export function registerNotificationRoutes(
         },
       },
     },
-    async (req, reply) => {
+    async (req) => {
       const { token, platform } = req.body;
       if (!isExpoPushToken(token))
         throw httpError(400, 'Token de avisos inválido.');
@@ -432,7 +432,7 @@ export function registerNotificationRoutes(
         },
       },
     },
-    async (req, reply) => {
+    async (req) => {
       const { callId, token } = req.body;
       const user = req.user!;
 
@@ -488,7 +488,7 @@ export function registerNotificationRoutes(
         },
       },
     },
-    async (req, reply) => {
+    async (req) => {
       const { callId, token } = req.body;
       if (!(await ownsToken(token, req.user!.id)))
         throw httpError(403, 'Este aparelho não está registrado na sua conta.');

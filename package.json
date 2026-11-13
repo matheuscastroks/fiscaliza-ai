@@ -8,7 +8,7 @@
     "ios": "npm run ios --prefix front --",
     "test": "npm test --prefix front --",
     "test:automation": "node --test .github/tests/*.test.cjs",
-    "lint": "npm run lint --prefix front --",
+    "lint": "npm run lint --prefix front && npm run lint --prefix back",
     "typecheck": "npm run typecheck --prefix front && npm run typecheck --prefix back",
     "api:start": "npm start --prefix back --",
     "api:test": "npm test --prefix back --",

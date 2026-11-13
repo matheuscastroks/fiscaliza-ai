@@ -8,7 +8,7 @@ test(
   'PostgreSQL: migration journal preserves later unassigned user and changed residence',
   { skip: !process.env.DATABASE_URL },
   async (t) => {
-    const { db, pool } = database();
+    const { pool } = database();
     t.after(() => pool.end());
     await applyMigrations(pool);
     const suffix = randomUUID();

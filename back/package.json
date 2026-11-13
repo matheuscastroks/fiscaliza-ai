@@ -15,7 +15,8 @@
     "openapi": "npm run build && node dist/back/src/openapi.js",
     "sync:rio1746": "npm run build && node dist/back/src/sync-cli.js",
     "probe:siurb": "npm run build && node dist/back/src/integrations/siurb/probe.js",
-    "sync:siurb": "npm run build && node dist/back/src/siurb-cli.js"
+    "sync:siurb": "npm run build && node dist/back/src/siurb-cli.js",
+    "lint": "cd .. && node back/node_modules/eslint/bin/eslint.js back/src back/test shared --max-warnings 0"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
@@ -32,8 +33,13 @@
     "sharp": "^0.35.5"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@types/node": "^22.18.0",
     "@types/pg": "^8.15.5",
+    "@typescript-eslint/eslint-plugin": "^8.72.1",
+    "@typescript-eslint/parser": "^8.72.1",
+    "eslint": "^9.39.5",
+    "globals": "^14.0.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.3"
   }
