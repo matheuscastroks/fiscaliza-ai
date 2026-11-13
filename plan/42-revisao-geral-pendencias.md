@@ -179,3 +179,11 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Metro anterior 19099 não respondia a /status após a compilação. Reiniciado com --clear e um worker, sessão 62626; /status confirmou packager-status:running. App reaberto; validar tela e erros após bundle antes de declarar a jornada funcionando.
 - Transporte espacial: teste, typecheck e lint app concluídos com sucesso. Hook/render/contadores e teste HTTP com banco ainda pendentes.
 - Falha temporária de revisão automática por limite de uso impediu um docker start; esse comando não foi executado. Aprovação voltou a responder para instalação/reabertura do APK. Banco de teste continua parado até nova verificação.
+
+## S22 — abertura e navegação confirmadas após atualização
+- Metro 62626 em localhost:8082 respondeu packager-status:running; bundle compilado e app abriu no aparelho com o APK novo. Erro ExpoNetwork ausente nessa abertura.
+- Explorar exibiu 12.686 chamados; mapa mostrou clusters 4, 8 e 25. Isso reproduz no runtime a cobertura parcial: soma 37 para 50 registros carregados, 13 sem ponto, não o total do recorte.
+- Lista abriu com "50 de 12.686 nesta área" e indicação de 13 sem local. Toque no protocolo público 24002879 abriu detalhe com cabeçalho Chamado, copiar protocolo, Atendimento e linha do tempo. Rotas dinâmicas funcionaram nessa jornada.
+- Avisos Reanimated "Dependencies should only be used on the web" continuam em lote durante navegação; aviso Sentry.wrap antes de init aparece no modo dev com captura desligada. Investigar, não considerar validação limpa.
+- Evidências locais ignoradas: .validation/s22-updated.png e XMLs s22-updated-ui, s22-list-ui e s22-detail-ui. Nenhuma captura foi publicada.
+- Pedido de atualizar APK e abrir pelo Expo Start atendido. Objetivo completo permanece ativo: cobertura espacial, testes restantes, documentação consolidada, revisão, merge e entrega ainda pendentes.
