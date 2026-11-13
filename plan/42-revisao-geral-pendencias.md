@@ -106,3 +106,9 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Cinco testes com renderRouter real passaram: link direto anônimo/autenticado, login para visitante, login indisponível para sessão ativa e remoção da tela protegida ao sair. Typecheck e lint app passaram.
 - Falha intermediária do teste de logout era import dinâmico incompatível com o modo Jest; corrigida com import estático, sem alterar configuração de runtime.
 - Validação de login/cadastro/logout no aparelho continua necessária.
+
+## Fase 5 — onboarding dividido e teste migrado
+- OnboardingFlow ficou com 254 linhas, responsável pelo controle de etapas e conclusão. Conteúdo tipado em slides.ts, apresentação em OnboardingSlideView.tsx e estilos em onboardingStyles.ts.
+- Testes de interação passaram antes e depois da extração: avançar, voltar, pular e concluir replay. Expectativas validam os títulos e conteúdo visíveis em cada etapa.
+- Removida inspeção de código de onboarding-flow-refinement; preservada verificação de assets presentes e não vazios. Tamanho de arquivo não é tratado como prova de qualidade de imagem.
+- Typecheck app, lint app, dois testes RNTL e dez regressões relacionadas passaram. Layout e leitura com fonte ampliada ainda precisam do aparelho.
