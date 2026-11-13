@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 
 import { createScopeGeneration, createWriteQueue } from './scopedPersistence';
-import type { OfficialCall } from '@/shared/contracts';
+import type { OfficialCall, SavedCallItem } from '@/shared/contracts';
 
 import { DEFAULT_MUNICIPALITY_ID } from '@/features/city/municipalityId';
 
@@ -21,7 +21,7 @@ export function setFollowNotificationListener(
  * store continuar testável sem rede.
  */
 export interface SavedCallsAccountApi {
-  list: () => Promise<{ call: OfficialCall; savedAt: string }[]>;
+  list: () => Promise<SavedCallItem[]>;
   merge: (ids: string[]) => Promise<void>;
   remove: (id: string) => Promise<void>;
   clear: () => Promise<void>;

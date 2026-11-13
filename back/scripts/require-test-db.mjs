@@ -1,5 +1,11 @@
 // Os testes apagam e recriam dados. Recusa rodar contra um banco que não seja de teste.
 const url = process.env.DATABASE_URL;
+// No CI, sem banco os testes com PostgreSQL seriam pulados em silêncio e o
+// resultado sairia verde sem testar nada.
+if (!url && process.env.CI) {
+  console.error('Recusado: no CI, defina DATABASE_URL com um banco de teste.');
+  process.exit(1);
+}
 if (url) {
   let name = '';
   try {

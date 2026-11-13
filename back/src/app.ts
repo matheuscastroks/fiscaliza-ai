@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
@@ -76,6 +77,10 @@ export async function buildApp(
       req: (req) => ({ method: req.method, url: req.url?.split('?')[0], hostname: req.hostname, remoteAddress: req.ip }),
     } } : false,
     trustProxy: config.trustProxy,
+    // O id da requisição é o cf-ray da Cloudflare, quando houver: o mesmo valor
+    // aparece no painel da Cloudflare e nos logs da API.
+    requestIdHeader: 'cf-ray',
+    genReqId: () => randomUUID(),
     bodyLimit: 1024 * 1024,
     requestTimeout: 30_000,
     connectionTimeout: 60_000,
@@ -175,6 +180,8 @@ export async function buildApp(
     // Operadoras móveis põem muitos aparelhos atrás do mesmo IP (CGNAT).
     hook: 'preHandler',
     keyGenerator: (req) => (req.user ? `user:${req.user.id}` : clientKey(req)),
+    errorResponseBuilder: () =>
+      fail(429, 'Muitas requisições em pouco tempo. Aguarde um momento e tente de novo.'),
   });
 
   app.decorateRequest('user', null);
@@ -212,20 +219,22 @@ export async function buildApp(
     };
   });
 
-  app.setErrorHandler((caught, _request, reply) => {
-    const error: Error & { statusCode?: number } =
+  app.setErrorHandler((caught, request, reply) => {
+    const error: Error & { statusCode?: number; validation?: unknown[] } =
       caught instanceof Error ? caught : new Error('Erro desconhecido.');
     const statusCode =
       error.statusCode && error.statusCode >= 400 ? error.statusCode : 500;
-    if (statusCode === 500)
-      app.log.error({ err: error, statusCode }, 'Erro interno ao atender requisição.');
-    reply.code(statusCode).send({
-      success: false,
-      error:
-        statusCode === 500
-          ? 'Não foi possível concluir a operação.'
-          : error.message,
-    });
+    if (statusCode >= 500)
+      request.log.error({ err: error, statusCode }, 'Erro interno ao atender requisição.');
+    // Mensagens do validador e do limite de requisições vêm em inglês e com
+    // detalhes internos: o app mostra uma frase em português.
+    const message =
+      statusCode >= 500
+        ? 'Não foi possível concluir a operação.'
+        : error.validation
+          ? 'Dados inválidos na requisição. Confira os campos e tente de novo.'
+          : error.message;
+    reply.code(statusCode).send({ success: false, error: message });
   });
 
   // Dados públicos mudam no ritmo das sincronizações: um minuto de cache no

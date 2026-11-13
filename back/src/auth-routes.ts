@@ -285,6 +285,11 @@ export function registerAuthRoutes(
 
   app.get<{ Params: { cep: string } }>(
     '/api/profile/postal-code/:cep',
+    {
+      schema: {
+        params: schema.object({ cep: { type: 'string', pattern: '^[0-9]{5}-?[0-9]{3}$' } }, ['cep']),
+      },
+    },
     async (req) => {
       if (!req.user) throw fail(401, 'Entre para continuar.');
       return ok(await territory.lookup(req.params.cep));

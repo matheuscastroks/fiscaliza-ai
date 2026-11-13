@@ -15,9 +15,17 @@ import {
 import { resolveFacilityNeighborhood, type MappingResult } from './mapper.js';
 import type { LayerSnapshot } from './client.js';
 
+// O catálogo é a fonte da verdade da origem e do uso permitido: uma mudança
+// nele (URL, atribuição, licença) precisa chegar ao banco, não só na primeira vez.
 export async function ensureSiurbSources(db: Database) {
   for (const id of SIURB_LAYER_IDS) {
     const layer = getSiurbLayer(id);
+    const catalog = {
+      officialUrl: layer.url,
+      attribution: layer.attribution,
+      usage: layer.usage,
+      usageEvidenceUrl: layer.usageEvidenceUrl,
+    };
     await db
       .insert(dataSources)
       .values({
@@ -36,7 +44,7 @@ export async function ensureSiurbSources(db: Database) {
         usage: layer.usage,
         usageEvidenceUrl: layer.usageEvidenceUrl,
       })
-      .onConflictDoNothing();
+      .onConflictDoUpdate({ target: dataSources.id, set: catalog });
   }
 }
 export async function publishSiurbSnapshot(

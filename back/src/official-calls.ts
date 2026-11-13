@@ -127,6 +127,8 @@ const filterProperties = {
 };
 const callsQuerySchema = {
   type: 'object',
+  // Parâmetro desconhecido é erro de quem chama, não filtro ignorado em silêncio.
+  additionalProperties: false,
   properties: {
     ...filterProperties,
     page: digits(4),
@@ -145,7 +147,17 @@ const callsQuerySchema = {
     west: text(32),
   },
 };
-const overviewQuerySchema = { type: 'object', properties: filterProperties };
+const overviewQuerySchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: filterProperties,
+};
+const callIdParams = {
+  type: 'object',
+  required: ['id'],
+  additionalProperties: false,
+  properties: { id: { type: 'string', minLength: 1, maxLength: 100, pattern: '^[A-Za-z0-9_-]+$' } },
+};
 const MAX_OFFSET_PAGE = 500;
 
 type FilterQuery = {
@@ -261,11 +273,6 @@ export function registerOfficialCallsRoutes(
         eq(officialCalls.serviceSubtype, req.query.subtipo.trim()),
       );
     }
-    if (req.query.situacao) {
-      conditions.push(
-        eq(officialCalls.officialSituation, req.query.situacao.trim()),
-      );
-    }
     if (req.query.hasCoordinates === 'true') {
       conditions.push(isNotNull(officialCalls.latitude));
       conditions.push(isNotNull(officialCalls.longitude));
@@ -352,7 +359,10 @@ export function registerOfficialCallsRoutes(
   });
 
   // 2. Details of single official call
-  app.get<{ Params: { id: string } }>('/api/rio1746/calls/:id', async (req) => {
+  app.get<{ Params: { id: string } }>(
+    '/api/rio1746/calls/:id',
+    { schema: { params: callIdParams } },
+    async (req) => {
     const paramId = req.params.id;
     const isPrefixed = paramId.startsWith('rio1746-');
     const externalId = isPrefixed ? paramId.replace('rio1746-', '') : paramId;

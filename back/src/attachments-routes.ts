@@ -127,6 +127,16 @@ export function registerAttachmentsRoutes(
 
   app.get<{ Params: { id: string } }>(
     '/api/attachments/:id',
+    {
+      schema: {
+        params: {
+          type: 'object',
+          required: ['id'],
+          additionalProperties: false,
+          properties: { id: { type: 'string', pattern: '^[a-f0-9-]{36}$' } },
+        },
+      },
+    },
     async (req, reply) => {
       if (!/^[a-f0-9-]{36}$/.test(req.params.id))
         throw fail(404, 'Anexo não encontrado.');
