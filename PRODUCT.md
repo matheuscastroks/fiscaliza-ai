@@ -21,10 +21,10 @@ Exemplo orientador: diante de uma rua sem iluminação, o morador procura relato
 O fluxo cidadão funciona sem conta. Sem conta, salvos, bairro preferido e aparência ficam só no aparelho. Com conta, os chamados salvos ficam na conta (`/api/v1/saved-calls`) e voltam em qualquer aparelho em que a pessoa entrar; a lista feita antes do login é adotada pela conta uma vez. Mudanças sem internet ficam pendentes no aparelho e chegam à conta depois. Bairro preferido, lugares e aparência continuam por aparelho. Avisos no celular exigem conta. Contas possuem apenas o perfil cidadão; importações são operadas pelos comandos do servidor. As jornadas legadas de escrita foram removidas do aplicativo.
 
 1. **Explorar (entrada map-first):** o app abre no mapa do recorte atual, com um botão de resultados na base ("Ver em lista · N chamados"). Tocar nele abre a lista equivalente num bottom sheet; tocar num marcador mostra a prévia do chamado. Não há Home separada. Panorama numérico e comparações ficam no aprofundamento (dados do bairro).
-2. **Território:** mapa e lista equivalente (sem Mapbox, como no Expo Go e na web, a lista é a visão principal) e segmentação em dois domínios exclusivos de visualização: **Chamados 1746** (ocorrências de zeladoria urbana) e **Serviços Públicos** (escolas, postos de saúde, praças e lazer). A separação impede sobreposição excessiva de camadas. Alternância simplificada entre Mapa e Lista pela barra de busca, além de painel de filtros com rolagem interna e pontos de toque ergonômicos.
+2. **Território:** mapa e lista equivalente (sem Mapbox, como no Expo Go, a lista é a visão principal) e segmentação em dois domínios exclusivos de visualização: **Chamados 1746** (ocorrências de zeladoria urbana) e **Serviços Públicos** (escolas, postos de saúde, praças e lazer). A separação impede sobreposição excessiva de camadas. Alternância simplificada entre Mapa e Lista pela barra de busca, além de painel de filtros com rolagem interna e pontos de toque ergonômicos.
 3. **Detalhe do chamado:** priorizar problema, local, situação publicada, protocolo e datas; depois origem e limitações. Oferecer salvar/retirar dos salvos e acesso ao canal oficial, sem prometer integração de envio ou atualização em tempo real.
 4. **Salvos:** facilitar o retorno aos registros que a pessoa escolheu salvar. Distinguir interesses pessoais da consulta geral aos chamados do município.
-5. **Meu Perfil e Conta Cidadã:** visual suave com cartões sem sombras pesadas, alinhado ao padrão de navegação do menu lateral. Permite personalização de avatar com sanitização de imagem, métricas de chamados salvos e lugares configurados, além de exclusão permanente da conta (`DELETE /api/profile`) em conformidade com a LGPD, revogando sessões e apagando dados do servidor com confirmação segura.
+5. **Meu Perfil e Conta Cidadã:** visual suave com cartões sem sombras pesadas, alinhado ao padrão de navegação do menu lateral. Permite personalização de avatar com sanitização de imagem, métricas de chamados salvos e lugares configurados, além de exclusão permanente da conta (`DELETE /api/auth/profile`, com a senha) em conformidade com a LGPD, revogando sessões e apagando dados do servidor com confirmação segura.
 
 Equipamentos públicos servem à descoberta de serviços: endereço, contato e horário apenas quando publicados. Gráficos respondem a perguntas específicas em uma camada de aprofundamento. Novos dashboards e integrações ficam fora da prioridade deste redesenho.
 
@@ -44,13 +44,13 @@ Não existe integração de abertura de solicitações no 1746. O aplicativo nã
 - Quando não encontra um registro, há um próximo passo para o canal oficial; a interface não afirma que nenhum chamado existe.
 - Situação, prazo, período dos dados e atualização são apresentados sem inventar informação ausente.
 - Cada tela oferece uma tarefa identificável e uma continuação útil, com estados de carregamento, erro e vazio recuperáveis.
-- Validar essas jornadas no cidadão web e no Expo Go; build e testes automatizados não substituem a avaliação de uso.
+- Validar essas jornadas num aparelho Android com build de desenvolvimento (e no Expo Go, sem mapa); build e testes automatizados não substituem a avaliação de uso.
 
 ## Fontes e responsabilidades
 
 SIURB/IPP: escolas (1), saúde (2), espaços públicos (16) e limites de bairros (18). Central 1746/DATA.RIO: demandas via BigQuery. A evidência de uso e atribuição está em plan/evidence/20-siurb-fontes.md.
 
-O backend importa e valida; PostgreSQL conserva cadastros e proveniência; Fastify serve contratos públicos; Expo apresenta as evidências em Android/iOS/web. O cliente não consulta os provedores de importação diretamente. O mapa utiliza Mapbox.
+O backend importa e valida; PostgreSQL conserva cadastros e proveniência; Fastify serve contratos públicos; Expo apresenta as evidências em Android e iOS (não há versão web publicada). O cliente não consulta os provedores de importação diretamente. O mapa utiliza Mapbox.
 
 Importações administrativas são limitadas, auditadas e protegidas por trava por fonte. Publicações cadastrais são atômicas; falhas preservam a versão anterior. Builds e abertura de telas não sincronizam dados.
 

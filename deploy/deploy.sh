@@ -6,7 +6,8 @@ export IMAGE_PREFIX="${1:?Usage: deploy.sh ghcr.io/owner/repo commit-sha}"
 export IMAGE_TAG="${2:?Provide the full commit SHA}"
 [[ "$IMAGE_PREFIX" =~ ^ghcr\.io/[a-z0-9_.-]+/[a-z0-9_.-]+$ ]] || exit 2
 [[ "$IMAGE_TAG" =~ ^[a-f0-9]{40}$ ]] || exit 2
-export RELEASE_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+RELEASE_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+export RELEASE_DIR
 root_dir="$(cd -- "$RELEASE_DIR/../.." && pwd)"
 [[ "$RELEASE_DIR" == "$root_dir/releases/$IMAGE_TAG" ]] || exit 2
 [[ -f "$root_dir/.env.production" ]] || { echo 'Missing .env.production on VPS' >&2; exit 2; }

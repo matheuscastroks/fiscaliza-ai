@@ -64,3 +64,9 @@ back/openapi.json
 # Backups e credenciais locais do modo público
 backups/
 secrets/
+
+# Chaves de assinatura e credenciais de serviço (nunca no git)
+*.keystore
+*.dump
+service-account*.json
+credentials*.json

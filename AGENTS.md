@@ -25,9 +25,9 @@ Use npm e preserve os package-lock.json. Instale módulos Expo com npx expo inst
 
 ## Convenções
 
-O município vem da sessão e usa código IBGE. Não aceite cidade arbitrária em mutações; registros validam o polígono no servidor. Cache e rascunhos incluem usuário e município. Não há papéis de gestão ou administração nas contas; sincronização é operação do servidor.
+O município vem da sessão e usa código IBGE. Não aceite cidade arbitrária em mutações; pontos são validados contra o polígono no servidor. Chaves locais e cache incluem usuário e município. Não há papéis de gestão ou administração nas contas; sincronização é operação do servidor.
 
-TypeScript estrito, indentação de dois espaços, componentes PascalCase, hooks useX e funções com responsabilidade delimitada. Preserve contratos compartilhados e valide entradas no servidor. API/banco são a autoridade; cache e rascunho nunca podem confirmar gravação inexistente. Apoios/respostas devem ter unicidade persistida. Mudanças de atendimento/decisão exigem justificativa e histórico com ator.
+TypeScript estrito, indentação de dois espaços, componentes PascalCase, hooks useX e funções com responsabilidade delimitada. Preserve contratos compartilhados e valide entradas no servidor. API/banco são a autoridade; cache local nunca pode confirmar gravação inexistente. Salvos e seguidores têm unicidade persistida no banco.
 
 ## UI e testes
 
@@ -35,5 +35,5 @@ Aplique RITO: razão, informação, tarefa e originalidade funcional. Sem slogan
 
 ## Segurança e colaboração
 
-Nunca comite .env, credenciais ou android/ios gerados. Gemini somente no servidor; fotos permanecem nesta aplicação. Atualize templates de ambiente. Commits seguem feat/fix/docs e escopo quando útil; sem prefixos de ferramenta na branch ou mensagem. PRs descrevem comportamento, validação e limitações reais.
+Nunca comite .env, credenciais ou android/ios gerados. Credenciais de integração (BigQuery, Sentry, Expo) ficam só no servidor ou nos secrets do EAS; a foto de perfil fica nesta aplicação. Atualize templates de ambiente. Commits seguem feat/fix/docs e escopo quando útil; sem prefixos de ferramenta na branch ou mensagem. PRs descrevem comportamento, validação e limitações reais.
 Skills Expo selecionadas ficam em front/.agents/skills. Em tarefas do aplicativo, leia front/AGENTS.md e carregue primeiro front/.agents/skills/expo-overview/SKILL.md. As instruções do projeto prevalecem.

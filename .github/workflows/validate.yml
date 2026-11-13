@@ -25,6 +25,11 @@ jobs:
         run: |
           test "$REPOSITORY_ID" = '997154192'
           if [ "$ACTOR_ID" = '49662686' ]; then exit 0; fi
+          # Dependabot: valida as atualizações (sem segredos e sem merge automático,
+          # que continua restrito ao dono no auto-merge.yml).
+          if [ "$ACTOR_ID" = '49699333' ] && [ "$EVENT_NAME" = 'push' ]; then
+            case "$REF" in refs/heads/dependabot/*) exit 0 ;; esac
+          fi
           test "$REF" = 'refs/heads/main'
           test "$EVENT_NAME" = 'workflow_dispatch'
           test "$ACTOR_ID" = '41898282'
@@ -145,6 +150,10 @@ jobs:
           bash -n deploy/deploy.sh
           sh -n deploy/backup.sh
           bash -n deploy/restore.sh
+          docker run --rm -v "$PWD:/repo" -w /repo koalaman/shellcheck:v0.10.0 -S warning deploy/deploy.sh deploy/backup.sh deploy/restore.sh
+          # Modo público do PC (compose.yaml + compose.public.yaml) também precisa ser válido.
+          cp .env.compose.example "$RUNNER_TEMP/compose.env"
+          docker compose --env-file "$RUNNER_TEMP/compose.env" -f compose.yaml -f compose.public.yaml --profile public config --quiet
           # Valida a partir do pacote que o release envia, não do checkout: um
           # arquivo montado no Compose e ausente do pacote quebraria a VPS.
           export RELEASE_DIR="$RUNNER_TEMP/release"
