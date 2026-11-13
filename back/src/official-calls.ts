@@ -1,3 +1,4 @@
+import { queryOfficialMap } from './official-call-map.js';
 import { RIO_MUNICIPALITY_ID } from './constants.js';
 import {
   officialDateConditions,
@@ -32,7 +33,7 @@ import { officialCalls } from './schema.js';
 import {
   getPublicSyncStatus,
 } from './integrations/rio1746/sync.js';
-import type { OfficialCall } from '../../shared/contracts.js';
+import type { OfficialCallsQueryParams, OfficialCall } from '../../shared/contracts.js';
 import {
   isMacroThemeId,
   serviceTypesForTheme,
@@ -214,6 +215,88 @@ export function registerOfficialCallsRoutes(
     return { conditions, territory };
   }
 
+  type CallsQuery = Partial<Record<keyof OfficialCallsQueryParams, string>>;
+
+  // The map and cursor list share every data filter; only representation differs.
+  async function callConditions(query: CallsQuery) {
+    const radius = parseRadiusFilter(query);
+    if (radius) {
+      const location = await resolveTerritoryLocation(db, { latitude: radius.centerLatitude, longitude: radius.centerLongitude });
+      if (!location.insideMunicipality) throw fail(422, 'Escolha um ponto dentro do Rio de Janeiro.');
+    }
+    const { conditions, territory } = await commonConditions(query);
+    if (radius) conditions.push(officialRadiusCondition(radius));
+    if (query.subtipo) {
+      conditions.push(
+        eq(officialCalls.serviceSubtype, query.subtipo.trim()),
+      );
+    }
+    if (query.hasCoordinates === 'true') {
+      conditions.push(isNotNull(officialCalls.latitude));
+      conditions.push(isNotNull(officialCalls.longitude));
+    }
+
+    if (query.search) {
+      const term = `%${escapeLike(query.search.trim())}%`;
+      const searchCond = or(
+        ilike(officialCalls.serviceType, term),
+        ilike(officialCalls.serviceSubtype, term),
+        ilike(officialCalls.neighborhoodName, term),
+        ilike(officialCalls.organizationName, term),
+        ilike(officialCalls.statusJustification, term),
+        ilike(officialCalls.externalId, term),
+      );
+      if (searchCond) conditions.push(searchCond);
+    }
+
+    // Spatial bounding box filter if coordinates passed
+    const north = parseFloat(query.north || '');
+    const south = parseFloat(query.south || '');
+    const east = parseFloat(query.east || '');
+    const west = parseFloat(query.west || '');
+    if (
+      Number.isFinite(north) &&
+      Number.isFinite(south) &&
+      Number.isFinite(east) &&
+      Number.isFinite(west)
+    ) {
+      const bboxCond = and(
+        gte(officialCalls.latitude, Math.min(south, north)),
+        lte(officialCalls.latitude, Math.max(south, north)),
+        gte(officialCalls.longitude, Math.min(west, east)),
+        lte(officialCalls.longitude, Math.max(west, east)),
+      );
+      if (bboxCond) conditions.push(bboxCond);
+    }
+
+    return { conditions, territory };
+  }
+
+  const mapProperties = Object.fromEntries(Object.entries(callsQuerySchema.properties)
+    .filter(([key]) => !['page', 'limit', 'cursor', 'includeTotal', 'hasCoordinates'].includes(key)));
+  app.get<{ Querystring: CallsQuery & { viewNorth: string; viewSouth: string; viewEast: string; viewWest: string } }>(
+    '/api/rio1746/map',
+    { schema: { querystring: {
+      type: 'object', additionalProperties: false,
+      required: ['viewNorth', 'viewSouth', 'viewEast', 'viewWest'],
+      properties: {
+        ...mapProperties,
+        viewNorth: { type: 'number', minimum: -90, maximum: 90 },
+        viewSouth: { type: 'number', minimum: -90, maximum: 90 },
+        viewEast: { type: 'number', minimum: -180, maximum: 180 },
+        viewWest: { type: 'number', minimum: -180, maximum: 180 },
+      },
+    } } },
+    async (req) => {
+      const { conditions, territory } = await callConditions(req.query);
+      const snapshot = await queryOfficialMap(db, and(...conditions)!, {
+        north: Number(req.query.viewNorth), south: Number(req.query.viewSouth),
+        east: Number(req.query.viewEast), west: Number(req.query.viewWest),
+      });
+      return ok({ ...snapshot, territoryConfirmed: territory.confirmed });
+    },
+  );
+
   // 1. List calls with rich filtering, visible map area bounding box, period, and pagination
   app.get<{
     Querystring: {
@@ -241,11 +324,6 @@ export function registerOfficialCallsRoutes(
       west?: string;
     };
   }>('/api/rio1746/calls', { schema: { querystring: callsQuerySchema } }, async (req) => {
-    const radius = parseRadiusFilter(req.query);
-    if (radius) {
-      const location = await resolveTerritoryLocation(db, { latitude: radius.centerLatitude, longitude: radius.centerLongitude });
-      if (!location.insideMunicipality) throw fail(422, 'Escolha um ponto dentro do Rio de Janeiro.');
-    }
     const page = Math.max(1, parseInt(req.query.page || '1', 10) || 1);
     const limit = Math.min(
       1000,
@@ -266,50 +344,7 @@ export function registerOfficialCallsRoutes(
       }
     }
 
-    const { conditions, territory } = await commonConditions(req.query);
-    if (radius) conditions.push(officialRadiusCondition(radius));
-    if (req.query.subtipo) {
-      conditions.push(
-        eq(officialCalls.serviceSubtype, req.query.subtipo.trim()),
-      );
-    }
-    if (req.query.hasCoordinates === 'true') {
-      conditions.push(isNotNull(officialCalls.latitude));
-      conditions.push(isNotNull(officialCalls.longitude));
-    }
-
-    if (req.query.search) {
-      const term = `%${escapeLike(req.query.search.trim())}%`;
-      const searchCond = or(
-        ilike(officialCalls.serviceType, term),
-        ilike(officialCalls.serviceSubtype, term),
-        ilike(officialCalls.neighborhoodName, term),
-        ilike(officialCalls.organizationName, term),
-        ilike(officialCalls.statusJustification, term),
-        ilike(officialCalls.externalId, term),
-      );
-      if (searchCond) conditions.push(searchCond);
-    }
-
-    // Spatial bounding box filter if coordinates passed
-    const north = parseFloat(req.query.north || '');
-    const south = parseFloat(req.query.south || '');
-    const east = parseFloat(req.query.east || '');
-    const west = parseFloat(req.query.west || '');
-    if (
-      Number.isFinite(north) &&
-      Number.isFinite(south) &&
-      Number.isFinite(east) &&
-      Number.isFinite(west)
-    ) {
-      const bboxCond = and(
-        gte(officialCalls.latitude, Math.min(south, north)),
-        lte(officialCalls.latitude, Math.max(south, north)),
-        gte(officialCalls.longitude, Math.min(west, east)),
-        lte(officialCalls.longitude, Math.max(west, east)),
-      );
-      if (bboxCond) conditions.push(bboxCond);
-    }
+    const { conditions, territory } = await callConditions(req.query);
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 

@@ -152,3 +152,17 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Regex borderw*Radius corrigida para border\w*Radius; teste reproduziu cantos específicos ignorados e passou após correção.
 - Guarda agora inclui rgba() e todos os pesos numéricos/literais de fonte. Inventário inicial das novas métricas: 9 rgba e 90 pesos; limites anteriores preservados (incluindo zero raios literais).
 - Dois testes da guarda passaram. Estes limites registram dívida existente e impedem aumento; não indicam que os 99 literais foram removidos.
+
+## Continuidade — compilação com pressão de memória
+- Build Android sessão 80977 segue ativo; avançou para merge de libs Sentry, compilação Expo Modules e assets/metadados do app. Ainda não foi concluído/instalado.
+- Windows medido com apenas 251084 KiB livres de 16454388 KiB. Metro anterior PID 7200 (porta 8082, pertencente a esta sessão) foi encerrado e reiniciado com --max-workers 1. Novo Metro: sessão 19099. Porta 8081 da outra worktree preservada.
+- Teste HTTP espacial adicionado em back/test/official-call-map.test.ts (não commitado), mas execução falhou por timeout de conexão ao banco; NÃO é evidência de falha funcional do endpoint. Endpoint ainda não implementado. Aguardar recursos e repetir antes da implementação.
+- Solicitada parada somente do contêiner descartável fiscaliza-fase5-test para liberar memória; operação na sessão 66494. Conferir estado antes de reiniciar o banco de teste. Não foi parado nenhum contêiner de produção.
+- Retomar primeiro atualização S22 e Expo Start; depois continuar endpoint/camada espacial e demais itens do plano.
+
+## Continuidade — build limitado e endpoint espacial
+- Primeira compilação terminou com falha confirmada: Gradle Worker Daemon não conectou em 120s sob carga extrema; 21m53s. Nenhum APK instalado nessa tentativa.
+- Nova compilação ativa sessão 25582: gradlew app:assembleDebug com --max-workers=1 --no-parallel, cache, arm64-v8a e porta nativa 8082. Log .validation/fase5-s22-build-limited.log. Já passou Javac Expo Modules e compilação Kotlin do app; ainda falta resultado final/instalação.
+- Metro sessão 19099 continua ativo em 8082 com um worker. Banco fiscaliza-fase5-test foi parado para reduzir consumo de memória.
+- Endpoint GET /api/rio1746/map implementado localmente com viewport obrigatório, sem paginação. callConditions agora compartilha os filtros de lista/mapa. Teste sem banco reproduziu 404 antes e passou com 400 de validação depois; typecheck backend passou.
+- Teste HTTP com banco ainda precisa ser repetido quando o contêiner de teste for reiniciado; tentativa anterior teve timeout de conexão sob pressão de memória, não validou o comportamento. Integração app/camada espacial ainda pendente.

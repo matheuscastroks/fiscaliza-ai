@@ -25,3 +25,37 @@ test('PostgreSQL: spatial aggregates cover every matching point independently of
   assert.equal(outside.total, 610);
   assert.deepEqual(outside.cells, []);
 });
+
+test('PostgreSQL: public map endpoint matches list filters and rejects pagination', { skip: !process.env.DATABASE_URL }, async (t) => {
+  const { buildApp } = await import('../src/app.js');
+  const { pool } = database();
+  const app = await buildApp();
+  t.after(async () => { await app.close(); await pool.query("DELETE FROM official_calls WHERE service_type='map-http-fixture'"); await pool.end(); });
+  await pool.query(`INSERT INTO official_calls (id,external_id,service_type,service_subtype,opened_at,latitude,longitude,official_situation)
+    VALUES ('map-http-a','map-http-a','map-http-fixture','lamp','2026-11-01',-22.9,-43.2,'Aberto'),
+      ('map-http-b','map-http-b','map-http-fixture','lamp','2026-11-02',null,null,'Aberto'),
+      ('map-http-c','map-http-c','map-http-fixture','lamp','2026-11-03',-22.9,-43.2,'Encerrado')`);
+  const filters = 'tipo=map-http-fixture&situacao=Aberto&search=lamp';
+  const viewport = '&viewNorth=-22&viewSouth=-23&viewEast=-43&viewWest=-44';
+  const response = await app.inject('/api/rio1746/map?' + filters + viewport);
+  assert.equal(response.statusCode, 200, response.body);
+  const map = response.json().data;
+  const list = await app.inject('/api/rio1746/calls?' + filters + '&limit=1');
+  assert.equal(map.total, list.json().data.total);
+  assert.equal(map.total, 2);
+  assert.equal(map.visibleTotal, 1);
+  assert.equal(map.unlocatedTotal, 1);
+  for (const suffix of ['&limit=50','&cursor=x','&viewNorth=bad']) {
+    assert.equal((await app.inject('/api/rio1746/map?' + filters + viewport + suffix)).statusCode, 400);
+  }
+  assert.equal((await app.inject('/api/rio1746/map?' + filters)).statusCode, 400);
+});
+
+test('map validates viewport before touching the database', async () => {
+  const { buildApp } = await import('../src/app.js');
+  const app = await buildApp({ databaseUrl: 'postgres://test:test@127.0.0.1:1/unavailable' });
+  try {
+    const response = await app.inject('/api/rio1746/map?limit=50');
+    assert.equal(response.statusCode, 400, response.body);
+  } finally { await app.close(); }
+});
