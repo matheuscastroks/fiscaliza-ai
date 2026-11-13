@@ -125,29 +125,6 @@ export function registerAttachmentsRoutes(
     },
   );
 
-  app.get<{ Params: { name: string } }>(
-    '/api/demo-media/:name',
-    async (req, reply) => {
-      if (
-        ![
-          'avatar-ana.jpg',
-          'avatar-gestao.jpg',
-          'avatar-admin.jpg',
-        ].includes(req.params.name)
-      )
-        throw fail(404, 'Imagem de exemplo não encontrada.');
-      try {
-        return reply
-          .type('image/jpeg')
-          .header('X-Content-Type-Options', 'nosniff')
-          .header('Cache-Control', 'public, max-age=86400')
-          .send(await readFile(resolve('data/demo-media', req.params.name)));
-      } catch {
-        throw fail(404, 'Imagem de exemplo não encontrada.');
-      }
-    },
-  );
-
   app.get<{ Params: { id: string } }>(
     '/api/attachments/:id',
     async (req, reply) => {
@@ -162,7 +139,9 @@ export function registerAttachmentsRoutes(
         return reply
           .type(row.mime)
           .header('X-Content-Type-Options', 'nosniff')
-          .header('Cache-Control', 'public, max-age=86400')
+          // Foto de perfil: o CDN não guarda cópia, para ela sumir junto com a
+          // conta ou com a troca de avatar.
+          .header('Cache-Control', 'private, no-store')
           .send(await readFile(resolve(uploadDir, row.id)));
       } catch {
         throw fail(404, 'Anexo não encontrado.');

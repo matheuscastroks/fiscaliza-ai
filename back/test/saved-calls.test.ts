@@ -64,6 +64,7 @@ test(
       method: 'POST',
       url: '/api/auth/login',
       remoteAddress: '203.0.113.77',
+      headers: { 'x-fiscaliza-client': 'citizen-native' },
       payload: { email: a.email, password: 'Senha-de-teste-123' },
     });
     const other = { headers: { authorization: `Bearer ${login.json().data.token}` } } as unknown as typeof a;

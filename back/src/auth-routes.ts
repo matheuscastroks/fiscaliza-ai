@@ -7,6 +7,8 @@ import {
   hashPassword,
   needsRehash,
   newToken,
+  SESSION_MS,
+  sessionExpiry,
   spendPasswordTime,
   tokenHash,
   verifyPassword,
@@ -22,7 +24,7 @@ import {
   removeAttachments,
   removeUploadFiles,
 } from './attachments-routes.js';
-import { attachments, sessions, users } from './schema.js';
+import { attachments, sessions, userPushTokens, users } from './schema.js';
 
 export function registerAuthRoutes(
   app: FastifyInstance,
@@ -35,6 +37,8 @@ export function registerAuthRoutes(
     production: boolean;
     uploadDir: string;
     sessionCookie: (req: FastifyRequest) => string;
+    /** IP do cliente (o real, quando a conexão vem do túnel). */
+    clientKey: (req: FastifyRequest) => string;
     validateImages: (
       req: FastifyRequest,
       values: string[] | undefined,
@@ -62,24 +66,34 @@ export function registerAuthRoutes(
     production,
     uploadDir,
     sessionCookie,
+    clientKey,
     validateImages,
     schema,
   } = options;
 
-  const loginThrottle = createLoginThrottle();
+  // Falhas por (e-mail, IP): errar a senha de propósito não bloqueia o dono da
+  // conta em outra rede. O limite por e-mail, bem mais alto, freia tentativas
+  // distribuídas por muitos IPs.
+  const loginThrottle = createLoginThrottle(10);
+  const accountThrottle = createLoginThrottle(100);
+  const throttleKeys = (req: FastifyRequest, email: string) =>
+    [`${email}|${clientKey(req)}`, email] as const;
 
-  function setSessionCookie(
-    req: FastifyRequest,
-    reply: FastifyReply,
-    token: string,
-  ) {
+  /**
+   * O app nativo guarda o token no armazenamento seguro e o envia como Bearer;
+   * o navegador recebe só o cookie httpOnly. O token nunca vai aos dois: no
+   * corpo de uma resposta ao navegador, um script injetado poderia lê-lo.
+   */
+  function issueSession(req: FastifyRequest, reply: FastifyReply, token: string) {
+    if (req.headers['x-fiscaliza-client'] === 'citizen-native') return { token };
     reply.setCookie(sessionCookie(req), token, {
       httpOnly: true,
       sameSite: 'lax',
       secure: production,
       path: '/api',
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: SESSION_MS / 1000,
     });
+    return {};
   }
 
   app.post<{ Body: RegistrationInput }>(
@@ -122,13 +136,13 @@ export function registerAuthRoutes(
         await tx.insert(sessions).values({
           tokenHash: tokenHash(token),
           userId: created.id,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          expiresAt: sessionExpiry(),
         });
         return created;
       });
-      setSessionCookie(req, reply, token);
+      const session = issueSession(req, reply, token);
       reply.code(201);
-      return ok({ user: await hydrate(user), token });
+      return ok({ user: await hydrate(user), ...session });
     },
   );
 
@@ -148,20 +162,22 @@ export function registerAuthRoutes(
     },
     async (req, reply) => {
       const email = req.body.email.toLowerCase().trim();
-      if (loginThrottle.blocked(email))
+      const [pairKey, emailKey] = throttleKeys(req, email);
+      if (loginThrottle.blocked(pairKey) || accountThrottle.blocked(emailKey))
         throw fail(429, 'Muitas tentativas. Tente de novo em alguns minutos.');
+      const failed = () => {
+        loginThrottle.fail(pairKey);
+        accountThrottle.fail(emailKey);
+        return fail(401, 'E-mail ou senha inválidos.');
+      };
       const [u] = await db.select().from(users).where(eq(users.email, email));
       if (!u) {
         // Mesmo custo de um login real: o tempo não revela se a conta existe.
         await spendPasswordTime(req.body.password);
-        loginThrottle.fail(email);
-        throw fail(401, 'E-mail ou senha inválidos.');
+        throw failed();
       }
-      if (!(await verifyPassword(req.body.password, u.passwordHash))) {
-        loginThrottle.fail(email);
-        throw fail(401, 'E-mail ou senha inválidos.');
-      }
-      loginThrottle.reset(email);
+      if (!(await verifyPassword(req.body.password, u.passwordHash))) throw failed();
+      loginThrottle.reset(pairKey);
       // Conta com hash do custo antigo: regrava no custo atual.
       if (needsRehash(u.passwordHash))
         await db
@@ -172,10 +188,9 @@ export function registerAuthRoutes(
       await db.insert(sessions).values({
         tokenHash: tokenHash(token),
         userId: u.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        expiresAt: sessionExpiry(),
       });
-      setSessionCookie(req, reply, token);
-      return ok({ user: await hydrate(u), token });
+      return ok({ user: await hydrate(u), ...issueSession(req, reply, token) });
     },
   );
 
@@ -206,8 +221,23 @@ export function registerAuthRoutes(
     },
   );
 
-  const deleteProfile = async (req: FastifyRequest, reply: FastifyReply) => {
+  // Apagar a conta é definitivo: pede a senha de novo, para um token vazado
+  // (ou um aparelho emprestado) não bastar.
+  const deleteProfile = async (
+    req: FastifyRequest<{ Body: { password?: string } }>,
+    reply: FastifyReply,
+  ) => {
     if (!req.user) throw fail(401, 'Entre para continuar.');
+    const [account] = await db
+      .select({ passwordHash: users.passwordHash })
+      .from(users)
+      .where(eq(users.id, req.user.id));
+    if (
+      !account ||
+      !req.body?.password ||
+      !(await verifyPassword(req.body.password, account.passwordHash))
+    )
+      throw fail(403, 'Senha incorreta. A conta não foi apagada.');
     const owned = await db
       .select({ id: attachments.id })
       .from(attachments)
@@ -225,8 +255,14 @@ export function registerAuthRoutes(
     reply.clearCookie(sessionCookie(req), { path: '/api' });
     return ok(null);
   };
-  app.delete('/api/auth/profile', deleteProfile);
-  app.delete('/api/profile', deleteProfile);
+  app.delete<{ Body: { password?: string } }>(
+    '/api/auth/profile',
+    {
+      config: { rateLimit: { max: 5, timeWindow: '1 minute' } },
+      schema: { body: schema.object({ password: schema.string(256) }, ['password']) },
+    },
+    deleteProfile,
+  );
 
   app.post('/api/auth/logout', async (req, reply) => {
     if (req.sessionToken)
@@ -237,10 +273,12 @@ export function registerAuthRoutes(
     return ok(null);
   });
 
-  // Encerra a sessão em todos os aparelhos da conta.
+  // Encerra a sessão em todos os aparelhos da conta. Nenhum deles continua
+  // recebendo avisos: os tokens de push da conta saem junto.
   app.post('/api/auth/logout-all', async (req, reply) => {
     if (!req.user) throw fail(401, 'Entre para continuar.');
     await db.delete(sessions).where(eq(sessions.userId, req.user.id));
+    await db.delete(userPushTokens).where(eq(userPushTokens.userId, req.user.id));
     reply.clearCookie(sessionCookie(req), { path: '/api' });
     return ok(null);
   });
@@ -286,5 +324,4 @@ export function registerAuthRoutes(
     },
   );
 
-  app.get('/api/municipality', async (req) => ok(req.user!.municipality));
 }

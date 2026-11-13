@@ -63,6 +63,7 @@ test(
         method: 'POST',
         url: '/api/auth/login',
         remoteAddress: `198.51.100.${ip++}`,
+        headers: { 'x-fiscaliza-client': 'citizen-native' },
         payload: { email, password },
       });
 
@@ -106,10 +107,22 @@ test(
     assert.equal(expired.statusCode, 200, expired.body);
     assert.match(String(expired.headers['set-cookie']), /citizen_session=;/);
 
-    // 10 falhas na mesma conta (de IPs diferentes) bloqueiam a conta por um tempo
-    for (let i = 0; i < 10; i++) await login(citizen.email, `errada-${i}-abc`);
-    const blocked = await login(citizen.email, 'Senha-de-teste-123');
-    assert.equal(blocked.statusCode, 429);
+    // 10 falhas da mesma rede bloqueiam só essa rede: o dono entra de outra.
+    const fromSameIp = (password: string) =>
+      app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        remoteAddress: '192.0.2.10',
+        headers: { 'x-fiscaliza-client': 'citizen-native' },
+        payload: { email: citizen.email, password },
+      });
+    for (let i = 0; i < 10; i++) await fromSameIp(`errada-${i}-abc`);
+    assert.equal((await fromSameIp('Senha-de-teste-123')).statusCode, 429);
+    assert.equal((await login(citizen.email, 'Senha-de-teste-123')).statusCode, 200);
+
+    // Tentativas espalhadas por muitos IPs ainda têm um teto por conta.
+    for (let i = 0; i < 100; i++) await login(citizen.email, `errada-${i}-xyz`);
+    assert.equal((await login(citizen.email, 'Senha-de-teste-123')).statusCode, 429);
     assert.equal((await login('outra-pessoa@example.test', 'abc-123-xyz')).statusCode, 401);
   },
 );

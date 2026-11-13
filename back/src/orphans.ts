@@ -17,9 +17,6 @@ export async function removeOrphanAttachments(
       AND NOT EXISTS (
         SELECT 1 FROM users u WHERE u.avatar = '/api/attachments/' || a.id
       )
-      AND NOT EXISTS (
-        SELECT 1 FROM records r WHERE r.data::text LIKE '%' || a.id || '%'
-      )
     RETURNING a.id
   `);
   const ids = result.rows.map((row) => row.id);
