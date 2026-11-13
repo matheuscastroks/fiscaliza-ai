@@ -131,3 +131,11 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Cópia local do perfil usa Directory/File/Paths; nenhuma importação expo-file-system/legacy permanece.
 - Três testes de upload falharam antes da migração; 11 testes de transporte passaram depois. Typecheck app/API, lint app e duas regressões do perfil passaram. Validar cópia/upload/cancelamento no S22 com novo build.
 - expo-linking é peer obrigatório do expo-router e foi preservado. Remoção de expo-web-browser/expo-asset ainda depende da avaliação dos usos indiretos e Expo Doctor. Permissão de galeria também permanece pendente.
+
+## Prioridade adicionada pelo usuário — cobertura espacial do mapa
+- Relato: Rio inteiro mostra total ~12,7k, mas os grupos somam apenas 27. Código confirma lista com limit 50 e marcadores derivados só das páginas carregadas; número 27 não foi reproduzido no aparelho.
+- Decisão: camada espacial independente da paginação, agregada no servidor por viewport, com mesmos filtros da lista. Não aumentar limite nem baixar todos os chamados completos.
+- Primeira implementação: queryOfficialMap, consulta SQL única com snapshot de contagens e grade limitada a 33x33 células; contrato shared/official-map.ts distingue total, locatedTotal, unlocatedTotal e visibleTotal. Células agregadas não expõem lista de IDs; singleton tem ID do chamado.
+- Evidência: teste PostgreSQL com 610 registros sintéticos passou (600 pontos representados, 10 sem ponto, soma das células igual à cobertura, viewport externo vazio preservando total). Lint backend passou; typecheck final acompanhar antes de concluir.
+- AINDA NÃO CORRIGIDO NO APP: falta rota HTTP com validação e reaproveitamento dos filtros, serviço/hook do app por viewport, render de agregados sem reclustering com pesos errados, interação de zoom/detalhe, rótulos de cobertura e testes de integração/end-to-end. Não afirmar resolução visual antes disso.
+- Correção da regex de estilos e demais itens originais do plano permanecem pendentes.
