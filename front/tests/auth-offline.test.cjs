@@ -47,3 +47,18 @@ test('offline without a cached session stays anonymous', async () => {
   await store.getState().initialize();
   assert.equal(store.getState().isAuthenticated, false);
 });
+
+test('com conta guardada, o app fica pronto antes de a rede responder', async () => {
+  let answer;
+  const pending = new Promise((resolve) => {
+    answer = resolve;
+  });
+  const store = load({ me: () => pending, cache: { id: 'u1' } });
+  const started = store.getState().initialize();
+  for (let i = 0; i < 10 && !store.getState().isReady; i++) await Promise.resolve();
+  assert.equal(store.getState().isReady, true, 'pronto sem esperar /auth/me');
+  assert.equal(store.getState().user.id, 'u1');
+  answer({ id: 'u1', name: 'Atualizado' });
+  await started;
+  assert.equal(store.getState().user.name, 'Atualizado');
+});

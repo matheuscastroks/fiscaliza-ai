@@ -36,6 +36,7 @@ services:
       PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:?Configure PUBLIC_DOMAIN}
       WEB_ORIGINS: https://${PUBLIC_DOMAIN:?Configure PUBLIC_DOMAIN}
       UPLOAD_DIR: /app/uploads
+      SENTRY_DSN: ${SENTRY_DSN:-}
       TRUST_PROXY: 172.30.97.0/24
       RIO1746_MAX_RUN_BYTES: ${RIO1746_MAX_RUN_BYTES:-500000000}
       GCP_PROJECT_ID: ${GCP_PROJECT_ID:-}
@@ -84,6 +85,7 @@ services:
       HEALTHCHECK_PING_URL: ${HEALTHCHECK_SYNC_URL:-}
       RIO1746_MAX_RUN_BYTES: ${RIO1746_MAX_RUN_BYTES:-500000000}
       UPLOAD_DIR: /app/uploads
+      SENTRY_DSN: ${SENTRY_DSN:-}
     volumes:
       - uploads:/app/uploads
     secrets:

@@ -9,6 +9,7 @@ import { syncSiurbLayer } from './integrations/siurb/sync.js';
 import { sessions } from './schema.js';
 import { uploadDirFrom } from './config.js';
 import { removeOrphanAttachments } from './orphans.js';
+import { flushMonitoring, reportError } from './monitoring.js';
 import type pg from 'pg';
 
 export type Job = {
@@ -185,6 +186,7 @@ export async function runDueJobs(
       log(
         `[scheduler] ${job.name} falhou: ${error instanceof Error ? error.message : 'erro desconhecido'}`,
       );
+      reportError(error, { job: job.name });
       await ping(pingUrl, '/fail');
     }
   }
@@ -230,6 +232,7 @@ export async function startScheduler() {
       // Espera a tarefa em curso terminar (até 25 s, abaixo do prazo do Docker).
       const deadline = new Promise((resolve) => setTimeout(resolve, 25_000).unref());
       void Promise.race([current ?? Promise.resolve(), deadline])
+        .finally(() => flushMonitoring())
         .finally(() => pool.end().catch(() => undefined))
         .finally(() => process.exit(0));
     });

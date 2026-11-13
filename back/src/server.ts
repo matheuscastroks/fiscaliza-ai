@@ -1,4 +1,5 @@
 import { buildApp } from './app.js';
+import { flushMonitoring } from './monitoring.js';
 const app = await buildApp({ logger: true });
 
 // Encerramento: para de aceitar conexões, espera as requisições em curso e
@@ -15,7 +16,9 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const)
       process.exit(1);
     }, 10_000);
     deadline.unref();
-    void app.close().then(
+    void app.close().then(async () => {
+      await flushMonitoring();
+    }).then(
       () => process.exit(0),
       (error: unknown) => {
         app.log.error({ err: error }, 'Falha ao encerrar a API.');

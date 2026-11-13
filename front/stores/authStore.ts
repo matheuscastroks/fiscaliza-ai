@@ -105,15 +105,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   sessionVersion: 0,
   error: null,
   initialize: async () => {
+    const version = get().sessionVersion;
+    await restoreToken().catch(() => undefined);
+    // Abre com a conta guardada no aparelho, sem esperar a rede; a sessão é
+    // conferida no servidor em seguida. Antes, a abertura esperava /auth/me
+    // (até 15 s numa rede ruim).
+    const cached = await readCachedSessionUser();
+    if (cached) set({ user: cached, isAuthenticated: true, isReady: true });
     try {
-      await restoreToken();
       const user = await request<SessionUser>('/auth/me');
+      // Entrou ou saiu da conta enquanto conferia: o resultado antigo não vale.
+      if (get().sessionVersion !== version) return;
       set({ user: user, isAuthenticated: true, offline: false });
       void cacheSessionUser(user);
     } catch (error) {
+      if (get().sessionVersion !== version) return;
       // Sem rede não é sessão inválida: mantém o usuário em cache (401 já limpa o token).
-      const cached = error instanceof NetworkError ? await readCachedSessionUser() : null;
-      if (cached) set({ user: cached, isAuthenticated: true, offline: true });
+      if (error instanceof NetworkError && cached)
+        set({ user: cached, isAuthenticated: true, offline: true });
       else {
         set({ user: null, isAuthenticated: false, offline: false });
         void cacheSessionUser(null);
