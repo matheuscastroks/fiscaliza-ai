@@ -2,7 +2,12 @@ import type { BigQuery } from '@google-cloud/bigquery';
 import { inArray, sql } from 'drizzle-orm';
 import type { Database } from '../../db.js';
 import { officialCalls, syncCheckpoints } from '../../schema.js';
-import { buildPartitionCallsQuery } from './queries.js';
+import {
+  buildPartitionCallsQuery,
+  buildTrackedCallsQuery,
+  TRACKED_IDS_PER_QUERY,
+  type ParameterizedBigQuery,
+} from './queries.js';
 import { mapRawRowToOfficialCall } from './mapper.js';
 import type { RawBigQuery1746Row } from './types.js';
 import type { SyncCoverage } from '../../../../shared/contracts.js';
@@ -110,15 +115,18 @@ export function deduplicateMappedCalls<T extends { externalId: string }>(
   return { unique: Array.from(byExternalId.values()), skippedDuplicates };
 }
 
-export async function importPartition(
+type PageCounters = Omit<ImportResult, 'partition' | 'durationMs'>;
+
+/**
+ * Lê páginas de uma consulta ordenada por `id_chamado` (cursor `afterId`) e
+ * grava cada página numa transação. Serve à partição diária e à revisita.
+ */
+async function importPages(
   bq: BigQuery,
   db: Database,
-  partitionDate: string,
-  options: number | ImportPartitionOptions = {},
-): Promise<ImportResult> {
-  const startTime = Date.now();
-  const normalizedOptions: ImportPartitionOptions =
-    typeof options === 'number' ? { maxRecords: options } : options;
+  buildQuery: (limit: number, afterId: string | undefined) => ParameterizedBigQuery,
+  normalizedOptions: ImportPartitionOptions,
+): Promise<PageCounters> {
 
   const pageSize = Math.min(
     5000,
@@ -146,12 +154,7 @@ export async function importPartition(
     }
 
     const fetchLimit = Math.min(pageSize, remainingBudget);
-    const { query, params } = buildPartitionCallsQuery(
-      partitionDate,
-      fetchLimit,
-      0,
-      afterId,
-    );
+    const { query, params } = buildQuery(fetchLimit, afterId);
 
     let rows: unknown[];
     try {
@@ -299,6 +302,34 @@ export async function importPartition(
     }
   }
 
+  return {
+    coverage,
+    pagesProcessed,
+    totalFetched,
+    imported,
+    updated,
+    skippedDuplicates,
+    rejected,
+  };
+}
+
+export async function importPartition(
+  bq: BigQuery,
+  db: Database,
+  partitionDate: string,
+  options: number | ImportPartitionOptions = {},
+): Promise<ImportResult> {
+  const startTime = Date.now();
+  const normalizedOptions: ImportPartitionOptions =
+    typeof options === 'number' ? { maxRecords: options } : options;
+  const counters = await importPages(
+    bq,
+    db,
+    (limit, afterId) => buildPartitionCallsQuery(partitionDate, limit, 0, afterId),
+    normalizedOptions,
+  );
+  const { coverage, imported, updated } = counters;
+
   // Record auditable checkpoint without regressing lastPartition
   await db
     .insert(syncCheckpoints)
@@ -328,14 +359,67 @@ export async function importPartition(
     });
 
   return {
-    coverage,
+    ...counters,
     partition: partitionDate,
-    pagesProcessed,
-    totalFetched,
-    imported,
-    updated,
-    skippedDuplicates,
-    rejected,
     durationMs: Date.now() - startTime,
   };
+}
+
+export interface TrackedCall {
+  externalId: string;
+  partitionDate: string;
+}
+
+export interface TrackedImportResult extends Omit<ImportResult, 'partition'> {
+  requested: number;
+}
+
+/**
+ * Relê, pela partição de abertura, os chamados que alguém salvou ou acompanha.
+ * Sem isso, a mudança de situação de um chamado aberto há mais de dois dias
+ * nunca chegaria ao banco (a sincronização diária só relê partições recentes).
+ */
+export async function importTrackedCalls(
+  bq: BigQuery,
+  db: Database,
+  tracked: TrackedCall[],
+  options: ImportPartitionOptions = {},
+): Promise<TrackedImportResult> {
+  const startTime = Date.now();
+  const total: TrackedImportResult = {
+    coverage: 'complete',
+    pagesProcessed: 0,
+    totalFetched: 0,
+    imported: 0,
+    updated: 0,
+    skippedDuplicates: 0,
+    rejected: 0,
+    durationMs: 0,
+    requested: tracked.length,
+  };
+  // A partição tem de vir junto: sem ela a consulta varreria a tabela inteira.
+  const sorted = [...tracked].sort((a, b) => a.partitionDate.localeCompare(b.partitionDate));
+  for (let i = 0; i < sorted.length; i += TRACKED_IDS_PER_QUERY) {
+    const chunk = sorted.slice(i, i + TRACKED_IDS_PER_QUERY);
+    const partitions = chunk.map((call) => call.partitionDate);
+    const ids = chunk.map((call) => call.externalId);
+    const part = await importPages(
+      bq,
+      db,
+      (limit, afterId) => buildTrackedCallsQuery(partitions, ids, limit, afterId),
+      { ...options, maxRecords: undefined, pageSize: TRACKED_IDS_PER_QUERY },
+    );
+    total.pagesProcessed += part.pagesProcessed;
+    total.totalFetched += part.totalFetched;
+    total.imported += part.imported;
+    total.updated += part.updated;
+    total.skippedDuplicates += part.skippedDuplicates;
+    total.rejected += part.rejected;
+    if (part.coverage !== 'complete') {
+      total.coverage = 'partial';
+      break;
+    }
+  }
+  total.durationMs = Date.now() - startTime;
+  return total;
 }

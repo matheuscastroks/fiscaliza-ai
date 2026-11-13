@@ -6,7 +6,7 @@ import { buildApp } from '../src/app.js';
 import { database } from '../src/db.js';
 import { importPartition } from '../src/integrations/rio1746/importer.js';
 import { applyMigrations } from '../src/migrations.js';
-import { notifyStatusChanges } from '../src/notifications.js';
+import { notifyPendingFollowers, notifyStatusChanges } from '../src/notifications.js';
 import { callNotificationFollowers, officialCalls, userPushTokens } from '../src/schema.js';
 import { bigQueryFixture } from './bigquery-fixture.js';
 import { createCitizen } from './helpers.js';
@@ -200,5 +200,58 @@ test(
     assert.equal(sent.length, 0);
 
     await db.delete(officialCalls).where(inArray(officialCalls.externalId, ids));
+  },
+);
+
+test(
+  'PostgreSQL: aviso que falhou na Expo sai na próxima rodada da caixa de saída, uma vez só',
+  { skip: !process.env.DATABASE_URL },
+  async (t) => {
+    const { app, db, cleanups } = await setup(t);
+    const id = call(randomUUID());
+    cleanups.push(() => db.delete(officialCalls).where(eq(officialCalls.externalId, id)));
+    await importPartition(bigQueryFixture(() => [row(id, 'Aberto', 'Não Encerrado')]), db, '2026-09-20', {
+      pageSize: 10,
+    });
+    const token = `ExponentPushToken[${randomUUID()}]`;
+    const user = await createCitizen(app, db);
+    await app.inject({
+      method: 'POST',
+      url: '/api/v1/notifications/register-token',
+      headers: user.headers,
+      payload: { token, platform: 'android' },
+    });
+    await app.inject({
+      method: 'POST',
+      url: '/api/v1/notifications/follow-call',
+      headers: user.headers,
+      payload: { callId: `rio1746-${id}`, token },
+    });
+
+    // Na sincronização, a Expo está fora do ar.
+    const down = (async () => ({ ok: false, status: 503 }) as Response) as typeof fetch;
+    await importPartition(bigQueryFixture(() => [row(id, 'Em andamento', 'Em execução')]), db, '2026-09-20', {
+      pageSize: 10,
+      onStatusChanges: async (changes) => {
+        assert.equal(await notifyStatusChanges(db, changes, down), 0);
+      },
+    });
+
+    const sent: string[] = [];
+    const up = (async (_url: unknown, init?: RequestInit) => {
+      const messages = JSON.parse(init!.body as string) as Array<{ to: string; body: string }>;
+      sent.push(...messages.filter((message) => message.to === token).map((message) => message.body));
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ data: messages.map(() => ({ status: 'ok', id: randomUUID() })) }),
+      } as unknown as Response;
+    }) as typeof fetch;
+
+    await notifyPendingFollowers(db, up);
+    assert.equal(sent.length, 1);
+    assert.match(sent[0], /Em andamento \(Em execução\)/);
+    await notifyPendingFollowers(db, up);
+    assert.equal(sent.length, 1, 'não repete o aviso já entregue');
   },
 );

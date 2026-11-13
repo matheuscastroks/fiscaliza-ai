@@ -62,6 +62,14 @@ export function loadConfig(
     databaseUrl: databaseUrl ?? DEV_DATABASE_URL,
     webOrigins: webOrigins.length ? webOrigins : list(DEV_ORIGINS),
     trustProxy: trustProxy.length ? trustProxy : false,
-    uploadDir: env.UPLOAD_DIR || 'uploads',
+    uploadDir: uploadDirFrom(env),
   };
+}
+
+/**
+ * Pasta de uploads para processos que não servem HTTP (agendador, CLIs). Não
+ * exige WEB_ORIGINS nem TRUST_PROXY, que só fazem sentido para a API.
+ */
+export function uploadDirFrom(env: NodeJS.ProcessEnv = process.env): string {
+  return env.UPLOAD_DIR || 'uploads';
 }
