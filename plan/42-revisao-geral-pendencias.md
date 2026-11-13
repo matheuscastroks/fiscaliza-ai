@@ -82,3 +82,9 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Removidos ui-components.test.cjs e helpers/render.cjs, substituídos pela cobertura RNTL. Outros testes que leem fontes continuam pendentes de migração.
 - Adicionado teste PostgreSQL da saúde detalhada: escolhe o sucesso mais recente e ignora falhas posteriores; 4/4 testes de saúde passaram no banco isolado. Lint completo e typecheck backend após as alterações passaram.
 - Sessões 15874, 40084 e 68344 encerradas. Contêiner fiscaliza-fase5-test permanece disponível para validações seguintes.
+
+## Deploy — backup antes de migrar (Codex)
+- deploy.sh inicia apenas postgres com --no-recreate, executa backup único com BACKUP_ONCE=1 e só então sobe o conjunto de serviços (API aplica migrações na inicialização).
+- Falha do backup interrompe antes de iniciar a API/migrações e não grava current-release. Primeiro deploy também passa pelo backup do banco inicializado.
+- Testes comportamentais com Docker/curl/flock simulados falharam antes da correção e passaram depois; automação completa 33/33 e bash -n passaram. Nenhum comando real de deploy/backup foi executado.
+- Limitação: banco e uploads são copiados em sequência, com aplicação antiga ativa; isso não constitui snapshot atômico entre banco e arquivos. Validação real do deploy continua pendente.

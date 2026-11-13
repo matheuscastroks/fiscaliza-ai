@@ -19,6 +19,10 @@ compose=(docker compose --project-name fiscaliza-ai --project-directory "$root_d
   --env-file "$root_dir/.env.production" -f "$RELEASE_DIR/compose.production.yaml")
 "${compose[@]}" config --quiet
 "${compose[@]}" pull
+# Keep an existing database container intact until its pre-migration backup exists.
+# On first deployment, initialize PostgreSQL without starting the API/migrations.
+"${compose[@]}" up -d --wait --wait-timeout 120 --no-recreate postgres
+"${compose[@]}" run --rm --no-deps -e BACKUP_ONCE=1 backup
 "${compose[@]}" up -d --wait --wait-timeout 300 --remove-orphans
 
 # Validate the actual public paths, including certificate and API/database health.
