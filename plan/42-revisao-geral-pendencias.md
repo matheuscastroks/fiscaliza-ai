@@ -88,3 +88,8 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Falha do backup interrompe antes de iniciar a API/migrações e não grava current-release. Primeiro deploy também passa pelo backup do banco inicializado.
 - Testes comportamentais com Docker/curl/flock simulados falharam antes da correção e passaram depois; automação completa 33/33 e bash -n passaram. Nenhum comando real de deploy/backup foi executado.
 - Limitação: banco e uploads são copiados em sequência, com aplicação antiga ativa; isso não constitui snapshot atômico entre banco e arquivos. Validação real do deploy continua pendente.
+
+## Fase 5 — detalhe do chamado (primeira divisão)
+- Extraídos estilos para features/city/call-details/styles.ts e seção de datas para OfficialCallDates.tsx. Tela principal preserva navegação, estado, ações e seções restantes; divisão do controlador ainda pendente.
+- Teste RNTL escrito antes da extração e verificado falhando por módulo ausente; passou após extração, cobrindo ausência de diagnóstico/encerramento/SLA sem inventar conteúdo.
+- Typecheck app, lint app e 15 verificações existentes relacionadas passaram. Não equivale à validação visual no S22.

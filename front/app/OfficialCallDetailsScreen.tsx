@@ -1,3 +1,5 @@
+import { OfficialCallDates } from '@/features/city/call-details/OfficialCallDates';
+import { createStyles } from '@/features/city/call-details/styles';
 import { OfficialChannel } from '@/features/city/OfficialChannel';
 import { isOfficialCallClosed } from '@/shared/official-call-state';
 import React, { useEffect, useState } from 'react';
@@ -9,7 +11,6 @@ import {
 import { resolveServiceCategoryTheme } from '@/features/city/officialCategoryThemes';
 import {
   View,
-  StyleSheet,
   ScrollView,
   Pressable,
   RefreshControl,
@@ -20,7 +21,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
-import type { ThemeColors } from '@/theme/colors';
 import { layout, spacing } from '@/theme';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -31,8 +31,7 @@ import { useOfficialCall } from '@/features/city/useOfficialCalls';
 import { useFollowStore } from '@/stores/followStore';
 import { OfficialCallTimeline } from '@/components/official/OfficialCallTimeline';
 import { goBack } from '@/utils/navigation';
-import { formatCallDateTime, formatTimeRemaining } from '@/features/city/formatDates';
-import { fontSizes } from '@/theme/typography';
+import { formatTimeRemaining } from '@/features/city/formatDates';
 import { useShallow } from 'zustand/react/shallow';
 import { AppToast } from '@/components/ui/AppToast';
 import { copyText } from '@/utils/clipboard';
@@ -408,79 +407,7 @@ export default function OfficialCallDetailsScreen() {
           <OfficialCallTimeline call={item} />
         </View>
 
-        {/* Seção: Prazos e datas */}
-        <View style={styles.sectionCard}>
-          <AppText variant="sectionTitle" style={styles.sectionHeading}>
-            Prazos e datas
-          </AppText>
-
-          <View style={styles.infoGrid}>
-            <View style={styles.gridItem}>
-              <AppText variant="caption" color="muted">
-                Data de abertura
-              </AppText>
-              <AppText variant="label" color="ink">
-                {formatCallDateTime(item.openedAt)}
-              </AppText>
-            </View>
-
-            <View style={styles.gridItem}>
-              <AppText variant="caption" color="muted">
-                Prazo estimado
-              </AppText>
-              <AppText variant="label" color="ink">
-                {formatCallDateTime(item.targetDate)}
-              </AppText>
-            </View>
-
-            {slaLabel ? (
-              <View style={styles.gridItem}>
-                <AppText variant="caption" color="muted">
-                  Prazo da Carta de Serviços
-                </AppText>
-                <AppText variant="label" color="ink">
-                  {slaLabel}
-                </AppText>
-              </View>
-            ) : null}
-
-            {item.diagnosisTargetDate ? (
-              <View style={styles.gridItem}>
-                <AppText variant="caption" color="muted">
-                  Previsão de diagnóstico
-                </AppText>
-                <AppText variant="label" color="ink">
-                  {formatCallDateTime(item.diagnosisTargetDate)}
-                </AppText>
-              </View>
-            ) : null}
-
-            {item.closedAt ? (
-              <View style={styles.gridItem}>
-                <AppText variant="caption" color="muted">
-                  Data de encerramento
-                </AppText>
-                <AppText variant="label" color="ink">
-                  {formatCallDateTime(item.closedAt)}
-                </AppText>
-              </View>
-            ) : null}
-
-            {deadlineInfo ? (
-              <View style={styles.gridItem}>
-                <AppText variant="caption" color="muted">
-                  Conformidade de prazo
-                </AppText>
-                <AppText
-                  variant="label"
-                  color={deadlineInfo.isOverdue ? 'risk' : 'ink'}
-                >
-                  {deadlineInfo.label}
-                </AppText>
-              </View>
-            ) : null}
-          </View>
-        </View>
+        <OfficialCallDates item={item} slaLabel={slaLabel} deadlineInfo={deadlineInfo} />
 
         {/* Seção: Localização */}
         <View style={styles.sectionCard}>
@@ -552,160 +479,3 @@ export default function OfficialCallDetailsScreen() {
   );
 }
 
-function createStyles(colors: ThemeColors) {
-  return StyleSheet.create({
-    officialAction: {
-      paddingHorizontal: spacing.contentPadding,
-      paddingTop: spacing.sm,
-      backgroundColor: colors.canvas,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: colors.divider,
-    },
-    centerContainer: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: spacing.xl,
-      gap: spacing.md,
-    },
-    scrollContent: {
-      padding: spacing.contentPadding,
-      gap: spacing.md,
-    },
-    officialHeaderBadge: {
-      // Ações em cima, título com a largura toda (títulos longos não quebram no meio da palavra).
-      flexDirection: 'column',
-      alignItems: 'stretch',
-    },
-    headerTextCol: {
-      flex: 1,
-      gap: spacing.xxs,
-    },
-    categoryLine: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.xxs,
-    },
-    saveButton: {
-      width: layout.touchTarget.minWidth,
-      height: layout.touchTarget.minHeight,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: layout.radius.pill,
-      backgroundColor: colors.surfaceSubdued,
-    },
-    headerActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      gap: spacing.xs,
-    },
-    actionButton: {
-      width: layout.touchTarget.minWidth,
-      height: layout.touchTarget.minHeight,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: layout.radius.pill,
-      backgroundColor: colors.surfaceSubdued,
-    },
-    protocolPill: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 5,
-      alignSelf: 'flex-start',
-      marginTop: 2,
-    },
-    slaPill: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      alignSelf: 'flex-start',
-      paddingVertical: 5,
-      paddingHorizontal: 12,
-      borderRadius: layout.radius.pill,
-      borderWidth: 1,
-      marginTop: -spacing.xs,
-      marginBottom: spacing.xs,
-    },
-    slaPillOverdue: {
-      backgroundColor: 'rgba(239, 68, 68, 0.08)',
-      borderColor: 'rgba(239, 68, 68, 0.25)',
-    },
-    slaPillNormal: {
-      backgroundColor: colors.surfaceSubdued,
-      borderColor: colors.border,
-    },
-    slaPillText: {
-      fontWeight: '600',
-      fontSize: fontSizes.caption,
-    },
-    summaryRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-      paddingBottom: spacing.sm,
-    },
-    neighborhood: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.xs,
-    },
-    sectionCard: {
-      paddingVertical: spacing.md,
-      gap: spacing.sm,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.divider,
-    },
-    mainTitle: {
-      fontSize: fontSizes.screenTitle,
-      lineHeight: 30,
-    },
-    sectionHeading: {
-      fontSize: fontSizes.body,
-      marginBottom: spacing.xxs,
-    },
-    statusRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.xs,
-      maxWidth: '55%',
-      flexShrink: 1,
-    },
-    statusIndicator: {
-      width: 7,
-      height: 7,
-      borderRadius: layout.radius.xs,
-    },
-    justificationBox: {
-      backgroundColor: colors.surfaceSubdued,
-      borderRadius: layout.radius.panel,
-      padding: spacing.md,
-      gap: 4,
-      marginTop: spacing.xs,
-    },
-    infoGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: spacing.md,
-    },
-    gridItem: {
-      minWidth: '45%',
-      flex: 1,
-      gap: 2,
-    },
-    locationSummary: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-    },
-    mapContainer: {
-      marginTop: spacing.sm,
-      borderRadius: layout.radius.panel,
-      overflow: 'hidden',
-    },
-    infoCard: {
-      gap: spacing.sm,
-    },
-  });
-}
