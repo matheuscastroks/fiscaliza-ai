@@ -92,7 +92,7 @@ import { usePlacesStore } from '@/stores/placesStore';
 
 
 
-import { type MapMarker } from '@/components/ui/MapboxMapView';
+import { type MapMarker, type MapRegionChange } from '@/components/ui/MapboxMapView';
 
 
 
@@ -122,13 +122,6 @@ import { OPEN_STATUS } from '@/features/city/callStatus';
 
 
 
-type TerritoryMapRegion = {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-  zoom?: number;
-};
 
 import { INITIAL_REGION, type useTerritoryQueries } from './useTerritoryQueries';
 
@@ -290,10 +283,12 @@ export function useTerritoryView(q: TerritoryQueries) {
 
   const lastFittedNeighborhoodRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!neighborhood || areaOnly || focusId || activeSelection.kind === 'radius') return;
-    if (lastFittedNeighborhoodRef.current === neighborhood) return;
+    // Enquadra os pontos do bairro (ou da cidade, sem bairro) quando chegam pela primeira vez.
+    if (areaOnly || focusId || activeSelection.kind === 'radius' || activeSelection.kind === 'pending-current') return;
+    const fitKey = neighborhood || '__city__';
+    if (lastFittedNeighborhoodRef.current === fitKey) return;
     if (entries.some((entry) => Boolean(entryLocation(entry)))) {
-      lastFittedNeighborhoodRef.current = neighborhood;
+      lastFittedNeighborhoodRef.current = fitKey;
       updateCameraRegion(municipalOverviewRegion);
     }
   }, [neighborhood, areaOnly, focusId, entries, municipalOverviewRegion, activeSelection.kind, updateCameraRegion]);
@@ -357,7 +352,7 @@ export function useTerritoryView(q: TerritoryQueries) {
   }, [focusId]);
 
   const handleRegionChange = useCallback(
-    (newRegion: { latitude: number; longitude: number; latitudeDelta: number; longitudeDelta: number; zoom?: number }) => {
+    (newRegion: MapRegionChange) => {
       viewportRef.current = {
         ...viewportRef.current,
         latitude: newRegion.latitude,
@@ -366,7 +361,8 @@ export function useTerritoryView(q: TerritoryQueries) {
         longitudeDelta: newRegion.longitudeDelta,
         zoom: newRegion.zoom ?? viewportRef.current.zoom,
       };
-      setHasMovedCamera(true);
+      // "Buscar nesta área" só faz sentido depois que a pessoa mexe no mapa.
+      if (newRegion.userGesture) setHasMovedCamera(true);
     },
     [],
   );
@@ -526,7 +522,7 @@ export function useTerritoryView(q: TerritoryQueries) {
       : activeSelection.kind === 'pending-current'
         ? 'Aguardando sua localização'
         : officialCalls.isLoading
-        ? 'Buscando chamados...'
+        ? 'Buscando chamados…'
         : officialCalls.error && listed.length === 0
           ? 'Não conseguimos carregar os chamados'
           : `Ver em lista · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;

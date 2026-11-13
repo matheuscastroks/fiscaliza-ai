@@ -1,4 +1,5 @@
 
+import type { CameraBounds } from './useMapCamera';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 
@@ -66,6 +67,7 @@ type TerritoryMapRegion = {
   latitudeDelta: number;
   longitudeDelta: number;
   zoom?: number;
+  bounds?: CameraBounds;
 };
 
 export const INITIAL_REGION: TerritoryMapRegion = {
