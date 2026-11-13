@@ -1,5 +1,5 @@
 import { monitoringEnabled, navigationIntegration, identifyUser, Sentry } from '@/features/monitoring/sentry';
-import { isPublicCitizenRoute } from '@/shared/citizen-navigation';
+import { CitizenStack } from '@/features/navigation/CitizenStack';
 import {
   OnboardingGate,
   useOnboardingInitialization,
@@ -10,7 +10,6 @@ import * as SystemUI from 'expo-system-ui';
 import React, { useEffect, useRef } from 'react';
 import {
   router,
-  Stack,
   useNavigationContainerRef,
   useSegments,
   DarkTheme,
@@ -121,26 +120,6 @@ function RootLayout() {
     user?.municipality?.id,
     user?.neighborhood,
   ]);
-  useEffect(() => {
-    if (!isReady) return;
-    const topSegment = segments[0] || '';
-    const isPublicRoute = isPublicCitizenRoute(segments);
-    if (!isAuthenticated) {
-      if (!isPublicRoute) router.replace('/LoginScreen');
-      return;
-    }
-    if (
-      !user?.municipality &&
-      !isPublicRoute &&
-      topSegment !== 'MunicipalityScreen'
-    ) {
-      router.replace('/MunicipalityScreen');
-      return;
-    }
-    if (topSegment === 'LoginScreen' || topSegment === 'RegisterScreen') {
-      router.replace(user?.municipality ? '/(tabs)' : '/MunicipalityScreen');
-    }
-  }, [isReady, isAuthenticated, segments, user?.municipality]);
   const appReady =
     themeReady && onboardingReady && isReady && (fontsLoaded || Boolean(fontError));
   // Toque num aviso, inclusive o que abriu o app: só navega depois que as telas
@@ -184,17 +163,7 @@ function RootLayout() {
               <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
                 <StatusBar style={isDark ? 'light' : 'dark'} />
                 <AppDrawer>
-                  <Stack
-                    screenOptions={{
-                      headerShown: false,
-                      contentStyle: { backgroundColor: colors.canvas },
-                    }}
-                  >
-                    <Stack.Screen name="(tabs)" />
-                    <Stack.Protected guard={isReady && isAuthenticated}>
-                      <Stack.Screen name="MunicipalityScreen" />
-                    </Stack.Protected>
-                  </Stack>
+                  <CitizenStack authenticated={isAuthenticated} backgroundColor={colors.canvas} />
                 </AppDrawer>
                 <SignOutSheet />
                 <OnboardingGate enabled={segments[0] !== 'OnboardingScreen'} />

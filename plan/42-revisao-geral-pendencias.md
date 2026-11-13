@@ -99,3 +99,10 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Links de Salvos, resultados e território usam rotas novas; classificação pública inclui os novos caminhos. Parâmetros vazios, múltiplos, com separadores/espaços ou maiores que 200 caracteres são rejeitados antes de montar a tela.
 - Tipos regenerados pelo Metro temporário (encerrado); typecheck e lint app passaram. Cinco testes RNTL dos redirects, teste de parâmetros e 17 regressões passaram.
 - Regra do plano preserva redirects legados apesar da recomendação genérica da skill de remover rotas antigas. Guarda de autenticação exclusivamente Stack.Protected, navegação nativa e App Links ainda pendentes.
+
+## Fase 5 — guardas declarativas
+- RootLayout não redireciona mais por efeito de autenticação; CitizenStack declara MunicipalityScreen protegido por sessão e Login/Register disponíveis apenas sem sessão. Exploração e demais telas públicas continuam acessíveis.
+- Login e cadastro mantêm seus encaminhamentos explícitos após sucesso, incluindo confirmação de município.
+- Cinco testes com renderRouter real passaram: link direto anônimo/autenticado, login para visitante, login indisponível para sessão ativa e remoção da tela protegida ao sair. Typecheck e lint app passaram.
+- Falha intermediária do teste de logout era import dinâmico incompatível com o modo Jest; corrigida com import estático, sem alterar configuração de runtime.
+- Validação de login/cadastro/logout no aparelho continua necessária.
