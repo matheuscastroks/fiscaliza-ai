@@ -19,3 +19,8 @@ Dependabot passa a respeitar as majors de rate-limit, Babel, TypeScript, ESLint 
 Exigir suíte da API com PostgreSQL isolado, tipos/lint e testes de automação, além do CI completo do commit final (app, Expo compatibility, API Node22/24, imagem Docker e automação). Não aplicar npm audit fix --force: o relatório restante apontava dependências de desenvolvimento e sugeria downgrade incompatível do parser/plugin TypeScript-ESLint.
 
 O worktree antigo da fase4 foi preservado e deixado em HEAD destacado antes de remover sua branch, cujo conteúdo já estava em main. Nenhum diretório de trabalho foi removido. Branches integradas e branches dos PRs descartados são removidas; main é preservada.
+
+
+## Decisão posterior do usuário: desativação completa — 14/11/2026
+
+Após o merge do PR #28 e CI aprovado (90 testes locais de backend também passaram), o usuário solicitou remover o Dependabot. A configuração .github/dependabot.yml foi removida, assim como a exceção que autorizava o bot no CI. Os PRs e branches novos do bot são encerrados/removidos e suas execuções em andamento canceladas. Atualizações de dependências passam a ser manuais. As atualizações já integradas e os testes próprios do projeto permanecem. Os alertas de vulnerabilidade e as correções automáticas do Dependabot já estavam desabilitados no GitHub, conforme consulta às configurações do repositório.

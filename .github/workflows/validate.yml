@@ -25,11 +25,6 @@ jobs:
         run: |
           test "$REPOSITORY_ID" = '997154192'
           if [ "$ACTOR_ID" = '49662686' ]; then exit 0; fi
-          # Dependabot: valida as atualizações (sem segredos e sem merge automático,
-          # que continua restrito ao dono no auto-merge.yml).
-          if [ "$ACTOR_ID" = '49699333' ] && [ "$EVENT_NAME" = 'push' ]; then
-            case "$REF" in refs/heads/dependabot/*) exit 0 ;; esac
-          fi
           test "$REF" = 'refs/heads/main'
           test "$EVENT_NAME" = 'workflow_dispatch'
           test "$ACTOR_ID" = '41898282'
