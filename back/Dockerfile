@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Base fixada por digest (node 22 alpine). Atualize junto com o Dependabot.
-FROM node:22-alpine@sha256:0e1754758c2df4cfa3e68d59e2e1b7374bb7fd9ea6328eaaacf15cc934af8202 AS build
+FROM node:25-alpine@sha256:bdf2cca6fe3dabd014ea60163eca3f0f7015fbd5c7ee1b0e9ccb4ced6eb02ef4 AS build
 WORKDIR /app
 COPY back/package*.json ./back/
 RUN npm ci --prefix back
@@ -11,7 +11,7 @@ COPY shared ./shared
 WORKDIR /app/back
 RUN npm run build
 
-FROM node:22-alpine@sha256:0e1754758c2df4cfa3e68d59e2e1b7374bb7fd9ea6328eaaacf15cc934af8202 AS runtime
+FROM node:25-alpine@sha256:bdf2cca6fe3dabd014ea60163eca3f0f7015fbd5c7ee1b0e9ccb4ced6eb02ef4 AS runtime
 ENV NODE_ENV=production PORT=3001 UPLOAD_DIR=/app/uploads
 WORKDIR /app/back
 COPY back/package*.json ./
