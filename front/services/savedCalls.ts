@@ -1,14 +1,14 @@
 import { request } from '@/services/http';
 import type { SavedCallsAccountApi } from '@/stores/followStore';
+import type { SavedCallsList, SavedCallsMergePayload } from '@/shared/contracts';
 
 // Lista de chamados salvos guardada na conta (veja followStore).
 export const savedCallsAccountApi: SavedCallsAccountApi = {
   list: async () =>
-    (await request<{ items: { call: import('@/shared/contracts').OfficialCall; savedAt: string }[] }>(
-      '/v1/saved-calls',
-    )).items,
+    (await request<SavedCallsList>('/v1/saved-calls')).items,
   merge: async (ids) => {
-    await request('/v1/saved-calls/merge', 'POST', { callIds: ids });
+    const payload: SavedCallsMergePayload = { callIds: ids };
+    await request('/v1/saved-calls/merge', 'POST', payload);
   },
   remove: async (id) => {
     await request(`/v1/saved-calls/${encodeURIComponent(id)}`, 'DELETE');

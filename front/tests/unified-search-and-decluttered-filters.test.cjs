@@ -79,15 +79,6 @@ test('decluttered filter modal: removes duplicate geographical selectors and ado
     content.includes('filterFormContainer'),
     'Filter modal must use frameless filterFormContainer instead of nested cards',
   );
-  assert.ok(
-    content.includes('macroThemesTrack'),
-    'Filter modal must preserve macroThemesTrack',
-  );
-  assert.ok(
-    content.includes("flexWrap: 'wrap'"),
-    'macroThemesTrack must use wrap layout to avoid horizontal scroll deadlock in bottom sheet',
-  );
-
   // No duplicate pickers in modal
   assert.ok(
     !content.includes('<NeighborhoodPicker'),
@@ -164,7 +155,7 @@ test('territory screen: respects architecture constraints and line ceiling', () 
   );
 
   assert.ok(
-    content.includes('top: insets.top + 108'),
-    'Contextual search pill must be placed right below top search bar (top: insets.top + 108)',
+    content.includes('top: headerHeight + spacing.xs'),
+    'Contextual search pill must sit right below the measured top search bar',
   );
 });

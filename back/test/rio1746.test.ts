@@ -176,7 +176,7 @@ test(
 
     // Verify multi-page pagination, auditable imported vs updated counts, and non-regressing checkpoint
     const { sql } = await import('drizzle-orm');
-    const { officialCalls, syncCheckpoints } = await import('../src/schema.js');
+    const { syncCheckpoints } = await import('../src/schema.js');
     await db.execute(
       sql`DELETE FROM official_calls WHERE external_id IN ('test-bq-1', 'test-bq-2', 'test-bq-3')`,
     );

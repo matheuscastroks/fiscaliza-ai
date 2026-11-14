@@ -1,3 +1,5 @@
+import { HEALTH_SOURCE_IDS, registerDeepHealthRoute } from './deep-health.js';
+import { randomUUID } from 'node:crypto';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
@@ -8,12 +10,13 @@ import { and, eq, gt } from 'drizzle-orm';
 import Fastify, { type FastifyRequest } from 'fastify';
 import { resolve } from 'node:path';
 import type { SessionUser } from '../../shared/contracts.js';
-import { tokenHash } from './auth.js';
+import { SESSION_RENEW_BELOW_MS, sessionExpiry, tokenHash } from './auth.js';
 import { loadConfig } from './config.js';
 import { database } from './db.js';
 import { rateLimitKey } from './client-ip.js';
 import { createKeyedLock } from './keyed-lock.js';
 import { httpError as fail, ok } from './http-errors.js';
+import { reportError } from './monitoring.js';
 import { createResponseCache } from './response-cache.js';
 import { municipalityService } from './municipality.js';
 import { attachments, municipalities, sessions, users } from './schema.js';
@@ -46,10 +49,8 @@ const images = {
   maxItems: 8,
   items: { type: 'string', pattern: '^/api/attachments/[a-f0-9-]{36}$' },
 };
-const sessionCookie = (req: FastifyRequest) =>
-  req.headers['x-fiscaliza-client'] === 'citizen'
-    ? 'citizen_session'
-    : 'session';
+// Um nome só de cookie de sessão (o painel municipal, que usava outro, não existe mais).
+const sessionCookie = (_req?: FastifyRequest) => 'citizen_session';
 const isAccountPath = (path: string) =>
   path.startsWith('/api/auth/') ||
   path === '/api/profile' ||
@@ -63,7 +64,6 @@ const publicUser = (u: typeof users.$inferSelect): SessionUser => ({
   postalCode: u.postalCode ?? undefined,
   neighborhood: u.neighborhood ?? undefined,
   municipality: null,
-  ...(u.sector ? { sector: u.sector } : {}),
 });
 
 export async function buildApp(
@@ -79,6 +79,10 @@ export async function buildApp(
       req: (req) => ({ method: req.method, url: req.url?.split('?')[0], hostname: req.hostname, remoteAddress: req.ip }),
     } } : false,
     trustProxy: config.trustProxy,
+    // O id da requisição é o cf-ray da Cloudflare, quando houver: o mesmo valor
+    // aparece no painel da Cloudflare e nos logs da API.
+    requestIdHeader: 'cf-ray',
+    genReqId: () => randomUUID(),
     bodyLimit: 1024 * 1024,
     requestTimeout: 30_000,
     connectionTimeout: 60_000,
@@ -170,10 +174,16 @@ export async function buildApp(
     referrerPolicy: { policy: 'no-referrer' },
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   });
+  const clientKey = rateLimitKey(config.trustProxy);
   await app.register(rateLimit, {
     max: 120,
     timeWindow: '1 minute',
-    keyGenerator: rateLimitKey(config.trustProxy),
+    // Depois da sessão: com conta, o limite é por pessoa; sem conta, por IP.
+    // Operadoras móveis põem muitos aparelhos atrás do mesmo IP (CGNAT).
+    hook: 'preHandler',
+    keyGenerator: (req) => (req.user ? `user:${req.user.id}` : clientKey(req)),
+    errorResponseBuilder: () =>
+      fail(429, 'Muitas requisições em pouco tempo. Aguarde um momento e tente de novo.'),
   });
 
   app.decorateRequest('user', null);
@@ -211,20 +221,24 @@ export async function buildApp(
     };
   });
 
-  app.setErrorHandler((caught, _request, reply) => {
-    const error: Error & { statusCode?: number } =
+  app.setErrorHandler((caught, request, reply) => {
+    const error: Error & { statusCode?: number; validation?: unknown[] } =
       caught instanceof Error ? caught : new Error('Erro desconhecido.');
     const statusCode =
       error.statusCode && error.statusCode >= 400 ? error.statusCode : 500;
-    if (statusCode === 500)
-      app.log.error({ err: error, statusCode }, 'Erro interno ao atender requisição.');
-    reply.code(statusCode).send({
-      success: false,
-      error:
-        statusCode === 500
-          ? 'Não foi possível concluir a operação.'
-          : error.message,
-    });
+    if (statusCode >= 500) {
+      request.log.error({ err: error, statusCode }, 'Erro interno ao atender requisição.');
+      reportError(error, { route: request.routeOptions.url, method: request.method, reqId: request.id });
+    }
+    // Mensagens do validador e do limite de requisições vêm em inglês e com
+    // detalhes internos: o app mostra uma frase em português.
+    const message =
+      statusCode >= 500
+        ? 'Não foi possível concluir a operação.'
+        : error.validation
+          ? 'Dados inválidos na requisição. Confira os campos e tente de novo.'
+          : error.message;
+    reply.code(statusCode).send({ success: false, error: message });
   });
 
   // Dados públicos mudam no ritmo das sincronizações: um minuto de cache no
@@ -253,7 +267,7 @@ export async function buildApp(
     reply.code(404).send({ success: false, error: 'Recurso não encontrado.' }),
   );
 
-  app.addHook('onRequest', async (req) => {
+  app.addHook('onRequest', async (req, reply) => {
     if (!req.url.startsWith('/api/')) return;
     const mutation = !['GET', 'HEAD', 'OPTIONS'].includes(req.method);
     const bearer = req.headers.authorization?.match(
@@ -282,7 +296,7 @@ export async function buildApp(
     const token = bearer || req.cookies[sessionCookie(req)];
     if (token) {
       const [row] = await db
-        .select({ user: users })
+        .select({ user: users, expiresAt: sessions.expiresAt })
         .from(sessions)
         .innerJoin(users, eq(users.id, sessions.userId))
         .where(
@@ -294,6 +308,22 @@ export async function buildApp(
       if (row) {
         req.user = await hydrate(row.user);
         req.sessionToken = token;
+        // Sessão em uso não vence: quando passa da metade, ganha mais 7 dias.
+        if (row.expiresAt.getTime() - Date.now() < SESSION_RENEW_BELOW_MS) {
+          const expiresAt = sessionExpiry();
+          await db
+            .update(sessions)
+            .set({ expiresAt })
+            .where(eq(sessions.tokenHash, tokenHash(token)));
+          if (!bearer)
+            reply.setCookie(sessionCookie(req), token, {
+              httpOnly: true,
+              sameSite: 'lax',
+              secure: config.production,
+              path: '/api',
+              expires: expiresAt,
+            });
+        }
       }
     }
     if (mutation && !isLogin && !isRegistration && !isLogout && !req.user)
@@ -301,6 +331,7 @@ export async function buildApp(
     if (
       !isAccountPath(path) &&
       path !== '/api/health' &&
+      path !== '/api/health/deep' &&
       !(req.method === 'GET' && path.startsWith('/api/rio1746/')) &&
       !(
         req.method === 'GET' &&
@@ -314,8 +345,7 @@ export async function buildApp(
       ) &&
       !(
         req.method === 'GET' &&
-        (path.startsWith('/api/attachments/') ||
-          path.startsWith('/api/demo-media/'))
+        path.startsWith('/api/attachments/')
       )
     )
       municipalityId(req);
@@ -340,10 +370,19 @@ export async function buildApp(
     }
   }
 
+  // Vida do processo (sem banco); /api/health também confere o banco.
   app.get('/health', async () => ok({ status: 'ok' }));
   app.get('/api/health', async () => {
     await connection.pool.query('SELECT 1');
     return ok({ status: 'ok' });
+  });
+
+  registerDeepHealthRoute(app, async () => {
+    const result = await connection.pool.query<{ sourceId: string; finishedAt: Date | null }>(
+      'SELECT source_id AS "sourceId", MAX(finished_at) AS "finishedAt" FROM source_sync_runs WHERE source_id = ANY($1::text[]) AND status = $2 GROUP BY source_id',
+      [HEALTH_SOURCE_IDS, 'success'],
+    );
+    return result.rows;
   });
 
   registerAuthRoutes(app, {
@@ -355,6 +394,7 @@ export async function buildApp(
     production: config.production,
     uploadDir,
     sessionCookie,
+    clientKey,
     validateImages,
     schema: { string, object, images },
   });

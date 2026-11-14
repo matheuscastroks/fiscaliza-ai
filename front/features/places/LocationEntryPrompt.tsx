@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.sm + 2,
     paddingRight: spacing.xs,
     paddingVertical: 6,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
     borderWidth: 1,
   },
   compactLabel: {
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   compactPrimaryPill: {
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
     minHeight: 28,
     alignItems: 'center',
     justifyContent: 'center',
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   compactSecondaryPill: {
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
     borderWidth: 1,
     minHeight: 28,
     alignItems: 'center',

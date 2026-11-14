@@ -18,28 +18,30 @@ async function wrap<T>(action: () => Promise<T>): Promise<ApiResult<T>> {
 export const authApi = {
   register: (input: RegistrationInput) =>
     wrap(async () => {
-      const session = await request<{ user: SessionUser; token: string }>(
+      const session = await request<{ user: SessionUser; token?: string }>(
         '/auth/register',
         'POST',
         input,
       );
-      await saveToken(session.token);
+      // No navegador não vem token: a sessão fica no cookie httpOnly.
+      if (session.token) await saveToken(session.token);
       return session.user;
     }),
   login: (email: string, password: string) =>
     wrap(async () => {
-      const session = await request<{ user: SessionUser; token: string }>(
+      const session = await request<{ user: SessionUser; token?: string }>(
         '/auth/login',
         'POST',
         { email, password },
       );
-      await saveToken(session.token);
+      if (session.token) await saveToken(session.token);
       return session.user;
     }),
   getCurrentUser: () =>
     wrap(async () => await request<SessionUser>('/auth/me')),
-  deleteAccount: () =>
+  /** Apagar a conta pede a senha de novo (a API recusa sem ela). */
+  deleteAccount: (password: string) =>
     wrap(async () => {
-      await request('/auth/profile', 'DELETE');
+      await request('/auth/profile', 'DELETE', { password });
     }),
 };

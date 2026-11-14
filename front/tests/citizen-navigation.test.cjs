@@ -21,6 +21,9 @@ test('territorial discovery and local places remain accessible without authentic
     '../shared/citizen-navigation.ts',
   );
   for (const segments of [
+    ['calls', '[id]'],
+    ['facilities', '[id]'],
+    ['neighborhoods', '[id]'],
     ['LoginScreen'],
     ['RegisterScreen'],
     ['AboutScreen'],

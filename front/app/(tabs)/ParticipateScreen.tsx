@@ -28,13 +28,14 @@ import { usePlacesStore } from '@/stores/placesStore';
 
 import {
   OFFICIAL_PORTAL,
-  OFFICIAL_REQUESTS_URL,
+  OFFICIAL_WHATSAPP_LABEL,
   OFFICIAL_WHATSAPP_URL,
   OFFICIAL_PHONE_URL,
   OFFICIAL_SERVICES,
 } from '@/features/city/OfficialChannel';
 
 import { useTheme, spacing, layout } from '@/theme';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 
 import { fontSizes } from '@/theme/typography';
 
@@ -58,7 +59,7 @@ const OFFICIAL_CHANNELS: ChannelItem[] = [
   {
     id: 'whatsapp',
     title: 'WhatsApp Oficial da Prefeitura',
-    subtitle: '(21) 3460-1746 · Mande mensagem e fotos',
+    subtitle: `${OFFICIAL_WHATSAPP_LABEL} · Mande mensagem e fotos`,
     icon: 'logo-whatsapp',
     url: OFFICIAL_WHATSAPP_URL,
   },
@@ -69,16 +70,11 @@ const OFFICIAL_CHANNELS: ChannelItem[] = [
     icon: 'globe-outline',
     url: OFFICIAL_PORTAL,
   },
-  {
-    id: 'requests',
-    title: 'Meus Protocolos no 1746',
-    subtitle: 'Veja seus pedidos e como andam',
-    icon: 'receipt-outline',
-    url: OFFICIAL_REQUESTS_URL,
-  },
+
 ];
 
 export default function ParticipateScreen() {
+  const { contentInset } = useTabBarInset();
   const { colors } = useTheme();
   const neighborhood = usePlacesStore((s) => {
     const { selection } = s;
@@ -105,7 +101,7 @@ export default function ParticipateScreen() {
       <KeyboardAwareScrollView
         contentContainerStyle={{
           padding: spacing.contentPadding,
-          paddingBottom: 140,
+          paddingBottom: contentInset,
           gap: spacing.lg,
         }}
         bottomOffset={48}
@@ -132,6 +128,15 @@ export default function ParticipateScreen() {
           </View>
 
           <InsetGroup>
+            <ListRow
+              icon="receipt-outline"
+              title="Buscar meu protocolo"
+              subtitle="Digite o número para consultar os dados no app"
+              onPress={() => router.navigate({
+                pathname: '/(tabs)/TerritoryScreen',
+                params: { lookup: 'protocol', lookupRequest: String(Date.now()) },
+              })}
+            />
             {OFFICIAL_CHANNELS.map((channel) => (
               <ListRow
                 key={channel.id}

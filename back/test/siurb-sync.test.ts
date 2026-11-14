@@ -231,3 +231,24 @@ test(
     }
   },
 );
+
+test(
+  'SIURB: mudança de uso permitido no catálogo chega ao banco',
+  { skip: !process.env.DATABASE_URL },
+  async () => {
+    const { db, pool } = database();
+    const { ensureSiurbSources } = await import('../src/integrations/siurb/repository.js');
+    const { dataSources } = await import('../src/schema.js');
+    const { eq } = await import('drizzle-orm');
+    const layer = getSiurbLayer(1);
+    try {
+      await ensureSiurbSources(db);
+      await db.update(dataSources).set({ usage: 'unknown' }).where(eq(dataSources.id, layer.sourceId));
+      await ensureSiurbSources(db);
+      const [row] = await db.select().from(dataSources).where(eq(dataSources.id, layer.sourceId));
+      assert.equal(row.usage, layer.usage);
+    } finally {
+      await pool.end();
+    }
+  },
+);

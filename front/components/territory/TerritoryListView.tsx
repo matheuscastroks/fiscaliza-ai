@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, memo } from 'react';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 import {
   FlatList,
   RefreshControl,
@@ -19,7 +20,8 @@ import {
   TerritoryFilterBar,
   type TerritoryFilterBarProps,
 } from '@/components/territory/TerritoryFilterBar';
-import { QueryState, createCityStyles } from '@/features/city/CityUI';
+import { createCityStyles } from '@/features/city/CityUI';
+import { ScreenState } from '@/components/ui/ScreenState';
 import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
 import type { TerritoryLayer } from '@/features/territory/selectors';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
@@ -99,6 +101,7 @@ function TerritoryListViewComponent({
 }: TerritoryListViewProps) {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const { contentInset } = useTabBarInset();
   const cityStyles = useThemedStyles(createCityStyles);
 
   const renderEntry = useCallback(
@@ -111,6 +114,15 @@ function TerritoryListViewComponent({
     ),
     [onOpenEntry, onLocateEntry],
   );
+
+  // Rolagem infinita: perto do fim, pede a próxima página (o botão abaixo continua como alternativa).
+  const loadMore = useCallback(() => {
+    if (layers.includes('official')) {
+      if (hasMoreCalls && !officialQuery.isFetching && !officialQuery.error) officialQuery.fetchNextPage();
+      return;
+    }
+    if (facilityPagination?.hasMore && !facilityPagination.isFetchingNextPage) facilityPagination.fetchNextPage();
+  }, [layers, hasMoreCalls, officialQuery, facilityPagination]);
 
   const facilityLoaded = facilityPagination?.loadedCount ?? 0;
   const facilityTotal = facilityPagination?.totalKnown ?? null;
@@ -137,7 +149,7 @@ function TerritoryListViewComponent({
         officialQuery.error ||
         officialQuery.fetchStatus === 'paused') && (
         <View style={{ gap: spacing.xs }}>
-          <QueryState
+          <ScreenState
             loading={officialQuery.isLoading}
             error={officialQuery.error}
             retry={officialQuery.refetch}
@@ -192,7 +204,9 @@ function TerritoryListViewComponent({
       )}
       {layers.includes('official') && hasMoreCalls && (
         <AppButton
-          title={`Carregar mais chamados (${listed.length} de ${totalCalls.toLocaleString('pt-BR')})`}
+          title={officialQuery.isFetchingNextPage
+            ? 'Carregando mais chamados…'
+            : `Carregar mais chamados (${listed.length} de ${totalCalls.toLocaleString('pt-BR')})`}
           variant="secondary"
           disabled={officialQuery.isFetchingNextPage}
           onPress={() => {
@@ -273,6 +287,8 @@ function TerritoryListViewComponent({
           ]}
           ListHeaderComponent={headerNotice}
           ListFooterComponent={footerContent}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.6}
         />
       </AppBottomSheetModal>
     );
@@ -324,10 +340,12 @@ function TerritoryListViewComponent({
         }
         contentContainerStyle={[
           cityStyles.content,
-          { gap: 0, paddingBottom: insets.bottom + 110 },
+          { gap: 0, paddingBottom: contentInset },
         ]}
         ListHeaderComponent={headerNotice}
         ListFooterComponent={footerContent}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.6}
       />
     </View>
   );

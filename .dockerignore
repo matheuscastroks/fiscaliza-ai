@@ -23,3 +23,11 @@ web-dist
 .codex
 .superpowers
 **/.impeccable
+
+# Fora da imagem: dados locais, app e documentação (a imagem é só da API)
+backups
+secrets
+front
+plan
+docs
+postman

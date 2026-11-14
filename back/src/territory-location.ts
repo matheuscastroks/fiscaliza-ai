@@ -11,6 +11,24 @@ import { dataVersion } from './response-cache.js';
 // em memória por versão de dados, em vez de serem lidas a cada requisição.
 type BoundaryRow = { id: string; name: string; geometry: Geometry };
 let boundaryCache: { version: string; rows: Promise<BoundaryRow[]> } | undefined;
+// O contorno do município (grande) não muda em operação: lido uma vez.
+let municipalityGeometry: Promise<Geometry | undefined> | undefined;
+
+function rioGeometry(db: ReadDatabase): Promise<Geometry | undefined> {
+  municipalityGeometry ??= db
+    .select({ geometry: municipalities.geometry })
+    .from(municipalities)
+    .where(eq(municipalities.id, RIO_MUNICIPALITY_ID))
+    .then(([row]) => {
+      // Sem malha ainda (instalação nova): tenta de novo na próxima chamada.
+      if (!row) municipalityGeometry = undefined;
+      return row?.geometry;
+    });
+  municipalityGeometry.catch(() => {
+    municipalityGeometry = undefined;
+  });
+  return municipalityGeometry;
+}
 
 export function resolvePointNeighborhood(point: { latitude: number; longitude: number }, boundaries: { id: string; name: string; geometry: Geometry }[]) {
   const matches = boundaries.filter((row) => containsPoint(row.geometry, point.latitude, point.longitude));
@@ -18,9 +36,9 @@ export function resolvePointNeighborhood(point: { latitude: number; longitude: n
 }
 
 export async function resolveTerritoryLocation(db: ReadDatabase, point: { latitude: number; longitude: number }): Promise<TerritoryLocationResolution> {
-  const [municipality] = await db.select().from(municipalities).where(eq(municipalities.id, RIO_MUNICIPALITY_ID));
-  if (!municipality) throw territorialError(503, 'Malha municipal indisponível. Tente novamente.');
-  const insideMunicipality = containsPoint(municipality.geometry, point.latitude, point.longitude);
+  const geometry = await rioGeometry(db);
+  if (!geometry) throw territorialError(503, 'Malha municipal indisponível. Tente novamente.');
+  const insideMunicipality = containsPoint(geometry, point.latitude, point.longitude);
   if (!insideMunicipality) return { municipalityId: RIO_MUNICIPALITY_ID, insideMunicipality: false, neighborhood: null };
   const version = await dataVersion(db);
   if (boundaryCache?.version !== version) {

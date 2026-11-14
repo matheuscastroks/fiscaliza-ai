@@ -7,7 +7,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3001/api"
+      "value": "http://localhost:43001/api"
     },
     {
       "key": "password",
@@ -35,6 +35,10 @@
           {
             "key": "Origin",
             "value": "{{webOrigin}}"
+          },
+          {
+            "key": "X-Fiscaliza-Client",
+            "value": "citizen-native"
           }
         ],
         "url": "{{baseUrl}}/auth/login",
@@ -215,6 +219,10 @@
           {
             "key": "Origin",
             "value": "{{webOrigin}}"
+          },
+          {
+            "key": "X-Fiscaliza-Client",
+            "value": "citizen-native"
           }
         ],
         "url": "{{baseUrl}}/auth/logout"
@@ -245,6 +253,10 @@
           {
             "key": "Origin",
             "value": "{{webOrigin}}"
+          },
+          {
+            "key": "X-Fiscaliza-Client",
+            "value": "citizen-native"
           }
         ],
         "url": "{{baseUrl}}/auth/me"
@@ -279,7 +291,7 @@
               },
               {
                 "key": "X-Fiscaliza-Client",
-                "value": "citizen"
+                "value": "citizen-native"
               },
               {
                 "key": "Origin",
@@ -335,7 +347,7 @@
               },
               {
                 "key": "X-Fiscaliza-Client",
-                "value": "citizen"
+                "value": "citizen-native"
               },
               {
                 "key": "Origin",
@@ -373,7 +385,7 @@
               },
               {
                 "key": "X-Fiscaliza-Client",
-                "value": "citizen"
+                "value": "citizen-native"
               },
               {
                 "key": "Origin",
@@ -415,7 +427,7 @@
               },
               {
                 "key": "X-Fiscaliza-Client",
-                "value": "citizen"
+                "value": "citizen-native"
               },
               {
                 "key": "Origin",
@@ -457,7 +469,7 @@
               },
               {
                 "key": "X-Fiscaliza-Client",
-                "value": "citizen"
+                "value": "citizen-native"
               },
               {
                 "key": "Origin",
@@ -499,7 +511,7 @@
               },
               {
                 "key": "X-Fiscaliza-Client",
-                "value": "citizen"
+                "value": "citizen-native"
               },
               {
                 "key": "Origin",
@@ -541,7 +553,7 @@
               },
               {
                 "key": "X-Fiscaliza-Client",
-                "value": "citizen"
+                "value": "citizen-native"
               },
               {
                 "key": "Origin",
@@ -583,7 +595,7 @@
               },
               {
                 "key": "X-Fiscaliza-Client",
-                "value": "citizen"
+                "value": "citizen-native"
               },
               {
                 "key": "Origin",
@@ -619,21 +631,24 @@
       "name": "Chamados 1746",
       "request": {
         "method": "GET",
-        "url": "{{baseUrl}}/rio1746/calls?limit=10"
+        "url": "{{baseUrl}}/rio1746/calls?limit=10",
+        "header": []
       }
     },
     {
       "name": "Fontes públicas",
       "request": {
         "method": "GET",
-        "url": "{{baseUrl}}/data-sources"
+        "url": "{{baseUrl}}/data-sources",
+        "header": []
       }
     },
     {
       "name": "Equipamentos públicos",
       "request": {
         "method": "GET",
-        "url": "{{baseUrl}}/public-facilities?limit=10"
+        "url": "{{baseUrl}}/public-facilities?limit=10",
+        "header": []
       }
     }
   ]

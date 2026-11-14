@@ -1,4 +1,5 @@
-import { isPublicCitizenRoute } from '@/shared/citizen-navigation';
+import { monitoringEnabled, navigationIntegration, identifyUser, Sentry } from '@/features/monitoring/sentry';
+import { CitizenStack } from '@/features/navigation/CitizenStack';
 import {
   OnboardingGate,
   useOnboardingInitialization,
@@ -6,16 +7,19 @@ import {
 import { useTheme, useThemeInitialization } from '@/theme/useTheme';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   router,
-  Stack,
+  useNavigationContainerRef,
   useSegments,
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from 'expo-router';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { persistOptions } from '@/features/network/queryPersistence';
+import { onReconnectOrForeground, startQueryLifecycle } from '@/features/network/queryLifecycle';
+import { ScreenErrorFallback } from '@/components/ui/ScreenErrorFallback';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -49,8 +53,25 @@ export const unstable_settings = { anchor: '(tabs)' };
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 setSavedCallsAccountApi(savedCallsAccountApi);
+startQueryLifecycle();
+// Mudanças nos salvos feitas sem internet sobem quando a rede ou o app voltam.
+onReconnectOrForeground(() => {
+  void useFollowStore.getState().syncWithAccount();
+});
 
-export default function RootLayout() {
+/** Erro de renderização em qualquer tela: em vez de fechar o app, oferece tentar de novo. */
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Promise<void> }) {
+  useEffect(() => {
+    if (monitoringEnabled) Sentry.captureException(error);
+  }, [error]);
+  return <ScreenErrorFallback onRetry={() => void retry()} />;
+}
+
+function RootLayout() {
+  const navigationRef = useNavigationContainerRef();
+  useEffect(() => {
+    if (monitoringEnabled) navigationIntegration.registerNavigationContainer(navigationRef);
+  }, [navigationRef]);
   const { colors, isDark } = useTheme();
   const themeReady = useThemeInitialization();
   const onboardingReady = useOnboardingInitialization();
@@ -73,15 +94,7 @@ export default function RootLayout() {
     // Novo usuário (ou logout) nunca herda o token/inscrições do anterior.
     useNotificationStore.getState().reset();
     void useNotificationStore.getState().initialize(user?.municipality?.id || DEFAULT_MUNICIPALITY_ID);
-    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
-      const callId = response.notification.request.content.data?.callId;
-      if (typeof callId === 'string' && callId) {
-        router.push({ pathname: '/(tabs)/TerritoryScreen', params: { focusId: callId } });
-      }
-    });
-    return () => {
-      sub.remove();
-    };
+    identifyUser(user?.id ?? null);
   }, [user?.id, user?.municipality?.id]);
   useEffect(() => {
     // Filtros da exploração nunca atravessam usuário ou município.
@@ -107,28 +120,21 @@ export default function RootLayout() {
     user?.municipality?.id,
     user?.neighborhood,
   ]);
-  useEffect(() => {
-    if (!isReady) return;
-    const topSegment = segments[0] || '';
-    const isPublicRoute = isPublicCitizenRoute(segments);
-    if (!isAuthenticated) {
-      if (!isPublicRoute) router.replace('/LoginScreen');
-      return;
-    }
-    if (
-      !user?.municipality &&
-      !isPublicRoute &&
-      topSegment !== 'MunicipalityScreen'
-    ) {
-      router.replace('/MunicipalityScreen');
-      return;
-    }
-    if (topSegment === 'LoginScreen' || topSegment === 'RegisterScreen') {
-      router.replace(user?.municipality ? '/(tabs)' : '/MunicipalityScreen');
-    }
-  }, [isReady, isAuthenticated, segments, user?.municipality]);
   const appReady =
     themeReady && onboardingReady && isReady && (fontsLoaded || Boolean(fontError));
+  // Toque num aviso, inclusive o que abriu o app: só navega depois que as telas
+  // existem (antes, um toque com o app fechado podia se perder).
+  const lastResponse = Notifications.useLastNotificationResponse();
+  const handledResponse = useRef<string | null>(null);
+  useEffect(() => {
+    if (!appReady || !lastResponse) return;
+    const id = lastResponse.notification.request.identifier;
+    if (handledResponse.current === id) return;
+    handledResponse.current = id;
+    const callId = lastResponse.notification.request.content.data?.callId;
+    if (typeof callId === 'string' && callId)
+      router.push({ pathname: '/(tabs)/TerritoryScreen', params: { focusId: callId } });
+  }, [appReady, lastResponse]);
   useEffect(() => {
     if (appReady) {
       void SplashScreen.hideAsync().catch(() => undefined);
@@ -154,25 +160,15 @@ export default function RootLayout() {
         <KeyboardProvider>
           <ThemeProvider value={navigationTheme}>
             <BottomSheetModalProvider>
-              <QueryClientProvider client={queryClient}>
+              <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
                 <StatusBar style={isDark ? 'light' : 'dark'} />
                 <AppDrawer>
-                  <Stack
-                    screenOptions={{
-                      headerShown: false,
-                      contentStyle: { backgroundColor: colors.canvas },
-                    }}
-                  >
-                    <Stack.Screen name="(tabs)" />
-                    <Stack.Protected guard={isReady && isAuthenticated}>
-                      <Stack.Screen name="MunicipalityScreen" />
-                    </Stack.Protected>
-                  </Stack>
+                  <CitizenStack authenticated={isAuthenticated} backgroundColor={colors.canvas} />
                 </AppDrawer>
                 <SignOutSheet />
                 <OnboardingGate enabled={segments[0] !== 'OnboardingScreen'} />
                 <AnimatedBrandSplash />
-              </QueryClientProvider>
+              </PersistQueryClientProvider>
             </BottomSheetModalProvider>
           </ThemeProvider>
         </KeyboardProvider>
@@ -180,3 +176,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(RootLayout);

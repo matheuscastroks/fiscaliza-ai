@@ -38,7 +38,6 @@ export interface SessionUser {
   name: string;
   email: string;
   role: Role;
-  sector?: string;
   municipality?: Municipality | null;
   postalCode?: string;
   neighborhood?: string;
@@ -156,8 +155,24 @@ export interface OfficialCallsOverview {
 
 export interface PushTokenRegistrationPayload {
   token: string;
-  platform: 'android' | 'ios' | 'web';
+  /** Push só existe no app nativo; o servidor recusa outros valores. */
+  platform: 'android' | 'ios';
   municipalityId?: string;
+}
+
+/** Chamados salvos na conta (`/api/v1/saved-calls`). */
+export interface SavedCallItem {
+  call: OfficialCall;
+  savedAt: string;
+}
+export interface SavedCallsList {
+  items: SavedCallItem[];
+}
+export interface SavedCallsMergePayload {
+  callIds: string[];
+}
+export interface SavedCallsMergeResult {
+  added: number;
 }
 
 export interface FollowCallNotificationPayload {
@@ -168,12 +183,6 @@ export interface FollowCallNotificationPayload {
 export interface UnfollowCallNotificationPayload {
   callId: string;
   token: string;
-}
-
-export interface TestNotificationPayload {
-  token: string;
-  title?: string;
-  body?: string;
 }
 
 export interface PushNotificationResult {

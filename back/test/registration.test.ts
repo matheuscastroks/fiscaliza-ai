@@ -80,6 +80,8 @@ test(
     });
     assert.equal(response.statusCode, 201, response.body);
     const { user, token } = response.json().data;
+    // Navegador: só o cookie httpOnly, nunca o token no corpo.
+    assert.equal(token, undefined);
     assert.equal(user.email, email);
     assert.equal(user.name, 'Nova pessoa');
     assert.equal(user.role, 'citizen');
@@ -98,7 +100,27 @@ test(
       (
         await app.inject({
           url: '/api/auth/me',
-          headers: { authorization: `Bearer ${token}` },
+          headers: {
+            cookie: String(response.headers['set-cookie']).split(';')[0],
+          },
+        })
+      ).json().data.id,
+      user.id,
+    );
+    // App nativo: token no corpo para o armazenamento seguro, sem cookie.
+    const native = await app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      headers: { 'x-fiscaliza-client': 'citizen-native' },
+      payload: { email, password: payload.password },
+    });
+    assert.equal(native.statusCode, 200, native.body);
+    assert.equal(native.headers['set-cookie'], undefined);
+    assert.equal(
+      (
+        await app.inject({
+          url: '/api/auth/me',
+          headers: { authorization: `Bearer ${native.json().data.token}` },
         })
       ).json().data.id,
       user.id,

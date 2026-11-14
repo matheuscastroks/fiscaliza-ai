@@ -52,7 +52,7 @@ const createStyles = (colors: ThemeColors) =>
     base: {
       width: layout.touchTarget.minWidth,
       height: layout.touchTarget.minHeight,
-      borderRadius: layout.touchTarget.minHeight / 2,
+      borderRadius: layout.radius.control,
       alignItems: 'center',
       justifyContent: 'center',
     },

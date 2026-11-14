@@ -125,7 +125,14 @@ export function computeOverviewRegion<T extends { latitude: number; longitude: n
     longitudeDelta: number;
     zoom?: number;
   },
-) {
+): {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+  zoom?: number;
+  bounds?: { northEast: [number, number]; southWest: [number, number] };
+} {
   if (points.length === 0) return fallback;
   let minLat = points[0].latitude;
   let maxLat = points[0].latitude;
@@ -144,12 +151,19 @@ export function computeOverviewRegion<T extends { latitude: number; longitude: n
   const delta = Math.max(latDelta, lngDelta, 0.001);
   const zoom = Math.max(11, Math.min(15, Math.round(Math.log2(360 / delta))));
 
+  // Pontos colados (um só chamado) ganham uma caixa mínima para a câmera não aproximar demais.
+  const padLat = Math.max(0, (0.004 - (maxLat - minLat)) / 2);
+  const padLng = Math.max(0, (0.004 - (maxLng - minLng)) / 2);
   return {
     latitude: (minLat + maxLat) / 2,
     longitude: (minLng + maxLng) / 2,
     latitudeDelta: latDelta,
     longitudeDelta: lngDelta,
     zoom,
+    bounds: {
+      northEast: [maxLng + padLng, maxLat + padLat] as [number, number],
+      southWest: [minLng - padLng, minLat - padLat] as [number, number],
+    },
   };
 }
 

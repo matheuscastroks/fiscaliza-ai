@@ -59,3 +59,18 @@ test('focused calls and bbox keep explicit camera navigation', () => {
   assert.equal(h.commands.length, 1);
   assert.equal(h.commands[0][0], 'center');
 });
+test('an overview box fits with the screen padding once, and the same box does not refit on pan', () => {
+  const h = harness();
+  const bounds = { northEast: [-43.5, -22.8], southWest: [-43.8, -23.0] };
+  const initial = { latitude: -22.9, longitude: -43.6, zoom: 12 };
+  h.render(initial, null, false);
+  h.render({ ...initial, bounds }, null, false);
+  assert.deepEqual(h.commands.at(-1), ['fit', bounds.northEast, bounds.southWest, [176, 32, 164, 32], 350]);
+  const count = h.commands.length;
+  h.render({ ...initial, bounds }, null, false);
+  assert.equal(h.commands.length, count, 'the same box object is not fitted again');
+  h.render({ ...initial, latitude: -22.95, bounds }, null, false);
+  assert.equal(h.commands.at(-1)[0], 'center', 'explicit recentering keeps working with an old box');
+  h.render({ ...initial, latitude: -22.95, bounds: { ...bounds } }, null, false);
+  assert.equal(h.commands.at(-1)[0], 'fit', 'a new box (Ver a cidade toda again) refits');
+});

@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   radiusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
     borderWidth: 1,
   },
   actionsRow: {

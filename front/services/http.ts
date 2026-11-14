@@ -3,10 +3,20 @@ import * as SecureStore from 'expo-secure-store';
 import { QueryClient, type QueryKey } from '@tanstack/react-query';
 import type { ApiResult } from '@/shared/contracts';
 export const API_URL = (
-  process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api'
+  process.env.EXPO_PUBLIC_API_URL || 'http://localhost:43001/api'
 ).replace(/\/$/, '');
+// O app nativo recebe o token da sessão no corpo (vai para o SecureStore); o
+// navegador recebe só o cookie httpOnly. A API decide por este cabeçalho.
+// Sem importar react-native aqui: no app nativo não existe `document`.
+const CLIENT_HEADER = typeof document === 'undefined' ? 'citizen-native' : 'citizen';
 export const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 1, staleTime: 15000 } },
+  defaultOptions: {
+    queries: {
+      // Repetir só falha de transporte: 404, 401 ou 422 não mudam na segunda vez.
+      retry: (failureCount, error) => error instanceof NetworkError && failureCount < 2,
+      staleTime: 15000,
+    },
+  },
 });
 /** Falha de transporte (sem rede/timeout), distinta de resposta do servidor como 401. */
 export class NetworkError extends Error {
@@ -78,7 +88,11 @@ export async function request<T>(
     throw error;
   }
   signal?.addEventListener('abort', cancel, { once: true });
-  const timer = setTimeout(() => controller.abort(), 15000);
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, 15000);
   try {
     const multipart = body instanceof FormData;
     const response = await fetch(API_URL + path, {
@@ -86,7 +100,7 @@ export async function request<T>(
       credentials: 'include',
       signal: controller.signal,
       headers: {
-        'X-Fiscaliza-Client': 'citizen',
+        'X-Fiscaliza-Client': CLIENT_HEADER,
         ...(multipart || body === undefined
           ? {}
           : { 'Content-Type': 'application/json' }),
@@ -116,8 +130,11 @@ export async function request<T>(
     if (signal?.aborted) throw error;
     // Tudo que não veio do servidor (TypeError, timeout, falha nativa de rede) é falta de conexão.
     if (error instanceof ApiError) throw error;
+    // Demora do servidor não é falta de internet: a mensagem diz o que houve.
     throw new NetworkError(
-      'Sem internet no momento. Confira sua conexão e tente de novo.',
+      timedOut
+        ? 'O servidor demorou para responder. Tente de novo em instantes.'
+        : 'Sem internet no momento. Confira sua conexão e tente de novo.',
     );
   } finally {
     clearTimeout(timer);
@@ -141,25 +158,26 @@ export function assetUrl(url: string) {
 export async function uploadImage(uri: string): Promise<string> {
   if (uri.startsWith('/api/attachments/') || /^https?:/.test(uri)) return uri;
   // Native mobile uploader via Expo FileSystem
-  const fs = await import('expo-file-system/legacy');
-  if (!(await fs.getInfoAsync(uri)).exists) {
+  const fs = await import('expo-file-system');
+  const file = new fs.File(uri);
+  if (!file.exists) {
     throw new Error(
       'A foto não está mais disponível. Escolha a imagem novamente.',
     );
   }
-  const task = fs.createUploadTask(API_URL + '/attachments', uri, {
+  const task = file.createUploadTask(API_URL + '/attachments', {
     httpMethod: 'POST',
-    uploadType: fs.FileSystemUploadType.MULTIPART,
+    uploadType: fs.UploadType.MULTIPART,
     fieldName: 'file',
     headers: {
-      'X-Fiscaliza-Client': 'citizen',
+      'X-Fiscaliza-Client': CLIENT_HEADER,
       ...(sessionToken ? { Authorization: 'Bearer ' + sessionToken } : {}),
     },
   });
   let expired = false;
   const timer = setTimeout(() => {
     expired = true;
-    void task.cancelAsync().catch(() => undefined);
+    task.cancel();
   }, 15000);
   try {
     const response = await task.uploadAsync();
@@ -174,5 +192,6 @@ export async function uploadImage(uri: string): Promise<string> {
     return result.url;
   } finally {
     clearTimeout(timer);
+    task.release();
   }
 }

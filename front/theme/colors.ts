@@ -27,7 +27,8 @@ export const lightColors = {
   // Tipografia e Conteúdo (distinto da cor de marca)
   ink: '#192D35',
   muted: '#556B73',
-  subtle: '#69818B',
+  // AA (≥4,5:1) sobre canvas e surface.
+  subtle: '#58707A',
 
   // Barra de Navegação Flutuante
   navigationSurface: '#192D35',
@@ -53,6 +54,11 @@ export const lightColors = {
   transparent: 'transparent',
   scrim: 'rgba(0, 0, 0, 0.44)',
   glass: 'rgba(255, 255, 255, 0.94)',
+  /** Faixa sob a barra de status quando o conteúdo é um mapa. */
+  statusScrim: 'rgba(243, 247, 248, 0.92)',
+  /** Fundo de aviso flutuante sobre o mapa (ex.: carregando). */
+  floatingInk: 'rgba(25, 45, 53, 0.9)',
+  onFloatingInk: '#FFFFFF',
   glassBorder: 'rgba(217, 227, 231, 0.72)',
   shadow: '#000000',
 } as const;
@@ -89,7 +95,7 @@ export const darkColors: ThemeColors = {
   // Tipografia e Conteúdo
   ink: '#F0F6F8',
   muted: '#8FA5AE',
-  subtle: '#748B94',
+  subtle: '#8299A2',
 
   // Barra de Navegação Flutuante
   navigationSurface: '#121E23',
@@ -115,6 +121,9 @@ export const darkColors: ThemeColors = {
   transparent: 'transparent',
   scrim: 'rgba(0, 0, 0, 0.68)',
   glass: 'rgba(18, 30, 35, 0.96)',
+  statusScrim: 'rgba(11, 19, 22, 0.88)',
+  floatingInk: 'rgba(240, 246, 248, 0.92)',
+  onFloatingInk: '#0B1316',
   glassBorder: 'rgba(121, 203, 213, 0.15)',
   shadow: '#000000',
 };

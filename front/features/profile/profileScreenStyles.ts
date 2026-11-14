@@ -53,7 +53,7 @@ export const createStyles = (colors: ThemeColors) =>
       gap: 5,
       paddingVertical: 3,
       paddingHorizontal: 8,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.compact,
       borderWidth: StyleSheet.hairlineWidth,
       marginTop: 4,
     },

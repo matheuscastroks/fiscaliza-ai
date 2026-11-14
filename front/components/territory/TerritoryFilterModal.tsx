@@ -4,6 +4,7 @@ import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import React, { memo, useMemo } from 'react';
 
 import { View, Pressable } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +12,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/ui/AppText';
+import { Chip } from '@/components/ui/Chip';
+import { SectionHeader } from '@/components/ui/SectionHeader';
 
 import { AppSelect } from '@/components/ui/AppSelect';
 
@@ -242,65 +245,30 @@ function TerritoryFilterModalComponent({
           <View style={styles.filterFormContainer}>
             {/* Seção 1: Macro-temas Cívicos */}
             <View style={styles.filterSection}>
-              <View style={styles.sectionHeaderRow}>
-                <Ionicons name="apps-outline" size={layout.iconSize.sm} color={colors.accent} />
-                <AppText variant="caption" style={styles.sectionHeaderTitle}>
-                  Tema Cívico
-                </AppText>
-              </View>
+              <SectionHeader icon="apps-outline" title="Tema Cívico" />
 
-              <View style={styles.macroThemesTrack}>
-                {CIVIC_MACRO_THEMES.map((theme) => {
-                  const isSelected = macroTheme === theme.id;
-                  return (
-                    <Pressable
-                      key={theme.id}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Filtrar por ${theme.label}`}
-                      accessibilityState={{ selected: isSelected }}
-                      onPress={() => {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        onMacroThemeChange(theme.id);
-                        if (theme.id !== 'all' && !matchesMacroTheme(serviceType, null, theme.id)) {
-                          onServiceTypeChange('all');
-                        }
-                      }}
-                      style={[
-                        styles.macroThemeChip,
-                        isSelected && styles.macroThemeChipSelected,
-                      ]}
-                    >
-                      <Ionicons
-                        name={theme.icon as React.ComponentProps<typeof Ionicons>['name']}
-                        size={14}
-                        color={isSelected ? colors.onAccentBrand : colors.ink}
-                      />
-                      <AppText
-                        variant="caption"
-                        style={[
-                          styles.macroThemeChipText,
-                          isSelected && styles.macroThemeChipTextSelected,
-                        ]}
-                      >
-                        {theme.label}
-                      </AppText>
-                    </Pressable>
-                  );
-                })}
-              </View>
+              <AppSelect
+                label="Tema cívico"
+                placeholder="Buscar tema cívico…"
+                icon="apps-outline"
+                defaultValue="all"
+                options={CIVIC_MACRO_THEMES.map((theme) => ({ value: theme.id, label: theme.label }))}
+                value={macroTheme}
+                onChange={(value) => {
+                  onMacroThemeChange(value);
+                  if (value !== 'all' && !matchesMacroTheme(serviceType, null, value)) {
+                    onServiceTypeChange('all');
+                  }
+                }}
+              />
             </View>
 
             {/* Seção 2: Subtipo Específico */}
             <View style={styles.filterSection}>
-              <View style={styles.sectionHeaderRow}>
-                <Ionicons name="construct-outline" size={layout.iconSize.sm} color={colors.accent} />
-                <AppText variant="caption" style={styles.sectionHeaderTitle}>
-                  Subtipo Específico (1746)
-                </AppText>
-              </View>
+              <SectionHeader icon="construct-outline" title="Subtipo Específico (1746)" />
               <AppSelect
                 label="Tipo de serviço 1746"
-                placeholder="Buscar tipo de serviço..."
+                placeholder="Buscar tipo de serviço…"
                 icon="construct-outline"
                 defaultValue="all"
                 options={filteredServiceOptions}
@@ -313,12 +281,7 @@ function TerritoryFilterModalComponent({
 
             {/* Seção 3: Situação */}
             <View style={styles.filterSection}>
-              <View style={styles.sectionHeaderRow}>
-                <Ionicons name="filter-circle-outline" size={layout.iconSize.sm} color={colors.accent} />
-                <AppText variant="caption" style={styles.sectionHeaderTitle}>
-                  Situação do Chamado
-                </AppText>
-              </View>
+              <SectionHeader icon="filter-circle-outline" title="Situação do Chamado" />
               <View style={styles.segmentContainer}>
                 {[
                   { value: 'all', label: 'Todas', dotColor: null },
@@ -372,44 +335,24 @@ function TerritoryFilterModalComponent({
 
             {/* Seção 4: Período */}
             <View style={styles.filterSection}>
-              <View style={styles.sectionHeaderRow}>
-                <Ionicons name="calendar-outline" size={layout.iconSize.sm} color={colors.accent} />
-                <AppText variant="caption" style={styles.sectionHeaderTitle}>
-                  Período de Abertura
-                </AppText>
-              </View>
-              <View style={styles.wrapChipsRow}>
+              <SectionHeader icon="calendar-outline" title="Período de Abertura" />
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled
+                keyboardShouldPersistTaps="handled" contentContainerStyle={styles.periodTrack}>
                 {periodOptions.map((opt) => {
                   const isSelected = period === opt.value;
                   return (
-                    <Pressable
+                    <Chip
                       key={opt.value}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: isSelected }}
+                      label={opt.label}
+                      selected={isSelected}
                       onPress={() => {
-                        void Haptics.impactAsync(
-                          Haptics.ImpactFeedbackStyle.Light,
-                        );
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         onPeriodChange(opt.value);
                       }}
-                      style={[
-                        styles.periodChip,
-                        isSelected && styles.periodChipActive,
-                      ]}
-                    >
-                      <AppText
-                        variant="caption"
-                        style={[
-                          styles.periodChipText,
-                          isSelected && styles.periodChipTextActive,
-                        ]}
-                      >
-                        {opt.label}
-                      </AppText>
-                    </Pressable>
+                    />
                   );
                 })}
-              </View>
+              </ScrollView>
             </View>
           </View>
         )}
@@ -418,12 +361,7 @@ function TerritoryFilterModalComponent({
         {territoryDomain === 'facilities' && (
           <View style={styles.filterFormContainer}>
             <View style={styles.filterSection}>
-              <View style={styles.sectionHeaderRow}>
-                <Ionicons name="business" size={layout.iconSize.sm} color={colors.accent} />
-                <AppText variant="caption" style={styles.sectionHeaderTitle}>
-                  Serviços públicos no mapa
-                </AppText>
-              </View>
+              <SectionHeader icon="business" title="Serviços públicos no mapa" />
               <AppText
                 variant="caption"
                 color="muted"

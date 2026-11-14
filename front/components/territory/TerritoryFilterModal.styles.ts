@@ -16,7 +16,7 @@ export const createStyles = (colors: ThemeColors) =>
     domainTabsTrack: {
       flexDirection: 'row',
       backgroundColor: colors.canvas,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.control,
       padding: 4,
       borderWidth: 1,
       borderColor: colors.border,
@@ -29,7 +29,7 @@ export const createStyles = (colors: ThemeColors) =>
       justifyContent: 'center',
       gap: 6,
       paddingVertical: 10,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.compact,
     },
     domainTabButtonActive: {
       backgroundColor: colors.surface,
@@ -50,17 +50,6 @@ export const createStyles = (colors: ThemeColors) =>
     },
     filterSection: {
       gap: spacing.xs + 2,
-    },
-    sectionHeaderRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      marginBottom: 2,
-    },
-    sectionHeaderTitle: {
-      fontWeight: '600',
-      fontSize: fontSizes.caption,
-      color: colors.muted,
     },
     sectionDivider: {
       height: StyleSheet.hairlineWidth,
@@ -113,7 +102,7 @@ export const createStyles = (colors: ThemeColors) =>
     segmentContainer: {
       flexDirection: 'row',
       backgroundColor: colors.canvas,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.control,
       padding: 3,
       borderWidth: 1,
       borderColor: colors.border,
@@ -124,9 +113,9 @@ export const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: 9,
+      minHeight: layout.touchTarget.minHeight - 4,
       paddingHorizontal: 8,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.compact,
     },
     segmentButtonActive: {
       backgroundColor: colors.ink,
@@ -140,62 +129,10 @@ export const createStyles = (colors: ThemeColors) =>
       color: colors.surface,
       fontWeight: '600',
     },
-    wrapChipsRow: {
+    periodTrack: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8,
-    },
-    periodChip: {
-      height: 34,
-      justifyContent: 'center',
-      paddingHorizontal: 14,
-      borderRadius: layout.radius.panel,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-    },
-    periodChipActive: {
-      backgroundColor: colors.ink,
-      borderColor: colors.ink,
-    },
-    periodChipText: {
-      fontSize: fontSizes.caption,
-      fontWeight: '600',
-      color: colors.ink,
-    },
-    periodChipTextActive: {
-      color: colors.surface,
-      fontWeight: '600',
-    },
-    macroThemesTrack: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8,
-      paddingVertical: 2,
-    },
-    macroThemeChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      height: 36,
-      paddingHorizontal: 12,
-      borderRadius: layout.radius.panel,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-    },
-    macroThemeChipSelected: {
-      backgroundColor: colors.accent,
-      borderColor: colors.accent,
-    },
-    macroThemeChipText: {
-      fontSize: fontSizes.caption,
-      fontWeight: '600',
-      color: colors.ink,
-    },
-    macroThemeChipTextSelected: {
-      color: colors.onAccent,
-      fontWeight: '600',
+      gap: spacing.xs,
+      paddingVertical: spacing.xxs,
     },
     modalFooter: {
       flexDirection: 'row',

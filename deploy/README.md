@@ -77,7 +77,7 @@ Use o merge automático, que solicita **Release API**, ou execute esse workflow 
 
 No app, use `EXPO_PUBLIC_API_URL=https://fiscalizaai.matheuscastroks.com.br/api`. O túnel encaminha as requisições diretamente à API. Banco e uploads têm volumes persistentes. Containers antigos fora da configuração, como o cidadão web, são removidos por `--remove-orphans`; volumes não são apagados.
 
-O deploy serializa execuções, aguarda os healthchecks, confere `/api/health` no domínio público e só então grava `/opt/fiscaliza-ai/current-release`. A verificação pública depende da rota Cloudflare e de suas políticas permitirem esse endpoint. Uma falha pode deixar serviços parcialmente atualizados; confira os logs. Não há rollback automático do banco.
+O deploy serializa execuções, inicia somente o PostgreSQL sem recriar um contêiner existente e exige um backup único (`BACKUP_ONCE=1`) antes de subir a API e suas migrações. Se o backup falhar, o deploy para antes das migrações. Depois, aguarda os healthchecks, confere `/api/health` no domínio público e só então grava `/opt/fiscaliza-ai/current-release`. A verificação pública depende da rota Cloudflare e de suas políticas permitirem esse endpoint. Uma falha pode deixar serviços parcialmente atualizados; confira os logs. Não há rollback automático do banco.
 
 Mantenha backups externos de banco e uploads e teste a restauração. Não use `docker compose down -v` para atualizar. Para voltar a uma release já publicada e compatível com as migrações atuais:
 

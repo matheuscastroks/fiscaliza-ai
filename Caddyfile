@@ -1,3 +1,0 @@
-{$PUBLIC_DOMAIN:localhost} {
-  reverse_proxy api:3001
-}

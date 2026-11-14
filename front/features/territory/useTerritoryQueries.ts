@@ -1,4 +1,6 @@
+import { useSpatialCalls } from './useSpatialCalls';
 
+import type { CameraBounds } from './useMapCamera';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 
@@ -27,7 +29,7 @@ import { BackHandler, Platform, FlatList } from 'react-native';
 
 
 
-import { useLocalSearchParams, useIsFocused } from 'expo-router';
+import { router, useLocalSearchParams, useIsFocused, useFocusEffect } from 'expo-router';
 
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -66,6 +68,7 @@ type TerritoryMapRegion = {
   latitudeDelta: number;
   longitudeDelta: number;
   zoom?: number;
+  bounds?: CameraBounds;
 };
 
 export const INITIAL_REGION: TerritoryMapRegion = {
@@ -96,10 +99,11 @@ export function useTerritoryQueries() {
   const {
     neighborhoodId: routeNeighborhoodId, layer: routeLayer,
     startDate, endDate, filters, focusId, lat, lng,
-    neighborhood: paramNeighborhood,
+    neighborhood: paramNeighborhood, lookup, lookupRequest,
   } = useLocalSearchParams<{
     neighborhoodId?: string; layer?: string; startDate?: string; endDate?: string;
     filters?: string; focusId?: string; lat?: string; lng?: string; neighborhood?: string;
+    lookup?: string; lookupRequest?: string;
   }>();
   const {
     neighborhood,
@@ -171,17 +175,19 @@ export function useTerritoryQueries() {
   const officialSource = sources.data?.find((s) => s.sourceId === 'rio1746');
   const officialFilters = useOfficialFilters(isFocused && interactionsComplete);
   const officialTime = { startDate, endDate, periodDays: startDate || endDate || period === 'all' ? undefined : Number(period) };
-  const officialCalls = useInfiniteOfficialCalls(
-    {
+  const officialParams = {
       ...(areaOnly && appliedBounds ? appliedBounds : routeNeighborhoodId ? { neighborhoodId: routeNeighborhoodId } : territorialFilters.params),
       tipo: serviceType === 'all' ? undefined : serviceType,
       tema: macroTheme === 'all' ? undefined : macroTheme,
       situacao: status === 'all' ? undefined : status,
       ...officialTime,
       search: appliedSearch || undefined,
-      limit: 50,
-      hasCoordinates: areaOnly ? true : undefined,
-    },
+    };
+  const { spatialMap, setSpatialViewport } = useSpatialCalls(officialParams,
+    isFocused && mapAvailable && layers.includes('official') && territorialFilters.hydrated,
+    territorialFilters.cacheScope, INITIAL_REGION);
+  const officialCalls = useInfiniteOfficialCalls(
+    { ...officialParams, limit: 50, hasCoordinates: areaOnly ? true : undefined },
     isFocused && layers.includes('official') && territorialFilters.hydrated,
     mapPerformanceEnabled,
     territorialFilters.cacheScope,
@@ -237,6 +243,30 @@ export function useTerritoryQueries() {
   const [selectedCluster, setSelectedCluster] = useState<{
     ids: string[]; latitude: number; longitude: number;
   } | null>(null);
+  const [searchFocusRequest, setSearchFocusRequest] = useState<string>();
+  useFocusEffect(useCallback(() => {
+    if (lookup !== 'protocol' || !lookupRequest) return;
+    // A consulta de um protocolo não pode herdar filtros que escondam o registro.
+    setTerritoryDomain('calls');
+    setIsListView(false);
+    setFiltersOpen(false);
+    setNeighborhood('');
+    setStatus('all');
+    setPeriod('all');
+    setServiceType('all');
+    setMacroTheme('all');
+    setSearch('');
+    setSelectedId(null);
+    setSelectedCluster(null);
+    setAreaOnly(false);
+    setAppliedBounds(null);
+    setHasMovedCamera(false);
+    setSearchFocusRequest(lookupRequest);
+    router.setParams({ lookup: undefined, lookupRequest: undefined, neighborhoodId: undefined,
+      layer: undefined, startDate: undefined, endDate: undefined, focusId: undefined,
+      lat: undefined, lng: undefined, neighborhood: undefined, filters: undefined });
+  }, [lookup, lookupRequest, setTerritoryDomain, setIsListView, setFiltersOpen,
+    setNeighborhood, setStatus, setPeriod, setServiceType, setMacroTheme, setSearch]));
   const { captureLocation, busy: locating, error: locationError } = useDeviceLocation();
   const capturedLocation = usePlacesStore((s) => s.deviceLocation);
   const mapOverlay = useMemo(() => mapOverlayContext(selection, capturedLocation, areaOnly || Boolean(routeNeighborhoodId)),
@@ -270,6 +300,7 @@ export function useTerritoryQueries() {
     return () => sub.remove();
   }, [isFocused, selectedId, selectedCluster, isListView, mapAvailable, areaOnly, setIsListView]);
 
+  const selectedCallQuery = useOfficialCall(selectedId, isFocused && Boolean(selectedId) && layers.includes('official'));
   const focusedCallQuery = useOfficialCall(focusId, isFocused && Boolean(focusId));
 
   // O foco vindo de notificação/rota vale uma vez por chamado; trocar para Serviços depois não o desfaz.
@@ -316,6 +347,7 @@ export function useTerritoryQueries() {
   }, [focusId, focusedCallQuery.isError, focusedCallQuery.data]);
 
   return {
+    spatialMap, setSpatialViewport, selectedCallQuery,
     isFocused,
     colors,
     mode,
@@ -355,6 +387,7 @@ export function useTerritoryQueries() {
     setMacroTheme,
     setPeriod,
     setSearch,
+    searchFocusRequest,
     setStatus,
     setIsListView,
     effectiveListView,

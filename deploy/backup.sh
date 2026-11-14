@@ -22,6 +22,8 @@ run_backup() {
 
   # Escreve em arquivo temporário e só renomeia ao terminar: nunca fica meia cópia.
   pg_dump -Fc --no-owner "$PGDATABASE" > "$daily/.fiscaliza-$stamp.dump.tmp"
+  # Confere que o arquivo é um dump legível antes de publicá-lo.
+  pg_restore --list "$daily/.fiscaliza-$stamp.dump.tmp" > /dev/null
   mv "$daily/.fiscaliza-$stamp.dump.tmp" "$daily/fiscaliza-$stamp.dump"
   if [ -d "$UPLOADS_DIR" ]; then
     tar -czf "$daily/.uploads-$stamp.tar.gz.tmp" -C "$UPLOADS_DIR" .
@@ -54,7 +56,14 @@ while true; do
   hour="$(date +%H)"
   if [ "$today" != "$last_day" ] && [ "$hour" -ge "$BACKUP_HOUR" ]; then
     last_day="$today"
-    if run_backup; then ping_monitor ""; else echo "[backup] FALHOU"; ping_monitor "/fail"; fi
+    # `set -e` não vale dentro de uma função chamada como condição de `if`: um
+    # pg_dump falho seguiria adiante e o monitor receberia sucesso. Num subshell
+    # com `set -e` próprio, o primeiro erro interrompe a cópia.
+    set +e
+    (set -e; run_backup)
+    status=$?
+    set -e
+    if [ "$status" -eq 0 ]; then ping_monitor ""; else echo "[backup] FALHOU"; rm -f "$BACKUP_ROOT"/daily/.*.tmp; ping_monitor "/fail"; fi
   fi
   sleep 300
 done

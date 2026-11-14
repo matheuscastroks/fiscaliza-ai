@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   button: {
     minWidth: layout.touchTarget.minWidth,
     minHeight: layout.touchTarget.minHeight,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.compact,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,

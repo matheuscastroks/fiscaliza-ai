@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.45)',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
-    borderRadius: layout.radius.pill,
+    borderRadius: layout.radius.control,
   },
   brandTitle: { fontWeight: '600', fontSize: fontSizes.meta },
   sheet: {

@@ -25,6 +25,11 @@ jobs:
         run: |
           test "$REPOSITORY_ID" = '997154192'
           if [ "$ACTOR_ID" = '49662686' ]; then exit 0; fi
+          # Dependabot: valida as atualizações (sem segredos e sem merge automático,
+          # que continua restrito ao dono no auto-merge.yml).
+          if [ "$ACTOR_ID" = '49699333' ] && [ "$EVENT_NAME" = 'push' ]; then
+            case "$REF" in refs/heads/dependabot/*) exit 0 ;; esac
+          fi
           test "$REF" = 'refs/heads/main'
           test "$EVENT_NAME" = 'workflow_dispatch'
           test "$ACTOR_ID" = '41898282'
@@ -43,14 +48,17 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: '24'
+          node-version-file: '.nvmrc'
           cache: npm
           cache-dependency-path: front/package-lock.json
       - run: npm ci --prefix front
+      - name: Check Expo compatibility
+        working-directory: front
+        run: npx expo-doctor
       - run: npm audit --omit=dev --audit-level=high --prefix front
       - run: npm test
       - run: npm run typecheck --prefix front
-      - run: npm run lint
+      - run: npm run lint --prefix front
       - run: npm run export:android --prefix front -- --output-dir ../.validation/android-bundle --max-workers 2
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -95,6 +103,7 @@ jobs:
           cache-dependency-path: back/package-lock.json
       - run: npm ci
       - run: npm audit --omit=dev --audit-level=high
+      - run: npm run lint
       - run: npm run build
       - run: node dist/back/src/migrate.js
       - run: node --test --test-concurrency=1 dist/back/test/*.test.js
@@ -130,7 +139,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: '24'
+          node-version-file: '.nvmrc'
       - run: node --test .github/tests/*.test.cjs
       - name: Validate workflows
         run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 -color
@@ -138,13 +147,29 @@ jobs:
         env:
           IMAGE_PREFIX: ghcr.io/example/fiscaliza-ai
           IMAGE_TAG: ${{ github.sha }}
-          RELEASE_DIR: ${{ github.workspace }}
           PUBLIC_DOMAIN: fiscalizaai.matheuscastroks.com.br
           CLOUDFLARE_TUNNEL_TOKEN: validation-only-not-a-real-token
           POSTGRES_PASSWORD: validation-only
         run: |
           bash -n deploy/deploy.sh
-          docker compose -f compose.production.yaml config --quiet
+          sh -n deploy/backup.sh
+          bash -n deploy/restore.sh
+          docker run --rm -v "$PWD:/repo" -w /repo koalaman/shellcheck:v0.10.0 -S warning deploy/deploy.sh deploy/backup.sh deploy/restore.sh
+          # Modo público do PC (compose.yaml + compose.public.yaml) também precisa ser válido.
+          cp .env.compose.example "$RUNNER_TEMP/compose.env"
+          docker compose --env-file "$RUNNER_TEMP/compose.env" -f compose.yaml -f compose.public.yaml --profile public config --quiet
+          # Valida a partir do pacote que o release envia, não do checkout: um
+          # arquivo montado no Compose e ausente do pacote quebraria a VPS.
+          export RELEASE_DIR="$RUNNER_TEMP/release"
+          mkdir -p "$RELEASE_DIR"
+          tar -czf "$RUNNER_TEMP/release.tgz" -T deploy/release-files.txt
+          tar -xzf "$RUNNER_TEMP/release.tgz" -C "$RELEASE_DIR"
+          docker compose -f "$RELEASE_DIR/compose.production.yaml" config --quiet
+          missing=0
+          while IFS= read -r source; do
+            case "$source" in "$RELEASE_DIR"/*) test -e "$source" || { echo "Ausente no pacote: $source"; missing=1; } ;; esac
+          done < <(docker compose -f "$RELEASE_DIR/compose.production.yaml" config --format json | jq -r '.services[].volumes[]? | select(.type == "bind") | .source')
+          exit "$missing"
   gate:
     name: CI gate
     needs: [owner, app, api, image, automation]

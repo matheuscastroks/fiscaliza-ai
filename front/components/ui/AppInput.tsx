@@ -152,7 +152,7 @@ const createStyles = (colors: ThemeColors) =>
       top: spacing.xxs,
       minWidth: layout.touchTarget.minWidth,
       minHeight: layout.touchTarget.minHeight,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.control,
       alignItems: 'center',
       justifyContent: 'center',
     },

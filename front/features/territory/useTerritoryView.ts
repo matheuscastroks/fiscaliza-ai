@@ -1,143 +1,24 @@
-
-
-
-
-
-
-
 import { type TerritoryFilterBarProps } from '@/components/territory/TerritoryFilterBar';
 
+import { computeOverviewRegion, TERRITORY_PERIOD_OPTIONS, TERRITORY_STATUS_OPTIONS } from '@/features/territory/selectors';
 
-
-
-
-
-
-
-
-
-
-import { chooseTerritorialEntries, computeOverviewRegion, TERRITORY_PERIOD_OPTIONS, TERRITORY_STATUS_OPTIONS } from '@/features/territory/selectors';
-
-
-
-
-
-
-
-
-
-import { summarizeFacilityPagination } from '@/features/territory/facilityPagination';
-
-
-
-
-
-
-
-
-
-
+import { useTerritoryEntries } from './useTerritoryEntries';
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
-
-
-
-
-
-
-
-
-
 import * as Haptics from 'expo-haptics';
-
-
-
-
-
-
-
-
 
 import { router } from 'expo-router';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { usePlacesStore } from '@/stores/placesStore';
 
+import { type MapRegionChange } from '@/components/ui/MapboxMapView';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-import { type MapMarker } from '@/components/ui/MapboxMapView';
-
-
-
-
-
-
-
-
-
-import { entryLocation, entryToMarker, type Entry } from '@/components/territory/TerritoryPreviewCard';
-
-
-
-
-
-
-
+import { entryLocation, type Entry } from '@/components/territory/TerritoryPreviewCard';
 
 import { OPEN_STATUS } from '@/features/city/callStatus';
 
-
-
-
-
-
-
-
-
-
-type TerritoryMapRegion = {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-  zoom?: number;
-};
-
 import { INITIAL_REGION, type useTerritoryQueries } from './useTerritoryQueries';
-
-
-
-
-
-
-
 
 type TerritoryQueries = ReturnType<typeof useTerritoryQueries>;
 
@@ -180,9 +61,6 @@ export function useTerritoryView(q: TerritoryQueries) {
     setIsListView,
     territoryDomain,
     facilitiesConfirmed,
-    schools,
-    health,
-    squares,
     facilityQueries,
     officialSource,
     officialCalls,
@@ -192,84 +70,26 @@ export function useTerritoryView(q: TerritoryQueries) {
     setFiltersOpen,
     selectedId,
     setSelectedId,
-    selectedCluster,
     setSelectedCluster,
     captureLocation,
     capturedLocation,
-    focusedCallQuery,
   } = q;
-  const entries = useMemo<Entry[]>(() => {
-    const calls = officialCalls.data?.calls || [];
-    const facilities = [schools.data, health.data, squares.data].flatMap(
-      (data) => data?.pages.flatMap((p) => p.items) || [],
-    );
-    return chooseTerritorialEntries(calls, facilities, layers, {
-      neighborhood: areaOnly ? undefined : neighborhood,
-      neighborhoodId: areaOnly ? undefined : neighborhoodId,
-    });
-  }, [
-    officialCalls.data?.calls, schools.data, health.data, squares.data,
-    layers, neighborhood, neighborhoodId, areaOnly,
-  ]);
-
-  const unlocated = useMemo(() => entries.filter((entry) => !entryLocation(entry)), [entries]);
-  const located = useMemo(() => entries.filter((entry) => Boolean(entryLocation(entry))), [entries]);
-  const listed = areaOnly ? located : entries;
-
-  const selectedEntry = useMemo<Entry | null>(() => {
-    if (!selectedId) return null;
-    const fromEntries = entries.find((entry) => entry.item.id === selectedId);
-    if (fromEntries) return fromEntries;
-    const off = officialCalls.data?.calls?.find((item) => item.id === selectedId);
-    if (off) return { type: 'official' as const, item: off };
-    if (
-      focusedCallQuery.data &&
-      (focusedCallQuery.data.id === selectedId ||
-        focusedCallQuery.data.externalId === selectedId)
-    ) {
-      return { type: 'official' as const, item: focusedCallQuery.data };
-    }
-    return null;
-  }, [selectedId, entries, officialCalls.data?.calls, focusedCallQuery.data]);
-
-  const activeFacilityQueries = useMemo(() => {
-    const labels = { school: 'escolas', health: 'serviços de saúde', square: 'praças' } as const;
-    return (['school', 'health', 'square'] as const)
-      .filter((cat) => layers.includes(cat))
-      .map((cat) => {
-        const query = facilityQueries[cat];
-        return {
-          category: cat,
-          query,
-          label: labels[cat],
-          loaded: query.data?.pages.flatMap((p) => p.items).length ?? 0,
-          total: query.data?.pages[0]?.total ?? null,
-          hasNextPage: Boolean(query.hasNextPage),
-          isFetchingNextPage: Boolean(query.isFetchingNextPage),
-          fetchNextPage: () => { void query.fetchNextPage(); },
-        };
-      });
-  }, [layers, facilityQueries]);
-
-  const facilityPagination = useMemo(
-    () => summarizeFacilityPagination(activeFacilityQueries),
-    [activeFacilityQueries],
-  );
-  const totalFacilitiesKnown = facilityPagination?.totalKnown ?? null;
-
-  const selectedClusterEntries = useMemo<Entry[]>(() => {
-    if (!selectedCluster || selectedCluster.ids.length === 0) return [];
-    const idSet = new Set(selectedCluster.ids);
-    return entries.filter((entry) => idSet.has(entry.item.id));
-  }, [selectedCluster, entries]);
+  const { entries, unlocated, listed, selectedEntry,
+    facilityPagination, totalFacilitiesKnown, selectedClusterEntries,
+    totalCalls, hasMoreCalls, dataReady, allMapMarkers } = useTerritoryEntries(q);
 
   const municipalOverviewRegion = useMemo(() => {
+    const extent = q.spatialMap.data?.bounds;
+    if (layers.includes('official') && extent) return computeOverviewRegion([
+      { latitude: extent.north, longitude: extent.east },
+      { latitude: extent.south, longitude: extent.west },
+    ], INITIAL_REGION);
     const points = entries
       .map((entry) => entryLocation(entry))
       .filter((pt): pt is { latitude: number; longitude: number } => Boolean(pt));
     const calculated = computeOverviewRegion(points, INITIAL_REGION);
     return { ...calculated, zoom: calculated.zoom ?? 12 };
-  }, [entries]);
+  }, [entries, layers, q.spatialMap.data?.bounds]);
 
   const filterCount =
     Number(Boolean(neighborhood)) +
@@ -279,28 +99,22 @@ export function useTerritoryView(q: TerritoryQueries) {
     Number(period !== 'all') + Number(selection.kind === 'radius') +
     Number(areaOnly);
 
-  const totalCalls = officialCalls.data?.total ?? listed.length;
-  const hasMoreCalls = Boolean(officialCalls.hasNextPage);
-  const dataReady = layers.includes('official')
-    ? officialCalls.data !== undefined
-    : activeFacilityQueries.length > 0 &&
-      activeFacilityQueries.every(
-        (query) => query.query.data !== undefined || query.query.isError,
-      );
-
   const lastFittedNeighborhoodRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!neighborhood || areaOnly || focusId || activeSelection.kind === 'radius') return;
-    if (lastFittedNeighborhoodRef.current === neighborhood) return;
-    if (entries.some((entry) => Boolean(entryLocation(entry)))) {
-      lastFittedNeighborhoodRef.current = neighborhood;
+    // Enquadra os pontos do bairro (ou da cidade, sem bairro) quando chegam pela primeira vez.
+    if (areaOnly || focusId || activeSelection.kind === 'radius' || activeSelection.kind === 'pending-current') return;
+    if (layers.includes('official') && !q.spatialMap.data) return;
+    const fitKey = neighborhood || '__city__';
+    if (lastFittedNeighborhoodRef.current === fitKey) return;
+    if (q.spatialMap.data?.locatedTotal || entries.some((entry) => Boolean(entryLocation(entry)))) {
+      lastFittedNeighborhoodRef.current = fitKey;
       updateCameraRegion(municipalOverviewRegion);
     }
-  }, [neighborhood, areaOnly, focusId, entries, municipalOverviewRegion, activeSelection.kind, updateCameraRegion]);
+  }, [neighborhood, areaOnly, focusId, entries, municipalOverviewRegion, activeSelection.kind, updateCameraRegion, layers, q.spatialMap.data]);
 
   const openEntry = useCallback((entry: Entry) => {
     router.push({
-      pathname: entry.type === 'facility' ? '/FacilityDetailsScreen' : '/OfficialCallDetailsScreen',
+      pathname: entry.type === 'facility' ? '/facilities/[id]' : '/calls/[id]',
       params: { id: entry.item.id },
     });
   }, []);
@@ -325,18 +139,6 @@ export function useTerritoryView(q: TerritoryQueries) {
     [mapAvailable, setIsListView, updateCameraRegion],
   );
 
-  const mapMarkers: MapMarker[] = useMemo(() => {
-    return located.map(entryToMarker).filter((m): m is MapMarker => m !== null);
-  }, [located]);
-
-  const allMapMarkers = useMemo(() => {
-    if (!selectedEntry || mapMarkers.some((m) => m.id === selectedEntry.item.id)) {
-      return mapMarkers;
-    }
-    const extra = entryToMarker(selectedEntry);
-    return extra ? [...mapMarkers, extra] : mapMarkers;
-  }, [mapMarkers, selectedEntry]);
-
   const handleMarkerClick = useCallback((id: string) => {
     setSelectedId(id);
     setSelectedCluster(null);
@@ -357,7 +159,8 @@ export function useTerritoryView(q: TerritoryQueries) {
   }, [focusId]);
 
   const handleRegionChange = useCallback(
-    (newRegion: { latitude: number; longitude: number; latitudeDelta: number; longitudeDelta: number; zoom?: number }) => {
+    (newRegion: MapRegionChange) => {
+      q.setSpatialViewport(newRegion);
       viewportRef.current = {
         ...viewportRef.current,
         latitude: newRegion.latitude,
@@ -366,9 +169,10 @@ export function useTerritoryView(q: TerritoryQueries) {
         longitudeDelta: newRegion.longitudeDelta,
         zoom: newRegion.zoom ?? viewportRef.current.zoom,
       };
-      setHasMovedCamera(true);
+      // "Buscar nesta área" só faz sentido depois que a pessoa mexe no mapa.
+      if (newRegion.userGesture) setHasMovedCamera(true);
     },
-    [],
+    [q.setSpatialViewport, viewportRef, setHasMovedCamera],
   );
 
   const resetFilters = useCallback(() => {
@@ -470,6 +274,7 @@ export function useTerritoryView(q: TerritoryQueries) {
     onClearAreaOnly: handleClearAreaOnly,
     mapAvailable,
     search,
+    searchFocusRequest: q.searchFocusRequest,
     onSearchChange: setSearch,
     onOpenFilters: () => setFiltersOpen(true),
     filtersOpen,
@@ -507,7 +312,7 @@ export function useTerritoryView(q: TerritoryQueries) {
     onMacroThemeChange: (value: string) => { setMacroTheme(value); setSelectedId(null); setSelectedCluster(null); },
     onResetFilters: resetFilters,
   }), [
-    selection, areaOnly, handleClearAreaOnly, mapAvailable, routeNeighborhoodId,
+    selection, areaOnly, handleClearAreaOnly, mapAvailable, routeNeighborhoodId, q.searchFocusRequest,
     setSearch, setServiceType, setPeriod, setStatus, search, setFiltersOpen, filtersOpen,
     filterCount, bairroOptions, neighborhood, neighborhoodId, handleNeighborhoodChange,
     serviceType, serviceTypeOptions, period, status, layers, setLayers, startDate, endDate,
@@ -526,7 +331,7 @@ export function useTerritoryView(q: TerritoryQueries) {
       : activeSelection.kind === 'pending-current'
         ? 'Aguardando sua localização'
         : officialCalls.isLoading
-        ? 'Buscando chamados...'
+        ? 'Buscando chamados…'
         : officialCalls.error && listed.length === 0
           ? 'Não conseguimos carregar os chamados'
           : `Ver em lista · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
@@ -564,6 +369,11 @@ export function useTerritoryView(q: TerritoryQueries) {
     filterBarProps,
     waitingForLocation,
     summaryLabel,
-    summarySubLabel,
+    summarySubLabel: layers.includes('official')
+      ? q.spatialMap.isError ? 'Mapa indisponível. A lista continua disponível.'
+        : q.spatialMap.isFetching ? 'Atualizando os pontos do mapa…'
+        : q.spatialMap.data ? `${q.spatialMap.data.visibleTotal.toLocaleString('pt-BR')} no mapa · ${q.spatialMap.data.unlocatedTotal.toLocaleString('pt-BR')} sem coordenadas no recorte`
+        : 'Carregando todos os pontos deste recorte…'
+      : summarySubLabel,
   };
 }

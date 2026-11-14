@@ -161,7 +161,7 @@ function createStyles(colors: ThemeColors) {
     heart: {
       width: 32,
       height: 32,
-      borderRadius: layout.radius.panel,
+      borderRadius: layout.radius.compact,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: StyleSheet.hairlineWidth,
@@ -173,7 +173,7 @@ function createStyles(colors: ThemeColors) {
       gap: 4,
       paddingHorizontal: 8,
       paddingVertical: 4,
-      borderRadius: layout.radius.pill,
+      borderRadius: layout.radius.compact,
       backgroundColor: colors.surfaceSubdued,
       borderWidth: 1,
       borderColor: colors.border,

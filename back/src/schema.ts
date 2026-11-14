@@ -13,7 +13,6 @@ export * from './territorial-schema.js';
 import type {
   SessionUser,
 } from '../../shared/contracts.js';
-import type { Occurrence, CivicItem } from './historical-records.js';
 export const municipalities = pgTable('municipalities', {
   id: text('id').primaryKey(),
   data: jsonb('data')
@@ -38,7 +37,6 @@ export const users = pgTable('users', {
   avatar: text('avatar'),
   email: text('email').notNull().unique(),
   role: text('role').$type<SessionUser['role']>().notNull(),
-  sector: text('sector'),
   municipalityId: text('municipality_id').references(() => municipalities.id),
   postalCode: text('postal_code'),
   neighborhood: text('neighborhood'),
@@ -51,46 +49,6 @@ export const sessions = pgTable('sessions', {
     .references(() => users.id, { onDelete: 'cascade' }),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
 });
-export const records = pgTable('records', {
-  id: text('id').primaryKey(),
-  kind: text('kind').notNull(),
-  municipalityId: text('municipality_id')
-    .notNull()
-    .references(() => municipalities.id),
-  authorId: text('author_id')
-    .notNull()
-    .references(() => users.id),
-  data: jsonb('data').$type<Occurrence | CivicItem>().notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
-export const relations = pgTable(
-  'relations',
-  {
-    recordId: text('record_id')
-      .notNull()
-      .references(() => records.id, { onDelete: 'cascade' }),
-    userId: text('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    kind: text('kind').notNull(),
-  },
-  (t) => [primaryKey({ columns: [t.recordId, t.userId, t.kind] })],
-);
-export const answers = pgTable(
-  'answers',
-  {
-    recordId: text('record_id')
-      .notNull()
-      .references(() => records.id, { onDelete: 'cascade' }),
-    userId: text('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    option: integer('option').notNull(),
-  },
-  (t) => [primaryKey({ columns: [t.recordId, t.userId] })],
-);
 export const attachments = pgTable('attachments', {
   id: text('id').primaryKey(),
   mime: text('mime').notNull(),
@@ -103,15 +61,6 @@ export const attachments = pgTable('attachments', {
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
-});
-
-// Scenario baseline is separate from attributable citizen interactions.
-export const demoEngagement = pgTable('demo_engagement', {
-  recordId: text('record_id')
-    .primaryKey()
-    .references(() => records.id, { onDelete: 'cascade' }),
-  views: integer('views').notNull(),
-  supports: integer('supports').notNull(),
 });
 
 export const officialCalls = pgTable('official_calls', {

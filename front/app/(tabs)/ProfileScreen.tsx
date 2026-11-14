@@ -18,11 +18,12 @@ import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 
 
-import * as FileSystem from 'expo-file-system/legacy';
+import { Directory, File, Paths } from 'expo-file-system';
 
 
 
 import { AppScreen } from '@/components/ui/AppScreen';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 
 
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -66,6 +67,7 @@ import { createStyles } from '@/features/profile/profileScreenStyles';
 
 
 export default function ProfileScreen() {
+  const { contentInset } = useTabBarInset();
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
 
@@ -102,13 +104,11 @@ export default function ProfileScreen() {
         setPhotoError('Escolha uma foto com tamanho de até 2 MB.');
         return;
       }
-      if (!FileSystem.documentDirectory) {
-        throw new Error('Armazenamento local indisponível');
-      }
-      const folder = FileSystem.documentDirectory + 'profile-photos/';
-      await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
-      const uri = folder + Date.now() + '.jpg';
-      await FileSystem.copyAsync({ from: asset.uri, to: uri });
+      const folder = new Directory(Paths.document, 'profile-photos');
+      folder.create({ intermediates: true, idempotent: true });
+      const localPhoto = new File(folder, Date.now() + '.jpg');
+      new File(asset.uri).copy(localPhoto);
+      const uri = localPhoto.uri;
       const current = useAuthStore.getState();
       if (current.user?.id !== userId || current.sessionVersion !== version)
         return;
@@ -133,7 +133,7 @@ export default function ProfileScreen() {
       />
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: contentInset }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >

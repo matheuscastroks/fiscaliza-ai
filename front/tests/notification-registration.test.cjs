@@ -50,18 +50,32 @@ test('push token errors reach the caller so activation can be retried', async ()
   await assert.rejects(service({ tokenFails: true }).registerForPushNotificationsAsync(), /Token unavailable/);
 });
 
-function store({ status = 'granted', register = async () => 'test-token' } = {}) {
+function load_store({ status = 'granted', register = async () => 'test-token', hooks = [], unregistered = [] } = {}) {
   return load('stores/notificationStore.ts', {
     'expo-notifications': { getPermissionsAsync: async () => ({ status }) },
     '@/features/notifications/notificationService': {
       registerForPushNotificationsAsync: register,
       followCallForNotifications() {},
+      unregisterTokenWithBackend: async (token) => {
+        unregistered.push(token);
+        return true;
+      },
     },
     './followStore': {
       useFollowStore: { getState: () => ({ savedCalls: [] }) },
       setFollowNotificationListener() {},
     },
-  }).useNotificationStore;
+    './authStore': {
+      onBeforeSessionEnd(task) {
+        hooks.push(task);
+        return () => {};
+      },
+    },
+  });
+}
+
+function store(options) {
+  return load_store(options).useNotificationStore;
 }
 
 test('permission alone does not report push activation success', async () => {
@@ -111,4 +125,16 @@ test('reset drops the previous user token so a new session must register again',
 test('push is only offered when the EAS projectId exists', () => {
   assert.equal(service({ projectId: 'project-1' }).isPushConfigured(), true);
   assert.equal(service({ projectId: null }).isPushConfigured(), false);
+});
+
+test('sair da conta desregistra o token deste aparelho antes do logout', async () => {
+  const hooks = [];
+  const unregistered = [];
+  const state = store({ hooks, unregistered });
+  assert.equal(hooks.length, 1);
+  await hooks[0]();
+  assert.deepEqual(unregistered, [], 'sem token, nada a desregistrar');
+  assert.equal(await state.getState().requestPermissions(), true);
+  await hooks[0]();
+  assert.deepEqual(unregistered, ['test-token']);
 });

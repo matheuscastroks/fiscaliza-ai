@@ -2,7 +2,7 @@ import type { Database, ReadDatabase } from '../../db.js';
 import type pg from 'pg';
 import type { BigQuery } from '@google-cloud/bigquery';
 import { randomUUID } from 'node:crypto';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { syncCheckpoints, sourceSyncRuns } from '../../schema.js';
 import type {
   SyncCoverage,
@@ -11,8 +11,11 @@ import type {
 import { createBigQueryClient } from './client.js';
 import {
   importPartition,
+  importTrackedCalls,
   type ImportPartitionOptions,
   type ImportResult,
+  type TrackedCall,
+  type TrackedImportResult,
 } from './importer.js';
 import { expandPartitionDateRange, assertSafeBoundedInt } from './queries.js';
 import { withSourceLock } from '../sync-lock.js';
@@ -71,6 +74,7 @@ export interface RangeSyncResult {
   run: SyncRunSummary;
   coverage: SyncCoverage;
   partitions: ImportResult[];
+  tracked: TrackedImportResult | null;
   totalFetched: number;
   totalImported: number;
   totalUpdated: number;
@@ -78,6 +82,38 @@ export interface RangeSyncResult {
 }
 export interface SyncOptions extends ImportPartitionOptions {
   client?: BigQuery;
+  /**
+   * Também relê os chamados abertos que alguém salvou ou acompanha e que foram
+   * abertos antes do intervalo pedido (a partição é a data de abertura).
+   */
+  revisitTracked?: boolean;
+}
+
+/** Limite de chamados relidos por execução, do mais recente para o mais antigo. */
+export const MAX_TRACKED_REVISIT = 2000;
+
+export async function listTrackedOpenCalls(
+  db: Database,
+  before: string,
+  limit = MAX_TRACKED_REVISIT,
+): Promise<TrackedCall[]> {
+  const result = await db.execute<{ external_id: string; partition_date: string }>(sql`
+    SELECT c.external_id, c.source_partition_date AS partition_date
+    FROM official_calls c
+    WHERE c.closed_at IS NULL
+      AND c.source_partition_date IS NOT NULL
+      AND c.source_partition_date < ${before}
+      AND (
+        EXISTS (SELECT 1 FROM saved_calls s WHERE s.call_id = c.id)
+        OR EXISTS (SELECT 1 FROM call_notification_followers f WHERE f.call_id = c.id)
+      )
+    ORDER BY c.opened_at DESC
+    LIMIT ${limit}
+  `);
+  return result.rows.map((row) => ({
+    externalId: row.external_id,
+    partitionDate: String(row.partition_date).slice(0, 10),
+  }));
 }
 
 export async function runRio1746Sync(
@@ -141,21 +177,23 @@ export async function runRio1746RangeSync(
         if (remaining !== undefined) remaining -= result.totalFetched;
         if (result.coverage !== 'complete') break;
       }
+      let tracked: TrackedImportResult | null = null;
+      if (options.revisitTracked) {
+        const calls = await listTrackedOpenCalls(db, dates[0]);
+        if (calls.length > 0)
+          tracked = await importTrackedCalls(bq, db, calls, { ...options, budget });
+      }
       const coverage =
         results.length === dates.length &&
-        results.every((result) => result.coverage === 'complete')
+        results.every((result) => result.coverage === 'complete') &&
+        (tracked === null || tracked.coverage === 'complete')
           ? 'complete'
           : 'partial';
-      const totalFetched = results.reduce(
-        (sum, part) => sum + part.totalFetched,
-        0,
-      );
-      const totalImported = results.reduce(
-        (sum, part) => sum + part.imported,
-        0,
-      );
-      const totalUpdated = results.reduce((sum, part) => sum + part.updated, 0);
-      const totalRejected = results.reduce((sum, part) => sum + part.rejected, 0);
+      const parts = [...results, ...(tracked ? [tracked] : [])];
+      const totalFetched = parts.reduce((sum, part) => sum + part.totalFetched, 0);
+      const totalImported = parts.reduce((sum, part) => sum + part.imported, 0);
+      const totalUpdated = parts.reduce((sum, part) => sum + part.updated, 0);
+      const totalRejected = parts.reduce((sum, part) => sum + part.rejected, 0);
       const [row] = await db
         .update(sourceSyncRuns)
         .set({
@@ -166,7 +204,7 @@ export async function runRio1746RangeSync(
           importedCount: totalImported,
           updatedCount: totalUpdated,
           rejectedCount: totalRejected,
-          details: { partitions: results },
+          details: { partitions: results, tracked },
         })
         .where(eq(sourceSyncRuns.id, id))
         .returning();
@@ -174,6 +212,7 @@ export async function runRio1746RangeSync(
         run: publicRun(row),
         coverage,
         partitions: results,
+        tracked,
         totalFetched,
         totalImported,
         totalUpdated,

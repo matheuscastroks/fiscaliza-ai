@@ -31,6 +31,16 @@ export function formatCallDate(
   return date ? date.toLocaleDateString('pt-BR', options) : null;
 }
 
+/** Data com hora para instantes; só a data para valores sem horário (prazos). "—" quando falta. */
+export function formatCallDateTime(value?: string | null): string {
+  if (!value) return '—';
+  const options: Intl.DateTimeFormatOptions = isDateOnly(value)
+    ? { day: '2-digit', month: '2-digit', year: 'numeric' }
+    : { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+  const date = parseCallDate(value);
+  return date ? date.toLocaleString('pt-BR', options) : value;
+}
+
 type Unit = 'day' | 'hour' | 'month' | null;
 function unitOf(rawUnit?: string | null): Unit {
   const unit = (rawUnit || '').trim().toUpperCase();

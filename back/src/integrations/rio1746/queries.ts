@@ -1,6 +1,6 @@
 export interface ParameterizedBigQuery {
   query: string;
-  params: Record<string, string | number>;
+  params: Record<string, string | number | string[]>;
 }
 
 /**
@@ -62,18 +62,7 @@ export function expandPartitionDateRange(startDate: string, endDate: string): st
   return dates;
 }
 
-export function buildPartitionCallsQuery(
-  partitionDate: string,
-  limit = 2500,
-  offset = 0,
-  afterId?: string,
-): ParameterizedBigQuery {
-  const safePartition = assertValidPartitionDate(partitionDate);
-  const safeLimit = assertSafeBoundedInt(limit, 1, 50000, 'limit');
-  const safeOffset = assertSafeBoundedInt(offset, 0, 1000000, 'offset');
-
-  return {
-    query: `
+const CALL_COLUMNS_AND_JOINS = `
       SELECT
         c.id_chamado,
         c.data_inicio,
@@ -108,7 +97,21 @@ export function buildPartitionCallsQuery(
         FROM \`datario.dados_mestres.logradouro\`
         GROUP BY id_logradouro
       ) l ON c.id_logradouro = l.id_logradouro
-      WHERE c.data_particao = DATE(@partitionDate)${
+`;
+
+export function buildPartitionCallsQuery(
+  partitionDate: string,
+  limit = 2500,
+  offset = 0,
+  afterId?: string,
+): ParameterizedBigQuery {
+  const safePartition = assertValidPartitionDate(partitionDate);
+  const safeLimit = assertSafeBoundedInt(limit, 1, 50000, 'limit');
+  const safeOffset = assertSafeBoundedInt(offset, 0, 1000000, 'offset');
+
+  return {
+    query: `
+${CALL_COLUMNS_AND_JOINS}      WHERE c.data_particao = DATE(@partitionDate)${
         afterId === undefined
           ? ''
           : '\n        AND CAST(c.id_chamado AS STRING) > @afterId'
@@ -143,5 +146,47 @@ export function buildLatestPartitionsQuery(limit = 7): ParameterizedBigQuery {
       days: safeLimit,
       limit: safeLimit,
     },
+  };
+}
+
+/** Máximo de chamados por consulta de revisita (parâmetro de array do BigQuery). */
+export const TRACKED_IDS_PER_QUERY = 500;
+
+/**
+ * Relê chamados específicos (salvos ou acompanhados e ainda abertos). A partição
+ * é a data de abertura, então um chamado antigo só tem a situação atualizada se
+ * for relido pela própria partição; filtrar por ela mantém a consulta barata.
+ */
+export function buildTrackedCallsQuery(
+  partitionDates: string[],
+  ids: string[],
+  limit = TRACKED_IDS_PER_QUERY,
+  afterId?: string,
+): ParameterizedBigQuery {
+  if (partitionDates.length === 0 || ids.length === 0)
+    throw new Error('Tracked calls query needs at least one partition and one id.');
+  if (ids.length > TRACKED_IDS_PER_QUERY)
+    throw new Error(`Too many tracked ids (${ids.length}); maximum is ${TRACKED_IDS_PER_QUERY}.`);
+  const partitions = [...new Set(partitionDates.map(assertValidPartitionDate))];
+  const safeIds = ids.map((id) => {
+    if (!/^[\w-]{1,64}$/.test(id)) throw new Error(`Invalid call id: "${id}".`);
+    return id;
+  });
+  const safeLimit = assertSafeBoundedInt(limit, 1, 50000, 'limit');
+  return {
+    query: `${CALL_COLUMNS_AND_JOINS}
+      WHERE c.data_particao IN UNNEST(ARRAY(SELECT DATE(p) FROM UNNEST(@partitions) AS p))
+        AND CAST(c.id_chamado AS STRING) IN UNNEST(@ids)${
+          afterId === undefined
+            ? ''
+            : '\n        AND CAST(c.id_chamado AS STRING) > @afterId'
+        }
+      ORDER BY CAST(c.id_chamado AS STRING) ASC
+      LIMIT @limit
+    `,
+    params:
+      afterId === undefined
+        ? { partitions, ids: safeIds, limit: safeLimit }
+        : { partitions, ids: safeIds, limit: safeLimit, afterId },
   };
 }

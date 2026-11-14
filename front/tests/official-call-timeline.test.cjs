@@ -6,7 +6,7 @@ const path = require('node:path');
 const ROOT_DIR = path.resolve(__dirname, '..');
 
 test('official call: details screen integrates timeline, sla badge and civic share action', () => {
-  const detailsPath = path.join(ROOT_DIR, 'app', 'OfficialCallDetailsScreen.tsx');
+  const detailsPath = path.join(ROOT_DIR, 'features', 'city', 'call-details', 'OfficialCallDetailsScreen.tsx');
   assert.ok(fs.existsSync(detailsPath), 'OfficialCallDetailsScreen.tsx must exist');
 
   const content = fs.readFileSync(detailsPath, 'utf8');

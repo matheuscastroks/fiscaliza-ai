@@ -3,7 +3,6 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Chip } from '@/components/ui/Chip';
 import { IconButton } from '@/components/ui/IconButton';
 import { InsetGroup, ListRow } from '@/components/ui/ListRow';
-import { StatusBadge } from '@/components/ui/StatusBadge';
 
 describe('componentes base', () => {
   it('Chip mostra o estado selecionado e responde ao toque', async () => {
@@ -22,10 +21,6 @@ describe('componentes base', () => {
     expect(onPress).toHaveBeenCalled();
   });
 
-  it('StatusBadge sempre mostra a situação em texto', async () => {
-    await render(<StatusBadge label="Em andamento" tone="progress" />);
-    expect(screen.getByText('Em andamento')).toBeTruthy();
-  });
 
   it('ListRow só vira botão quando tem ação', async () => {
     const onPress = jest.fn();
@@ -40,4 +35,28 @@ describe('componentes base', () => {
     expect(screen.getByText('Somente leitura')).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Somente leitura/ })).toBeNull();
   });
+});
+
+it('Chip desabilitado não executa a ação', async () => {
+  const onPress = jest.fn();
+  await render(<Chip label="Abertos" disabled onPress={onPress} />);
+  const chip = screen.getByRole('button', { name: 'Abertos' });
+  expect(chip.props.accessibilityState).toMatchObject({ disabled: true });
+  await fireEvent.press(chip);
+  expect(onPress).not.toHaveBeenCalled();
+});
+
+it('IconButton mantém alvo mínimo de toque', async () => {
+  const { StyleSheet } = require('react-native');
+  await render(<IconButton icon="menu" accessibilityLabel="Menu" onPress={jest.fn()} />);
+  const button = screen.getByRole('button', { name: 'Menu' });
+  const style = StyleSheet.flatten(button.props.style);
+  expect(style.width).toBeGreaterThanOrEqual(48);
+  expect(style.height).toBeGreaterThanOrEqual(48);
+});
+
+it('InsetGroup aceita filhos ausentes sem esconder as linhas', async () => {
+  await render(<InsetGroup><ListRow title="Primeira" />{null}<ListRow title="Segunda" /></InsetGroup>);
+  expect(screen.getByText('Primeira')).toBeTruthy();
+  expect(screen.getByText('Segunda')).toBeTruthy();
 });

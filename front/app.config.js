@@ -26,7 +26,7 @@ module.exports = ({ config }) => {
         'expo-image-picker',
         {
           photosPermission:
-            'Permita selecionar fotos para complementar seu registro.',
+            'O Fiscaliza aí acessa suas fotos só quando você escolhe uma imagem para o seu perfil.',
           microphonePermission: false,
         },
       ],
@@ -37,6 +37,16 @@ module.exports = ({ config }) => {
           : {},
       ],
       'expo-secure-store',
+      'expo-status-bar',
+      'expo-web-browser',
+      [
+        '@sentry/react-native/expo',
+        {
+          organization: 'instituto-de-pesquisa-economic',
+          project: 'fiscaliza-ai',
+          // O envio de source maps no build do EAS usa SENTRY_AUTH_TOKEN (secret).
+        },
+      ],
     ],
     extra: {
       ...(config.extra || {}),

@@ -81,8 +81,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <AppText
             variant="sectionTitle"
             color="ink"
+            accessibilityRole="header"
             numberOfLines={1}
-            style={onBack ? { textAlign: 'center' } : undefined}
+            style={onBack && !rightElement ? { textAlign: 'center' } : undefined}
           >
             {title === 'Fiscaliza aí' ? (
               <>
@@ -107,7 +108,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         {rightElement ? (
           <View style={styles.rightArea}>{rightElement}</View>
         ) : onBack ? (
-          <View style={{ width: 48 }} />
+          <View style={{ width: layout.touchTarget.minWidth }} />
         ) : null}
       </View>
     </View>
@@ -138,8 +139,8 @@ const createStyles = (colors: ThemeColors) =>
       gap: spacing.sm,
     },
     circleButton: {
-      width: 48,
-      height: 48,
+      width: layout.touchTarget.minWidth,
+      height: layout.touchTarget.minHeight,
       borderRadius: layout.radius.card,
       backgroundColor: colors.surface,
       alignItems: 'center',

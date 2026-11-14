@@ -128,6 +128,8 @@ export async function sendExpoPushBatch(
           'Accept-Encoding': 'gzip, deflate',
           'Content-Type': 'application/json',
         },
+        // Sem prazo, uma Expo lenta seguraria a sincronização (e o lock da fonte).
+        signal: AbortSignal.timeout(15_000),
         body: JSON.stringify(
           slice.map((message) => ({
             ...message,
@@ -162,46 +164,28 @@ export type CallStatusChange = {
   situation?: string | null;
 };
 
-// Avisa quem segue os chamados que mudaram de situação. Devolve quantos avisos
-// foram aceitos pela Expo. Nunca lança: falha de envio não pode derrubar a
-// sincronização que a chamou.
-export async function notifyStatusChanges(
-  db: Database,
-  changes: CallStatusChange[],
-  customFetch: typeof fetch = fetch,
-): Promise<number> {
-  if (changes.length === 0) return 0;
-  try {
-    const byCall = new Map(changes.map((change) => [change.callId, change]));
-    const followers = await db
-      .select({
-        id: callNotificationFollowers.id,
-        callId: callNotificationFollowers.callId,
-        pushToken: callNotificationFollowers.pushToken,
-        lastNotified: callNotificationFollowers.lastNotifiedStatus,
-      })
-      .from(callNotificationFollowers)
-      .where(inArray(callNotificationFollowers.callId, [...byCall.keys()]));
+type PendingPush = { followerId: string; state: string; message: PushMessage };
 
-    const pending: Array<{ followerId: string; state: string; message: PushMessage }> = [];
-    for (const follower of followers) {
-      const change = byCall.get(follower.callId);
-      if (!change) continue;
-      const state = callStateLabel(change.status, change.situation);
-      if (follower.lastNotified === state) continue;
-      pending.push({
-        followerId: follower.id,
-        state,
-        message: {
-          to: follower.pushToken,
-          title: change.serviceType
-            ? `Chamado de ${change.serviceType}`
-            : 'Chamado do 1746',
-          body: `A Prefeitura publicou nova situação: ${state}.`,
-          data: { callId: follower.callId, status: change.status },
-        },
-      });
-    }
+function pushMessage(
+  follower: { callId: string; pushToken: string },
+  call: { serviceType?: string | null; status: string | null },
+  state: string,
+): PushMessage {
+  return {
+    to: follower.pushToken,
+    title: call.serviceType ? `Chamado de ${call.serviceType}` : 'Chamado do 1746',
+    body: `A Prefeitura publicou nova situação: ${state}.`,
+    data: { callId: follower.callId, status: call.status },
+  };
+}
+
+// Envia e só então marca a situação como avisada: o que falhou continua
+// pendente e sai no próximo `notifyPendingFollowers`.
+async function sendPending(
+  db: Database,
+  pending: PendingPush[],
+  customFetch: typeof fetch,
+): Promise<number> {
     if (pending.length === 0) return 0;
 
     const outcomes = await sendExpoPushBatch(
@@ -231,6 +215,90 @@ export async function notifyStatusChanges(
         .delete(userPushTokens)
         .where(inArray(userPushTokens.pushToken, invalidTokens));
     return delivered.length;
+}
+
+/**
+ * Caixa de saída: avisa todo seguidor cuja última situação avisada difere da
+ * situação gravada do chamado. Cobre os envios que falharam antes (Expo fora,
+ * rede) e as mudanças gravadas sem aviso. Nunca lança.
+ */
+export async function notifyPendingFollowers(
+  db: Database,
+  customFetch: typeof fetch = fetch,
+  limit = 5000,
+): Promise<number> {
+  try {
+    const result = await db.execute<{
+      follower_id: string;
+      call_id: string;
+      push_token: string;
+      service_type: string | null;
+      status: string | null;
+      situation: string | null;
+      last_notified: string | null;
+    }>(sql`
+      SELECT f.id AS follower_id, f.call_id, f.push_token, f.last_notified_status AS last_notified,
+             c.service_type, c.official_status AS status, c.official_situation AS situation
+      FROM call_notification_followers f
+      JOIN official_calls c ON c.id = f.call_id
+      ORDER BY f.id
+      LIMIT ${limit}
+    `);
+    const pending: PendingPush[] = [];
+    for (const row of result.rows) {
+      const state = callStateLabel(row.status, row.situation);
+      if (row.last_notified === state) continue;
+      pending.push({
+        followerId: row.follower_id,
+        state,
+        message: pushMessage(
+          { callId: row.call_id, pushToken: row.push_token },
+          { serviceType: row.service_type, status: row.status },
+          state,
+        ),
+      });
+    }
+    return await sendPending(db, pending, customFetch);
+  } catch (error) {
+    console.error('[push] falha na caixa de saída de avisos:', error);
+    return 0;
+  }
+}
+
+// Avisa quem segue os chamados que mudaram de situação. Devolve quantos avisos
+// foram aceitos pela Expo. Nunca lança: falha de envio não pode derrubar a
+// sincronização que a chamou.
+export async function notifyStatusChanges(
+  db: Database,
+  changes: CallStatusChange[],
+  customFetch: typeof fetch = fetch,
+): Promise<number> {
+  if (changes.length === 0) return 0;
+  try {
+    const byCall = new Map(changes.map((change) => [change.callId, change]));
+    const followers = await db
+      .select({
+        id: callNotificationFollowers.id,
+        callId: callNotificationFollowers.callId,
+        pushToken: callNotificationFollowers.pushToken,
+        lastNotified: callNotificationFollowers.lastNotifiedStatus,
+      })
+      .from(callNotificationFollowers)
+      .where(inArray(callNotificationFollowers.callId, [...byCall.keys()]));
+
+    const pending: PendingPush[] = [];
+    for (const follower of followers) {
+      const change = byCall.get(follower.callId);
+      if (!change) continue;
+      const state = callStateLabel(change.status, change.situation);
+      if (follower.lastNotified === state) continue;
+      pending.push({
+        followerId: follower.id,
+        state,
+        message: pushMessage(follower, change, state),
+      });
+    }
+    return await sendPending(db, pending, customFetch);
   } catch (error) {
     console.error('[push] falha ao enviar avisos de mudança de situação:', error);
     return 0;
@@ -247,6 +315,34 @@ export function registerNotificationRoutes(
   },
 ) {
   const { db } = options;
+
+  // Sair da conta neste aparelho: o token deixa de receber avisos da conta.
+  // Só apaga o token se ele for desta conta (outra conta não desliga o aparelho
+  // de ninguém). Os avisos que ele seguia saem junto (ON DELETE CASCADE).
+  app.delete<{ Body: { token: string } }>(
+    '/api/v1/notifications/register-token',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          required: ['token'],
+          additionalProperties: false,
+          properties: { token: tokenSchema },
+        },
+      },
+    },
+    async (req) => {
+      await db
+        .delete(userPushTokens)
+        .where(
+          and(
+            eq(userPushTokens.pushToken, req.body.token),
+            eq(userPushTokens.userId, req.user!.id),
+          ),
+        );
+      return ok(null);
+    },
+  );
 
   // Registra o token do aparelho para a conta logada. Trocar de conta no mesmo
   // aparelho é legítimo: o token passa para a conta nova e os avisos que a
@@ -267,7 +363,7 @@ export function registerNotificationRoutes(
         },
       },
     },
-    async (req, reply) => {
+    async (req) => {
       const { token, platform } = req.body;
       if (!isExpoPushToken(token))
         throw httpError(400, 'Token de avisos inválido.');
@@ -336,7 +432,7 @@ export function registerNotificationRoutes(
         },
       },
     },
-    async (req, reply) => {
+    async (req) => {
       const { callId, token } = req.body;
       const user = req.user!;
 
@@ -392,7 +488,7 @@ export function registerNotificationRoutes(
         },
       },
     },
-    async (req, reply) => {
+    async (req) => {
       const { callId, token } = req.body;
       if (!(await ownsToken(token, req.user!.id)))
         throw httpError(403, 'Este aparelho não está registrado na sua conta.');

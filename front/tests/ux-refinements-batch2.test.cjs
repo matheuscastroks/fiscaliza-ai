@@ -39,7 +39,7 @@ test('places screen: renders structured cards with icons, radius badges and map 
 });
 
 test('official call details: provides quick protocol share/copy pill', () => {
-  const detailsPath = path.join(ROOT_DIR, 'app', 'OfficialCallDetailsScreen.tsx');
+  const detailsPath = path.join(ROOT_DIR, 'features', 'city', 'call-details', 'OfficialCallDetailsScreen.tsx');
   assert.ok(fs.existsSync(detailsPath), 'OfficialCallDetailsScreen.tsx must exist');
 
   const content = fs.readFileSync(detailsPath, 'utf8');

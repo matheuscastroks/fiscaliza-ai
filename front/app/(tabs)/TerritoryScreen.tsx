@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import type { CameraPadding } from '@/features/territory/useMapCamera';
+import { useTabBarInset } from '@/hooks/useTabBarInset';
 import { mapPerformanceEnabled, mapPerformanceVariant } from '@/features/territory/mapPerformance';
 
 import { TerritoryFilterBar, TerritoryFilterModal } from '@/components/territory/TerritoryFilterBar';
@@ -36,8 +39,6 @@ import { FacilityLoadMoreButton } from '@/components/territory/FacilityLoadMoreB
 
 import { fontSizes } from '@/theme/typography';
 
-import { lightColors } from '@/theme/colors';
-
 import { elevation } from '@/theme/elevation';
 
 import { useTerritoryController } from '@/features/territory/useTerritoryController';
@@ -52,6 +53,9 @@ export function TerritoryContent() {
   const styles = useThemedStyles(createStyles);
   // Altura real do cartão de resultados: os controles do mapa ficam sempre acima dele.
   const [summaryHeight, setSummaryHeight] = useState(110);
+  const [headerHeight, setHeaderHeight] = useState(112);
+  // Controles flutuantes ficam logo acima da barra de abas.
+  const floatBottom = useTabBarInset().barTop + spacing.sm;
   const {
     isFocused,
     colors,
@@ -87,6 +91,7 @@ export function TerritoryContent() {
     effectiveListView,
     visitTrace,
     officialCalls,
+    spatialMap,
     serviceTypeOptions,
     filtersOpen,
     setFiltersOpen,
@@ -126,12 +131,20 @@ export function TerritoryContent() {
     summarySubLabel,
   } = useTerritoryController();
 
+  // Enquadramentos deixam livres a barra de busca, o resumo e a barra de abas.
+  const cameraPadding = useMemo<CameraPadding>(() => [
+    headerHeight + spacing.lg,
+    spacing.xxl,
+    floatBottom + summaryHeight + spacing.lg,
+    spacing.xxl,
+  ], [headerHeight, summaryHeight, floatBottom]);
+
   return (
     <View style={[styles.container, !isFocused && mapPerformanceVariant !== 'visible-surface' && { display: 'none' }]}>
       <AppToast
         message={toastMessage}
         onDismiss={() => setToastMessage(null)}
-        topOffset={insets.top + 130}
+        topOffset={headerHeight + spacing.xs}
         type={locationError ? 'warning' : 'info'}
       />
 
@@ -141,6 +154,11 @@ export function TerritoryContent() {
             style={StyleSheet.absoluteFill}
             region={region}
             markers={allMapMarkers}
+            spatialCells={layers.includes('official') ? spatialMap.data?.cells ?? [] : undefined}
+            onSpatialCellPress={cell => updateCameraRegion({
+              latitude: cell.latitude, longitude: cell.longitude, latitudeDelta: Math.max(0.00004, cell.north - cell.south), longitudeDelta: Math.max(0.00004, cell.east - cell.west), zoom: Math.min(19, (region.zoom ?? 12) + 2),
+              bounds: { northEast: [cell.east + 0.00002, cell.north + 0.00002], southWest: [cell.west - 0.00002, cell.south - 0.00002] },
+            })}
             boundary={boundary.data?.geometry}
             searchArea={mapOverlay.searchArea}
             deviceLocation={mapOverlay.deviceLocation}
@@ -148,6 +166,9 @@ export function TerritoryContent() {
             selectedId={selectedId}
             selectedClusterIds={selectedCluster?.ids || null}
             isDark={mode === 'dark'}
+            cameraPadding={cameraPadding}
+            accessibilityLabel={`Mapa de chamados. ${summaryLabel}`}
+            accessibilityHint="Para navegar pelos chamados com leitor de tela, use o botão Ver em lista"
             performanceDiagnostics={mapPerformanceEnabled}
             diagnosticTrace={visitTrace}
             onMarkerClick={handleMarkerClick}
@@ -157,25 +178,39 @@ export function TerritoryContent() {
           />
 
           {officialCalls.isLoading && (
-            <View style={[styles.loadingPill, { top: insets.top + 148 }]}>
-              <ActivityIndicator size="small" color={lightColors.white} />
-              <AppText variant="caption" style={{ color: lightColors.white, fontWeight: '600' }}>
-                Carregando chamados...
+            <View
+              accessibilityLiveRegion="polite"
+              style={[styles.loadingPill, { top: headerHeight + spacing.sm }]}
+            >
+              <ActivityIndicator size="small" color={colors.onFloatingInk} />
+              <AppText variant="caption" style={{ color: colors.onFloatingInk, fontWeight: '600' }}>
+                Carregando chamados…
               </AppText>
             </View>
           )}
+
+          {/* Faixa sob a barra de status: ícones legíveis sobre qualquer trecho do mapa. */}
+          <LinearGradient
+            pointerEvents="none"
+            colors={[colors.statusScrim, colors.statusScrim, colors.transparent]}
+            locations={[0, 0.6, 1]}
+            style={[styles.statusScrim, { height: insets.top + spacing.lg }]}
+          />
         </View>
       )}
 
       {mapAvailable && (
-        <View style={[styles.topFloatingHeader, { paddingTop: insets.top + spacing.xs }]}>
+        <View
+          onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height)}
+          style={[styles.topFloatingHeader, { paddingTop: insets.top + spacing.xs }]}
+        >
           <TerritoryFilterBar {...filterBarProps} />
         </View>
       )}
 
       {/* Botão Contextual Flutuante: Buscar Nesta Área (só aparece se moveu a câmera ou se área estiver ativa) */}
       {!effectiveListView && (hasMovedCamera || areaOnly) && (
-        <View style={[styles.contextualAreaPillContainer, { top: insets.top + 108 }]}>
+        <View style={[styles.contextualAreaPillContainer, { top: headerHeight + spacing.xs }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={areaOnly ? 'Voltar à área escolhida' : 'Buscar nesta área'}
@@ -196,7 +231,7 @@ export function TerritoryContent() {
 
       {/* Dock Vertical Direita: Controles Rápidos do Mapa (Posição e Enquadrar) */}
       {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
-        <View style={[styles.rightMapDock, { bottom: insets.bottom + 90 + summaryHeight + spacing.sm }]}>
+        <View style={[styles.rightMapDock, { bottom: floatBottom + summaryHeight + spacing.sm }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Minha posição"
@@ -217,7 +252,11 @@ export function TerritoryContent() {
             accessibilityLabel="Ver a cidade toda"
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              updateCameraRegion(municipalOverviewRegion);
+              // Caixa nova: refaz o enquadramento mesmo se a região não mudou.
+              updateCameraRegion({
+                ...municipalOverviewRegion,
+                bounds: municipalOverviewRegion.bounds ? { ...municipalOverviewRegion.bounds } : undefined,
+              });
               setAreaOnly(false);
               setSelectedId(null);
               setSelectedCluster(null);
@@ -233,12 +272,13 @@ export function TerritoryContent() {
       {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
         <View
           onLayout={(event) => setSummaryHeight(event.nativeEvent.layout.height)}
-          style={[styles.bottomFloatingContainer, { bottom: insets.bottom + 90 }]}
+          style={[styles.bottomFloatingContainer, { bottom: floatBottom }]}
         >
           {/* Barra Contextual de Resultados e Acesso à Lista */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`${summaryLabel}. ${summarySubLabel}`}
+            accessibilityLiveRegion="polite"
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setIsListView(true);
@@ -285,7 +325,7 @@ export function TerritoryContent() {
               }));
             }
           }}
-          bottomOffset={insets.bottom + 92}
+          bottomOffset={floatBottom}
         />
       )}
 
@@ -294,7 +334,7 @@ export function TerritoryContent() {
           entry={selectedClusterEntries[0]}
           onOpen={openEntry}
           onClose={() => setSelectedCluster(null)}
-          bottomOffset={insets.bottom + 92}
+          bottomOffset={floatBottom}
         />
       )}
 
@@ -306,7 +346,7 @@ export function TerritoryContent() {
             setSelectedId(null);
             if (focusId) router.setParams({ focusId: undefined });
           }}
-          bottomOffset={insets.bottom + 92}
+          bottomOffset={floatBottom}
         />
       )}
 
@@ -363,21 +403,22 @@ const createStyles = (colors: ThemeColors) =>
     loadingPill: {
       ...elevation.floating,
       position: 'absolute', alignSelf: 'center', flexDirection: 'row', alignItems: 'center',
-      gap: 8, backgroundColor: 'rgba(15, 23, 42, 0.85)', paddingHorizontal: 14, paddingVertical: 8,
-      borderRadius: layout.radius.pill, zIndex: 40,
+      gap: 8, backgroundColor: colors.floatingInk, paddingHorizontal: 14, paddingVertical: 8,
+      borderRadius: layout.radius.control, zIndex: 40,
     },
+    statusScrim: { position: 'absolute', top: 0, left: 0, right: 0 },
     topFloatingHeader: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50, paddingHorizontal: spacing.md, gap: 8 },
     contextualAreaPillContainer: { position: 'absolute', alignSelf: 'center', zIndex: 45 },
     rightMapDock: { position: 'absolute', right: spacing.md, zIndex: 40, gap: 10 },
     bottomFloatingContainer: { position: 'absolute', left: spacing.md, right: spacing.md, zIndex: 40, gap: 8 },
     dockCircleButton: {
       ...elevation.floating,
-      width: 42, height: 42, borderRadius: layout.radius.panel, alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
+      width: layout.touchTarget.minWidth, height: layout.touchTarget.minHeight, borderRadius: layout.radius.panel, alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
     },
     areaPillButton: {
       ...elevation.floating,
-      flexDirection: 'row', alignItems: 'center', gap: 6, height: 42, paddingHorizontal: spacing.md,
-      borderRadius: layout.radius.pill, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
+      flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: layout.touchTarget.minHeight, paddingHorizontal: spacing.md,
+      borderRadius: layout.radius.control, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
     },
     summaryBarButton: {
       flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.sm + 4,

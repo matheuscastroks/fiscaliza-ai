@@ -64,6 +64,7 @@ test(
       method: 'POST',
       url: '/api/auth/login',
       remoteAddress: '203.0.113.77',
+      headers: { 'x-fiscaliza-client': 'citizen-native' },
       payload: { email: a.email, password: 'Senha-de-teste-123' },
     });
     const other = { headers: { authorization: `Bearer ${login.json().data.token}` } } as unknown as typeof a;
@@ -79,5 +80,62 @@ test(
     assert.equal((await call(a, 'GET', '')).json().data.items.length, 2);
     await call(a, 'DELETE', '');
     assert.equal((await call(a, 'GET', '')).json().data.items.length, 0);
+  },
+);
+
+test('período por dia usa o dia no Rio (UTC-3), não em UTC', async () => {
+  const { officialDateConditions } = await import('../src/neighborhood-overview.js');
+  const { PgDialect } = await import('drizzle-orm/pg-core');
+  const dialect = new PgDialect();
+  const [lower, upper] = officialDateConditions('2026-10-01', '2026-10-01').map(
+    (condition) => dialect.sqlToQuery(condition).params[0] as string,
+  );
+  assert.equal(new Date(lower).toISOString(), '2026-10-01T03:00:00.000Z');
+  assert.equal(new Date(upper).toISOString(), '2026-10-02T03:00:00.000Z');
+});
+
+test(
+  'PostgreSQL: perto do limite, o merge adota o chamado novo mesmo com um já salvo no pedido',
+  { skip: !process.env.DATABASE_URL },
+  async (t) => {
+    const { createCitizen } = await import('./helpers.js');
+    const { savedCalls } = await import('../src/schema.js');
+    const app = await buildApp();
+    const { db, pool } = database();
+    const ids = Array.from({ length: 501 }, () => `limite-${randomUUID()}`);
+    t.after(async () => {
+      await db.delete(officialCalls).where(inArray(officialCalls.externalId, ids));
+      await app.close();
+      await pool.end();
+    });
+    await applyMigrations(pool);
+    await importPartition(
+      bigQueryFixture(() =>
+        ids.map((id) => ({
+          id_chamado: id,
+          data_inicio: '2026-09-20T10:00:00',
+          tipo: 'Iluminação Pública',
+          subtipo: 'Reparo',
+          data_particao: '2026-09-20',
+        })),
+      ),
+      db,
+      '2026-09-20',
+      { pageSize: 1000 },
+    );
+    const callIds = ids.map((id) => `rio1746-${id}`);
+    const user = await createCitizen(app, db);
+    await db.insert(savedCalls).values(callIds.slice(0, 499).map((callId) => ({ userId: user.id, callId })));
+
+    const merged = await app.inject({
+      method: 'POST',
+      url: '/api/v1/saved-calls/merge',
+      headers: user.headers,
+      payload: { callIds: [callIds[0], callIds[499], callIds[500]] },
+    });
+    assert.equal(merged.statusCode, 200, merged.body);
+    assert.equal(merged.json().data.added, 1, 'o já salvo não ocupa a última vaga');
+    const saved = await db.select().from(savedCalls).where(inArray(savedCalls.callId, [callIds[499], callIds[500]]));
+    assert.deepEqual(saved.map((row) => row.callId), [callIds[499]], 'na ordem pedida');
   },
 );

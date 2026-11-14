@@ -4,6 +4,7 @@ import { and, count, desc, eq, inArray } from 'drizzle-orm';
 import type { Database } from './db.js';
 import { formatOfficialCall } from './official-calls.js';
 import { officialCalls, savedCalls } from './schema.js';
+import type { SavedCallsList } from '../../shared/contracts.js';
 
 export const MAX_SAVED_CALLS = 500;
 const callId = { type: 'string', minLength: 1, maxLength: 100 };
@@ -19,12 +20,13 @@ export function registerSavedCallsRoutes(app: FastifyInstance, db: Database) {
       .where(eq(savedCalls.userId, req.user!.id))
       .orderBy(desc(savedCalls.savedAt))
       .limit(MAX_SAVED_CALLS);
-    return ok({
+    const list: SavedCallsList = {
       items: rows.map((row) => ({
         call: formatOfficialCall(row.call),
         savedAt: row.savedAt.toISOString(),
       })),
-    });
+    };
+    return ok(list);
   });
 
   app.put<{ Params: { callId: string } }>(
@@ -38,7 +40,7 @@ export function registerSavedCallsRoutes(app: FastifyInstance, db: Database) {
         },
       },
     },
-    async (req, reply) => {
+    async (req) => {
       const userId = req.user!.id;
       const [call] = await db
         .select({ id: officialCalls.id })
@@ -76,14 +78,29 @@ export function registerSavedCallsRoutes(app: FastifyInstance, db: Database) {
         },
       },
     },
-    async (req, reply) => {
+    async (req) => {
       const userId = req.user!.id;
       const wanted = [...new Set(req.body.callIds)];
       if (wanted.length === 0) return ok({ added: 0 });
-      const existing = await db
-        .select({ id: officialCalls.id })
-        .from(officialCalls)
-        .where(inArray(officialCalls.id, wanted));
+      const known = new Set(
+        (
+          await db
+            .select({ id: officialCalls.id })
+            .from(officialCalls)
+            .where(inArray(officialCalls.id, wanted))
+        ).map((row) => row.id),
+      );
+      const already = new Set(
+        (
+          await db
+            .select({ callId: savedCalls.callId })
+            .from(savedCalls)
+            .where(and(eq(savedCalls.userId, userId), inArray(savedCalls.callId, wanted)))
+        ).map((row) => row.callId),
+      );
+      // Só os novos contam para o limite, na ordem em que o aparelho pediu.
+      const fresh = wanted.filter((id) => known.has(id) && !already.has(id));
+      if (fresh.length === 0) return ok({ added: 0 });
       const [{ total }] = await db
         .select({ total: count() })
         .from(savedCalls)
@@ -91,9 +108,7 @@ export function registerSavedCallsRoutes(app: FastifyInstance, db: Database) {
       const room = Math.max(0, MAX_SAVED_CALLS - total);
       if (room === 0)
         throw httpError(400, 'Você chegou ao limite de chamados salvos.');
-      const rows = existing
-        .slice(0, room)
-        .map((row) => ({ userId, callId: row.id }));
+      const rows = fresh.slice(0, room).map((callId) => ({ userId, callId }));
       if (rows.length === 0) return ok({ added: 0 });
       const inserted = await db
         .insert(savedCalls)

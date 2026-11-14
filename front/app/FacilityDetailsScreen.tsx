@@ -1,8 +1,8 @@
 import React from 'react';
-import { useLocalSearchParams } from 'expo-router';
-import { FacilityDetails } from '@/components/territory/FacilityDetails';
-import { goBack } from '@/utils/navigation';
-export default function FacilityDetailsScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  return <FacilityDetails id={id} onBack={() => goBack()} />;
+import { Redirect, useLocalSearchParams } from 'expo-router';
+import { routeId } from '@/utils/routeId';
+export default function LegacyRoute() {
+  const params = useLocalSearchParams();
+  const id = routeId(params.id);
+  return <Redirect href={id ? { pathname: '/facilities/[id]', params: { id } } : '/+not-found'} />;
 }

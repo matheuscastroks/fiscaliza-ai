@@ -4,7 +4,7 @@ Aplicativo independente que ajuda moradores do Rio de Janeiro (IBGE 3304557) a d
 
 Aplicativo Expo Android/iOS e API Fastify/PostgreSQL. Consulte [PRODUCT.md](PRODUCT.md) para escopo e limites de interpretação.
 
-Na Home, escolha um bairro ou consulte chamados a 500 m, 1 km, 2 km ou 5 km de um ponto. A localização só é solicitada pelo botão correspondente; Casa, Trabalho e outros lugares ficam no aparelho, com endereço/referência e ponto confirmado no mapa ou por coordenadas. Não há autocomplete de endereços nessa versão. O raio é calculado na API antes da paginação; chamados sem coordenadas continuam acessíveis por bairro. No Território, a visualização divide-se entre dois domínios exclusivos: **Chamados 1746** (ocorrências de zeladoria) e **Serviços Públicos** (educação, saúde e praças/lazer), evitando sobreposição e garantindo filtros contextuais com rolagem interna suave. Implementação e validação em [evidências do entorno](plan/evidence/2026-11-06-home-entorno-configuravel.md).
+No Explorar, escolha um bairro ou consulte chamados a 500 m, 1 km, 2 km ou 5 km de um ponto. A localização só é solicitada pelo botão correspondente; Casa, Trabalho e outros lugares ficam no aparelho, com endereço/referência e ponto confirmado no mapa ou por coordenadas. Não há autocomplete de endereços nessa versão. O raio é calculado na API antes da paginação; chamados sem coordenadas continuam acessíveis por bairro. No Território, a visualização divide-se entre dois domínios exclusivos: **Chamados 1746** (ocorrências de zeladoria) e **Serviços Públicos** (educação, saúde e praças/lazer), evitando sobreposição e garantindo filtros contextuais com rolagem interna suave. Implementação e validação em [evidências do entorno](plan/evidence/2026-11-06-home-entorno-configuravel.md).
 
 CI, merge automático das suas branches e ativação das proteções: [.github/README.md](.github/README.md). A release publica somente a API; instruções de VPS em [deploy/README.md](deploy/README.md).
 
@@ -54,7 +54,7 @@ Copy-Item .env.compose.example .env.compose
 docker compose --env-file .env.compose up --build
 ```
 
-API: `http://localhost:3001/api`. O container aplica migrações antes de iniciar a API, sem criar contas ou dados de exemplo. Volumes preservam banco e anexos. Não use `docker compose down -v` para atualizar os serviços, pois remove os dados.
+API: `http://localhost:43001/api` (porta do host definida por `API_PORT` no `.env.compose`; dentro da rede do Compose a API continua em `api:3001`). O container aplica migrações antes de iniciar a API, sem criar contas ou dados de exemplo. Volumes preservam banco e anexos. Não use `docker compose down -v` para atualizar os serviços, pois remove os dados.
 
 ### Acesso, criação e encerramento de conta
 
@@ -77,7 +77,7 @@ sessão, login, duplicidade, senha inválida e rejeição de privilégios e orig
 Execute somente contra um banco isolado de validação, pois cria uma conta:
 
 ```powershell
-postman collection run postman/fiscaliza.collection.json -i "Cadastro de conta" --env-var "baseUrl=http://localhost:3001/api" --no-report-events
+postman collection run postman/fiscaliza.collection.json -i "Cadastro de conta" --env-var "baseUrl=http://localhost:43001/api" --no-report-events
 ```
 
 Com PostgreSQL já iniciado, defina `DATABASE_URL` no ambiente do processo:

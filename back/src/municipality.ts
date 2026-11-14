@@ -54,14 +54,15 @@ export function containsPoint(
   });
 }
 export function parseGeometry(value: unknown): Geometry {
-  const root = value as any;
+  type GeoJsonInput = { type?: string; coordinates?: unknown; geometry?: GeoJsonInput; features?: GeoJsonInput[] };
+  const root = value as GeoJsonInput | null;
   const geometry =
     root?.type === 'FeatureCollection'
       ? root.features?.[0]?.geometry
       : root?.type === 'Feature'
         ? root.geometry
         : root;
-  if (!geometry || !['Polygon', 'MultiPolygon'].includes(geometry.type))
+  if (!geometry || !['Polygon', 'MultiPolygon'].includes(geometry.type ?? ''))
     throw territorialError(
       503,
       'Malha municipal indisponível. Tente novamente.',
@@ -72,15 +73,15 @@ export function parseGeometry(value: unknown): Geometry {
     !Array.isArray(polygons) ||
     !polygons.length ||
     polygons.some(
-      (rings: any) =>
+      (rings) =>
         !Array.isArray(rings) ||
         !rings.length ||
         rings.some(
-          (ring: any) =>
+          (ring) =>
             !Array.isArray(ring) ||
             ring.length < 4 ||
             ring.some(
-              (p: any) =>
+              (p) =>
                 !Array.isArray(p) ||
                 p.length < 2 ||
                 !Number.isFinite(p[0]) ||
@@ -94,7 +95,7 @@ export function parseGeometry(value: unknown): Geometry {
     )
   )
     throw territorialError(503, 'Malha municipal inválida. Tente novamente.');
-  return geometry;
+  return geometry as Geometry;
 }
 export function municipalityFromGeometry(
   id: string,
@@ -160,16 +161,18 @@ export function municipalityService(
       .where(eq(postalCodes.postalCode, cep));
     if (cached && Date.now() - cached.fetchedAt.getTime() < 30 * 86400000)
       return cached.data;
-    const v = (await json(`https://viacep.com.br/ws/${cep}/json/`)) as any;
+    const v = (await json(`https://viacep.com.br/ws/${cep}/json/`)) as Record<string, unknown> | null;
     if (v?.erro === true || v?.erro === 'true')
       throw territorialError(
         404,
         'CEP não encontrado. Verifique o número informado.',
       );
     if (
-      !/^\d{7}$/.test(v?.ibge) ||
+      typeof v?.ibge !== 'string' ||
+      !/^\d{7}$/.test(v.ibge) ||
       typeof v.localidade !== 'string' ||
       !v.localidade.trim() ||
+      typeof v.uf !== 'string' ||
       !/^[A-Z]{2}$/.test(v.uf) ||
       typeof v.bairro !== 'string' ||
       typeof v.logradouro !== 'string' ||
