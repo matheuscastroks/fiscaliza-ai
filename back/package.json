@@ -19,7 +19,7 @@
     "lint": "cd .. && node back/node_modules/eslint/bin/eslint.js back/src back/test shared --max-warnings 0"
   },
   "dependencies": {
-    "@fastify/cookie": "^11.0.2",
+    "@fastify/cookie": "^11.1.5",
     "@fastify/cors": "^11.1.0",
     "@fastify/helmet": "^13.2.0",
     "@fastify/multipart": "^9.2.1",
