@@ -1,5 +1,5 @@
 // Trava de UX Writing: termos técnicos não podem voltar aos textos da interface.
-// Glossário e alternativas em ../plan/39-guia-ux-writing.md.
+// Glossário e alternativas em ../docs/ux-writing.md.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');

@@ -1,10 +1,27 @@
 # Fiscaliza aí — Descobrir, fiscalizar e agir no Rio
 
-Aplicativo independente que ajuda moradores do Rio de Janeiro (IBGE 3304557) a descobrir o que acontece no bairro, acompanhar a atuação da prefeitura e encontrar como agir. Utiliza demandas do 1746 e cadastros de serviços públicos como apoio à fiscalização e à participação cidadã, com origem e cobertura explícitas. Não representa a prefeitura nem abre chamados no 1746.
+Aplicativo independente (Expo Android/iOS + API Fastify/PostgreSQL) que ajuda moradores do Rio de Janeiro (IBGE `3304557`) a **descobrir** chamados e serviços públicos próximos, **fiscalizar** prazos e situações publicadas pela prefeitura e **agir** pelos canais oficiais do 1746.
 
-Aplicativo Expo Android/iOS e API Fastify/PostgreSQL. Consulte [PRODUCT.md](PRODUCT.md) para escopo e limites de interpretação.
+O projeto consulta dados abertos oficiais da **Central 1746 / DATA.RIO** (Google BigQuery) e do **SIURB / Instituto Pereira Passos** (escolas, unidades de saúde, praças/espaços públicos e limites de bairros), com origem e limitações explícitas. Não representa a Prefeitura do Rio de Janeiro e não registra ou encaminha chamados ao 1746.
 
-No Explorar, escolha um bairro ou consulte chamados a 500 m, 1 km, 2 km ou 5 km de um ponto. A localização só é solicitada pelo botão correspondente; Casa, Trabalho e outros lugares ficam no aparelho, com endereço/referência e ponto confirmado no mapa ou por coordenadas. Não há autocomplete de endereços nessa versão. O raio é calculado na API antes da paginação; chamados sem coordenadas continuam acessíveis por bairro. No Território, a visualização divide-se entre dois domínios exclusivos: **Chamados 1746** (ocorrências de zeladoria) e **Serviços Públicos** (educação, saúde e praças/lazer), evitando sobreposição e garantindo filtros contextuais com rolagem interna suave. Implementação e validação em [evidências do entorno](plan/evidence/2026-11-06-home-entorno-configuravel.md).
+## Download (Android)
+
+Os instaladores Android (`.apk`) estão disponíveis em [Releases no GitHub](https://github.com/matheuscastroks/fiscaliza-ai/releases/latest).
+
+## Documentação Principal
+
+| Documento | Conteúdo |
+| --- | --- |
+| [PRODUCT.md](PRODUCT.md) | Propósito, pilares, jornadas atuais e limites de interpretação |
+| [front/DESIGN.md](front/DESIGN.md) | Sistema visual, tokens, componentes e linguagem simples |
+| [docs/arquitetura.md](docs/arquitetura.md) | Arquitetura técnica consolidada, fluxo de dados e endpoints |
+| [docs/fontes-de-dados.md](docs/fontes-de-dados.md) | Contratos, licenças e restrições do DATA.RIO (1746) e SIURB/IPP |
+| [docs/decisoes.md](docs/decisoes.md) | Decisões de engenharia, trade-offs e infraestrutura |
+| [docs/backlog/pendencias.md](docs/backlog/pendencias.md) | Pendências operacionais e melhorias técnicas futuras |
+| [docs/artigo/README.md](docs/artigo/README.md) | Índice de evidências técnicas e métricas para publicação |
+| [docs/historico/README.md](docs/historico/README.md) | Planos, especificações, relatórios e evidências históricas |
+
+No Explorar, escolha um bairro ou consulte chamados a 500 m, 1 km, 2 km ou 5 km de um ponto. A localização só é solicitada pelo botão correspondente; Casa, Trabalho e outros lugares ficam no aparelho, com endereço/referência e ponto confirmado no mapa ou por coordenadas. Não há autocomplete de endereços nessa versão. O raio é calculado na API antes da paginação; chamados sem coordenadas continuam acessíveis por bairro. No Território, a visualização divide-se entre dois domínios exclusivos: **Chamados 1746** (ocorrências de zeladoria) e **Serviços Públicos** (educação, saúde e praças/lazer), evitando sobreposição e garantindo filtros contextuais com rolagem interna suave. Implementação e validação em [evidências do entorno](docs/historico/evidencias/2026-11-06-home-entorno-configuravel.md).
 
 CI, merge automático das suas branches e ativação das proteções: [.github/README.md](.github/README.md). A release publica somente a API; instruções de VPS em [deploy/README.md](deploy/README.md).
 
@@ -129,7 +146,7 @@ npm run sync:siurb --prefix back -- all
 # all importa limites 18 antes de escolas 1, saúde 2 e espaços 16.
 ```
 
-O probe lê metadados e amostras; não equivale à extração integral. A importação é administrativa e nunca ocorre como efeito do build ou navegação. Fontes ausentes, cadastros sem nome e bairros sem vínculo são apresentados como tal. Consulte [integração SIURB](back/src/integrations/siurb/README.md) para limites, codificação e recuperação e [evidência das fontes](plan/evidence/20-siurb-fontes.md) para licença e contagens reais.
+O probe lê metadados e amostras; não equivale à extração integral. A importação é administrativa e nunca ocorre como efeito do build ou navegação. Fontes ausentes, cadastros sem nome e bairros sem vínculo são apresentados como tal. Consulte [integração SIURB](back/src/integrations/siurb/README.md) para limites, codificação e recuperação e [evidência das fontes](docs/historico/evidencias/20-siurb-fontes.md) para licença e contagens reais.
 
 Leituras públicas: /api/data-sources, /api/public-facilities (paginado), /api/territorial-boundaries e seus detalhes, /api/neighborhoods/:id/overview?startDate=AAAA-MM-DD&endDate=AAAA-MM-DD. O OpenAPI gerado com npm run openapi --prefix back documenta os schemas e é publicado como artefato de validação no CI.
 

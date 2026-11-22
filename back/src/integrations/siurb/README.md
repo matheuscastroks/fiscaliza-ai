@@ -12,7 +12,7 @@ O staging fica em memória dentro desses limites; somente um snapshot validado �
 
 Preservamos o GeoJSON recebido em `original_data`. Marcadores derivados de polígonos usam ponto interno validado, sem representar entrada ou endereço exato. Ambiguidades de bairro, divisas e códigos conflitantes ficam sem vínculo, em vez de receber uma aproximação por nome. Campos vazios permanecem ausentes. Data de importação não substitui uma data de referência desconhecida.
 
-Testes usam servidor HTTP local e PostgreSQL dedicado; há também uma amostra real por camada em `test/fixtures/siurb`, com proveniência. Consulte `plan/evidence/20-siurb-fontes.md` para as consultas reais. Aprovação dos testes não significa importação no banco do aplicativo ou validação nativa.
+Testes usam servidor HTTP local e PostgreSQL dedicado; há também uma amostra real por camada em `test/fixtures/siurb`, com proveniência. Consulte `docs/historico/evidencias/20-siurb-fontes.md` para as consultas reais. Aprovação dos testes não significa importação no banco do aplicativo ou validação nativa.
 
 ## Leitura pública
 

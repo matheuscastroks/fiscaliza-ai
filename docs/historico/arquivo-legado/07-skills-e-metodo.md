@@ -2,7 +2,7 @@
 
 ## Instalações verificadas em 29/09/2026
 
-Instalação pessoal em `C:/Users/Matheus/.codex/skills`, reutilizável em outros projetos. Foram examinados os arquivos SKILL.md das cinco candidatas e o catálogo curado; isso é revisão de finalidade e instruções, não auditoria integral de todos os arquivos dos repositórios.
+Instalação pessoal em `~/.codex/skills`, reutilizável em outros projetos. Foram examinados os arquivos SKILL.md das cinco candidatas e o catálogo curado; isso é revisão de finalidade e instruções, não auditoria integral de todos os arquivos dos repositórios.
 
 | Skill | Origem e revisão instalada | Uso e limite |
 | --- | --- | --- |

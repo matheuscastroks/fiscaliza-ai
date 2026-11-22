@@ -36,7 +36,7 @@ Explorar permite consultar os chamados a 500 m, 1 km, 2 km ou 5 km de um ponto, 
 
 Explorar e o recorte por lugar compartilham lugar, abrangência e filtros de chamados. A escolha de um lugar ativa a camada 1746 e substitui uma área de mapa anterior. A busca pela área visível é uma escolha explícita, separada do raio do lugar salvo. Equipamentos conservam seus filtros próprios; o raio é identificado como filtro de chamados 1746.
 
-Não existe integração de abertura de solicitações no 1746. O aplicativo não oferece cadastro de ocorrências, propostas, consultas ou ações públicas. Os endpoints legados de participação não são registrados na API. Tabelas e migrações históricas são preservadas para evitar perda de dados.
+Não existe integração de abertura de solicitações no 1746. O aplicativo não oferece cadastro de ocorrências, propostas, consultas ou ações públicas. Os endpoints legados de participação não são registrados na API. Migrações históricas são preservadas; as tabelas vazias de participação foram removidas pela migração `0019` após dump de segurança.
 
 ## Critérios de aceitação de produto
 
@@ -48,7 +48,7 @@ Não existe integração de abertura de solicitações no 1746. O aplicativo nã
 
 ## Fontes e responsabilidades
 
-SIURB/IPP: escolas (1), saúde (2), espaços públicos (16) e limites de bairros (18). Central 1746/DATA.RIO: demandas via BigQuery. A evidência de uso e atribuição está em plan/evidence/20-siurb-fontes.md.
+SIURB/IPP: escolas (1), saúde (2), espaços públicos (16) e limites de bairros (18). Central 1746/DATA.RIO: demandas via BigQuery. A evidência de uso e atribuição está em `docs/historico/evidencias/20-siurb-fontes.md` e consolidada em `docs/fontes-de-dados.md`.
 
 O backend importa e valida; PostgreSQL conserva cadastros e proveniência; Fastify serve contratos públicos; Expo apresenta as evidências em Android e iOS (não há versão web publicada). O cliente não consulta os provedores de importação diretamente. O mapa utiliza Mapbox.
 

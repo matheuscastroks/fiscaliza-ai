@@ -9,7 +9,7 @@ Fiscaliza aí permite explorar dados oficiais do 1746 e Data.Rio, acompanhar cha
 - front/: aplicativo Expo; front/app/: rotas Expo Router; front/features/: jornadas; front/components/: UI compartilhada; front/theme/: tokens.
 - front/services/: transporte HTTP e compatibilidade; front/stores/: sessão, interface e adaptadores legados.
 - shared/: contratos públicos; back/: Fastify, PostgreSQL, Drizzle, migrações e testes.
-- front/tests/: testes puros e de componentes; front/assets/: arquivos estáticos; plan/: decisões e evidências.
+- front/tests/: testes puros e de componentes; front/assets/: arquivos estáticos; docs/: arquitetura, fontes, decisões, backlog e histórico.
 - package.json da raiz: atalhos; instalações npm independentes em front/ e back/, sem workspaces.
 
 ## Comandos

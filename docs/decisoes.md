@@ -1,6 +1,6 @@
 # Decisões de arquitetura e engenharia — Fiscaliza aí
 
-Síntese das escolhas técnicas, dos limites assumidos e de como o sistema cresce. O produto está descrito em [`PRODUCT.md`](../PRODUCT.md); as regras de trabalho, em [`AGENTS.md`](../AGENTS.md). Atualizado em 13/11/2026, depois da revisão geral (`plan/evidence/2026-11-13-*`).
+Síntese das escolhas técnicas, dos limites assumidos e de como o sistema cresce. O produto está descrito em [`PRODUCT.md`](../PRODUCT.md); a arquitetura consolidada, em [`arquitetura.md`](arquitetura.md); as fontes oficiais, em [`fontes-de-dados.md`](fontes-de-dados.md); e as regras de trabalho, em [`AGENTS.md`](../AGENTS.md). Atualizado após a revisão geral (`historico/evidencias/2026-11-13-*`).
 
 ## 1. Escolhas tecnológicas
 
@@ -33,7 +33,7 @@ fiscaliza-ai/
 ├── back/       # API Fastify, migrações, integrações, agendador e testes
 ├── shared/     # Contratos usados pelo app e pela API
 ├── deploy/     # Scripts de deploy, backup e restauração
-└── plan/       # Decisões, planos e evidências
+└── docs/       # Arquitetura, fontes, decisões, UX, backlog, artigo e histórico
 ```
 Instalações npm independentes em `front/` e `back/`, sem workspaces.
 

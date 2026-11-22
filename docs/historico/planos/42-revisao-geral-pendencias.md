@@ -1,6 +1,6 @@
 # Revisão geral (13/11/2026) — o que foi feito e o que falta
 
-Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear-rossum.md` (cópia das decisões abaixo). Evidências em `plan/evidence/2026-11-13-*`.
+Plano local aprovado da revisão geral (cópia das decisões abaixo). Evidências em `../evidencias/2026-11-13-*`.
 
 ## Feito e integrado na `main` (sem push)
 - **Fase 0, produção:** limpeza de fotos do agendador; revisita dos chamados salvos ou seguidos (a partição do 1746 é a data de abertura); caixa de saída de push; agendador decide pelo banco o que já rodou; `backup.sh` não esconde falha; pacote do release com `backup.sh`; API na porta 43001.
@@ -10,7 +10,7 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - **Fase 6, infra e docs:** Caddy removido; ignores; Postman; `plan/` arquivado; `docs/decisoes.md`; AGENTS/README/PRODUCT; Dependabot no CI; shellcheck.
 
 ## Integração da Fase 4 (concluída localmente)
-- **Fase 4, interface no aparelho:** branch `refs/heads/fix/app-fase-4-interface` (worktree `.claude/worktrees/youthful-lumiere-e60a3f`), 3 commits, conferida no S22. **Integrada na main local em c53cc08; instalação, testes, tipos e lint passaram. O texto seguinte registra a previsão original de integração.** Conflito esperado em `front/package.json` e `front/package-lock.json` (a Fase 3 instalou `@sentry/react-native`, `expo-network` e os persisters; a Fase 4 instalou `expo-clipboard`): manter as dependências dos dois lados e rodar `npm install` em `front/`. Depois, `npm test`, `npm run typecheck` e `npm run lint`.
+- **Fase 4, interface no aparelho:** branch `refs/heads/fix/app-fase-4-interface`, 3 commits, conferida em aparelho Android de teste. **Integrada na main local em c53cc08; instalação, testes, tipos e lint passaram. O texto seguinte registra a previsão original de integração.** Conflito esperado em `front/package.json` e `front/package-lock.json` (a Fase 3 instalou `@sentry/react-native`, `expo-network` e os persisters; a Fase 4 instalou `expo-clipboard`): manter as dependências dos dois lados e rodar `npm install` em `front/`. Depois, `npm test`, `npm run typecheck` e `npm run lint`.
 
 ## Falta fazer
 1. **Verificar no aparelho as Fases 1, 3 e 4 juntas.** Depois da junção, gerar um build de desenvolvimento novo (`npx expo run:android` em `front/`): o Sentry e o `expo-network` são módulos nativos e o APK instalado não os tem. Percorrer: abrir sem rede (cache e conta guardada), modo avião e volta (salvos pendentes sobem), apagar conta com senha, sair (sem avisos depois), erro forçado com a `ErrorBoundary` chegando ao Sentry (`EXPO_PUBLIC_SENTRY_DEV=1`).
@@ -140,11 +140,11 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - AINDA NÃO CORRIGIDO NO APP: falta rota HTTP com validação e reaproveitamento dos filtros, serviço/hook do app por viewport, render de agregados sem reclustering com pesos errados, interação de zoom/detalhe, rótulos de cobertura e testes de integração/end-to-end. Não afirmar resolução visual antes disso.
 - Correção da regex de estilos e demais itens originais do plano permanecem pendentes.
 
-## Pedido em andamento — Expo Start e S22
-- Metro da branch atual iniciado com expo start --dev-client --localhost --port 8082; sessão 13523 deve permanecer ativa. Porta 8081 pertence à outra worktree e foi preservada.
-- S22 reconectado e autorizado: <serial-s22> (SM_S901E). adb reverse tcp:8082 tcp:8082 aplicado; Bundle Location no menu RN ajustado e conferido como localhost:8082.
-- Bundle JS compilado e solicitado pelo aparelho. APK antigo falhou com Cannot find native module ExpoNetwork; avisos de default export/ErrorBoundary são consequência do import nativo quebrado.
-- expo prebuild --platform android --no-install concluído. Compilação/instalação em andamento na sessão 80977, comando RCT_METRO_PORT=8082 npx expo run:android --device <serial-s22> --no-bundler. Log .validation/fase5-s22-build.log; conferir sessão antes de reiniciar.
+## Pedido em andamento — Expo Start e aparelho Android
+- Metro da branch atual iniciado com `expo start --dev-client --localhost --port 8082`.
+- Aparelho Android de teste reconectado e autorizado via ADB (`adb reverse tcp:8082 tcp:8082`). Bundle Location no menu RN ajustado para `localhost:8082`.
+- Bundle JS compilado e solicitado pelo aparelho. APK antigo falhou com `Cannot find native module ExpoNetwork`; avisos de default export/ErrorBoundary são consequência do import nativo quebrado.
+- `expo prebuild --platform android --no-install` concluído. Compilação/instalação em andamento (`RCT_METRO_PORT=8082 npx expo run:android --no-bundler`, log `.validation/fase5-s22-build.log`).
 - Ainda não afirmar app atualizado/funcionando no aparelho. Ao concluir APK, verificar conexão à 8082, tela inicial, erros nativos e continuar os testes UI autorizados pelo usuário.
 - Trabalho da rota espacial foi interrompido para este pedido; backend agregador está commitado, endpoint e app seguem pendentes.
 
@@ -155,7 +155,7 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 
 ## Continuidade — compilação com pressão de memória
 - Build Android sessão 80977 segue ativo; avançou para merge de libs Sentry, compilação Expo Modules e assets/metadados do app. Ainda não foi concluído/instalado.
-- Windows medido com apenas 251084 KiB livres de 16454388 KiB. Metro anterior PID 7200 (porta 8082, pertencente a esta sessão) foi encerrado e reiniciado com --max-workers 1. Novo Metro: sessão 19099. Porta 8081 da outra worktree preservada.
+- Ambiente medido com 251084 KiB livres de 16454388 KiB. Metro na porta 8082 reiniciado com `--max-workers 1`.
 - Teste HTTP espacial adicionado em back/test/official-call-map.test.ts (não commitado), mas execução falhou por timeout de conexão ao banco; NÃO é evidência de falha funcional do endpoint. Endpoint ainda não implementado. Aguardar recursos e repetir antes da implementação.
 - Solicitada parada somente do contêiner descartável fiscaliza-fase5-test para liberar memória; operação na sessão 66494. Conferir estado antes de reiniciar o banco de teste. Não foi parado nenhum contêiner de produção.
 - Retomar primeiro atualização S22 e Expo Start; depois continuar endpoint/camada espacial e demais itens do plano.
@@ -206,7 +206,7 @@ Plano aprovado em `C:\Users\Matheus\.claude\plans\preciso-que-revise-todo-linear
 - Zoom out: ShapeSource agora agrupa células nativamente com raio 64 e soma customizada count, além de min/max dos limites. Não usar point_count como número de chamados. Suporte confirmado no código nativo Android/iOS instalado. S22 mostrou círculos separados após reload; ainda validar o extremo de zoom out e toque em grupo amplo com todos os dados antes de declarar todos os cenários aprovados.
 - Tema cívico passou a AppSelect com busca; subtipo incompatível é limpo e opções de serviço respeitam tema. Período mantém pills em uma linha com ScrollView horizontal de gesture-handler dentro do painel. S22 confirmou três opções em y=1816..1936; conferir scroll horizontal e última opção.
 - Testes completos app passaram: etapas TS/CJS (169 CJS) e 30 Jest/9 suites; tipos passaram. Testes de geometria/seleção agregada 3/3. Três asserts antigos que exigiam nomes de estilos/layout anterior removidos em favor de testes de comportamento de conteúdo/tema/período. Logs ignorados em .validation/ui-refinement-tests-final.log.
-- Revisão por subagente da listagem solicitada pelo usuário: proposta salva em plan/43-proposta-lista-chamados.md, ainda não implementada. Direção: tela própria, 25 por página, Anterior/Próxima, filtros visíveis; preservar card do ponto. Plano global segue incompleto, com pendências anteriores.
+- Revisão por subagente da listagem solicitada pelo usuário: proposta salva em `../../backlog/proposta-lista-chamados.md`, ainda não implementada. Direção: tela própria, 25 por página, Anterior/Próxima, filtros visíveis; preservar card do ponto. Plano global segue incompleto, com pendências anteriores.
 
 - Confirmação nativa adicional: zoom afastado mostrou cinco grupos 698 + 4239 + 1604 + 1151 + 2 = 7694, exatamente o contador de visíveis, sem o amontoado anterior. Evidência local .validation/map-zoom-out-final.png; não publicar captura (pode conter notificação de outro app).
 - Período horizontal confirmado no S22: swipe levou Todo o período de x=942 parcialmente cortado a x=617..1032 completamente visível; todos os itens permaneceram em y=1816..1936. XML .validation/period-horizontal-verified.xml. Lint completo terminou exit0; teste de filtros após limpeza de mocks 3/3 e tipos passaram.
