@@ -38,7 +38,7 @@ function NeighborhoodContent({ initialId }: { initialId?: string }) {
   return (
     <AppScreen keyboardAvoiding>
       <AppHeader
-        title="Serviços do bairro"
+        title="Indicadores do bairro"
         context="Rio de Janeiro"
         onBack={() => goBack()}
       />
@@ -83,6 +83,7 @@ function NeighborhoodContent({ initialId }: { initialId?: string }) {
           <NeighborhoodOverview
             key={id}
             data={overview.data}
+            updatingPeriod={overview.isPlaceholderData}
             onDates={setDates}
           />
         )}

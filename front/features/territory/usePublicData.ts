@@ -87,5 +87,9 @@ export function useNeighborhoodOverview(
     queryFn: ({ signal }) =>
       fetchNeighborhoodOverview(id as string, dates, signal),
     enabled: Boolean(id),
+    placeholderData: (previous, query) =>
+      id && query?.queryKey[1] === municipalityId && query.queryKey[2] === id
+        ? previous
+        : undefined,
   });
 }

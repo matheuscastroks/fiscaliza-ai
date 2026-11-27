@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { InsetGroup, ListRow } from '@/components/ui/ListRow';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import { goBack } from '@/utils/navigation';
-import { ScrollView, View, Pressable } from 'react-native';
+import { ScrollView, View, Pressable, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { AppScreen } from '@/components/ui/AppScreen';
@@ -22,6 +22,8 @@ import { RankingSection } from '@/features/city/RankingSection';
 
 export default function ResultsScreen() {
   const { colors } = useTheme();
+  const { width, fontScale } = useWindowDimensions();
+  const stackMetrics = width < 380 || fontScale > 1.2;
   const cityStyles = useThemedStyles(createCityStyles);
   const styles = useThemedStyles(createStyles);
   const { neighborhood, neighborhoodId, setNeighborhood } = useTerritorySelection();
@@ -85,16 +87,16 @@ export default function ResultsScreen() {
             <View
               style={[
                 styles.territoryCapsule,
+                stackMetrics && styles.stackedContent,
                 { backgroundColor: colors.surface, borderColor: colors.divider },
               ]}
             >
               <View style={styles.territoryInfo}>
-                <Ionicons name="location-outline" size={layout.iconSize.md} color={colors.primary} />
                 <View style={styles.territoryTextCol}>
                   <AppText variant="caption" color="muted">
                     Área
                   </AppText>
-                  <AppText variant="label" numberOfLines={1} style={styles.territoryName}>
+                  <AppText variant="label" style={styles.territoryName}>
                     {neighborhood || 'Rio de Janeiro'}
                   </AppText>
                 </View>
@@ -134,9 +136,8 @@ export default function ResultsScreen() {
             {overview && totalCalls > 0 && (
               <View style={styles.dashboardBlock}>
                 <View style={styles.sectionHeaderRow}>
-                  <Ionicons name="speedometer-outline" size={layout.iconSize.sm} color={colors.muted} />
-                  <AppText variant="caption" style={styles.sectionHeaderText}>
-                    Prazos
+                  <AppText variant="sectionTitle" accessibilityRole="header" style={{ flex: 1 }}>
+                    Quantos chamados estão no prazo?
                   </AppText>
                 </View>
 
@@ -147,26 +148,7 @@ export default function ResultsScreen() {
                     { backgroundColor: colors.surface, borderColor: colors.divider },
                   ]}
                 >
-                  <View style={styles.heroKpiTopRow}>
-                    <View
-                      style={[
-                        styles.kpiIconSquircle,
-                        { backgroundColor: colors.primaryContainer },
-                      ]}
-                    >
-                      <Ionicons name="timer-outline" size={layout.iconSize.md} color={colors.primary} />
-                    </View>
-
-                    <View style={styles.heroKpiTitleCol}>
-                      <AppText variant="caption" color="muted">
-                        Prazos cumpridos
-                      </AppText>
-                      <AppText variant="label">Os prazos estão sendo cumpridos?</AppText>
-                    </View>
-
-                  </View>
-
-                  <View style={styles.heroKpiValueRow}>
+                  <View style={[styles.heroKpiValueRow, stackMetrics && styles.stackedContent]}>
                     <AppText
                       style={[
                         styles.heroKpiNumber,
@@ -187,7 +169,7 @@ export default function ResultsScreen() {
                         {withinDeadlineCount.toLocaleString('pt-BR')} no prazo
                       </AppText>
                       <AppText variant="caption" color="muted">
-                        {overdueCount.toLocaleString('pt-BR')} chamados com prazo estourado
+                        {overdueCount.toLocaleString('pt-BR')} fora do prazo
                       </AppText>
                     </View>
                   </View>
@@ -210,12 +192,12 @@ export default function ResultsScreen() {
                     />
                   </View>
                   <AppText variant="caption" color="muted">
-                    Considera os chamados desta área que têm prazo divulgado. Fonte: Prefeitura do Rio (Data.Rio).
+                    Inclui chamados em andamento e encerrados com informação de prazo. Fonte: Prefeitura do Rio (Data.Rio).
                   </AppText>
                 </View>
 
                 {/* Dupla de KPIs Secundários: Conclusão & Total */}
-                <View style={styles.secondaryKpiRow}>
+                <View style={[styles.secondaryKpiRow, stackMetrics && styles.stackedContent]}>
                   {/* KPI 2: Taxa de Conclusão */}
                   <View
                     style={[
@@ -224,18 +206,6 @@ export default function ResultsScreen() {
                     ]}
                   >
                     <View style={styles.secondaryKpiHeader}>
-                      <View
-                        style={[
-                          styles.kpiSmallIcon,
-                          { backgroundColor: colors.surfaceSubdued },
-                        ]}
-                      >
-                        <Ionicons
-                          name="checkmark-done-circle-outline"
-                          size={layout.iconSize.sm}
-                          color={colors.completed}
-                        />
-                      </View>
                       <AppText variant="caption" color="muted">
                         Taxa de conclusão
                       </AppText>
@@ -247,7 +217,7 @@ export default function ResultsScreen() {
                       {resolutionRate}%
                     </AppText>
 
-                    <AppText variant="caption" color="muted" numberOfLines={1}>
+                    <AppText variant="caption" color="muted">
                       {(overview.closedCalls ?? 0).toLocaleString('pt-BR')} de{' '}
                       {totalCalls.toLocaleString('pt-BR')}
                     </AppText>
@@ -261,18 +231,6 @@ export default function ResultsScreen() {
                     ]}
                   >
                     <View style={styles.secondaryKpiHeader}>
-                      <View
-                        style={[
-                          styles.kpiSmallIcon,
-                          { backgroundColor: colors.surfaceSubdued },
-                        ]}
-                      >
-                        <Ionicons
-                          name="documents-outline"
-                          size={layout.iconSize.sm}
-                          color={colors.primary}
-                        />
-                      </View>
                       <AppText variant="caption" color="muted">
                         Total registrado
                       </AppText>
@@ -282,7 +240,7 @@ export default function ResultsScreen() {
                       {totalCalls.toLocaleString('pt-BR')}
                     </AppText>
 
-                    <AppText variant="caption" color="muted" numberOfLines={1}>
+                    <AppText variant="caption" color="muted">
                       Chamados registrados
                     </AppText>
                   </View>
@@ -292,8 +250,7 @@ export default function ResultsScreen() {
                 {statusBreakdown.length > 0 && (
                   <View style={styles.breakdownBlock}>
                     <View style={styles.sectionHeaderRow}>
-                      <Ionicons name="pie-chart-outline" size={layout.iconSize.sm} color={colors.muted} />
-                      <AppText variant="caption" style={styles.sectionHeaderText}>
+                      <AppText variant="sectionTitle" accessibilityRole="header" style={{ flex: 1 }}>
                         Como os chamados terminaram
                       </AppText>
                     </View>
@@ -334,7 +291,6 @@ export default function ResultsScreen() {
                                   />
                                   <AppText
                                     variant="label"
-                                    numberOfLines={1}
                                     style={styles.statusLabelText}
                                   >
                                     {item.status}
@@ -385,9 +341,8 @@ export default function ResultsScreen() {
             {avgDays != null && (
               <View style={styles.dashboardBlock}>
                 <View style={styles.sectionHeaderRow}>
-                  <Ionicons name="hourglass-outline" size={layout.iconSize.sm} color={colors.muted} />
-                  <AppText variant="caption" style={styles.sectionHeaderText}>
-                    Velocidade de resolução
+                  <AppText variant="sectionTitle" accessibilityRole="header" style={{ flex: 1 }}>
+                    Quanto tempo levou o atendimento?
                   </AppText>
                 </View>
                 <View
@@ -396,7 +351,7 @@ export default function ResultsScreen() {
                     { backgroundColor: colors.surface, borderColor: colors.divider },
                   ]}
                 >
-                  <View style={styles.heroKpiValueRow}>
+                  <View style={[styles.heroKpiValueRow, stackMetrics && styles.stackedContent]}>
                     <AppText style={[styles.heroKpiNumber, { color: colors.ink }]}>
                       {formatDays(avgDays)}
                     </AppText>
@@ -422,7 +377,6 @@ export default function ResultsScreen() {
             {/* Tipos de problema mais frequentes */}
             {topServices.length > 0 && (
               <RankingSection
-                icon="construct-outline"
                 title={neighborhood ? `Problemas mais registrados · ${neighborhood}` : 'Problemas mais registrados'}
                 rows={topServices.map((service) => {
                   const days = speedByService.get(service.type);

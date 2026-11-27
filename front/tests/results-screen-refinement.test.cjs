@@ -8,7 +8,7 @@ const read = () => fs.readFileSync(path.join(ROOT_DIR, 'app', 'ResultsScreen.tsx
 
 test('results screen: keeps 3-KPI civic dashboard with citywide benchmark', () => {
   const content = read();
-  assert.ok(content.includes('Prazos cumpridos'), 'Must include SLA deadline compliance KPI');
+  assert.ok(content.includes('Quantos chamados estão no prazo?'), 'Must explain what the deadline KPI measures');
   assert.ok(content.includes('Taxa de conclusão'), 'Must include resolution rate KPI');
   assert.ok(content.includes('Total registrado'), 'Must include total volume KPI');
   assert.ok(content.includes('cityOverviewQuery'), 'Must compare with citywide overview');

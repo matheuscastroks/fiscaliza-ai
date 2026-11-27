@@ -51,7 +51,7 @@ test('TabLayout starts on TerritoryScreen and TerritoryScreen falls back to list
   );
   assert.ok(
     territorySource.includes(
-      'const effectiveListView = isListView || !mapAvailable;',
+      '{(!mapAvailable || resultsOpen) && territoryList}',
     ),
     'TerritoryScreen must fall back to list view when native Mapbox is unavailable',
   );

@@ -1,4 +1,5 @@
 import { useSpatialCalls } from './useSpatialCalls';
+import type { SpatialClusterSelection } from './spatialFeatures';
 
 import type { CameraBounds } from './useMapCamera';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -50,7 +51,7 @@ import { mapOverlayContext } from '@/features/territory/mapArea';
 import { useInfiniteOfficialCalls, useOfficialCall, useOfficialFilters } from '@/features/city/useOfficialCalls';
 
 
-import { useTerritoryStore, useTerritorySelection, useTerritoryViewMode, useTerritoryFiltersModal, useTerritoryDomain } from '@/stores/territoryStore';
+import { useTerritoryStore, useTerritorySelection, useTerritoryFiltersModal, useTerritoryDomain } from '@/stores/territoryStore';
 
 
 import { isMapboxAvailable } from '@/components/ui/MapboxMapView';
@@ -99,11 +100,11 @@ export function useTerritoryQueries() {
   const {
     neighborhoodId: routeNeighborhoodId, layer: routeLayer,
     startDate, endDate, filters, focusId, lat, lng,
-    neighborhood: paramNeighborhood, lookup, lookupRequest,
+    neighborhood: paramNeighborhood, lookup, lookupRequest, scopeRequest,
   } = useLocalSearchParams<{
     neighborhoodId?: string; layer?: string; startDate?: string; endDate?: string;
     filters?: string; focusId?: string; lat?: string; lng?: string; neighborhood?: string;
-    lookup?: string; lookupRequest?: string;
+    lookup?: string; lookupRequest?: string; scopeRequest?: string;
   }>();
   const {
     neighborhood,
@@ -154,10 +155,9 @@ export function useTerritoryQueries() {
   const setStatus = useCallback((value: string) => setFilter('status', value), [setFilter]);
   const debouncedSearch = useDebouncedValue(search, 300);
   const appliedSearch = search.trim() ? debouncedSearch.trim() : '';
-  const { isListView, setIsListView } = useTerritoryViewMode();
-  const effectiveListView = isListView || !mapAvailable;
+  const searchPending = search.trim() !== appliedSearch;
   const { territoryDomain, setTerritoryDomain, setFacilityLayers } = useTerritoryDomain();
-  const { interactionsComplete, visitTrace } = useMapPerformance(isFocused, effectiveListView);
+  const { interactionsComplete, visitTrace } = useMapPerformance(isFocused, !mapAvailable);
 
   const facilityParams = {
     search: appliedSearch || undefined,
@@ -192,6 +192,25 @@ export function useTerritoryQueries() {
     mapPerformanceEnabled,
     territorialFilters.cacheScope,
   );
+  const clusterScope = JSON.stringify([officialParams, search, territoryDomain]);
+  const [clusterSelection, setClusterSelection] = useState<{
+    scope: string;
+    cell: SpatialClusterSelection;
+  } | null>(null);
+  const clusterCell = clusterSelection?.scope === clusterScope ? clusterSelection.cell : null;
+  if (clusterSelection && !clusterCell) setClusterSelection(null);
+  const setClusterCell = useCallback((cell: SpatialClusterSelection | null) => {
+    setClusterSelection(cell ? { scope: clusterScope, cell } : null);
+  }, [clusterScope]);
+  const clusterCalls = useInfiniteOfficialCalls({
+    ...officialParams,
+    north: clusterCell?.north,
+    south: clusterCell?.south,
+    east: clusterCell?.east,
+    west: clusterCell?.west,
+    hasCoordinates: true,
+    limit: 50,
+  }, isFocused && Boolean(clusterCell) && layers.includes('official'), false, territorialFilters.cacheScope);
 
   const bairroOptions = useMemo(
     () => neighborhoods.data?.map((x) => x.name) || officialFilters.data?.bairros || [],
@@ -215,14 +234,15 @@ export function useTerritoryQueries() {
   const appliedRouteKey = useRef<string | null>(null);
   useEffect(() => {
     if (!routeNeighborhoodId && !routeLayer) return;
-    const routeKey = `${routeNeighborhoodId ?? ''}|${routeLayer ?? ''}`;
+    const routeKey = `${routeNeighborhoodId ?? ''}|${routeLayer ?? ''}|${scopeRequest ?? ''}`;
     if (appliedRouteKey.current === routeKey) return;
     const target = neighborhoods.data?.find((n) => n.id === routeNeighborhoodId);
     // Com bairro na rota, espera a lista carregar para resolver o nome.
     if (routeNeighborhoodId && !neighborhoods.data) return;
     appliedRouteKey.current = routeKey;
     if (target) setNeighborhood(target.name);
-    setStatus(OPEN_STATUS);
+    // A contagem do bairro inclui todos os estados no período consultado.
+    setStatus(routeLayer === 'official' && startDate && endDate ? 'all' : OPEN_STATUS);
     setMacroTheme('all');
     setServiceType('all');
     setSearch('');
@@ -235,7 +255,7 @@ export function useTerritoryQueries() {
       setFacilityLayers([routeLayer]);
     }
   }, [
-    routeNeighborhoodId, routeLayer, neighborhoods.data, setNeighborhood,
+    routeNeighborhoodId, routeLayer, scopeRequest, startDate, endDate, neighborhoods.data, setNeighborhood,
     setLayers, setSearch, setMacroTheme, setServiceType, setStatus, setTerritoryDomain, setFacilityLayers,
   ]);
 
@@ -248,7 +268,6 @@ export function useTerritoryQueries() {
     if (lookup !== 'protocol' || !lookupRequest) return;
     // A consulta de um protocolo não pode herdar filtros que escondam o registro.
     setTerritoryDomain('calls');
-    setIsListView(false);
     setFiltersOpen(false);
     setNeighborhood('');
     setStatus('all');
@@ -263,9 +282,9 @@ export function useTerritoryQueries() {
     setHasMovedCamera(false);
     setSearchFocusRequest(lookupRequest);
     router.setParams({ lookup: undefined, lookupRequest: undefined, neighborhoodId: undefined,
-      layer: undefined, startDate: undefined, endDate: undefined, focusId: undefined,
+      layer: undefined, scopeRequest: undefined, startDate: undefined, endDate: undefined, focusId: undefined,
       lat: undefined, lng: undefined, neighborhood: undefined, filters: undefined });
-  }, [lookup, lookupRequest, setTerritoryDomain, setIsListView, setFiltersOpen,
+  }, [lookup, lookupRequest, setTerritoryDomain, setFiltersOpen,
     setNeighborhood, setStatus, setPeriod, setServiceType, setMacroTheme, setSearch]));
   const { captureLocation, busy: locating, error: locationError } = useDeviceLocation();
   const capturedLocation = usePlacesStore((s) => s.deviceLocation);
@@ -286,10 +305,6 @@ export function useTerritoryQueries() {
         setSelectedCluster(null);
         return true;
       }
-      if (isListView && mapAvailable) {
-        setIsListView(false);
-        return true;
-      }
       if (areaOnly) {
         setAreaOnly(false);
         setAppliedBounds(null);
@@ -298,7 +313,7 @@ export function useTerritoryQueries() {
       return false;
     });
     return () => sub.remove();
-  }, [isFocused, selectedId, selectedCluster, isListView, mapAvailable, areaOnly, setIsListView]);
+  }, [isFocused, selectedId, selectedCluster, areaOnly]);
 
   const selectedCallQuery = useOfficialCall(selectedId, isFocused && Boolean(selectedId) && layers.includes('official'));
   const focusedCallQuery = useOfficialCall(focusId, isFocused && Boolean(focusId));
@@ -317,14 +332,13 @@ export function useTerritoryQueries() {
      
     setSelectedId(focusId);
     setSelectedCluster(null);
-    setIsListView(false);
     setAreaOnly(false);
     setStatus('all');
     setMacroTheme('all');
     setServiceType('all');
     setSearch('');
     if (paramNeighborhood) setNeighborhood(paramNeighborhood);
-  }, [focusId, paramNeighborhood, setTerritoryDomain, layers, setLayers, setIsListView, setNeighborhood, setSearch, setMacroTheme, setServiceType, setStatus]);
+  }, [focusId, paramNeighborhood, setTerritoryDomain, layers, setLayers, setNeighborhood, setSearch, setMacroTheme, setServiceType, setStatus]);
 
   useEffect(() => {
     if (!focusId) return;
@@ -381,6 +395,10 @@ export function useTerritoryQueries() {
     macroTheme,
     period,
     search,
+    searchPending,
+    clusterCell,
+    setClusterCell,
+    clusterCalls,
     status,
     selection,
     setServiceType,
@@ -388,9 +406,8 @@ export function useTerritoryQueries() {
     setPeriod,
     setSearch,
     searchFocusRequest,
+    setSearchFocusRequest,
     setStatus,
-    setIsListView,
-    effectiveListView,
     territoryDomain,
     visitTrace,
     facilitiesConfirmed,

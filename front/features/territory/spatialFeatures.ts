@@ -1,4 +1,18 @@
-import type { OfficialMapCell } from '@/shared/official-map';
+import type { MapViewport, OfficialMapCell } from '@/shared/official-map';
+import type { OfficialCall } from '@/shared/contracts';
+
+export type SpatialClusterSelection = OfficialMapCell & {
+  members?: readonly MapViewport[];
+};
+
+export function belongsToSpatialCluster(call: Pick<OfficialCall, 'latitude' | 'longitude'>, selection: SpatialClusterSelection) {
+  if (!selection.members) return true;
+  const { latitude, longitude } = call;
+  return latitude != null && longitude != null && selection.members.some(
+    ({ south, north, west, east }) =>
+      latitude >= south && latitude <= north && longitude >= west && longitude <= east,
+  );
+}
 export function spatialFeatures(cells: OfficialMapCell[]) {
   return { type: 'FeatureCollection' as const, features: cells.map(cell => ({
     type: 'Feature' as const, id: cell.key, properties: { ...cell },

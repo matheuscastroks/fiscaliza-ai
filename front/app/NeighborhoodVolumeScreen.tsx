@@ -30,13 +30,11 @@ export default function NeighborhoodVolumeScreen() {
           empty={rows.length === 0 ? { description: 'Ainda não há chamados suficientes para mostrar os bairros.' } : undefined}
         >
           <RankingSection
-            icon="alert-circle-outline"
             showPosition={false}
-            title="Chamados registrados por bairro"
+            title="Bairros com mais registros"
             rows={rows.map((row) => ({
               key: row.neighborhood,
               label: row.neighborhood,
-              detail: row.overdueCount > 0 ? `${row.overdueCount.toLocaleString('pt-BR')} fora do prazo` : undefined,
               value: row.count.toLocaleString('pt-BR'),
               share: row.count / (rows[0]?.count || 1),
               tone: colors.primary,
@@ -49,7 +47,7 @@ export default function NeighborhoodVolumeScreen() {
           />
           <View>
             <AppText variant="meta" color="muted">
-              A lista mostra só o volume de chamados registrados e não avalia o desempenho de nenhum bairro. Toque em um bairro para ver seus dados.
+              Toque em um bairro para ver seus dados. Fonte: Prefeitura do Rio (Data.Rio).
             </AppText>
           </View>
         </ScreenState>

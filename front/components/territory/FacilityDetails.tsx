@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Linking, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { Ionicons } from '@expo/vector-icons';
 import { DetailSheet, DetailSection } from '@/components/ui/DetailSheet';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
@@ -13,13 +12,13 @@ import { formatCallDate } from '@/features/city/formatDates';
 import { usePublicFacility } from '@/features/territory/usePublicData';
 import {
   facilityLabels,
-  facilityIcons,
   facilityColors,
   facilityNeighborhoodLabel,
 } from '@/features/territory/selectors';
 import { facilityTitle } from './FacilityRow';
 import { useTheme } from '@/theme/useTheme';
 import { layout } from '@/theme/layout';
+import { spacing } from '@/theme/spacing';
 export function FacilityDetails({
   id,
   onBack,
@@ -28,7 +27,7 @@ export function FacilityDetails({
   onBack: () => void;
 }) {
   const query = usePublicFacility(id);
-  const { colors, isDark } = useTheme();
+  const { isDark } = useTheme();
   const item = query.data;
   const [linkError, setLinkError] = useState<string | null>(null);
 
@@ -62,40 +61,46 @@ export function FacilityDetails({
       title={item ? facilityLabels[item.category] : 'Serviço público'}
       onBack={onBack}
       onRefresh={query.refetch}
+      footer={item && (item.location || item.phone) ? (
+        <View style={{ gap: spacing.xs }}>
+          {item.location && <AppButton title="Como chegar" onPress={handleOpenDirections} />}
+          {item.phone && (
+            <AppButton
+              title="Ligar para a unidade"
+              variant={item.location ? 'secondary' : 'primary'}
+              accessibilityLabel={`Ligar para a unidade: ${item.phone}`}
+              onPress={handleCall}
+            />
+          )}
+        </View>
+      ) : undefined}
     >
       <ScreenState
         loading={query.isLoading}
-        error={query.error}
+        error={item ? null : query.error}
         retry={query.refetch}
       />
+      {item && query.error && (
+        <AppText variant="meta" color="muted" accessibilityLiveRegion="polite">
+          Não foi possível atualizar. Exibindo os dados da última consulta.
+        </AppText>
+      )}
       {item ? (
         <>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <Ionicons
-              name={facilityIcons[item.category]}
-              size={layout.iconSize.lg}
-              color={colors.ink}
-            />
-            <AppText variant="title" style={{ flex: 1 }}>
+          <View style={{ gap: spacing.xs }}>
+            <AppText variant="sectionTitle" accessibilityRole="header">
               {facilityTitle(item)}
             </AppText>
+            <AppText color="muted">
+              {[item.facilityType, item.activity].filter(Boolean).join(' · ') ||
+                'Situação cadastral não informada'}
+            </AppText>
           </View>
-          <AppText color="muted">
-            {[item.facilityType, item.activity].filter(Boolean).join(' · ') ||
-              'Situação cadastral não informada'}
-          </AppText>
           <DetailSection title="Onde fica">
             <AppText selectable>
               {item.address || 'Endereço não informado'}
             </AppText>
             <AppText color="muted">{facilityNeighborhoodLabel(item)}</AppText>
-            {item.location && (
-              <AppButton
-                title="Como chegar"
-                variant="secondary"
-                onPress={handleOpenDirections}
-              />
-            )}
           </DetailSection>
           {item.location && (
             <View style={{ height: 230, borderRadius: layout.radius.card, overflow: 'hidden' }}>
@@ -126,13 +131,6 @@ export function FacilityDetails({
             <AppText selectable>
               {item.phone || 'Telefone não informado'}
             </AppText>
-            {Boolean(item.phone) && (
-              <AppButton
-                title={`Ligar para a unidade (${item.phone})`}
-                variant="secondary"
-                onPress={handleCall}
-              />
-            )}
             <AppText selectable>
               {item.openingHours || 'Horário não informado'}
             </AppText>

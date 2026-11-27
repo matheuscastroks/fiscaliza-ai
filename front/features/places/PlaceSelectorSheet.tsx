@@ -1,23 +1,28 @@
-import React from 'react';
-import { View, Pressable } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { AppText } from '@/components/ui/AppText';
+import { AppButton } from '@/components/ui/AppButton';
 import { AppBottomSheetModal, BottomSheetScrollView } from '@/components/ui/AppBottomSheetModal';
+import { ListRow } from '@/components/ui/ListRow';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { Surface } from '@/components/ui/Surface';
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
-import { usePlacesStore } from '@/stores/placesStore';
-import { useDeviceLocation } from './useDeviceLocation';
+import type { usePlacesStore } from '@/stores/placesStore';
+import type { useDeviceLocation } from './useDeviceLocation';
 import { RadiusControl } from './RadiusControl';
-import { layout, spacing, useTheme } from '@/theme';
+import { spacing } from '@/theme';
 import type { SavedPlace, TerritorySelection } from './types';
-import { styles } from './PlaceSelector.styles';
 
 type PlacesState = ReturnType<typeof usePlacesStore.getState>;
+const noNeighborhoodFallback: string[] = [];
 
-/** Conteúdo do bottom sheet "Trocar Local": recorte atual, ações rápidas, lugares, bairros e raio. */
-export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, places, setRadius, device, activePlace, title, subtitle, iconName, areaOnly, onClearAreaOnly }: {
+export function PlaceSelectorSheet({
+  sheetOpen, setSheetOpen, state, selection, places, setRadius, device,
+  activePlace, title, areaOnly, onClearAreaOnly,
+}: {
   sheetOpen: boolean;
   setSheetOpen: (value: boolean) => void;
   state: PlacesState;
@@ -27,343 +32,124 @@ export function PlaceSelectorSheet({ sheetOpen, setSheetOpen, state, selection, 
   device: ReturnType<typeof useDeviceLocation>;
   activePlace: SavedPlace | null | undefined;
   title: string;
-  subtitle: string;
-  iconName: keyof typeof Ionicons.glyphMap;
   areaOnly: boolean;
   onClearAreaOnly: (() => void) | undefined;
 }) {
-  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [bodyHeight, setBodyHeight] = useState(0);
+  const snapPoint = headerHeight && bodyHeight
+    ? Math.ceil(Math.min(windowHeight - insets.top - spacing.sm, headerHeight + bodyHeight + 30))
+    : '75%';
+  const close = () => setSheetOpen(false);
+  const choose = (action?: () => void) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onClearAreaOnly?.();
+    action?.();
+    close();
+  };
+  const managePlaces = () => {
+    close();
+    router.push('/PlacesScreen');
+  };
+  const currentLocation = selection.kind === 'radius' && selection.source === 'current';
+  const neighborhood = selection.kind === 'radius' ? selection.neighborhood : undefined;
+
   return (
     <AppBottomSheetModal
       visible={sheetOpen}
-      onClose={() => setSheetOpen(false)}
-      title="Trocar Local"
-      snapPoints={['75%', '92%']}
+      onClose={close}
+      title="Trocar área"
+      snapPoints={[snapPoint]}
+      onHeaderHeightChange={setHeaderHeight}
     >
       <BottomSheetScrollView
-        style={styles.sheetScroll}
-        contentContainerStyle={[
-          styles.sheetScrollBody,
-          { paddingBottom: Math.max(insets.bottom + spacing.lg, spacing.xxl) },
-        ]}
-        showsVerticalScrollIndicator={true}
+        style={styles.scroll}
+        contentContainerStyle={[styles.content, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}
         keyboardShouldPersistTaps="handled"
+        onContentSizeChange={(_, height) => setBodyHeight(height)}
       >
-        <View style={styles.filterFormContainer}>
-          {/* Card de Destaque: Recorte Atual */}
-          <View
-            style={[
-              styles.heroScopeCard,
-              {
-                backgroundColor: isDark ? colors.surfaceSubdued : colors.surface,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.heroScopeIconBadge,
-                { backgroundColor: isDark ? colors.surface : colors.canvas },
-              ]}
-            >
-              <Ionicons name={iconName} size={layout.iconSize.md} color={colors.onSurfaceBrand} />
-            </View>
-            <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-              <AppText variant="caption" color="muted" style={styles.heroScopeLabel}>
-                Área em uso
-              </AppText>
-              <AppText variant="label" numberOfLines={1} style={styles.heroScopeTitle}>
-                {title}
-              </AppText>
-              <AppText variant="caption" color="muted" numberOfLines={1}>
-                {subtitle}
-              </AppText>
-            </View>
+        <View style={styles.section}>
+          <SectionHeader title="Bairro" />
+          <NeighborhoodPicker
+            options={noNeighborhoodFallback}
+            value={selection.kind === 'neighborhood' ? selection.name : ''}
+            triggerLabel="Buscar bairro"
+            onChange={(name) => choose(() => {
+              void state.dismissPrompt();
+              void state.selectNeighborhood(name);
+            })}
+          />
+          <AppText variant="caption" color="muted">
+            Área em uso · {title}
+          </AppText>
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeader title="Outras áreas" />
+          <Surface padded={false} tone="recessed" elevation="recessed" clipContent>
             {areaOnly && onClearAreaOnly && (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Voltar à área salvo"
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  onClearAreaOnly();
-                  setSheetOpen(false);
-                }}
-                style={({ pressed }) => [
-                  styles.undoAreaButton,
-                  { backgroundColor: colors.accent },
-                  pressed && { opacity: 0.8 },
-                ]}
-              >
-                <Ionicons name="arrow-undo" size={layout.iconSize.sm} color={colors.onAccent} />
-                <AppText variant="caption" style={{ color: colors.onAccent, fontWeight: '600' }}>
-                  Voltar
-                </AppText>
-              </Pressable>
+              <ListRow title="Voltar à área escolhida" onPress={() => choose()} />
             )}
-          </View>
-
-          {/* Seção 1: Atalhos */}
-          <View style={styles.filterSection}>
-            <View style={styles.sectionHeaderRow}>
-              <Ionicons name="flash-outline" size={layout.iconSize.sm} color={colors.accent} />
-              <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
-                Atalhos
-              </AppText>
-            </View>
-            <View style={[styles.insetGroupCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              {/* Linha GPS */}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={
-                  selection.kind === 'radius' && selection.source === 'current'
-                    ? 'Atualizar minha localização'
-                    : 'Usar minha localização'
-                }
-                disabled={device.busy}
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  onClearAreaOnly?.();
-                  void device.captureLocation().then((loc) => {
-                    if (loc) setSheetOpen(false);
-                  });
-                }}
-                style={({ pressed }) => [
-                  styles.insetRow,
-                  pressed && { backgroundColor: colors.surfaceSubdued },
-                ]}
-              >
-                <View style={[styles.rowIconBadge, { backgroundColor: colors.infoSurface }]}>
-                  <Ionicons name="navigate" size={layout.iconSize.sm} color={colors.info} />
-                </View>
-                <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-                  <AppText variant="caption" style={styles.rowTitle}>
-                    {selection.kind === 'radius' && selection.source === 'current'
-                      ? 'Atualizar minha localização'
-                      : 'Usar minha localização'}
-                  </AppText>
-                  <AppText variant="caption" color="muted" style={styles.rowDesc}>
-                    Mostra o que está perto de você agora
-                  </AppText>
-                </View>
-                {device.busy ? (
-                  <AppText variant="caption" color="muted">Buscando…</AppText>
-                ) : selection.kind === 'radius' && selection.source === 'current' ? (
-                  <Ionicons name="checkmark-circle" size={layout.iconSize.md} color={colors.info} />
-                ) : (
-                  <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.muted} />
-                )}
-              </Pressable>
-
-              <View style={[styles.insetDivider, { backgroundColor: colors.divider }]} />
-
-              {/* Linha Todo o Município */}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Ver a cidade toda do Rio de Janeiro"
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  onClearAreaOnly?.();
-                  void state.selectNeighborhood('');
-                  setSheetOpen(false);
-                }}
-                style={({ pressed }) => [
-                  styles.insetRow,
-                  pressed && { backgroundColor: colors.surfaceSubdued },
-                ]}
-              >
-                <View style={[styles.rowIconBadge, { backgroundColor: colors.completedSurface }]}>
-                  <Ionicons name="globe-outline" size={layout.iconSize.sm} color={colors.completed} />
-                </View>
-                <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-                  <AppText variant="caption" style={styles.rowTitle}>
-                    A cidade toda
-                  </AppText>
-                  <AppText variant="caption" color="muted" style={styles.rowDesc}>
-                    Ver chamados de todo o Rio de Janeiro
-                  </AppText>
-                </View>
-                {selection.kind === 'municipality' && !areaOnly ? (
-                  <Ionicons name="checkmark-circle" size={layout.iconSize.md} color={colors.completed} />
-                ) : (
-                  <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.muted} />
-                )}
-              </Pressable>
-
-              {/* Linha Ver Bairro Inteiro (se estiver em modo raio com bairro identificado) */}
-              {selection.kind === 'radius' && selection.neighborhood && (
-                <>
-                  <View style={[styles.insetDivider, { backgroundColor: colors.divider }]} />
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`Ver todo o bairro ${selection.neighborhood.name}`}
-                    onPress={() => {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      if (selection.neighborhood) {
-                        onClearAreaOnly?.();
-                        void state.selectNeighborhood(
-                          selection.neighborhood.name,
-                          selection.neighborhood.id,
-                        );
-                        setSheetOpen(false);
-                      }
-                    }}
-                    style={({ pressed }) => [
-                      styles.insetRow,
-                      pressed && { backgroundColor: colors.surfaceSubdued },
-                    ]}
-                  >
-                    <View style={[styles.rowIconBadge, { backgroundColor: colors.attentionSurface }]}>
-                      <Ionicons name="business" size={layout.iconSize.sm} color={colors.attention} />
-                    </View>
-                    <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-                      <AppText variant="caption" style={styles.rowTitle}>
-                        Ver todo o bairro {selection.neighborhood.name}
-                      </AppText>
-                      <AppText variant="caption" color="muted" style={styles.rowDesc}>
-                        Expandir a busca para o bairro completo
-                      </AppText>
-                    </View>
-                    <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.muted} />
-                  </Pressable>
-                </>
-              )}
-            </View>
-          </View>
-
-          <View style={[styles.sectionDivider, { backgroundColor: colors.divider }]} />
-
-          {/* Seção 2: Meus Meus lugares */}
-          <View style={styles.filterSection}>
-            <View style={styles.sectionHeaderRowBetween}>
-              <View style={styles.sectionHeaderRow}>
-                <Ionicons name="bookmark-outline" size={layout.iconSize.sm} color={colors.accent} />
-                <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
-                  Meus lugares
-                </AppText>
-              </View>
-              <Pressable
-                onPress={() => {
-                  setSheetOpen(false);
-                  router.push('/PlacesScreen');
-                }}
-                hitSlop={8}
-              >
-                <AppText variant="caption" style={{ color: colors.accent, fontWeight: '600' }}>
-                  Gerenciar
-                </AppText>
-              </Pressable>
-            </View>
-
-            {places.length > 0 ? (
-              <View style={[styles.insetGroupCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                {places.map((p, idx) => {
-                  const isSelected = activePlace?.id === p.id;
-                  return (
-                    <React.Fragment key={p.id}>
-                      {idx > 0 && <View style={[styles.insetDivider, { backgroundColor: colors.divider }]} />}
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={`Selecionar lugar ${p.name}`}
-                        onPress={() => {
-                          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          onClearAreaOnly?.();
-                          void state.selectPlace(p.id);
-                          setSheetOpen(false);
-                        }}
-                        style={({ pressed }) => [
-                          styles.insetRow,
-                          pressed && { backgroundColor: colors.surfaceSubdued },
-                        ]}
-                      >
-                        <View style={[styles.rowIconBadge, { backgroundColor: colors.surfaceSubdued }]}>
-                          <Ionicons name="bookmark" size={layout.iconSize.sm} color={isSelected ? colors.onSurfaceBrand : colors.muted} />
-                        </View>
-                        <View style={{ flex: 1, minWidth: 0, gap: 1 }}>
-                          <AppText variant="caption" style={[styles.rowTitle, isSelected && { fontWeight: '600' }]}>
-                            {p.name}
-                          </AppText>
-                          <AppText variant="caption" color="muted" style={styles.rowDesc}>
-                            {p.radiusMeters >= 1000 ? `${p.radiusMeters / 1000} km` : `${p.radiusMeters} m`} de distância
-                          </AppText>
-                        </View>
-                        {isSelected ? (
-                          <Ionicons name="checkmark-circle" size={layout.iconSize.md} color={colors.onSurfaceBrand} />
-                        ) : (
-                          <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.muted} />
-                        )}
-                      </Pressable>
-                    </React.Fragment>
-                  );
-                })}
-              </View>
-            ) : (
-              <Pressable
-                onPress={() => {
-                  setSheetOpen(false);
-                  router.push('/PlacesScreen');
-                }}
-                style={[styles.emptyPlacesButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              >
-                <Ionicons name="add-circle-outline" size={layout.iconSize.sm} color={colors.accent} />
-                <AppText variant="caption" style={{ color: colors.ink, fontWeight: '600' }}>
-                  Cadastrar Casa, Trabalho ou ponto de interesse
-                </AppText>
-              </Pressable>
-            )}
-          </View>
-
-          <View style={[styles.sectionDivider, { backgroundColor: colors.divider }]} />
-
-          {/* Seção 3: Escolher um bairro */}
-          <View style={styles.filterSection}>
-            <View style={styles.sectionHeaderRow}>
-              <Ionicons name="business-outline" size={layout.iconSize.sm} color={colors.accent} />
-              <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
-                Escolher um bairro
-              </AppText>
-            </View>
-            <NeighborhoodPicker
-              options={[]}
-              value={selection.kind === 'neighborhood' ? selection.name : ''}
-              onChange={(name) => {
+            <ListRow
+              title={device.busy ? 'Buscando localização…' : currentLocation ? 'Atualizar minha localização' : 'Usar minha localização'}
+              onPress={device.busy ? undefined : () => {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                onClearAreaOnly?.();
-                void state.dismissPrompt();
-                void state.selectNeighborhood(name);
-                setSheetOpen(false);
+                void device.captureLocation().then((location) => {
+                  if (location) {
+                    onClearAreaOnly?.();
+                    close();
+                  }
+                });
               }}
             />
-          </View>
+            <ListRow title="A cidade toda" onPress={() => choose(() => { void state.selectNeighborhood(''); })} />
+            {neighborhood && (
+              <ListRow title={`Ver todo o bairro ${neighborhood.name}`} onPress={() => choose(() => {
+                void state.selectNeighborhood(neighborhood.name, neighborhood.id);
+              })} />
+            )}
+          </Surface>
+        </View>
 
-          {/* Seção 4: Ajuste de Raio (se em modo raio ou GPS) */}
-          {(selection.kind === 'radius' || selection.kind === 'pending-current') && (
-            <>
-              <View style={[styles.sectionDivider, { backgroundColor: colors.divider }]} />
-              <View style={styles.filterSection}>
-                <View style={styles.sectionHeaderRow}>
-                  <Ionicons name="radio-outline" size={layout.iconSize.sm} color={colors.accent} />
-                  <AppText variant="caption" color="muted" style={styles.sectionHeaderTitle}>
-                    Até onde olhar
-                  </AppText>
-                </View>
-                {selection.kind === 'pending-current' && (
-                  <AppText variant="caption" color="muted" style={{ marginBottom: spacing.xs }}>
-                    Sua localização antiga não fica guardada. Atualize para ver o que está perto de você.
-                  </AppText>
-                )}
-                <RadiusControl
-                  value={selection.radiusMeters}
-                  onChange={(radius) => {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    onClearAreaOnly?.();
-                    void setRadius(radius);
-                  }}
+        {(selection.kind === 'radius' || selection.kind === 'pending-current') && (
+          <View style={styles.section}>
+            <SectionHeader title="Até onde olhar" />
+            {selection.kind === 'pending-current' && (
+              <AppText variant="caption" color="muted">Atualize sua localização para ver o que está perto de você.</AppText>
+            )}
+            <RadiusControl value={selection.radiusMeters} onChange={(radius) => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onClearAreaOnly?.();
+              void setRadius(radius);
+            }} />
+          </View>
+        )}
+
+        <View style={styles.section}>
+          <SectionHeader title="Meus lugares" />
+          {places.length > 0 && (
+            <Surface padded={false} tone="recessed" elevation="recessed" clipContent>
+              {places.map((place) => (
+                <ListRow
+                  key={place.id}
+                  title={place.name}
+                  subtitle={activePlace?.id === place.id && !areaOnly ? 'Área em uso' : undefined}
+                  onPress={() => choose(() => { void state.selectPlace(place.id); })}
                 />
-              </View>
-            </>
+              ))}
+            </Surface>
           )}
+          <AppButton title={places.length > 0 ? 'Gerenciar lugares' : 'Adicionar um lugar'} variant="quiet" onPress={managePlaces} />
         </View>
       </BottomSheetScrollView>
-    </AppBottomSheetModal>);
+    </AppBottomSheetModal>
+  );
 }
+
+const styles = StyleSheet.create({
+  scroll: { flex: 1 },
+  content: { paddingHorizontal: spacing.contentPadding, paddingTop: spacing.xs, gap: spacing.lg },
+  section: { gap: spacing.xs },
+});

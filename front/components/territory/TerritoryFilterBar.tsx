@@ -5,6 +5,7 @@ import { useMenu } from '@/components/ui/SideMenu';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 
 import type { ThemeColors } from '@/theme/colors';
+import type { ElevationTokens } from '@/theme/elevation';
 
 import { memo, useState } from 'react';
 
@@ -25,14 +26,10 @@ import { PlaceSelector } from '@/features/places/PlaceSelector';
 
 import type { RadiusMeters } from '@/features/places/types';
 
-import { CIVIC_MACRO_THEMES } from '@/features/city/officialCategoryThemes';
 import { useTerritoryDomain } from '@/stores/territoryStore';
 
 import { fontSizes } from '@/theme/typography';
 
-import { elevation } from '@/theme/elevation';
-
-import { CLOSED_STATUS, OPEN_STATUS } from '@/features/city/callStatus';
 
 import type { TerritoryLayer } from '@/features/territory/selectors';
 
@@ -90,12 +87,12 @@ export interface TerritoryFilterBarProps {
   facilityQueries: Record<FacilityCategory, FacilityLayerQuerySummary>;
   facilitiesConfirmed: boolean;
   padded?: boolean;
+  showMenu?: boolean;
   radiusMeters?: RadiusMeters;
   onRadiusChange?: (radius: RadiusMeters) => void;
   radiusLabel?: string;
   areaOnly?: boolean;
   onClearAreaOnly?: () => void;
-  mapAvailable?: boolean;
   macroTheme?: string;
   onMacroThemeChange?: (value: string) => void;
   onResetFilters?: () => void;
@@ -109,44 +106,23 @@ function TerritoryFilterBarComponent({
   filtersOpen,
   filterCount,
   neighborhood,
-  radiusLabel,
-  totalCalls,
-  officialCallsStatus,
   padded = false,
+  showMenu = true,
   areaOnly = false,
   onClearAreaOnly,
-  mapAvailable = true,
-  status,
-  onStatusChange,
-  period,
-  onPeriodChange,
-  macroTheme,
-  onMacroThemeChange,
-  onResetFilters,
 }: TerritoryFilterBarProps) {
   const { colors, isDark } = useTheme();
   const styles = useThemedStyles(createStyles);
   const {
     territoryDomain,
     setTerritoryDomain,
-    savedFacilityLayers,
-    setFacilityLayers,
   } = useTerritoryDomain();
 
   // A busca começa recolhida para o bairro caber inteiro; abre por toque ou com texto.
-  const [searchOpen, setSearchOpen] = useState(Boolean(search));
+  const [searchOpen, setSearchOpen] = useState(false);
   const [dismissedRequest, setDismissedRequest] = useState<string>();
   const requestedSearch = Boolean(searchFocusRequest) && dismissedRequest !== searchFocusRequest;
   const searchCollapsed = !searchOpen && !search && !requestedSearch;
-
-  const callsLabel = officialCallsStatus.isLoading
-    ? '…'
-    : totalCalls > 999
-      ? `${(totalCalls / 1000).toFixed(1)}k`
-      : `${totalCalls}`;
-
-  const hasSpecificActiveFilters =
-    filterCount > 0 || (macroTheme && macroTheme !== 'all') || (status && status !== 'all');
 
   const locationTrigger = (
     <PlaceSelector
@@ -172,7 +148,7 @@ function TerritoryFilterBarComponent({
               { backgroundColor: isDark ? colors.surfaceSubdued : colors.canvas },
             ]}
           >
-            <Ionicons name={iconName} size={layout.iconSize.sm} color={colors.onSurfaceBrand} />
+            <Ionicons name={iconName} size={layout.iconSize.sm} color={colors.primary} />
           </View>
           <AppText
             variant="caption"
@@ -183,7 +159,7 @@ function TerritoryFilterBarComponent({
           </AppText>
           <Ionicons name="chevron-down" size={layout.iconSize.sm} color={colors.muted} />
           <View
-            style={[styles.unifiedDivider, { backgroundColor: colors.border }]}
+            style={[styles.unifiedDivider, { backgroundColor: colors.dividerSubtle }]}
           />
         </Pressable>
       )}
@@ -193,8 +169,8 @@ function TerritoryFilterBarComponent({
   return (
     <View style={[styles.wrapper, padded && styles.paddedWrapper]}>
       {/* Linha 1: Barra Unificada de Busca (Cápsula de Local + Input + Filtros) */}
-      <View style={[padded ? styles.paddedSection : styles.searchContainer, styles.searchRow]}>
-        <IconButton
+      <View style={[styles.searchRow, padded && styles.paddedSection]}>
+        {showMenu && <IconButton
           icon="menu"
           variant="floating"
           accessibilityLabel="Abrir menu"
@@ -202,14 +178,18 @@ function TerritoryFilterBarComponent({
             void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             useMenu.getState().setOpen(true);
           }}
-        />
+        />}
         <View style={styles.searchGrow}>
         <CitySearch
+          floating={!padded}
           key={searchFocusRequest}
           leftElement={locationTrigger}
+          searchLabel={territoryDomain === 'calls' ? 'Buscar chamado' : 'Buscar serviço público'}
+          searchPlaceholder={territoryDomain === 'calls' ? 'Assunto ou protocolo' : 'Nome do serviço'}
           value={search}
           onChangeText={onSearchChange}
           searchCollapsed={searchCollapsed}
+          autoFocus={searchOpen || requestedSearch}
           onExpandSearch={() => setSearchOpen(true)}
           onCollapseSearch={() => {
             setSearchOpen(false);
@@ -250,13 +230,6 @@ function TerritoryFilterBarComponent({
                 territoryDomain === 'calls' && styles.domainPillButtonActive,
               ]}
             >
-              <Ionicons
-                name="warning"
-                size={layout.iconSize.sm}
-                color={
-                  territoryDomain === 'calls' ? colors.onAccentBrand : colors.ink
-                }
-              />
               <AppText
                 variant="caption"
                 numberOfLines={1}
@@ -265,7 +238,7 @@ function TerritoryFilterBarComponent({
                   territoryDomain === 'calls' && styles.domainPillTextActive,
                 ]}
               >
-                1746 · {callsLabel}
+                Chamados
               </AppText>
             </Pressable>
 
@@ -283,13 +256,6 @@ function TerritoryFilterBarComponent({
                 territoryDomain === 'facilities' && styles.domainPillButtonActive,
               ]}
             >
-              <Ionicons
-                name="business"
-                size={layout.iconSize.sm}
-                color={
-                  territoryDomain === 'facilities' ? colors.onAccentBrand : colors.ink
-                }
-              />
               <AppText
                 variant="caption"
                 numberOfLines={1}
@@ -303,148 +269,6 @@ function TerritoryFilterBarComponent({
             </Pressable>
           </View>
 
-          {/* Chips Rápidos de Chamados 1746 */}
-          {territoryDomain === 'calls' && (
-            <>
-              {/* Toggle Inline de Situação: Todas -> Abertos -> Encerrados */}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Situação: ${status === OPEN_STATUS ? 'Abertos' : status === CLOSED_STATUS ? 'Encerrados' : 'Todas'}. Toque para alternar.`}
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  const next =
-                    status === 'all'
-                      ? OPEN_STATUS
-                      : status === OPEN_STATUS
-                        ? CLOSED_STATUS
-                        : 'all';
-                  onStatusChange(next);
-                }}
-                hitSlop={CHIP_HIT_SLOP}
-                style={[
-                  styles.quickChip,
-                  status !== 'all' && styles.quickChipActive,
-                ]}
-              >
-                <Ionicons
-                  name={
-                    status === OPEN_STATUS
-                      ? 'alert-circle'
-                      : status === CLOSED_STATUS
-                        ? 'checkmark-circle'
-                        : 'funnel-outline'
-                  }
-                  size={layout.iconSize.sm}
-                  color={status !== 'all' ? colors.onSurfaceBrand : colors.muted}
-                />
-                <AppText
-                  variant="caption"
-                  style={[
-                    styles.quickChipText,
-                    status !== 'all' && styles.quickChipTextActive,
-                  ]}
-                >
-                  {status === OPEN_STATUS
-                    ? 'Abertos'
-                    : status === CLOSED_STATUS
-                      ? 'Encerrados'
-                      : 'Situação'}
-                </AppText>
-              </Pressable>
-
-              {/* Macro-tema ativo com botão de limpar direto */}
-              {macroTheme && macroTheme !== 'all' && (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`Remover filtro de tema ${macroTheme}`}
-                  onPress={() => {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    onMacroThemeChange?.('all');
-                  }}
-                  hitSlop={CHIP_HIT_SLOP}
-                  style={[styles.quickChip, styles.quickChipActive]}
-                >
-                  <Ionicons name="pricetag" size={layout.iconSize.sm} color={colors.onSurfaceBrand} />
-                  <AppText variant="caption" style={[styles.quickChipText, styles.quickChipTextActive]}>
-                    {CIVIC_MACRO_THEMES.find((t) => t.id === macroTheme)?.label || macroTheme}
-                  </AppText>
-                  <Ionicons name="close" size={layout.iconSize.sm} color={colors.onSurfaceBrand} />
-                </Pressable>
-              )}
-            </>
-          )}
-
-          {/* Chips Rápidos de Serviços Públicos: Ligar/Desligar Camadas com 1 Toque */}
-          {territoryDomain === 'facilities' && (
-            <>
-              {[
-                { id: 'school' as const, label: 'Escolas', icon: 'school' as const },
-                { id: 'health' as const, label: 'Saúde', icon: 'medkit' as const },
-                { id: 'square' as const, label: 'Praças', icon: 'leaf' as const },
-              ].map((f) => {
-                const isSelected = savedFacilityLayers.includes(f.id);
-                return (
-                  <Pressable
-                    key={f.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Mostrar ${f.label}`}
-                    accessibilityState={{ selected: isSelected }}
-                    onPress={() => {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      const current = savedFacilityLayers.filter((l): l is FacilityCategory => l !== 'official');
-                      const next = current.includes(f.id)
-                        ? current.filter((l) => l !== f.id)
-                        : [...current, f.id];
-                      if (next.length === 0) return;
-                      setFacilityLayers(next);
-                    }}
-                    hitSlop={CHIP_HIT_SLOP}
-                    style={[
-                      styles.quickChip,
-                      isSelected && styles.quickChipActive,
-                    ]}
-                  >
-                    <Ionicons
-                      name={f.icon}
-                      size={layout.iconSize.sm}
-                      color={isSelected ? colors.onSurfaceBrand : colors.muted}
-                    />
-                    <AppText
-                      variant="caption"
-                      style={[
-                        styles.quickChipText,
-                        isSelected && styles.quickChipTextActive,
-                      ]}
-                    >
-                      {f.label}
-                    </AppText>
-                  </Pressable>
-                );
-              })}
-            </>
-          )}
-
-          {/* Indicador de Filtros Ativos / Acesso Rápido */}
-          {hasSpecificActiveFilters && (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ver filtros aplicados"
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                onOpenFilters();
-              }}
-              hitSlop={CHIP_HIT_SLOP}
-              style={({ pressed }) => [
-                styles.activeFilterPill,
-                pressed && { opacity: 0.8 },
-              ]}
-            >
-              <Ionicons name="options" size={layout.iconSize.sm} color={colors.onSurfaceBrand} />
-              <AppText variant="caption" numberOfLines={1} style={styles.activeFilterText}>
-                Filtros{filterCount > 0 ? ` (${filterCount})` : ''}
-              </AppText>
-            </Pressable>
-          )}
         </ScrollView>
       </View>
     </View>
@@ -452,12 +276,11 @@ function TerritoryFilterBarComponent({
 }
 
 // Chips de 36 (ou 32 + trilho) com folga vertical chegam a 48 de área de toque.
-const CHIP_HIT_SLOP = { top: 6, bottom: 6 };
 const DOMAIN_HIT_SLOP = { top: 8, bottom: 8 };
 
 export const TerritoryFilterBar = memo(TerritoryFilterBarComponent);
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
   StyleSheet.create({
     searchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
     searchGrow: { flex: 1 },
@@ -471,9 +294,6 @@ const createStyles = (colors: ThemeColors) =>
     },
     paddedSection: {
       paddingHorizontal: spacing.md,
-    },
-    searchContainer: {
-      ...elevation.floating,
     },
     unifiedLocationPill: {
       flexDirection: 'row',
@@ -522,12 +342,11 @@ const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: spacing.sm,
       borderRadius: layout.radius.panel,
       backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
+      ...elevation?.subtle,
     },
     quickChipActive: {
       backgroundColor: colors.surfaceSubdued,
-      borderColor: colors.onSurfaceBrand,
+      ...elevation?.raised,
     },
     quickChipText: {
       fontSize: fontSizes.caption,
@@ -542,11 +361,10 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       flexShrink: 0,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.surfaceRecessed,
+      ...elevation?.recessed,
       borderRadius: layout.radius.control,
       padding: 3,
-      borderWidth: 1,
-      borderColor: colors.border,
       gap: 3,
     },
     domainPillButton: {
@@ -560,6 +378,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     domainPillButtonActive: {
       backgroundColor: colors.accent,
+      ...elevation?.subtle,
     },
     domainPillText: {
       fontSize: fontSizes.caption,
@@ -578,9 +397,8 @@ const createStyles = (colors: ThemeColors) =>
       minHeight: 36,
       paddingHorizontal: spacing.sm,
       borderRadius: layout.radius.compact,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
+      backgroundColor: colors.surfaceRaised,
+      ...elevation?.subtle,
     },
     activeFilterText: {
       fontWeight: '600',

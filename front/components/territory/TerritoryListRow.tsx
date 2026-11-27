@@ -18,6 +18,7 @@ export const TerritoryListRow = memo(
     if (entry.type === 'official') {
       return (
         <OfficialCallRow
+          variant="compact"
           call={entry.item}
           onPress={() => onOpen(entry)}
           onLocateOnMap={onLocate ? () => onLocate(entry) : undefined}

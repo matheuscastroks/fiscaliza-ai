@@ -40,7 +40,7 @@ export function RadiusControl({
   compact = false,
   style,
 }: RadiusControlProps) {
-  const { colors, isDark } = useTheme();
+  const { colors, elevation } = useTheme();
   const [containerWidth, setContainerWidth] = useState(0);
 
   const selectedIndex = Math.max(
@@ -88,9 +88,9 @@ export function RadiusControl({
         style={[
           styles.pillRow,
           compact && styles.pillRowCompact,
+          elevation.recessed,
           {
-            backgroundColor: colors.surfaceSubdued,
-            borderColor: colors.border,
+            backgroundColor: colors.surfaceRecessed,
             borderRadius: pillRadius,
           },
         ]}
@@ -101,6 +101,7 @@ export function RadiusControl({
             pointerEvents="none"
             style={[
               styles.indicator,
+              elevation.subtle,
               {
                 width: itemWidth,
                 backgroundColor: colors.ink,
@@ -172,7 +173,6 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderRadius: layout.radius.control,
     padding: 3,
-    borderWidth: 1,
     overflow: 'hidden',
   },
   pillRowCompact: {

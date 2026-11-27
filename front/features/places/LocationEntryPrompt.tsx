@@ -28,7 +28,7 @@ export function LocationEntryPrompt({
   busy: boolean;
   compact?: boolean;
 }) {
-  const { colors, isDark } = useTheme();
+  const { colors, elevation, isDark } = useTheme();
   const { hydrated, promptSeen, dismissPrompt } = usePlacesStore(useShallow((s) => ({ hydrated: s.hydrated, promptSeen: s.promptSeen, dismissPrompt: s.dismissPrompt })));
 
   if (!hydrated || promptSeen) return null;
@@ -38,16 +38,16 @@ export function LocationEntryPrompt({
       <View
         style={[
           styles.compactBanner,
+          elevation.subtle,
           {
             backgroundColor: colors.surface,
-            borderColor: colors.border,
           },
         ]}
       >
         <Ionicons
           name="navigate-outline"
           size={layout.iconSize.sm}
-          color={colors.onSurfaceBrand}
+          color={colors.primary}
         />
         <AppText
           variant="caption"
@@ -96,10 +96,7 @@ export function LocationEntryPrompt({
             style={({ pressed }) => [
               styles.compactSecondaryPill,
               {
-                backgroundColor: isDark
-                  ? colors.surfaceSubdued
-                  : colors.canvas,
-                borderColor: colors.border,
+                backgroundColor: colors.surfaceRecessed,
                 opacity: pressed ? 0.8 : 1,
               },
             ]}
@@ -129,9 +126,9 @@ export function LocationEntryPrompt({
     <View
       style={[
         styles.card,
+        elevation.subtle,
         {
-          backgroundColor: isDark ? colors.surfaceSubdued : colors.surface,
-          borderColor: colors.border,
+          backgroundColor: isDark ? colors.surfaceRaised : colors.surface,
         },
       ]}
     >
@@ -203,7 +200,6 @@ const styles = StyleSheet.create({
   card: {
     padding: spacing.md,
     borderRadius: layout.radius.panel,
-    borderWidth: 1,
     gap: spacing.sm,
   },
   header: {
@@ -249,7 +245,6 @@ const styles = StyleSheet.create({
     paddingRight: spacing.xs,
     paddingVertical: 6,
     borderRadius: layout.radius.control,
-    borderWidth: 1,
   },
   compactLabel: {
     flex: 1,
@@ -273,7 +268,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: layout.radius.control,
-    borderWidth: 1,
     minHeight: 28,
     alignItems: 'center',
     justifyContent: 'center',

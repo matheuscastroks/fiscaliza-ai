@@ -13,11 +13,13 @@ export function NeighborhoodPicker({
   value,
   onChange,
   compact = false,
+  triggerLabel,
 }: {
   options: string[];
   value: string;
   onChange: (value: string) => void;
   compact?: boolean;
+  triggerLabel?: string;
 }) {
   const boundaries = useNeighborhoods();
   const home = useTerritoryStore((s) => s.preferredNeighborhood);
@@ -82,7 +84,9 @@ export function NeighborhoodPicker({
     <AppSelect
       label="Filtrar por bairro"
       placeholder="Buscar bairro do Rio de Janeiro…"
-      icon="location-outline"
+      icon={triggerLabel ? undefined : 'location-outline'}
+      triggerLabel={triggerLabel}
+      clearable={!triggerLabel}
       compact={compact}
       defaultValue=""
       options={selectOptions}

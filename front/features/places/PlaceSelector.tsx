@@ -122,7 +122,7 @@ export function PlaceSelector({
 
 
   const sheet = (
-    <PlaceSelectorSheet sheetOpen={sheetOpen} setSheetOpen={setSheetOpen} state={state} selection={selection} places={places} setRadius={setRadius} device={device} activePlace={activePlace} title={title} subtitle={subtitle} iconName={iconName} areaOnly={areaOnly} onClearAreaOnly={onClearAreaOnly} />
+    <PlaceSelectorSheet sheetOpen={sheetOpen} setSheetOpen={setSheetOpen} state={state} selection={selection} places={places} setRadius={setRadius} device={device} activePlace={activePlace} title={title} areaOnly={areaOnly} onClearAreaOnly={onClearAreaOnly} />
   );
 
   const shortSummary = areaOnly
@@ -179,13 +179,12 @@ export function PlaceSelector({
               <Ionicons
                 name={iconName}
                 size={layout.iconSize.sm}
-                color={colors.onSurfaceBrand}
+                color={colors.primary}
               />
             </View>
 
             <AppText
               variant="label"
-              numberOfLines={1}
               style={styles.compactTitle}
             >
               {compactSummary}
@@ -273,10 +272,10 @@ export function PlaceSelector({
           </View>
 
           <View style={styles.headerInfo}>
-            <AppText variant="label" numberOfLines={1}>
+            <AppText variant="label">
               {title}
             </AppText>
-            <AppText variant="caption" color="muted" numberOfLines={1}>
+            <AppText variant="caption" color="muted">
               {subtitle}
             </AppText>
           </View>
