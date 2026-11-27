@@ -31,16 +31,10 @@ module.exports = ({ config }) => {
         'expo-image-picker',
         {
           photosPermission:
-            'O Fiscaliza aí acessa suas fotos só quando você escolhe uma imagem para o perfil ou para descrever um problema ao 1746.',
-          cameraPermission:
-            'O Fiscaliza aí usa a câmera só quando você fotografa um problema para preparar a mensagem ao 1746.',
+            'O Fiscaliza aí acessa suas fotos só quando você escolhe uma imagem para o perfil.',
+          cameraPermission: false,
           microphonePermission: false,
         },
-      ],
-      // Foto e texto vão juntos para o WhatsApp oficial do 1746.
-      [
-        'react-native-share',
-        { ios: ['whatsapp'], android: ['com.whatsapp', 'com.whatsapp.w4b'] },
       ],
       [
         '@rnmapbox/maps',

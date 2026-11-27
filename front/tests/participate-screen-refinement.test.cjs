@@ -5,30 +5,15 @@ const path = require('node:path');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 
-test('quick complaint kit: incorporates bottom sheet topic selector, select, location-filled address and photo-first steps', () => {
-  const kitPath = path.join(ROOT_DIR, 'features', 'city', 'QuickComplaintKit.tsx');
-  assert.ok(fs.existsSync(kitPath), 'QuickComplaintKit.tsx must exist');
-
-  const sheetPath = path.join(ROOT_DIR, 'features', 'city', 'ComplaintTopicSheet.tsx');
-  assert.ok(fs.existsSync(sheetPath), 'ComplaintTopicSheet.tsx must exist');
-
-  const content = fs.readFileSync(kitPath, 'utf8');
-  assert.ok(content.includes('export function QuickComplaintKit'), 'Must export QuickComplaintKit');
-  assert.ok(content.includes('COMPLAINT_TOPICS'), 'Must define COMPLAINT_TOPICS');
-  assert.ok(content.includes('defaultLocation'), 'Must support defaultLocation prop');
-  assert.ok(content.includes('photoThumb'), 'A foto acompanha a revisão do pedido');
-  assert.ok(content.includes('<AppButton title="Enviar pelo WhatsApp do 1746"'), 'A ação principal usa o botão com contraste do design system');
-  assert.ok(content.includes('Haptics'), 'Must provide haptic feedback on user actions');
-
-  assert.ok(content.includes('multiline'), 'Details field must be multiline');
-  assert.ok(content.includes('<AppSelect'), 'Assunto é um select, sem card em volta dos campos');
-  assert.ok(content.includes('reverseGeocodeAsync'), 'Endereço preenchido pela localização do aparelho');
-  assert.ok(!content.includes('insetTable'), 'Sem card envolvendo os campos');
-
-
-  const appInputPath = path.join(ROOT_DIR, 'components', 'ui', 'AppInput.tsx');
-  const appInputContent = fs.readFileSync(appInputPath, 'utf8');
-  assert.ok(appInputContent.includes('layout.radius'), 'AppInput multiline style must use theme radius tokens');
+test('Agir abre o WhatsApp do 1746 sem mensagem pronta', () => {
+  const start = fs.readFileSync(path.join(ROOT_DIR, 'app', '(tabs)', 'ParticipateScreen.tsx'), 'utf8');
+  // O atendimento do 1746 no WhatsApp é um menu numerado e ignora texto livre.
+  assert.ok(start.includes('openExternal(OFFICIAL_WHATSAPP_URL)'));
+  assert.ok(!start.includes('QuickComplaintKit'));
+  assert.ok(!fs.existsSync(path.join(ROOT_DIR, 'features', 'city', 'QuickComplaintKit.tsx')));
+  const details = fs.readFileSync(path.join(ROOT_DIR, 'features', 'city', 'call-details', 'OfficialCallDetailsScreen.tsx'), 'utf8');
+  assert.ok(details.includes('openExternal(OFFICIAL_WHATSAPP_URL)'), 'reabertura só abre a conversa');
+  assert.ok(!/[?&]text=/.test(fs.readFileSync(path.join(ROOT_DIR, 'features', 'city', 'OfficialChannel.tsx'), 'utf8')));
 });
 
 test('Agir separates protocol lookup from requesting a service', () => {

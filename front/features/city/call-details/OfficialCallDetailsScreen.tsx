@@ -1,6 +1,6 @@
 import { OfficialCallDates } from '@/features/city/call-details/OfficialCallDates';
 import { createStyles } from '@/features/city/call-details/styles';
-import { OfficialChannel } from '@/features/city/OfficialChannel';
+import { OfficialChannel, OFFICIAL_WHATSAPP_URL } from '@/features/city/OfficialChannel';
 import { isOfficialCallClosed } from '@/shared/official-call-state';
 import React, { useEffect, useState } from 'react';
 import {
@@ -33,8 +33,7 @@ import { formatCallDate, formatTimeRemaining } from '@/features/city/formatDates
 import { useShallow } from 'zustand/react/shallow';
 import { AppToast } from '@/components/ui/AppToast';
 import { copyText } from '@/utils/clipboard';
-import { formatReopenMessage } from '@/features/city/reopenMessage';
-import { sendComplaintToWhatsApp } from '@/services/shareComplaint';
+import { openExternal } from '@/services/openExternal';
 
 export default function OfficialCallDetailsScreen({ id }: { id: string }) {
   const insets = useSafeAreaInsets();
@@ -155,18 +154,11 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
     }
   };
 
-  // Encerrado sem resolver: o morador pede de novo, citando este protocolo.
+  // Encerrado sem resolver: o morador abre um novo pedido no WhatsApp do 1746.
   const handleReopen = async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const message = formatReopenMessage({
-      protocol: item.externalId,
-      service: title,
-      place: [item.streetName, item.neighborhoodName].filter(Boolean).join(' · '),
-      closedOn: formatCallDate(item.closedAt),
-      closingNote: item.statusJustification || item.officialStatus || null,
-    });
-    if ((await sendComplaintToWhatsApp(message, null)) === 'failed')
-      setToast('Não foi possível abrir o WhatsApp. Ligue para o 1746.');
+    if (!(await openExternal(OFFICIAL_WHATSAPP_URL)))
+      setToast('Não conseguimos abrir o WhatsApp. Ligue para o 1746.');
   };
 
   return (

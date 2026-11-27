@@ -53,7 +53,7 @@ const OFFICIAL_CHANNELS: ChannelItem[] = [
   {
     id: 'whatsapp',
     title: 'WhatsApp Oficial da Prefeitura',
-    subtitle: `${OFFICIAL_WHATSAPP_LABEL} · Mensagem e fotos`,
+    subtitle: OFFICIAL_WHATSAPP_LABEL,
     url: OFFICIAL_WHATSAPP_URL,
   },
   {

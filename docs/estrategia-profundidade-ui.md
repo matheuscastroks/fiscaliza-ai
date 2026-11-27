@@ -225,8 +225,6 @@ Inventário levantado em `front/components/`, `front/features/` e `front/app/` c
 | :--- | :---: | :--- |
 | `components/profile/PostalCodeSheet.tsx` | 3 | Trocar caixas/opções com borda por `AppInput`/`Surface` tonais (`surfaceRecessed` vs `surface`). |
 | `features/places/LocationEntryPrompt.tsx` | 3 | Substituir bordas de cards/opções de endereço por `Surface` (`subtle`/`raised`). |
-| `features/city/QuickComplaintKit.tsx` | 3 | Substituir bordas do kit rápido por cards tonais com hierarquia de elevação e highlight superior. |
-| `features/city/ComplaintTopicSheet.tsx` | 1 | Opções de tópico em `Surface` sem borda; item selecionado com `surfaceRaised` + acento sutil. |
 | `features/places/RadiusControl.tsx` | 1 | Controle de raio usando trilho `surfaceRecessed` e botões/opções `surface` + `subtle`. |
 
 ### Grupo E — Telas (`front/app/` — 4 arquivos)

@@ -26,8 +26,6 @@ import { registerAuthRoutes } from './auth-routes.js';
 import { registerAttachmentsRoutes } from './attachments-routes.js';
 import { registerNotificationRoutes } from './notifications.js';
 import { registerSavedCallsRoutes } from './saved-calls.js';
-import { createAnalysisQuota, registerComplaintDraftRoutes } from './complaint-drafts-routes.js';
-import { createGeminiAnalyzer, type ImageAnalyzer } from './integrations/gemini.js';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -73,8 +71,6 @@ export async function buildApp(
     databaseUrl?: string;
     logger?: boolean;
     fetch?: typeof fetch;
-    /** Testes: substitui o Gemini (null desliga a análise por foto). */
-    imageAnalyzer?: ImageAnalyzer | null;
   } = {},
 ) {
   const config = loadConfig(process.env, { databaseUrl: options.databaseUrl });
@@ -419,15 +415,6 @@ export async function buildApp(
     db,
   });
   registerSavedCallsRoutes(app, db);
-  registerComplaintDraftRoutes(app, {
-    analyzer:
-      options.imageAnalyzer !== undefined
-        ? options.imageAnalyzer
-        : config.gemini && createGeminiAnalyzer(config.gemini),
-    quota: createAnalysisQuota(config.analysisQuota),
-    ok,
-    fail,
-  });
 
   return app;
 }
