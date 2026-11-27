@@ -26,7 +26,7 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import * as Haptics from 'expo-haptics';
 
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 
 import { AppText } from '@/components/ui/AppText';
 
@@ -38,6 +38,8 @@ import { MapboxMapView } from '@/components/ui/MapboxMapView';
 
 import { TerritoryPreviewCard } from '@/components/territory/TerritoryPreviewCard';
 import { TerritoryClusterList } from '@/components/territory/TerritoryClusterList';
+import { TerritoryClusterCarousel } from '@/components/territory/TerritoryClusterCarousel';
+import { clusterAction, clusterZoomTarget, CLUSTER_CAROUSEL_MAX } from '@/features/territory/clusterAction';
 import type { Entry } from '@/components/territory/TerritoryPreviewCard';
 import { belongsToSpatialCluster } from '@/features/territory/spatialFeatures';
 
@@ -154,6 +156,10 @@ export function TerritoryContent() {
   }));
   const closeResults = useCallback(() => router.setParams({ territoryResults: undefined }), []);
   const showCluster = Boolean(clusterCell || selectedClusterEntries.length);
+  const clusterTotal = clusterCell?.count ?? selectedCluster?.count ?? selectedClusterEntries.length;
+  // Até 20 itens: cartões sobre o mapa; acima disso, a lista no painel.
+  const showCarousel = showCluster && clusterTotal <= CLUSTER_CAROUSEL_MAX;
+  const showClusterList = showCluster && !showCarousel;
   const handleMapClick = useCallback(() => {
     setClusterCell(null);
     clearMapSelection();
@@ -165,12 +171,19 @@ export function TerritoryContent() {
       .map((item) => ({ type: 'official', item }))
     : selectedClusterEntries, [clusterCell, clusterCalls.data?.calls, selectedClusterEntries]);
 
+  // A lista de um agrupamento sobe da base da tela por cima da barra de abas.
+  const navigation = useNavigation();
+  const hideTabBar = isFocused && mapAvailable && showClusterList;
   useEffect(() => {
-    if (!mapAvailable || !showCluster) return;
+    navigation.setOptions({ tabBarStyle: hideTabBar ? { display: 'none' } : undefined });
+  }, [navigation, hideTabBar]);
+
+  useEffect(() => {
+    if (!mapAvailable || !showClusterList) return;
     const sheet = panel.current;
     sheet?.snapToIndex(1);
     return () => sheet?.snapToIndex(0);
-  }, [mapAvailable, showCluster]);
+  }, [mapAvailable, showClusterList]);
 
   useEffect(() => {
     if (!isFocused || !mapAvailable || filtersOpen || (!resultsOpen && !showCluster && !selectedEntry)) return;
@@ -181,6 +194,21 @@ export function TerritoryContent() {
     });
     return () => subscription.remove();
   }, [closeResults, isFocused, mapAvailable, filtersOpen, showCluster, selectedEntry, resultsOpen, handleMapClick]);
+
+  // Grupos grandes aproximam o mapa em vez de abrir uma lista enorme.
+  const zoomIntoCluster = useCallback((point: { latitude: number; longitude: number; count: number }) => {
+    const zoom = viewportRef.current.zoom;
+    if (clusterAction(point.count, zoom) !== 'zoom') return false;
+    void Haptics.selectionAsync();
+    updateCameraRegion((prev) => ({
+      ...prev,
+      latitude: point.latitude,
+      longitude: point.longitude,
+      zoom: clusterZoomTarget(zoom),
+      bounds: undefined,
+    }));
+    return true;
+  }, [updateCameraRegion, viewportRef]);
 
   const locateListEntry = useCallback((entry: Parameters<typeof handleLocateEntry>[0]) => {
     closeResults();
@@ -247,9 +275,10 @@ export function TerritoryContent() {
             spatialCells={layers.includes('official') ? (searchPending ? [] : spatialMap.data?.cells ?? []) : undefined}
             onSpatialCellPress={(cell) => {
               clearMapSelection();
+              if (zoomIntoCluster(cell)) { setClusterCell(null); return; }
               setClusterCell(cell);
             }}
-            onSpatialSelectionError={() => setToastMessage('Não foi possível abrir este agrupamento. Toque nele para tentar novamente.')}
+            onSpatialSelectionError={() => setToastMessage('Não conseguimos abrir estes pontos. Tente de novo.')}
             boundary={boundary.data?.geometry}
             searchArea={mapOverlay.searchArea}
             deviceLocation={mapOverlay.deviceLocation}
@@ -268,6 +297,7 @@ export function TerritoryContent() {
             }}
             onClusterClick={(cluster) => {
               setClusterCell(null);
+              if (zoomIntoCluster(cluster)) { clearMapSelection(); return; }
               handleClusterClick(cluster);
             }}
             onMapClick={handleMapClick}
@@ -295,7 +325,7 @@ export function TerritoryContent() {
             pointerEvents="none"
             colors={[colors.statusScrim, colors.statusScrim, colors.transparent]}
             locations={[0, 0.6, 1]}
-            style={[styles.statusScrim, { height: insets.top + spacing.lg }]}
+            style={[styles.statusScrim, { height: insets.top + spacing.xl }]}
           />
         </View>
       )}
@@ -303,7 +333,7 @@ export function TerritoryContent() {
       {mapAvailable && !resultsOpen && (
         <View
           onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height)}
-          style={[styles.topFloatingHeader, { paddingTop: insets.top + spacing.xs }]}
+          style={[styles.topFloatingHeader, { paddingTop: insets.top + spacing.md }]}
         >
           <TerritoryFilterBar
             {...filterBarProps}
@@ -337,7 +367,7 @@ export function TerritoryContent() {
       )}
 
       {/* Dock Vertical Direita: Controles Rápidos do Mapa (Posição e Enquadrar) */}
-      {mapAvailable && !keyboardVisible && panelIndex === 0 && !selectedEntry && selectedClusterEntries.length === 0 && (
+      {mapAvailable && !keyboardVisible && panelIndex === 0 && !selectedEntry && !showCluster && (
         <View style={[styles.rightMapDock, { bottom: floatBottom + collapsedPanelHeight + spacing.sm }]}>
           <Pressable
             accessibilityRole="button"
@@ -385,31 +415,46 @@ export function TerritoryContent() {
         />
       )}
 
+      {mapAvailable && showCarousel && (
+        <TerritoryClusterCarousel
+          key={clusterCell ? `cell:${clusterCell.key}:${clusterCell.latitude}:${clusterCell.longitude}` : selectedCluster?.ids.join(',')}
+          entries={clusterEntries}
+          total={clusterTotal}
+          loading={Boolean(clusterCell && clusterCalls.isLoading)}
+          error={Boolean(clusterCell && clusterCalls.isError)}
+          offline={offline}
+          bottomOffset={floatBottom + spacing.md}
+          onOpen={openEntry}
+          onClose={handleMapClick}
+          onRetry={() => { void clusterCalls.refetch(); }}
+        />
+      )}
+
       {mapAvailable && (
         <BottomSheet
           ref={panel}
           index={0}
-          bottomInset={floatBottom}
+          bottomInset={showClusterList ? 0 : floatBottom}
           snapPoints={snapPoints}
           enableDynamicSizing={false}
-          enableHandlePanningGesture={showCluster}
-          enableContentPanningGesture={showCluster}
+          enableHandlePanningGesture={showClusterList}
+          enableContentPanningGesture={showClusterList}
           animateOnMount={false}
-          backgroundStyle={{ backgroundColor: showCluster ? colors.surfaceFloating : colors.transparent }}
+          backgroundStyle={{ backgroundColor: showClusterList ? colors.surfaceFloating : colors.transparent }}
           handleIndicatorStyle={{ backgroundColor: colors.muted }}
           onChange={(index) => {
             if (index < 0) return;
             setPanelIndex(index);
-            if (showCluster && index === 0) {
+            if (showClusterList && index === 0) {
               handleMapClick();
             }
           }}
-          handleComponent={showCluster ? undefined : selectedEntry ? null : () => (
+          handleComponent={showClusterList ? undefined : selectedEntry || showCarousel ? null : () => (
             <View style={styles.summaryInset} onLayout={(event) => setSummaryHeight(event.nativeEvent.layout.height)}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`Ver lista. ${summaryLabel}`}
-            accessibilityHint={summarySubLabel}
+            accessibilityHint={summarySubLabel || undefined}
             accessibilityLiveRegion="polite"
             onPress={() => {
               Keyboard.dismiss();
@@ -424,7 +469,9 @@ export function TerritoryContent() {
               <AppText variant="label" style={styles.summaryTitle}>
                 Ver lista · {summaryLabel}
               </AppText>
-              <AppText variant="caption" color="muted" style={styles.summarySubtitle}>{summarySubLabel}</AppText>
+              {summarySubLabel ? (
+                <AppText variant="caption" color="muted" style={styles.summarySubtitle}>{summarySubLabel}</AppText>
+              ) : null}
             </View>
             <Ionicons name="chevron-forward" size={layout.iconSize.md} color={colors.muted} />
           </Pressable>
@@ -432,12 +479,12 @@ export function TerritoryContent() {
             </View>
           )}
         >
-          {showCluster && (
+          {showClusterList && (
             <TerritoryClusterList
               key={clusterCell ? `cell:${clusterCell.key}:${clusterCell.latitude}:${clusterCell.longitude}` : selectedCluster?.ids.join(',')}
               entries={clusterEntries}
               offline={offline}
-              total={clusterCell?.count ?? selectedClusterEntries.length}
+              total={clusterTotal}
               loading={Boolean(clusterCell && clusterCalls.isLoading)}
               loadingMore={Boolean(clusterCell && clusterCalls.isFetchingNextPage)}
               error={Boolean(clusterCell && clusterCalls.isError)}
