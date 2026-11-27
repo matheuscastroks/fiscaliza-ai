@@ -157,6 +157,14 @@ export function assetUrl(url: string) {
 }
 export async function uploadImage(uri: string): Promise<string> {
   if (uri.startsWith('/api/attachments/') || /^https?:/.test(uri)) return uri;
+  return (await uploadFile<{ url: string }>(uri, '/attachments')).url;
+}
+/** Envia um arquivo local como multipart (campo "file") e lê a resposta da API. */
+export async function uploadFile<T>(
+  uri: string,
+  path: string,
+  timeoutMs = 15000,
+): Promise<T> {
   // Native mobile uploader via Expo FileSystem
   const fs = await import('expo-file-system');
   const file = new fs.File(uri);
@@ -165,7 +173,7 @@ export async function uploadImage(uri: string): Promise<string> {
       'A foto não está mais disponível. Escolha a imagem novamente.',
     );
   }
-  const task = file.createUploadTask(API_URL + '/attachments', {
+  const task = file.createUploadTask(API_URL + path, {
     httpMethod: 'POST',
     uploadType: fs.UploadType.MULTIPART,
     fieldName: 'file',
@@ -178,18 +186,19 @@ export async function uploadImage(uri: string): Promise<string> {
   const timer = setTimeout(() => {
     expired = true;
     task.cancel();
-  }, 15000);
+  }, timeoutMs);
   try {
     const response = await task.uploadAsync();
     if (expired || !response) {
       throw new Error('O envio da foto foi interrompido. Tente de novo.');
     }
-    const result = await readResult<{ url: string }>(
-      '/attachments',
-      response.status,
-      JSON.parse(response.body),
-    );
-    return result.url;
+    let body: ApiResult<T>;
+    try {
+      body = JSON.parse(response.body) as ApiResult<T>;
+    } catch {
+      throw new ApiError('Algo deu errado. Tente de novo em instantes.');
+    }
+    return await readResult<T>(path, response.status, body);
   } finally {
     clearTimeout(timer);
     task.release();

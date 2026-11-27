@@ -5,7 +5,7 @@ const path = require('node:path');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 
-test('quick complaint kit: incorporates bottom sheet topic selector, inset table, smart location pill and photo guidance', () => {
+test('quick complaint kit: incorporates bottom sheet topic selector, select, location-filled address and photo-first steps', () => {
   const kitPath = path.join(ROOT_DIR, 'features', 'city', 'QuickComplaintKit.tsx');
   assert.ok(fs.existsSync(kitPath), 'QuickComplaintKit.tsx must exist');
 
@@ -15,48 +15,28 @@ test('quick complaint kit: incorporates bottom sheet topic selector, inset table
   const content = fs.readFileSync(kitPath, 'utf8');
   assert.ok(content.includes('export function QuickComplaintKit'), 'Must export QuickComplaintKit');
   assert.ok(content.includes('COMPLAINT_TOPICS'), 'Must define COMPLAINT_TOPICS');
-  assert.ok(content.includes('ComplaintTopicSheet'), 'Must integrate ComplaintTopicSheet bottom sheet');
-  assert.ok(content.includes('insetTable'), 'Must adopt Apple Inset-Grouped table layout');
-  assert.ok(content.includes('photoTipBanner'), 'Must provide clear photo tip banner for WhatsApp guidance');
-  assert.ok(content.includes('OFFICIAL_WHATSAPP_URL'), 'Must retain official 1746 WhatsApp endpoint');
-  assert.ok(content.includes('Share.share'), 'Must retain Share.share action');
   assert.ok(content.includes('defaultLocation'), 'Must support defaultLocation prop');
-  assert.ok(content.includes('showPreview'), 'Must support progressive disclosure with preview toggle');
-  assert.ok(content.includes('suggestedLocationPill'), 'Must offer 1-tap suggested location pill');
+  assert.ok(content.includes('photoThumb'), 'A foto acompanha a revisão do pedido');
+  assert.ok(content.includes('<AppButton title="Enviar pelo WhatsApp do 1746"'), 'A ação principal usa o botão com contraste do design system');
   assert.ok(content.includes('Haptics'), 'Must provide haptic feedback on user actions');
 
-  // Textarea auto-expansível sem corte de texto nos cantos
   assert.ok(content.includes('multiline'), 'Details field must be multiline');
-  assert.ok(content.includes('onContentSizeChange'), 'Details field must track content size for auto-growth');
-  assert.ok(content.includes('detailsTextarea'), 'Details field must apply detailsTextarea style');
-  assert.ok(content.includes('layout.radius.sm'), 'Must use the soft theme radius token instead of a literal or full pill');
+  assert.ok(content.includes('<AppSelect'), 'Assunto é um select, sem card em volta dos campos');
+  assert.ok(content.includes('reverseGeocodeAsync'), 'Endereço preenchido pela localização do aparelho');
+  assert.ok(!content.includes('insetTable'), 'Sem card envolvendo os campos');
 
-  // WhatsApp brand color
-  assert.ok(content.includes('partnerBrand.whatsapp'), 'Must use official WhatsApp green token for the send button');
 
   const appInputPath = path.join(ROOT_DIR, 'components', 'ui', 'AppInput.tsx');
   const appInputContent = fs.readFileSync(appInputPath, 'utf8');
   assert.ok(appInputContent.includes('layout.radius'), 'AppInput multiline style must use theme radius tokens');
 });
 
-test('participate screen: adopts Apple Inset-Grouped tables and KeyboardAwareScrollView', () => {
-  const screenPath = path.join(ROOT_DIR, 'app', '(tabs)', 'ParticipateScreen.tsx');
-  assert.ok(fs.existsSync(screenPath), 'ParticipateScreen.tsx must exist');
-
-  const content = fs.readFileSync(screenPath, 'utf8');
-  assert.ok(content.includes('QuickComplaintKit'), 'Must render QuickComplaintKit as hero');
-  assert.ok(content.includes('usePlacesStore'), 'Must bind neighborhood from the active places selection');
-  assert.ok(content.includes('OFFICIAL_CHANNELS'), 'Must define unified official channels list');
-  assert.ok(content.includes('InsetGroup') && content.includes('ListRow'), 'Must use the shared InsetGroup/ListRow');
-  assert.ok(content.includes('OFFICIAL_SERVICES'), 'Must render official services catalog');
-  assert.ok(content.includes('service.agency'), 'Must show the agency on popular services');
-  assert.ok(content.includes('/(tabs)/TerritoryScreen'), 'Must offer the map shortcut before opening a new request');
-  assert.ok(!content.includes('civicTipCard'), 'The map tip is the top shortcut now, not a second card');
-  assert.ok(content.includes('KeyboardAwareScrollView'), 'Must wrap screen in KeyboardAwareScrollView to prevent inputs from being covered by keyboard');
-  assert.ok(content.includes('bottomOffset'), 'Must provide bottomOffset for comfortable input clearance');
-
-  // Verify elimination of old nested-card anti-patterns
-  assert.ok(!content.includes('accountCard'), 'Must eliminate legacy accountCard');
-  assert.ok(!content.includes('stepsCard'), 'Must eliminate legacy static stepsCard');
-  assert.ok(!content.includes('serviceCard'), 'Must eliminate legacy standalone serviceCards with individual buttons');
+test('Agir separates protocol lookup from requesting a service', () => {
+  const readApp = (...parts) => fs.readFileSync(path.join(ROOT_DIR, 'app', ...parts), 'utf8');
+  const start = readApp('(tabs)', 'ParticipateScreen.tsx');
+  const services = readApp('OfficialServicesScreen.tsx');
+  assert.ok(start.includes("router.push('/OfficialServicesScreen')"));
+  assert.ok(start.includes("lookup: 'protocol'"));
+  assert.ok(start.includes('OFFICIAL_PROTOCOL_LOOKUP'));
+  assert.ok(services.includes('OFFICIAL_SERVICES'));
 });
