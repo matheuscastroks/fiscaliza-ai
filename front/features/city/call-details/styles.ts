@@ -127,6 +127,7 @@ export function createStyles(colors: ThemeColors, elevation?: ElevationTokens) {
       height: 7,
       borderRadius: layout.radius.xs,
     },
+    reopen: { gap: spacing.xs, marginTop: spacing.xs },
     justificationBox: {
       backgroundColor: colors.surfaceSubdued,
       borderRadius: layout.radius.panel,

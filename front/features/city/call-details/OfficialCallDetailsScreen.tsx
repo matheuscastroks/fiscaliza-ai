@@ -33,6 +33,8 @@ import { formatCallDate, formatTimeRemaining } from '@/features/city/formatDates
 import { useShallow } from 'zustand/react/shallow';
 import { AppToast } from '@/components/ui/AppToast';
 import { copyText } from '@/utils/clipboard';
+import { formatReopenMessage } from '@/features/city/reopenMessage';
+import { sendComplaintToWhatsApp } from '@/services/shareComplaint';
 
 export default function OfficialCallDetailsScreen({ id }: { id: string }) {
   const insets = useSafeAreaInsets();
@@ -62,7 +64,7 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
         <View style={styles.centerContainer}>
           <Ionicons name="sync" size={layout.iconSize.lg} color={colors.muted} />
           <AppText variant="body" color="muted">
-            Carregando dados oficiais do chamado…
+            Carregando chamado…
           </AppText>
         </View>
       </AppScreen>
@@ -85,7 +87,7 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
           <AppText variant="body" color="muted" style={{ textAlign: 'center' }}>
             {offline
               ? 'Confira sua conexão e tente de novo.'
-              : 'Não achamos este chamado nos dados da Prefeitura. Ele pode ter saído da base do 1746.'}
+              : 'Não achamos este chamado nos dados da Prefeitura.'}
           </AppText>
           <AppButton
             title="Tentar novamente"
@@ -145,13 +147,26 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
           `Protocolo: ${item.externalId}\n` +
           `Situação: ${status.label}\n` +
           (deadlineInfo ? `Prazo: ${deadlineInfo.label}\n` : '') +
-          `Local: ${fullLocationLabel}\n` +
-          `Acompanhe este chamado pelo Fiscaliza aí`,
+          `Local: ${fullLocationLabel}`,
         title: `Protocolo 1746 nº ${item.externalId}`,
       });
     } catch {
       // Ignora cancelamentos de compartilhamento
     }
+  };
+
+  // Encerrado sem resolver: o morador pede de novo, citando este protocolo.
+  const handleReopen = async () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const message = formatReopenMessage({
+      protocol: item.externalId,
+      service: title,
+      place: [item.streetName, item.neighborhoodName].filter(Boolean).join(' · '),
+      closedOn: formatCallDate(item.closedAt),
+      closingNote: item.statusJustification || item.officialStatus || null,
+    });
+    if ((await sendComplaintToWhatsApp(message, null)) === 'failed')
+      setToast('Não foi possível abrir o WhatsApp. Ligue para o 1746.');
   };
 
   return (
@@ -194,17 +209,16 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
           { paddingBottom: insets.bottom + spacing.xl },
         ]}
       >
-        {!data && item && (
-          <AppText variant="caption" color="muted">
-            Última informação consultada e salva neste celular.
-          </AppText>
-        )}
-        {isError && (
+        {isError ? (
           <AppText color="risk">
-            {offline ? 'Sem internet no momento. ' : 'Não conseguimos atualizar. '}
-            Mostrando o que você já tinha salvo.
+            {offline ? 'Sem internet. ' : 'Não conseguimos atualizar. '}
+            Mostrando a última versão salva.
           </AppText>
-        )}
+        ) : !data && item ? (
+          <AppText variant="caption" color="muted">
+            Versão salva neste celular.
+          </AppText>
+        ) : null}
         {/* Cabeçalho editorial do chamado (sem card aninhado) */}
         <View style={styles.officialHeaderBadge}>
           <View style={styles.headerTextCol}>
@@ -309,7 +323,7 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
             <AppText variant="body">{item.organizationName}</AppText>
           ) : (
             <AppText variant="body" color="muted">
-              Órgão municipal não informado
+              Órgão não informado
             </AppText>
           )}
 
@@ -327,21 +341,20 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
           {item.complaintsCount != null && item.complaintsCount > 0 ? (
             <AppText variant="caption" color="muted">
               {item.complaintsCount === 1
-                ? '1 reclamação registrada neste protocolo'
-                : `${item.complaintsCount} reclamações registradas neste protocolo`}
+                ? '1 reclamação neste protocolo'
+                : `${item.complaintsCount} reclamações neste protocolo`}
             </AppText>
           ) : null}
 
           {item.viaOmbudsman ? (
             <AppText variant="caption" color="muted">
-              Passou pela Ouvidoria da Prefeitura
+              Passou pela Ouvidoria
             </AppText>
           ) : null}
 
           {isClosed && (
             <AppText color="muted" variant="caption">
-              Encerrado no 1746. Esse estado administrativo não confirma a
-              resolução no local.
+              “Encerrado” não garante que o problema foi resolvido.
             </AppText>
           )}
 
@@ -355,12 +368,27 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
               </AppText>
             </View>
           ) : null}
+
+          {isClosed && (
+            <View style={styles.reopen}>
+              <AppButton
+                title="O problema continua"
+                variant="secondary"
+                icon={<Ionicons name="logo-whatsapp" size={layout.iconSize.md} color={colors.ink} />}
+                onPress={() => { void handleReopen(); }}
+                accessibilityHint="Abre o WhatsApp do 1746 com o protocolo e um novo pedido já escritos"
+              />
+              <AppText variant="caption" color="muted">
+                Abre o WhatsApp do 1746 com o protocolo deste chamado e o pedido já escritos. Você confere antes de enviar.
+              </AppText>
+            </View>
+          )}
         </View>
 
         {/* Seção: Linha do Tempo Oficial */}
         <View style={styles.sectionCard}>
           <AppText variant="sectionTitle" accessibilityRole="header" style={styles.sectionHeading}>
-            Linha do tempo oficial
+            Linha do tempo
           </AppText>
           <OfficialCallTimeline call={item} />
         </View>
@@ -404,8 +432,7 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
               color="muted"
               style={{ marginTop: spacing.sm }}
             >
-              Coordenadas exatas não fornecidas pela prefeitura para este
-              chamado.
+              A Prefeitura não informou o ponto exato.
             </AppText>
           )}
         </View>
@@ -413,24 +440,20 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
         {/* Seção: De onde vem e onde pedir */}
         <View style={[styles.sectionCard, styles.infoCard]}>
           <AppText variant="sectionTitle" accessibilityRole="header" style={styles.sectionHeading}>
-            De onde vem e onde pedir
+            Fonte
           </AppText>
           <AppText variant="caption" color="muted" style={{ lineHeight: 18 }}>
-            Fonte: Prefeitura do Rio (Data.Rio). O Fiscaliza aí não faz parte
-            da Prefeitura.
+            Prefeitura do Rio (Data.Rio). O Fiscaliza aí é independente.
           </AppText>
           {sourceDate && (
-            <AppText variant="caption" color="muted">Data de referência no Data.Rio: {sourceDate}</AppText>
+            <AppText variant="caption" color="muted">Dados de {sourceDate} no Data.Rio</AppText>
           )}
           {sourceUpdateDate && (
-            <AppText variant="caption" color="muted">Última atualização informada pelo 1746: {sourceUpdateDate}</AppText>
+            <AppText variant="caption" color="muted">Atualizado pelo 1746 em {sourceUpdateDate}</AppText>
           )}
           {appRecordDate && (
-            <AppText variant="caption" color="muted">Versão registrada no Fiscaliza aí em {appRecordDate}.</AppText>
+            <AppText variant="caption" color="muted">Atualizado no app em {appRecordDate}</AppText>
           )}
-          <AppText variant="caption" color="muted">
-            Para pedir ou acompanhar, use o canal oficial da Prefeitura.
-          </AppText>
         </View>
       </ScrollView>
       <View
@@ -446,7 +469,7 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
             accessibilityLiveRegion="polite"
           >
             {persistenceError ||
-              'Não conseguimos salvar. Toque em Salvar para tentar de novo.'}
+              'Não conseguimos salvar. Tente de novo.'}
           </AppText>
         )}
         <Pressable
@@ -463,7 +486,7 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
           accessibilityLabel={
             isSaved
               ? 'Remover dos chamados salvos'
-              : 'Salvar chamado para acompanhar'
+              : 'Salvar chamado'
           }
           style={({ pressed }) => [
             styles.saveButton,
