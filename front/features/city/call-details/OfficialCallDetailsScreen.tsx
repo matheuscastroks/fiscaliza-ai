@@ -8,7 +8,6 @@ import {
   officialCallStatus,
   resolveOfficialCallDeadline,
 } from '@/features/city/officialCallStatus';
-import { resolveServiceCategoryTheme } from '@/features/city/officialCategoryThemes';
 import {
   View,
   ScrollView,
@@ -30,7 +29,7 @@ import { useOfficialCall } from '@/features/city/useOfficialCalls';
 import { useFollowStore } from '@/stores/followStore';
 import { OfficialCallTimeline } from '@/components/official/OfficialCallTimeline';
 import { goBack } from '@/utils/navigation';
-import { formatTimeRemaining } from '@/features/city/formatDates';
+import { formatCallDate, formatTimeRemaining } from '@/features/city/formatDates';
 import { useShallow } from 'zustand/react/shallow';
 import { AppToast } from '@/components/ui/AppToast';
 import { copyText } from '@/utils/clipboard';
@@ -99,12 +98,13 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
   }
 
   const isClosed = isOfficialCallClosed(item);
+  const sourceDate = formatCallDate(item.sourcePartitionDate);
+  const appRecordDate = formatCallDate(item.updatedAt) ?? formatCallDate(item.importedAt);
+  const sourceUpdateDate = formatCallDate(item.sourceUpdatedAt);
   const status = officialCallStatus(item, colors, isDark);
   const deadlineInfo = resolveOfficialCallDeadline(item, isClosed);
-  const categoryTheme = resolveServiceCategoryTheme(
-    item.serviceType,
-    item.serviceSubtype,
-  );
+  const title = item.serviceSubtype?.trim() || item.serviceType;
+  const category = item.serviceType.trim();
 
   const save = async () => {
     setSaveFailed(false);
@@ -173,33 +173,7 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
               <Ionicons name="share-social-outline" size={layout.iconSize.md} color={colors.ink} />
             </Pressable>
 
-            <Pressable
-              disabled={!hydrated || busy}
-              onPress={() => {
-                void save();
-              }}
-              accessibilityRole="checkbox"
-              accessibilityState={{
-                checked: isSaved,
-                disabled: !hydrated || busy,
-                busy,
-              }}
-              accessibilityLabel={
-                isSaved
-                  ? 'Remover dos chamados salvos neste celular'
-                  : 'Salvar chamado neste celular para acompanhar'
-              }
-              style={({ pressed }) => [
-                styles.saveButton,
-                { opacity: !hydrated || busy ? 0.5 : pressed ? 0.75 : 1 },
-              ]}
-            >
-              <Ionicons
-                name={isSaved ? 'bookmark' : 'bookmark-outline'}
-                size={layout.iconSize.md}
-                color={isSaved ? colors.accent : colors.ink}
-              />
-            </Pressable>
+
           </View>
         }
       />
@@ -231,94 +205,19 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
             Mostrando o que você já tinha salvo.
           </AppText>
         )}
-        {(persistenceError || saveFailed) && (
-          <AppText
-            color="risk"
-            accessibilityRole="alert"
-            accessibilityLiveRegion="polite"
-          >
-            {persistenceError ||
-              'Não conseguimos salvar. Toque em Salvar para tentar de novo.'}
-          </AppText>
-        )}
-
         {/* Cabeçalho editorial do chamado (sem card aninhado) */}
         <View style={styles.officialHeaderBadge}>
           <View style={styles.headerTextCol}>
-            <View style={styles.categoryLine}>
-              <Ionicons
-                name={
-                  categoryTheme.icon as React.ComponentProps<
-                    typeof Ionicons
-                  >['name']
-                }
-                size={layout.iconSize.sm}
-                color={colors.muted}
-              />
-              <AppText variant="caption" color="muted" numberOfLines={1}>
-                {item.serviceType}
-              </AppText>
-            </View>
+            {category && category.toLocaleLowerCase('pt-BR') !== title.trim().toLocaleLowerCase('pt-BR') && (
+              <AppText variant="caption" color="muted">{category}</AppText>
+            )}
             <AppText variant="screenTitle" accessibilityRole="header" style={styles.mainTitle}>
-              {item.serviceSubtype || item.serviceType}
+              {title}
             </AppText>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Copiar protocolo ${item.externalId}`}
-              hitSlop={{ top: 12, bottom: 12 }}
-              onPress={async () => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                try {
-                  if (await copyText(item.externalId)) {
-                    setToast('Protocolo copiado');
-                    return;
-                  }
-                } catch {
-                  // Sem área de transferência: cai no compartilhamento abaixo.
-                }
-                await Share.share({
-                  message: item.externalId,
-                  title: `Protocolo 1746 nº ${item.externalId}`,
-                }).catch(() => undefined);
-              }}
-              style={({ pressed }) => [
-                styles.protocolPill,
-                pressed && { opacity: 0.7 },
-              ]}
-            >
-              <Ionicons name="copy-outline" size={layout.iconSize.sm} color={colors.muted} />
-              <AppText variant="protocol" color="muted">
-                Protocolo {item.externalId}
-              </AppText>
-            </Pressable>
+
           </View>
 
         </View>
-
-        {/* Badge de Prazo Oficial (SLA) em Destaque */}
-        {deadlineInfo && (
-          <View
-            style={[
-              styles.slaPill,
-              deadlineInfo.isOverdue ? styles.slaPillOverdue : styles.slaPillNormal,
-            ]}
-          >
-            <Ionicons
-              name={deadlineInfo.isOverdue ? 'alert-circle' : 'time-outline'}
-              size={layout.iconSize.sm}
-              color={deadlineInfo.isOverdue ? colors.risk : colors.onSurfaceBrand}
-            />
-            <AppText
-              variant="caption"
-              style={[
-                styles.slaPillText,
-                { color: deadlineInfo.isOverdue ? colors.risk : colors.onSurfaceBrand },
-              ]}
-            >
-              {deadlineInfo.label}
-            </AppText>
-          </View>
-        )}
 
         <View style={styles.summaryRow}>
           <View style={styles.neighborhood}>
@@ -345,9 +244,64 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
           </View>
         </View>
 
+        {/* Badge de Prazo Oficial (SLA) em Destaque */}
+        {deadlineInfo && (
+          <View
+            style={[
+              styles.slaPill,
+              deadlineInfo.isOverdue ? styles.slaPillOverdue : styles.slaPillNormal,
+            ]}
+          >
+            <Ionicons
+              name={deadlineInfo.isOverdue ? 'alert-circle' : 'time-outline'}
+              size={layout.iconSize.sm}
+              color={deadlineInfo.isOverdue ? colors.risk : colors.primary}
+            />
+            <AppText
+              variant="caption"
+              style={[
+                styles.slaPillText,
+                { color: deadlineInfo.isOverdue ? colors.risk : colors.primary },
+              ]}
+            >
+              {deadlineInfo.label}
+            </AppText>
+          </View>
+        )}
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Copiar protocolo ${item.externalId}`}
+          hitSlop={{ top: 12, bottom: 12 }}
+          onPress={async () => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            try {
+              if (await copyText(item.externalId)) {
+                setToast('Protocolo copiado');
+                return;
+              }
+            } catch {
+              // Sem área de transferência: cai no compartilhamento abaixo.
+            }
+            await Share.share({
+              message: item.externalId,
+              title: `Protocolo 1746 nº ${item.externalId}`,
+            }).catch(() => undefined);
+          }}
+          style={({ pressed }) => [
+            styles.protocolPill,
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <Ionicons name="copy-outline" size={layout.iconSize.sm} color={colors.muted} />
+          <AppText variant="protocol" color="muted">
+            Protocolo {item.externalId}
+          </AppText>
+        </Pressable>
+
         {/* Seção: Atendimento */}
         <View style={styles.sectionCard}>
-          <AppText variant="sectionTitle" style={styles.sectionHeading}>
+          <AppText variant="sectionTitle" accessibilityRole="header" style={styles.sectionHeading}>
             Atendimento
           </AppText>
 
@@ -378,6 +332,12 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
             </AppText>
           ) : null}
 
+          {item.viaOmbudsman ? (
+            <AppText variant="caption" color="muted">
+              Passou pela Ouvidoria da Prefeitura
+            </AppText>
+          ) : null}
+
           {isClosed && (
             <AppText color="muted" variant="caption">
               Encerrado no 1746. Esse estado administrativo não confirma a
@@ -399,7 +359,7 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
 
         {/* Seção: Linha do Tempo Oficial */}
         <View style={styles.sectionCard}>
-          <AppText variant="sectionTitle" style={styles.sectionHeading}>
+          <AppText variant="sectionTitle" accessibilityRole="header" style={styles.sectionHeading}>
             Linha do tempo oficial
           </AppText>
           <OfficialCallTimeline call={item} />
@@ -409,7 +369,7 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
 
         {/* Seção: Localização */}
         <View style={styles.sectionCard}>
-          <AppText variant="sectionTitle" style={styles.sectionHeading}>
+          <AppText variant="sectionTitle" accessibilityRole="header" style={styles.sectionHeading}>
             Localização
           </AppText>
           <View style={styles.locationSummary}>
@@ -452,13 +412,22 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
 
         {/* Seção: De onde vem e onde pedir */}
         <View style={[styles.sectionCard, styles.infoCard]}>
-          <AppText variant="sectionTitle" style={styles.sectionHeading}>
+          <AppText variant="sectionTitle" accessibilityRole="header" style={styles.sectionHeading}>
             De onde vem e onde pedir
           </AppText>
           <AppText variant="caption" color="muted" style={{ lineHeight: 18 }}>
             Fonte: Prefeitura do Rio (Data.Rio). O Fiscaliza aí não faz parte
             da Prefeitura.
           </AppText>
+          {sourceDate && (
+            <AppText variant="caption" color="muted">Data de referência no Data.Rio: {sourceDate}</AppText>
+          )}
+          {sourceUpdateDate && (
+            <AppText variant="caption" color="muted">Última atualização informada pelo 1746: {sourceUpdateDate}</AppText>
+          )}
+          {appRecordDate && (
+            <AppText variant="caption" color="muted">Versão registrada no Fiscaliza aí em {appRecordDate}.</AppText>
+          )}
           <AppText variant="caption" color="muted">
             Para pedir ou acompanhar, use o canal oficial da Prefeitura.
           </AppText>
@@ -470,6 +439,46 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
           { paddingBottom: Math.max(insets.bottom, spacing.md) },
         ]}
       >
+        {(persistenceError || saveFailed) && (
+          <AppText
+            color="risk"
+            accessibilityRole="alert"
+            accessibilityLiveRegion="polite"
+          >
+            {persistenceError ||
+              'Não conseguimos salvar. Toque em Salvar para tentar de novo.'}
+          </AppText>
+        )}
+        <Pressable
+          disabled={!hydrated || busy}
+          onPress={() => {
+            void save();
+          }}
+          accessibilityRole="checkbox"
+          accessibilityState={{
+            checked: isSaved,
+            disabled: !hydrated || busy,
+            busy,
+          }}
+          accessibilityLabel={
+            isSaved
+              ? 'Remover dos chamados salvos'
+              : 'Salvar chamado para acompanhar'
+          }
+          style={({ pressed }) => [
+            styles.saveButton,
+            { opacity: !hydrated || busy ? 0.5 : pressed ? 0.75 : 1 },
+          ]}
+        >
+          <Ionicons
+            name={isSaved ? 'bookmark' : 'bookmark-outline'}
+            size={layout.iconSize.md}
+            color={isSaved ? colors.accent : colors.ink}
+          />
+          <AppText variant="label" style={{ flexShrink: 1 }}>
+            {isSaved ? 'Remover dos salvos' : 'Salvar chamado'}
+          </AppText>
+        </Pressable>
         <OfficialChannel variant="primary" />
       </View>
       <AppToast message={toast} onDismiss={() => setToast(null)} type="info" />

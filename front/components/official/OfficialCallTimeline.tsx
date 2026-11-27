@@ -40,6 +40,28 @@ function buildTimelineSteps(call: OfficialCall, isClosed: boolean): TimelineStep
     icon: 'document-text-outline',
   });
 
+  // Serviços com prazo tipo D exigem avaliação técnica antes da execução. A
+  // data real do diagnóstico é um evento publicado; a previsão, não.
+  if (call.diagnosedAt) {
+    steps.push({
+      id: 'diagnosed',
+      title: 'Diagnóstico registrado',
+      subtitle: 'O órgão registrou a avaliação técnica. Isso não confirma que o serviço foi feito.',
+      date: formatCallDate(call.diagnosedAt),
+      state: 'done',
+      icon: 'search-outline',
+    });
+  } else if (call.deadlineType === 'D' && !isClosed) {
+    steps.push({
+      id: 'diagnosed',
+      title: 'Diagnóstico ainda não registrado',
+      subtitle: 'Este serviço depende de avaliação técnica antes do prazo de execução.',
+      date: null,
+      state: 'pending',
+      icon: 'search-outline',
+    });
+  }
+
   // A publicação informa abertura e encerramento, sem histórico de execução.
   // Prazos estimados não comprovam vistoria nem realização do serviço.
   steps.push({
@@ -160,19 +182,15 @@ const createStyles = (colors: ThemeColors) =>
       borderRadius: layout.radius.sm,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 2,
     },
     nodeCircleDone: {
       backgroundColor: colors.accent,
-      borderColor: colors.accent,
     },
     nodeCircleActive: {
-      backgroundColor: colors.surfaceSubdued,
-      borderColor: colors.accent,
+      backgroundColor: colors.primaryContainer,
     },
     nodeCirclePending: {
-      backgroundColor: colors.surface,
-      borderColor: colors.border,
+      backgroundColor: colors.surfaceRecessed,
     },
     connectorLine: {
       width: 2,
