@@ -12,7 +12,17 @@ export type AppConfig = {
   webOrigins: string[];
   trustProxy: string[] | false;
   uploadDir: string;
+  /** null sem GEMINI_API_KEY: a análise por foto responde 503. */
+  gemini: { apiKey: string; model: string | undefined } | null;
+  analysisQuota: { perUserPerDay: number; totalPerDay: number };
 };
+
+function positiveInt(value: string | undefined, fallback: number, name: string) {
+  if (!value) return fallback;
+  if (!/^[1-9]\d*$/.test(value))
+    throw new Error(`${name} deve ser um inteiro positivo.`);
+  return Number(value);
+}
 
 function list(value: string | undefined): string[] {
   return (value ?? '')
@@ -63,6 +73,13 @@ export function loadConfig(
     webOrigins: webOrigins.length ? webOrigins : list(DEV_ORIGINS),
     trustProxy: trustProxy.length ? trustProxy : false,
     uploadDir: uploadDirFrom(env),
+    gemini: env.GEMINI_API_KEY
+      ? { apiKey: env.GEMINI_API_KEY, model: env.GEMINI_MODEL || undefined }
+      : null,
+    analysisQuota: {
+      perUserPerDay: positiveInt(env.GEMINI_DAILY_LIMIT_PER_USER, 20, 'GEMINI_DAILY_LIMIT_PER_USER'),
+      totalPerDay: positiveInt(env.GEMINI_DAILY_LIMIT, 500, 'GEMINI_DAILY_LIMIT'),
+    },
   };
 }
 
