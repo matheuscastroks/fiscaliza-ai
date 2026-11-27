@@ -376,11 +376,8 @@ export default function OfficialCallDetailsScreen({ id }: { id: string }) {
                 variant="secondary"
                 icon={<Ionicons name="logo-whatsapp" size={layout.iconSize.md} color={colors.ink} />}
                 onPress={() => { void handleReopen(); }}
-                accessibilityHint="Abre o WhatsApp do 1746 com o protocolo e um novo pedido já escritos"
+                accessibilityHint="Abre o WhatsApp do 1746"
               />
-              <AppText variant="caption" color="muted">
-                Abre o WhatsApp do 1746 com o protocolo deste chamado e o pedido já escritos. Você confere antes de enviar.
-              </AppText>
             </View>
           )}
         </View>
