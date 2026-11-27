@@ -6,7 +6,9 @@ O projeto consulta dados abertos oficiais da **Central 1746 / DATA.RIO** (Google
 
 ## Download (Android)
 
-Os instaladores Android (`.apk`) estão disponíveis em [Releases no GitHub](https://github.com/matheuscastroks/fiscaliza-ai/releases/latest).
+O canal oficial de distribuição Android é o [Expo EAS](https://expo.dev/accounts/couks/projects/fiscaliza-ai/builds). Para instalar, use o APK de um build do perfil `production`.
+
+A partir da versão 1.0.1, o APK usa uma chave de produção. Se você instalou a versão 1.0.0 pelo GitHub, o Android exige remover essa instalação antes de instalar o novo APK. A remoção apaga preferências e dados guardados apenas no aparelho.
 
 ## Documentação Principal
 
