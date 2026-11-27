@@ -59,7 +59,8 @@ export interface MapboxMapViewProps {
   region: MapboxRegion;
   markers?: MapMarker[];
   spatialCells?: OfficialMapCell[];
-  onSpatialCellPress?: (cell: OfficialMapCell) => void;
+  onSpatialCellPress?: (cell: import('@/features/territory/spatialFeatures').SpatialClusterSelection) => void;
+  onSpatialSelectionError?: () => void;
   boundary?: unknown;
   searchArea?: MapSearchArea | null;
   deviceLocation?: CapturedDeviceLocation | null;
@@ -82,6 +83,7 @@ export interface MapboxMapViewProps {
   /** Descrição para leitores de tela. */
   accessibilityLabel?: string;
   accessibilityHint?: string;
+  onInitialLoadError?: () => void;
 }
 
 export { MAPBOX_STYLE_DARK, MAPBOX_STYLE_LIGHT };
@@ -126,7 +128,7 @@ function getRnMapbox(): any {
 }
 
 export function isMapboxAvailable(): boolean {
-  return Boolean(getRnMapbox());
+  return Boolean(resolveMapboxAccessToken() && getRnMapbox());
 }
 
 const memoComponent = memo || ((c: any) => c);
@@ -135,7 +137,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
   style,
   region,
   markers = [],
-  spatialCells, onSpatialCellPress,
+  spatialCells, onSpatialCellPress, onSpatialSelectionError,
   boundary,
   searchArea,
   deviceLocation,
@@ -153,8 +155,10 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
   cameraPadding,
   accessibilityLabel,
   accessibilityHint,
+  onInitialLoadError,
 }: MapboxMapViewProps) {
   const palette = mapPalette(isDark);
+  const styleLoaded = useRef(false);
   const [completedTrace, setCompletedTrace] = useState<number | null>(null);
   const mounted = useRef(true);
   const initialTrace = useRef(diagnosticTrace);
@@ -337,13 +341,19 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
         scaleBarEnabled={false}
         onPress={handleMapPress}
         onCameraChanged={handleCameraChanged}
-        onDidFinishLoadingStyle={performanceDiagnostics ? () => { if (mounted.current) mapPerformanceEvent('style-loaded', {}, diagnosticTrace); } : undefined}
+        onDidFinishLoadingStyle={() => {
+          styleLoaded.current = true;
+          if (performanceDiagnostics && mounted.current) mapPerformanceEvent('style-loaded', {}, diagnosticTrace);
+        }}
+        onMapLoadingError={(event?: { type?: string }) => {
+          if (performanceDiagnostics && mounted.current) mapPerformanceEvent('load-error', {}, diagnosticTrace);
+          if (!styleLoaded.current && event?.type === 'style') onInitialLoadError?.();
+        }}
         onDidFinishRenderingFrameFully={performanceDiagnostics && diagnosticTrace !== null && completedTrace !== diagnosticTrace ? () => {
           if (!mounted.current) return;
           mapPerformanceEvent('frame-ready', {}, diagnosticTrace);
           setCompletedTrace(diagnosticTrace);
         } : undefined}
-        onMapLoadingError={performanceDiagnostics ? () => { if (mounted.current) mapPerformanceEvent('load-error', {}, diagnosticTrace); } : undefined}
       >
         <Mapbox.Camera
           ref={cameraRef}
@@ -375,7 +385,7 @@ export const MapboxMapView = memoComponent(function MapboxMapView({
 
         <MapAreaLayers Mapbox={Mapbox} searchCircle={searchCircle} accuracyCircle={accuracyCircle} isDark={isDark} />
 
-        {spatialCells && <SpatialCallLayers Mapbox={Mapbox} cells={spatialCells} isDark={isDark} onSelect={cell => {
+        {spatialCells && <SpatialCallLayers Mapbox={Mapbox} cells={spatialCells} isDark={isDark} onSelectionError={onSpatialSelectionError} onSelect={cell => {
           if (cell.id && cell.count === 1) onMarkerClick?.(cell.id);
           else onSpatialCellPress?.(cell);
         }} />}

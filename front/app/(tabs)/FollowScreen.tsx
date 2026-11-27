@@ -4,6 +4,7 @@ import {
   RefreshControl,
   Pressable,
   StyleSheet,
+  useWindowDimensions,
 } from 'react-native';
 import { useCallback, useMemo } from 'react';
 import type { OfficialCall } from '@/shared/contracts';
@@ -14,6 +15,7 @@ import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { AppText } from '@/components/ui/AppText';
 import { SlidingTabs } from '@/components/ui/SlidingTabs';
+import { AppSelect } from '@/components/ui/AppSelect';
 import { OfficialCallRow } from '@/components/official/OfficialCallRow';
 import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
 import { useAuthStore } from '@/stores/authStore';
@@ -26,7 +28,9 @@ import { useShallow } from 'zustand/react/shallow';
 
 export default function FollowScreen() {
   const { contentInset } = useTabBarInset();
-  const { colors, isDark } = useTheme();
+  const { colors, elevation, isDark } = useTheme();
+  const { width, fontScale } = useWindowDimensions();
+  const compactFilters = width < 390 || fontScale > 1.15;
   const user = useAuthStore((s) => s.user);
   const {
     savedCalls,
@@ -45,6 +49,13 @@ export default function FollowScreen() {
     () => savedCalls.filter((c) => isOfficialCallClosed(c)).length,
     [savedCalls],
   );
+  const statusOptions = [
+    { value: 'all', label: `Todos (${savedCalls.length})` },
+    { value: 'open', label: `Em aberto (${openCount})` },
+    { value: 'resolved', label: `Encerrados (${closedCount})` },
+  ] satisfies { value: FollowStatusFilter; label: string }[];
+  const filterValue = statusFilter === 'saved' ? 'all' : statusFilter;
+  const changeFilter = (value: string) => setStatusFilter(value as FollowStatusFilter);
 
   const calls = useMemo(
     () =>
@@ -124,11 +135,11 @@ export default function FollowScreen() {
                   }}
                   style={({ pressed }) => [
                     styles.refreshPill,
+                    elevation.subtle,
                     {
                       backgroundColor: isDark
-                        ? colors.surfaceSubdued
+                        ? colors.surfaceRaised
                         : colors.surface,
-                      borderColor: colors.border,
                       opacity: refreshing ? 0.6 : pressed ? 0.75 : 1,
                     },
                   ]}
@@ -141,21 +152,33 @@ export default function FollowScreen() {
               </View>
             )}
 
-            <SlidingTabs
-              label="Filtrar meus salvos"
-              value={statusFilter === 'saved' ? 'all' : statusFilter}
-              options={[
-                { value: 'all', label: `Todos (${savedCalls.length})` },
-                { value: 'open', label: `Em aberto (${openCount})` },
-                { value: 'resolved', label: `Encerrados (${closedCount})` },
-              ]}
-              onChange={(v) => setStatusFilter(v as FollowStatusFilter)}
-            />
+            {savedCalls.length > 0 && (
+              <>
+                {compactFilters ? (
+                  <AppSelect
+                    label="Filtrar meus salvos"
+                    options={statusOptions}
+                    value={filterValue}
+                    onChange={changeFilter}
+                    clearable={false}
+                  />
+                ) : (
+                  <SlidingTabs
+                    label="Filtrar meus salvos"
+                    scroll={false}
+                    options={statusOptions}
+                    value={filterValue}
+                    onChange={changeFilter}
+                  />
+                )}
 
-            <AppText variant="caption" color="muted">
-              Situação informada pela Prefeitura. “Encerrado” não garante que o
-              problema foi resolvido: se continuar, veja a aba Agir.
-            </AppText>
+                <AppText variant="caption" color="muted">
+                  Situação informada pela Prefeitura. “Encerrado” não garante que o
+                  problema foi resolvido: se continuar, veja a aba Agir.
+                </AppText>
+
+              </>
+            )}
 
             {!hydrated && (
               <AppText color="muted">Carregando seus salvos…</AppText>
@@ -216,7 +239,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: layout.radius.control,
-    borderWidth: 1,
   },
   flex: {
     flex: 1,

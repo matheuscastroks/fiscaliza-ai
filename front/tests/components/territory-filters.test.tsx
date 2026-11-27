@@ -33,7 +33,7 @@ const props = (): TerritoryFilterModalProps => ({
 it('selecionar um tema limpa somente o subtipo incompatível', async () => {
   const p = props();
   await render(<TerritoryFilterModal {...p} />);
-  await fireEvent.press(screen.getByRole('button', { name: 'Tema cívico: Iluminação' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Categoria: Iluminação' }));
   expect(p.onMacroThemeChange).toHaveBeenCalledWith('lighting');
   expect(p.onServiceTypeChange).toHaveBeenCalledWith('all');
 });
@@ -43,7 +43,7 @@ it('um tema preserva subtipo compatível e oferece só seus serviços', async ()
   await render(<TerritoryFilterModal {...p} />);
   expect(screen.queryByRole('button', { name: 'Tipo de serviço 1746: Tapa-buraco' })).toBeNull();
   expect(screen.getByRole('button', { name: 'Tipo de serviço 1746: Iluminação Pública' })).toBeTruthy();
-  await fireEvent.press(screen.getByRole('button', { name: 'Tema cívico: Iluminação' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Categoria: Iluminação' }));
   expect(p.onServiceTypeChange).not.toHaveBeenCalled();
 });
 

@@ -1,19 +1,15 @@
-import React, { useCallback, useMemo, memo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, memo } from 'react';
 import { useTabBarInset } from '@/hooks/useTabBarInset';
 import {
+  AccessibilityInfo,
   FlatList,
   RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
-import {
-  AppBottomSheetModal,
-  BottomSheetFlatList,
-} from '@/components/ui/AppBottomSheetModal';
 import { TerritoryListRow } from '@/components/territory/TerritoryListRow';
 import type { Entry } from '@/components/territory/TerritoryPreviewCard';
 import {
@@ -25,19 +21,20 @@ import { ScreenState } from '@/components/ui/ScreenState';
 import { IllustratedEmptyState } from '@/features/onboarding/IllustratedEmptyState';
 import type { TerritoryLayer } from '@/features/territory/selectors';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
-import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 
 const entryKey = (entry: Entry) => entry.type + ':' + entry.item.id;
 
 function TerritoryRowSeparator() {
-  return <View style={{ height: spacing.md }} />;
+  const { colors } = useTheme();
+  return <View style={[styles.separator, { backgroundColor: colors.dividerSubtle }]} />;
 }
 
 export interface TerritoryListViewProps {
   visible?: boolean;
-  asSheet?: boolean;
-  onClose?: () => void;
+  offline?: boolean;
+  onRetryMap?: () => void;
+  onBackToMap?: () => void;
   /** Recorte "localização atual" sem posição: explica e oferece capturar ou escolher um bairro. */
   locationPrompt?: { onUseLocation: () => void };
   listRef: React.RefObject<FlatList<Entry> | null>;
@@ -77,8 +74,9 @@ export interface TerritoryListViewProps {
 
 function TerritoryListViewComponent({
   visible = true,
-  asSheet = true,
-  onClose,
+  offline = false,
+  onRetryMap,
+  onBackToMap,
   locationPrompt,
   listRef,
   listOffsetRef,
@@ -99,7 +97,7 @@ function TerritoryListViewComponent({
   filterBarProps,
   facilityPagination,
 }: TerritoryListViewProps) {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { contentInset } = useTabBarInset();
   const cityStyles = useThemedStyles(createCityStyles);
@@ -117,12 +115,13 @@ function TerritoryListViewComponent({
 
   // Rolagem infinita: perto do fim, pede a próxima página (o botão abaixo continua como alternativa).
   const loadMore = useCallback(() => {
+    if (offline) return;
     if (layers.includes('official')) {
       if (hasMoreCalls && !officialQuery.isFetching && !officialQuery.error) officialQuery.fetchNextPage();
       return;
     }
     if (facilityPagination?.hasMore && !facilityPagination.isFetchingNextPage) facilityPagination.fetchNextPage();
-  }, [layers, hasMoreCalls, officialQuery, facilityPagination]);
+  }, [offline, layers, hasMoreCalls, officialQuery, facilityPagination]);
 
   const facilityLoaded = facilityPagination?.loadedCount ?? 0;
   const facilityTotal = facilityPagination?.totalKnown ?? null;
@@ -145,46 +144,30 @@ function TerritoryListViewComponent({
 
   const headerNotice = (
     <View style={{ gap: spacing.sm, marginBottom: spacing.md }}>
-      {(officialQuery.isLoading ||
-        officialQuery.error ||
-        officialQuery.fetchStatus === 'paused') && (
-        <View style={{ gap: spacing.xs }}>
-          <ScreenState
-            loading={officialQuery.isLoading}
-            error={officialQuery.error}
-            retry={officialQuery.refetch}
-          />
+      {offline ? (
+        <View accessibilityLiveRegion="polite" style={{ gap: spacing.xs, paddingVertical: spacing.md }}>
+          <AppText variant="label">Sem conexão</AppText>
+          <AppText color="muted">
+            {listed.length ? 'Mostrando dados carregados anteriormente.' : 'A busca recomeça quando a conexão voltar.'}
+          </AppText>
         </View>
-      )}
-      {(!asSheet || unlocatedCount > 0) && (
-        <View style={cityStyles.section}>
-          {!asSheet && (
-            <AppText variant="sectionTitle">{sectionHeading}</AppText>
-          )}
+      ) : layers.includes('official') && officialQuery.error ? (
+        <View accessibilityLiveRegion="polite" style={{ gap: spacing.sm, paddingVertical: spacing.md }}>
+          <AppText variant="label" color="risk">
+            {listed.length ? 'Mostrando os chamados carregados anteriormente.' : 'Os chamados não carregaram.'}
+          </AppText>
+          <AppButton title="Tentar novamente" variant="secondary" onPress={officialQuery.refetch} />
+        </View>
+      ) : layers.includes('official') && officialQuery.isLoading ? (
+        <ScreenState loading />
+      ) : null}
+      {(listed.length > 0 || unlocatedCount > 0) && (
+        <View style={styles.resultContext}>
+          <AppText variant="caption" color="muted">{sectionHeading}</AppText>
           {unlocatedCount > 0 && (
-            <View
-              style={[
-                styles.unlocatedNotice,
-                {
-                  backgroundColor: isDark
-                    ? colors.surfaceSubdued
-                    : colors.surfaceSubdued,
-                  borderColor: colors.border,
-                },
-              ]}
-            >
-              <Ionicons
-                name="information-circle-outline"
-                size={layout.iconSize.sm}
-                color={colors.onSurfaceBrand}
-              />
-              <AppText variant="caption" color="muted" style={{ flex: 1 }}>
-                Inclui {unlocatedCount}{' '}
-                {unlocatedCount === 1
-                  ? 'chamado sem local marcado no mapa.'
-                  : 'chamados sem local marcado no mapa.'}
-              </AppText>
-            </View>
+            <AppText variant="caption" color="muted">
+              {unlocatedCount} {unlocatedCount === 1 ? 'chamado sem ponto no mapa' : 'chamados sem ponto no mapa'} entre os resultados carregados.
+            </AppText>
           )}
         </View>
       )}
@@ -198,11 +181,11 @@ function TerritoryListViewComponent({
           kind="territory"
           height={96}
           title="Aguardando sua localização"
-          description="Permita a localização para ver os chamados perto de você. Ou feche esta lista e escolha um bairro lá em cima."
+          description="Permita a localização para ver os chamados perto de você. Você também pode escolher um bairro no seletor de área."
           action={{ title: 'Usar minha localização', onPress: locationPrompt.onUseLocation }}
         />
       )}
-      {layers.includes('official') && hasMoreCalls && (
+      {!offline && layers.includes('official') && hasMoreCalls && (
         <AppButton
           title={officialQuery.isFetchingNextPage
             ? 'Carregando mais chamados…'
@@ -216,7 +199,7 @@ function TerritoryListViewComponent({
           }}
         />
       )}
-      {facilityPagination?.hasMore && (
+      {!offline && facilityPagination?.hasMore && (
         <AppButton
           title={
             facilityTotal !== null
@@ -228,7 +211,7 @@ function TerritoryListViewComponent({
           onPress={facilityPagination.fetchNextPage}
         />
       )}
-      {dataReady &&
+      {!offline && dataReady &&
         listed.length === 0 &&
         layers.length === 1 &&
         layers[0] === 'official' && (
@@ -242,7 +225,7 @@ function TerritoryListViewComponent({
             }}
           />
         )}
-      {dataReady &&
+      {!offline && dataReady &&
         listed.length === 0 &&
         !layers.includes('official') && (
           <IllustratedEmptyState
@@ -258,41 +241,18 @@ function TerritoryListViewComponent({
     </View>
   );
 
-  if (asSheet) {
-    return (
-      <AppBottomSheetModal
-        visible={visible}
-        onClose={() => onClose?.()}
-        title={sectionHeading}
-        snapPoints={['48%', '75%', '92%']}
-        backdropOpacity={0.16}
-      >
-        <BottomSheetFlatList<Entry>
-          data={listed}
-          keyExtractor={entryKey}
-          renderItem={renderEntry}
-          initialNumToRender={10}
-          maxToRenderPerBatch={8}
-          windowSize={7}
-          ItemSeparatorComponent={TerritoryRowSeparator}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          contentContainerStyle={[
-            cityStyles.content,
-            {
-              gap: 0,
-              paddingTop: spacing.xs,
-              paddingBottom: insets.bottom + spacing.xl,
-            },
-          ]}
-          ListHeaderComponent={headerNotice}
-          ListFooterComponent={footerContent}
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.6}
-        />
-      </AppBottomSheetModal>
-    );
-  }
+  const titleRef = useRef<React.ComponentRef<typeof View>>(null);
+  const hasResultsHeader = Boolean(onBackToMap);
+  useEffect(() => {
+    if (!visible || !hasResultsHeader) return;
+    let active = true;
+    void AccessibilityInfo.isScreenReaderEnabled().then((enabled) => {
+      if (active && enabled && titleRef.current) {
+        AccessibilityInfo.sendAccessibilityEvent(titleRef.current, 'focus');
+      }
+    });
+    return () => { active = false; };
+  }, [visible, hasResultsHeader]);
 
   if (!visible) return null;
 
@@ -306,7 +266,25 @@ function TerritoryListViewComponent({
         },
       ]}
     >
-      <TerritoryFilterBar {...filterBarProps} padded />
+      {onBackToMap ? (
+        <View style={styles.toolbar}>
+          <View ref={titleRef} accessible accessibilityRole="header" accessibilityLabel="Resultados" style={styles.title}>
+            <AppText variant="sectionTitle">Resultados</AppText>
+          </View>
+          <AppButton title="Voltar ao mapa" variant="quiet" onPress={onBackToMap} />
+        </View>
+      ) : null}
+      <TerritoryFilterBar
+        {...filterBarProps}
+        searchFocusRequest={onBackToMap ? undefined : filterBarProps.searchFocusRequest}
+        padded
+        showMenu={!onBackToMap}
+      />
+      {onRetryMap && (
+        <View style={{ paddingHorizontal: spacing.contentPadding }}>
+          <AppButton title="Tentar carregar o mapa" variant="secondary" onPress={onRetryMap} />
+        </View>
+      )}
 
       <FlatList<Entry>
         ref={listRef}
@@ -331,7 +309,7 @@ function TerritoryListViewComponent({
         maxToRenderPerBatch={8}
         windowSize={7}
         ItemSeparatorComponent={TerritoryRowSeparator}
-        refreshControl={
+        refreshControl={offline ? undefined :
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
@@ -340,7 +318,7 @@ function TerritoryListViewComponent({
         }
         contentContainerStyle={[
           cityStyles.content,
-          { gap: 0, paddingBottom: contentInset },
+          { gap: 0, paddingBottom: onBackToMap ? insets.bottom + spacing.md : contentInset },
         ]}
         ListHeaderComponent={headerNotice}
         ListFooterComponent={footerContent}
@@ -354,6 +332,18 @@ function TerritoryListViewComponent({
 export const TerritoryListView = memo(TerritoryListViewComponent);
 
 const styles = StyleSheet.create({
+  toolbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.contentPadding,
+  },
+  title: { flexShrink: 1 },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+  },
   fullListOverlay: {
     position: 'absolute',
     top: 0,
@@ -362,14 +352,5 @@ const styles = StyleSheet.create({
     bottom: 0,
     zIndex: 60,
   },
-  unlocatedNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: layout.radius.panel,
-    borderWidth: 1,
-    marginTop: 4,
-  },
+  resultContext: { gap: spacing.xxs },
 });

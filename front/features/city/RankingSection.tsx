@@ -17,12 +17,10 @@ export interface RankingRow {
 }
 
 export function RankingSection({
-  icon,
   title,
   rows,
   showPosition = true,
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
   title: string;
   rows: RankingRow[];
   /** Falso quando a ordem é só de volume e não deve parecer classificação. */
@@ -33,8 +31,7 @@ export function RankingSection({
   return (
     <View style={styles.dashboardBlock}>
       <View style={styles.sectionHeaderRow}>
-        <Ionicons name={icon} size={layout.iconSize.sm} color={colors.muted} />
-        <AppText variant="caption" style={styles.sectionHeaderText} numberOfLines={1}>
+        <AppText variant="sectionTitle" accessibilityRole="header" style={{ flex: 1 }}>
           {title}
         </AppText>
       </View>

@@ -9,6 +9,7 @@ import { AppText } from '@/components/ui/AppText';
 import { CallSummary, describeCall } from '@/components/official/CallSummary';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
+import type { ElevationTokens } from '@/theme/elevation';
 import { layout, spacing } from '@/theme';
 import type { OfficialCall } from '@/shared/contracts';
 import { useFollowStore } from '@/stores/followStore';
@@ -67,6 +68,7 @@ interface TerritoryPreviewCardProps {
   onOpen: (entry: Entry) => void;
   onClose: () => void;
   bottomOffset?: number;
+  embedded?: boolean;
 }
 
 export function TerritoryCardContent({
@@ -204,27 +206,26 @@ export function TerritoryPreviewCard({
   onOpen,
   onClose,
   bottomOffset = 90,
+  embedded = false,
 }: TerritoryPreviewCardProps) {
   const styles = useThemedStyles(createStyles);
   return (
-    <View style={[styles.card, { bottom: bottomOffset }]}>
+    <View style={embedded ? undefined : [styles.card, { bottom: bottomOffset }]}>
       <TerritoryCardContent entry={entry} onOpen={onOpen} onClose={onClose} />
     </View>
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
   StyleSheet.create({
     card: {
       position: 'absolute',
       left: spacing.md,
       right: spacing.md,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.surfaceFloating,
       borderRadius: layout.radius.card,
-      borderWidth: 1,
-      borderColor: colors.border,
+      ...elevation?.floating,
       zIndex: 100,
-      overflow: 'hidden',
     },
     content: {
       padding: spacing.md,
@@ -234,8 +235,6 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: colors.border,
       paddingTop: spacing.xs,
       marginTop: spacing.xs,
     },

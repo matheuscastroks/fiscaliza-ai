@@ -1,5 +1,5 @@
 {
-  "cli": { "version": ">= 16.0.0", "appVersionSource": "remote" },
+  "cli": { "version": ">= 16.0.0", "appVersionSource": "local" },
   "build": {
     "development": {
       "developmentClient": true,
@@ -13,9 +13,13 @@
       "env": { "EXPO_PUBLIC_API_URL": "https://fiscalizaai.matheuscastroks.com.br/api" }
     },
     "production": {
-      "autoIncrement": true,
-      "android": { "buildType": "app-bundle" },
-      "env": { "EXPO_PUBLIC_API_URL": "https://fiscalizaai.matheuscastroks.com.br/api" }
+      "environment": "production",
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://fiscalizaai.matheuscastroks.com.br/api",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      }
     }
   },
   "submit": { "production": {} }

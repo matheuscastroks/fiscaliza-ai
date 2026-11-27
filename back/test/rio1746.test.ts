@@ -293,3 +293,44 @@ test(
     );
   },
 );
+
+test('rio1746: mapper lê diagnóstico real, Ouvidoria e updated_at da fonte', () => {
+  const base: RawBigQuery1746Row = {
+    id_chamado: '77777',
+    data_inicio: '2026-09-20T08:00:00',
+    tipo: 'Parques e praças',
+    subtipo: 'Poda de árvore',
+    prazo_tipo: 'D',
+    data_real_diagnostico: { value: '2026-09-22T10:30:00' },
+    unidade_organizacional_ouvidoria: '1',
+    updated_at: '2026-09-23 06:15:00.123456 UTC',
+  };
+  const mapped = mapRawRowToOfficialCall(base);
+  assert.equal(mapped.diagnosedAt, '2026-09-22T13:30:00.000Z');
+  assert.equal(mapped.viaOmbudsman, true);
+  assert.equal(mapped.sourceUpdatedAt, '2026-09-23T06:15:00.123Z');
+
+  assert.equal(
+    mapRawRowToOfficialCall({ ...base, updated_at: '2026-09-23T06:15:00+0000' }).sourceUpdatedAt,
+    '2026-09-23T06:15:00.000Z',
+  );
+  // Sem fuso explícito vale a regra dos DATETIME do DATA.RIO (UTC-3).
+  assert.equal(
+    mapRawRowToOfficialCall({ ...base, updated_at: '2026-09-23 06:15:00' }).sourceUpdatedAt,
+    '2026-09-23T09:15:00.000Z',
+  );
+
+  const empty = mapRawRowToOfficialCall({
+    ...base,
+    data_real_diagnostico: null,
+    unidade_organizacional_ouvidoria: '0',
+    updated_at: 'sem data',
+  });
+  assert.equal(empty.diagnosedAt, null);
+  assert.equal(empty.viaOmbudsman, false);
+  assert.equal(empty.sourceUpdatedAt, null);
+  assert.equal(
+    mapRawRowToOfficialCall({ ...base, unidade_organizacional_ouvidoria: null }).viaOmbudsman,
+    null,
+  );
+});

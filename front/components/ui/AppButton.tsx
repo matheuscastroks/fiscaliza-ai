@@ -1,5 +1,6 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
+import type { ElevationTokens } from '@/theme/elevation';
 import React from 'react';
 import {
   TouchableOpacity,
@@ -112,7 +113,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
   );
 };
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
   StyleSheet.create({
     baseContainer: {
       minHeight: 54,
@@ -125,22 +126,23 @@ const createStyles = (colors: ThemeColors) =>
     },
     primaryContainer: {
       backgroundColor: colors.accent,
+      ...elevation?.subtle,
     },
     secondaryContainer: {
       backgroundColor: colors.surface,
-      borderWidth: layout.borderWidth.hairline,
-      borderColor: colors.border,
+      ...elevation?.subtle,
     },
     destructiveContainer: {
       backgroundColor: colors.destructive,
+      ...elevation?.subtle,
     },
     quietContainer: {
       backgroundColor: 'transparent',
+      ...elevation?.none,
     },
     disabledContainer: {
       backgroundColor: colors.surfaceSubdued,
-      borderColor: colors.border,
-      borderWidth: layout.borderWidth.hairline,
+      ...elevation?.none,
       opacity: 0.6,
     },
     contentRow: {

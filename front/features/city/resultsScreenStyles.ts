@@ -37,6 +37,10 @@ export const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: 6,
       lineHeight: 17,
     },
+    stackedContent: {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+    },
     territoryCapsule: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -82,31 +86,11 @@ export const createStyles = (colors: ThemeColors) =>
       gap: 6,
       paddingHorizontal: 4,
     },
-    sectionHeaderText: {
-      fontSize: fontSizes.caption,
-      fontWeight: '600',
-    },
     heroKpiCard: {
       borderRadius: layout.radius.panel,
       borderWidth: StyleSheet.hairlineWidth,
       padding: spacing.md,
       gap: 12,
-    },
-    heroKpiTopRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 10,
-    },
-    kpiIconSquircle: {
-      width: 38,
-      height: 38,
-      borderRadius: layout.radius.sm,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    heroKpiTitleCol: {
-      flex: 1,
-      gap: 1,
     },
     benchmarkPill: {
       flexDirection: 'row',
@@ -145,13 +129,6 @@ export const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
-    },
-    kpiSmallIcon: {
-      width: 32,
-      height: 32,
-      borderRadius: layout.radius.sm,
-      alignItems: 'center',
-      justifyContent: 'center',
     },
     secondaryKpiNumber: {
       fontSize: fontSizes.sectionTitle,

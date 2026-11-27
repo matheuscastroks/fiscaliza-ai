@@ -64,6 +64,12 @@ export interface OfficialCall {
   closedAt?: string | null;
   targetDate?: string | null;
   diagnosisTargetDate?: string | null;
+  /** Data real do diagnóstico (data_real_diagnostico); só existe em prazo tipo D. */
+  diagnosedAt?: string | null;
+  /** Chamado passou pela Ouvidoria (unidade_organizacional_ouvidoria). */
+  viaOmbudsman?: boolean | null;
+  /** Última atualização informada pela fonte (updated_at do 1746). */
+  sourceUpdatedAt?: string | null;
   withinDeadline?: string | null;
   timeRemaining?: number | null;
   timeUnit?: string | null;
@@ -77,6 +83,7 @@ export interface OfficialCall {
   longitude?: number | null;
   sourcePartitionDate?: string | null;
   importedAt: string;
+  /** Quando o Fiscaliza aí gravou a versão atual; não é a data da fonte. */
   updatedAt: string;
 }
 

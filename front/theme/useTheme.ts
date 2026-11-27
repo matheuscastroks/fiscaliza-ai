@@ -1,34 +1,28 @@
-import { useEffect } from 'react';
-import { useThemeStore, resolveThemeMode } from '@/stores/themeStore';
+import { useColorScheme } from 'react-native';
 import { darkColors, lightColors, type ThemeColors } from './colors';
+import { darkElevation, lightElevation, type ElevationTokens } from './elevation';
 
 const themes = {
   light: {
     mode: 'light' as const,
     isDark: false,
     colors: lightColors as ThemeColors,
+    elevation: lightElevation as ElevationTokens,
   },
-  dark: { mode: 'dark' as const, isDark: true, colors: darkColors },
+  dark: {
+    mode: 'dark' as const,
+    isDark: true,
+    colors: darkColors,
+    elevation: darkElevation as ElevationTokens,
+  },
 };
 
 /** Every consumer receives an explicit reactive value, including under React Compiler. */
 export function useTheme() {
-  const preference = useThemeStore((state) => state.preference);
-  const systemMode = useThemeStore((state) => state.systemMode);
-  return themes[resolveThemeMode(preference, systemMode)];
+  return themes[useColorScheme() === 'dark' ? 'dark' : 'light'];
 }
 
-/** Call once in RootLayout, before its loading return. Does not remount navigation. */
-export function useThemeInitialization() {
-  const initialize = useThemeStore((state) => state.initialize);
-  const hydrated = useThemeStore((state) => state.hydrated);
-  useEffect(() => {
-    void initialize();
-  }, [initialize]);
-  return hydrated;
-}
-
-export type ThemedStyleFactory<T> = (colors: ThemeColors) => T;
+export type ThemedStyleFactory<T> = (colors: ThemeColors, elevation: ElevationTokens) => T;
 const styleCache = new WeakMap<
   ThemedStyleFactory<unknown>,
   WeakMap<ThemeColors, unknown>
@@ -36,12 +30,12 @@ const styleCache = new WeakMap<
 
 /** Static factories are evaluated once per palette; hook consumers update without remounting. */
 export function useThemedStyles<T>(factory: ThemedStyleFactory<T>): T {
-  const { colors } = useTheme();
+  const { colors, elevation } = useTheme();
   let factoryCache = styleCache.get(factory);
   if (!factoryCache) {
     factoryCache = new WeakMap<ThemeColors, unknown>();
     styleCache.set(factory, factoryCache);
   }
-  if (!factoryCache.has(colors)) factoryCache.set(colors, factory(colors));
+  if (!factoryCache.has(colors)) factoryCache.set(colors, factory(colors, elevation));
   return factoryCache.get(colors) as T;
 }

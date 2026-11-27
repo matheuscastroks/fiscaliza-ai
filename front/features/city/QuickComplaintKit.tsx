@@ -1,24 +1,33 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { View, StyleSheet, Pressable, Share, TextInput } from 'react-native';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { View, StyleSheet, Pressable, TextInput, ActivityIndicator } from 'react-native';
+import * as Location from 'expo-location';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { BottomSheetTextInput } from '@/components/ui/AppBottomSheetModal';
-import { openExternal } from '@/services/openExternal';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
+import type { ElevationTokens } from '@/theme/elevation';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
+import { AppInput } from '@/components/ui/AppInput';
+import { AppSelect } from '@/components/ui/AppSelect';
+import { useDeviceLocation } from '@/features/places/useDeviceLocation';
 import { spacing, layout } from '@/theme';
-import {
-  COMPLAINT_TOPICS,
-  ComplaintTopicSheet,
-  type ComplaintTopic,
-} from './ComplaintTopicSheet';
-import { partnerBrand } from '@/theme/palette';
 import { fontSizes } from '@/theme/typography';
-import { lightColors } from '@/theme/colors';
-import { IconTile } from '@/components/ui/IconTile';
-import { OFFICIAL_WHATSAPP_NUMBER, OFFICIAL_WHATSAPP_URL } from './OfficialChannel';
+import { useAuthStore } from '@/stores/authStore';
+import { analyzeComplaintPhoto } from '@/services/complaintDraft';
+import { sendComplaintToWhatsApp, shareComplaint } from '@/services/shareComplaint';
+import { COMPLAINT_DESCRIPTION_MAX } from '@/shared/complaint-draft';
+import { COMPLAINT_TOPICS, type ComplaintTopic } from './ComplaintTopicSheet';
+import {
+  COMPLAINT_STEPS,
+  COMPLAINT_STEP_TITLES,
+  formatComplaintMessage,
+  type ComplaintStep,
+} from './complaintMessage';
 
 export { COMPLAINT_TOPICS, type ComplaintTopic };
 
@@ -28,307 +37,411 @@ export interface QuickComplaintKitProps {
   inSheet?: boolean;
 }
 
+type Analysis = 'idle' | 'loading' | 'done' | 'not-urban' | 'failed';
+
+const TOPIC_OPTIONS = COMPLAINT_TOPICS.map((topic) => ({
+  value: topic.id,
+  label: topic.label,
+  icon: topic.icon,
+}));
+
+/** "Rua X, 123 - Bairro" a partir do geocodificador do aparelho. */
+function formatPlace(
+  place: Location.LocationGeocodedAddress | undefined,
+  neighborhood: string | null,
+) {
+  const street = place?.street
+    ? place.streetNumber
+      ? `${place.street}, ${place.streetNumber}`
+      : place.street
+    : null;
+  return [street, neighborhood ?? place?.district ?? null].filter(Boolean).join(' - ');
+}
+
 export function QuickComplaintKit({ defaultLocation = '', inSheet = false }: QuickComplaintKitProps) {
   const Input = inSheet ? BottomSheetTextInput : TextInput;
-  const { colors } = useTheme();
+  const { colors, elevation } = useTheme();
   const styles = useThemedStyles(createStyles);
+  // A folha mede a altura pelo conteúdo: o respiro final evita a barra do sistema.
+  const { bottom: bottomInset } = useSafeAreaInsets();
+  // Sugestão por foto exige conta com município (a API recusa sem isso).
+  const canAnalyze = useAuthStore((state) => Boolean(state.user?.municipality));
 
+  const [step, setStep] = useState<ComplaintStep>('photo');
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [analysis, setAnalysis] = useState<Analysis>('idle');
+  const [suggested, setSuggested] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<string>('buraco');
-  const [address, setAddress] = useState(defaultLocation);
+  const [editedAddress, setAddress] = useState<string | null>(null);
+  const address = editedAddress ?? defaultLocation;
   const [description, setDescription] = useState('');
-  const [detailsHeight, setDetailsHeight] = useState(60);
-  const [showPreview, setShowPreview] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
-
-  // Sincroniza se defaultLocation chegar de forma assíncrona
+  const [sending, setSending] = useState(false);
+  // A análise de uma foto trocada no meio do caminho não sobrescreve a atual.
+  const currentPhoto = useRef<string | null>(null);
+  const descriptionRef = useRef('');
   useEffect(() => {
-    if (!address && defaultLocation) {
-      setAddress(defaultLocation);
-    }
-  }, [defaultLocation, address]);
-
-  // Reseta altura mínima se o texto for limpo
-  useEffect(() => {
-    if (!description) {
-      setDetailsHeight(60);
-    }
+    descriptionRef.current = description;
   }, [description]);
+
+  // Endereço: preenchido pela localização do aparelho até o morador editar.
+  const addressTouched = useRef(false);
+  const autoLocated = useRef(false);
+  const { captureLocation, busy: locating, error: locationError } = useDeviceLocation();
+
+  const fillAddressFromLocation = async (manual = false) => {
+    if (manual) addressTouched.current = false;
+    const point = await captureLocation(false);
+    if (!point || addressTouched.current) return;
+    let place: Location.LocationGeocodedAddress | undefined;
+    try {
+      [place] = await Location.reverseGeocodeAsync(point);
+    } catch {
+      // Sem geocodificador no aparelho: fica o bairro.
+    }
+    const text = formatPlace(place, point.neighborhood?.name ?? null);
+    if (text && !addressTouched.current) setAddress(text);
+  };
+
+  useEffect(() => {
+    if (step !== 'details' || autoLocated.current) return;
+    autoLocated.current = true;
+    void fillAddressFromLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const currentTopic = useMemo(
     () => COMPLAINT_TOPICS.find((t) => t.id === selectedTopic) || COMPLAINT_TOPICS[0],
     [selectedTopic],
   );
 
-  const topicLabel = currentTopic.label;
+  const message = useMemo(
+    () =>
+      formatComplaintMessage({
+        topicLabel: currentTopic.label,
+        address,
+        description,
+        hasPhoto: Boolean(photoUri),
+      }),
+    [currentTopic.label, address, description, photoUri],
+  );
 
-  const formattedMessage = useMemo(() => {
-    const loc = address.trim() || 'Rio de Janeiro (endereço a especificar)';
-    const desc = description.trim() || 'Solicitação de reparo / vistoria';
+  const stepIndex = COMPLAINT_STEPS.indexOf(step);
 
-    return (
-      `Olá! Quero pedir um serviço pelo 1746:\n\n` +
-      `• Assunto: ${topicLabel}\n` +
-      `• Onde: ${loc}\n` +
-      `• Detalhes: ${desc}`
-    );
-  }, [topicLabel, address, description]);
-
-  const handleOpenWhatsApp = async () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const text = encodeURIComponent(formattedMessage);
-    const opened = await openExternal(
-      `${OFFICIAL_WHATSAPP_URL}?text=${text}`,
-      `https://api.whatsapp.com/send?phone=${OFFICIAL_WHATSAPP_NUMBER}&text=${text}`,
-    );
-    setErrorNotice(
-      opened ? null : 'Não conseguimos abrir o WhatsApp. Compartilhe o texto ou ligue para o 1746.',
-    );
+  const goTo = (next: ComplaintStep) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setErrorNotice(null);
+    setStep(next);
   };
 
-  const handleShare = async () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const runAnalysis = async (uri: string) => {
+    setAnalysis('loading');
     try {
-      await Share.share({
-        message: formattedMessage,
-        title: `Solicitação 1746 - ${topicLabel}`,
-      });
+      const draft = await analyzeComplaintPhoto(uri);
+      if (currentPhoto.current !== uri) return;
+      if (!draft.isUrbanIssue) {
+        setAnalysis('not-urban');
+        return;
+      }
+      setSelectedTopic(draft.topicId);
+      // Não apaga o que o morador já escreveu enquanto a análise rodava.
+      if (!descriptionRef.current.trim()) {
+        setDescription(draft.description);
+        setSuggested(true);
+      }
+      setAnalysis('done');
     } catch {
-      // Ignora cancelamento do diálogo nativo
+      if (currentPhoto.current === uri) setAnalysis('failed');
     }
   };
 
-  const handleApplyDefaultLocation = () => {
+  const pickPhoto = async (source: 'camera' | 'library') => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setAddress(defaultLocation);
+    setErrorNotice(null);
+    try {
+      const permission =
+        source === 'camera'
+          ? await ImagePicker.requestCameraPermissionsAsync()
+          : await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        setErrorNotice(
+          source === 'camera'
+            ? 'Permita o uso da câmera para fotografar o problema.'
+            : 'Permita o acesso à galeria para escolher a foto.',
+        );
+        return;
+      }
+      const options: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], quality: 0.6 };
+      const result =
+        source === 'camera'
+          ? await ImagePicker.launchCameraAsync(options)
+          : await ImagePicker.launchImageLibraryAsync(options);
+      if (result.canceled || !result.assets[0]) return;
+      const asset = result.assets[0];
+      if ((asset.fileSize || 0) > 5 * 1024 * 1024) {
+        setErrorNotice('Escolha uma foto com até 5 MB.');
+        return;
+      }
+      currentPhoto.current = asset.uri;
+      setPhotoUri(asset.uri);
+      setSuggested(false);
+      setAnalysis('idle');
+      setStep('details');
+      if (canAnalyze) void runAnalysis(asset.uri);
+    } catch {
+      setErrorNotice('Não conseguimos abrir a câmera ou a galeria. Tente de novo.');
+    }
   };
 
+  const skipPhoto = () => {
+    currentPhoto.current = null;
+    setPhotoUri(null);
+    setAnalysis('idle');
+    goTo('details');
+  };
+
+  const handleSend = async () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setSending(true);
+    setErrorNotice(null);
+    try {
+      const outcome = await sendComplaintToWhatsApp(message, photoUri);
+      if (outcome === 'failed')
+        setErrorNotice('Não conseguimos abrir o WhatsApp. Compartilhe o pedido ou ligue para o 1746.');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const analysisLine = (() => {
+    if (!photoUri) return null;
+    if (!canAnalyze)
+      return 'Entre na sua conta e confirme o CEP para receber uma sugestão de texto a partir da foto.';
+    switch (analysis) {
+      case 'loading':
+        return 'Analisando a foto…';
+      case 'done':
+        return suggested
+          ? 'Texto sugerido a partir da foto. Confira e corrija antes de enviar.'
+          : 'Assunto sugerido a partir da foto. Confira antes de enviar.';
+      case 'not-urban':
+        return 'A foto não parece mostrar um problema na rua. Descreva o que você viu.';
+      case 'failed':
+        return 'Não foi possível analisar a foto agora. Descreva o problema no texto.';
+      default:
+        return null;
+    }
+  })();
+
   return (
-    <View style={styles.container} accessibilityLabel="Assistente de solicitação rápida 1746">
+    <View
+      style={[styles.container, inSheet && { paddingBottom: bottomInset + spacing.lg }]}
+      accessibilityLabel="Assistente de solicitação 1746"
+    >
       <View style={styles.titleBlock}>
-        {!inSheet && (
-          <AppText variant="sectionTitle" style={styles.title}>
-            Escrever mensagem para o 1746
-          </AppText>
-        )}
-        <AppText variant="caption" color="muted" style={styles.subtitle}>
-          Você envia a mensagem pelo WhatsApp da Prefeitura. O Fiscaliza aí não envia nem acompanha o seu pedido.
+        <AppText variant="caption" color="muted">
+          Passo {stepIndex + 1} de {COMPLAINT_STEPS.length}
         </AppText>
-      </View>
-
-      {/* Formulário Apple Inset-Grouped Table */}
-      <View
-        style={[
-          styles.insetTable,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      >
-        {/* Linha 1: Seletor com Bottom Sheet ("O que precisa de reparo?") */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`O que precisa de reparo: ${topicLabel}. Toque para alterar`}
-          onPress={() => {
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setSheetOpen(true);
-          }}
-          style={({ pressed }) => [
-            styles.tableRow,
-            pressed && { backgroundColor: colors.surfaceSubdued },
-          ]}
-        >
-          <IconTile icon={currentTopic.icon} />
-          <View style={styles.tableRowContent}>
-            <AppText variant="caption" color="muted">
-              O que precisa de reparo?
-            </AppText>
-            <AppText variant="label" style={styles.rowValueText}>
-              {currentTopic.label}
-            </AppText>
-          </View>
-          <View style={styles.rowActionRight}>
-            <AppText variant="caption" color="muted" style={styles.changeActionText}>
-              Alterar
-            </AppText>
-            <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
-          </View>
-        </Pressable>
-
-        <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
-
-        {/* Linha 2: Endereço e Localização ("Onde é o problema?") */}
-        <View style={styles.tableInputRow}>
-          <IconTile icon="location-outline" />
-          <View style={styles.tableInputContent}>
-            <View style={styles.inputHeaderRow}>
-              <AppText variant="caption" color="muted">
-                Onde é o problema?
-              </AppText>
-              {defaultLocation && address !== defaultLocation && (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`Usar local sugerido: ${defaultLocation}`}
-                  onPress={handleApplyDefaultLocation}
-                  style={({ pressed }) => [
-                    styles.suggestedLocationPill,
-                    pressed && { opacity: 0.75 },
-                  ]}
-                >
-                  <Ionicons name="navigate-outline" size={layout.iconSize.sm} color={colors.primary} />
-                  <AppText variant="caption" style={styles.suggestedLocationText} numberOfLines={1}>
-                    Usar {defaultLocation}
-                  </AppText>
-                </Pressable>
-              )}
-            </View>
-            <Input
-              placeholder="Rua, número aproximado ou esquina"
-              placeholderTextColor={colors.muted}
-              value={address}
-              onChangeText={setAddress}
-              returnKeyType="next"
-              style={[styles.framelessInput, { color: colors.ink }]}
-            />
-          </View>
-        </View>
-
-        <View style={[styles.tableDivider, { backgroundColor: colors.divider }]} />
-
-        {/* Linha 3: Detalhes Adicionais (Textarea auto-expansível) */}
-        <View style={styles.tableInputRow}>
-          <IconTile icon="document-text-outline" />
-          <View style={styles.tableInputContent}>
-            <AppText variant="caption" color="muted">
-              Detalhes úteis (opcional)
-            </AppText>
-            <Input
-              placeholder="Ex: Próximo à padaria, faixa da direita, galhos caídos"
-              placeholderTextColor={colors.muted}
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              onContentSizeChange={(e) => {
-                const h = e.nativeEvent?.contentSize?.height;
-                if (h && typeof h === 'number' && h > 0) {
-                  setDetailsHeight(Math.max(60, Math.min(180, Math.ceil(h + 8))));
-                }
-              }}
+        <AppText variant="sectionTitle" style={styles.title} accessibilityRole="header">
+          {COMPLAINT_STEP_TITLES[step]}
+        </AppText>
+        <View style={styles.progressTrack} accessibilityElementsHidden>
+          {COMPLAINT_STEPS.map((item, index) => (
+            <View
+              key={item}
               style={[
-                styles.detailsTextarea,
-                { height: detailsHeight, color: colors.ink, borderRadius: layout.radius.sm },
+                styles.progressSegment,
+                { backgroundColor: index <= stepIndex ? colors.primary : colors.dividerSubtle },
               ]}
             />
-          </View>
+          ))}
         </View>
       </View>
 
-      {/* Dica Cívica: Fotos e Evidências no WhatsApp */}
-      <View
-        style={[
-          styles.photoTipBanner,
-          { backgroundColor: colors.surfaceSubdued, borderColor: colors.divider },
-        ]}
-      >
-        <Ionicons name="camera-outline" size={layout.iconSize.md} color={colors.primary} />
-        <View style={styles.photoTipTextCol}>
-          <AppText variant="caption" style={styles.photoTipTitle}>
-            Fotos no WhatsApp
+      {step === 'photo' && (
+        <>
+          <AppText variant="caption" color="muted" style={styles.subtitle}>
+            Fotografe o problema. A foto vai junto com a mensagem para o WhatsApp do 1746.
+            {canAnalyze ? ' O app sugere o texto a partir dela.' : ''}
           </AppText>
-          <AppText variant="caption" color="muted" style={styles.photoTipBody}>
-            Na conversa com o 1746 você pode mandar fotos do local.
-          </AppText>
-        </View>
-      </View>
-
-      {/* Progressive Disclosure: Prévia da Mensagem */}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={showPreview ? 'Ocultar mensagem formatada' : 'Visualizar mensagem formatada'}
-        onPress={() => {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          setShowPreview((prev) => !prev);
-        }}
-        style={styles.previewToggle}
-      >
-        <Ionicons
-          name={showPreview ? 'chevron-up-circle-outline' : 'chevron-down-circle-outline'}
-          size={layout.iconSize.sm}
-          color={colors.primary}
-        />
-        <AppText variant="caption" style={styles.previewToggleText}>
-          {showPreview ? 'Ocultar prévia da mensagem' : 'Ver a mensagem preparada'}
-        </AppText>
-      </Pressable>
-
-      {showPreview && (
-        <View style={[styles.previewBox, { backgroundColor: colors.surfaceSubdued, borderColor: colors.border }]}>
-          <View style={styles.previewHeader}>
-            <Ionicons name="chatbubble-ellipses-outline" size={layout.iconSize.sm} color={colors.muted} />
-            <AppText variant="caption" color="muted" style={{ fontWeight: '600' }}>
-              Texto para você enviar ao 1746:
-            </AppText>
+          {photoUri && (
+            <Image source={{ uri: photoUri }} style={styles.photoLarge} contentFit="cover" accessibilityLabel="Foto escolhida" />
+          )}
+          <View style={styles.actionsBlock}>
+            <AppButton
+              title="Tirar foto"
+              onPress={() => void pickPhoto('camera')}
+              icon={<Ionicons name="camera-outline" size={layout.iconSize.md} color={colors.onAccent} />}
+            />
+            <AppButton
+              title="Escolher da galeria"
+              variant="secondary"
+              onPress={() => void pickPhoto('library')}
+              icon={<Ionicons name="images-outline" size={layout.iconSize.md} color={colors.ink} />}
+            />
+            <AppButton title="Continuar sem foto" variant="quiet" onPress={skipPhoto} />
           </View>
-          <AppText variant="caption" color="ink" style={styles.previewText} selectable>
-            {formattedMessage}
-          </AppText>
-        </View>
+        </>
       )}
 
-      {errorNotice && (
-        <AppText variant="caption" color="risk">
+      {step === 'details' && (
+        <>
+          {photoUri && (
+            <View style={styles.photoRow}>
+              <Image source={{ uri: photoUri }} style={styles.photoThumb} contentFit="cover" accessibilityLabel="Foto do problema" />
+              <View style={styles.photoRowText}>
+                {analysis === 'loading' && <ActivityIndicator size="small" color={colors.primary} />}
+                {analysisLine && (
+                  <AppText
+                    variant="caption"
+                    color={analysis === 'failed' ? 'risk' : 'muted'}
+                    accessibilityLiveRegion="polite"
+                  >
+                    {analysisLine}
+                  </AppText>
+                )}
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => goTo('photo')}
+                  style={({ pressed }) => [styles.inlineAction, pressed && { opacity: 0.75 }]}
+                >
+                  <AppText variant="caption" style={styles.inlineActionText}>
+                    Trocar foto
+                  </AppText>
+                </Pressable>
+              </View>
+            </View>
+          )}
+
+          <View style={styles.field}>
+            <AppText variant="label" style={styles.fieldLabel}>
+              O que precisa de reparo?
+            </AppText>
+            <AppSelect
+              label="O que precisa de reparo?"
+              options={TOPIC_OPTIONS}
+              value={selectedTopic}
+              onChange={(value) => value && setSelectedTopic(value)}
+              clearable={false}
+            />
+          </View>
+
+          <View style={styles.field}>
+            <View style={styles.fieldLabelRow}>
+              <AppText variant="label" style={styles.fieldLabel}>
+                Onde é o problema?
+              </AppText>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Usar minha localização no endereço"
+                onPress={() => void fillAddressFromLocation(true)}
+                disabled={locating}
+                hitSlop={spacing.sm}
+                style={({ pressed }) => [styles.inlineActionRow, pressed && { opacity: 0.75 }]}
+              >
+                {locating ? (
+                  <ActivityIndicator size="small" color={colors.primary} />
+                ) : (
+                  <Ionicons name="locate-outline" size={layout.iconSize.sm} color={colors.primary} />
+                )}
+                <AppText variant="caption" style={styles.inlineActionText}>
+                  Minha localização
+                </AppText>
+              </Pressable>
+            </View>
+            <AppInput
+              label="Onde é o problema?"
+              inputComponent={Input}
+              placeholder="Rua, número aproximado ou esquina"
+              value={address}
+              onChangeText={(text) => {
+                addressTouched.current = true;
+                setAddress(text);
+              }}
+              multiline
+              style={styles.addressInput}
+              containerStyle={styles.inputContainer}
+              helper={
+                locating
+                  ? 'Buscando o endereço de onde você está…'
+                  : locationError ?? undefined
+              }
+            />
+          </View>
+
+          <View style={styles.field}>
+            <AppText variant="label" style={styles.fieldLabel}>
+              {suggested ? 'Detalhes sugeridos pela foto' : 'Detalhes'}
+            </AppText>
+            <AppInput
+              label={suggested ? 'Detalhes sugeridos pela foto, editáveis' : 'Detalhes'}
+              inputComponent={Input}
+              placeholder="Ex.: buraco grande perto da padaria"
+              value={description}
+              onChangeText={setDescription}
+              maxLength={COMPLAINT_DESCRIPTION_MAX}
+              multiline
+              textAlignVertical="top"
+              containerStyle={styles.inputContainer}
+            />
+          </View>
+
+          <View style={styles.actionsBlock}>
+            <AppButton title="Revisar mensagem" onPress={() => goTo('confirm')} />
+            <AppButton title="Voltar" variant="quiet" onPress={() => goTo('photo')} />
+          </View>
+        </>
+      )}
+
+      {step === 'confirm' && (
+        <>
+          <View style={[styles.previewBox, elevation.recessed, { backgroundColor: colors.surfaceRecessed }]}>
+            {photoUri && (
+              <Image source={{ uri: photoUri }} style={styles.photoPreview} contentFit="cover" accessibilityLabel="Foto que vai junto" />
+            )}
+            <AppText variant="caption" color="ink" style={styles.previewText} selectable>
+              {message}
+            </AppText>
+          </View>
+          <AppText variant="caption" color="muted" style={styles.subtitle}>
+            {photoUri
+              ? 'O WhatsApp abre com a foto e o texto. Você confere e envia na conversa do 1746.'
+              : 'O WhatsApp abre com o texto pronto. Você confere e envia na conversa do 1746.'}{' '}
+            O Fiscaliza aí não registra nem acompanha o pedido.
+          </AppText>
+
+          {errorNotice && (
+            <AppText variant="caption" color="risk" accessibilityRole="alert">
+              {errorNotice}
+            </AppText>
+          )}
+
+          <View style={styles.actionsBlock}>
+            <AppButton title="Enviar pelo WhatsApp do 1746" loading={sending} onPress={() => void handleSend()} />
+            <AppButton
+              title="Compartilhar de outro jeito"
+              variant="quiet"
+              onPress={() => void shareComplaint(message, photoUri)}
+            />
+            <AppButton title="Voltar" variant="quiet" onPress={() => goTo('details')} />
+          </View>
+        </>
+      )}
+
+      {step !== 'confirm' && errorNotice && (
+        <AppText variant="caption" color="risk" accessibilityRole="alert">
           {errorNotice}
         </AppText>
       )}
 
-      {/* Ações Diretas */}
-      <View style={styles.actionsBlock}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Abrir o WhatsApp do 1746 com a mensagem"
-          onPress={handleOpenWhatsApp}
-          style={({ pressed }) => [
-            styles.whatsAppButton,
-            pressed && styles.whatsAppButtonPressed,
-          ]}
-        >
-          <Ionicons name="logo-whatsapp" size={layout.iconSize.md} color={lightColors.white} />
-          <AppText variant="label" style={styles.whatsAppButtonText}>
-            Abrir WhatsApp do 1746
-          </AppText>
-        </Pressable>
-        <AppButton
-          title="Compartilhar texto"
-          variant="secondary"
-          icon={<Ionicons name="share-outline" size={layout.iconSize.sm} color={colors.ink} />}
-          onPress={handleShare}
-        />
-      </View>
-
-      {/* Bottom Sheet para Seleção de Tópico */}
-      <ComplaintTopicSheet
-        visible={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        selectedTopicId={selectedTopic}
-        onSelectTopic={setSelectedTopic}
-      />
     </View>
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
   StyleSheet.create({
     container: {
       gap: spacing.md,
-    },
-    sectionHeaderRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 5,
-      paddingHorizontal: spacing.xs,
-    },
-    sectionHeaderText: {
-      color: colors.muted,
-      fontWeight: '600',
-      fontSize: fontSizes.caption,
     },
     titleBlock: {
       gap: 3,
@@ -339,143 +452,84 @@ const createStyles = (colors: ThemeColors) =>
       lineHeight: 22,
       fontWeight: '600',
     },
+    progressTrack: {
+      flexDirection: 'row',
+      gap: spacing.xs,
+      marginTop: spacing.xs,
+    },
+    progressSegment: {
+      flex: 1,
+      height: 3,
+      borderRadius: layout.radius.xs,
+    },
     subtitle: {
       fontSize: fontSizes.meta,
       lineHeight: 18,
+      paddingHorizontal: spacing.xs,
     },
-    insetTable: {
+    photoLarge: {
+      width: '100%',
+      aspectRatio: 4 / 3,
       borderRadius: layout.radius.panel,
-      borderWidth: StyleSheet.hairlineWidth,
-      overflow: 'hidden',
+      backgroundColor: colors.surfaceRecessed,
     },
-    tableRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: spacing.md,
-      gap: spacing.md,
-      minHeight: 56,
-    },
-    tableInputRow: {
+    photoRow: {
       flexDirection: 'row',
       alignItems: 'flex-start',
-      paddingVertical: 10,
-      paddingHorizontal: spacing.md,
       gap: spacing.md,
-      minHeight: 56,
+      paddingHorizontal: spacing.xs,
     },
-    tableDivider: {
-      height: StyleSheet.hairlineWidth,
-      marginLeft: 56,
-    },
-    iconSquircle: {
-      width: 36,
-      height: 36,
+    photoThumb: {
+      width: 88,
+      height: 88,
       borderRadius: layout.radius.sm,
-      alignItems: 'center',
+      backgroundColor: colors.surfaceRecessed,
+    },
+    photoRowText: {
+      flex: 1,
+      gap: spacing.xs,
+      alignItems: 'flex-start',
+    },
+    photoPreview: {
+      width: '100%',
+      aspectRatio: 4 / 3,
+      borderRadius: layout.radius.sm,
+    },
+    inlineAction: {
+      minHeight: layout.touchTarget.minHeight,
       justifyContent: 'center',
-      marginTop: 2,
     },
-    tableRowContent: {
-      flex: 1,
-      gap: 2,
+    field: {
+      gap: spacing.xs,
     },
-    tableInputContent: {
-      flex: 1,
-      gap: 4,
-    },
-    rowValueText: {
-      fontSize: fontSizes.label,
-      fontWeight: '600',
-    },
-    rowActionRight: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    changeActionText: {
-      fontWeight: '600',
-    },
-    inputHeaderRow: {
+    fieldLabelRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: spacing.sm,
     },
-    suggestedLocationPill: {
+    fieldLabel: {
+      paddingHorizontal: spacing.xs,
+    },
+    inputContainer: {
+      marginBottom: 0,
+    },
+    addressInput: {
+      minHeight: layout.touchTarget.minHeight,
+    },
+    inlineActionRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 4,
-      backgroundColor: colors.primaryContainer,
-      paddingVertical: 2,
-      paddingHorizontal: 8,
-      borderRadius: layout.radius.control,
+      gap: spacing.xs,
     },
-    suggestedLocationText: {
+    inlineActionText: {
       color: colors.primary,
-      fontSize: fontSizes.caption,
-      fontWeight: '600',
-      maxWidth: 160,
-    },
-    framelessInput: {
-      fontSize: fontSizes.meta,
-      lineHeight: 20,
-      paddingVertical: 4,
-      paddingHorizontal: 0,
-      minHeight: 32,
-    },
-    detailsTextarea: {
-      fontSize: fontSizes.meta,
-      lineHeight: 20,
-      paddingVertical: 6,
-      paddingHorizontal: 10,
-      backgroundColor: colors.surfaceSubdued,
-      textAlignVertical: 'top',
-      marginTop: 2,
-    },
-    photoTipBanner: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: spacing.sm,
-      padding: spacing.md,
-      borderRadius: layout.radius.panel,
-      borderWidth: StyleSheet.hairlineWidth,
-    },
-    photoTipTextCol: {
-      flex: 1,
-      gap: 2,
-    },
-    photoTipTitle: {
-      fontWeight: '600',
-      fontSize: fontSizes.caption,
-      color: colors.ink,
-    },
-    photoTipBody: {
-      fontSize: fontSizes.caption,
-      lineHeight: 17,
-    },
-    previewToggle: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      paddingVertical: 4,
-    },
-    previewToggleText: {
-      color: colors.primary,
-      fontSize: fontSizes.caption,
       fontWeight: '600',
     },
     previewBox: {
       borderRadius: layout.radius.sm,
       padding: spacing.sm,
-      gap: spacing.xs,
-      borderWidth: StyleSheet.hairlineWidth,
-    },
-    previewHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
+      gap: spacing.sm,
     },
     previewText: {
       fontSize: fontSizes.caption,
@@ -484,25 +538,5 @@ const createStyles = (colors: ThemeColors) =>
     actionsBlock: {
       gap: spacing.xs,
       marginTop: 2,
-    },
-    whatsAppButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      minHeight: layout.touchTarget.minHeight,
-      borderRadius: layout.radius.button,
-      backgroundColor: partnerBrand.whatsapp,
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-    },
-    whatsAppButtonPressed: {
-      backgroundColor: partnerBrand.whatsappPressed,
-      opacity: 0.9,
-    },
-    whatsAppButtonText: {
-      color: lightColors.white,
-      fontWeight: '600',
-      fontSize: fontSizes.label,
     },
   });

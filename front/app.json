@@ -2,11 +2,17 @@
   "expo": {
     "name": "Fiscaliza aí",
     "slug": "fiscaliza-ai",
-    "version": "1.0.0",
+    "owner": "couks",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "fiscalizaai",
     "userInterfaceStyle": "automatic",
+    "extra": {
+      "eas": {
+        "projectId": "f74e3107-49c9-4b85-8a01-c93957434599"
+      }
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -16,6 +22,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.anonymous.fiscalizaai",
+      "versionCode": 2,
       "googleServicesFile": "./google-services.json"
     },
     "androidStatusBar": {

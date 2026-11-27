@@ -10,7 +10,7 @@ function component(file, mocks = {}) {
   const jsx = (type, props) => ({ type, props });
   const theme = { colors: {}, isDark: false };
   const spacing = {};
-  const layout = { radius: {}, iconSize: {} };
+  const layout = { radius: {}, iconSize: {}, touchTarget: { minHeight: 48 } };
   const hooks = {
     memo: (fn) => fn,
     useState(initial) {
@@ -94,8 +94,6 @@ function component(file, mocks = {}) {
           AppBrandGlyph: 'AppBrandGlyph',
           AppBrandLockup: 'AppBrandLockup',
         };
-      if (name.endsWith('/ThemeToggleButton'))
-        return { ThemeToggleButton: 'ThemeToggleButton' };
       if (name.endsWith('/UserAvatar')) return { UserAvatar: 'UserAvatar' };
       if (name.endsWith('/SignOutSheet')) return {};
       if (name === '@/features/city/formatDates' || name.startsWith('@/theme/')) return require(name);
@@ -229,7 +227,7 @@ test('heart reflects confirmed persistence, and unavailable storage disables it'
   );
 });
 
-test('sidebar preserves destinations, closes before navigating, and disables its hidden theme control', () => {
+test('sidebar groups destinations, marks the current tab and closes before navigating', () => {
   const visits = [];
   const ui = component('components/ui/SideMenu.tsx', {
     'expo-router': {
@@ -238,9 +236,6 @@ test('sidebar preserves destinations, closes before navigating, and disables its
     },
     '@/stores/authStore': {
       useAuthStore: (select) => select({ user: null, isAuthenticated: false }),
-    },
-    '@/stores/themeStore': {
-      useThemeStore: (select) => select({ persistenceError: null }),
     },
     '@/stores/territoryStore': {
       useTerritoryStore: (select) => select({ preferredNeighborhood: '' }),
@@ -266,13 +261,16 @@ test('sidebar preserves destinations, closes before navigating, and disables its
       n.type === 'Pressable' &&
       nodes(n).some((child) => child.props?.children === 'Explorar'),
   );
+  assert.equal(explore.props.accessibilityState.selected, true);
+  assert.ok(ui.exports.citizenNavigationSections[0].items.some((item) => item.path === '/ResultsScreen'));
+  assert.equal(nodes(tree).filter((n) => n.props?.children === 'Entrar na conta').length, 1);
   explore.props.onPress();
   assert.equal(visits.length, 0);
   afterClose();
   assert.equal(visits[0], '/(tabs)/TerritoryScreen');
   const hidden = ui.render('SideMenu', { visible: false, onClose() {} });
   assert.equal(
-    nodes(hidden).some((n) => n.type === 'ThemeToggleButton'),
-    false,
+    nodes(hidden).find((n) => n.props?.accessibilityLabel === 'Menu de navegação')?.props.accessibilityElementsHidden,
+    true,
   );
 });

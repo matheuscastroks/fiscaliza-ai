@@ -56,7 +56,7 @@ export interface CallSummaryProps {
 
 /** Miolo único do chamado: categoria, situação, título, local, prazo e protocolo. */
 export function CallSummary({ call, headerAccessory, metaTrailing, headerInset = 0 }: CallSummaryProps) {
-  const { colors } = useTheme();
+  const { colors, elevation } = useTheme();
   const styles = useThemedStyles(createStyles);
   const d = describeCall(call, colors);
   const iconName = d.theme.icon as IconName;
@@ -72,15 +72,17 @@ export function CallSummary({ call, headerAccessory, metaTrailing, headerInset =
         <View
           style={[
             styles.slaBadge,
-            d.isOverdue
-              ? { backgroundColor: colors.riskSurface, borderColor: colors.risk }
-              : { backgroundColor: colors.surfaceSubdued, borderColor: colors.border },
+            {
+              backgroundColor: d.isOverdue
+                ? colors.riskSurface
+                : colors.surfaceRecessed,
+            },
           ]}
         >
           <Ionicons
             name={d.isOverdue ? 'alert-circle' : 'hourglass-outline'}
             size={layout.iconSize.sm}
-            color={d.isOverdue ? colors.risk : colors.onSurfaceBrand}
+            color={d.isOverdue ? colors.risk : colors.primary}
           />
           <AppText variant="caption" color={d.isOverdue ? 'risk' : 'ink'} style={styles.shrink}>{d.slaText}</AppText>
         </View>
@@ -109,7 +111,7 @@ export function CallSummary({ call, headerAccessory, metaTrailing, headerInset =
       </View>
 
       <View style={styles.contextRow}>
-        <View style={[styles.statusBadge, { backgroundColor: d.status.color + '1F' }]}>
+        <View style={[styles.statusBadge, elevation.subtle, { backgroundColor: colors.surfaceRaised }]}>
           <View style={[styles.statusDot, { backgroundColor: d.status.color }]} />
           <AppText variant="caption" color={d.status.color} style={styles.shrink}>{d.status.label}</AppText>
         </View>
@@ -139,7 +141,7 @@ export function CallSummary({ call, headerAccessory, metaTrailing, headerInset =
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (_colors: ThemeColors) =>
   StyleSheet.create({
     root: { gap: spacing.xs },
     shrink: { flexShrink: 1 },
@@ -174,7 +176,6 @@ const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: spacing.xs,
       paddingVertical: spacing.xxs / 2,
       borderRadius: layout.radius.compact,
-      borderWidth: StyleSheet.hairlineWidth,
     },
     protocolChip: { maxWidth: '100%' },
     footerRow: {
@@ -183,8 +184,6 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       gap: spacing.xs,
       paddingTop: spacing.xs,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: colors.divider,
     },
     trailing: { flexDirection: 'row', alignItems: 'center', flexShrink: 0, maxWidth: '100%' },
   });

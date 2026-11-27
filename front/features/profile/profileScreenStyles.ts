@@ -19,8 +19,7 @@ export const createStyles = (colors: ThemeColors) =>
       borderWidth: StyleSheet.hairlineWidth,
       gap: spacing.md,
     },
-    authPromptRow: {
-      flexDirection: 'row',
+    authActions: {
       gap: spacing.sm,
     },
     avatarContainer: {
@@ -54,7 +53,6 @@ export const createStyles = (colors: ThemeColors) =>
       paddingVertical: 3,
       paddingHorizontal: 8,
       borderRadius: layout.radius.compact,
-      borderWidth: StyleSheet.hairlineWidth,
       marginTop: 4,
     },
     statusPillText: {
@@ -71,41 +69,7 @@ export const createStyles = (colors: ThemeColors) =>
       borderWidth: 1,
       borderColor: colors.risk,
     },
-    metricsRow: {
-      flexDirection: 'row',
-      gap: spacing.sm,
-    },
-    metricCard: {
-      flex: 1,
-      borderRadius: layout.radius.panel,
-      padding: spacing.md,
-      borderWidth: StyleSheet.hairlineWidth,
-      gap: 2,
-    },
-    metricHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 6,
-    },
-    metricIconSquircle: {
-      width: 30,
-      height: 30,
-      borderRadius: layout.radius.sm,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    metricValue: {
-      fontSize: fontSizes.screenTitle,
-      fontWeight: '600',
-      color: colors.ink,
-    },
-    metricLabel: {
-      fontWeight: '600',
-      color: colors.ink,
-      fontSize: fontSizes.meta,
-      marginTop: 2,
-    },
+
     sectionBlock: {
       gap: 8,
     },

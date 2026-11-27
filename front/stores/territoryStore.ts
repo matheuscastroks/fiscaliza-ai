@@ -42,9 +42,6 @@ export const useTerritoryStore = create<{
   savedFacilityLayers: TerritoryLayer[];
   setTerritoryDomain: (domain: TerritoryDomain) => void;
   setFacilityLayers: (layers: TerritoryLayer[]) => void;
-  isListView: boolean;
-  setIsListView: (value: boolean) => void;
-  toggleViewMode: () => void;
   filtersOpen: boolean;
   setFiltersOpen: (value: boolean) => void;
 }>((set, get) => ({
@@ -56,7 +53,6 @@ export const useTerritoryStore = create<{
   layers: ['official'],
   territoryDomain: 'calls',
   savedFacilityLayers: ['school', 'health', 'square'],
-  isListView: false,
   filtersOpen: false,
   initialize: () => {
     if (initialization) return initialization;
@@ -113,7 +109,6 @@ export const useTerritoryStore = create<{
       hydrated: false,
       persistenceError: null,
       preferredNeighborhood: defaultNeighborhood.trim(),
-      isListView: false,
     });
     return get().initialize();
   },
@@ -169,8 +164,6 @@ export const useTerritoryStore = create<{
       ...(get().territoryDomain === 'facilities' ? { layers: nextSaved } : {}),
     });
   },
-  setIsListView: (isListView) => set({ isListView }),
-  toggleViewMode: () => set({ isListView: !get().isListView }),
   setFiltersOpen: (filtersOpen) => set({ filtersOpen }),
 }));
 export function useTerritorySelection() {
@@ -183,12 +176,6 @@ export function useTerritorySelection() {
     [selection, neighborhood, boundaries.data],
   );
   return { neighborhood, neighborhoodId, setNeighborhood };
-}
-export function useTerritoryViewMode() {
-  const isListView = useTerritoryStore((s) => s.isListView);
-  const setIsListView = useTerritoryStore((s) => s.setIsListView);
-  const toggleViewMode = useTerritoryStore((s) => s.toggleViewMode);
-  return { isListView, setIsListView, toggleViewMode };
 }
 export function useTerritoryFiltersModal() {
   const filtersOpen = useTerritoryStore((s) => s.filtersOpen);

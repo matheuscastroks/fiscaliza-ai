@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
+import type { ElevationTokens } from '@/theme/elevation';
 import { spacing, layout } from '@/theme';
 import {
   AppBottomSheetModal,
@@ -17,7 +19,6 @@ import { useAuthStore } from '@/stores/authStore';
 import { formatPostalCode } from '@/services/postalCode';
 import { usePostalCodeFlow } from '@/features/profile/usePostalCodeFlow';
 import { fontSizes } from '@/theme/typography';
-import { IconTile } from '@/components/ui/IconTile';
 
 export interface PostalCodeSheetProps {
   visible: boolean;
@@ -32,8 +33,15 @@ export function PostalCodeSheet({
   currentPostalCode,
   currentNeighborhood,
 }: PostalCodeSheetProps) {
-  const { colors, mode } = useTheme();
+  const { colors, elevation, mode } = useTheme();
   const styles = useThemedStyles(createStyles);
+  const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [bodyHeight, setBodyHeight] = useState(0);
+  const sheetHeight = headerHeight && bodyHeight
+    ? Math.ceil(Math.min(height - insets.top - spacing.sm, headerHeight + bodyHeight + 30))
+    : '55%';
 
   const user = useAuthStore((s) => s.user);
   const flow = usePostalCodeFlow(
@@ -65,26 +73,26 @@ export function PostalCodeSheet({
       onClose={() => {
         if (!busy && !saving) onClose();
       }}
-      title="Meu CEP Residencial"
-      snapPoints={['65%', '90%']}
+      title="Meu CEP"
+      snapPoints={[sheetHeight]}
+      onHeaderHeightChange={setHeaderHeight}
+      keyboardBehavior="fillParent"
+      keyboardBlurBehavior="restore"
       enablePanDownToClose={!busy && !saving}
       showHeader={true}
     >
       <BottomSheetScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}
+        onContentSizeChange={(_, contentHeight) => setBodyHeight(contentHeight)}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {!user ? (
           /* Estado Não Conectado: Apelo para Login */
           <View style={styles.guestCard}>
-            <IconTile icon="location" />
             <View style={{ gap: 4 }}>
-              <AppText variant="sectionTitle">
-                Vincule seu CEP carioca
-              </AppText>
               <AppText variant="body" color="muted">
-                Entre na sua conta para guardar seu CEP e acompanhar os chamados do seu bairro.
+                Entre na sua conta para guardar seu CEP no perfil.
               </AppText>
             </View>
             <AppButton
@@ -108,14 +116,16 @@ export function PostalCodeSheet({
             <View
               style={[
                 styles.inputWrapper,
+                elevation.recessed,
                 {
-                  backgroundColor: colors.surfaceSubdued,
-                  borderColor: colors.border,
+                  backgroundColor: colors.surfaceRecessed,
                 },
               ]}
             >
               <Ionicons name="search-outline" size={layout.iconSize.md} color={colors.muted} />
               <BottomSheetTextInput
+                accessibilityLabel="CEP residencial"
+                autoComplete="postal-code"
                 value={postalCode}
                 placeholder="Digite seu CEP (00000-000)"
                 placeholderTextColor={colors.subtle}
@@ -161,9 +171,9 @@ export function PostalCodeSheet({
               <View
                 style={[
                   styles.resultCard,
+                  elevation.subtle,
                   {
-                    backgroundColor: colors.surfaceSubdued,
-                    borderColor: colors.divider,
+                    backgroundColor: colors.surfaceRaised,
                   },
                 ]}
               >
@@ -235,7 +245,13 @@ export function PostalCodeSheet({
             {/* Alerta de Erro */}
             {error !== '' && (
               <View
-                style={[styles.errorBox, { borderColor: colors.risk }]}
+                style={[
+                  styles.errorBox,
+                  {
+                    backgroundColor: colors.riskSurface,
+                    borderColor: colors.risk,
+                  },
+                ]}
                 accessibilityRole="alert"
               >
                 <Ionicons name="alert-circle" size={layout.iconSize.sm} color={colors.risk} />
@@ -251,26 +267,15 @@ export function PostalCodeSheet({
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, _elevation?: ElevationTokens) =>
   StyleSheet.create({
     scrollContent: {
       paddingHorizontal: spacing.contentPadding,
       paddingTop: spacing.xs,
-      paddingBottom: 40,
       gap: spacing.md,
     },
     guestCard: {
-      alignItems: 'center',
-      textAlign: 'center',
-      paddingVertical: spacing.lg,
       gap: spacing.md,
-    },
-    iconSquircle: {
-      width: 52,
-      height: 52,
-      borderRadius: layout.radius.panel,
-      alignItems: 'center',
-      justifyContent: 'center',
     },
     headerInfo: {
       gap: 2,
@@ -279,7 +284,6 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       borderRadius: layout.radius.sm,
-      borderWidth: 1,
       paddingHorizontal: 14,
       minHeight: 52,
       gap: 10,
@@ -292,13 +296,13 @@ const createStyles = (colors: ThemeColors) =>
     },
     resultCard: {
       borderRadius: layout.radius.panel,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.divider,
       padding: spacing.md,
       gap: spacing.sm,
     },
     resultBadgeRow: {
       flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.xs,
       alignItems: 'center',
       justifyContent: 'space-between',
     },
@@ -338,8 +342,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: 8,
       padding: spacing.sm,
       borderRadius: layout.radius.sm,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
+      borderWidth: layout.borderWidth.focus,
     },
     flex: {
       flex: 1,

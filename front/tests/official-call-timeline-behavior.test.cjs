@@ -66,3 +66,23 @@ test('calendar dates retain their published day in the Brazil time zone', () => 
   assert.match(content, /15\/09\/2026/);
   assert.match(content, /17\/09\/2026/);
 });
+
+test('published diagnosis appears as an event without certifying the service', () => {
+  const content = texts(render({ openedAt: '2026-09-15', deadlineType: 'D', diagnosedAt: '2026-09-18', officialSituation: 'Não Encerrado' })).join(' ');
+  assert.match(content, /Diagnóstico registrado/);
+  assert.match(content, /18\/09\/2026/);
+  assert.match(content, /não confirma que o serviço foi feito/);
+});
+
+test('open diagnosis-type call without diagnosis shows it as pending, without the forecast date', () => {
+  const content = texts(render({ openedAt: '2026-09-15', deadlineType: 'D', diagnosisTargetDate: '2026-09-20', officialSituation: 'Não Encerrado' })).join(' ');
+  assert.match(content, /Diagnóstico ainda não registrado/);
+  assert.doesNotMatch(content, /20\/09\/2026/);
+});
+
+test('calls without a diagnosis requirement get no diagnosis step', () => {
+  const open = texts(render({ openedAt: '2026-09-15', deadlineType: 'F', officialSituation: 'Não Encerrado' })).join(' ');
+  const closed = texts(render({ openedAt: '2026-09-15', deadlineType: 'D', closedAt: '2026-09-17', officialSituation: 'Encerrado' })).join(' ');
+  assert.doesNotMatch(open, /Diagnóstico/);
+  assert.doesNotMatch(closed, /Diagnóstico/);
+});

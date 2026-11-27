@@ -57,6 +57,17 @@ export function OfficialCallDates({ item, slaLabel, deadlineInfo }: Props) {
               </View>
             ) : null}
 
+            {item.diagnosedAt ? (
+              <View style={styles.gridItem}>
+                <AppText variant="caption" color="muted">
+                  Diagnóstico realizado
+                </AppText>
+                <AppText variant="label" color="ink">
+                  {formatCallDateTime(item.diagnosedAt)}
+                </AppText>
+              </View>
+            ) : null}
+
             {item.closedAt ? (
               <View style={styles.gridItem}>
                 <AppText variant="caption" color="muted">

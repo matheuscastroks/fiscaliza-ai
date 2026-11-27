@@ -79,6 +79,11 @@ export function formatOfficialCall(
     diagnosisTargetDate: row.diagnosisTargetDate
       ? row.diagnosisTargetDate.toISOString()
       : null,
+    diagnosedAt: row.diagnosedAt ? row.diagnosedAt.toISOString() : null,
+    viaOmbudsman: row.viaOmbudsman,
+    sourceUpdatedAt: row.sourceUpdatedAt
+      ? row.sourceUpdatedAt.toISOString()
+      : null,
     withinDeadline: row.withinDeadline,
     timeRemaining: row.timeRemaining,
     timeUnit: row.timeUnit,
@@ -238,12 +243,13 @@ export function registerOfficialCallsRoutes(
 
     if (query.search) {
       const term = `%${escapeLike(query.search.trim())}%`;
+      const foldedTerm = sql`official_search_fold(${term})`;
       const searchCond = or(
-        ilike(officialCalls.serviceType, term),
-        ilike(officialCalls.serviceSubtype, term),
-        ilike(officialCalls.neighborhoodName, term),
-        ilike(officialCalls.organizationName, term),
-        ilike(officialCalls.statusJustification, term),
+        sql`official_search_fold(${officialCalls.serviceType}) LIKE ${foldedTerm}`,
+        sql`official_search_fold(${officialCalls.serviceSubtype}) LIKE ${foldedTerm}`,
+        sql`official_search_fold(${officialCalls.neighborhoodName}) LIKE ${foldedTerm}`,
+        sql`official_search_fold(${officialCalls.organizationName}) LIKE ${foldedTerm}`,
+        sql`official_search_fold(${officialCalls.statusJustification}) LIKE ${foldedTerm}`,
         ilike(officialCalls.externalId, term),
       );
       if (searchCond) conditions.push(searchCond);

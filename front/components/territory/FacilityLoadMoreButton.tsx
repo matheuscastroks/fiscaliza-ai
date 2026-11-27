@@ -14,8 +14,6 @@ import { layout } from '@/theme/layout';
 
 import { spacing } from '@/theme/spacing';
 
-import { elevation } from '@/theme/elevation';
-
 
 export interface FacilityLoadMoreButtonProps {
   label: string;
@@ -33,7 +31,7 @@ export function FacilityLoadMoreButton({
   isFetching,
   onPress,
 }: FacilityLoadMoreButtonProps) {
-  const { colors } = useTheme();
+  const { colors, elevation } = useTheme();
   const count =
     totalKnown === null
       ? ''
@@ -50,14 +48,15 @@ export function FacilityLoadMoreButton({
       }}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: colors.surface, borderColor: colors.border },
+        elevation.floating,
+        { backgroundColor: colors.surfaceFloating },
         pressed && styles.pressed,
       ]}
     >
       <Ionicons
         name="add-circle-outline"
         size={layout.iconSize.md}
-        color={colors.onSurfaceBrand}
+        color={colors.primary}
       />
       <AppText variant="caption" style={styles.text}>
         {isFetching
@@ -70,7 +69,6 @@ export function FacilityLoadMoreButton({
 
 const styles = StyleSheet.create({
   button: {
-      ...elevation.floating,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -78,7 +76,6 @@ const styles = StyleSheet.create({
     minHeight: layout.touchTarget.minHeight,
     paddingHorizontal: spacing.md,
     borderRadius: layout.radius.control,
-    borderWidth: StyleSheet.hairlineWidth,
   },
   pressed: { opacity: 0.85 },
   text: { fontWeight: '600' },

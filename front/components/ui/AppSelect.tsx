@@ -3,10 +3,13 @@ import {
   Pressable,
   StyleSheet,
   View,
+  useWindowDimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
+import type { ElevationTokens } from '@/theme/elevation';
 import { layout, spacing } from '@/theme';
 import { fontFamilies , fontSizes } from '@/theme/typography';
 import { AppText } from './AppText';
@@ -26,6 +29,7 @@ export interface SelectOption {
 interface AppSelectProps {
   label: string;
   options: readonly SelectOption[];
+  triggerLabel?: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -46,6 +50,7 @@ function normalizeText(text: string): string {
 
 export function AppSelect({
   label,
+  triggerLabel,
   options,
   value,
   onChange,
@@ -56,17 +61,22 @@ export function AppSelect({
   clearable = true,
   snapPoints: customSnapPoints,
 }: AppSelectProps) {
-  const { colors, mode } = useTheme();
+  const { colors, elevation, isDark, mode } = useTheme();
   const styles = useThemedStyles(createStyles);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [optionsHeight, setOptionsHeight] = useState(0);
+  const { height: windowHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const fitOptions = !customSnapPoints && options.length <= 3;
 
-  const computedSnapPoints = useMemo(() => {
-    if (customSnapPoints) return customSnapPoints;
-    if (options.length <= 3) return ['30%'];
-    if (options.length <= 5) return ['40%'];
-    return ['55%', '85%'];
-  }, [customSnapPoints, options.length]);
+  const shortSnapPoint = headerHeight && optionsHeight
+    ? Math.ceil(Math.min(windowHeight - insets.top - spacing.sm, headerHeight + optionsHeight + 30))
+    : '40%';
+  const computedSnapPoints = customSnapPoints ?? (
+    fitOptions ? [shortSnapPoint] : options.length <= 5 ? ['40%'] : ['55%', '85%']
+  );
 
   const selectedOption = useMemo(
     () => options.find((opt) => opt.value === value) || options[0],
@@ -110,7 +120,7 @@ export function AppSelect({
           onPress={() => handleSelect(item.value)}
           style={({ pressed }) => [
             styles.optionRow,
-            active && { backgroundColor: colors.surfaceSubdued },
+            active && { backgroundColor: isDark ? colors.surfaceRaised : colors.surfaceSubdued },
             pressed && { opacity: 0.75 },
           ]}
         >
@@ -142,14 +152,14 @@ export function AppSelect({
         </Pressable>
       );
     },
-    [colors.accent, colors.ink, colors.muted, colors.surfaceSubdued, handleSelect, styles.optionLabel, styles.optionLeft, styles.optionRow, value],
+    [colors.accent, colors.ink, colors.muted, colors.surfaceRaised, colors.surfaceSubdued, handleSelect, isDark, styles.optionLabel, styles.optionLeft, styles.optionRow, value],
   );
 
   return (
     <>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${label}: ${selectedOption?.label || 'Selecionar'}`}
+        accessibilityLabel={triggerLabel ?? `${label}: ${selectedOption?.label || 'Selecionar'}`}
         onPress={handleOpen}
         style={({ pressed }) => [
           compact ? styles.compactTrigger : styles.trigger,
@@ -181,7 +191,7 @@ export function AppSelect({
               !isFiltered && !compact && { color: colors.ink },
             ]}
           >
-            {selectedOption?.label || label}
+            {triggerLabel ?? (selectedOption?.label || label)}
           </AppText>
         </View>
 
@@ -218,19 +228,23 @@ export function AppSelect({
         onClose={() => setOpen(false)}
         title={label}
         snapPoints={computedSnapPoints}
+        onHeaderHeightChange={fitOptions ? setHeaderHeight : undefined}
+        keyboardBehavior="fillParent"
+        keyboardBlurBehavior="restore"
       >
         {options.length > 5 && (
           <View
             style={[
               styles.searchBox,
               {
-                backgroundColor: colors.surfaceSubdued,
-                borderColor: colors.border,
+                backgroundColor: colors.surfaceRecessed,
+                ...elevation.recessed,
               },
             ]}
           >
             <Ionicons name="search-outline" size={layout.iconSize.md} color={colors.muted} />
             <BottomSheetTextInput
+              accessibilityLabel={placeholder}
               value={search}
               onChangeText={setSearch}
               placeholder={placeholder}
@@ -252,8 +266,8 @@ export function AppSelect({
           keyExtractor={(item) => item.value || '__empty__'}
           keyboardShouldPersistTaps="handled"
           style={styles.list}
-          contentContainerStyle={{ paddingBottom: spacing.md }}
-          scrollEnabled={options.length > 3}
+          contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, spacing.md) }}
+          onContentSizeChange={fitOptions ? (_, height) => setOptionsHeight(height) : undefined}
           showsVerticalScrollIndicator={false}
           initialNumToRender={15}
           maxToRenderPerBatch={15}
@@ -272,31 +286,30 @@ export function AppSelect({
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
   StyleSheet.create({
     trigger: {
       minHeight: 48,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.xs,
       borderRadius: layout.radius.panel,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
+      backgroundColor: colors.surfaceRecessed,
+      ...elevation?.recessed,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: spacing.sm,
     },
     triggerActive: {
-      borderColor: colors.ink,
+      backgroundColor: colors.surfaceRaised,
+      ...elevation?.subtle,
     },
     compactTrigger: {
       height: 38,
       paddingHorizontal: spacing.sm + 4,
       borderRadius: layout.radius.compact,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
+      backgroundColor: colors.surfaceRecessed,
+      ...elevation?.recessed,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -305,7 +318,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     compactTriggerActive: {
       backgroundColor: colors.darkPill,
-      borderColor: colors.darkPill,
+      ...elevation?.subtle,
     },
     triggerLeft: {
       flexDirection: 'row',
@@ -331,7 +344,6 @@ const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: spacing.md,
       height: 44,
       borderRadius: layout.radius.control,
-      borderWidth: 1,
       gap: spacing.xs,
     },
     searchInput: {

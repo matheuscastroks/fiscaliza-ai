@@ -2,10 +2,11 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 
 import type { ThemeColors } from '@/theme/colors';
+import type { ElevationTokens } from '@/theme/elevation';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import { View, Pressable, StyleSheet, useWindowDimensions, Keyboard, Animated } from 'react-native';
+import { View, Pressable, StyleSheet, useWindowDimensions, Keyboard, Animated, Easing } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,20 +14,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { type Tabs } from 'expo-router';
 
 import { AppText } from './AppText';
+import { isMapboxAvailable } from './MapboxMapView';
 
-import { useTerritoryStore } from '@/stores/territoryStore';
 
 import { beginMapTrace } from '@/features/territory/mapPerformance';
 
 import { fontSizes } from '@/theme/typography';
-
-import { elevation } from '@/theme/elevation';
 import { layout } from '@/theme/layout';
+import { motion } from '@/theme/motion';
 
 
 const TAB_HEIGHT = layout.tabBar.itemHeight;
 const TAB_PADDING = layout.tabBar.padding;
 const TAB_GAP = 6;
+const selectionEasing = Easing.bezier(...motion.settle);
 
 export type AppTabBarProps = Parameters<
   NonNullable<React.ComponentProps<typeof Tabs>['tabBar']>
@@ -42,7 +43,7 @@ const VISIBLE = new Set([
 ]);
 
 /**
- * Barra de abas principal com cápsula sólida, ícone + rótulo visível e indicador com física de mola.
+ * Barra de abas principal com cápsula sólida, ícone, rótulo e indicador deslizante.
  */
 export function AppTabBar({
   state,
@@ -57,7 +58,8 @@ export function AppTabBar({
   const { width } = useWindowDimensions();
 
   const visibleRoutes = state.routes.filter((route) => VISIBLE.has(route.name));
-  const currentRouteName = state.routes[state.index]?.name || 'TerritoryScreen';
+  const currentRoute = state.routes[state.index];
+  const currentRouteName = currentRoute?.name || 'TerritoryScreen';
   const effectiveRouteName =
     currentRouteName === 'index' ? 'TerritoryScreen' : currentRouteName;
 
@@ -79,24 +81,26 @@ export function AppTabBar({
 
   const target = selectedIndex * (tabWidth + TAB_GAP);
   const [selectionAnim] = useState(() => new Animated.Value(target));
+  const previousTabWidth = useRef(tabWidth);
   const reducedMotion = useReducedMotion();
 
 
   useEffect(() => {
-    if (reducedMotion) {
+    const resized = previousTabWidth.current !== tabWidth;
+    previousTabWidth.current = tabWidth;
+    if (resized || reducedMotion) {
       selectionAnim.setValue(target);
       return;
     }
-    const spring = Animated.spring(selectionAnim, {
+    const transition = Animated.timing(selectionAnim, {
       toValue: target,
-      damping: 24,
-      stiffness: 280,
-      mass: 0.8,
+      duration: motion.selectionDuration,
+      easing: selectionEasing,
       useNativeDriver: true,
     });
-    spring.start();
-    return () => spring.stop();
-  }, [target, reducedMotion, selectionAnim]);
+    transition.start();
+    return () => transition.stop();
+  }, [target, tabWidth, reducedMotion, selectionAnim]);
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   useEffect(() => {
@@ -112,9 +116,10 @@ export function AppTabBar({
     };
   }, []);
 
-  const isListView = useTerritoryStore((s) => s.isListView);
 
-  if (keyboardVisible || !VISIBLE.has(effectiveRouteName)) {
+  const territoryResults = (currentRoute?.params as { territoryResults?: string } | undefined)?.territoryResults;
+  const resultsOpen = effectiveRouteName === 'TerritoryScreen' && territoryResults === 'list' && isMapboxAvailable();
+  if (keyboardVisible || resultsOpen || !VISIBLE.has(effectiveRouteName)) {
     return null;
   }
 
@@ -174,7 +179,7 @@ export function AppTabBar({
                   canPreventDefault: true,
                 });
                 if (!focused && !event.defaultPrevented) {
-                  if (route.name === 'TerritoryScreen' && !isListView)
+                  if (route.name === 'TerritoryScreen' && isMapboxAvailable())
                     beginMapTrace('tab');
                   navigateToTab(route.key);
                 }
@@ -186,32 +191,25 @@ export function AppTabBar({
               style={({ pressed }) => [
                 styles.tab,
                 { width: tabWidth },
-                pressed && {
-                  opacity: 0.75,
-                  transform: [{ scale: 0.94 }],
-                },
+                pressed && { opacity: 0.75 },
               ]}
             >
               <View collapsable={false} style={styles.tabContent}>
-                {options.tabBarIcon?.({
-                  focused,
-                  color: itemColor,
-                  size: 20,
-                })}
-                <AppText
-                  variant="meta"
-                  numberOfLines={1}
-                  maxFontSizeMultiplier={1.15}
-                  style={[
-                    styles.tabLabel,
-                    {
-                      color: itemColor,
-                      fontWeight: '600',
-                    },
-                  ]}
-                >
-                  {label}
-                </AppText>
+                {options.tabBarIcon && (
+                  <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                    {options.tabBarIcon({ focused, color: itemColor, size: layout.iconSize.md })}
+                  </View>
+                )}
+                {focused && (
+                  <AppText
+                    variant="meta"
+                    numberOfLines={1}
+                    maxFontSizeMultiplier={1.15}
+                    style={[styles.tabLabel, { color: itemColor }]}
+                  >
+                    {label}
+                  </AppText>
+                )}
               </View>
             </Pressable>
           );
@@ -224,7 +222,7 @@ export function AppTabBar({
 // Alias para retrocompatibilidade
 export const FloatingGlassTabBar = AppTabBar;
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
   StyleSheet.create({
     barContainer: {
       position: 'absolute',
@@ -243,7 +241,7 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      ...elevation.floating,
+      ...elevation?.floating,
     },
     tab: {
       height: TAB_HEIGHT,
@@ -258,6 +256,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     tabLabel: {
       fontSize: fontSizes.caption,
+      fontWeight: '600',
       lineHeight: 12,
     },
     selected: {

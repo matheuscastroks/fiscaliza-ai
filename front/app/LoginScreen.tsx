@@ -46,6 +46,7 @@ export default function LoginScreen() {
         : '/MunicipalityScreen',
     );
   const submit = async () => {
+    if (isLoading || !email.trim() || !password) return;
     const result = await login(email.trim(), password);
     if (result.success) openSession();
   };
@@ -54,6 +55,7 @@ export default function LoginScreen() {
     <AuthScreenLayout
       title="Acesse sua conta"
       description="Entre para guardar seus chamados e lugares."
+      expandPhoto
     >
       <View style={styles.form}>
         <AppInput
@@ -71,6 +73,7 @@ export default function LoginScreen() {
           onChangeText={setPassword}
           secureTextEntry
           autoComplete="current-password"
+          returnKeyType="go"
           editable={!isLoading}
           onSubmitEditing={() => {
             void submit();
@@ -81,42 +84,34 @@ export default function LoginScreen() {
         )}
         <View style={styles.actions}>
           <AppButton
+            title="Entrar"
+            loading={isLoading}
+            disabled={!email.trim() || !password}
+            onPress={() => {
+              void submit();
+            }}
+          />
+          <AppButton
             title="Criar conta"
-            variant="secondary"
+            variant="quiet"
             disabled={isLoading}
-            style={styles.registerButton}
             onPress={() => {
               useAuthStore.getState().clearError();
               router.push('/RegisterScreen');
             }}
           />
           <AppButton
-            title="Entrar"
-            loading={isLoading}
-            disabled={!email.trim() || !password}
-            style={styles.loginButton}
-            onPress={() => {
-              void submit();
-            }}
+            title="Sobre o app"
+            variant="quiet"
+            onPress={() => router.push('/AboutScreen')}
           />
         </View>
       </View>
-      <AppButton
-        title="Sobre o app"
-        variant="quiet"
-        onPress={() => router.push('/AboutScreen')}
-      />
     </AuthScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  accessOptions: { gap: spacing.xs },
-  hint: { textAlign: 'center' },
-  divider: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  line: { flex: 1, height: 1 },
   form: { gap: spacing.sm },
-  actions: { flexDirection: 'row', alignItems: 'stretch', gap: spacing.xs },
-  registerButton: { flex: 1, minWidth: 112, paddingHorizontal: spacing.sm },
-  loginButton: { flex: 1.5 },
+  actions: { paddingTop: spacing.sm, gap: spacing.xxs },
 });

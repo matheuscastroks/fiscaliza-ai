@@ -8,20 +8,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppBrandGlyph } from './AppBrandGlyph';
 import { AppText } from './AppText';
 import { KeyboardAwareScrollView } from './KeyboardAwareScrollView';
-import { ThemeToggleButton } from './ThemeToggleButton';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { useTheme } from '@/theme/useTheme';
 import { fontSizes } from '@/theme/typography';
+import { darkElevation } from '@/theme/elevation';
 
 export function AuthScreenLayout({
   title,
   description,
   children,
+  expandPhoto = false,
 }: {
   title: string;
   description: string;
   children: ReactNode;
+  expandPhoto?: boolean;
 }) {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -32,7 +34,7 @@ export function AuthScreenLayout({
       layout.touchTarget.minHeight +
       layout.radius.sheet +
       spacing.xxs,
-    Math.min(160, Math.max(100, Math.round(height * 0.17))),
+    Math.min(184, Math.max(100, Math.round(height * 0.23))),
   );
   useFocusEffect(
     useCallback(() => {
@@ -48,20 +50,20 @@ export function AuthScreenLayout({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
-        <View style={[styles.hero, { height: heroHeight }]}>
+        <View style={[styles.hero, { height: heroHeight, flexGrow: expandPhoto ? 1 : 0 }]}>
           <Image
             source={require('@/assets/images/auth-backdrop.jpg')}
             contentFit="cover"
             style={StyleSheet.absoluteFill}
             priority="high"
-            accessibilityLabel="Fotografia urbana de cidadãos caminhando na cidade"
+            accessible={false}
           />
           <LinearGradient
             colors={['rgba(15, 23, 42, 0.65)', 'rgba(15, 23, 42, 0.25)']}
             style={StyleSheet.absoluteFill}
           />
           <View style={[styles.topBar, { paddingTop: topPadding }]}>
-            <View style={styles.brandPill}>
+            <View style={[styles.brandPill, darkElevation.subtle]}>
               <AppBrandGlyph size={24} variant="onDark" active />
               <AppText numberOfLines={1} style={[styles.brandTitle, { color: colors.white }]}>
                 Fiscaliza{' '}
@@ -72,7 +74,6 @@ export function AuthScreenLayout({
                 </AppText>
               </AppText>
             </View>
-            <ThemeToggleButton />
           </View>
         </View>
         <View
@@ -80,13 +81,14 @@ export function AuthScreenLayout({
             styles.sheet,
             {
               backgroundColor: colors.surface,
+              flexGrow: expandPhoto ? 0 : 1,
               paddingBottom: Math.max(insets.bottom, spacing.xl),
             },
           ]}
         >
           <View style={styles.content}>
             <View style={styles.heading}>
-              <AppText variant="screenTitle">{title}</AppText>
+              <AppText variant="screenTitle" accessibilityRole="header">{title}</AppText>
               <AppText color="muted">{description}</AppText>
             </View>
             {children}
@@ -117,7 +119,6 @@ const styles = StyleSheet.create({
   },
   brandTitle: { fontWeight: '600', fontSize: fontSizes.meta },
   sheet: {
-    flex: 1,
     marginTop: -layout.radius.sheet,
     borderTopLeftRadius: layout.radius.sheet,
     borderTopRightRadius: layout.radius.sheet,
@@ -125,6 +126,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   content: {
+    flexGrow: 1,
     width: '100%',
     maxWidth: 480,
     alignSelf: 'center',

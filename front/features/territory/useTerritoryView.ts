@@ -4,7 +4,8 @@ import { computeOverviewRegion, TERRITORY_PERIOD_OPTIONS, TERRITORY_STATUS_OPTIO
 
 import { useTerritoryEntries } from './useTerritoryEntries';
 
-import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback, useSyncExternalStore } from 'react';
+import { onlineManager } from '@tanstack/react-query';
 
 import * as Haptics from 'expo-haptics';
 
@@ -16,14 +17,15 @@ import { type MapRegionChange } from '@/components/ui/MapboxMapView';
 
 import { entryLocation, type Entry } from '@/components/territory/TerritoryPreviewCard';
 
-import { OPEN_STATUS } from '@/features/city/callStatus';
 
 import { INITIAL_REGION, type useTerritoryQueries } from './useTerritoryQueries';
 
 type TerritoryQueries = ReturnType<typeof useTerritoryQueries>;
+const getOnlineStatus = () => onlineManager.isOnline();
 
 /** Entradas derivadas, seleção, câmera e callbacks de interação do mapa/lista. */
 export function useTerritoryView(q: TerritoryQueries) {
+  const offline = !useSyncExternalStore(onlineManager.subscribe, getOnlineStatus, getOnlineStatus);
   const {
     mapAvailable,
     listOffsetRef,
@@ -58,7 +60,6 @@ export function useTerritoryView(q: TerritoryQueries) {
     setPeriod,
     setSearch,
     setStatus,
-    setIsListView,
     territoryDomain,
     facilitiesConfirmed,
     facilityQueries,
@@ -91,13 +92,10 @@ export function useTerritoryView(q: TerritoryQueries) {
     return { ...calculated, zoom: calculated.zoom ?? 12 };
   }, [entries, layers, q.spatialMap.data?.bounds]);
 
-  const filterCount =
-    Number(Boolean(neighborhood)) +
-    Number(status !== 'all') +
-    Number(serviceType !== 'all') +
-    Number(macroTheme !== 'all') +
-    Number(period !== 'all') + Number(selection.kind === 'radius') +
-    Number(areaOnly);
+  const filterCount = layers.includes('official')
+    ? Number(status !== 'all') + Number(serviceType !== 'all') +
+      Number(macroTheme !== 'all') + Number(period !== 'all')
+    : Number(layers.length < 3);
 
   const lastFittedNeighborhoodRef = useRef<string | null>(null);
   useEffect(() => {
@@ -126,7 +124,6 @@ export function useTerritoryView(q: TerritoryQueries) {
       const point = entryLocation(entry);
       setSelectedId(entry.item.id);
       setSelectedCluster(null);
-      setIsListView(false);
       if (point) {
         updateCameraRegion((prev) => ({
           ...prev,
@@ -136,7 +133,7 @@ export function useTerritoryView(q: TerritoryQueries) {
         }));
       }
     },
-    [mapAvailable, setIsListView, updateCameraRegion],
+    [mapAvailable, updateCameraRegion],
   );
 
   const handleMarkerClick = useCallback((id: string) => {
@@ -180,15 +177,11 @@ export function useTerritoryView(q: TerritoryQueries) {
     setMacroTheme('all');
     setServiceType('all');
     setPeriod('all');
-    router.setParams({ neighborhoodId: undefined, layer: undefined, startDate: undefined, endDate: undefined });
+    router.setParams({ startDate: undefined, endDate: undefined });
     setSelectedId(null);
     setSelectedCluster(null);
-    setStatus(OPEN_STATUS);
-    setNeighborhood('');
-    setAreaOnly(false);
-    setAppliedBounds(null);
-    setHasMovedCamera(false);
-  }, [setNeighborhood, setSearch, setMacroTheme, setServiceType, setPeriod, setStatus]);
+    setStatus('all');
+  }, [setSearch, setMacroTheme, setServiceType, setPeriod, setStatus]);
 
   const locate = async () => {
     setHasMovedCamera(false);
@@ -272,7 +265,6 @@ export function useTerritoryView(q: TerritoryQueries) {
     radiusLabel: !areaOnly && !routeNeighborhoodId && selection.kind === 'radius' ? layers.some((layer) => layer !== 'official') ? 'Raio só no 1746' : 'Entorno 1746' : undefined,
     areaOnly,
     onClearAreaOnly: handleClearAreaOnly,
-    mapAvailable,
     search,
     searchFocusRequest: q.searchFocusRequest,
     onSearchChange: setSearch,
@@ -312,7 +304,7 @@ export function useTerritoryView(q: TerritoryQueries) {
     onMacroThemeChange: (value: string) => { setMacroTheme(value); setSelectedId(null); setSelectedCluster(null); },
     onResetFilters: resetFilters,
   }), [
-    selection, areaOnly, handleClearAreaOnly, mapAvailable, routeNeighborhoodId, q.searchFocusRequest,
+    selection, areaOnly, handleClearAreaOnly, routeNeighborhoodId, q.searchFocusRequest,
     setSearch, setServiceType, setPeriod, setStatus, search, setFiltersOpen, filtersOpen,
     filterCount, bairroOptions, neighborhood, neighborhoodId, handleNeighborhoodChange,
     serviceType, serviceTypeOptions, period, status, layers, setLayers, startDate, endDate,
@@ -324,23 +316,27 @@ export function useTerritoryView(q: TerritoryQueries) {
   const waitingForLocation = activeSelection.kind === 'pending-current';
 
   const summaryLabel =
-    territoryDomain === 'facilities'
+    offline
+      ? 'Sem conexão'
+      : q.searchPending
+      ? 'Atualizando resultados…'
+      : territoryDomain === 'facilities'
       ? totalFacilitiesKnown !== null && listed.length < totalFacilitiesKnown
-        ? `Ver lista de serviços públicos (${listed.length.toLocaleString('pt-BR')} de ${totalFacilitiesKnown.toLocaleString('pt-BR')})`
-        : `Ver lista de serviços públicos (${listed.length.toLocaleString('pt-BR')})`
+        ? `Serviços públicos (${listed.length.toLocaleString('pt-BR')} de ${totalFacilitiesKnown.toLocaleString('pt-BR')})`
+        : `Serviços públicos (${listed.length.toLocaleString('pt-BR')})`
       : activeSelection.kind === 'pending-current'
         ? 'Aguardando sua localização'
         : officialCalls.isLoading
         ? 'Buscando chamados…'
         : officialCalls.error && listed.length === 0
           ? 'Não conseguimos carregar os chamados'
-          : `Ver em lista · ${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
+          : `${totalCalls.toLocaleString('pt-BR')} ${totalCalls === 1 ? 'chamado' : 'chamados'}`;
 
   const summarySubLabel =
     territoryDomain === 'calls' && activeSelection.kind === 'pending-current'
       ? 'Toque em localizar ou escolha um bairro lá em cima'
       : territoryDomain === 'calls' && officialCalls.error && listed.length === 0
-      ? 'Confira sua internet. Toque para tentar de novo'
+      ? 'Abra a lista para tentar novamente.'
       : territoryDomain === 'calls' && unlocated.length > 0
       ? `+${unlocated.length} sem ponto no mapa · Toque para abrir a lista`
       : 'Toque num ponto do mapa ou veja a lista';
@@ -368,11 +364,21 @@ export function useTerritoryView(q: TerritoryQueries) {
     refreshAll,
     filterBarProps,
     waitingForLocation,
+    offline,
     summaryLabel,
-    summarySubLabel: layers.includes('official')
-      ? q.spatialMap.isError ? 'Mapa indisponível. A lista continua disponível.'
+    summarySubLabel: offline
+      ? listed.length > 0 || Boolean(q.spatialMap.data?.visibleTotal)
+        ? 'Mostrando dados carregados anteriormente.'
+        : 'A busca recomeça quando a conexão voltar.'
+      : q.searchPending
+      ? 'Buscando pelo texto digitado'
+      : layers.includes('official')
+      ? q.spatialMap.isError ? officialCalls.error ? 'Abra a lista para tentar novamente.' : 'Os pontos dos chamados não carregaram. Consulte a lista.'
         : q.spatialMap.isFetching ? 'Atualizando os pontos do mapa…'
-        : q.spatialMap.data ? `${q.spatialMap.data.visibleTotal.toLocaleString('pt-BR')} no mapa · ${q.spatialMap.data.unlocatedTotal.toLocaleString('pt-BR')} sem coordenadas no recorte`
+        : q.spatialMap.data
+          ? totalCalls === 0 && q.spatialMap.data.visibleTotal === 0 && q.spatialMap.data.unlocatedTotal === 0
+            ? 'Tente outro termo, área ou filtro.'
+            : `${q.spatialMap.data.visibleTotal.toLocaleString('pt-BR')} no mapa · ${q.spatialMap.data.unlocatedTotal.toLocaleString('pt-BR')} sem coordenadas no recorte`
         : 'Carregando todos os pontos deste recorte…'
       : summarySubLabel,
   };

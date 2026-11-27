@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import BottomSheet from '@gorhom/bottom-sheet';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { CameraPadding } from '@/features/territory/useMapCamera';
 import { useTabBarInset } from '@/hooks/useTabBarInset';
@@ -13,16 +14,19 @@ import { computeRegionBounds, TERRITORY_PERIOD_OPTIONS } from '@/features/territ
 import { useThemedStyles } from '@/theme/useTheme';
 
 import type { ThemeColors } from '@/theme/colors';
+import type { ElevationTokens } from '@/theme/elevation';
 
 import { Ionicons } from '@expo/vector-icons';
 
 import { layout } from '@/theme/layout';
 
-import { Pressable, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { Pressable, StyleSheet, View, ActivityIndicator, BackHandler, Keyboard } from 'react-native';
+import { useKeyboardState, useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 import * as Haptics from 'expo-haptics';
 
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import { AppText } from '@/components/ui/AppText';
 
@@ -33,13 +37,12 @@ import { spacing } from '@/theme/spacing';
 import { MapboxMapView } from '@/components/ui/MapboxMapView';
 
 import { TerritoryPreviewCard } from '@/components/territory/TerritoryPreviewCard';
-import { TerritoryClusterCarousel } from '@/components/territory/TerritoryClusterCarousel';
+import { TerritoryClusterList } from '@/components/territory/TerritoryClusterList';
+import type { Entry } from '@/components/territory/TerritoryPreviewCard';
+import { belongsToSpatialCluster } from '@/features/territory/spatialFeatures';
 
-import { FacilityLoadMoreButton } from '@/components/territory/FacilityLoadMoreButton';
 
 import { fontSizes } from '@/theme/typography';
-
-import { elevation } from '@/theme/elevation';
 
 import { useTerritoryController } from '@/features/territory/useTerritoryController';
 
@@ -51,17 +54,21 @@ export default function TerritoryScreen() {
 
 export function TerritoryContent() {
   const styles = useThemedStyles(createStyles);
+  const { territoryResults } = useLocalSearchParams<{ territoryResults?: string }>();
   // Altura real do cartão de resultados: os controles do mapa ficam sempre acima dele.
   const [summaryHeight, setSummaryHeight] = useState(110);
   const [headerHeight, setHeaderHeight] = useState(112);
   // Controles flutuantes ficam logo acima da barra de abas.
-  const floatBottom = useTabBarInset().barTop + spacing.sm;
+  const keyboardVisible = useKeyboardState((state) => state.isVisible);
+  const { height: keyboardOffset } = useReanimatedKeyboardAnimation();
+  const { barTop } = useTabBarInset();
+  const floatBottom = keyboardVisible ? spacing.sm : barTop + spacing.sm;
   const {
     isFocused,
     colors,
     mode,
     insets,
-    mapAvailable,
+    mapAvailable: nativeMapAvailable,
     listOffsetRef,
     listRef,
     restoreListOffsetRef,
@@ -87,11 +94,14 @@ export function TerritoryContent() {
     setMacroTheme,
     setPeriod,
     setStatus,
-    setIsListView,
-    effectiveListView,
     visitTrace,
     officialCalls,
     spatialMap,
+    searchPending,
+    clusterCell,
+    setClusterCell,
+    clusterCalls,
+    setSearchFocusRequest,
     serviceTypeOptions,
     filtersOpen,
     setFiltersOpen,
@@ -119,7 +129,7 @@ export function TerritoryContent() {
     allMapMarkers,
     handleMarkerClick,
     handleClusterClick,
-    handleMapClick,
+    handleMapClick: clearMapSelection,
     handleRegionChange,
     resetFilters,
     locate,
@@ -127,20 +137,94 @@ export function TerritoryContent() {
     refreshAll,
     filterBarProps,
     summaryLabel,
+    offline,
     waitingForLocation,
     summarySubLabel,
   } = useTerritoryController();
 
   // Enquadramentos deixam livres a barra de busca, o resumo e a barra de abas.
+  const panel = useRef<BottomSheet>(null);
+  const [mapFailed, setMapFailed] = useState(false);
+  const [panelIndex, setPanelIndex] = useState(0);
+  const mapAvailable = nativeMapAvailable && !mapFailed;
+  const resultsOpen = mapAvailable && territoryResults === 'list';
+  const avoidKeyboard = keyboardVisible && isFocused && mapAvailable && !filtersOpen && !resultsOpen;
+  const keyboardPadding = useAnimatedStyle(() => ({
+    paddingBottom: avoidKeyboard ? Math.max(0, -keyboardOffset.value) : 0,
+  }));
+  const closeResults = useCallback(() => router.setParams({ territoryResults: undefined }), []);
+  const showCluster = Boolean(clusterCell || selectedClusterEntries.length);
+  const handleMapClick = useCallback(() => {
+    setClusterCell(null);
+    clearMapSelection();
+  }, [clearMapSelection, setClusterCell]);
+  const collapsedPanelHeight = summaryHeight + spacing.md;
+  const snapPoints = useMemo(() => [collapsedPanelHeight, '50%'], [collapsedPanelHeight]);
+  const clusterEntries = useMemo<Entry[]>(() => clusterCell
+    ? (clusterCalls.data?.calls ?? []).filter((item) => belongsToSpatialCluster(item, clusterCell))
+      .map((item) => ({ type: 'official', item }))
+    : selectedClusterEntries, [clusterCell, clusterCalls.data?.calls, selectedClusterEntries]);
+
+  useEffect(() => {
+    if (!mapAvailable || !showCluster) return;
+    const sheet = panel.current;
+    sheet?.snapToIndex(1);
+    return () => sheet?.snapToIndex(0);
+  }, [mapAvailable, showCluster]);
+
+  useEffect(() => {
+    if (!isFocused || !mapAvailable || filtersOpen || (!resultsOpen && !showCluster && !selectedEntry)) return;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (resultsOpen) closeResults();
+      else handleMapClick();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [closeResults, isFocused, mapAvailable, filtersOpen, showCluster, selectedEntry, resultsOpen, handleMapClick]);
+
+  const locateListEntry = useCallback((entry: Parameters<typeof handleLocateEntry>[0]) => {
+    closeResults();
+    handleLocateEntry(entry);
+  }, [closeResults, handleLocateEntry]);
+
   const cameraPadding = useMemo<CameraPadding>(() => [
     headerHeight + spacing.lg,
     spacing.xxl,
-    floatBottom + summaryHeight + spacing.lg,
+    floatBottom + collapsedPanelHeight + spacing.lg,
     spacing.xxl,
-  ], [headerHeight, summaryHeight, floatBottom]);
+  ], [headerHeight, collapsedPanelHeight, floatBottom]);
+
+  const territoryList = (
+    <TerritoryListView
+          locationPrompt={waitingForLocation ? { onUseLocation: () => { void locate(); } } : undefined}
+          visible={isFocused}
+          onBackToMap={resultsOpen ? closeResults : undefined}
+          onRetryMap={mapFailed ? () => setMapFailed(false) : undefined}
+          listRef={listRef}
+          listOffsetRef={listOffsetRef}
+          restoreListOffsetRef={restoreListOffsetRef}
+          listed={listed} unlocatedCount={unlocated.length} areaOnly={areaOnly}
+          layers={layers} totalCalls={totalCalls} hasMoreCalls={hasMoreCalls}
+          offline={offline}
+          dataReady={dataReady} refreshing={refreshing}
+          onRefresh={() => { void refreshAll(); }} onOpenEntry={openEntry}
+          onLocateEntry={mapAvailable ? locateListEntry : undefined} onResetFilters={resetFilters}
+          officialQuery={{
+            isLoading: officialCalls.isLoading, isFetching: officialCalls.isFetching,
+            isFetchingNextPage: officialCalls.isFetchingNextPage, error: officialCalls.error,
+            fetchStatus: officialCalls.fetchStatus, refetch: () => { void officialCalls.refetch(); },
+            fetchNextPage: () => { void officialCalls.fetchNextPage(); },
+          }}
+          facilityPagination={facilityPagination}
+          filterBarProps={filterBarProps}
+        />
+  );
 
   return (
-    <View style={[styles.container, !isFocused && mapPerformanceVariant !== 'visible-surface' && { display: 'none' }]}>
+    <Animated.View
+      style={[styles.container, keyboardPadding, !isFocused && mapPerformanceVariant !== 'visible-surface' && { display: 'none' }]}
+    >
+      <View style={styles.container}>
       <AppToast
         message={toastMessage}
         onDismiss={() => setToastMessage(null)}
@@ -148,17 +232,24 @@ export function TerritoryContent() {
         type={locationError ? 'warning' : 'info'}
       />
 
+      <View
+        style={StyleSheet.absoluteFill}
+        accessibilityElementsHidden={resultsOpen}
+        importantForAccessibility={resultsOpen ? 'no-hide-descendants' : 'auto'}
+        pointerEvents={resultsOpen ? 'none' : 'box-none'}
+      >
       {mapAvailable && (
         <View style={StyleSheet.absoluteFill}>
           <MapboxMapView
             style={StyleSheet.absoluteFill}
             region={region}
-            markers={allMapMarkers}
-            spatialCells={layers.includes('official') ? spatialMap.data?.cells ?? [] : undefined}
-            onSpatialCellPress={cell => updateCameraRegion({
-              latitude: cell.latitude, longitude: cell.longitude, latitudeDelta: Math.max(0.00004, cell.north - cell.south), longitudeDelta: Math.max(0.00004, cell.east - cell.west), zoom: Math.min(19, (region.zoom ?? 12) + 2),
-              bounds: { northEast: [cell.east + 0.00002, cell.north + 0.00002], southWest: [cell.west - 0.00002, cell.south - 0.00002] },
-            })}
+            markers={searchPending ? [] : allMapMarkers}
+            spatialCells={layers.includes('official') ? (searchPending ? [] : spatialMap.data?.cells ?? []) : undefined}
+            onSpatialCellPress={(cell) => {
+              clearMapSelection();
+              setClusterCell(cell);
+            }}
+            onSpatialSelectionError={() => setToastMessage('Não foi possível abrir este agrupamento. Toque nele para tentar novamente.')}
             boundary={boundary.data?.geometry}
             searchArea={mapOverlay.searchArea}
             deviceLocation={mapOverlay.deviceLocation}
@@ -168,16 +259,26 @@ export function TerritoryContent() {
             isDark={mode === 'dark'}
             cameraPadding={cameraPadding}
             accessibilityLabel={`Mapa de chamados. ${summaryLabel}`}
-            accessibilityHint="Para navegar pelos chamados com leitor de tela, use o botão Ver em lista"
+            accessibilityHint="Para navegar pelos resultados com leitor de tela, use o botão Ver lista"
             performanceDiagnostics={mapPerformanceEnabled}
             diagnosticTrace={visitTrace}
-            onMarkerClick={handleMarkerClick}
-            onClusterClick={handleClusterClick}
+            onMarkerClick={(id) => {
+              setClusterCell(null);
+              handleMarkerClick(id);
+            }}
+            onClusterClick={(cluster) => {
+              setClusterCell(null);
+              handleClusterClick(cluster);
+            }}
             onMapClick={handleMapClick}
+            onInitialLoadError={() => {
+              setMapFailed(true);
+              closeResults();
+            }}
             onRegionChange={handleRegionChange}
           />
 
-          {officialCalls.isLoading && (
+          {!offline && officialCalls.isLoading && (
             <View
               accessibilityLiveRegion="polite"
               style={[styles.loadingPill, { top: headerHeight + spacing.sm }]}
@@ -199,22 +300,28 @@ export function TerritoryContent() {
         </View>
       )}
 
-      {mapAvailable && (
+      {mapAvailable && !resultsOpen && (
         <View
           onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height)}
           style={[styles.topFloatingHeader, { paddingTop: insets.top + spacing.xs }]}
         >
-          <TerritoryFilterBar {...filterBarProps} />
+          <TerritoryFilterBar
+            {...filterBarProps}
+            onSearchChange={(value) => {
+              handleMapClick();
+              filterBarProps.onSearchChange(value);
+            }}
+          />
         </View>
       )}
 
       {/* Botão Contextual Flutuante: Buscar Nesta Área (só aparece se moveu a câmera ou se área estiver ativa) */}
-      {!effectiveListView && (hasMovedCamera || areaOnly) && (
+      {mapAvailable && panelIndex === 0 && (hasMovedCamera || areaOnly) && (
         <View style={[styles.contextualAreaPillContainer, { top: headerHeight + spacing.xs }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={areaOnly ? 'Voltar à área escolhida' : 'Buscar nesta área'}
-            style={({ pressed }) => [styles.areaPillButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
+            style={({ pressed }) => [styles.areaPillButton, { backgroundColor: colors.surfaceFloating }, pressed && styles.buttonPressed]}
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               if (areaOnly) { setAreaOnly(false); setAppliedBounds(null); setHasMovedCamera(false); }
@@ -230,8 +337,8 @@ export function TerritoryContent() {
       )}
 
       {/* Dock Vertical Direita: Controles Rápidos do Mapa (Posição e Enquadrar) */}
-      {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
-        <View style={[styles.rightMapDock, { bottom: floatBottom + summaryHeight + spacing.sm }]}>
+      {mapAvailable && !keyboardVisible && panelIndex === 0 && !selectedEntry && selectedClusterEntries.length === 0 && (
+        <View style={[styles.rightMapDock, { bottom: floatBottom + collapsedPanelHeight + spacing.sm }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Minha posição"
@@ -242,7 +349,7 @@ export function TerritoryContent() {
               setHasMovedCamera(false);
               void locate();
             }}
-            style={({ pressed }) => [styles.dockCircleButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
+            style={({ pressed }) => [styles.dockCircleButton, { backgroundColor: colors.surfaceFloating }, pressed && styles.buttonPressed]}
           >
             <Ionicons name="locate" size={layout.iconSize.md} color={locating ? colors.accent : colors.ink} />
           </Pressable>
@@ -262,118 +369,90 @@ export function TerritoryContent() {
               setSelectedCluster(null);
               setHasMovedCamera(false);
             }}
-            style={({ pressed }) => [styles.dockCircleButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
+            style={({ pressed }) => [styles.dockCircleButton, { backgroundColor: colors.surfaceFloating }, pressed && styles.buttonPressed]}
           >
             <Ionicons name="expand-outline" size={layout.iconSize.md} color={colors.ink} />
           </Pressable>
         </View>
       )}
 
-      {!effectiveListView && !selectedEntry && selectedClusterEntries.length === 0 && (
-        <View
-          onLayout={(event) => setSummaryHeight(event.nativeEvent.layout.height)}
-          style={[styles.bottomFloatingContainer, { bottom: floatBottom }]}
-        >
-          {/* Barra Contextual de Resultados e Acesso à Lista */}
+      {mapAvailable && selectedEntry && !showCluster && (
+        <TerritoryPreviewCard
+          entry={selectedEntry}
+          onOpen={openEntry}
+          onClose={handleMapClick}
+          bottomOffset={floatBottom}
+        />
+      )}
+
+      {mapAvailable && (
+        <BottomSheet
+          ref={panel}
+          index={0}
+          bottomInset={floatBottom}
+          snapPoints={snapPoints}
+          enableDynamicSizing={false}
+          enableHandlePanningGesture={showCluster}
+          enableContentPanningGesture={showCluster}
+          animateOnMount={false}
+          backgroundStyle={{ backgroundColor: showCluster ? colors.surfaceFloating : colors.transparent }}
+          handleIndicatorStyle={{ backgroundColor: colors.muted }}
+          onChange={(index) => {
+            if (index < 0) return;
+            setPanelIndex(index);
+            if (showCluster && index === 0) {
+              handleMapClick();
+            }
+          }}
+          handleComponent={showCluster ? undefined : selectedEntry ? null : () => (
+            <View style={styles.summaryInset} onLayout={(event) => setSummaryHeight(event.nativeEvent.layout.height)}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`${summaryLabel}. ${summarySubLabel}`}
+            accessibilityLabel={`Ver lista. ${summaryLabel}`}
+            accessibilityHint={summarySubLabel}
             accessibilityLiveRegion="polite"
             onPress={() => {
+              Keyboard.dismiss();
+              setSearchFocusRequest(undefined);
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setIsListView(true);
+              restoreListOffsetRef.current = true;
+              router.setParams({ territoryResults: 'list' });
             }}
-            style={({ pressed }) => [styles.summaryBarButton, { backgroundColor: colors.surface }, pressed && styles.buttonPressed]}
+            style={({ pressed }) => [styles.summaryBarButton, pressed && styles.buttonPressed]}
           >
-            <View style={[styles.summaryIconCircle, { backgroundColor: colors.surfaceSubdued }]}>
-              <Ionicons name="list-outline" size={layout.iconSize.md} color={colors.onSurfaceBrand} />
-            </View>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <AppText variant="label" numberOfLines={2} maxFontSizeMultiplier={1.3} style={styles.summaryTitle}>{summaryLabel}</AppText>
-              <AppText variant="caption" color="muted" numberOfLines={2} maxFontSizeMultiplier={1.3} style={styles.summarySubtitle}>{summarySubLabel}</AppText>
+              <AppText variant="label" style={styles.summaryTitle}>
+                Ver lista · {summaryLabel}
+              </AppText>
+              <AppText variant="caption" color="muted" style={styles.summarySubtitle}>{summarySubLabel}</AppText>
             </View>
             <Ionicons name="chevron-forward" size={layout.iconSize.md} color={colors.muted} />
           </Pressable>
 
-          {facilityPagination?.hasMore && (
-            <FacilityLoadMoreButton
-              label={facilityPagination.label}
-              loadedCount={facilityPagination.loadedCount}
-              totalKnown={facilityPagination.totalKnown}
-              isFetching={facilityPagination.isFetchingNextPage}
-              onPress={facilityPagination.fetchNextPage}
+            </View>
+          )}
+        >
+          {showCluster && (
+            <TerritoryClusterList
+              key={clusterCell ? `cell:${clusterCell.key}:${clusterCell.latitude}:${clusterCell.longitude}` : selectedCluster?.ids.join(',')}
+              entries={clusterEntries}
+              offline={offline}
+              total={clusterCell?.count ?? selectedClusterEntries.length}
+              loading={Boolean(clusterCell && clusterCalls.isLoading)}
+              loadingMore={Boolean(clusterCell && clusterCalls.isFetchingNextPage)}
+              error={Boolean(clusterCell && clusterCalls.isError)}
+              onOpen={openEntry}
+              onClose={handleMapClick}
+              onLoadMore={!offline && clusterCell && clusterCalls.hasNextPage && !clusterCalls.isFetching
+                ? () => { void clusterCalls.fetchNextPage(); }
+                : undefined}
+              onRetry={() => { void clusterCalls.refetch(); }}
             />
           )}
-        </View>
+        </BottomSheet>
       )}
-
-      {!effectiveListView && selectedClusterEntries.length > 1 && (
-        <TerritoryClusterCarousel
-          entries={selectedClusterEntries}
-          onOpen={openEntry}
-          onClose={() => setSelectedCluster(null)}
-          onZoomCluster={() => {
-            if (selectedCluster) {
-              const targetLat = selectedCluster.latitude;
-              const targetLng = selectedCluster.longitude;
-              setSelectedCluster(null);
-              updateCameraRegion((curr) => ({
-                ...curr,
-                latitude: targetLat,
-                longitude: targetLng,
-                zoom: Math.max(16, Math.min(18, (curr.zoom ?? 14) + 2)),
-              }));
-            }
-          }}
-          bottomOffset={floatBottom}
-        />
-      )}
-
-      {!effectiveListView && selectedClusterEntries.length === 1 && (
-        <TerritoryPreviewCard
-          entry={selectedClusterEntries[0]}
-          onOpen={openEntry}
-          onClose={() => setSelectedCluster(null)}
-          bottomOffset={floatBottom}
-        />
-      )}
-
-      {!effectiveListView && selectedClusterEntries.length === 0 && selectedEntry && (
-        <TerritoryPreviewCard
-          entry={selectedEntry}
-          onOpen={openEntry}
-          onClose={() => {
-            setSelectedId(null);
-            if (focusId) router.setParams({ focusId: undefined });
-          }}
-          bottomOffset={floatBottom}
-        />
-      )}
-
-      {effectiveListView && (
-        <TerritoryListView
-          locationPrompt={waitingForLocation ? { onUseLocation: () => { void locate(); } } : undefined}
-          visible={isFocused}
-          asSheet={mapAvailable}
-          onClose={() => setIsListView(false)}
-          listRef={listRef}
-          listOffsetRef={listOffsetRef}
-          restoreListOffsetRef={restoreListOffsetRef}
-          listed={listed} unlocatedCount={unlocated.length} areaOnly={areaOnly}
-          layers={layers} totalCalls={totalCalls} hasMoreCalls={hasMoreCalls}
-          dataReady={dataReady} refreshing={refreshing}
-          onRefresh={() => { void refreshAll(); }} onOpenEntry={openEntry}
-          onLocateEntry={mapAvailable ? handleLocateEntry : undefined} onResetFilters={resetFilters}
-          officialQuery={{
-            isLoading: officialCalls.isLoading, isFetching: officialCalls.isFetching,
-            isFetchingNextPage: officialCalls.isFetchingNextPage, error: officialCalls.error,
-            fetchStatus: officialCalls.fetchStatus, refetch: () => { void officialCalls.refetch(); },
-            fetchNextPage: () => { void officialCalls.fetchNextPage(); },
-          }}
-          facilityPagination={facilityPagination}
-          filterBarProps={filterBarProps}
-        />
-      )}
+      </View>
+      {(!mapAvailable || resultsOpen) && territoryList}
 
       <TerritoryFilterModal
         visible={filtersOpen}
@@ -391,17 +470,17 @@ export function TerritoryContent() {
         periodOptions={TERRITORY_PERIOD_OPTIONS}
         onPeriodChange={(value) => { setPeriod(value); router.setParams({ startDate: undefined, endDate: undefined }); setSelectedId(null); }}
         areaOnly={areaOnly}
-        totalCalls={totalCalls}
       />
-    </View>
+      </View>
+    </Animated.View>
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.canvas },
     loadingPill: {
-      ...elevation.floating,
+      ...elevation?.floating,
       position: 'absolute', alignSelf: 'center', flexDirection: 'row', alignItems: 'center',
       gap: 8, backgroundColor: colors.floatingInk, paddingHorizontal: 14, paddingVertical: 8,
       borderRadius: layout.radius.control, zIndex: 40,
@@ -412,19 +491,21 @@ const createStyles = (colors: ThemeColors) =>
     rightMapDock: { position: 'absolute', right: spacing.md, zIndex: 40, gap: 10 },
     bottomFloatingContainer: { position: 'absolute', left: spacing.md, right: spacing.md, zIndex: 40, gap: 8 },
     dockCircleButton: {
-      ...elevation.floating,
-      width: layout.touchTarget.minWidth, height: layout.touchTarget.minHeight, borderRadius: layout.radius.panel, alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
+      ...elevation?.floating,
+      width: layout.touchTarget.minWidth, height: layout.touchTarget.minHeight, borderRadius: layout.radius.panel, alignItems: 'center', justifyContent: 'center',
     },
     areaPillButton: {
-      ...elevation.floating,
+      ...elevation?.floating,
       flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: layout.touchTarget.minHeight, paddingHorizontal: spacing.md,
-      borderRadius: layout.radius.control, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border,
+      borderRadius: layout.radius.control,
     },
     summaryBarButton: {
+      ...elevation?.floating,
+      backgroundColor: colors.surfaceFloating,
       flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.sm + 4,
-      paddingVertical: 10, borderRadius: layout.radius.card, borderWidth: 1, borderColor: colors.border,
+      paddingVertical: 10, borderRadius: layout.radius.card,
     },
-    summaryIconCircle: { width: 36, height: 36, borderRadius: layout.radius.panel, alignItems: 'center', justifyContent: 'center' },
+    summaryInset: { marginHorizontal: spacing.md },
     summaryTitle: { fontSize: fontSizes.meta, fontWeight: '600' },
     summarySubtitle: { fontSize: fontSizes.caption },
     buttonPressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },

@@ -1,19 +1,27 @@
-import React from 'react';
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
+import { ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AppButton } from '@/components/ui/AppButton';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppText } from '@/components/ui/AppText';
-import { useTheme } from '@/theme';
+import { spacing } from '@/theme/spacing';
+
 export default function NotFound() {
-  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+
   return (
-    <AppScreen scroll>
-      <AppText variant="screenTitle">Página não encontrada</AppText>
-      <AppText>
-        O endereço não está disponível. Volte ao início para continuar.
-      </AppText>
-      <Link href="/(tabs)" style={{ paddingVertical: 24, color: colors.accent }}>
-        Voltar ao início
-      </Link>
+    <AppScreen>
+      <ScrollView contentContainerStyle={{ padding: spacing.contentPadding, gap: spacing.sm }}>
+        <AppText variant="screenTitle" accessibilityRole="header">
+          Página indisponível
+        </AppText>
+        <AppText color="muted">
+          Você pode continuar explorando os chamados e serviços no mapa.
+        </AppText>
+      </ScrollView>
+      <View style={{ paddingHorizontal: spacing.contentPadding, paddingBottom: Math.max(insets.bottom, spacing.md) }}>
+        <AppButton title="Abrir o mapa" onPress={() => router.replace('/(tabs)')} />
+      </View>
     </AppScreen>
   );
 }

@@ -4,14 +4,13 @@ import {
   OnboardingGate,
   useOnboardingInitialization,
 } from '@/features/onboarding/OnboardingGate';
-import { useTheme, useThemeInitialization } from '@/theme/useTheme';
+import { useTheme } from '@/theme/useTheme';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
 import React, { useEffect, useRef } from 'react';
 import {
   router,
   useNavigationContainerRef,
-  useSegments,
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
@@ -73,7 +72,6 @@ function RootLayout() {
     if (monitoringEnabled) navigationIntegration.registerNavigationContainer(navigationRef);
   }, [navigationRef]);
   const { colors, isDark } = useTheme();
-  const themeReady = useThemeInitialization();
   const onboardingReady = useOnboardingInitialization();
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(colors.canvas).catch(() => undefined);
@@ -86,7 +84,6 @@ function RootLayout() {
     InstrumentSans_700Bold,
   });
   const { isReady, isAuthenticated, initialize, user } = useAuthStore(useShallow((s) => ({ isReady: s.isReady, isAuthenticated: s.isAuthenticated, initialize: s.initialize, user: s.user })));
-  const segments: readonly string[] = useSegments();
   useEffect(() => {
     void initialize();
   }, [initialize]);
@@ -121,7 +118,7 @@ function RootLayout() {
     user?.neighborhood,
   ]);
   const appReady =
-    themeReady && onboardingReady && isReady && (fontsLoaded || Boolean(fontError));
+    onboardingReady && isReady && (fontsLoaded || Boolean(fontError));
   // Toque num aviso, inclusive o que abriu o app: só navega depois que as telas
   // existem (antes, um toque com o app fechado podia se perder).
   const lastResponse = Notifications.useLastNotificationResponse();
@@ -133,7 +130,7 @@ function RootLayout() {
     handledResponse.current = id;
     const callId = lastResponse.notification.request.content.data?.callId;
     if (typeof callId === 'string' && callId)
-      router.push({ pathname: '/(tabs)/TerritoryScreen', params: { focusId: callId } });
+      router.push({ pathname: '/calls/[id]', params: { id: callId } });
   }, [appReady, lastResponse]);
   useEffect(() => {
     if (appReady) {
@@ -166,7 +163,7 @@ function RootLayout() {
                   <CitizenStack authenticated={isAuthenticated} backgroundColor={colors.canvas} />
                 </AppDrawer>
                 <SignOutSheet />
-                <OnboardingGate enabled={segments[0] !== 'OnboardingScreen'} />
+                <OnboardingGate />
                 <AnimatedBrandSplash />
               </PersistQueryClientProvider>
             </BottomSheetModalProvider>
@@ -177,4 +174,4 @@ function RootLayout() {
   );
 }
 
-export default Sentry.wrap(RootLayout);
+export default monitoringEnabled ? Sentry.wrap(RootLayout) : RootLayout;

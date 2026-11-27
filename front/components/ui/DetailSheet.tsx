@@ -14,6 +14,7 @@ import {
   useWindowDimensions,
   RefreshControl,
 } from 'react-native';
+import Reanimated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +24,12 @@ import { AppText } from './AppText';
 
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
+import { motion as motionTokens } from '@/theme/motion';
+
+const disclosureTiming = {
+  duration: motionTokens.disclosureDuration,
+  easing: Easing.bezier(...motionTokens.settle),
+};
 
 /** Attached, non-modal detail panel: dragging the handle leaves the photo visible.
  * A modal BottomSheet would dim/occlude that photo and interrupt this full-page task.
@@ -182,6 +189,19 @@ export function DetailSection({
   const styles = useThemedStyles(createStyles);
 
   const [open, setOpen] = useState(true);
+  const reduced = useReducedMotion();
+  const [contentHeight, setContentHeight] = useState<number>();
+  const progress = useSharedValue(1);
+  const bodyStyle = useAnimatedStyle(() => ({
+    height: contentHeight === undefined ? undefined : contentHeight * progress.get(),
+  }));
+  const chevronStyle = useAnimatedStyle(() => ({
+    transform: [{ scaleY: 1 - 2 * progress.get() }],
+  }));
+  useEffect(() => {
+    const target = open ? 1 : 0;
+    progress.set(reduced ? target : withTiming(target, disclosureTiming));
+  }, [open, progress, reduced]);
   return (
     <View style={styles.section}>
       <Pressable
@@ -195,13 +215,23 @@ export function DetailSection({
         <AppText variant="sectionTitle" style={{ flex: 1 }}>
           {title}
         </AppText>
-        <Ionicons
-          name={open ? 'chevron-up' : 'chevron-down'}
-          size={layout.iconSize.md}
-          color={colors.ink}
-        />
+        <Reanimated.View style={chevronStyle} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          <Ionicons name="chevron-down" size={layout.iconSize.md} color={colors.ink} />
+        </Reanimated.View>
       </Pressable>
-      {open && <View style={{ gap: spacing.sm }}>{children}</View>}
+      <Reanimated.View
+        style={[styles.disclosureBody, bodyStyle]}
+        pointerEvents={open ? 'auto' : 'none'}
+        accessibilityElementsHidden={!open}
+        importantForAccessibility={open ? 'auto' : 'no-hide-descendants'}
+      >
+        <View
+          style={styles.disclosureContent}
+          onLayout={({ nativeEvent }) => setContentHeight(nativeEvent.layout.height)}
+        >
+          {children}
+        </View>
+      </Reanimated.View>
     </View>
   );
 }
@@ -277,6 +307,8 @@ class SheetMotion {
 
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
+    disclosureBody: { overflow: 'hidden' },
+    disclosureContent: { flexShrink: 0, gap: spacing.sm },
     stage: { flex: 1, overflow: 'hidden' },
     hero: { width: '100%' },
     backArea: {

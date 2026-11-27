@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spatialFeatures, spatialSelection } from '../features/territory/spatialFeatures.ts';
+import { belongsToSpatialCluster, spatialFeatures, spatialSelection } from '../features/territory/spatialFeatures.ts';
 test('spatial cells preserve full counts instead of reclustering cells as individual calls', () => {
   const shape = spatialFeatures([{ key: '1:1', id: null, count: 600, latitude: -22.9, longitude: -43.2, north: -22.8, south: -23, east: -43, west: -43.3 }]);
   assert.equal(shape.features.length, 1);
@@ -24,4 +24,18 @@ test('singleton selection preserves the call id; empty map taps do nothing', () 
     north: -22.9, south: -22.9, east: -43.2, west: -43.2 };
   assert.deepEqual(spatialSelection({ properties: cell }), cell);
   assert.equal(spatialSelection(undefined), null);
+});
+
+test('a nearby call inside the envelope is excluded when it belongs to no selected cell', () => {
+  const selection = {
+    key: 'cluster:8', id: null, count: 2, longitude: -43.5, latitude: -23,
+    north: -22.8, south: -23.2, east: -43.2, west: -43.8,
+    members: [
+      { north: -22.8, south: -22.9, east: -43.2, west: -43.3 },
+      { north: -23.1, south: -23.2, east: -43.7, west: -43.8 },
+    ],
+  };
+  assert.equal(belongsToSpatialCluster({ latitude: -23, longitude: -43.5 }, selection), false);
+  assert.equal(belongsToSpatialCluster({ latitude: -22.9, longitude: -43.3 }, selection), true);
+  assert.equal(belongsToSpatialCluster({ latitude: null, longitude: -43.3 }, selection), false);
 });

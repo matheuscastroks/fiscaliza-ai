@@ -15,23 +15,24 @@ import { spacing, layout, useTheme } from '@/theme';
 import { formatRadius, getPlaceIcon } from '@/features/places/placeDisplay';
 
 export default function PlacesScreen() {
-  const { colors, isDark } = useTheme();
+  const { colors, elevation } = useTheme();
   const state = usePlacesStore();
   const [editing, setEditing] = useState<string | null>(null);
   const [removing, setRemoving] = useState<string | null>(null);
 
   return (
-    <AppScreen>
+    <AppScreen edges={['top', 'bottom', 'left', 'right']}>
       <AppHeader title="Meus lugares" onBack={() => goBack()} />
       <KeyboardAwareScrollView
+        style={styles.flex}
         contentContainerStyle={{
           padding: spacing.contentPadding,
-          paddingBottom: 120,
+          paddingBottom: editing !== null ? spacing.xxxl : spacing.lg,
           gap: spacing.lg,
         }}
       >
         <AppText color="muted">
-          Guarde lugares como Casa ou Trabalho para ver rápido os chamados perto deles. Os dados ficam salvos localmente neste celular.
+          Guarde lugares como Casa ou Trabalho para ver rápido os chamados perto deles. Os lugares ficam só neste celular.
         </AppText>
 
         {!state.hydrated ? (
@@ -45,24 +46,13 @@ export default function PlacesScreen() {
           />
         ) : (
           <>
-            <AppButton
-              title="Adicionar novo lugar"
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setEditing('new');
-              }}
-            />
-
             {!state.places.length && (
               <View
-                style={[
-                  styles.emptyCard,
-                  { backgroundColor: colors.surface, borderColor: colors.border },
-                ]}
+                style={styles.emptyCard}
               >
                 <Ionicons name="location-outline" size={layout.iconSize.lg} color={colors.muted} />
                 <AppText variant="sectionTitle" style={{ textAlign: 'center' }}>
-                  Nenhum lugar cadastrado
+                  Nenhum lugar salvo
                 </AppText>
                 <AppText color="muted" style={{ textAlign: 'center' }}>
                   Salve um lugar para acompanhar iluminação, buracos e limpeza perto de casa ou do trabalho.
@@ -81,34 +71,25 @@ export default function PlacesScreen() {
                   key={place.id}
                   style={[
                     styles.placeCard,
-                    { backgroundColor: colors.surface, borderColor: colors.border },
+                    elevation.subtle,
+                    { backgroundColor: colors.surface },
                   ]}
                 >
                   <View style={styles.cardHeader}>
                     <View
                       style={[
                         styles.iconCircle,
-                        { backgroundColor: isDark ? colors.surfaceSubdued : colors.surfaceSubdued },
+                        { backgroundColor: colors.surfaceRecessed },
                       ]}
                     >
                       <Ionicons name={icon} size={layout.iconSize.md} color={colors.onSurfaceBrand} />
                     </View>
                     <View style={styles.headerInfo}>
-                      <AppText variant="sectionTitle" numberOfLines={1}>
+                      <AppText variant="sectionTitle" accessibilityRole="header">
                         {place.name}
                       </AppText>
-                      <AppText variant="caption" color="muted" numberOfLines={1}>
-                        {locationDesc}
-                      </AppText>
-                    </View>
-                    <View
-                      style={[
-                        styles.radiusBadge,
-                        { backgroundColor: isDark ? colors.surfaceSubdued : colors.surfaceSubdued, borderColor: colors.border },
-                      ]}
-                    >
-                      <AppText variant="caption" style={{ fontWeight: '600', color: colors.onSurfaceBrand }}>
-                        {radiusLabel}
+                      <AppText variant="caption" color="muted">
+                        {locationDesc} · Raio de {radiusLabel}
                       </AppText>
                     </View>
                   </View>
@@ -154,7 +135,8 @@ export default function PlacesScreen() {
                     <View
                       style={[
                         styles.removalBox,
-                        { backgroundColor: isDark ? colors.surfaceSubdued : colors.surfaceSubdued, borderColor: colors.border },
+                        elevation.recessed,
+                        { backgroundColor: colors.surfaceRecessed },
                       ]}
                     >
                       <AppText variant="caption">
@@ -196,6 +178,18 @@ export default function PlacesScreen() {
           </AppText>
         )}
       </KeyboardAwareScrollView>
+      {state.hydrated && editing === null && removing === null && (
+        <View style={{ paddingHorizontal: spacing.contentPadding, paddingVertical: spacing.sm }}>
+          <AppButton
+            title="Adicionar novo lugar"
+            disabled={state.busy}
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setEditing('new');
+            }}
+          />
+        </View>
+      )}
     </AppScreen>
   );
 }
@@ -203,7 +197,6 @@ export default function PlacesScreen() {
 const styles = StyleSheet.create({
   placeCard: {
     borderRadius: layout.radius.card,
-    borderWidth: 1,
     padding: spacing.md,
     gap: spacing.md,
   },
@@ -223,12 +216,6 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
-  radiusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: layout.radius.control,
-    borderWidth: 1,
-  },
   actionsRow: {
     flexDirection: 'row',
     gap: spacing.sm,
@@ -239,13 +226,11 @@ const styles = StyleSheet.create({
   removalBox: {
     padding: spacing.md,
     borderRadius: layout.radius.card,
-    borderWidth: 1,
     gap: spacing.sm,
   },
   emptyCard: {
     padding: spacing.xl,
     borderRadius: layout.radius.card,
-    borderWidth: 1,
     alignItems: 'center',
     gap: spacing.sm,
   },

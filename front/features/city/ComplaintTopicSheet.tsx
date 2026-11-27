@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
+import type { ElevationTokens } from '@/theme/elevation';
 import { spacing, layout } from '@/theme';
 import {
   AppBottomSheetModal,
@@ -89,7 +90,7 @@ export function ComplaintTopicSheet({
   selectedTopicId,
   onSelectTopic,
 }: ComplaintTopicSheetProps) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const styles = useThemedStyles(createStyles);
 
   const handleSelect = (topicId: string) => {
@@ -117,7 +118,7 @@ export function ComplaintTopicSheet({
         <View
           style={[
             styles.insetTable,
-            { backgroundColor: colors.surface, borderColor: colors.border },
+            { backgroundColor: colors.surface },
           ]}
         >
           {COMPLAINT_TOPICS.map((topic, index) => {
@@ -126,7 +127,7 @@ export function ComplaintTopicSheet({
               <React.Fragment key={topic.id}>
                 {index > 0 && (
                   <View
-                    style={[styles.tableDivider, { backgroundColor: colors.divider }]}
+                    style={[styles.tableDivider, { backgroundColor: colors.dividerSubtle }]}
                   />
                 )}
                 <Pressable
@@ -136,7 +137,7 @@ export function ComplaintTopicSheet({
                   onPress={() => handleSelect(topic.id)}
                   style={({ pressed }) => [
                     styles.topicRow,
-                    isSelected && { backgroundColor: colors.surfaceSubdued },
+                    isSelected && { backgroundColor: isDark ? colors.surfaceRaised : colors.surfaceSubdued },
                     pressed && { opacity: 0.75 },
                   ]}
                 >
@@ -189,7 +190,7 @@ export function ComplaintTopicSheet({
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
   StyleSheet.create({
     scrollContent: {
       paddingHorizontal: spacing.contentPadding,
@@ -203,8 +204,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     insetTable: {
       borderRadius: layout.radius.panel,
-      borderWidth: StyleSheet.hairlineWidth,
-      overflow: 'hidden',
+      ...elevation?.subtle,
     },
     tableDivider: {
       height: StyleSheet.hairlineWidth,

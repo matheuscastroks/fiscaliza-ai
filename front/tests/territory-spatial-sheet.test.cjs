@@ -5,14 +5,13 @@ const path = require('node:path');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 
-test('territory sheet: uses 3-tier spatial snap points (half, expanded, full)', () => {
+test('territory results: uses a virtualized full-screen list with map entry navigation', () => {
   const listViewPath = path.join(ROOT_DIR, 'components', 'territory', 'TerritoryListView.tsx');
   assert.ok(fs.existsSync(listViewPath), 'TerritoryListView.tsx must exist');
 
   const content = fs.readFileSync(listViewPath, 'utf8');
-  assert.ok(content.includes("snapPoints={['48%', '75%', '92%']}"), 'Must configure half, expanded and full snap points');
-  assert.ok(content.includes('backdropOpacity={0.16}'), 'Must maintain subtle map backdrop visibility');
-  assert.ok(content.includes('BottomSheetFlatList'), 'Must use BottomSheetFlatList for smooth gesture scrolling');
+  assert.ok(content.includes('<FlatList<Entry>'), 'Must virtualize the results');
+  assert.ok(!content.includes('BottomSheetFlatList'), 'Results must sit outside the map sheet');
   assert.ok(content.includes('onLocateEntry'), 'Must support locating entries directly onto the map');
 });
 

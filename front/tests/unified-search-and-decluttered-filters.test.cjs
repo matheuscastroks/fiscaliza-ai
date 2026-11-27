@@ -108,7 +108,7 @@ test('decluttered filter modal: removes duplicate geographical selectors and ado
   );
 });
 
-test('place selector bottom sheet: adopts Apple Inset-Grouped table design and smooth scroll', () => {
+test('place selector: prioritizes neighborhood search and groups secondary actions', () => {
   const placeSelectorPath = path.join(ROOT_DIR, 'features', 'places', 'PlaceSelector.tsx');
   const content = ['PlaceSelector.tsx', 'PlaceSelectorSheet.tsx', 'PlaceSelector.styles.ts']
     .map((name) => fs.readFileSync(path.join(path.dirname(placeSelectorPath), name), 'utf8'))
@@ -118,30 +118,10 @@ test('place selector bottom sheet: adopts Apple Inset-Grouped table design and s
     content.includes('BottomSheetScrollView'),
     'PlaceSelector bottom sheet must use BottomSheetScrollView for smooth scrolling',
   );
-  assert.ok(
-    content.includes('heroScopeCard'),
-    'Must render heroScopeCard showing active scope and undo area trigger',
-  );
-  assert.ok(
-    content.includes('insetGroupCard'),
-    'Must group actions in Apple-style insetGroupCard containers',
-  );
-  assert.ok(
-    content.includes('insetRow'),
-    'Must format items as interactive insetRow elements with icons and descriptions',
-  );
-  assert.ok(
-    content.includes('filterFormContainer'),
-    'PlaceSelector must use filterFormContainer matching TerritoryFilterBar architecture',
-  );
-  assert.ok(
-    content.includes('sectionHeaderRow'),
-    'PlaceSelector must use sectionHeaderRow with icon and uppercase label',
-  );
-  assert.ok(
-    content.includes('sectionDivider'),
-    'PlaceSelector must use sectionDivider between logical sections',
-  );
+  assert.ok(content.indexOf('triggerLabel="Buscar bairro"') < content.indexOf('title="Outras áreas"'));
+  assert.ok(content.includes('Área em uso'));
+  assert.ok(content.includes('title="Voltar à área escolhida"'));
+  assert.ok(content.includes('tone="recessed" elevation="recessed"'));
 });
 
 test('territory screen: respects architecture constraints and line ceiling', () => {

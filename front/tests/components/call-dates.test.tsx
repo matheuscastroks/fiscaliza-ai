@@ -9,6 +9,13 @@ it('mostra datas publicadas e omite diagnóstico e encerramento ausentes', async
   expect(screen.getByText('Data de abertura')).toBeTruthy();
   expect(screen.getByText('Prazo estimado')).toBeTruthy();
   expect(screen.queryByText('Previsão de diagnóstico')).toBeNull();
+  expect(screen.queryByText('Diagnóstico realizado')).toBeNull();
   expect(screen.queryByText('Data de encerramento')).toBeNull();
   expect(screen.queryByText('Prazo da Carta de Serviços')).toBeNull();
+});
+
+it('mostra a data real do diagnóstico quando a fonte publica', async () => {
+  const item = { openedAt: '2026-10-01T10:00:00Z', targetDate: null, closedAt: null, diagnosisTargetDate: null, diagnosedAt: '2026-10-03T14:00:00Z' } as OfficialCall;
+  await render(<OfficialCallDates item={item} slaLabel={null} deadlineInfo={null} />);
+  expect(screen.getByText('Diagnóstico realizado')).toBeTruthy();
 });

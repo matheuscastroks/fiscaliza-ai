@@ -1,5 +1,5 @@
 import { useTheme } from '@/theme/useTheme';
-import { Pressable, TextInput, View } from 'react-native';
+import { Keyboard, Pressable, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from './AppText';
 import { spacing } from '@/theme';
@@ -8,6 +8,7 @@ import { fontFamilies, fontSizes } from '@/theme/typography';
 import { layout } from '@/theme/layout';
 
 export interface CitySearchProps {
+  floating?: boolean;
   value?: string;
   onChangeText?: (text: string) => void;
   onPress?: () => void;
@@ -26,6 +27,9 @@ export interface CitySearchProps {
    * (ex.: bairro) ter a largura toda; ao tocar, o campo ocupa o lugar dele.
    */
   searchCollapsed?: boolean;
+  autoFocus?: boolean;
+  searchLabel?: string;
+  searchPlaceholder?: string;
   onExpandSearch?: () => void;
   onCollapseSearch?: () => void;
 }
@@ -45,10 +49,14 @@ export function CitySearch({
   filterCount = 0,
   leftElement,
   searchCollapsed,
+  autoFocus = false,
+  searchLabel = 'Buscar',
+  searchPlaceholder,
   onExpandSearch,
   onCollapseSearch,
+  floating = false,
 }: CitySearchProps) {
-  const { colors, mode } = useTheme();
+  const { colors, elevation, mode } = useTheme();
 
   const handleAction = onAction ?? onFilters;
   const resolvedIcon =
@@ -73,15 +81,14 @@ export function CitySearch({
     <View
       style={{
         minHeight: layout.touchTarget.minHeight + 4,
-        backgroundColor: colors.surface,
+        backgroundColor: floating ? colors.surfaceFloating : colors.surfaceRecessed,
+        ...(floating ? elevation.floating : elevation.recessed),
         borderRadius: layout.radius.card,
         paddingLeft: leftElement ? 2 : spacing.md,
         paddingRight: 3,
         flexDirection: 'row',
         alignItems: 'center',
         gap: spacing.xxs,
-        borderWidth: 1,
-        borderColor: colors.border,
       }}
     >
       {showLeft && <View style={{ flex: 1, minWidth: 0 }}>{leftElement}</View>}
@@ -89,7 +96,10 @@ export function CitySearch({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Fechar busca"
-          onPress={onCollapseSearch}
+          onPress={() => {
+            Keyboard.dismiss();
+            onCollapseSearch?.();
+          }}
           style={iconButton}
         >
           <Ionicons name="arrow-back" size={layout.iconSize.md} color={colors.ink} />
@@ -99,7 +109,7 @@ export function CitySearch({
       {collapsible && searchCollapsed && (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Buscar chamado ou serviço"
+          accessibilityLabel={searchLabel}
           onPress={onExpandSearch}
           style={iconButton}
         >
@@ -108,10 +118,10 @@ export function CitySearch({
       )}
       {showInput && onChangeText ? (
         <TextInput
-          accessibilityLabel="Buscar"
+          accessibilityLabel={searchLabel}
           keyboardAppearance={mode}
-          autoFocus={collapsible}
-          placeholder={leftElement ? 'Assunto ou protocolo' : 'Buscar por protocolo, assunto ou bairro…'}
+          autoFocus={autoFocus}
+          placeholder={searchPlaceholder ?? (leftElement ? 'Assunto ou protocolo' : 'Buscar por protocolo, assunto ou bairro…')}
           value={value}
           onChangeText={onChangeText}
           placeholderTextColor={colors.muted}
@@ -149,19 +159,19 @@ export function CitySearch({
       {handleAction && (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={filterCount > 0 ? `${resolvedLabel}, ${filterCount} ativos` : resolvedLabel}
-          accessibilityState={{ expanded: expanded || Boolean(actionActive) }}
-          aria-expanded={expanded || Boolean(actionActive)}
+          accessibilityLabel={filterCount > 0 ? `${resolvedLabel}, ${filterCount} ${filterCount === 1 ? 'ativo' : 'ativos'}` : resolvedLabel}
+          accessibilityState={{ expanded }}
+          aria-expanded={expanded}
           onPress={handleAction}
           style={{
             ...iconButton,
-            backgroundColor: isActionActive ? colors.accent : colors.ink,
+            backgroundColor: isActionActive ? colors.primaryContainer : colors.surfaceSubdued,
           }}
         >
           <Ionicons
             name={resolvedIcon}
             size={layout.iconSize.md}
-            color={colors.onAccent}
+            color={isActionActive ? colors.onPrimaryContainer : colors.ink}
           />
           {filterCount > 0 && (
             <View
@@ -172,9 +182,8 @@ export function CitySearch({
                 minWidth: 17,
                 height: 17,
                 borderRadius: layout.radius.sm,
-                backgroundColor: colors.surface,
-                borderWidth: 1,
-                borderColor: colors.border,
+                backgroundColor: colors.surfaceFloating,
+                ...elevation.raised,
                 alignItems: 'center',
                 justifyContent: 'center',
               }}

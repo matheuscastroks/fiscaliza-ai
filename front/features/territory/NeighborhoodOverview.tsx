@@ -4,7 +4,8 @@ import { router } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
-import { useTheme } from '@/theme/useTheme';
+import { InsetGroup, ListRow } from '@/components/ui/ListRow';
+import { spacing } from '@/theme/spacing';
 import type { NeighborhoodOverview as Overview } from '@/shared/public-data';
 import { facilityLabels } from './selectors';
 import {
@@ -15,15 +16,21 @@ import {
   dayLabel,
 } from './evidence';
 import { Provenance } from './Provenance';
-import { layout } from '@/theme/layout';
+const serviceCategories = [
+  { category: 'school', sourceId: 'siurb-schools' },
+  { category: 'health', sourceId: 'siurb-health' },
+  { category: 'square', sourceId: 'siurb-squares' },
+] as const;
 export function NeighborhoodOverview({
   data,
+  updatingPeriod,
   onDates,
 }: {
   data: Overview;
+  updatingPeriod: boolean;
   onDates: (dates: { startDate: string; endDate: string }) => void;
 }) {
-  const { colors } = useTheme();
+  const [showSources, setShowSources] = useState(false);
   const [startDate, setStart] = useState(data.calls.requestedStart);
   const [endDate, setEnd] = useState(data.calls.requestedEnd);
   const [dateError, setDateError] = useState('');
@@ -34,69 +41,47 @@ export function NeighborhoodOverview({
   const open = (layer: 'official' | 'school' | 'health' | 'square') =>
     router.push({
       pathname: '/(tabs)/TerritoryScreen',
-      params: evidenceScope(data.neighborhood.id, layer, dates),
+      params: {
+        ...evidenceScope(data.neighborhood.id, layer, dates),
+        scopeRequest: String(Date.now()),
+      },
     });
   return (
-    <View style={{ gap: 24 }}>
-      <View style={{ gap: 6 }}>
-        <AppText variant="title">{data.neighborhood.name}</AppText>
-        <AppText color="muted">
-          Serviços públicos e chamados do bairro.
-        </AppText>
-      </View>
-      <View style={{ gap: 12 }}>
-        <AppText variant="sectionTitle">Serviços públicos</AppText>
+    <View style={{ gap: spacing.xl }}>
+      <View style={{ gap: spacing.sm }}>
+        <AppText variant="sectionTitle" accessibilityRole="header">Serviços públicos</AppText>
         <AppText variant="caption" color="muted">
           Cadastros com bairro confirmado. Quantidade não indica capacidade ou
           qualidade do atendimento.
         </AppText>
-        {(['school', 'health', 'square'] as const).map((category) => {
-          const source = data.sources.find(
-            (s) =>
-              s.sourceId ===
-              {
-                school: 'siurb-schools',
-                health: 'siurb-health',
-                square: 'siurb-squares',
-              }[category],
-          );
-          return (
-            <View
+        <InsetGroup>
+          {serviceCategories.map(({ category }) => (
+            <ListRow
               key={category}
-              style={{
-                padding: 18,
-                gap: 10,
-                borderRadius: layout.radius.card,
-                backgroundColor: colors.surface,
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'baseline',
-                  justifyContent: 'space-between',
-                  gap: 10,
-                }}
-              >
-                <AppText variant="label" style={{ flex: 1 }}>
-                  {facilityLabels[category]}
-                </AppText>
-                <AppText variant="sectionTitle">
-                  {countLabel(data.facilityCounts[category])}
-                </AppText>
-              </View>
-              {source && <Provenance source={source} />}
-              <AppButton
-                title={`Explorar ${facilityLabels[category].toLowerCase()}`}
-                variant="secondary"
-                onPress={() => open(category)}
-              />
+              title={facilityLabels[category]}
+              subtitle={countLabel(data.facilityCounts[category])}
+              onPress={() => open(category)}
+            />
+          ))}
+        </InsetGroup>
+        <AppButton
+          title={showSources ? 'Ocultar fontes dos serviços' : 'Ver fontes dos serviços'}
+          variant="quiet"
+          onPress={() => setShowSources((previous) => !previous)}
+        />
+        {showSources && serviceCategories.map(({ category, sourceId }) => {
+          const source = data.sources.find((item) => item.sourceId === sourceId);
+          if (!source) return null;
+          return (
+            <View key={category} style={{ gap: spacing.xxs }}>
+              <AppText variant="label">{facilityLabels[category]}</AppText>
+              <Provenance source={source} />
             </View>
           );
         })}
       </View>
-      <View style={{ gap: 12 }}>
-        <AppText variant="sectionTitle">Chamados do 1746</AppText>
+      <View style={{ gap: spacing.sm }}>
+        <AppText variant="sectionTitle" accessibilityRole="header">Chamados do 1746</AppText>
         <AppText variant="title">{countLabel(data.calls.total)}</AppText>
         <AppText variant="caption" color="muted">
           Período consultado: {periodLabel(dates)}
@@ -134,6 +119,7 @@ export function NeighborhoodOverview({
         <AppButton
           title="Consultar período"
           variant="secondary"
+          loading={updatingPeriod}
           onPress={() => {
             const valid = (v: string) =>
               /^\d{4}-\d{2}-\d{2}$/.test(v) &&
@@ -157,6 +143,7 @@ export function NeighborhoodOverview({
         ))}
         <AppButton
           title="Ver chamados deste período"
+          disabled={updatingPeriod}
           onPress={() => open('official')}
         />
       </View>

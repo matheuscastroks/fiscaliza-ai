@@ -5,7 +5,7 @@ Consolidação das pendências reais extraídas da revisão geral (`docs/histori
 ## 1. Ações Operacionais do Mantenedor
 
 - Configurar credencial ativa do BigQuery (`secrets/bigquery.json`) e `GCP_PROJECT_ID` no ambiente de produção para retomar a sincronização periódica do 1746.
-- Executar `eas init` e registrar o `projectId` do EAS para habilitar notificações push reais em produção.
+- Distribuir em produção um build Android com o `projectId` do EAS quando houver uma nova versão. O projeto `@couks/fiscaliza-ai` está vinculado ao app e a credencial FCM v1 está associada ao pacote Android. O envio por mudança de situação e a abertura do detalhe pelo aviso foram validados no Samsung com dados sintéticos e API isolada.
 - Configurar `SENTRY_DSN` da API e `SENTRY_AUTH_TOKEN` (secret EAS) quando desejado monitoramento remoto de erros.
 - Configurar monitores externos (Healthchecks.io / UptimeRobot) para os pings já emitidos pelo agendador e backup, além de cópia externa periódica de `backups/`.
 - Restringir no Google Cloud a chave Android antiga do Firebase e avaliar oportunamente a eventual troca do identificador de pacote (`com.anonymous.fiscalizaai`).

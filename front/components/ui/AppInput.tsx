@@ -1,6 +1,7 @@
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
-import React, { useRef, useState } from 'react';
+import type { ElevationTokens } from '@/theme/elevation';
+import React, { useState } from 'react';
 import {
   View,
   Pressable,
@@ -14,7 +15,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { spacing } from '@/theme/spacing';
 import { layout } from '@/theme/layout';
 import { AppText } from './AppText';
-import { useKeyboardAwareInput } from './KeyboardAwareScrollView';
 import { fontFamilies , fontSizes } from '@/theme/typography';
 
 
@@ -24,6 +24,7 @@ export interface AppInputProps extends TextInputProps {
   error?: string | null;
   helper?: string;
   containerStyle?: ViewStyle;
+  inputComponent?: React.ComponentType<TextInputProps>;
 }
 
 export const AppInput: React.FC<AppInputProps> = ({
@@ -38,6 +39,7 @@ export const AppInput: React.FC<AppInputProps> = ({
   secureTextEntry = false,
   onFocus,
   onBlur,
+  inputComponent: Input = TextInput,
   ...rest
 }) => {
   const { colors, mode } = useTheme();
@@ -45,18 +47,14 @@ export const AppInput: React.FC<AppInputProps> = ({
 
   const [isFocused, setIsFocused] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const input = useRef<React.ComponentRef<typeof TextInput>>(null);
-  const keyboardScroll = useKeyboardAwareInput();
 
   const handleFocus: NonNullable<TextInputProps['onFocus']> = (e) => {
     setIsFocused(true);
-    if (input.current) keyboardScroll?.focus(input.current);
     onFocus?.(e);
   };
 
   const handleBlur: NonNullable<TextInputProps['onBlur']> = (e) => {
     setIsFocused(false);
-    if (input.current) keyboardScroll?.blur(input.current);
     onBlur?.(e);
   };
 
@@ -72,8 +70,7 @@ export const AppInput: React.FC<AppInputProps> = ({
         </AppText>
       ) : null}
       <View style={styles.inputWrapper}>
-        <TextInput
-          ref={input}
+        <Input
           keyboardAppearance={mode}
           accessibilityLabel={effectiveAccessibilityLabel}
           accessibilityHint={error || helper}
@@ -136,7 +133,7 @@ export const AppInput: React.FC<AppInputProps> = ({
   );
 };
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
   StyleSheet.create({
     container: {
       marginBottom: spacing.md,
@@ -160,9 +157,8 @@ const createStyles = (colors: ThemeColors) =>
       minHeight: 56,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
-      backgroundColor: colors.surface,
-      borderWidth: layout.borderWidth.hairline,
-      borderColor: colors.border,
+      backgroundColor: colors.surfaceRecessed,
+      ...elevation?.recessed,
       borderRadius: layout.radius.button,
       color: colors.ink,
       fontSize: fontSizes.body,
@@ -178,13 +174,17 @@ const createStyles = (colors: ThemeColors) =>
       paddingBottom: spacing.sm + 4,
     },
     inputFocused: {
+      backgroundColor: colors.surface,
+      borderWidth: layout.borderWidth.focus,
       borderColor: colors.borderActive,
     },
     inputError: {
+      borderWidth: layout.borderWidth.focus,
       borderColor: colors.risk,
     },
     inputDisabled: {
       backgroundColor: colors.surfaceSubdued,
+      ...elevation?.none,
       color: colors.muted,
     },
     feedback: {
