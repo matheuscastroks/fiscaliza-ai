@@ -13,8 +13,12 @@ test('call cards: lista e sheet compartilham um único CallSummary com metadados
 
   assert.ok(summary.includes('formatRelativeAge'), 'CallSummary must format relative age (e.g. Há X dias)');
   assert.ok(summary.includes('resolveOfficialCallDeadline') && summary.includes('isOverdue'), 'CallSummary must resolve overdue deadlines');
+  assert.ok(row.includes('<CallSummary'), 'a lista usa o resumo completo');
+  // No mapa, só o essencial: sem protocolo nem órgão.
+  assert.ok(preview.includes('<CallPreview'), 'o card do mapa usa o resumo curto');
+  const short = summary.slice(summary.indexOf('export function CallPreview'));
+  assert.ok(!short.includes('externalId') && !short.includes('agencyName'), 'card do mapa sem protocolo e órgão');
   for (const [name, content] of [['OfficialCallRow', row], ['TerritoryPreviewCard', preview]]) {
-    assert.ok(content.includes('<CallSummary'), `${name} must render the shared CallSummary`);
     assert.ok(!content.includes('slaBadge') && !content.includes('categoryBadge'), `${name} must not duplicate the summary markup`);
   }
 });

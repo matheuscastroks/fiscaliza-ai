@@ -108,7 +108,7 @@ export const usePlacesStore = create<PlacesState>((set, get) => {
       const active = state.selection.kind === 'radius' && state.selection.placeId === id;
       const neighborhood = state.selection.kind === 'radius' ? state.selection.neighborhood : null;
       return { ...state, places: state.places.filter((p) => p.id !== id), selection: active ? neighborhood ? { kind: 'neighborhood', ...neighborhood } : { kind: 'municipality' } : state.selection };
-    }).then((ok) => { if (ok) set({ notice: 'Lugar apagado. Confira a área que está em uso.' }); return ok; }),
+    }).then((ok) => { if (ok) set({ notice: 'Lugar apagado.' }); return ok; }),
     selectPlace: (id) => save((state) => {
       const place = state.places.find((p) => p.id === id);
       if (!place) throw Error('Lugar não encontrado.');

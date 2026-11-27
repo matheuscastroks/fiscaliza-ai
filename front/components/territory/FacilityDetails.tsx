@@ -82,7 +82,7 @@ export function FacilityDetails({
       />
       {item && query.error && (
         <AppText variant="meta" color="muted" accessibilityLiveRegion="polite">
-          Não foi possível atualizar. Exibindo os dados da última consulta.
+          Não conseguimos atualizar. Mostrando a última versão.
         </AppText>
       )}
       {item ? (
@@ -93,7 +93,7 @@ export function FacilityDetails({
             </AppText>
             <AppText color="muted">
               {[item.facilityType, item.activity].filter(Boolean).join(' · ') ||
-                'Situação cadastral não informada'}
+                'Tipo não informado'}
             </AppText>
           </View>
           <DetailSection title="Onde fica">
@@ -124,7 +124,7 @@ export function FacilityDetails({
           )}
           {item.locationDerived && (
             <AppText variant="caption" color="muted">
-              Ponto interno do espaço público; não indica uma entrada.
+              O ponto marca a área, não a entrada.
             </AppText>
           )}
           <DetailSection title="Contato e funcionamento">
@@ -135,7 +135,7 @@ export function FacilityDetails({
               {item.openingHours || 'Horário não informado'}
             </AppText>
             <AppText variant="caption" color="muted">
-              Cadastro público; confirme o funcionamento com a unidade.
+              Confirme o horário com a unidade.
             </AppText>
           </DetailSection>
           <DetailSection title="De onde vem a informação">
@@ -144,11 +144,10 @@ export function FacilityDetails({
               {item.provenance.attribution}
             </AppText>
             <AppText variant="caption" color="muted">
-              Atualizado em{' '}
+              Divulgado em{' '}
               {formatCallDate(item.provenance.publishedAt) ?? 'data não informada'}
-              . Atualização na origem:{' '}
-              {formatCallDate(item.provenance.sourceUpdatedAt) ?? 'não informada'}
-              .
+              {' · '}Atualizado na fonte em{' '}
+              {formatCallDate(item.provenance.sourceUpdatedAt) ?? 'data não informada'}
             </AppText>
             {item.provenance.state === 'stale' && (
               <AppText color="attention">
@@ -167,7 +166,7 @@ export function FacilityDetails({
           </DetailSection>
         </>
       ) : !query.isLoading && !query.error ? (
-        <AppText>Cadastro indisponível. Volte à exploração.</AppText>
+        <AppText>Não achamos este serviço.</AppText>
       ) : null}
     </DetailSheet>
     <AppToast message={linkError} type="error" onDismiss={() => setLinkError(null)} />

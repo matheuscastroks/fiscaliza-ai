@@ -42,7 +42,7 @@ export function SignOutSheet() {
         <View style={{ gap: spacing.xs }}>
           <AppText variant="sectionTitle">Sair da conta?</AppText>
           <AppText color="muted">
-            Quando você entrar de novo, seus chamados salvos voltam. Os lugares voltam se for neste celular.
+            Seus salvos voltam quando você entrar de novo. Os lugares, só neste celular.
           </AppText>
         </View>
 

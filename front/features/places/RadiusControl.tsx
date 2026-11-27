@@ -75,7 +75,7 @@ export function RadiusControl({
     <View style={[styles.container, compact && styles.containerCompact, style]}>
       {!compact && (
         <AppText variant="caption" color="muted" style={styles.label}>
-          Raio de busca ao redor do ponto:
+          Distância:
         </AppText>
       )}
       <View

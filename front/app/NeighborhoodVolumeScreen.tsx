@@ -47,7 +47,7 @@ export default function NeighborhoodVolumeScreen() {
           />
           <View>
             <AppText variant="meta" color="muted">
-              Toque em um bairro para ver seus dados. Fonte: Prefeitura do Rio (Data.Rio).
+              Mais chamados não quer dizer pior atendimento. Fonte: Prefeitura do Rio (Data.Rio).
             </AppText>
           </View>
         </ScreenState>

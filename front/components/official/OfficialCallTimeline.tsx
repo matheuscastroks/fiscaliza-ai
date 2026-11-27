@@ -33,8 +33,7 @@ function buildTimelineSteps(call: OfficialCall, isClosed: boolean): TimelineStep
   // 1. Abertura do chamado
   steps.push({
     id: 'opened',
-    title: 'Chamado registrado',
-    subtitle: 'Chamado aberto no 1746',
+    title: 'Aberto no 1746',
     date: openedDate,
     state: 'done',
     icon: 'document-text-outline',
@@ -46,7 +45,7 @@ function buildTimelineSteps(call: OfficialCall, isClosed: boolean): TimelineStep
     steps.push({
       id: 'diagnosed',
       title: 'Diagnóstico registrado',
-      subtitle: 'O órgão registrou a avaliação técnica. Isso não confirma que o serviço foi feito.',
+      subtitle: 'Avaliação técnica registrada. Isso não confirma que o serviço foi feito.',
       date: formatCallDate(call.diagnosedAt),
       state: 'done',
       icon: 'search-outline',
@@ -55,7 +54,7 @@ function buildTimelineSteps(call: OfficialCall, isClosed: boolean): TimelineStep
     steps.push({
       id: 'diagnosed',
       title: 'Diagnóstico ainda não registrado',
-      subtitle: 'Este serviço depende de avaliação técnica antes do prazo de execução.',
+      subtitle: 'Este serviço passa por avaliação técnica antes da execução.',
       date: null,
       state: 'pending',
       icon: 'search-outline',
@@ -66,13 +65,12 @@ function buildTimelineSteps(call: OfficialCall, isClosed: boolean): TimelineStep
   // Prazos estimados não comprovam vistoria nem realização do serviço.
   steps.push({
     id: 'closed',
-    title: isClosed ? 'Encerramento no 1746' : 'Ainda sem encerramento',
+    title: isClosed ? 'Encerrado no 1746' : 'Ainda sem encerramento',
     subtitle: isClosed
-      ? [
-          !closedDate && 'A Prefeitura ainda não informou quando encerrou.',
-          call.statusJustification || 'O encerramento administrativo não comprova a execução do serviço.',
-        ].filter(Boolean).join(' ')
-      : call.officialSituation || call.officialStatus || 'A fonte ainda não publicou um encerramento.',
+      ? [!closedDate && 'Data de encerramento não informada.', call.statusJustification]
+          .filter(Boolean)
+          .join(' ') || null
+      : call.officialSituation || call.officialStatus || null,
     date: closedDate,
     state: isClosed ? 'done' : 'pending',
     icon: isClosed ? 'checkmark-circle' : 'flag-outline',
@@ -88,7 +86,7 @@ function OfficialCallTimelineComponent({ call }: OfficialCallTimelineProps) {
   const steps = buildTimelineSteps(call, isClosed);
 
   return (
-    <View style={styles.container} accessibilityRole="list" accessibilityLabel="Linha do tempo de atendimento do chamado">
+    <View style={styles.container} accessibilityRole="list" accessibilityLabel="Linha do tempo do chamado">
       {steps.map((step, index) => {
         const isLast = index === steps.length - 1;
         const isDone = step.state === 'done';

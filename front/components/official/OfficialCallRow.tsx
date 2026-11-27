@@ -48,11 +48,11 @@ export const OfficialCallRow = memo(function OfficialCallRow({
     try {
       if (!(await toggleSavedCall(call)))
         setSaveError(
-          'Não conseguimos atualizar seus acompanhamentos. Toque em Salvar para tentar de novo.',
+          'Não conseguimos salvar. Tente de novo.',
         );
     } catch {
       setSaveError(
-        'Não conseguimos atualizar seus acompanhamentos. Toque em Salvar para tentar de novo.',
+        'Não conseguimos salvar. Tente de novo.',
       );
     }
   };
@@ -72,10 +72,10 @@ export const OfficialCallRow = memo(function OfficialCallRow({
         }}
         accessibilityLabel={
           isSaved
-            ? `Deixar de acompanhar chamado ${compact ? callLabel : call.externalId}`
+            ? `Remover dos salvos: chamado ${compact ? callLabel : call.externalId}`
             : `Salvar chamado ${compact ? callLabel : call.externalId}`
         }
-        accessibilityHint={isSaved ? undefined : 'Guarda este chamado nos seus acompanhamentos.'}
+        accessibilityHint={isSaved ? undefined : 'Salva este chamado.'}
         hitSlop={compact ? undefined : 8}
         style={({ pressed }) => [
           compact ? styles.compactAction : styles.heart,

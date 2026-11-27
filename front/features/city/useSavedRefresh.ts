@@ -37,7 +37,7 @@ export function useSavedRefresh() {
       if (fresh.length) await useFollowStore.getState().updateSnapshots(fresh);
       if (failures)
         setError(
-          'Alguns chamados não puderam ser atualizados. Mantivemos a última informação consultada.',
+          'Alguns chamados não foram atualizados. Mostrando a última versão.',
         );
     } finally {
       if (current.current === controller) setRefreshing(false);

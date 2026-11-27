@@ -314,7 +314,7 @@ export function PlaceSelector({
         {selection.kind === 'pending-current' && (
           <View style={styles.pendingArea}>
             <AppText variant="caption" color="muted">
-              Sua localização antiga não foi guardada. Atualize para ver o que está perto.
+              Atualize sua localização para ver o que está perto.
             </AppText>
             <AppButton
               title="Atualizar localização"

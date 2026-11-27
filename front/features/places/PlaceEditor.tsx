@@ -54,8 +54,8 @@ export function PlaceEditor({ initialPlace, onDone, onCancel }: { initialPlace?:
     <AppText variant="sectionTitle">{initialPlace ? 'Editar lugar' : 'Adicionar lugar'}</AppText>
     <AppInput label="Nome do lugar" showLabel placeholder="Casa, Trabalho ou outro nome" value={name} editable={!busy} onChangeText={(text) => { revision.current++; setName(text); }} />
     <AppInput label="Endereço ou referência (opcional)" placeholder="Rua, número ou ponto de referência" showLabel value={addressLabel} editable={!busy} onChangeText={(text) => { revision.current++; setAddressLabel(text); }} />
-    <AppText color="muted">Marque o local no mapa. Digitar o endereço não move o marcador. O nome e o endereço ficam só neste celular.</AppText>
-    <AppButton title="Usar minha localização como ponto" variant="secondary" disabled={busy} loading={device.busy} onPress={() => {
+    <AppText color="muted">Marque o ponto no mapa. O endereço digitado não move o marcador.</AppText>
+    <AppButton title="Usar minha localização" variant="secondary" disabled={busy} loading={device.busy} onPress={() => {
       const version = revision.current;
       void device.captureLocation(false).then((result) => { if (result && version === revision.current) changePoint(result); });
     }} />
@@ -63,7 +63,7 @@ export function PlaceEditor({ initialPlace, onDone, onCancel }: { initialPlace?:
       <MapboxMapView region={{ ...(validPoint ? point : { latitude: -22.91, longitude: -43.2 }), zoom: 14 }} markers={validPoint ? [{ ...point, id: 'place', title: name || 'Lugar' }] : []} onMapClick={(p) => { if (!busy) changePoint(p); }} interactive={!busy} isDark={isDark} />
     </View>
     <AppText variant="label">Digitar latitude e longitude</AppText>
-    <AppText variant="caption" color="muted">Se preferir, digite os números. Exemplo: -22.91 e -43.20.</AppText>
+    <AppText variant="caption" color="muted">Ou digite as coordenadas. Ex.: -22.91 e -43.20.</AppText>
     <AppInput label="Latitude" showLabel value={latitude} editable={!busy} keyboardType="numbers-and-punctuation" onChangeText={(v) => { revision.current++; setLatitude(v); }} />
     <AppInput label="Longitude" showLabel value={longitude} editable={!busy} keyboardType="numbers-and-punctuation" onChangeText={(v) => { revision.current++; setLongitude(v); }} />
     <RadiusControl value={radiusMeters} onChange={(r) => { if (!busy) { revision.current++; setRadius(r); } }} />

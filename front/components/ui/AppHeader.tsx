@@ -133,7 +133,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     container: {
       paddingHorizontal: spacing.contentPadding,
-      paddingTop: spacing.xs,
+      paddingTop: spacing.md,
       paddingBottom: spacing.sm,
       backgroundColor: colors.canvas,
       borderBottomWidth: 0,

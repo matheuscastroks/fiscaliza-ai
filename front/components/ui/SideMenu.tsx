@@ -150,7 +150,7 @@ export function SideMenu({
                 ? user.municipality.name + ' · ' + user.municipality.state
                 : authenticated
                   ? 'Definir cidade'
-                  : 'Acesse seus salvos em outros aparelhos'}
+                  : 'Seus salvos em qualquer aparelho'}
             </AppText>
             {authenticated && (
               <AppText variant="caption" color="muted">

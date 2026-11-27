@@ -19,7 +19,7 @@ export function OfficialCallDates({ item, slaLabel, deadlineInfo }: Props) {
           <View style={styles.infoGrid}>
             <View style={styles.gridItem}>
               <AppText variant="caption" color="muted">
-                Data de abertura
+                Aberto em
               </AppText>
               <AppText variant="label" color="ink">
                 {formatCallDateTime(item.openedAt)}
@@ -71,7 +71,7 @@ export function OfficialCallDates({ item, slaLabel, deadlineInfo }: Props) {
             {item.closedAt ? (
               <View style={styles.gridItem}>
                 <AppText variant="caption" color="muted">
-                  Data de encerramento
+                  Encerrado em
                 </AppText>
                 <AppText variant="label" color="ink">
                   {formatCallDateTime(item.closedAt)}
@@ -82,7 +82,7 @@ export function OfficialCallDates({ item, slaLabel, deadlineInfo }: Props) {
             {deadlineInfo ? (
               <View style={styles.gridItem}>
                 <AppText variant="caption" color="muted">
-                  Conformidade de prazo
+                  Situação do prazo
                 </AppText>
                 <AppText
                   variant="label"

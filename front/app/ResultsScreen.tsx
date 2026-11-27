@@ -192,7 +192,7 @@ export default function ResultsScreen() {
                     />
                   </View>
                   <AppText variant="caption" color="muted">
-                    Inclui chamados em andamento e encerrados com informação de prazo. Fonte: Prefeitura do Rio (Data.Rio).
+                    Chamados com prazo informado, em aberto ou encerrados. Fonte: Prefeitura do Rio (Data.Rio).
                   </AppText>
                 </View>
 
@@ -397,18 +397,18 @@ export default function ResultsScreen() {
             <ListRow
               icon="map-outline"
               title="Bairros com mais chamados"
-              subtitle="Quantos chamados cada bairro tem, sem dizer se é bom ou ruim"
+              subtitle="Volume não diz se o atendimento é bom ou ruim"
               onPress={() => router.push('/NeighborhoodVolumeScreen')}
             />
             <ListRow
               icon="information-circle-outline"
               title="De onde vêm os dados"
-              subtitle="De onde vêm os dados e o que eles não mostram"
+              subtitle="Fontes e limites"
               onPress={() => router.push('/AboutScreen')}
             />
           </InsetGroup>
           <AppText variant="meta" color="muted">
-            Fonte: Prefeitura do Rio (Data.Rio). O Fiscaliza aí só mostra o que a Prefeitura divulga.
+            Fonte: Prefeitura do Rio (Data.Rio).
           </AppText>
       </ScrollView>
     </AppScreen>

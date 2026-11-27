@@ -81,6 +81,8 @@ function component(file, mocks = {}) {
       if (name === '@/components/official/CallSummary')
         return {
           CallSummary: 'CallSummary',
+          CallPreview: 'CallPreview',
+          callDeadlineText: () => null,
           describeCall: (call) => ({
             title: call.serviceSubtype || call.serviceType,
             locationText: 'Rua · Bairro',

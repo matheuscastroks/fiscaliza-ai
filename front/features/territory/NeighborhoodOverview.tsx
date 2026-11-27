@@ -51,8 +51,7 @@ export function NeighborhoodOverview({
       <View style={{ gap: spacing.sm }}>
         <AppText variant="sectionTitle" accessibilityRole="header">Serviços públicos</AppText>
         <AppText variant="caption" color="muted">
-          Cadastros com bairro confirmado. Quantidade não indica capacidade ou
-          qualidade do atendimento.
+          Quantidade não indica vagas nem qualidade do atendimento.
         </AppText>
         <InsetGroup>
           {serviceCategories.map(({ category }) => (
@@ -87,15 +86,12 @@ export function NeighborhoodOverview({
           Período consultado: {periodLabel(dates)}
         </AppText>
         <AppText variant="caption" color="muted">
-          {coverageLabel(data.calls.coverage)}. Registros sem coordenadas
-          participam da contagem, mas não aparecem no mapa.
+          {coverageLabel(data.calls.coverage)}. Inclui chamados sem ponto no mapa.
         </AppText>
         <AppText variant="caption" color="muted">
-          Extensão disponível:{' '}
           {data.calls.availableStart && data.calls.availableEnd
-            ? `${dayLabel(data.calls.availableStart)} a ${dayLabel(data.calls.availableEnd)}`
-            : 'não confirmada para este bairro'}
-          . Não comprova dados contínuos entre as datas.
+            ? `Dados de ${dayLabel(data.calls.availableStart)} a ${dayLabel(data.calls.availableEnd)}, que podem ter lacunas.`
+            : 'Período disponível não confirmado para este bairro.'}
         </AppText>
         <AppInput
           showLabel
@@ -148,9 +144,7 @@ export function NeighborhoodOverview({
         />
       </View>
       <AppText variant="caption" color="muted">
-        Fontes: IPP e Prefeitura do Rio (Data.Rio). O Fiscaliza aí é independente.
-        Estar perto não quer dizer que um serviço seja o responsável por um
-        chamado.
+        Fontes: IPP e Prefeitura do Rio (Data.Rio).
       </AppText>
     </View>
   );

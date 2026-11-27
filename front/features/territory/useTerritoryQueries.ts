@@ -261,7 +261,7 @@ export function useTerritoryQueries() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<{
-    ids: string[]; latitude: number; longitude: number;
+    ids: string[]; count?: number; latitude: number; longitude: number;
   } | null>(null);
   const [searchFocusRequest, setSearchFocusRequest] = useState<string>();
   useFocusEffect(useCallback(() => {
@@ -356,7 +356,7 @@ export function useTerritoryQueries() {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setToastMessage('Não conseguimos localizar o chamado da notificação.');
     } else if (focusedCallQuery.data && (focusedCallQuery.data.latitude == null || focusedCallQuery.data.longitude == null)) {
-      setToastMessage('Este chamado não possui coordenadas registradas no mapa.');
+      setToastMessage('Este chamado não tem ponto no mapa.');
     }
   }, [focusId, focusedCallQuery.isError, focusedCallQuery.data]);
 

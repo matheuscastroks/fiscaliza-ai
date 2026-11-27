@@ -63,8 +63,8 @@ export default function SettingsScreen() {
     Alert.alert(
       'Apagar chamados salvos?',
       signedIn
-        ? 'Eles saem da sua conta e de todos os seus aparelhos. Os chamados continuam existindo no 1746 e você pode salvá-los de novo.'
-        : 'Eles serão removidos deste aparelho. Os chamados continuam existindo no 1746 e você pode salvá-los de novo.',
+        ? 'Eles saem da sua conta em todos os aparelhos. Os chamados continuam no 1746.'
+        : 'Eles saem deste aparelho. Os chamados continuam no 1746.',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -95,7 +95,7 @@ export default function SettingsScreen() {
       >
         <View style={styles.sectionBlock}>
           <AppText variant="sectionTitle" accessibilityRole="header">
-            Bairro de referência no mapa
+            Bairro inicial do mapa
           </AppText>
 
           <NeighborhoodPicker
@@ -130,14 +130,14 @@ export default function SettingsScreen() {
               title="Avisos no celular"
               subtitle={
                 !pushAvailable
-                  ? 'Ainda não funciona nesta versão do app'
+                  ? 'Indisponível nesta versão'
                   : !signedIn
-                    ? 'Entre na sua conta para receber avisos dos chamados salvos'
+                    ? 'Entre na conta para receber avisos'
                     : notificationsActive
-                    ? 'Avisos ligados para seus chamados salvos'
+                    ? 'Ligados para seus salvos'
                     : permissionGranted
-                      ? 'Permissão dada. Toque para ligar os avisos.'
-                      : 'Avisos desligados neste celular'
+                      ? 'Toque para ligar'
+                      : 'Desligados neste celular'
               }
               trailing={
                 pushAvailable && !signedIn ? (
@@ -164,7 +164,7 @@ export default function SettingsScreen() {
 
           {pushAvailable && signedIn && (
             <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
-              Avisamos quando um chamado que você salvou tiver novidade. O aviso pode demorar um pouco.
+              Avisamos quando um chamado salvo tiver novidade.
             </AppText>
           )}
 
@@ -187,7 +187,7 @@ export default function SettingsScreen() {
               title={savedCount > 0 ? 'Apagar chamados salvos' : 'Chamados salvos'}
               subtitle={
                 savedCount > 0
-                  ? `${savedCount} ${savedCount === 1 ? 'chamado salvo será removido' : 'chamados salvos serão removidos'} ${signedIn ? 'da sua conta' : 'deste aparelho'}`
+                  ? `${savedCount} ${savedCount === 1 ? 'chamado salvo' : 'chamados salvos'} ${signedIn ? 'na sua conta' : 'neste celular'}`
                   : signedIn
                     ? 'Nenhum chamado salvo na sua conta'
                     : 'Nenhum chamado salvo neste celular'

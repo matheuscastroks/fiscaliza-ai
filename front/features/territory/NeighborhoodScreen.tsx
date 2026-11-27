@@ -90,8 +90,7 @@ function NeighborhoodContent({ initialId }: { initialId?: string }) {
         {!options.isLoading && options.data?.length === 0 && (
           <View>
             <AppText color="muted">
-              Os limites dos bairros ainda não estão disponíveis. Tente de novo mais
-              tarde.
+              Os bairros não carregaram. Tente de novo mais tarde.
             </AppText>
           </View>
         )}

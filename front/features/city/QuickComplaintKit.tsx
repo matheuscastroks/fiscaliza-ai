@@ -215,19 +215,18 @@ export function QuickComplaintKit({ defaultLocation = '', inSheet = false }: Qui
 
   const analysisLine = (() => {
     if (!photoUri) return null;
-    if (!canAnalyze)
-      return 'Entre na sua conta e confirme o CEP para receber uma sugestão de texto a partir da foto.';
+    if (!canAnalyze) return null;
     switch (analysis) {
       case 'loading':
         return 'Analisando a foto…';
       case 'done':
         return suggested
-          ? 'Texto sugerido a partir da foto. Confira e corrija antes de enviar.'
-          : 'Assunto sugerido a partir da foto. Confira antes de enviar.';
+          ? 'Texto sugerido pela foto. Confira antes de enviar.'
+          : 'Assunto sugerido pela foto. Confira antes de enviar.';
       case 'not-urban':
-        return 'A foto não parece mostrar um problema na rua. Descreva o que você viu.';
+        return 'A foto não parece mostrar um problema de rua. Descreva o que você viu.';
       case 'failed':
-        return 'Não foi possível analisar a foto agora. Descreva o problema no texto.';
+        return 'Não deu para analisar a foto. Descreva o problema.';
       default:
         return null;
     }
@@ -236,7 +235,7 @@ export function QuickComplaintKit({ defaultLocation = '', inSheet = false }: Qui
   return (
     <View
       style={[styles.container, inSheet && { paddingBottom: bottomInset + spacing.lg }]}
-      accessibilityLabel="Assistente de solicitação 1746"
+      accessibilityLabel="Pedido ao 1746"
     >
       <View style={styles.titleBlock}>
         <AppText variant="caption" color="muted">
@@ -260,10 +259,11 @@ export function QuickComplaintKit({ defaultLocation = '', inSheet = false }: Qui
 
       {step === 'photo' && (
         <>
-          <AppText variant="caption" color="muted" style={styles.subtitle}>
-            Fotografe o problema. A foto vai junto com a mensagem para o WhatsApp do 1746.
-            {canAnalyze ? ' O app sugere o texto a partir dela.' : ''}
-          </AppText>
+          {canAnalyze && (
+            <AppText variant="caption" color="muted" style={styles.subtitle}>
+              Com a foto, sugerimos o texto do pedido.
+            </AppText>
+          )}
           {photoUri && (
             <Image source={{ uri: photoUri }} style={styles.photoLarge} contentFit="cover" accessibilityLabel="Foto escolhida" />
           )}
@@ -363,7 +363,7 @@ export function QuickComplaintKit({ defaultLocation = '', inSheet = false }: Qui
               containerStyle={styles.inputContainer}
               helper={
                 locating
-                  ? 'Buscando o endereço de onde você está…'
+                  ? 'Buscando seu endereço…'
                   : locationError ?? undefined
               }
             />
@@ -374,7 +374,7 @@ export function QuickComplaintKit({ defaultLocation = '', inSheet = false }: Qui
               {suggested ? 'Detalhes sugeridos pela foto' : 'Detalhes'}
             </AppText>
             <AppInput
-              label={suggested ? 'Detalhes sugeridos pela foto, editáveis' : 'Detalhes'}
+              label={suggested ? 'Detalhes sugeridos pela foto' : 'Detalhes'}
               inputComponent={Input}
               placeholder="Ex.: buraco grande perto da padaria"
               value={description}
@@ -397,17 +397,14 @@ export function QuickComplaintKit({ defaultLocation = '', inSheet = false }: Qui
         <>
           <View style={[styles.previewBox, elevation.recessed, { backgroundColor: colors.surfaceRecessed }]}>
             {photoUri && (
-              <Image source={{ uri: photoUri }} style={styles.photoPreview} contentFit="cover" accessibilityLabel="Foto que vai junto" />
+              <Image source={{ uri: photoUri }} style={styles.photoPreview} contentFit="cover" accessibilityLabel="Foto do pedido" />
             )}
             <AppText variant="caption" color="ink" style={styles.previewText} selectable>
               {message}
             </AppText>
           </View>
           <AppText variant="caption" color="muted" style={styles.subtitle}>
-            {photoUri
-              ? 'O WhatsApp abre com a foto e o texto. Você confere e envia na conversa do 1746.'
-              : 'O WhatsApp abre com o texto pronto. Você confere e envia na conversa do 1746.'}{' '}
-            O Fiscaliza aí não registra nem acompanha o pedido.
+            O Fiscaliza aí não registra nem acompanha este pedido.
           </AppText>
 
           {errorNotice && (

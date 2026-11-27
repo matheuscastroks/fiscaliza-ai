@@ -29,7 +29,7 @@ export default function AccountScreen() {
   const confirmLogoutAll = () => {
     Alert.alert(
       'Sair em todos os celulares?',
-      'Você será desconectado aqui e em todo celular onde entrou na sua conta. Seus chamados salvos continuam na conta.',
+      'Seus salvos continuam na conta.',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -66,7 +66,7 @@ export default function AccountScreen() {
       setConfirmDelete(false);
       router.replace('/LoginScreen');
     } catch {
-      setDeleteError('Erro ao apagar conta. Tente de novo.');
+      setDeleteError('Não conseguimos apagar a conta. Tente de novo.');
       setDeleting(false);
     }
   };
@@ -78,14 +78,13 @@ export default function AccountScreen() {
         {user ? (
           <>
             <AppText variant="meta" color="muted">
-              Conectado como {user.email}. Seus chamados salvos ficam na sua conta e voltam em qualquer celular onde você entrar. Seus lugares ficam só neste celular.
+              Conectado como {user.email}. Lugares ficam só neste celular.
             </AppText>
             <InsetGroup>
               <ListRow
                 icon="log-out-outline"
                 tone="neutral"
                 title="Sair da conta"
-                subtitle="Sai da conta neste celular"
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   useSignOutSheet.getState().setOpen(true);
@@ -95,7 +94,6 @@ export default function AccountScreen() {
                 icon="phone-portrait-outline"
                 tone="neutral"
                 title="Sair em todos os celulares"
-                subtitle="Encerra a conta em todo celular onde você entrou"
                 onPress={confirmLogoutAll}
               />
             </InsetGroup>
@@ -108,7 +106,7 @@ export default function AccountScreen() {
                   icon="trash-outline"
                   tone="risk"
                   title="Apagar minha conta"
-                  subtitle="Apaga para sempre seus dados e preferências"
+                  subtitle="Apaga seus dados e preferências"
                   onPress={() => {
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     setDeleteError('');
@@ -122,13 +120,13 @@ export default function AccountScreen() {
         ) : (
           <>
             <AppText variant="meta" color="muted">
-              Você está usando o app sem conta. Salvos e lugares ficam só neste celular.
+              Sem conta, salvos e lugares ficam só neste celular.
             </AppText>
             <InsetGroup>
               <ListRow
                 icon="person-add-outline"
                 title="Entrar ou criar conta"
-                subtitle="Acesse seus chamados salvos em outros aparelhos"
+                subtitle="Seus salvos em qualquer aparelho"
                 onPress={() => router.push('/LoginScreen')}
               />
             </InsetGroup>
@@ -155,7 +153,7 @@ export default function AccountScreen() {
           <View style={{ gap: spacing.xs }}>
             <AppText variant="sectionTitle">Apagar conta permanentemente?</AppText>
             <AppText color="muted">
-              Não dá para desfazer. Seus dados de cadastro, chamados salvos e preferências serão apagados, inclusive deste celular.
+              Sua conta, seus salvos e suas preferências serão apagados, também deste celular. Não dá para desfazer.
             </AppText>
           </View>
           <AppInput

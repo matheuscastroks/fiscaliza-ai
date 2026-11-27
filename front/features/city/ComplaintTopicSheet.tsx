@@ -111,10 +111,6 @@ export function ComplaintTopicSheet({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <AppText variant="caption" color="muted" style={styles.sheetSubtitle}>
-          Escolha o assunto para organizar sua mensagem para o 1746.
-        </AppText>
-
         <View
           style={[
             styles.insetTable,

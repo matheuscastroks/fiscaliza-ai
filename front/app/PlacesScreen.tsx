@@ -32,7 +32,7 @@ export default function PlacesScreen() {
         }}
       >
         <AppText color="muted">
-          Guarde lugares como Casa ou Trabalho para ver rápido os chamados perto deles. Os lugares ficam só neste celular.
+          Seus lugares ficam só neste celular.
         </AppText>
 
         {!state.hydrated ? (
@@ -55,7 +55,7 @@ export default function PlacesScreen() {
                   Nenhum lugar salvo
                 </AppText>
                 <AppText color="muted" style={{ textAlign: 'center' }}>
-                  Salve um lugar para acompanhar iluminação, buracos e limpeza perto de casa ou do trabalho.
+                  Adicione Casa, Trabalho ou outro lugar para ver os chamados por perto.
                 </AppText>
               </View>
             )}
@@ -181,7 +181,7 @@ export default function PlacesScreen() {
       {state.hydrated && editing === null && removing === null && (
         <View style={{ paddingHorizontal: spacing.contentPadding, paddingVertical: spacing.sm }}>
           <AppButton
-            title="Adicionar novo lugar"
+            title="Adicionar lugar"
             disabled={state.busy}
             onPress={() => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

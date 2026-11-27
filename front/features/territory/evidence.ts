@@ -5,7 +5,7 @@ export const coverageLabel = (value: string) =>
   value === 'partial'
     ? 'Cobertura parcial'
     : value === 'complete'
-      ? 'Extração completa da fonte'
+      ? 'Dados completos da fonte'
       : 'Cobertura não confirmada';
 export const dayLabel = (value: string) =>
   value.slice(0, 10).split('-').reverse().join('/');

@@ -119,7 +119,10 @@ export function AppTabBar({
 
   const territoryResults = (currentRoute?.params as { territoryResults?: string } | undefined)?.territoryResults;
   const resultsOpen = effectiveRouteName === 'TerritoryScreen' && territoryResults === 'list' && isMapboxAvailable();
-  if (keyboardVisible || resultsOpen || !VISIBLE.has(effectiveRouteName)) {
+  // A tela pode esconder a barra (ex.: lista de um agrupamento no mapa, que sobe por cima dela).
+  const screenStyle = currentRoute ? descriptors[currentRoute.key]?.options.tabBarStyle : undefined;
+  const hiddenByScreen = StyleSheet.flatten(screenStyle)?.display === 'none';
+  if (keyboardVisible || resultsOpen || hiddenByScreen || !VISIBLE.has(effectiveRouteName)) {
     return null;
   }
 

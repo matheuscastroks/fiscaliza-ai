@@ -22,6 +22,6 @@ export const COMPLAINT_STEPS: ComplaintStep[] = ['photo', 'details', 'confirm'];
 
 export const COMPLAINT_STEP_TITLES: Record<ComplaintStep, string> = {
   photo: 'Foto do problema',
-  details: 'Revise o pedido',
-  confirm: 'Confirme e envie',
+  details: 'Descreva o problema',
+  confirm: 'Revise e envie',
 };

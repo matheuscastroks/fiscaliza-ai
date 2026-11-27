@@ -10,16 +10,16 @@ export function Provenance({ source }: { source: SourceCoverage }) {
     <View style={{ gap: 4 }}>
       <AppText variant="caption" color="muted">
         {unavailable
-          ? 'Fonte sem publicação disponível'
+          ? 'Fonte indisponível'
           : source.state === 'stale'
-            ? 'Última publicação disponível'
-            : 'Informação divulgada'}
+            ? 'Última versão divulgada'
+            : 'Divulgado'}
         {source.publishedAt
-          ? ` · Importação: ${dayLabel(source.publishedAt)}`
+          ? ` · No app desde ${dayLabel(source.publishedAt)}`
           : ''}
       </AppText>
       <AppText variant="caption" color="muted">
-        Referência na origem:{' '}
+        Data na fonte:{' '}
         {source.referenceDate
           ? dayLabel(source.referenceDate)
           : 'não informada'}
@@ -28,8 +28,7 @@ export function Provenance({ source }: { source: SourceCoverage }) {
         source.unresolvedCount !== undefined &&
         source.unresolvedCount > 0 && (
           <AppText variant="caption" color="muted">
-            {source.unresolvedCount} cadastros da fonte sem bairro confirmado no
-            município.
+            {source.unresolvedCount} sem bairro confirmado.
           </AppText>
         )}
     </View>

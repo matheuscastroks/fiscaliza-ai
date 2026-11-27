@@ -166,7 +166,7 @@ function TerritoryListViewComponent({
           <AppText variant="caption" color="muted">{sectionHeading}</AppText>
           {unlocatedCount > 0 && (
             <AppText variant="caption" color="muted">
-              {unlocatedCount} {unlocatedCount === 1 ? 'chamado sem ponto no mapa' : 'chamados sem ponto no mapa'} entre os resultados carregados.
+              {unlocatedCount} {unlocatedCount === 1 ? 'chamado sem ponto no mapa' : 'chamados sem ponto no mapa'}
             </AppText>
           )}
         </View>
@@ -181,7 +181,7 @@ function TerritoryListViewComponent({
           kind="territory"
           height={96}
           title="Aguardando sua localização"
-          description="Permita a localização para ver os chamados perto de você. Você também pode escolher um bairro no seletor de área."
+          description="Para ver chamados perto de você, permita a localização. Ou escolha um bairro."
           action={{ title: 'Usar minha localização', onPress: locationPrompt.onUseLocation }}
         />
       )}
@@ -218,7 +218,7 @@ function TerritoryListViewComponent({
           <IllustratedEmptyState
             kind="territory"
             title="Nenhum chamado por aqui"
-            description="Não achamos chamados com esses filtros."
+            description="Não achamos chamados com esses filtros. Tente limpar os filtros."
             action={{
               title: 'Limpar filtros',
               onPress: onResetFilters,
@@ -262,7 +262,7 @@ function TerritoryListViewComponent({
         styles.fullListOverlay,
         {
           backgroundColor: colors.canvas,
-          paddingTop: insets.top + spacing.xs,
+          paddingTop: insets.top + spacing.md,
         },
       ]}
     >

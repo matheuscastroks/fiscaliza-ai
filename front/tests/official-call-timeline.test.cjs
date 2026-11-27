@@ -13,5 +13,5 @@ test('official call: details screen integrates timeline, sla badge and civic sha
   assert.ok(content.includes('OfficialCallTimeline'), 'Must mount OfficialCallTimeline component');
   assert.ok(content.includes('slaPill'), 'Must render highlighted SLA badge');
   assert.ok(content.includes('handleShare') && content.includes('Share.share'), 'Must provide civic Share action for community groups');
-  assert.ok(content.includes('Linha do tempo oficial'), 'Must feature the official timeline section');
+  assert.ok(content.includes('Linha do tempo'), 'Must feature the official timeline section');
 });

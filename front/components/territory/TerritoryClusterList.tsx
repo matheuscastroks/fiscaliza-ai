@@ -1,5 +1,9 @@
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import { View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '@/theme/useTheme';
+import { layout } from '@/theme/layout';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppText } from '@/components/ui/AppText';
 import { TerritoryListRow } from './TerritoryListRow';
@@ -19,7 +23,14 @@ interface Props {
   onRetry: () => void;
 }
 
+function Separator() {
+  const { colors } = useTheme();
+  return <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: colors.dividerSubtle }} />;
+}
+
 export function TerritoryClusterList({ entries, offline, total, loading, loadingMore, error, onOpen, onClose, onLoadMore, onRetry }: Props) {
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const title = entries[0]?.type === 'facility'
     ? total === 1 ? 'Serviço neste ponto' : total + ' serviços neste ponto'
     : total === 1 ? 'Chamado neste ponto' : total + ' chamados neste ponto';
@@ -30,13 +41,25 @@ export function TerritoryClusterList({ entries, offline, total, loading, loading
         <View style={{ flex: 1 }}>
           <AppText variant="sectionTitle" accessibilityRole="header">{title}</AppText>
         </View>
-        <AppButton title="Fechar" variant="secondary" onPress={onClose} />
+        <Pressable
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Fechar lista deste ponto"
+          hitSlop={8}
+          style={({ pressed }) => [
+            { width: layout.touchTarget.minWidth, height: layout.touchTarget.minHeight, borderRadius: layout.radius.panel, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceRecessed },
+            pressed && { opacity: 0.8 },
+          ]}
+        >
+          <Ionicons name="close" size={layout.iconSize.md} color={colors.ink} />
+        </Pressable>
       </View>
       <BottomSheetFlatList<Entry>
         data={entries}
         keyExtractor={(entry) => entry.type + ':' + entry.item.id}
         renderItem={({ item }) => <TerritoryListRow entry={item} onOpen={onOpen} />}
-        contentContainerStyle={{ paddingHorizontal: spacing.md, paddingBottom: spacing.lg }}
+        ItemSeparatorComponent={Separator}
+        contentContainerStyle={{ paddingHorizontal: spacing.md, paddingBottom: insets.bottom + spacing.lg }}
         ListEmptyComponent={offline ? undefined : error || loading ? (
           <AppText color="muted" accessibilityLiveRegion="polite">
             {error ? 'Não foi possível carregar os resultados deste ponto.' : 'Carregando resultados…'}

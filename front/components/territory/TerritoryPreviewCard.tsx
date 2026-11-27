@@ -6,14 +6,13 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
-import { CallSummary, describeCall } from '@/components/official/CallSummary';
+import { CallPreview, callDeadlineText, describeCall } from '@/components/official/CallSummary';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
 import type { ElevationTokens } from '@/theme/elevation';
 import { layout, spacing } from '@/theme';
 import type { OfficialCall } from '@/shared/contracts';
 import { useFollowStore } from '@/stores/followStore';
-import { formatCallDate } from '@/features/city/formatDates';
 import { lightColors } from '@/theme/colors';
 
 export type Entry =
@@ -121,7 +120,6 @@ export function TerritoryCardContent({
   const official = entry.item;
   const d = describeCall(official, colors);
   const { title, locationText: address } = d;
-  const dateLabel = formatCallDate(official.openedAt) ?? 'Data não informada';
 
   const save = async () => {
     if (!official) return;
@@ -132,59 +130,47 @@ export function TerritoryCardContent({
       setFailedId(official.id);
     }
   };
+  const saveButton = (
+    <Pressable
+      onPress={() => {
+        void save();
+      }}
+      disabled={!hydrated || busy}
+      accessibilityRole="checkbox"
+      accessibilityState={{
+        checked: saved,
+        disabled: !hydrated || busy,
+        busy,
+      }}
+      accessibilityLabel={
+        saved
+          ? 'Remover dos salvos: chamado ' + official.externalId
+          : 'Salvar chamado ' + official.externalId
+      }
+      hitSlop={8}
+      style={({ pressed }) => [
+        styles.heart,
+        { opacity: !hydrated || busy ? 0.5 : pressed ? 0.7 : 1 },
+      ]}
+    >
+      <Ionicons
+        name={saved ? 'bookmark' : 'bookmark-outline'}
+        size={layout.iconSize.md}
+        color={saved ? colors.accent : colors.muted}
+      />
+    </Pressable>
+  );
+  const deadline = callDeadlineText(official, d.isOverdue);
   return (
     <View style={styles.content}>
       <Pressable
         onPress={() => onOpen(entry)}
         accessibilityRole="button"
-        accessibilityLabel={`${title}. ${address}. ${d.status.label}. ${dateLabel}.${official ? ' Protocolo ' + official.externalId + '.' : ''} Ver detalhes.`}
+        accessibilityLabel={`Ver detalhes de ${title}. ${address}. ${d.status.label}.${deadline ? ' ' + deadline + '.' : ''}`}
         style={({ pressed }) => pressed && { opacity: 0.85 }}
       >
-        <CallSummary call={official} headerInset={close ? 36 : 0} />
+        <CallPreview call={official} headerAccessory={saveButton} headerInset={close ? 36 : 0} />
       </Pressable>
-
-      {/* Action footer */}
-      <View style={styles.actions}>
-        <Pressable
-          onPress={() => onOpen(entry)}
-          accessibilityRole="button"
-          accessibilityLabel={`Ver detalhes de ${title}`}
-          style={styles.details}
-        >
-          <AppText variant="label" style={{ color: colors.ink }}>Ver detalhes</AppText>
-          <Ionicons name="arrow-forward" size={layout.iconSize.sm} color={colors.ink} />
-        </Pressable>
-        {official && (
-          <Pressable
-            onPress={() => {
-              void save();
-            }}
-            disabled={!hydrated || busy}
-            accessibilityRole="checkbox"
-            accessibilityState={{
-              checked: saved,
-              disabled: !hydrated || busy,
-              busy,
-            }}
-            accessibilityLabel={
-              saved
-                ? 'Deixar de acompanhar chamado ' + official.externalId
-                : 'Salvar chamado ' + official.externalId
-            }
-            hitSlop={8}
-            style={({ pressed }) => [
-              styles.heart,
-              { opacity: !hydrated || busy ? 0.5 : pressed ? 0.7 : 1 },
-            ]}
-          >
-            <Ionicons
-              name={saved ? 'bookmark' : 'bookmark-outline'}
-              size={layout.iconSize.md}
-              color={saved ? colors.accent : colors.muted}
-            />
-          </Pressable>
-        )}
-      </View>
 
       {failedId === officialId && (
         <AppText
@@ -193,7 +179,7 @@ export function TerritoryCardContent({
           accessibilityRole="alert"
           accessibilityLiveRegion="polite"
         >
-          Não conseguimos salvar. Toque em Salvar para tentar de novo.
+          Não conseguimos salvar. Tente de novo.
         </AppText>
       )}
       {close}
@@ -230,19 +216,6 @@ const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
     content: {
       padding: spacing.md,
       gap: spacing.xs,
-    },
-    actions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingTop: spacing.xs,
-      marginTop: spacing.xs,
-    },
-    details: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.xs,
-      paddingVertical: spacing.xs,
     },
     heart: {
       width: 36,

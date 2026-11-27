@@ -28,7 +28,7 @@ export function AuthScreenLayout({
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
-  const topPadding = Math.max(insets.top, 16) + spacing.xs;
+  const topPadding = Math.max(insets.top, 16) + spacing.md;
   const heroHeight = Math.max(
     topPadding +
       layout.touchTarget.minHeight +

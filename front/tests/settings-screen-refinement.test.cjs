@@ -18,7 +18,7 @@ test('settings screen: removes redundancies (places and saved calls) and adopts 
 
   // Apple Inset-Grouped containers and frameless form sections
   assert.ok(content.includes('sectionBlock'), 'Must use frameless section blocks');
-  for (const title of ['Bairro de referência no mapa', 'Notificações', "{signedIn ? 'Seus dados' : 'Dados neste celular'}"]) {
+  for (const title of ['Bairro inicial do mapa', 'Notificações', "{signedIn ? 'Seus dados' : 'Dados neste celular'}"]) {
     assert.ok(
       content.includes(`accessibilityRole="header"> ${title} </AppText>`),
       `${title} deve ser anunciado como cabeçalho`,

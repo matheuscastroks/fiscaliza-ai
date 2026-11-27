@@ -334,12 +334,12 @@ export function useTerritoryView(q: TerritoryQueries) {
 
   const summarySubLabel =
     territoryDomain === 'calls' && activeSelection.kind === 'pending-current'
-      ? 'Toque em localizar ou escolha um bairro lá em cima'
+      ? 'Use sua localização ou escolha um bairro'
       : territoryDomain === 'calls' && officialCalls.error && listed.length === 0
       ? 'Abra a lista para tentar novamente.'
       : territoryDomain === 'calls' && unlocated.length > 0
-      ? `+${unlocated.length} sem ponto no mapa · Toque para abrir a lista`
-      : 'Toque num ponto do mapa ou veja a lista';
+      ? `+${unlocated.length} sem ponto no mapa`
+      : '';
 
   return {
     unlocated,
@@ -373,13 +373,13 @@ export function useTerritoryView(q: TerritoryQueries) {
       : q.searchPending
       ? 'Buscando pelo texto digitado'
       : layers.includes('official')
-      ? q.spatialMap.isError ? officialCalls.error ? 'Abra a lista para tentar novamente.' : 'Os pontos dos chamados não carregaram. Consulte a lista.'
+      ? q.spatialMap.isError ? officialCalls.error ? 'Abra a lista para tentar novamente.' : 'Os pontos não carregaram. Veja a lista.'
         : q.spatialMap.isFetching ? 'Atualizando os pontos do mapa…'
         : q.spatialMap.data
           ? totalCalls === 0 && q.spatialMap.data.visibleTotal === 0 && q.spatialMap.data.unlocatedTotal === 0
             ? 'Tente outro termo, área ou filtro.'
-            : `${q.spatialMap.data.visibleTotal.toLocaleString('pt-BR')} no mapa · ${q.spatialMap.data.unlocatedTotal.toLocaleString('pt-BR')} sem coordenadas no recorte`
-        : 'Carregando todos os pontos deste recorte…'
+            : `${q.spatialMap.data.visibleTotal.toLocaleString('pt-BR')} no mapa · ${q.spatialMap.data.unlocatedTotal.toLocaleString('pt-BR')} sem ponto no mapa`
+        : 'Carregando pontos do mapa…'
       : summarySubLabel,
   };
 }

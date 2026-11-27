@@ -34,8 +34,8 @@ test('a chave do Gemini nunca vai para o app', () => {
   assert.doesNotMatch(read('services', 'complaintDraft.ts'), /generativelanguage|GEMINI/i);
 });
 
-test('participate screen: integrates QuickComplaintKit with territory location', () => {
-  const content = read('app', 'OfficialServicesScreen.tsx');
+test('Agir abre o pedido com foto direto, com o bairro em uso como local sugerido', () => {
+  const content = read('app', '(tabs)', 'ParticipateScreen.tsx');
   assert.ok(content.includes('usePlacesStore'), 'Must use the active places selection for neighborhood context');
   assert.ok(content.includes('<QuickComplaintKit'), 'Must render QuickComplaintKit in the scroll tree');
 });

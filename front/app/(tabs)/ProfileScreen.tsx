@@ -179,10 +179,10 @@ export default function ProfileScreen() {
 
           <View style={styles.heroDetails}>
             <AppText variant="screenTitle" style={styles.heroName}>
-              {user?.name || 'Acesso sem conta'}
+              {user?.name || 'Sem conta'}
             </AppText>
             <AppText variant="caption" color="muted" selectable>
-              {user?.email || 'Seus salvos e lugares ficam guardados neste celular.'}
+              {user?.email || 'Salvos e lugares ficam neste celular.'}
             </AppText>
             <View
               style={[
@@ -298,7 +298,7 @@ export default function ProfileScreen() {
           <InsetGroup>
             <ListRow
               title="Preferências do aplicativo"
-              subtitle="Bairro de referência e avisos"
+              subtitle="Bairro e avisos"
               onPress={() => router.push('/SettingsScreen')}
             />
             <ListRow

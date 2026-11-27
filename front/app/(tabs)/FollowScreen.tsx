@@ -88,8 +88,8 @@ export default function FollowScreen() {
         title="Salvos"
         context={
           user?.name
-            ? `Conta de ${user.name.split(' ')[0]} · Seus chamados salvos`
-            : 'Seus chamados salvos neste celular'
+            ? `Conta de ${user.name.split(' ')[0]}`
+            : 'Neste celular'
         }
       />
       <FlatList
@@ -173,8 +173,7 @@ export default function FollowScreen() {
                 )}
 
                 <AppText variant="caption" color="muted">
-                  Situação informada pela Prefeitura. “Encerrado” não garante que o
-                  problema foi resolvido: se continuar, veja a aba Agir.
+                  “Encerrado” não garante que o problema foi resolvido.
                 </AppText>
 
               </>
@@ -197,12 +196,12 @@ export default function FollowScreen() {
               title={
                 savedCalls.length
                   ? 'Nenhum chamado neste filtro'
-                  : 'Salve chamados para voltar a eles'
+                  : 'Nenhum chamado salvo'
               }
               description={
                 savedCalls.length
-                  ? 'Altere o filtro acima para Todos e veja os outros registros salvos neste celular.'
-                  : 'Ao explorar o mapa ou os filtros da cidade, toque em Salvar num chamado para voltar a ele depois e ver como anda.'
+                  ? 'Seus outros salvos estão em Todos.'
+                  : 'Os chamados que você salvar aparecem aqui.'
               }
               action={{
                 title: savedCalls.length

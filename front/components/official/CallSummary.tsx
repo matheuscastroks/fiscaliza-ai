@@ -141,6 +141,62 @@ export function CallSummary({ call, headerAccessory, metaTrailing, headerInset =
   );
 }
 
+/** Prazo como data ("Prazo 12/12/2026"); null quando o chamado não tem previsão. */
+export function callDeadlineText(call: OfficialCall, isOverdue: boolean) {
+  if (isOfficialCallClosed(call)) return null;
+  const date = formatCallDate(call.targetDate);
+  if (!date) return null;
+  return isOverdue ? `Venceu em ${date}` : `Prazo ${date}`;
+}
+
+/**
+ * Versão curta para o mapa: categoria, título, rua, situação e prazo. Cada
+ * linha tem altura reservada (título sempre com duas), para que cartões lado
+ * a lado tenham o mesmo tamanho qualquer que seja o texto.
+ */
+export function CallPreview({ call, headerAccessory, headerInset = 0 }: Omit<CallSummaryProps, 'metaTrailing'>) {
+  const { colors } = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const d = describeCall(call, colors);
+  const iconName = d.theme.icon as IconName;
+  const deadline = callDeadlineText(call, d.isOverdue);
+  return (
+    <View style={styles.root}>
+      <View style={[styles.header, headerInset > 0 && { paddingRight: headerInset }]}>
+        <View style={styles.heading}>
+          <View style={styles.categoryBadge}>
+            <Ionicons name={iconName} size={layout.iconSize.sm} color={colors.muted} />
+            <AppText variant="caption" color="muted" numberOfLines={1} style={styles.shrink}>
+              {d.theme.label}
+            </AppText>
+          </View>
+          <AppText variant="sectionTitle" numberOfLines={2} style={[styles.title, styles.previewTitle]}>
+            {d.title}
+          </AppText>
+        </View>
+        {headerAccessory ? <View style={styles.headerAction}>{headerAccessory}</View> : null}
+      </View>
+      <View style={styles.locationRow}>
+        <Ionicons name="location-outline" size={layout.iconSize.sm} color={colors.muted} />
+        <AppText variant="caption" color="muted" numberOfLines={1} style={styles.shrink}>
+          {d.locationText}
+        </AppText>
+      </View>
+      <View style={styles.previewStatusRow}>
+        <View style={[styles.statusBadge, styles.previewStatusBadge, { backgroundColor: colors.surfaceRecessed }]}>
+          <View style={[styles.statusDot, { backgroundColor: d.status.color }]} />
+          <AppText variant="caption" color={d.status.color} numberOfLines={1}>{d.status.label}</AppText>
+        </View>
+        {deadline ? (
+          <AppText variant="caption" color={d.isOverdue ? 'risk' : 'muted'} numberOfLines={1} style={styles.shrink}>
+            {deadline}
+          </AppText>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
 const createStyles = (_colors: ThemeColors) =>
   StyleSheet.create({
     root: { gap: spacing.xs },
@@ -163,6 +219,10 @@ const createStyles = (_colors: ThemeColors) =>
     },
     statusDot: { width: spacing.xs - 2, height: spacing.xs - 2, borderRadius: layout.radius.xs, flexShrink: 0 },
     title: { fontSize: fontSizes.body, lineHeight: 22 },
+    // A situação nunca é cortada; se faltar espaço, o prazo é que encurta.
+    previewStatusBadge: { flexShrink: 0 },
+    previewTitle: { minHeight: 22 * 2 },
+    previewStatusRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, minWidth: 0 },
     locationRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs },
     metaRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.xs },
     metaLeft: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.xs, flexGrow: 1, flexBasis: 200, minWidth: 0 },

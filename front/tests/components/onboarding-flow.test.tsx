@@ -13,7 +13,7 @@ it('avança, volta e conclui a apresentação apenas por ação explícita', asy
   await render(<OnboardingFlow onFinish={finish} />);
   expect(screen.getByText('Etapa 1 de 3')).toBeTruthy();
   expect(screen.getByRole('header', { name: 'Conheça melhor seu bairro' })).toBeTruthy();
-  expect(screen.getByText(/consulta chamados do 1746/)).toBeTruthy();
+  expect(screen.getByText(/Chamados do 1746 e serviços públicos/)).toBeTruthy();
   expect(finish).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
   expect(screen.getByText('Etapa 2 de 3')).toBeTruthy();

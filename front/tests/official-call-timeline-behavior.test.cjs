@@ -51,13 +51,13 @@ test('an open call does not fabricate inspections or treat deadlines as complete
 
 test('administrative closure never certifies that field work was executed', () => {
   const content = texts(render({ openedAt: '2026-09-15', closedAt: '2026-09-17', officialSituation: 'Encerrado' })).join(' ');
-  assert.match(content, /Encerramento no 1746/);
+  assert.match(content, /Encerrado no 1746/);
   assert.doesNotMatch(content, /Execução do serviço|Processamento administrativo concluído pelo órgão/);
 });
 
 test('closed calls without a published closure date do not invent one', () => {
   const content = texts(render({ openedAt: '2026-09-15', officialSituation: 'Encerrado', statusJustification: 'Duplicidade de protocolo' })).join(' ');
-  assert.match(content, /ainda não informou quando encerrou/);
+  assert.match(content, /Data de encerramento não informada/);
   assert.match(content, /Duplicidade de protocolo/);
 });
 
