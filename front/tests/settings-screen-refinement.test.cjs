@@ -9,7 +9,7 @@ test('settings screen: removes redundancies (places and saved calls) and adopts 
   const settingsPath = path.join(ROOT_DIR, 'app', 'SettingsScreen.tsx');
   assert.ok(fs.existsSync(settingsPath), 'SettingsScreen.tsx must exist');
 
-  const content = fs.readFileSync(settingsPath, 'utf8');
+  const content = fs.readFileSync(settingsPath, 'utf8').replace(/\s+/g, ' ');
 
   // Elimination of redundant sections
   assert.ok(!content.includes("'/PlacesScreen'"), 'Must remove redundant PlacesScreen link from settings');
@@ -18,11 +18,16 @@ test('settings screen: removes redundancies (places and saved calls) and adopts 
 
   // Apple Inset-Grouped containers and frameless form sections
   assert.ok(content.includes('sectionBlock'), 'Must use frameless section blocks');
-  assert.ok(content.includes('sectionHeaderRow'), 'Must style headers with sectionHeaderRow');
+  for (const title of ['Bairro de referência no mapa', 'Notificações', "{signedIn ? 'Seus dados' : 'Dados neste celular'}"]) {
+    assert.ok(
+      content.includes(`accessibilityRole="header"> ${title} </AppText>`),
+      `${title} deve ser anunciado como cabeçalho`,
+    );
+  }
   assert.ok(content.includes('InsetGroup') && content.includes('ListRow'), 'Must use the shared InsetGroup/ListRow');
 
   // Essential features preserved
-  assert.ok(content.includes('SlidingTabs'), 'Must preserve theme appearance switcher');
+  assert.ok(!content.includes('Aparência do aplicativo'), 'A aparência é definida pelo sistema');
   assert.ok(content.includes('NeighborhoodPicker'), 'Must preserve neighborhood reference picker');
   assert.ok(content.includes('o mapa já abrir nele'), 'Must retain map focus instructions');
   assert.ok(content.includes('useNotificationStore'), 'Must retain notification store binding');

@@ -68,7 +68,7 @@ import { createStyles } from '@/features/profile/profileScreenStyles';
 
 export default function ProfileScreen() {
   const { contentInset } = useTabBarInset();
-  const { colors } = useTheme();
+  const { colors, elevation } = useTheme();
   const styles = useThemedStyles(createStyles);
 
   const user = useAuthStore((s) => s.user);
@@ -178,18 +178,18 @@ export default function ProfileScreen() {
           </Pressable>
 
           <View style={styles.heroDetails}>
-            <AppText variant="screenTitle" numberOfLines={1} style={styles.heroName}>
+            <AppText variant="screenTitle" style={styles.heroName}>
               {user?.name || 'Acesso sem conta'}
             </AppText>
-            <AppText variant="caption" color="muted" numberOfLines={1} selectable>
+            <AppText variant="caption" color="muted" selectable>
               {user?.email || 'Seus salvos e lugares ficam guardados neste celular.'}
             </AppText>
             <View
               style={[
                 styles.statusPill,
+                elevation.subtle,
                 {
-                  backgroundColor: user ? colors.primaryContainer : colors.canvas,
-                  borderColor: user ? colors.primaryContainer : colors.border,
+                  backgroundColor: user ? colors.primaryContainer : colors.surfaceRaised,
                 },
               ]}
             >
@@ -212,20 +212,16 @@ export default function ProfileScreen() {
         </View>
 
         {!user && (
-          <View style={styles.authPromptRow}>
-            <View style={styles.flex}>
-              <AppButton
-                title="Entrar na conta"
-                onPress={() => router.push('/LoginScreen')}
-              />
-            </View>
-            <View style={styles.flex}>
-              <AppButton
-                title="Criar conta"
-                variant="secondary"
-                onPress={() => router.push('/RegisterScreen')}
-              />
-            </View>
+          <View style={styles.authActions}>
+            <AppButton
+              title="Entrar na conta"
+              onPress={() => router.push('/LoginScreen')}
+            />
+            <AppButton
+              title="Criar conta"
+              variant="secondary"
+              onPress={() => router.push('/RegisterScreen')}
+            />
           </View>
         )}
 
@@ -239,78 +235,18 @@ export default function ProfileScreen() {
           </View>
         )}
 
-        {/* Métricas Cívicas (KPIs Cívicos com Squircles e Haptics) */}
-        <View style={styles.metricsRow}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Chamados salvos: ${savedCalls.length}`}
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/(tabs)/FollowScreen');
-            }}
-            style={({ pressed }) => [
-              styles.metricCard,
-              { backgroundColor: colors.surface, borderColor: colors.border },
-              pressed && { opacity: 0.8 },
-            ]}
-          >
-            <View style={styles.metricHeader}>
-              <View
-                style={[
-                  styles.metricIconSquircle,
-                  { backgroundColor: colors.primaryContainer },
-                ]}
-              >
-                <Ionicons name="bookmark" size={layout.iconSize.sm} color={colors.primary} />
-              </View>
-              <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
-            </View>
-            <AppText variant="screenTitle" style={styles.metricValue}>
-              {savedCalls.length}
-            </AppText>
-            <AppText variant="caption" style={styles.metricLabel}>
-              Chamados salvos
-            </AppText>
-            <AppText variant="meta" color="muted">
-              Da Prefeitura
-            </AppText>
-          </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Meus lugares salvos: ${places.length}`}
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/PlacesScreen');
-            }}
-            style={({ pressed }) => [
-              styles.metricCard,
-              { backgroundColor: colors.surface, borderColor: colors.divider },
-              pressed && { opacity: 0.8 },
-            ]}
-          >
-            <View style={styles.metricHeader}>
-              <View
-                style={[
-                  styles.metricIconSquircle,
-                  { backgroundColor: colors.primaryContainer },
-                ]}
-              >
-                <Ionicons name="navigate" size={layout.iconSize.sm} color={colors.primary} />
-              </View>
-              <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
-            </View>
-            <AppText variant="screenTitle" style={styles.metricValue}>
-              {places.length}
-            </AppText>
-            <AppText variant="caption" style={styles.metricLabel}>
-              Meus lugares
-            </AppText>
-            <AppText variant="meta" color="muted">
-              Casa, trabalho e mais
-            </AppText>
-          </Pressable>
-        </View>
+        <InsetGroup>
+          <ListRow
+            title="Chamados salvos"
+            subtitle={`${savedCalls.length} no acompanhamento`}
+            onPress={() => router.navigate('/(tabs)/FollowScreen')}
+          />
+          <ListRow
+            title="Meus lugares"
+            subtitle={`${places.length} ${places.length === 1 ? 'lugar salvo' : 'lugares salvos'}`}
+            onPress={() => router.push('/PlacesScreen')}
+          />
+        </InsetGroup>
 
         {/* Seção: Domicílio Cívico (Cadastro único de CEP Carioca) */}
         <View style={styles.sectionBlock}>
@@ -349,7 +285,7 @@ export default function ProfileScreen() {
                 <AppText variant="caption" color="muted">
                   {formattedCep
                     ? `${user?.neighborhood ? `${user.neighborhood} · ` : ''}Rio de Janeiro, RJ`
-                    : 'Para ver o que acontece perto de casa'}
+                    : 'Guarde seu CEP no perfil'}
                 </AppText>
               </View>
               <Ionicons name="chevron-forward" size={layout.iconSize.sm} color={colors.subtle} />
@@ -361,31 +297,26 @@ export default function ProfileScreen() {
         <View style={styles.sectionBlock}>
           <InsetGroup>
             <ListRow
-              icon="options-outline"
               title="Preferências do aplicativo"
-              subtitle="Tema, bairro e avisos"
+              subtitle="Bairro de referência e avisos"
               onPress={() => router.push('/SettingsScreen')}
             />
             <ListRow
-              icon="stats-chart-outline"
               title="Dados do bairro"
               subtitle="Chamados e prazos"
               onPress={() => router.push('/ResultsScreen')}
             />
             <ListRow
-              icon="help-circle-outline"
               title="Ajuda"
               subtitle="Como usar o app"
               onPress={() => router.push('/HelpScreen')}
             />
             <ListRow
-              icon="information-circle-outline"
               title="Sobre o app"
               subtitle="De onde vêm as informações"
               onPress={() => router.push('/AboutScreen')}
             />
             <ListRow
-              icon="shield-outline"
               title="Conta e privacidade"
               subtitle={user ? 'Sair ou apagar minha conta' : 'Entrar ou criar conta'}
               onPress={() => router.push('/AccountScreen')}

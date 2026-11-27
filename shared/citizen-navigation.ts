@@ -9,6 +9,7 @@ const PUBLIC = new Set([
   'OnboardingScreen',
   'SettingsScreen',
   'PlacesScreen',
+  'OfficialServicesScreen',
   'OfficialCallDetailsScreen',
   'FacilityDetailsScreen',
   'NeighborhoodScreen',

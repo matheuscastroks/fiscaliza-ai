@@ -52,6 +52,17 @@ test('texto secundário (subtle) passa AA nos dois temas', () => {
   }
 });
 
+test('rótulo e ícones permanecem legíveis durante o deslocamento da seleção', () => {
+  for (const colors of [lightColors, darkColors]) {
+    for (const background of [colors.navigationSurface, colors.navigationSelection]) {
+      assert.ok(contrast(colors.navigationOnSelection, background) >= 4.5);
+      assert.ok(contrast(colors.navigationIcon, background) >= 4.5);
+    }
+    assert.ok(contrast(colors.navigationOnSelection, colors.surfaceRecessed) >= 4.5);
+    assert.ok(contrast(colors.ink, colors.navigationSelection) >= 4.5);
+  }
+});
+
 test('"Buscar nesta área" depende de gesto do usuário, não de movimento da câmera', () => {
   const view = read('features', 'territory', 'useTerritoryView.ts');
   assert.match(view, /if \(newRegion\.userGesture\) setHasMovedCamera\(true\)/);

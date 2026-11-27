@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 import { Alert, View, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 import * as Haptics from 'expo-haptics';
 
@@ -16,13 +15,9 @@ import { AppText } from '@/components/ui/AppText';
 
 import { AppButton } from '@/components/ui/AppButton';
 
-import { SlidingTabs } from '@/components/ui/SlidingTabs';
-
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 
 import { NeighborhoodPicker } from '@/features/city/NeighborhoodPicker';
-
-import { useThemeStore, isThemePreference } from '@/stores/themeStore';
 
 import { useTerritoryStore } from '@/stores/territoryStore';
 
@@ -39,32 +34,13 @@ import { useMunicipalityId } from '@/features/city/municipality';
 
 import { AppToast } from '@/components/ui/AppToast';
 
-import { useTheme, spacing, layout } from '@/theme';
+import { spacing } from '@/theme';
 
-import { fontSizes } from '@/theme/typography';
 
 import { useShallow } from 'zustand/react/shallow';
 
 
-const appearanceOptions = [
-  {
-    value: 'system',
-    label: 'Sistema',
-    icon: 'phone-portrait-outline' as const,
-  },
-  { value: 'light', label: 'Claro', icon: 'sunny-outline' as const },
-  { value: 'dark', label: 'Escuro', icon: 'moon-outline' as const },
-];
-
 export default function SettingsScreen() {
-  const { colors } = useTheme();
-
-  const {
-    preference,
-    setPreference,
-    persistenceError: themeError,
-  } = useThemeStore(useShallow((s) => ({ preference: s.preference, setPreference: s.setPreference, persistenceError: s.persistenceError })));
-
   const {
     preferredNeighborhood,
     setPreferredNeighborhood,
@@ -117,70 +93,19 @@ export default function SettingsScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Seção 1: Aparência do Aplicativo (Apple Segmented HIG) */}
         <View style={styles.sectionBlock}>
-          <View style={styles.sectionHeaderRow}>
-            <Ionicons name="color-palette-outline" size={layout.iconSize.sm} color={colors.muted} />
-            <AppText variant="caption" style={styles.sectionHeaderText}>
-              Aparência do aplicativo
-            </AppText>
-          </View>
-
-          <View
-            style={[
-              styles.insetContainer,
-              { backgroundColor: colors.surface, borderColor: colors.divider },
-            ]}
-          >
-            <SlidingTabs
-              options={appearanceOptions}
-              value={preference}
-              label="Aparência do aplicativo"
-              edgeToEdge={false}
-              onChange={(value) => {
-                if (isThemePreference(value)) {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  void setPreference(value);
-                }
-              }}
-            />
-          </View>
-
-          <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
-            O Fiscaliza aí adapta automaticamente o contraste para modo diurno e noturno.
+          <AppText variant="sectionTitle" accessibilityRole="header">
+            Bairro de referência no mapa
           </AppText>
 
-          {themeError && (
-            <AppText color="risk" accessibilityRole="alert">
-              {themeError}
-            </AppText>
-          )}
-        </View>
-
-        {/* Seção 2: Bairro de Referência no Mapa */}
-        <View style={styles.sectionBlock}>
-          <View style={styles.sectionHeaderRow}>
-            <Ionicons name="map-outline" size={layout.iconSize.sm} color={colors.muted} />
-            <AppText variant="caption" style={styles.sectionHeaderText}>
-              Bairro de referência no mapa
-            </AppText>
-          </View>
-
-          <View
-            style={[
-              styles.insetContainer,
-              { backgroundColor: colors.surface, borderColor: colors.divider },
-            ]}
-          >
-            <NeighborhoodPicker
-              options={[]}
-              value={preferredNeighborhood}
-              onChange={(name) => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                void setPreferredNeighborhood(name);
-              }}
-            />
-          </View>
+          <NeighborhoodPicker
+            options={[]}
+            value={preferredNeighborhood}
+            onChange={(name) => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              void setPreferredNeighborhood(name);
+            }}
+          />
 
           <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
             Escolha um bairro para o mapa já abrir nele.
@@ -195,12 +120,9 @@ export default function SettingsScreen() {
 
         {/* Seção 3: Notificações e Alertas do 1746 */}
         <View style={styles.sectionBlock}>
-          <View style={styles.sectionHeaderRow}>
-            <Ionicons name="notifications-outline" size={layout.iconSize.sm} color={colors.muted} />
-            <AppText variant="caption" style={styles.sectionHeaderText} accessibilityLabel="Avisos">
-              Notificações
-            </AppText>
-          </View>
+          <AppText variant="sectionTitle" accessibilityRole="header">
+            Notificações
+          </AppText>
 
           <InsetGroup>
             <ListRow
@@ -240,9 +162,11 @@ export default function SettingsScreen() {
             />
           </InsetGroup>
 
-          <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
-            Avisamos quando um chamado que você salvou tiver novidade. O aviso pode demorar um pouco.
-          </AppText>
+          {pushAvailable && signedIn && (
+            <AppText variant="caption" color="muted" style={styles.sectionFooterText}>
+              Avisamos quando um chamado que você salvou tiver novidade. O aviso pode demorar um pouco.
+            </AppText>
+          )}
 
           {notificationError && (
             <AppText color="risk" accessibilityRole="alert">
@@ -253,17 +177,14 @@ export default function SettingsScreen() {
 
         {/* Dados guardados: apagar chamados salvos (com confirmação) */}
         <View style={styles.sectionBlock}>
-          <View style={styles.sectionHeaderRow}>
-            <Ionicons name="phone-portrait-outline" size={layout.iconSize.sm} color={colors.muted} />
-            <AppText variant="caption" style={styles.sectionHeaderText}>
-              {signedIn ? 'Seus dados' : 'Dados neste celular'}
-            </AppText>
-          </View>
+          <AppText variant="sectionTitle" accessibilityRole="header">
+            {signedIn ? 'Seus dados' : 'Dados neste celular'}
+          </AppText>
           <InsetGroup>
             <ListRow
-              icon="trash-outline"
-              tone="risk"
-              title="Apagar chamados salvos"
+              icon={savedCount > 0 ? 'trash-outline' : 'bookmark-outline'}
+              tone={savedCount > 0 ? 'risk' : 'neutral'}
+              title={savedCount > 0 ? 'Apagar chamados salvos' : 'Chamados salvos'}
               subtitle={
                 savedCount > 0
                   ? `${savedCount} ${savedCount === 1 ? 'chamado salvo será removido' : 'chamados salvos serão removidos'} ${signedIn ? 'da sua conta' : 'deste aparelho'}`
@@ -294,21 +215,6 @@ const styles = StyleSheet.create({
   },
   sectionBlock: {
     gap: 8,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 4,
-  },
-  sectionHeaderText: {
-    fontSize: fontSizes.caption,
-    fontWeight: '600',
-  },
-  insetContainer: {
-    borderRadius: layout.radius.panel,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: spacing.sm,
   },
   sectionFooterText: {
     paddingHorizontal: 6,

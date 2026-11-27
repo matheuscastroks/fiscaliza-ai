@@ -12,7 +12,7 @@ import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
 import { InsetGroup, ListRow } from '@/components/ui/ListRow';
 import { useSignOutSheet } from '@/components/ui/SignOutSheet';
-import { AppBottomSheetModal, BottomSheetView } from '@/components/ui/AppBottomSheetModal';
+import { AppBottomSheetModal, BottomSheetTextInput, BottomSheetView } from '@/components/ui/AppBottomSheetModal';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/theme/useTheme';
 import { layout } from '@/theme/layout';
@@ -128,7 +128,7 @@ export default function AccountScreen() {
               <ListRow
                 icon="person-add-outline"
                 title="Entrar ou criar conta"
-                subtitle="Guarde seus lugares e salvos na sua conta"
+                subtitle="Acesse seus chamados salvos em outros aparelhos"
                 onPress={() => router.push('/LoginScreen')}
               />
             </InsetGroup>
@@ -144,6 +144,7 @@ export default function AccountScreen() {
         enableDynamicSizing
         enablePanDownToClose={!deleting}
         showHeader={false}
+        keyboardBlurBehavior="restore"
       >
         <BottomSheetView
           style={[
@@ -158,6 +159,7 @@ export default function AccountScreen() {
             </AppText>
           </View>
           <AppInput
+            inputComponent={BottomSheetTextInput}
             label="Sua senha"
             showLabel
             placeholder="Digite sua senha para confirmar"

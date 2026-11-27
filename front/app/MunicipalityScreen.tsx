@@ -1,10 +1,11 @@
-import { useThemedStyles } from '@/theme/useTheme';
+import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import { KeyboardAwareScrollView } from '@/components/ui/KeyboardAwareScrollView';
 import { goBack } from '@/utils/navigation';
 import { useSignOutSheet } from '@/components/ui/SignOutSheet';
 import { createCityStyles } from '@/features/city/CityUI';
 import React from 'react';
-import { View } from 'react-native';
+import { Keyboard, View } from 'react-native';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/AppScreen';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -14,31 +15,38 @@ import { AppButton } from '@/components/ui/AppButton';
 import { useAuthStore } from '@/stores/authStore';
 import { formatPostalCode } from '@/services/postalCode';
 import { usePostalCodeFlow } from '@/features/profile/usePostalCodeFlow';
+import { spacing } from '@/theme/spacing';
 
 /** First access and changes of residence share the same server-confirmed flow. */
 export default function MunicipalityScreen() {
   const cityStyles = useThemedStyles(createCityStyles);
+  const { colors } = useTheme();
 
   const user = useAuthStore((state) => state.user);
   const flow = usePostalCodeFlow(user?.postalCode || '');
   const { postalCode, digits, lookup, busy, saving, error } = flow;
   const linked = user?.municipality;
+  const search = () => {
+    if (digits.length !== 8 || busy || saving) return;
+    Keyboard.dismiss();
+    void flow.search();
+  };
   const confirm = async () => {
     if (await flow.confirm()) router.replace('/(tabs)');
   };
   return (
-    <AppScreen keyboardAvoiding>
+    <AppScreen edges={['top', 'left', 'right', 'bottom']}>
       <AppHeader
         title={linked ? 'Minha cidade' : 'Sua cidade'}
         onBack={linked ? () => goBack() : undefined}
       />
       <KeyboardAwareScrollView
-        contentContainerStyle={cityStyles.content}
+        contentContainerStyle={[cityStyles.content, { paddingBottom: spacing.md }]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={{ gap: 20 }}>
-          <View style={{ gap: 8 }}>
-            <AppText variant="screenTitle">
+        <View style={{ gap: spacing.lg }}>
+          <View style={{ gap: spacing.xs }}>
+            <AppText variant="screenTitle" accessibilityRole="header">
               {linked ? 'Atualizar meu CEP' : 'Onde você mora?'}
             </AppText>
             <AppText color="muted">
@@ -51,24 +59,20 @@ export default function MunicipalityScreen() {
             </AppText>
           )}
           <AppInput
-            placeholder="Digite seu CEP (00000-000)"
+            label="CEP residencial"
+            showLabel
+            placeholder="00000-000"
             value={postalCode}
             maxLength={9}
             keyboardType="number-pad"
             autoComplete="postal-code"
-            editable={!busy && !saving}
+            editable={!busy && !saving && !lookup}
             onChangeText={(value) => flow.reset(formatPostalCode(value))}
-            onSubmitEditing={() => void flow.search()}
-          />
-          <AppButton
-            title="Buscar minha cidade"
-            loading={busy}
-            disabled={digits.length !== 8 || saving}
-            onPress={() => void flow.search()}
+            onSubmitEditing={search}
           />
           {lookup && (
-            <View style={{ gap: 12 }}>
-              <AppText variant="sectionTitle">
+            <View style={{ gap: spacing.sm }}>
+              <AppText variant="sectionTitle" accessibilityRole="header">
                 {lookup.municipality.name} · {lookup.municipality.state}
               </AppText>
               {Boolean(lookup.neighborhood) && (
@@ -85,12 +89,6 @@ export default function MunicipalityScreen() {
                   Seu histórico em {linked.name} será preservado.
                 </AppText>
               )}
-              <AppButton
-                title="Confirmar cidade"
-                loading={saving}
-                disabled={busy}
-                onPress={() => void confirm()}
-              />
               <AppButton
                 title="Corrigir CEP"
                 variant="quiet"
@@ -114,6 +112,16 @@ export default function MunicipalityScreen() {
           )}
         </View>
       </KeyboardAwareScrollView>
+      <KeyboardStickyView
+        style={{ backgroundColor: colors.canvas, paddingHorizontal: spacing.contentPadding, paddingVertical: spacing.sm }}
+      >
+        <AppButton
+          title={lookup ? 'Confirmar cidade' : 'Buscar minha cidade'}
+          loading={busy || saving}
+          disabled={digits.length !== 8}
+          onPress={lookup ? () => void confirm() : search}
+        />
+      </KeyboardStickyView>
     </AppScreen>
   );
 }

@@ -14,20 +14,18 @@ export function useOnboardingInitialization() {
 }
 
 /** Overlay the existing entry route; auth and CEP keep their original destinations. */
-export function OnboardingGate({ enabled = true }: { enabled?: boolean }) {
+export function OnboardingGate() {
   const { colors } = useTheme();
   const completed = useOnboardingStore((state) => state.completed);
   const ready = useOnboardingStore((state) => state.hydrated);
   const complete = useOnboardingStore((state) => state.complete);
   return (
     <Modal
-      visible={enabled && ready && !completed}
+      visible={ready && !completed}
       animationType="none"
       presentationStyle="fullScreen"
       statusBarTranslucent
-      onRequestClose={() => {
-        void complete();
-      }}
+      onRequestClose={() => {}}
     >
       <View style={{ flex: 1, backgroundColor: colors.canvas }}>
         <OnboardingFlow onFinish={complete} />

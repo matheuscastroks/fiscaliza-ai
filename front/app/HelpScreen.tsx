@@ -28,12 +28,12 @@ const answers: { question: string; answer: string }[] = [
   {
     question: 'Como peço um serviço, como tapar um buraco?',
     answer:
-      'Na aba Agir, escolha o canal oficial: telefone 1746, WhatsApp ou portal. O pedido é feito lá, não no Fiscaliza aí. Salvar um chamado aqui não envia nada à Prefeitura.',
+      'Na aba Agir, toque em “Pedir um serviço no 1746” e escolha o canal oficial: telefone 1746, WhatsApp ou portal. O pedido é feito lá, não no Fiscaliza aí. Salvar um chamado aqui não envia nada à Prefeitura.',
   },
   {
     question: 'Como acompanho um chamado?',
     answer:
-      'Toque em Salvar no chamado. Ele fica na aba Salvos, neste celular. Arraste a tela para baixo para atualizar. Se estiver sem internet, você continua vendo o que já salvou.',
+      'Toque em Salvar no chamado para encontrá-lo em Salvos. Com a mesma conta, você pode ver seus salvos em outros aparelhos. Arraste a tela para baixo para atualizar. Sem internet, você continua vendo o que já salvou.',
   },
   {
     question: 'O que quer dizer "encerrado"?',
@@ -48,7 +48,7 @@ const answers: { question: string; answer: string }[] = [
   {
     question: 'O app funciona com leitor de tela e letra grande?',
     answer:
-      'Sim. Os textos acompanham o tamanho de letra do celular e os botões têm descrição para o TalkBack. Se algo falhar, tente de novo; o resto do app continua funcionando.',
+      'O app acompanha o tamanho de texto do celular. Se você usa um leitor de tela, escolha Ver lista em Explorar para navegar pelos chamados e serviços.',
   },
 ];
 
@@ -67,7 +67,7 @@ export default function HelpScreen() {
             <ListRow
               icon="book-outline"
               title="Rever a apresentação"
-              subtitle="Como o app funciona, em duas telas"
+              subtitle="Entenda o 1746 e como usar o app"
               onPress={() => router.push('/OnboardingScreen')}
             />
           </InsetGroup>

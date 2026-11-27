@@ -12,7 +12,6 @@ import { AppScreen } from '@/components/ui/AppScreen';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppBrandGlyph } from '@/components/ui/AppBrandGlyph';
-import { ThemeToggleButton } from '@/components/ui/ThemeToggleButton';
 import { layout, useTheme } from '@/theme';
 import { styles } from './onboardingStyles';
 import { slides, type OnboardingSlide } from './slides';
@@ -95,8 +94,6 @@ export function OnboardingFlow({
             <View style={styles.brandTextCol}>
               <AppText
                 variant="sectionTitle"
-                numberOfLines={1}
-                maxFontSizeMultiplier={1.1}
                 style={styles.brandTitle}
               >
                 Fiscaliza{' '}
@@ -107,35 +104,9 @@ export function OnboardingFlow({
                   aí
                 </AppText>
               </AppText>
-              <AppText variant="caption" color="muted" numberOfLines={2} maxFontSizeMultiplier={1.1}>
-                Seu bairro, em acompanhamento.
-              </AppText>
             </View>
           </View>
 
-          <View style={styles.headerActions}>
-            <ThemeToggleButton />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={replay ? 'Fechar apresentação' : 'Pular apresentação'}
-              disabled={busy}
-              onPress={() => {
-                void finish();
-              }}
-              style={({ pressed }) => [
-                styles.skipPill,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.divider,
-                  opacity: busy ? 0.5 : pressed ? 0.75 : 1,
-                },
-              ]}
-            >
-              <AppText variant="label" maxFontSizeMultiplier={1.2} style={styles.skipText}>
-                {replay ? 'Fechar' : 'Pular'}
-              </AppText>
-            </Pressable>
-          </View>
         </View>
 
         {/* Carousel Slides */}
@@ -144,6 +115,7 @@ export function OnboardingFlow({
           data={slides}
           horizontal
           pagingEnabled
+          scrollEnabled={replay}
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item) => item.id}
           extraData={{ viewport, page, wide, height, isDark }}
@@ -171,26 +143,6 @@ export function OnboardingFlow({
         {/* Footer Controls */}
         <View style={styles.footer}>
           <View style={styles.paginationRow}>
-            <View
-              style={styles.dotsRow}
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants"
-              aria-hidden
-            >
-              {slides.map((slide, index) => (
-                <View
-                  key={slide.id}
-                  style={[
-                    styles.dot,
-                    {
-                      width: index === page ? 28 : 8,
-                      backgroundColor:
-                        index === page ? colors.primary : colors.divider,
-                    },
-                  ]}
-                />
-              ))}
-            </View>
             <AppText
               variant="caption"
               color="muted"
@@ -230,19 +182,6 @@ export function OnboardingFlow({
                 }
                 loading={busy}
                 onPress={next}
-                icon={
-                  <Ionicons
-                    name={
-                      page === slides.length - 1
-                        ? replay
-                          ? 'checkmark-outline'
-                          : 'compass-outline'
-                        : 'arrow-forward'
-                    }
-                    size={layout.iconSize.md}
-                    color={colors.onAccentBrand}
-                  />
-                }
               />
             </View>
           </View>

@@ -7,6 +7,7 @@ import { AppText } from '@/components/ui/AppText';
 import { spacing, useTheme } from '@/theme';
 import { layout } from '@/theme/layout';
 
+export const OFFICIAL_PROTOCOL_LOOKUP = 'https://www.1746.rio/hc/pt-br/p/solicitacoes';
 export const OFFICIAL_PORTAL = 'https://www.1746.rio/hc/pt-br';
 export const OFFICIAL_SIGNIN_URL = 'https://www.1746.rio/hc/pt-br/signin';
 export const OFFICIAL_REQUESTS_URL = 'https://www.1746.rio/hc/pt-br/requests';
