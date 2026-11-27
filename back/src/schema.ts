@@ -8,6 +8,7 @@ import {
   integer,
   doublePrecision,
   date,
+  boolean,
 } from 'drizzle-orm/pg-core';
 export * from './territorial-schema.js';
 import type {
@@ -82,6 +83,9 @@ export const officialCalls = pgTable('official_calls', {
   diagnosisTargetDate: timestamp('diagnosis_target_date', {
     withTimezone: true,
   }),
+  diagnosedAt: timestamp('diagnosed_at', { withTimezone: true }),
+  viaOmbudsman: boolean('via_ombudsman'),
+  sourceUpdatedAt: timestamp('source_updated_at', { withTimezone: true }),
   withinDeadline: text('within_deadline'),
   timeRemaining: integer('time_remaining'),
   timeUnit: text('time_unit'),

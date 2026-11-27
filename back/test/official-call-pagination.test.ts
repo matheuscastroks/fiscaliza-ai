@@ -66,12 +66,17 @@ test(
     for (const id of ['90001', '90002', '90003']) {
       await pool.query(
         `INSERT INTO official_calls(id, external_id, service_type, service_subtype, opened_at)
-      VALUES($1,$2,'pagination-fixture','fixture','2026-10-20T10:00:00Z')
+      VALUES($1,$2,'pagination-fixture','Iluminação pública','2026-10-20T10:00:00Z')
       ON CONFLICT(id) DO NOTHING`,
         ['pagination-fixture-' + id, id],
       );
     }
     const url = '/api/rio1746/calls?tipo=pagination-fixture&limit=2';
+    for (const term of ['iluminacao', 'ILUMINAÇÃO']) {
+      const response = await app.inject({ url: url + '&search=' + encodeURIComponent(term) });
+      assert.equal(response.statusCode, 200, response.body);
+      assert.equal(response.json().data.total, 3);
+    }
     const firstResponse = await app.inject({ url });
     assert.equal(firstResponse.statusCode, 200, firstResponse.body);
     const first = firstResponse.json().data;

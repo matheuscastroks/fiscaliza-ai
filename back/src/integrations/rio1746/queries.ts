@@ -81,6 +81,8 @@ const CALL_COLUMNS_AND_JOINS = `
         c.justificativa_status,
         c.data_alvo_finalizacao,
         c.data_alvo_diagnostico,
+        c.data_real_diagnostico,
+        c.unidade_organizacional_ouvidoria,
         c.tempo_prazo,
         c.prazo_unidade,
         c.prazo_tipo,
@@ -93,7 +95,7 @@ const CALL_COLUMNS_AND_JOINS = `
       FROM \`datario.adm_central_atendimento_1746.chamado\` c
       LEFT JOIN \`datario.dados_mestres.bairro\` b ON c.id_bairro = b.id_bairro
       LEFT JOIN (
-        SELECT id_logradouro, ANY_VALUE(completo) as nome_logradouro
+        SELECT id_logradouro, ANY_VALUE(nome_completo) as nome_logradouro
         FROM \`datario.dados_mestres.logradouro\`
         GROUP BY id_logradouro
       ) l ON c.id_logradouro = l.id_logradouro

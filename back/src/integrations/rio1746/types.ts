@@ -18,6 +18,9 @@ export interface RawBigQuery1746Row {
   justificativa_status?: string | null;
   data_alvo_finalizacao?: { value: string } | string | null;
   data_alvo_diagnostico?: { value: string } | string | null;
+  data_real_diagnostico?: { value: string } | string | null;
+  /** "1" quando o chamado passou pela Ouvidoria, "0" quando não. */
+  unidade_organizacional_ouvidoria?: string | null;
   tempo_prazo?: number | null;
   prazo_unidade?: string | null;
   prazo_tipo?: string | null;

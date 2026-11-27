@@ -30,6 +30,28 @@ function extractDateString(val: { value: string } | string | null | undefined): 
   return raw && raw.length >= 10 ? raw.slice(0, 10) : null;
 }
 
+/**
+ * updated_at chega como STRING, sem formato documentado. Aceita sufixo " UTC",
+ * fuso sem dois-pontos (+0000) e frações com mais de 3 dígitos; sem fuso
+ * explícito, segue a regra dos DATETIME do DATA.RIO (horário de Brasília).
+ */
+export function parseSourceTimestamp(val: string | null | undefined): string | null {
+  if (typeof val !== 'string') return null;
+  const normalized = val
+    .trim()
+    .replace(/\s*UTC$/i, 'Z')
+    .replace(/(\.\d{3})\d+/, '$1')
+    .replace(/([+-]\d{2})(\d{2})$/, '$1:$2');
+  return extractDateValue(normalized);
+}
+
+function parseOmbudsmanFlag(val: string | null | undefined): boolean | null {
+  const flag = typeof val === 'string' ? val.trim().toLowerCase() : '';
+  if (flag === '1' || flag === 'true') return true;
+  if (flag === '0' || flag === 'false') return false;
+  return null;
+}
+
 export function mapRawRowToOfficialCall(row: RawBigQuery1746Row) {
   // Validate coordinates: Rio de Janeiro bounding box is lat [-23.15, -22.70], lng [-43.80, -43.10]
   let lat: number | null = null;
@@ -57,6 +79,8 @@ export function mapRawRowToOfficialCall(row: RawBigQuery1746Row) {
   const closedAt = extractDateValue(row.data_fim);
   const targetDate = extractDateValue(row.data_alvo_finalizacao);
   const diagnosisTargetDate = extractDateValue(row.data_alvo_diagnostico);
+  const diagnosedAt = extractDateValue(row.data_real_diagnostico);
+  const sourceUpdatedAt = parseSourceTimestamp(row.updated_at);
   const partitionDate = extractDateString(row.data_particao);
 
   return {
@@ -76,6 +100,9 @@ export function mapRawRowToOfficialCall(row: RawBigQuery1746Row) {
     closedAt,
     targetDate,
     diagnosisTargetDate,
+    diagnosedAt,
+    viaOmbudsman: parseOmbudsmanFlag(row.unidade_organizacional_ouvidoria),
+    sourceUpdatedAt,
     withinDeadline: row.dentro_prazo || null,
     timeRemaining: typeof row.tempo_prazo === 'number' ? row.tempo_prazo : null,
     timeUnit: row.prazo_unidade || null,

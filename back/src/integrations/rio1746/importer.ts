@@ -69,6 +69,8 @@ const CONTENT_COLUMNS = [
   'closed_at',
   'target_date',
   'diagnosis_target_date',
+  'diagnosed_at',
+  'via_ombudsman',
   'within_deadline',
   'time_remaining',
   'time_unit',
@@ -82,6 +84,10 @@ const CONTENT_COLUMNS = [
   'longitude',
   'source_partition_date',
 ];
+// source_updated_at fica fora de CONTENT_COLUMNS de propósito: se a fonte
+// carimbar a mesma data em todas as linhas a cada carga, compará-la reescreveria
+// a tabela inteira e marcaria como "atualizado" chamado que não mudou. Ela é
+// regravada junto com qualquer mudança real de conteúdo.
 
 async function withRetries<T>(
   run: () => Promise<T>,
@@ -201,6 +207,8 @@ async function importPages(
           diagnosisTargetDate: c.diagnosisTargetDate
             ? new Date(c.diagnosisTargetDate)
             : null,
+          diagnosedAt: c.diagnosedAt ? new Date(c.diagnosedAt) : null,
+          sourceUpdatedAt: c.sourceUpdatedAt ? new Date(c.sourceUpdatedAt) : null,
           sourcePartitionDate: c.sourcePartitionDate || null,
           importedAt: new Date(),
           updatedAt: new Date(),
@@ -252,6 +260,9 @@ async function importPages(
               closedAt: sql`excluded.closed_at`,
               targetDate: sql`excluded.target_date`,
               diagnosisTargetDate: sql`excluded.diagnosis_target_date`,
+              diagnosedAt: sql`excluded.diagnosed_at`,
+              viaOmbudsman: sql`excluded.via_ombudsman`,
+              sourceUpdatedAt: sql`excluded.source_updated_at`,
               withinDeadline: sql`excluded.within_deadline`,
               timeRemaining: sql`excluded.time_remaining`,
               timeUnit: sql`excluded.time_unit`,
