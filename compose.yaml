@@ -104,6 +104,7 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/bigquery_credentials
       HEALTHCHECK_PING_URL: ${HEALTHCHECK_SYNC_URL:-}
       RIO1746_MAX_RUN_BYTES: ${RIO1746_MAX_RUN_BYTES:-500000000}
+      RIO1746_SYNC_DAYS: ${RIO1746_SYNC_DAYS:-4}
       UPLOAD_DIR: /app/uploads
       SENTRY_DSN: ${SENTRY_DSN:-}
     volumes:

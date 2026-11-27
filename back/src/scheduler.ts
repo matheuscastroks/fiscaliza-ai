@@ -117,11 +117,13 @@ export async function failStaleRuns(db: Database, olderThanMinutes = 60): Promis
 }
 
 export function buildJobs(db: Database, pool: pg.Pool, now = () => new Date()): Job[] {
-  const syncDays = Math.min(7, Math.max(1, Number(process.env.RIO1746_SYNC_DAYS) || 2));
+  // O Data.Rio regrava a tabela por volta das 6h30 e publica até dois dias
+  // antes. Rodar às 8h e reler 4 dias cobre esse atraso e um dia sem carga.
+  const syncDays = Math.min(7, Math.max(1, Number(process.env.RIO1746_SYNC_DAYS) || 4));
   return [
     {
       name: 'rio1746',
-      hour: 4,
+      hour: 8,
       minute: 0,
       ranOn: (day) => sourceRanOn(db, 'rio1746', day),
       run: async () => {

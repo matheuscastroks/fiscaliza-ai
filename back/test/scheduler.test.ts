@@ -158,3 +158,11 @@ test(
     assert.equal(await sourceRanOn(db, sourceId, today), true);
   },
 );
+
+test('agendador: 1746 roda depois da publicação do Data.Rio', () => {
+  const rio = buildJobs({} as Parameters<typeof buildJobs>[0], {} as Parameters<typeof buildJobs>[1]).find(
+    (item) => item.name === 'rio1746',
+  );
+  // A tabela é regravada por volta das 6h30; às 4h os dias pedidos ainda não existem.
+  assert.ok(rio && rio.hour >= 7);
+});
