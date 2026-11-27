@@ -13,7 +13,6 @@ import type { ThemeColors } from '@/theme/colors';
 import { useAuthStore } from '@/stores/authStore';
 import { useTerritoryStore } from '@/stores/territoryStore';
 import { useFollowStore } from '@/stores/followStore';
-import { fontSizes } from '@/theme/typography';
 
 export const useMenu = create<{
   open: boolean;
@@ -23,65 +22,56 @@ export const useMenu = create<{
 type Destination = {
   label: string;
   path: Href;
-  icon: React.ComponentProps<typeof Ionicons>['name'];
 };
 export const citizenNavigationSections: {
   title: string;
   items: Destination[];
 }[] = [
   {
-    title: 'Minha região',
+    title: 'Cidade e chamados',
     items: [
       {
         label: 'Explorar',
         path: '/(tabs)/TerritoryScreen',
-        icon: 'map-outline',
       },
       {
         label: 'Salvos',
         path: '/(tabs)/FollowScreen',
-        icon: 'bookmark-outline',
       },
       {
         label: 'Agir',
         path: '/(tabs)/ParticipateScreen',
-        icon: 'chatbubbles-outline',
+      },
+      {
+        label: 'Dados do bairro',
+        path: '/ResultsScreen',
       },
     ],
   },
   {
-    title: 'Minha conta',
+    title: 'Conta e preferências',
     items: [
       {
         label: 'Meu perfil',
         path: '/(tabs)/ProfileScreen',
-        icon: 'person-outline',
       },
       {
         label: 'Preferências',
         path: '/SettingsScreen',
-        icon: 'settings-outline',
       },
     ],
   },
   {
-    title: 'Informações',
+    title: 'Ajuda e informações',
     items: [
       {
         label: 'Como funciona',
         path: '/OnboardingScreen',
-        icon: 'book-outline',
       },
-      { label: 'Ajuda', path: '/HelpScreen', icon: 'help-circle-outline' },
+      { label: 'Ajuda', path: '/HelpScreen' },
       {
-        label: 'Sobre e fontes',
+        label: 'Sobre o app',
         path: '/AboutScreen',
-        icon: 'information-circle-outline',
-      },
-      {
-        label: 'Aprofundar nos dados',
-        path: '/ResultsScreen',
-        icon: 'stats-chart-outline',
       },
     ],
   },
@@ -97,7 +87,7 @@ export function SideMenu({
   onClose: (afterClose?: () => void) => void;
   visible: boolean;
 }) {
-  const { colors } = useTheme();
+  const { colors, elevation } = useTheme();
   const styles = useThemedStyles(createStyles);
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
@@ -120,15 +110,10 @@ export function SideMenu({
       <View style={styles.header}>
         <View style={styles.brand}>
           <AppBrandGlyph size={32} active={visible} />
-          <AppText variant="sectionTitle" style={styles.brandName}>
-            Fiscaliza{' '}
-            <AppText
-              variant="sectionTitle"
-              style={[styles.brandName, { color: colors.onSurfaceBrand }]}
-            >
-              aí
-            </AppText>
-          </AppText>
+          <View style={styles.brandWords} accessible accessibilityLabel="Fiscaliza aí">
+            <AppText variant="sectionTitle">Fiscaliza</AppText>
+            <AppText variant="sectionTitle" color={colors.onSurfaceBrand}>aí</AppText>
+          </View>
         </View>
         <Pressable
           accessibilityRole="button"
@@ -155,17 +140,17 @@ export function SideMenu({
           }
           style={styles.profile}
         >
-          <UserAvatar size={44} />
+          {authenticated && <UserAvatar size={44} />}
           <View style={styles.flex}>
-            <AppText variant="label" numberOfLines={1}>
+            <AppText variant="label">
               {user?.name || 'Entrar na conta'}
             </AppText>
-            <AppText color="muted" variant="caption" numberOfLines={2}>
+            <AppText color="muted" variant="caption">
               {user?.municipality
                 ? user.municipality.name + ' · ' + user.municipality.state
                 : authenticated
                   ? 'Definir cidade'
-                  : 'Acesse para salvar chamados'}
+                  : 'Acesse seus salvos em outros aparelhos'}
             </AppText>
             {authenticated && (
               <AppText variant="caption" color="muted">
@@ -188,34 +173,13 @@ export function SideMenu({
             >
               {section.title}
             </AppText>
-            {section.title === 'Minha região' && (
-              <Pressable
-                disabled={!visible}
-                accessibilityRole="button"
-                accessibilityLabel="Escolher minha região"
-                onPress={() => navigate('/SettingsScreen')}
-                style={styles.region}
-              >
-                <Ionicons
-                  name="location-outline"
-                  size={layout.iconSize.md}
-                  color={colors.muted}
-                />
-                <AppText variant="caption" color="muted" style={styles.flex}>
-                  {preferred ||
-                    user?.neighborhood ||
-                    'Rio de Janeiro · cidade toda'}
-                </AppText>
-                <Ionicons
-                  name="chevron-forward"
-                  size={layout.iconSize.sm}
-                  color={colors.muted}
-                />
-              </Pressable>
-            )}
-            {section.items.map((item) => {
+            {section.title === 'Cidade e chamados' && preferred ? (
+              <AppText variant="caption" color="muted" style={styles.sectionTitle}>Bairro preferido · {preferred}</AppText>
+            ) : null}
+            {section.items.filter((item) => !authenticated || item.path !== '/(tabs)/ProfileScreen').map((item) => {
               const selected =
-                pathname === String(item.path).replace('/(tabs)', '');
+                pathname === String(item.path).replace('/(tabs)', '') ||
+                (pathname === '/' && item.path === '/(tabs)/TerritoryScreen');
               return (
                 <Pressable
                   key={item.label}
@@ -225,21 +189,16 @@ export function SideMenu({
                   onPress={() => navigate(item.path)}
                   style={({ pressed }) => [
                     styles.destination,
-                    selected && styles.selected,
+                    selected && [styles.selected, elevation.subtle],
                     pressed && { opacity: 0.65 },
                   ]}
                 >
-                  <Ionicons
-                    name={item.icon}
-                    size={layout.iconSize.md}
-                    color={selected ? colors.onSurfaceBrand : colors.ink}
-                  />
                   <AppText style={styles.flex}>{item.label}</AppText>
                   {selected && (
                     <Ionicons
                       name="checkmark"
                       size={layout.iconSize.md}
-                      color={colors.onSurfaceBrand}
+                      color={colors.primary}
                     />
                   )}
                 </Pressable>
@@ -248,19 +207,16 @@ export function SideMenu({
           </View>
         ))}
       </ScrollView>
-      <View style={styles.footer}>
+      {authenticated && <View style={styles.footer}>
         <AppButton
-          title={authenticated ? 'Sair da conta' : 'Entrar na conta'}
+          title="Sair da conta"
           variant="quiet"
           disabled={!visible}
           onPress={() =>
-            onClose(() => {
-              if (authenticated) useSignOutSheet.getState().setOpen(true);
-              else router.push('/LoginScreen');
-            })
+            onClose(() => useSignOutSheet.getState().setOpen(true))
           }
         />
-      </View>
+      </View>}
     </SafeAreaView>
   );
 }
@@ -287,43 +243,25 @@ function createStyles(colors: ThemeColors) {
       alignItems: 'center',
       gap: spacing.xs,
     },
-    brandName: { fontSize: fontSizes.sectionTitle, flexShrink: 1 },
+    brandWords: { flexShrink: 1, flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing.xxs },
     iconButton: {
       minWidth: 48,
       minHeight: 48,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    appearance: {
-      marginHorizontal: spacing.lg,
-      paddingBottom: spacing.sm,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.border,
-    },
-    themeError: { paddingHorizontal: spacing.lg, paddingVertical: spacing.xs },
     flex: { flex: 1, minWidth: 0 },
     content: {
       paddingHorizontal: spacing.lg,
-      paddingTop: spacing.lg,
+      paddingTop: spacing.sm,
       paddingBottom: spacing.md,
-      gap: spacing.xl,
+      gap: spacing.lg,
     },
-    profile: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    profile: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.sm },
     section: { gap: spacing.xxs },
     sectionTitle: { paddingHorizontal: spacing.sm, marginBottom: spacing.xs },
-    region: {
-      minHeight: 48,
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: spacing.sm,
-      gap: spacing.xs,
-      marginBottom: spacing.xxs,
-    },
     destination: {
-      minHeight: 52,
+      minHeight: layout.touchTarget.minHeight,
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.sm,
@@ -331,7 +269,7 @@ function createStyles(colors: ThemeColors) {
       paddingVertical: spacing.xs,
       borderRadius: layout.radius.sm,
     },
-    selected: { backgroundColor: colors.surfaceSubdued },
+    selected: { backgroundColor: colors.surfaceRaised },
     footer: {
       paddingHorizontal: spacing.lg,
       borderTopWidth: StyleSheet.hairlineWidth,

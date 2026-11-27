@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Animated, Pressable, StyleSheet } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 
@@ -9,8 +9,10 @@ import { AppText } from '@/components/ui/AppText';
 import { layout, spacing, useTheme } from '@/theme';
 
 import { fontSizes } from '@/theme/typography';
+import { motion } from '@/theme/motion';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
-import { elevation } from '@/theme/elevation';
+const toastEasing = Easing.bezier(...motion.settle);
 
 
 export interface AppToastProps {
@@ -28,62 +30,68 @@ export function AppToast({
   topOffset = 110,
   type = 'info',
 }: AppToastProps) {
-  const { colors, isDark } = useTheme();
+  const { colors, elevation } = useTheme();
+  const reducedMotion = useReducedMotion();
   const [opacity] = useState(() => new Animated.Value(0));
-  const [translateY] = useState(() => new Animated.Value(-12));
+  const [translateY] = useState(() => new Animated.Value(-motion.toastDistance));
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const animationRef = useRef<Animated.CompositeAnimation | null>(null);
+  const dismissRef = useRef(onDismiss);
 
   useEffect(() => {
+    dismissRef.current = onDismiss;
+  }, [onDismiss]);
+
+  const animate = useCallback((visible: boolean, onEnd?: () => void) => {
+    const nextOpacity = visible ? 1 : 0;
+    const nextTranslate = visible || reducedMotion ? 0 : -motion.toastDistance;
+    animationRef.current?.stop();
+    if (reducedMotion) {
+      opacity.setValue(nextOpacity);
+      translateY.setValue(nextTranslate);
+      onEnd?.();
+      return;
+    }
+    const config = {
+      duration: visible ? motion.toastEnterDuration : motion.toastExitDuration,
+      easing: toastEasing,
+      useNativeDriver: true,
+    };
+    const transition = Animated.parallel([
+      Animated.timing(opacity, { ...config, toValue: nextOpacity }),
+      Animated.timing(translateY, { ...config, toValue: nextTranslate }),
+    ]);
+    animationRef.current = transition;
+    transition.start(({ finished }) => {
+      if (animationRef.current === transition) animationRef.current = null;
+      if (finished) onEnd?.();
+    });
+  }, [opacity, translateY, reducedMotion]);
+
+  const dismiss = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+    animate(false, () => dismissRef.current?.());
+  }, [animate]);
 
+  useEffect(() => {
     if (!message) {
       opacity.setValue(0);
-      translateY.setValue(-12);
+      translateY.setValue(reducedMotion ? 0 : -motion.toastDistance);
       return;
     }
-
-    // Smooth entrance
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 220,
-        useNativeDriver: true,
-      }),
-      Animated.spring(translateY, {
-        toValue: 0,
-        damping: 16,
-        stiffness: 160,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    // Auto-dismiss timer
-    timerRef.current = setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(opacity, {
-          toValue: 0,
-          duration: 220,
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateY, {
-          toValue: -12,
-          duration: 220,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        onDismiss?.();
-      });
-    }, durationMs);
-
+    animate(true);
+    timerRef.current = setTimeout(dismiss, durationMs);
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
+        timerRef.current = null;
       }
+      animationRef.current?.stop();
     };
-  }, [message, durationMs, onDismiss, opacity, translateY]);
+  }, [message, durationMs, animate, dismiss, opacity, translateY, reducedMotion]);
 
   if (!message) return null;
 
@@ -116,21 +124,12 @@ export function AppToast({
       <Pressable
         accessibilityRole="alert"
         accessibilityLabel={message}
-        onPress={() => {
-          if (timerRef.current) clearTimeout(timerRef.current);
-          Animated.timing(opacity, {
-            toValue: 0,
-            duration: 150,
-            useNativeDriver: true,
-          }).start(() => {
-            onDismiss?.();
-          });
-        }}
+        onPress={dismiss}
         style={[
           styles.toastCard,
+          elevation.floating,
           {
-            backgroundColor: isDark ? colors.surfaceSubdued : colors.surface,
-            borderColor: colors.border,
+            backgroundColor: colors.surfaceFloating,
           },
         ]}
       >
@@ -159,14 +158,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toastCard: {
-      ...elevation.floating,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: pillRadius,
-    borderWidth: StyleSheet.hairlineWidth,
     maxWidth: '92%',
   },
   messageText: {

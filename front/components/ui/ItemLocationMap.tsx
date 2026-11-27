@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
+import type { ElevationTokens } from '@/theme/elevation';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { AppText } from './AppText';
@@ -102,31 +103,33 @@ export function ItemLocationMap({
         accessibilityRole="button"
         accessibilityLabel={`Mapa do local: ${formattedAddress}`}
         accessibilityHint="Abre o mapa completo"
-        style={[styles.mapFrame, { height }]}
+        style={[styles.mapFrameShadow, { height }]}
         collapsable={false}
       >
-        <MapboxMapView
-          style={styles.map}
-          region={{
-            latitude,
-            longitude,
-            zoom: 16,
-          }}
-          markers={[
-            {
-              id: id || 'item-pin',
+        <View style={styles.mapFrame}>
+          <MapboxMapView
+            style={styles.map}
+            region={{
               latitude,
               longitude,
-              title: title || formattedAddress,
-              color: pinColor,
-              kind,
-            },
-          ]}
-          isDark={mode === 'dark'}
-          interactive={false}
-          onMarkerClick={handleOpenMap}
-          onMapClick={handleOpenMap}
-        />
+              zoom: 16,
+            }}
+            markers={[
+              {
+                id: id || 'item-pin',
+                latitude,
+                longitude,
+                title: title || formattedAddress,
+                color: pinColor,
+                kind,
+              },
+            ]}
+            isDark={mode === 'dark'}
+            interactive={false}
+            onMarkerClick={handleOpenMap}
+            onMapClick={handleOpenMap}
+          />
+        </View>
       </Pressable>
 
       <View style={styles.footer}>
@@ -142,7 +145,7 @@ export function ItemLocationMap({
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
   StyleSheet.create({
     container: {
       gap: spacing.xs,
@@ -168,13 +171,18 @@ const createStyles = (colors: ThemeColors) =>
       gap: 2,
       paddingVertical: 2,
     },
+    mapFrameShadow: {
+      width: '100%',
+      borderRadius: layout.radius.card,
+      backgroundColor: colors.surfaceSubdued,
+      ...elevation?.subtle,
+    },
     mapFrame: {
       width: '100%',
+      height: '100%',
       borderRadius: layout.radius.card,
       overflow: 'hidden',
       backgroundColor: colors.surfaceSubdued,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
     },
     map: {
       width: '100%',

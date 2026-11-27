@@ -17,24 +17,28 @@ export const lightColors = {
   darkPill: '#16576C',
 
   // Superfícies e Fundos
-  canvas: '#F3F7F8',
+  canvas: '#F3F4F6',
+  surfaceRecessed: '#E8EBEF',
   surface: '#FFFFFF',
-  surfaceSubdued: '#E0EFF2',
-  divider: '#D9E3E7',
-  border: '#D9E3E7',
+  surfaceRaised: '#FFFFFF',
+  surfaceFloating: '#FFFFFF',
+  surfaceSubdued: '#ECEEF1',
+  divider: '#D6DAE0',
+  dividerSubtle: '#DBDEE3',
+  border: '#D6DAE0',
   borderActive: '#16576C',
 
   // Tipografia e Conteúdo (distinto da cor de marca)
-  ink: '#192D35',
-  muted: '#556B73',
+  ink: '#20262B',
+  muted: '#4F5B63',
   // AA (≥4,5:1) sobre canvas e surface.
-  subtle: '#58707A',
+  subtle: '#57636D',
 
   // Barra de Navegação Flutuante
-  navigationSurface: '#192D35',
-  navigationSelection: '#FFFFFF',
+  navigationSurface: '#FFFFFF',
+  navigationSelection: '#D6E9EE',
   navigationOnSelection: '#16576C',
-  navigationIcon: '#FFFFFF',
+  navigationIcon: '#4F5B63',
 
   // Estados Semânticos
   destructive: '#9E3431',
@@ -55,11 +59,11 @@ export const lightColors = {
   scrim: 'rgba(0, 0, 0, 0.44)',
   glass: 'rgba(255, 255, 255, 0.94)',
   /** Faixa sob a barra de status quando o conteúdo é um mapa. */
-  statusScrim: 'rgba(243, 247, 248, 0.92)',
+  statusScrim: 'rgba(243, 244, 246, 0.92)',
   /** Fundo de aviso flutuante sobre o mapa (ex.: carregando). */
   floatingInk: 'rgba(25, 45, 53, 0.9)',
   onFloatingInk: '#FFFFFF',
-  glassBorder: 'rgba(217, 227, 231, 0.72)',
+  glassBorder: 'rgba(214, 218, 224, 0.72)',
   shadow: '#000000',
 } as const;
 
@@ -84,24 +88,28 @@ export const darkColors: ThemeColors = {
   onSelection: '#0E2A33',
   darkPill: '#79CBD5',
 
-  // Superfícies e Fundos com matiz petróleo profundo
-  canvas: '#0B1316',
-  surface: '#121E23',
-  surfaceSubdued: '#1A2C34',
-  divider: '#20343D',
-  border: '#20343D',
+  // Base grafite e superfícies elevadas progressivamente mais claras.
+  canvas: '#121315',
+  surfaceRecessed: '#0C0D0F',
+  surface: '#1B1D21',
+  surfaceRaised: '#25282D',
+  surfaceFloating: '#2D3036',
+  surfaceSubdued: '#22252A',
+  divider: '#3A3E45',
+  dividerSubtle: '#353940',
+  border: '#3A3E45',
   borderActive: '#79CBD5',
 
   // Tipografia e Conteúdo
-  ink: '#F0F6F8',
-  muted: '#8FA5AE',
-  subtle: '#8299A2',
+  ink: '#F3F4F6',
+  muted: '#B8BEC6',
+  subtle: '#A4ABB4',
 
   // Barra de Navegação Flutuante
-  navigationSurface: '#121E23',
-  navigationSelection: '#79CBD5',
-  navigationOnSelection: '#0E2A33',
-  navigationIcon: '#F0F6F8',
+  navigationSurface: '#2D3036',
+  navigationSelection: '#164450',
+  navigationOnSelection: '#A8E3EB',
+  navigationIcon: '#D9DDE3',
 
   // Estados Semânticos
   destructive: '#9E3431',
@@ -120,11 +128,11 @@ export const darkColors: ThemeColors = {
   black: '#000000',
   transparent: 'transparent',
   scrim: 'rgba(0, 0, 0, 0.68)',
-  glass: 'rgba(18, 30, 35, 0.96)',
-  statusScrim: 'rgba(11, 19, 22, 0.88)',
-  floatingInk: 'rgba(240, 246, 248, 0.92)',
-  onFloatingInk: '#0B1316',
-  glassBorder: 'rgba(121, 203, 213, 0.15)',
+  glass: 'rgba(45, 48, 54, 0.96)',
+  statusScrim: 'rgba(18, 19, 21, 0.88)',
+  floatingInk: 'rgba(243, 244, 246, 0.94)',
+  onFloatingInk: '#121315',
+  glassBorder: 'rgba(243, 244, 246, 0.15)',
   shadow: '#000000',
 };
 

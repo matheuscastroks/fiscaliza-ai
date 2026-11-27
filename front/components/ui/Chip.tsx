@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
+import type { ElevationTokens } from '@/theme/elevation';
 import { layout } from '@/theme/layout';
 import { spacing } from '@/theme/spacing';
 import { AppText } from './AppText';
@@ -39,18 +40,17 @@ export function Chip({ label, selected = false, onPress, icon, disabled = false 
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
   StyleSheet.create({
     base: {
       minHeight: layout.touchTarget.minHeight - spacing.xs,
       paddingHorizontal: spacing.md,
       borderRadius: layout.radius.compact,
       justifyContent: 'center',
-      borderWidth: layout.borderWidth.hairline,
     },
-    idle: { backgroundColor: colors.surface, borderColor: colors.border },
-    selected: { backgroundColor: colors.ink, borderColor: colors.ink },
+    idle: { backgroundColor: colors.surface, ...elevation?.subtle },
+    selected: { backgroundColor: colors.ink, ...elevation?.raised },
     row: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs },
-    pressed: { opacity: 0.75 },
-    disabled: { opacity: 0.5 },
+    pressed: { opacity: 0.82, ...elevation?.none },
+    disabled: { opacity: 0.5, ...elevation?.none },
   });

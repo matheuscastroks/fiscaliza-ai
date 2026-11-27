@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import React from 'react';
 import {
   View,
+  I18nManager,
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
@@ -36,6 +37,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const user = useAuthStore((state) => state.user);
+  const titleAlignment = onBack && !rightElement ? styles.centered : undefined;
 
   return (
     <View
@@ -56,7 +58,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             {user && !hideUserAvatar ? (
               <UserAvatar size={48} />
             ) : (
-              <Ionicons name="menu-outline" size={layout.iconSize.lg} color={colors.ink} />
+              <Ionicons name="menu-outline" size={layout.iconSize.md} color={colors.ink} accessible={false} />
             )}
           </TouchableOpacity>
         )}
@@ -71,7 +73,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             accessibilityLabel="Voltar"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="chevron-back" size={layout.iconSize.md} color={colors.ink} />
+            <Ionicons
+              name={I18nManager.isRTL ? 'chevron-forward' : 'chevron-back'}
+              size={layout.iconSize.md}
+              color={colors.ink}
+              accessible={false}
+            />
           </TouchableOpacity>
         )}
         <View
@@ -82,8 +89,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             variant="sectionTitle"
             color="ink"
             accessibilityRole="header"
-            numberOfLines={1}
-            style={onBack && !rightElement ? { textAlign: 'center' } : undefined}
+            style={titleAlignment}
           >
             {title === 'Fiscaliza aí' ? (
               <>
@@ -100,7 +106,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             )}
           </AppText>
           {context ? (
-            <AppText variant="caption" color="muted" numberOfLines={1}>
+            <AppText variant="caption" color="muted" style={titleAlignment}>
               {context}
             </AppText>
           ) : null}
@@ -148,9 +154,12 @@ const createStyles = (colors: ThemeColors) =>
     },
     titleArea: {
       flex: 1,
+      minWidth: 0,
       justifyContent: 'center',
     },
+    centered: { textAlign: 'center' },
     rightArea: {
+      flexShrink: 0,
       marginLeft: spacing.sm,
       flexDirection: 'row',
       alignItems: 'center',

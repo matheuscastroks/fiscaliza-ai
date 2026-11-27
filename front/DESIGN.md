@@ -4,14 +4,18 @@ description: Sistema visual territorial baseado nas referências aprovadas em 18
 colors:
   primary: "#16576C"
   brandYellow: "#F4B400"
-  ink: "#192D35"
-  canvas: "#F3F7F8"
+  ink: "#20262B"
+  canvas: "#F3F4F6"
+  surfaceRecessed: "#E8EBEF"
   surface: "#FFFFFF"
-  surfaceSubdued: "#E0EFF2"
-  muted: "#556B73"
-  subtle: "#58707A"
-  divider: "#D9E3E7"
-  border: "#D9E3E7"
+  surfaceRaised: "#FFFFFF"
+  surfaceFloating: "#FFFFFF"
+  surfaceSubdued: "#ECEEF1"
+  muted: "#4F5B63"
+  subtle: "#57636D"
+  divider: "#D6DAE0"
+  dividerSubtle: "#DBDEE3"
+  border: "#D6DAE0"
   borderActive: "#16576C"
   accent: "#16576C"
   accentPressed: "#0F3D4C"
@@ -107,7 +111,7 @@ components:
     rounded: "{rounded.button}"
     padding: "12px 20px"
   input:
-    backgroundColor: "{colors.surface}"
+    backgroundColor: "{colors.surfaceRecessed}"
     textColor: "{colors.ink}"
     rounded: "{rounded.button}"
     padding: "12px 16px"
@@ -141,11 +145,11 @@ Este documento é a fonte única dos tokens e componentes. A fonte de verdade do
 
 ## Estrutura da informação
 
-- **Navegação:** quatro abas fixas com ícone e rótulo — `Explorar` (mapa), `Salvos`, `Agir`, `Perfil`. O menu lateral repete os mesmos nomes e ícones e abre por gesto só nas abas principais.
-- **Explorar (entrada):** mapa do recorte atual com um botão de resultados na base ("Ver em lista · N chamados") que abre a lista equivalente num bottom sheet; tocar num marcador mostra a prévia do chamado. Sem Mapbox a lista ocupa a tela.
+- **Navegação** — quatro abas com ícones e rótulo visual na aba ativa. Todas mantêm nome acessível. O menu lateral agrupa atalhos por tarefa e abre por gesto nas abas principais, exceto no mapa.
+- **Explorar (entrada):** o mapa ocupa o fundo e o painel persistente reúne resumo, lista e prévia. O cabeçalho pertence à superfície do painel. Qualifique se uma contagem se refere à área pesquisada ou aos itens carregados. Sem Mapbox, a lista ocupa a tela.
 - **Domínios exclusivos do território:** **Chamados 1746** e **Serviços Públicos** (escolas, saúde, praças). Nunca sobrepostos no mesmo mapa; o recorte (bairro, ou lugar com raio de 500 m, 1 km, 2 km ou 5 km) é compartilhado.
 - **Chamado:** problema, local, situação publicada, protocolo, datas e prazo, nessa ordem. "Salvar chamado" e "Acessar atendimento oficial" são ações distintas, sem rolagem para a segunda.
-- **Agir:** 1) "Já existe chamado? Veja no mapa"; 2) canais oficiais (telefone, WhatsApp, portal, Meus Protocolos); 3) preparar mensagem para o WhatsApp do 1746, recolhido. O texto deixa claro que quem envia é o morador, pelo canal oficial; o app não registra nem acompanha o envio.
+- **Agir:** pedir um serviço é a ação principal. Consultas por protocolo, mapa ou portal ficam em um grupo próprio. Canais, preparação de mensagem e catálogo por assunto aparecem no fluxo de pedir um serviço. O texto deixa claro que quem envia é o morador, pelo canal oficial; o app não registra nem acompanha o envio.
 - **Dados do bairro:** uma tela de aprofundamento; cada gráfico traz a pergunta, a fonte e o período. Sem ranking competitivo; sem número gigante sem pergunta.
 - **Perfil:** identidade, duas métricas (salvos e lugares), domicílio e um menu curto (Preferências, Dados do bairro, Ajuda, Sobre e fontes, Conta e privacidade). Os chamados salvos ficam só na aba Salvos. Decisões raras e destrutivas (sair, apagar conta) ficam em `AccountScreen`, fora do Perfil.
 - **Telas de apoio:** `AccountScreen` (conta e privacidade) e `NeighborhoodVolumeScreen` (bairros por volume, sem numeração de ranking) existem para aliviar Perfil e Dados do bairro; qualquer tela que passe de uma pergunta principal deve ser dividida assim, exceto o mapa.
@@ -160,9 +164,10 @@ Teste em cada tela: *onde estou? o que posso fazer aqui? para onde vou depois?* 
 
 Papéis separados de marca, texto, navegação, seleção e estado. Valores claros e escuros em `theme/colors.ts`.
 
-- **Ação:** `primary`/`accent` `#16576C` (escuro `#79CBD5`); texto sobre ação `onAccent`. Seleção ativa usa `darkPill`/`borderActive`.
+- **Ação** — `primary`/`accent` `#16576C` no claro e `#79CBD5` no escuro. Use `onAccent` sobre ação preenchida, `primary` para controles ativos e `onSurfaceBrand` para a assinatura visual.
+- **Aparência** — acompanha o sistema. A base clara é neutra com superfícies brancas. No escuro, a ordem de profundidade vai de `#0C0D0F` no rebaixo a `#2D3036` nas superfícies flutuantes. Os estados usam pares semânticos próprios, com texto ou símbolo para comunicar a diferença.
 - **Marca:** `brandYellow` `#F4B400` só em logotipo e detalhes pontuais; nunca como botão amplo nem como estado `attention`.
-- **Conteúdo:** `ink`, `muted`, `subtle`; fundos `canvas`, `surface`, `surfaceSubdued`; bordas `border`/`divider`.
+- **Conteúdo:** `ink`, `muted`, `subtle`; fundos tonais em camadas `surfaceRecessed` (côncavo), `canvas` (nível 0), `surface` (+1), `surfaceRaised` (+2), `surfaceFloating` (+3) e `surfaceSubdued` (desabilitado/neutro); divisores suaves `dividerSubtle`. Bordas `borderActive`/`risk` ficam restritas a foco de acessibilidade, erro de validação e conectores gráficos.
 - **Estados:** `risk`, `attention`, `completed`, `info` (cada um com `…Surface`). Em andamento usa `primary`; aberto usa `info`. Cor acompanha o texto e nunca substitui a situação do servidor. Recebida/pendente é neutro, não risco.
 - **Categorias e equipamentos:** paleta derivada da marca em `theme/` (claro/escuro), sem cores Tailwind/Material.
 - **Logotipo:** grafia **Fiscaliza aí**; `AppBrandGlyph` preserva as duas cores do símbolo, sem `tintColor`.
@@ -185,23 +190,31 @@ Sem CAIXA ALTA espaçada. Preserve o escalonamento de texto do sistema.
 
 ## Layout, formas e elevação
 
+- **Ícones:** priorize rótulos claros. Em listas e seções, omita o ícone quando ele apenas repetir o título. Preserve ícones que comunicam estado ou indicam uma ação, como voltar, buscar, limpar e abrir um item. Controles sem texto precisam de um rótulo acessível.
+
+- **Ordem de leitura:** abrir com a informação ou ação que realiza a tarefa principal. Em detalhes de chamados, a sequência é problema, local, situação, prazo, protocolo e histórico. Em Agir, iniciar pela escolha da tarefa; exibir canais e opções auxiliares no fluxo correspondente.
+- **Escolhas e áreas seguras:** opções curtas de igual importância usam seletor compacto se couberem. Em espaço estreito ou com texto ampliado, usar linhas em coluna com estado selecionado explícito. Margens e conteúdo devem respeitar a área segura e manter ações acessíveis com teclado e navegação por leitor de tela.
+- **Profundidade:** usar uma única superfície elevada por plano funcional. Dentro de um painel, separar o cabeçalho, os resultados e as ações com alinhamento e espaço. Para erros, mostrar a falha perto da região afetada, manter resultados prévios quando disponíveis e oferecer uma ação de recuperação.
+
+
 - `AppScreen`: largura fluida até 760, áreas seguras. Ritmo de 4 (`spacing`): `contentPadding = lg`, `gutter = md`, `rowGap = sm`, `sectionGap = xl`. Acima de 1100 há navegação lateral e conteúdo até 1200.
 - **Raios** (`layout.radius`): `xs`, `sm`, `compact`, `control`, `avatar`, `panel`, `card`, `sheet`. O squircle dos controles do mapa é a referência: cantos de 20 em ações, campos, cards e avatares; 14 em controles compactos e seleção interna da tab bar; 24 nos painéis. Avatares pequenos limitam o raio a 40% do tamanho. Círculos ficam restritos a pontos geográficos e indicadores.
 - **Ícones** (`layout.iconSize`): `sm 16`, `md 20`, `lg 24`.
-- **Elevação** (`theme/elevation.ts`): só `none` e `floating`. Cartões, campos, cabeçalho e linhas de lista são planos. `floating` é para tab bar, sheets e botões sobre o mapa. Texto sobre foto usa gradiente funcional de contraste.
+- **Elevação e Iluminação Direcional** (`theme/elevation.ts`): cinco níveis via `boxShadow` nativo (`none`, `recessed`, `subtle`, `raised`, `floating`) sensíveis ao tema claro/escuro. Superfícies elevadas recebem highlight superior interno (`inset 0 1px 0`) + sombra de contato + sombra ambiente; superfícies côncavas (`recessed`) recebem sombra interna superior + highlight inferior. Contraste tonal e sombras multicamadas substituem bordas estruturais de `1px`. Texto sobre foto usa gradiente funcional de contraste.
 - Alvos de toque de pelo menos 48. Nunca animação `entering` em `Marker`; movimento reduzido torna transições imediatas.
 
 ## Componentes
 
 Cada componente tem variantes fechadas e estados acessíveis.
 
-- `AppButton`: `primary` (cor de ação), `secondary` (branco com borda), `quiet` (transparente, texto `ink`), `destructive` (`risk`). Altura mínima 54; um botão primário por tela; carregamento e bloqueio declarados; confirmação visual só após a resposta da API.
-- `AppInput`: placeholder no lugar de rótulo persistente, altura mínima 56; foco muda a borda; erro usa `risk` com mensagem anunciada; preserva texto em falhas.
+- `AppButton`: `primary` (cor de ação, `subtle`), `secondary` (`surface` + `subtle`, sem borda), `quiet` (transparente, plano), `destructive` (`risk`, `subtle`). Altura mínima 54; um botão primário por tela; carregamento e bloqueio declarados; confirmação visual só após a resposta da API.
+- `AppInput`: placeholder no lugar de rótulo persistente, altura mínima 56, poço côncavo (`surfaceRecessed` + `recessed`, sem borda em repouso); foco aplica `borderWidth.focus` (`borderActive`); erro usa `risk` com mensagem anunciada; preserva texto em falhas.
 - `AppHeader`: título, contexto territorial opcional e controles circulares. Ícones interativos exigem nome acessível.
-- `AppTabBar`: barra sólida de tinta com cantos de 20, altura 64, quatro alvos de 48, seleção branca com cantos de 14; some em rotas internas e com teclado aberto.
+- `AppTabBar` usa superfície flutuante e seleção em azul-petróleo no claro ou ciano no escuro. A barra fica fora da lista de resultados em tela cheia e das rotas internas.
+- Em Explorar, o mapa mantém um atalho de resultados e uma prévia de marcador. O atalho abre uma lista virtualizada em tela cheia com os mesmos filtros, ações de salvar e localizar, e retorno ao mesmo recorte do mapa.
 - `SideMenu`/`AppDrawer`: destinos reais, sem pontuação fictícia nem selo institucional; o botão de menu existe em todas as abas principais.
 - `DetailSheet`, `AppBottomSheetModal`: espaçamento declarado no `BottomSheetView` (`paddingHorizontal: contentPadding`, `paddingTop: md`, `paddingBottom: max(insets.bottom + md, xxl)`).
-- Base compartilhada: `IconButton`, `Chip` (claro em repouso, escuro selecionado), `StatusBadge`, `IconTile`, `ListRow`/`InsetGroup`, `Surface` (plano, proibido aninhar), `SectionHeader`, `ScreenState` (carregando, erro com nova tentativa, vazio com ação) e `CallSummary` (miolo único do chamado, usado na lista e no sheet). Telas antigas ainda têm blocos próprios que devem migrar para esses componentes.
+- Base compartilhada: `IconButton`, `Chip` (tonal claro em repouso, escuro elevado quando selecionado), `StatusBadge`, `IconTile`, `ListRow`/`InsetGroup`, `Surface` (camada tonal elevada com `clipContent` opcional, proibido aninhar), `SectionHeader`, `ScreenState` (carregando, erro com nova tentativa, vazio com ação) e `CallSummary` (miolo único do chamado, usado na lista e no sheet). Telas antigas ainda têm blocos próprios que devem migrar para esses componentes.
 
 Estados remotos: toda leitura tem carregando, erro recuperável, vazio e conteúdo; falha de atualização preserva o conteúdo anterior.
 
@@ -209,7 +222,7 @@ Estados remotos: toda leitura tem carregando, erro recuperável, vazio e conteú
 
 **Do:** usar tokens de `theme/` e componentes compartilhados antes de criar variações; mostrar situação textual e a próxima ação; informar origem e período dos dados; testar conteúdo longo, erro, vazio, fonte ampliada, claro e escuro.
 
-**Don't:** valores literais fora de `theme/`; sombra fora de elementos flutuantes; card dentro de card; ranking competitivo; slogans ou vínculo institucional fictício; confundir encerramento administrativo com resolução; fotografia genérica como evidência; afirmar revisão visual, teste nativo ou desempenho sem evidência específica.
+**Don't:** valores literais fora de `theme/`; bordas estruturais de `1px` para dividir layout (use contraste tonal e elevação; bordas ficam restritas a foco, erro e conectores); card dentro de card; ranking competitivo; slogans ou vínculo institucional fictício; confundir encerramento administrativo com resolução; fotografia genérica como evidência; afirmar revisão visual, teste nativo ou desempenho sem evidência específica.
 
 ## Camadas e fichas cadastrais
 

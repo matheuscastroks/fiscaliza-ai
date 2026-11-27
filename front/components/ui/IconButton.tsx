@@ -3,8 +3,8 @@ import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-nat
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useThemedStyles } from '@/theme/useTheme';
 import type { ThemeColors } from '@/theme/colors';
+import type { ElevationTokens } from '@/theme/elevation';
 import { layout } from '@/theme/layout';
-import { elevation } from '@/theme/elevation';
 
 export type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -23,7 +23,7 @@ export interface IconButtonProps {
 export function IconButton({
   icon, accessibilityLabel, onPress, variant = 'surface', disabled = false, selected, style,
 }: IconButtonProps) {
-  const { colors } = useTheme();
+  const { colors, elevation } = useTheme();
   const styles = useThemedStyles(createStyles);
   const dark = variant === 'ink';
   return (
@@ -35,7 +35,7 @@ export function IconButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
-        dark ? styles.ink : styles.surface,
+        dark ? styles.ink : variant === 'floating' ? styles.floating : styles.surface,
         variant === 'floating' && elevation.floating,
         pressed && styles.pressed,
         disabled && styles.disabled,
@@ -47,7 +47,7 @@ export function IconButton({
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, elevation?: ElevationTokens) =>
   StyleSheet.create({
     base: {
       width: layout.touchTarget.minWidth,
@@ -56,8 +56,9 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    surface: { backgroundColor: colors.surface, borderWidth: layout.borderWidth.hairline, borderColor: colors.border },
-    ink: { backgroundColor: colors.ink },
+    surface: { backgroundColor: colors.surface, ...elevation?.subtle },
+    floating: { backgroundColor: colors.surfaceFloating },
+    ink: { backgroundColor: colors.ink, ...elevation?.subtle },
     pressed: { opacity: 0.75 },
     disabled: { opacity: 0.5 },
   });

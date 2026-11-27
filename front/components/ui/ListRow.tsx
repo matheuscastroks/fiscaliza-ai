@@ -18,10 +18,11 @@ export interface ListRowProps {
   trailing?: React.ReactNode;
   onPress?: () => void;
   accessibilityLabel?: string;
+  accessibilityRole?: 'button' | 'link';
 }
 
 /** Linha com ícone, título, subtítulo e chevron; use dentro de `InsetGroup`. */
-export function ListRow({ title, subtitle, icon, tone, trailing, onPress, accessibilityLabel }: ListRowProps) {
+export function ListRow({ title, subtitle, icon, tone, trailing, onPress, accessibilityLabel, accessibilityRole = 'button' }: ListRowProps) {
   const { colors } = useTheme();
   const styles = useThemedStyles(createStyles);
   const content = (
@@ -38,7 +39,7 @@ export function ListRow({ title, subtitle, icon, tone, trailing, onPress, access
   if (!onPress) return <View style={styles.row}>{content}</View>;
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={accessibilityRole}
       accessibilityLabel={accessibilityLabel || [title, subtitle].filter(Boolean).join('. ')}
       onPress={onPress}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
@@ -48,12 +49,12 @@ export function ListRow({ title, subtitle, icon, tone, trailing, onPress, access
   );
 }
 
-/** Grupo de linhas com divisórias, num único Surface plano. */
+/** Grupo de linhas com divisórias, num único Surface elevado. */
 export function InsetGroup({ children }: { children: React.ReactNode }) {
   const styles = useThemedStyles(createStyles);
   const items = React.Children.toArray(children).filter(Boolean);
   return (
-    <Surface padded={false}>
+    <Surface padded={false} clipContent>
       {items.map((child, index) => (
         <React.Fragment key={index}>
           {index > 0 ? <View style={styles.divider} /> : null}
@@ -76,5 +77,5 @@ const createStyles = (colors: ThemeColors) =>
     },
     text: { flex: 1, gap: spacing.xxs / 2 },
     pressed: { backgroundColor: colors.surfaceSubdued },
-    divider: { height: layout.borderWidth.hairline, backgroundColor: colors.divider, marginLeft: spacing.md },
+    divider: { height: layout.borderWidth.hairline, backgroundColor: colors.dividerSubtle, marginHorizontal: spacing.md },
   });

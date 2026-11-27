@@ -16,7 +16,9 @@ import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetScrollView,
   BottomSheetTextInput,
+  useBottomSheetTimingConfigs,
 } from '@gorhom/bottom-sheet';
+import { Easing, ReduceMotion } from 'react-native-reanimated';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -31,15 +33,22 @@ import { spacing } from '@/theme';
 import { fontSizes } from '@/theme/typography';
 
 import { layout } from '@/theme/layout';
+import { motion } from '@/theme/motion';
+
+const panelEasing = Easing.bezier(...motion.settle);
 
 
 export interface AppBottomSheetModalProps {
   visible: boolean;
   onClose: () => void;
   title?: string;
+  onHeaderHeightChange?: (height: number) => void;
   snapPoints?: (string | number)[];
   enablePanDownToClose?: boolean;
   enableDynamicSizing?: boolean;
+  enableBlurKeyboardOnGesture?: boolean;
+  keyboardBehavior?: 'interactive' | 'extend' | 'fillParent';
+  keyboardBlurBehavior?: 'none' | 'restore';
   children?: React.ReactNode;
   contentContainerStyle?: StyleProp<ViewStyle>;
   headerRight?: React.ReactNode;
@@ -61,9 +70,13 @@ export const AppBottomSheetModal = forwardRef<BottomSheet, AppBottomSheetModalPr
       visible,
       onClose,
       title,
+      onHeaderHeightChange,
       snapPoints: rawSnapPoints = ['55%', '85%'],
       enablePanDownToClose = true,
       enableDynamicSizing = false,
+      enableBlurKeyboardOnGesture = false,
+      keyboardBehavior = 'interactive',
+      keyboardBlurBehavior = 'none',
       children,
       contentContainerStyle,
       headerRight,
@@ -74,6 +87,11 @@ export const AppBottomSheetModal = forwardRef<BottomSheet, AppBottomSheetModalPr
   ) => {
     const { colors } = useTheme();
     const sheetRef = useRef<BottomSheet>(null);
+    const animationConfigs = useBottomSheetTimingConfigs({
+      duration: motion.panelDuration,
+      easing: panelEasing,
+      reduceMotion: ReduceMotion.System,
+    });
 
     const snapPoints = useMemo(
       () => rawSnapPoints,
@@ -120,10 +138,13 @@ export const AppBottomSheetModal = forwardRef<BottomSheet, AppBottomSheetModalPr
             snapPoints={enableDynamicSizing ? undefined : snapPoints}
             enablePanDownToClose={enablePanDownToClose}
             enableDynamicSizing={enableDynamicSizing}
+            enableBlurKeyboardOnGesture={enableBlurKeyboardOnGesture}
+            animationConfigs={animationConfigs}
             onChange={handleSheetChanges}
             onClose={onClose}
             backdropComponent={renderBackdrop}
-            keyboardBehavior="interactive"
+            keyboardBehavior={keyboardBehavior}
+            keyboardBlurBehavior={keyboardBlurBehavior}
             android_keyboardInputMode="adjustResize"
             backgroundStyle={[
               styles.sheetBackground,
@@ -141,7 +162,10 @@ export const AppBottomSheetModal = forwardRef<BottomSheet, AppBottomSheetModalPr
               ]}
             >
               {showHeader && (title || headerRight) ? (
-                <View style={styles.header}>
+                <View
+                  style={styles.header}
+                  onLayout={onHeaderHeightChange ? (event) => onHeaderHeightChange(event.nativeEvent.layout.height) : undefined}
+                >
                   <AppText variant="sectionTitle" style={styles.headerTitle}>
                     {title || ''}
                   </AppText>
